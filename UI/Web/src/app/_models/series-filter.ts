@@ -12,6 +12,7 @@ export interface SeriesFilter {
     readStatus: ReadStatus;
     genres: Array<number>;
     writers: Array<number>;
+    artists: Array<number>;
     penciller: Array<number>;
     inker: Array<number>;
     colorist: Array<number>;
@@ -69,3 +70,9 @@ export const mangaFormatFilters = [
       selected: false
     }
 ];
+
+export interface FilterEvent {
+  filter: SeriesFilter;
+  isFirst: boolean;
+}
+

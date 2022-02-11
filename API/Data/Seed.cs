@@ -60,6 +60,7 @@ namespace API.Data
                 new () {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
                 new () {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
                 new () {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
+                new () {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
             };
 
             foreach (var defaultSetting in DefaultSettings)
@@ -92,12 +93,9 @@ namespace API.Data
             await context.Database.EnsureCreatedAsync();
 
             var users = await context.AppUser.ToListAsync();
-            foreach (var user in users)
+            foreach (var user in users.Where(user => string.IsNullOrEmpty(user.ApiKey)))
             {
-                if (string.IsNullOrEmpty(user.ApiKey))
-                {
-                    user.ApiKey = HashUtil.ApiKey();
-                }
+                user.ApiKey = HashUtil.ApiKey();
             }
             await context.SaveChangesAsync();
         }

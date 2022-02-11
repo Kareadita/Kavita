@@ -3,6 +3,7 @@
     [items]="lists"
     [actions]="actions"
     [pagination]="pagination"
+    [filteringDisabled]="true"
     (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">

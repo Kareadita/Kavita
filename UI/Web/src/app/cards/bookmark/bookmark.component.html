@@ -1,6 +1,5 @@
 <div class="card" *ngIf="bookmark != undefined">
-    <img class="img-top lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)" 
-            (error)="imageService.updateErroredImage($event)" aria-hidden="true" height="230px" width="170px">
+    <app-image height="230px" width="170px" [imageUrl]="imageService.getBookmarkedImage(bookmark.chapterId, bookmark.page)"></app-image>        
 
     <div class="card-body" *ngIf="bookmark.page >= 0">
       <div class="header-row">

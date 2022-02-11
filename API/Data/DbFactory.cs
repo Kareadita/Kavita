@@ -61,6 +61,11 @@ namespace API.Data
             };
         }
 
+        public static SeriesMetadata SeriesMetadata(ComicInfo info)
+        {
+            return SeriesMetadata(Array.Empty<CollectionTag>());
+        }
+
         public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
         {
             return new SeriesMetadata()

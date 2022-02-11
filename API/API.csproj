@@ -14,6 +14,7 @@
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DocumentationFile>bin\Debug\API.xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
     <PropertyGroup>
@@ -49,17 +50,17 @@
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.0" />
     <PackageReference Include="NetVips" Version="2.1.0" />
-    <PackageReference Include="NetVips.Native" Version="8.12.1" />
+    <PackageReference Include="NetVips.Native" Version="8.12.2" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.2" />
     <PackageReference Include="SharpCompress" Version="0.30.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
@@ -100,6 +101,9 @@
     <Compile Remove="logs\**" />
     <Compile Remove="temp\**" />
     <Compile Remove="covers\**" />
+    <Compile Remove="DTOs\Email\SmtpConfig.cs" />
+    <Compile Remove="DTOs\Email\EmailOptionsDto.cs" />
+    <Compile Remove="Helpers\Converters\SmtpConverter.cs" />
   </ItemGroup>
 
   <ItemGroup>

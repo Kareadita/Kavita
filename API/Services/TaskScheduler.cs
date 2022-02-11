@@ -35,7 +35,6 @@ public class TaskScheduler : ITaskScheduler
 
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
-    private readonly IDirectoryService _directoryService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     private static readonly Random Rnd = new Random();
@@ -43,8 +42,7 @@ public class TaskScheduler : ITaskScheduler
 
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
-        ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IDirectoryService directoryService)
+        ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -55,7 +53,6 @@ public class TaskScheduler : ITaskScheduler
         _cleanupService = cleanupService;
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
-        _directoryService = directoryService;
     }
 
     public async Task ScheduleTasks()

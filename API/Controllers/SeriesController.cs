@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
-using API.Data.Metadata;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
@@ -148,7 +147,7 @@ namespace API.Controllers
         }
 
         [HttpGet("chapter")]
-        public async Task<ActionResult<VolumeDto>> GetChapter(int chapterId)
+        public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
         {
             return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
@@ -235,6 +234,20 @@ namespace API.Controllers
             Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
             return Ok(series);
+        }
+
+        [HttpPost("recently-updated-series")]
+        public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId));
+        }
+
+        [HttpPost("recently-added-chapters")]
+        public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChaptersAlt()
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAddedChapters(userId));
         }
 
         [HttpPost("all")]

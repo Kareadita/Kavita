@@ -14,6 +14,7 @@ public interface IImageService
     /// Creates a Thumbnail version of a base64 image
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
+    /// <param name="fileName"></param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     string CreateThumbnailFromBase64(string encodedImage, string fileName);
 
@@ -88,7 +89,7 @@ public class ImageService : IImageService
         try
         {
             _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
-        } catch (Exception ex) {/* Swallow exception */}
+        } catch (Exception) {/* Swallow exception */}
         thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         return filename;
     }

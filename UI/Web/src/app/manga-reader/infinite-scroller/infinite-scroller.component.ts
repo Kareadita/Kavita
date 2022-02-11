@@ -61,7 +61,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
   @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
 
-  @Input() goToPage: ReplaySubject<number> = new ReplaySubject<number>();
+  @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
 
@@ -121,10 +121,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     * Keeps track of the previous scrolling height for restoring scroll position after we inject spacer block
     */
    previousScrollHeightMinusTop: number = 0;
+   /**
+    * Tracks the first load, until all the initial prefetched images are loaded. We use this to reduce opacity so images can load without jerk.
+    */
+   initFinished: boolean = false;
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
   debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  /**
+   * Debug mode. Will filter out any messages in here so they don't hit the log
+   */
+  debugLogFilter: Array<string> = ['[PREFETCH]', '[Intersection]', '[Visibility]', '[Image Load]'];
 
   get minPageLoaded() {
     return Math.min(...Object.values(this.imagesLoaded));
@@ -135,7 +143,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   get areImagesWiderThanWindow() {
-    let [innerWidth, _] = this.getInnerDimensions();
+    let [_, innerWidth] = this.getInnerDimensions();
     return this.webtoonImageWidth > (innerWidth || document.documentElement.clientWidth);
   }
 
@@ -173,18 +181,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : window, 'scroll')
     .pipe(debounceTime(20), takeUntil(this.onDestroy))
     .subscribe((event) => this.handleScrollEvent(event));
-
-
   }
 
   ngOnInit(): void {
     this.initScrollHandler();
 
+    this.recalculateImageWidth();
+
     if (this.goToPage) {
       this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
-        this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
+        this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
 
         if (this.pageNum < page) {
           this.scrollingDirection = PAGING_DIRECTION.FORWARD;
@@ -212,12 +220,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.fullscreenToggled.pipe(takeUntil(this.onDestroy)).subscribe(isFullscreen => {
         this.debugLog('[FullScreen] Fullscreen mode: ', isFullscreen);
         this.isFullscreenMode = isFullscreen;
-        const [innerWidth, _] = this.getInnerDimensions();
-        this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+        this.recalculateImageWidth();
         this.initScrollHandler();
         this.setPageNum(this.pageNum, true);
       });
     }
+  }
+
+  recalculateImageWidth() {
+    const [_, innerWidth] = this.getInnerDimensions();
+    this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
   }
 
   getVerticalOffset() {
@@ -252,10 +264,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.prevScrollPosition = verticalOffset;
 
-    console.log('CurrentPageElem: ', this.currentPageElem);
-    if (this.currentPageElem != null) {
-      console.log('Element Visible: ', this.isElementVisible(this.currentPageElem));
-    }
     if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
       this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
       this.isScrolling = false;
@@ -336,6 +344,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   }
 
+  /**
+   * 
+   * @returns Height, Width
+   */
   getInnerDimensions() {
     let innerHeight = window.innerHeight;
     let innerWidth = window.innerWidth;
@@ -356,14 +368,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   isElementVisible(elem: Element) {
     if (elem === null || elem === undefined) { return false; }
 
+    this.debugLog('[Visibility] Checking if Page ' + elem.getAttribute('id') + ' is visible');
     // NOTE: This will say an element is visible if it is 1 px offscreen on top
     var rect = elem.getBoundingClientRect();
 
     let [innerHeight, innerWidth] = this.getInnerDimensions();
-
-    
-    console.log('innerHeight: ', innerHeight);
-    console.log('innerWidth: ', innerWidth);
 
     return (rect.bottom >= 0 && 
             rect.right >= 0 && 
@@ -399,8 +408,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
 
   initWebtoonReader() {
-    const [innerWidth, _] = this.getInnerDimensions();
-    this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    this.initFinished = false;
+    this.recalculateImageWidth();
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
     this.atBottom = false;
@@ -437,11 +446,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         .filter((img: any) => !img.complete)
         .map((img: any) => new Promise(resolve => { img.onload = img.onerror = resolve; })))
         .then(() => {
+          this.debugLog('[Initialization] All images have loaded from initial prefetch, initFinished = true');
           this.debugLog('[Image Load] ! Loaded current page !', this.pageNum);
           this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
-          
+          // There needs to be a bit of time before we scroll
           if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) { 
             this.scrollToCurrentPage();
+          } else {
+            this.initFinished = true;
           }
           
           this.allImagesLoaded = true;
@@ -471,8 +483,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param scrollToPage Optional (default false) parameter to trigger scrolling to the newly set page
    */
   setPageNum(pageNum: number, scrollToPage: boolean = false) {
-    if (pageNum > this.totalPages) {
-      pageNum = this.totalPages;
+    if (pageNum >= this.totalPages) {
+      pageNum = this.totalPages - 1;
     } else if (pageNum < 0) {
       pageNum = 0;
     }
@@ -482,9 +494,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.prefetchWebtoonImages();
 
     if (scrollToPage) {
-      const currentImage = document.querySelector('img#page-' + this.pageNum);
-      if (currentImage === null) return;
-      this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
       this.scrollToCurrentPage();
     }
   }
@@ -499,6 +508,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   scrollToCurrentPage() {
     this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
     if (!this.currentPageElem) { return; }
+    this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
     
     // Update prevScrollPosition, so the next scroll event properly calculates direction
     this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
@@ -508,6 +518,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (this.currentPageElem) {
         this.debugLog('[Scroll] Scrolling to page ', this.pageNum);
         this.currentPageElem.scrollIntoView({behavior: 'smooth'});
+        this.initFinished = true;
       }
     }, 600);
   }
@@ -540,7 +551,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   attachIntersectionObserverElem(elem: HTMLImageElement) {
     if (elem !== null) {
       this.intersectionObserver.observe(elem);
-      this.debugLog('Attached Intersection Observer to page', this.readerService.imageUrlToPageNum(elem.src));
+      this.debugLog('[Intersection] Attached Intersection Observer to page', this.readerService.imageUrlToPageNum(elem.src));
     } else {
       console.error('Could not attach observer on elem'); // This never happens
     }
@@ -610,6 +621,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
 
+    if (this.debugLogFilter.filter(str => message.replace('\t', '').startsWith(str)).length > 0) return;
     if (extraData !== undefined) {
       console.log(message, extraData);  
     } else {

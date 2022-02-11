@@ -164,11 +164,14 @@ namespace API.Controllers
         public async Task<ActionResult> DeleteList([FromQuery] int readingListId)
         {
             var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             var readingList = user.ReadingLists.SingleOrDefault(r => r.Id == readingListId);
-            if (readingList == null)
+            if (readingList == null && !isAdmin)
             {
                 return BadRequest("User is not associated with this reading list");
             }
+
+            readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
 
             user.ReadingLists.Remove(readingList);
 
@@ -211,7 +214,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Update the properites (title, summary) of a reading list
+        /// Update the properties (title, summary) of a reading list
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>

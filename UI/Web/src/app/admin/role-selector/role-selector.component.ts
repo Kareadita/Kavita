@@ -1,17 +1,23 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Member } from 'src/app/_models/member';
 import { AccountService } from 'src/app/_services/account.service';
 import { MemberService } from 'src/app/_services/member.service';
 
 @Component({
-  selector: 'app-edit-rbs-modal',
-  templateUrl: './edit-rbs-modal.component.html',
-  styleUrls: ['./edit-rbs-modal.component.scss']
+  selector: 'app-role-selector',
+  templateUrl: './role-selector.component.html',
+  styleUrls: ['./role-selector.component.scss']
 })
-export class EditRbsModalComponent implements OnInit {
+export class RoleSelectorComponent implements OnInit {
 
   @Input() member: Member | undefined;
+  /**
+   * Allows the selection of Admin role
+   */
+  @Input() allowAdmin: boolean = false;
+  @Output() selected: EventEmitter<string[]> = new EventEmitter<string[]>();
+
   allRoles: string[] = [];
   selectedRoles: Array<{selected: boolean, data: string}> = [];
 
@@ -19,43 +25,18 @@ export class EditRbsModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountService.getRoles().subscribe(roles => {
-      roles = roles.filter(item => item != 'Admin' && item != 'Pleb'); // Do not allow the user to modify Account RBS
+      let bannedRoles = ['Pleb'];
+      if (!this.allowAdmin) {
+        bannedRoles.push('Admin');
+      }
+      roles = roles.filter(item => !bannedRoles.includes(item));
       this.allRoles = roles;
       this.selectedRoles = roles.map(item => {
         return {selected: false, data: item};
       });
-
       this.preselect();
+      this.selected.emit(this.selectedRoles.filter(item => item.selected).map(item => item.data));
     });
-  }
-
-  close() {
-    this.modal.close(undefined);
-  }
-
-  save() {
-    if (this.member?.username === undefined) {
-      return;
-    }
-
-    const selectedRoles = this.selectedRoles.filter(item => item.selected).map(item => item.data);
-    this.memberService.updateMemberRoles(this.member?.username, selectedRoles).subscribe(() => {
-      if (this.member) {
-        this.member.roles = selectedRoles;
-        this.modal.close(this.member);
-        return;
-      }
-      this.modal.close(undefined);
-    });
-  }
-
-  reset() {
-    this.selectedRoles = this.allRoles.map(item => {
-      return {selected: false, data: item};
-    });
-
-
-    this.preselect();
   }
 
   preselect() {
@@ -67,6 +48,10 @@ export class EditRbsModalComponent implements OnInit {
         }
       });
     }
+  }
+
+  handleModelUpdate() {
+    this.selected.emit(this.selectedRoles.filter(item => item.selected).map(item => item.data));
   }
 
 }

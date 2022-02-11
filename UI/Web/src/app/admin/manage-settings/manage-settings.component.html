@@ -64,15 +64,29 @@
                 <label for="opds" class="form-check-label">Enable OPDS</label>
             </div>
         </div>
-
+        
+        <h4>Email Services (SMTP)</h4>
+        <p class="accent">Kavita comes out of the box with an email service to power flows like invite user, forgot password, etc. Emails sent via our service are deleted immediately. You can use your own
+            email service. Set the url of the email service and use the Test button to ensure it works. At any time you can reset to ours. There is no way to disable emails althought confirmation links will always 
+            be saved to logs. 
+        </p>
         <div class="form-group">
-            <label for="authentication" aria-describedby="authentication-info">Authentication</label>
-            <p class="accent" id="authentication-info">By disabling authentication, all non-admin users will be able to login by just their username. No password will be required to authenticate.</p>
-            <div class="form-check">
-                <input id="authentication" type="checkbox" aria-label="User Authentication" class="form-check-input" formControlName="enableAuthentication">
-                <label for="authentication" class="form-check-label">Enable Authentication</label>
+            <label for="settings-emailservice">Email Service Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="emailServiceTooltip" role="button" tabindex="0"></i>
+            <ng-template #emailServiceTooltip>Use fully qualified url of the email service. Do not include ending slash.</ng-template>
+            <span class="sr-only" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
+            <div class="input-group">
+                <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="text" aria-describedby="change-bookmarks-dir">
+                <div class="input-group-append">
+                    <button class="btn btn-secondary" (click)="resetEmailServiceUrl()">
+                        Reset
+                    </button>
+                    <button class="btn btn-secondary" (click)="testEmailServiceUrl()">
+                        Test
+                    </button>
+                </div>
             </div>
         </div>
+
 
         <h4>Reoccuring Tasks</h4>
         <div class="form-group">

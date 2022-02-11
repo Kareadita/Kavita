@@ -14,7 +14,7 @@ import { Language } from 'src/app/_models/metadata/language';
 import { PublicationStatusDto } from 'src/app/_models/metadata/publication-status-dto';
 import { Pagination } from 'src/app/_models/pagination';
 import { Person, PersonRole } from 'src/app/_models/person';
-import { FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
+import { FilterEvent, FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
 import { Tag } from 'src/app/_models/tag';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
@@ -58,6 +58,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
   /**
+   * Should filtering be shown on the page
+   */
+  @Input() filteringDisabled: boolean = false;
+  /**
    * Any actions to exist on the header for the parent collection (library, collection)
    */
   @Input() actions: ActionItem<any>[] = [];
@@ -65,7 +69,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Input() filterSettings!: FilterSettings;
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
-  @Output() applyFilter: EventEmitter<SeriesFilter> = new EventEmitter();
+  @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
   
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
 
@@ -94,6 +98,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
+
 
   private onDestory: Subject<void> = new Subject();
 
@@ -194,10 +199,13 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.formatSettings.id = 'format';
     this.formatSettings.unique = true;
     this.formatSettings.addIfNonExisting = false;
-    this.formatSettings.fetchFn = (filter: string) => of(mangaFormatFilters);
+    this.formatSettings.fetchFn = (filter: string) => of(mangaFormatFilters).pipe(map(items => this.formatSettings.compareFn(items, filter))); 
     this.formatSettings.compareFn = (options: FilterItem<MangaFormat>[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f);
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+
+    this.formatSettings.singleCompareFn = (a: FilterItem<MangaFormat>, b: FilterItem<MangaFormat>) => {
+      return a.title == b.title;
     }
 
     if (this.filterSettings.presets?.formats && this.filterSettings.presets?.formats.length > 0) {
@@ -214,11 +222,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.librarySettings.unique = true;
     this.librarySettings.addIfNonExisting = false;
     this.librarySettings.fetchFn = (filter: string) => {
-      return this.libraryService.getLibrariesForMember();
+      return this.libraryService.getLibrariesForMember()
+      .pipe(map(items => this.librarySettings.compareFn(items, filter))); 
     };
     this.librarySettings.compareFn = (options: Library[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.name.toLowerCase() === f);
+      return options.filter(m => this.utilityService.filter(m.name, filter));
+    }
+    this.librarySettings.singleCompareFn = (a: Library, b: Library) => {
+      return a.name == b.name;
     }
 
     if (this.filterSettings.presets?.libraries && this.filterSettings.presets?.libraries.length > 0) {
@@ -238,11 +249,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.genreSettings.unique = true;
     this.genreSettings.addIfNonExisting = false;
     this.genreSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllGenres(this.filter.libraries);
+      return this.metadataService.getAllGenres(this.filter.libraries)
+      .pipe(map(items => this.genreSettings.compareFn(items, filter))); 
     };
     this.genreSettings.compareFn = (options: Genre[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f);
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.genreSettings.singleCompareFn = (a: Genre, b: Genre) => {
+      return a.title == b.title;
     }
 
     if (this.filterSettings.presets?.genres && this.filterSettings.presets?.genres.length > 0) {
@@ -261,12 +275,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.ageRatingSettings.id = 'age-rating';
     this.ageRatingSettings.unique = true;
     this.ageRatingSettings.addIfNonExisting = false;
-    this.ageRatingSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllAgeRatings(this.filter.libraries);
-    };
+    this.ageRatingSettings.fetchFn = (filter: string) => this.metadataService.getAllAgeRatings(this.filter.libraries)
+      .pipe(map(items => this.ageRatingSettings.compareFn(items, filter))); 
+    
     this.ageRatingSettings.compareFn = (options: AgeRatingDto[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+
+    this.ageRatingSettings.singleCompareFn = (a: AgeRatingDto, b: AgeRatingDto) => {
+      return a.title == b.title;
     }
 
     if (this.filterSettings.presets?.ageRating && this.filterSettings.presets?.ageRating.length > 0) {
@@ -285,12 +302,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.publicationStatusSettings.id = 'publication-status';
     this.publicationStatusSettings.unique = true;
     this.publicationStatusSettings.addIfNonExisting = false;
-    this.publicationStatusSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllPublicationStatus(this.filter.libraries);
-    };
+    this.publicationStatusSettings.fetchFn = (filter: string) => this.metadataService.getAllPublicationStatus(this.filter.libraries)
+      .pipe(map(items => this.publicationStatusSettings.compareFn(items, filter))); 
+    
     this.publicationStatusSettings.compareFn = (options: PublicationStatusDto[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+
+    this.publicationStatusSettings.singleCompareFn = (a: PublicationStatusDto, b: PublicationStatusDto) => {
+      return a.title == b.title;
     }
 
     if (this.filterSettings.presets?.publicationStatus && this.filterSettings.presets?.publicationStatus.length > 0) {
@@ -309,12 +329,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.tagsSettings.id = 'tags';
     this.tagsSettings.unique = true;
     this.tagsSettings.addIfNonExisting = false;
-    this.tagsSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllTags(this.filter.libraries);
-    };
     this.tagsSettings.compareFn = (options: Tag[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.tagsSettings.fetchFn = (filter: string) => this.metadataService.getAllTags(this.filter.libraries)
+      .pipe(map(items => this.tagsSettings.compareFn(items, filter))); 
+    
+    this.tagsSettings.singleCompareFn = (a: Tag, b: Tag) => {
+      return a.id == b.id;
     }
 
     if (this.filterSettings.presets?.tags && this.filterSettings.presets?.tags.length > 0) {
@@ -333,12 +355,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.languageSettings.id = 'languages';
     this.languageSettings.unique = true;
     this.languageSettings.addIfNonExisting = false;
-    this.languageSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllLanguages(this.filter.libraries);
-    };
     this.languageSettings.compareFn = (options: Language[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f && this.utilityService.filter(m.title, filter));
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.languageSettings.fetchFn = (filter: string) => this.metadataService.getAllLanguages(this.filter.libraries)
+          .pipe(map(items => this.languageSettings.compareFn(items, filter))); 
+
+    this.languageSettings.singleCompareFn = (a: Language, b: Language) => {
+      return a.isoCode == b.isoCode;
     }
 
     if (this.filterSettings.presets?.languages && this.filterSettings.presets?.languages.length > 0) {
@@ -357,12 +381,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.collectionSettings.id = 'collections';
     this.collectionSettings.unique = true;
     this.collectionSettings.addIfNonExisting = false;
-    this.collectionSettings.fetchFn = (filter: string) => {
-      return this.collectionTagService.allTags();
-    };
     this.collectionSettings.compareFn = (options: CollectionTag[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f);
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.collectionSettings.fetchFn = (filter: string) => this.collectionTagService.allTags()
+      .pipe(map(items => this.collectionSettings.compareFn(items, filter)));
+
+    this.collectionSettings.singleCompareFn = (a: CollectionTag, b: CollectionTag) => {
+      return a.id == b.id;
     }
 
     if (this.filterSettings.presets?.collectionTags && this.filterSettings.presets?.collectionTags.length > 0) {
@@ -427,11 +453,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     personSettings.addIfNonExisting = false;
     personSettings.id = id;
     personSettings.compareFn = (options: Person[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.name.toLowerCase() === f);
+      return options.filter(m => this.utilityService.filter(m.name, filter));
+    }
+
+    personSettings.singleCompareFn = (a: Person, b: Person) => {
+      return a.name == b.name && a.role == b.role;
     }
     personSettings.fetchFn = (filter: string) => {
-      return this.fetchPeople(role, filter);
+      return this.fetchPeople(role, filter).pipe(map(items => personSettings.compareFn(items, filter)));
     };
     return personSettings;
   }
@@ -566,7 +595,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   }
 
   apply() {
-    this.applyFilter.emit(this.filter);
+    this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
     this.updateApplied++;
   }
 

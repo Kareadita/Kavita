@@ -4,7 +4,11 @@
         
         
         <!-- Arc Information -->
-        
+        <div class="row no-gutters">
+            <div class="col">
+                Id: {{chapter.id}} 
+            </div>
+        </div>
     
         <div class="row no-gutters">
             <div class="col">
@@ -28,7 +32,7 @@
     <ul class="list-unstyled" >
         <li class="media my-4">
             <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
-                <img class="mr-3" style="width: 74px" [src]="chapter.coverImage">
+                <app-image class="mr-3" width="74px" [imageUrl]="chapter.coverImage"></app-image>
             </a>
             <div class="media-body">
                 <h5 class="mt-0 mb-1">

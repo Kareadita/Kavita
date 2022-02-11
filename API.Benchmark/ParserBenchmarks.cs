@@ -29,16 +29,14 @@ namespace API.Benchmark
             Console.WriteLine($"Performing benchmark on {_names.Count} series");
         }
 
-        private static void NormalizeOriginal(string name)
-        {
-            Regex.Replace(name.ToLower(), "[^a-zA-Z0-9]", string.Empty);
-        }
-
-        private static void NormalizeNew(string name)
+        private static string Normalize(string name)
         {
             // ReSharper disable once UnusedVariable
             var ret = NormalizeRegex.Replace(name, string.Empty).ToLower();
+            var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
+            return string.IsNullOrEmpty(normalized) ? name : normalized;
         }
+
 
 
         [Benchmark]
@@ -46,19 +44,10 @@ namespace API.Benchmark
         {
             foreach (var name in _names)
             {
-                NormalizeOriginal(name);
+                Normalize(name);
             }
         }
 
-
-        [Benchmark]
-        public void TestNormalizeName_New()
-        {
-            foreach (var name in _names)
-            {
-                NormalizeNew(name);
-            }
-        }
 
         [Benchmark]
         public void TestIsEpub()

@@ -19,6 +19,7 @@ export enum KEY_CODES {
   ENTER = 'Enter',
   G = 'g',
   B = 'b',
+  F = 'f',
   BACKSPACE = 'Backspace',
   DELETE = 'Delete',
   SHIFT = 'Shift'
@@ -146,6 +147,12 @@ export class UtilityService {
     const writers = snapshot.queryParamMap.get('writers');
     if (writers !== undefined && writers !== null) {
       filter.writers = [...filter.writers, ...writers.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const artists = snapshot.queryParamMap.get('artists');
+    if (artists !== undefined && artists !== null) {
+      filter.artists = [...filter.artists, ...artists.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 

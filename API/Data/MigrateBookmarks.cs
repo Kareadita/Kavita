@@ -9,13 +9,13 @@ using Microsoft.Extensions.Logging;
 namespace API.Data;
 
 /// <summary>
-/// Responsible to migrate existing bookmarks to files
+/// Responsible to migrate existing bookmarks to files. Introduced in v0.4.9.27
 /// </summary>
 public static class MigrateBookmarks
 {
-    private static readonly Version VersionBookmarksChanged = new Version(0, 4, 9, 27);
     /// <summary>
-    /// This will migrate existing bookmarks to bookmark folder based
+    /// This will migrate existing bookmarks to bookmark folder based.
+    /// If the bookmarks folder already exists, this will not run.
     /// </summary>
     /// <remarks>Bookmark directory is configurable. This will always use the default bookmark directory.</remarks>
     /// <param name="directoryService"></param>

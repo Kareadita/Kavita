@@ -8,7 +8,7 @@ export class PublicationStatusPipe implements PipeTransform {
 
   transform(value: PublicationStatus): string {
     switch (value) {
-      case PublicationStatus.OnGoing: return 'On Going';
+      case PublicationStatus.OnGoing: return 'Ongoing';
       case PublicationStatus.Hiatus: return 'Hiatus';
       case PublicationStatus.Completed: return 'Completed';
       

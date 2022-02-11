@@ -1,4 +1,4 @@
-<div class="container-sm mt-2" *ngIf="readingList">
+<div class="container-fluid mt-2" *ngIf="readingList">
   <div class="mb-3">
     <!-- Title row-->
     <div class="row no-gutters">
@@ -49,8 +49,7 @@
     <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
         <ng-template #draggableItem let-item let-position="idx">
             <div class="media" style="width: 100%;">
-                <img width="74px" style="width: 74px;" class="img-top lazyload mr-3" [src]="imageService.placeholderImage" [attr.data-src]="imageService.getChapterCoverImage(item.chapterId)" 
-                (error)="imageService.updateErroredImage($event)">
+                <app-image width="74px" class="img-top mr-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
                 <div class="media-body">
                   <h5 class="mt-0 mb-1" id="item.id--{{position}}">{{formatTitle(item)}}&nbsp;
                       <span class="badge badge-primary badge-pill">

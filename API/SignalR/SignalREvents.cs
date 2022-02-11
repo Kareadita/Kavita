@@ -2,12 +2,14 @@
 {
     public static class SignalREvents
     {
-        public const string UpdateAvailable = "UpdateAvailable";
-        public const string ScanSeries = "ScanSeries";
         /// <summary>
-        /// Event during Refresh Metadata for cover image change
+        /// An update is available for the Kavita instance
         /// </summary>
-        public const string RefreshMetadata = "RefreshMetadata";
+        public const string UpdateAvailable = "UpdateAvailable";
+        /// <summary>
+        /// Used to tell when a scan series completes
+        /// </summary>
+        public const string ScanSeries = "ScanSeries";
         /// <summary>
         /// Event sent out during Refresh Metadata for progress tracking
         /// </summary>
@@ -48,6 +50,9 @@
         /// Event sent out during downloading of files
         /// </summary>
         public const string DownloadProgress = "DownloadProgress";
-
+        /// <summary>
+        /// A cover was updated
+        /// </summary>
+        public const string CoverUpdate = "CoverUpdate";
     }
 }

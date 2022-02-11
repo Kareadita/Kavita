@@ -75,20 +75,6 @@ namespace API.SignalR
         }
 
 
-
-        public static SignalRMessage RefreshMetadataEvent(int libraryId, int seriesId)
-        {
-            return new SignalRMessage()
-            {
-                Name = SignalREvents.RefreshMetadata,
-                Body = new
-                {
-                    SeriesId = seriesId,
-                    LibraryId = libraryId
-                }
-            };
-        }
-
         public static SignalRMessage BackupDatabaseProgressEvent(float progress)
         {
             return new SignalRMessage()
@@ -158,6 +144,19 @@ namespace API.SignalR
                     UserName = username,
                     DownloadName = downloadName,
                     Progress = progress
+                }
+            };
+        }
+
+        public static SignalRMessage CoverUpdateEvent(int id, string entityType)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.CoverUpdate,
+                Body = new
+                {
+                    Id = id,
+                    EntityType = entityType,
                 }
             };
         }

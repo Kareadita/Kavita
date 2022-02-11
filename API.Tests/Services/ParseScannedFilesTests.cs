@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -10,10 +11,8 @@ using API.Entities.Enums;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner;
-using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -96,8 +95,6 @@ public class ParseScannedFilesTests
 
         return connection;
     }
-
-    public void Dispose() => _connection.Dispose();
 
     private async Task<bool> SeedDb()
     {

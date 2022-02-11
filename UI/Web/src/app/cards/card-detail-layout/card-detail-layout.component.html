@@ -5,16 +5,16 @@
                 <span *ngIf="actions.length > 0" class="">
                     <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
                 </span>{{header}}&nbsp;
-                <!-- NOTE: On mobile the pill can eat up a lot of space, we can hide it and move to the filter section if user is interested -->
                 <span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </h2>
         </div>
-        
-        <button class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
+
+        <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
             <i class="fa fa-filter" aria-hidden="true"></i>
             <span class="sr-only">Sort / Filter</span>
         </button>
     </div>
+    
     <div class="phone-hidden">
         <div #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
             <ng-container [ngTemplateOutlet]="filterSection"></ng-container>

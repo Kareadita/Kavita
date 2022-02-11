@@ -103,17 +103,6 @@ namespace API.Data.Metadata
             info.Characters = Parser.Parser.CleanAuthor(info.Characters);
             info.Translator = Parser.Parser.CleanAuthor(info.Translator);
             info.CoverArtist = Parser.Parser.CleanAuthor(info.CoverArtist);
-
-
-            // if (!string.IsNullOrEmpty(info.Web))
-            // {
-            //     // ComicVine stores the Issue number in Number field and does not use Volume.
-            //     if (!info.Web.Contains("https://comicvine.gamespot.com/")) return;
-            //     if (info.Volume.Equals("1"))
-            //     {
-            //         info.Volume = Parser.Parser.DefaultVolume;
-            //     }
-            // }
         }
 
 

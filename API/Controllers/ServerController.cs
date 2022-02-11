@@ -24,24 +24,24 @@ namespace API.Controllers
         private readonly IConfiguration _config;
         private readonly IBackupService _backupService;
         private readonly IArchiveService _archiveService;
-        private readonly ICacheService _cacheService;
         private readonly IVersionUpdaterService _versionUpdaterService;
         private readonly IStatsService _statsService;
         private readonly ICleanupService _cleanupService;
+        private readonly IEmailService _emailService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
-            IBackupService backupService, IArchiveService archiveService, ICacheService cacheService,
-            IVersionUpdaterService versionUpdaterService, IStatsService statsService, ICleanupService cleanupService)
+            IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
+            ICleanupService cleanupService, IEmailService emailService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
             _config = config;
             _backupService = backupService;
             _archiveService = archiveService;
-            _cacheService = cacheService;
             _versionUpdaterService = versionUpdaterService;
             _statsService = statsService;
             _cleanupService = cleanupService;
+            _emailService = emailService;
         }
 
         /// <summary>
@@ -108,6 +108,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Checks for updates, if no updates that are > current version installed, returns null
+        /// </summary>
         [HttpGet("check-update")]
         public async Task<ActionResult<UpdateNotificationDto>> CheckForUpdates()
         {
@@ -118,6 +121,17 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
         {
             return Ok(await _versionUpdaterService.GetAllReleases());
+        }
+
+        /// <summary>
+        /// Is this server accessible to the outside net
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("accessible")]
+        [AllowAnonymous]
+        public async Task<ActionResult<bool>> IsServerAccessible()
+        {
+            return await _emailService.CheckIfAccessible(Request.Host.ToString());
         }
     }
 }

@@ -15,7 +15,6 @@ import { User } from '../_models/user';
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
   ScanSeries = 'ScanSeries',
-  RefreshMetadata = 'RefreshMetadata',
   RefreshMetadataProgress = 'RefreshMetadataProgress',
   SeriesAdded = 'SeriesAdded',
   SeriesRemoved = 'SeriesRemoved',
@@ -25,7 +24,11 @@ export enum EVENTS {
   ScanLibraryError = 'ScanLibraryError',
   BackupDatabaseProgress = 'BackupDatabaseProgress',
   CleanupProgress = 'CleanupProgress',
-  DownloadProgress = 'DownloadProgress'
+  DownloadProgress = 'DownloadProgress',
+  /**
+   * A cover is updated
+   */
+  CoverUpdate = 'CoverUpdate'
 }
 
 export interface Message<T> {
@@ -49,7 +52,6 @@ export class MessageHubService {
   public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
   public scanLibrary: EventEmitter<ProgressEvent> = new EventEmitter<ProgressEvent>(); // TODO: Refactor this name to be generic
   public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
-  public refreshMetadata: EventEmitter<RefreshMetadataEvent> = new EventEmitter<RefreshMetadataEvent>();
 
   isAdmin: boolean = false;
 
@@ -143,10 +145,6 @@ export class MessageHubService {
         payload: resp.body
       });
       this.seriesAdded.emit(resp.body);
-      // Don't show the toast when user has reader open
-      if (this.isAdmin && this.router.url.match(/\d+\/manga|book\/\d+/gi) !== null) {
-        this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
-      }
     });
 
     this.hubConnection.on(EVENTS.SeriesRemoved, resp => {
@@ -156,12 +154,19 @@ export class MessageHubService {
       });
     });
 
-    this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
+    // this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
+    //   this.messagesSource.next({
+    //     event: EVENTS.RefreshMetadata,
+    //     payload: resp.body
+    //   });
+    //   this.refreshMetadata.emit(resp.body); // TODO: Remove this
+    // });
+
+    this.hubConnection.on(EVENTS.CoverUpdate, resp => {
       this.messagesSource.next({
-        event: EVENTS.RefreshMetadata,
+        event: EVENTS.CoverUpdate,
         payload: resp.body
       });
-      this.refreshMetadata.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.UpdateAvailable, resp => {

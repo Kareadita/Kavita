@@ -25,7 +25,7 @@ export class MemberService {
   }
 
   deleteMember(username: string) {
-    return this.httpClient.delete(this.baseUrl + 'users/delete-user?username=' + username);
+    return this.httpClient.delete(this.baseUrl + 'users/delete-user?username=' + encodeURIComponent(username));
   }
 
   hasLibraryAccess(libraryId: number) {
@@ -36,7 +36,8 @@ export class MemberService {
     return this.httpClient.get<boolean>(this.baseUrl + 'users/has-reading-progress?libraryId=' + librayId);
   }
 
-  updateMemberRoles(username: string, roles: string[]) {
-    return this.httpClient.post(this.baseUrl + 'account/update-rbs', {username, roles});
+
+  getPendingInvites() {
+    return this.httpClient.get<Array<Member>>(this.baseUrl + 'users/pending');
   }
 }

@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using API.Entities.Enums;
-using API.Services;
 
 namespace API.Parser
 {
@@ -484,7 +483,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Extra(?:(\sChapter)?[^\S])|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
+                @"(?<Special>Specials?|OneShot|One\-Shot|\d.+?(\W|_|-)Annual|Annual(\W|_|-)\d.+?|Extra(?:(\sChapter)?[^\S])|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
                 MatchOptions, RegexTimeout),
         };
 
@@ -660,20 +659,17 @@ namespace API.Parser
 
         private static string FormatValue(string value, bool hasPart)
         {
-            if (!value.Contains("-"))
+            if (!value.Contains('-'))
             {
                 return RemoveLeadingZeroes(hasPart ? AddChapterPart(value) : value);
             }
 
             var tokens = value.Split("-");
             var from = RemoveLeadingZeroes(tokens[0]);
-            if (tokens.Length == 2)
-            {
-                var to = RemoveLeadingZeroes(hasPart ? AddChapterPart(tokens[1]) : tokens[1]);
-                return $"{@from}-{to}";
-            }
+            if (tokens.Length != 2) return from;
 
-            return @from;
+            var to = RemoveLeadingZeroes(hasPart ? AddChapterPart(tokens[1]) : tokens[1]);
+            return $"{from}-{to}";
         }
 
         public static string ParseChapter(string filename)
@@ -697,7 +693,7 @@ namespace API.Parser
 
         private static string AddChapterPart(string value)
         {
-            if (value.Contains("."))
+            if (value.Contains('.'))
             {
                 return value;
             }
@@ -877,13 +873,10 @@ namespace API.Parser
         /// <returns>A zero padded number</returns>
         public static string PadZeros(string number)
         {
-            if (number.Contains("-"))
-            {
-                var tokens = number.Split("-");
-                return $"{PerformPadding(tokens[0])}-{PerformPadding(tokens[1])}";
-            }
+            if (!number.Contains('-')) return PerformPadding(number);
 
-            return PerformPadding(number);
+            var tokens = number.Split("-");
+            return $"{PerformPadding(tokens[0])}-{PerformPadding(tokens[1])}";
         }
 
         private static string PerformPadding(string number)
@@ -926,6 +919,25 @@ namespace API.Parser
             return XmlRegex.IsMatch(Path.GetExtension(filePath));
         }
 
+
+        public static float MaximumNumberFromRange(string range)
+        {
+            try
+            {
+                if (!Regex.IsMatch(range, @"^[\d-.]+$"))
+                {
+                    return (float) 0.0;
+                }
+
+                var tokens = range.Replace("_", string.Empty).Split("-");
+                return tokens.Max(float.Parse);
+            }
+            catch
+            {
+                return (float) 0.0;
+            }
+        }
+
         public static float MinimumNumberFromRange(string range)
         {
             try
@@ -946,7 +958,8 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            return NormalizeRegex.Replace(name, string.Empty).ToLower();
+            var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
+            return string.IsNullOrEmpty(normalized) ? name : normalized;
         }
 
 

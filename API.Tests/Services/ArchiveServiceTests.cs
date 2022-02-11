@@ -257,6 +257,17 @@ namespace API.Tests.Services
                 Assert.Equal("Junya Inoue", comicInfo.Writer);
             }
 
+            [Fact]
+            public void ShouldHaveComicInfo_TopLevelFileOnly()
+            {
+                var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+                var archive = Path.Join(testDirectory, "ComicInfo_duplicateInfos.zip");
+
+                var comicInfo = _archiveService.GetComicInfo(archive);
+                Assert.NotNull(comicInfo);
+                Assert.Equal("BTOOOM!", comicInfo.Series);
+            }
+
         #endregion
 
         #region CanParseComicInfo

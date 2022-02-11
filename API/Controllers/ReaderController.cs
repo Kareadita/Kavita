@@ -8,7 +8,6 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
@@ -28,12 +27,13 @@ namespace API.Controllers
         private readonly IReaderService _readerService;
         private readonly IDirectoryService _directoryService;
         private readonly ICleanupService _cleanupService;
+        private readonly IBookmarkService _bookmarkService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
             IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
             IReaderService readerService, IDirectoryService directoryService,
-            ICleanupService cleanupService)
+            ICleanupService cleanupService, IBookmarkService bookmarkService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
@@ -41,6 +41,7 @@ namespace API.Controllers
             _readerService = readerService;
             _directoryService = directoryService;
             _cleanupService = cleanupService;
+            _bookmarkService = bookmarkService;
         }
 
         /// <summary>
@@ -357,6 +358,64 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Continue point is the chapter which you should start reading again from. If there is no progress on a series, then the first chapter will be returned (non-special unless only specials).
+        /// Otherwise, loop through the chapters and volumes in order to find the next chapter which has progress.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("continue-point")]
+        public async Task<ActionResult<ChapterDto>> GetContinuePoint(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+
+            return Ok(await _readerService.GetContinuePoint(seriesId, userId));
+        }
+
+        /// <summary>
+        /// Returns if the user has reading progress on the Series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        [HttpGet("has-progress")]
+        public async Task<ActionResult<ChapterDto>> HasProgress(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId));
+        }
+
+        /// <summary>
+        /// Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read.
+        /// </summary>
+        /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
+        /// <returns></returns>
+        [HttpPost("mark-chapter-until-as-read")]
+        public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+            user.Progresses ??= new List<AppUserProgress>();
+
+            if (chapterNumber < 1.0f)
+            {
+                // This is a hack to track volume number. We need to map it back by x100
+                var volumeNumber = int.Parse($"{chapterNumber * 100f}");
+                await _readerService.MarkVolumesUntilAsRead(user, seriesId, volumeNumber);
+            }
+            else
+            {
+                await _readerService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber);
+            }
+
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (!_unitOfWork.HasChanges()) return Ok(true);
+            if (await _unitOfWork.CommitAsync()) return Ok(true);
+
+            await _unitOfWork.RollbackAsync();
+            return Ok(false);
+        }
+
+
+        /// <summary>
         /// Returns a list of bookmarked pages for a given Chapter
         /// </summary>
         /// <param name="chapterId"></param>
@@ -393,6 +452,7 @@ namespace API.Controllers
             if (user.Bookmarks == null) return Ok("Nothing to remove");
             try
             {
+                var bookmarksToRemove = user.Bookmarks.Where(bmk => bmk.SeriesId == dto.SeriesId).ToList();
                 user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != dto.SeriesId).ToList();
                 _unitOfWork.UserRepository.Update(user);
 
@@ -400,7 +460,7 @@ namespace API.Controllers
                 {
                     try
                     {
-                        await _cleanupService.CleanupBookmarks();
+                        await _bookmarkService.DeleteBookmarkFiles(bookmarksToRemove);
                     }
                     catch (Exception ex)
                     {
@@ -456,49 +516,17 @@ namespace API.Controllers
         {
             // Don't let user save past total pages.
             bookmarkDto.Page = await _readerService.CapPageToChapter(bookmarkDto.ChapterId, bookmarkDto.Page);
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+            var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
+            if (chapter == null) return BadRequest("Could not find cached image. Reload and try again.");
+            var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
 
-            try
+            if (await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
             {
-                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-                var userBookmark =
-                    await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, user.Id);
-
-                // We need to get the image
-                var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
-                if (chapter == null) return BadRequest("There was an issue finding image file for reading");
-                var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
-                var fileInfo = new FileInfo(path);
-
-                var bookmarkDirectory =
-                    (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-                _directoryService.CopyFileToDirectory(path, Path.Join(bookmarkDirectory,
-                    $"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}"));
-
-
-               if (userBookmark == null)
-               {
-                   user.Bookmarks ??= new List<AppUserBookmark>();
-                   user.Bookmarks.Add(new AppUserBookmark()
-                   {
-                       Page = bookmarkDto.Page,
-                       VolumeId = bookmarkDto.VolumeId,
-                       SeriesId = bookmarkDto.SeriesId,
-                       ChapterId = bookmarkDto.ChapterId,
-                       FileName = Path.Join($"{user.Id}", $"{bookmarkDto.SeriesId}", $"{bookmarkDto.ChapterId}", fileInfo.Name)
-
-                   });
-                   _unitOfWork.UserRepository.Update(user);
-               }
-
-               await _unitOfWork.CommitAsync();
-            }
-            catch (Exception)
-            {
-               await _unitOfWork.RollbackAsync();
-               return BadRequest("Could not save bookmark");
+                return Ok();
             }
 
-            return Ok();
+            return BadRequest("Could not save bookmark");
         }
 
         /// <summary>
@@ -510,24 +538,11 @@ namespace API.Controllers
         public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-
             if (user.Bookmarks == null) return Ok();
-            try {
-                user.Bookmarks = user.Bookmarks.Where(x =>
-                    x.ChapterId == bookmarkDto.ChapterId
-                    && x.AppUserId == user.Id
-                    && x.Page != bookmarkDto.Page).ToList();
 
-                _unitOfWork.UserRepository.Update(user);
-
-                if (await _unitOfWork.CommitAsync())
-                {
-                    return Ok();
-                }
-            }
-            catch (Exception)
+            if (await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
             {
-                await _unitOfWork.RollbackAsync();
+                return Ok();
             }
 
             return BadRequest("Could not remove bookmark");

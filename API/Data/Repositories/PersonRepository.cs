@@ -66,6 +66,8 @@ public class PersonRepository : IPersonRepository
             .Where(s => libraryIds.Contains(s.LibraryId))
             .SelectMany(s => s.Metadata.People)
             .Distinct()
+            .OrderBy(p => p.Name)
+            .AsNoTracking()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -74,6 +76,7 @@ public class PersonRepository : IPersonRepository
     public async Task<IList<Person>> GetAllPeople()
     {
         return await _context.Person
+            .OrderBy(p => p.Name)
             .ToListAsync();
     }
 }

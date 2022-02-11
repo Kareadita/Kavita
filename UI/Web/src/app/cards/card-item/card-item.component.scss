@@ -118,6 +118,12 @@ $image-width: 160px;
     }
     
     z-index: 10;
+
+    .count {
+        top: 5px;
+        right: 10px;
+        position: absolute;
+    }
 }
 
 .card-actions {

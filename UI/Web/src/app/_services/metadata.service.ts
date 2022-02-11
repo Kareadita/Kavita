@@ -42,7 +42,7 @@ export class MetadataService {
     if (libraries != undefined && libraries.length > 0) {
       method += '?libraryIds=' + libraries.join(',');
     }
-    return this.httpClient.get<Array<AgeRatingDto>>(this.baseUrl + method);;
+    return this.httpClient.get<Array<AgeRatingDto>>(this.baseUrl + method);
   }
 
   getAllPublicationStatus(libraries?: Array<number>) {
@@ -50,7 +50,7 @@ export class MetadataService {
     if (libraries != undefined && libraries.length > 0) {
       method += '?libraryIds=' + libraries.join(',');
     }
-    return this.httpClient.get<Array<PublicationStatusDto>>(this.baseUrl + method);;
+    return this.httpClient.get<Array<PublicationStatusDto>>(this.baseUrl + method);
   }
 
   getAllTags(libraries?: Array<number>) {
@@ -58,7 +58,7 @@ export class MetadataService {
     if (libraries != undefined && libraries.length > 0) {
       method += '?libraryIds=' + libraries.join(',');
     }
-    return this.httpClient.get<Array<Tag>>(this.baseUrl + method);;
+    return this.httpClient.get<Array<Tag>>(this.baseUrl + method);
   }
 
   getAllGenres(libraries?: Array<number>) {
@@ -66,7 +66,7 @@ export class MetadataService {
     if (libraries != undefined && libraries.length > 0) {
       method += '?libraryIds=' + libraries.join(',');
     }
-    return this.httpClient.get<Genre[]>(this.baseUrl + method);
+    return this.httpClient.get<Array<Genre>>(this.baseUrl + method);
   }
 
   getAllLanguages(libraries?: Array<number>) {
@@ -74,7 +74,7 @@ export class MetadataService {
     if (libraries != undefined && libraries.length > 0) {
       method += '?libraryIds=' + libraries.join(',');
     }
-    return this.httpClient.get<Language[]>(this.baseUrl + method);
+    return this.httpClient.get<Array<Language>>(this.baseUrl + method);
   }
 
   getAllPeople(libraries?: Array<number>) {
@@ -82,6 +82,6 @@ export class MetadataService {
     if (libraries != undefined && libraries.length > 0) {
       method += '?libraryIds=' + libraries.join(',');
     }
-    return this.httpClient.get<Person[]>(this.baseUrl + method);
+    return this.httpClient.get<Array<Person>>(this.baseUrl + method);
   }
 }

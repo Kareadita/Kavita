@@ -4,9 +4,10 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { SettingsService } from '../settings.service';
+import { EmailTestResult, SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
+
 
 @Component({
   selector: 'app-manage-settings',
@@ -40,8 +41,8 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
-      this.settingsForm.addControl('enableAuthentication', new FormControl(this.serverSettings.enableAuthentication, [Validators.required]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
+      this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
     });
   }
 
@@ -54,29 +55,17 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel);
     this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection);
     this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds);
-    this.settingsForm.get('enableAuthentication')?.setValue(this.serverSettings.enableAuthentication);
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
+    this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
   }
 
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
 
-    if (this.settingsForm.get('enableAuthentication')?.dirty && this.settingsForm.get('enableAuthentication')?.value === false) {
-      if (!await this.confirmService.confirm('Disabling Authentication opens your server up to unauthorized access and possible hacking. Are you sure you want to continue with this?')) {
-        return;
-      }
-    }
-
-    const informUserAfterAuthenticationEnabled = this.settingsForm.get('enableAuthentication')?.dirty && this.settingsForm.get('enableAuthentication')?.value && !this.serverSettings.enableAuthentication;
-
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
-
-      if (informUserAfterAuthenticationEnabled) {
-        await this.confirmService.alert('You have just re-enabled authentication. All non-admin users have been re-assigned a password of "[k.2@RZ!mxCQkJzE". This is a publicly known password. Please change their users passwords or request them to.');
-      }
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -102,6 +91,30 @@ export class ManageSettingsComponent implements OnInit {
         this.settingsForm.markAsTouched();
       }
     });
+  }
+
+  resetEmailServiceUrl() {
+    this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+      this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
+      this.resetForm();
+      this.toastr.success('Email Service Reset');
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+  }
+
+  testEmailServiceUrl() {
+    this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (result: EmailTestResult) => {
+      if (result.successful) {
+        this.toastr.success('Email Service Url validated');
+      } else {
+        this.toastr.error('Email Service Url did not respond. ' + result.errorMessage);
+      }
+      
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+    
   }
 
 }

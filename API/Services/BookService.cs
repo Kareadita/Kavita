@@ -171,7 +171,7 @@ namespace API.Services
 
             stylesheetHtml = stylesheetHtml.Insert(0, importBuilder.ToString());
 
-            EscapeCSSImportReferences(ref stylesheetHtml, apiBase, prepend);
+            EscapeCssImportReferences(ref stylesheetHtml, apiBase, prepend);
 
             EscapeFontFamilyReferences(ref stylesheetHtml, apiBase, prepend);
 
@@ -200,7 +200,7 @@ namespace API.Services
             return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
         }
 
-        private static void EscapeCSSImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
+        private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
         {
             foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
             {
@@ -384,9 +384,11 @@ namespace API.Services
                     Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                     Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
+                    Day = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Day : 0,
                     Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
                     Title = epubBook.Title,
                     Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
+                    LanguageISO = epubBook.Schema.Package.Metadata.Languages.FirstOrDefault() ?? string.Empty
 
                 };
                 // Parse tags not exposed via Library
@@ -457,6 +459,11 @@ namespace API.Services
             return content;
         }
 
+        /// <summary>
+        /// Removes the leading ../
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public static string CleanContentKeys(string key)
         {
             return key.Replace("../", string.Empty);

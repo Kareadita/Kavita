@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Parser;
 using API.Services.Tasks.Scanner;
 

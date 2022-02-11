@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -9,6 +9,7 @@ import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 @Component({
   selector: 'app-bulk-add-to-collection',
   templateUrl: './bulk-add-to-collection.component.html',
+  encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.
   styleUrls: ['./bulk-add-to-collection.component.scss']
 })
 export class BulkAddToCollectionComponent implements OnInit {

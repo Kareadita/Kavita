@@ -1,6 +1,6 @@
 ﻿using API.Entities.Enums;
 
-namespace API.DTOs
+namespace API.DTOs.Search
 {
     public class SearchResultDto
     {

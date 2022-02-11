@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
@@ -120,13 +120,15 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.settings.id = 'collections';
     this.settings.unique = true;
     this.settings.addIfNonExisting = true;
-    this.settings.fetchFn = (filter: string) => this.fetchCollectionTags(filter);
+    this.settings.fetchFn = (filter: string) => this.fetchCollectionTags(filter).pipe(map(items => this.settings.compareFn(items, filter)));
     this.settings.addTransformFn = ((title: string) => {
       return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
     });
     this.settings.compareFn = (options: CollectionTag[], filter: string) => {
-      const f = filter.toLowerCase();
-      return options.filter(m => m.title.toLowerCase() === f);
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.settings.singleCompareFn = (a: CollectionTag, b: CollectionTag) => {
+      return a.id == b.id;
     }
   }
 
