@@ -13,7 +13,7 @@
                         <ngb-panel id="site-panel" title="Site">
                             <ng-template ngbPanelHeader>
                                 <div class="d-flex align-items-center justify-content-between">
-                                  <button ngbPanelToggle class="btn container-fluid text-start pl-0 accordion-header">Site</button>
+                                  <button ngbPanelToggle class="btn container-fluid text-start ps-0 accordion-header">Site</button>
                                   <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('site-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
                                 </div>
                               </ng-template>
@@ -42,7 +42,7 @@
                         <ngb-panel id="reading-panel" title="Reading">
                             <ng-template ngbPanelHeader>
                                 <div class="d-flex align-items-center justify-content-between">
-                                  <button ngbPanelToggle class="btn container-fluid text-start pl-0 accordion-header">Reading</button>
+                                  <button ngbPanelToggle class="btn container-fluid text-start ps-0 accordion-header">Reading</button>
                                   <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('reading-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
                                 </div>
                               </ng-template>
@@ -51,7 +51,7 @@
                                     <h3 id="manga-header">Image Reader</h3>
                                     
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pr-2">
+                                        <div class="form-group col-md-6 col-sm-12 pe-2">
                                             <label for="settings-reading-direction">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
                                             <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
@@ -71,7 +71,7 @@
                                     </div>
                                     
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pr-2">
+                                        <div class="form-group col-md-6 col-sm-12 pe-2">
                                             <label for="settings-pagesplit-option">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
                                             <span class="visually-hidden" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
@@ -105,7 +105,7 @@
                                     <hr>
                                     <h3>Book Reader</h3>
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pr-2">
+                                        <div class="form-group col-md-6 col-sm-12 pe-2">
                                             <label id="dark-mode-label">Dark Mode</label>
                                             <div class="form-group">
                                                 <div class="custom-control custom-radio custom-control-inline">
@@ -137,7 +137,7 @@
                                     </div>
 
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pr-2">
+                                        <div class="form-group col-md-6 col-sm-12 pe-2">
                                             <label for="settings-book-reading-direction">Book Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
                                             <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
@@ -160,11 +160,11 @@
                                     
 
                                     <div class="row g-0">
-                                        <div class="form-group col-md-4 col-sm-12 pr-2">
+                                        <div class="form-group col-md-4 col-sm-12 pe-2">
                                             <label id="font-size">Font Size</label>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderFontSizeOptions" formControlName="bookReaderFontSize" aria-labelledby="font-size"></ngx-slider></div>
                                         </div>
-                                        <div class="form-group col-md-4 col-sm-12 pr-2">
+                                        <div class="form-group col-md-4 col-sm-12 pe-2">
                                             <label>Line Height</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookLineHeightOptionTooltip>How much spacing between the lines of the book</ng-template>
                                             <span class="visually-hidden" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
