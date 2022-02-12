@@ -1,6 +1,6 @@
 <div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container" tabindex="0" #reader>
     <div class="fixed-top" #stickyTop>
-        <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+        <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="drawerBackgroundColor" (drawerClosed)="closeDrawer()">
             <div header>
@@ -54,13 +54,13 @@
                     <div class="controls">
                         <label id="tap-pagination">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
                         <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
-                        <span class="sr-only" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
+                        <span class="visually-hidden" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
                         <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
                     </div>
                     <div class="controls">
                         <label id="fullscreen">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
                         <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
-                        <span class="sr-only" id="fullscreen-help">
+                        <span class="visually-hidden" id="fullscreen-help">
                             <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
                         </span>
                         <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
@@ -137,12 +137,12 @@
             <div class="book-title col-2 phone-hidden">
                 <ng-container *ngIf="isLoading; else showTitle">
                     <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
-                        <span class="sr-only">Loading book...</span>
+                        <span class="visually-hidden">Loading book...</span>
                     </div>
                 </ng-container>
                 <ng-template #showTitle>
                     {{bookTitle}}
-                    <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span>
+                    <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode</span>)</span>
                 </ng-template>
             </div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>

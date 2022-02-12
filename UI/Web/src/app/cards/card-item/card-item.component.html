@@ -12,7 +12,7 @@
 
         <span class="download" *ngIf="download$ | async as download">
           <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
-          <span class="sr-only" role="status">
+          <span class="visually-hidden" role="status">
             {{download.progress}}% downloaded
           </span>
         </span>
@@ -36,9 +36,9 @@
         <span class="card-title" placement="top" id="{{title}}_{{entity?.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick()" tabindex="0">
           <span *ngIf="isPromoted()">
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-            <span class="sr-only">(promoted)</span>
+            <span class="visually-hidden">(promoted)</span>
           </span>
-          <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="sr-only">{{utilityService.mangaFormat(format)}}</span>
+          <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="visually-hidden">{{utilityService.mangaFormat(format)}}</span>
           &nbsp;{{title}}
         </span>
         <span class="card-actions float-end">

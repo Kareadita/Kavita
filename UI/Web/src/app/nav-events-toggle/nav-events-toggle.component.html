@@ -11,7 +11,7 @@
                 <div class="spinner-border text-primary small-spinner"
                 role="status" title="Started at {{event.timestamp | date: 'short'}}" 
                 attr.aria-valuetext="{{prettyPrintProgress(event.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(event.progress)">
-                    <span class="sr-only">Scan for {{event.libraryName}} in progress</span>
+                    <span class="visually-hidden">Scan for {{event.libraryName}} in progress</span>
                 </div>
                 {{prettyPrintProgress(event.progress)}}%
                 {{prettyPrintEvent(event.eventType, event)}} {{event.libraryName}}

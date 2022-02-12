@@ -42,7 +42,7 @@
                     <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
                     <span *ngIf="member.username === loggedInUsername">
                         <i class="fas fa-star" aria-hidden="true"></i>
-                        <span class="sr-only">(You)</span>
+                        <span class="visually-hidden">(You)</span>
                     </span>
                     <div class="float-end" *ngIf="canEditMember(member)">
                         <button class="btn btn-danger mr-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>

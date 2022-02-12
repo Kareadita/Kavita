@@ -13,7 +13,7 @@
                         <ngb-panel id="site-panel" title="Site">
                             <ng-template ngbPanelHeader>
                                 <div class="d-flex align-items-center justify-content-between">
-                                  <button ngbPanelToggle class="btn container-fluid text-left pl-0 accordion-header">Site</button>
+                                  <button ngbPanelToggle class="btn container-fluid text-start pl-0 accordion-header">Site</button>
                                   <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('site-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
                                 </div>
                               </ng-template>
@@ -42,7 +42,7 @@
                         <ngb-panel id="reading-panel" title="Reading">
                             <ng-template ngbPanelHeader>
                                 <div class="d-flex align-items-center justify-content-between">
-                                  <button ngbPanelToggle class="btn container-fluid text-left pl-0 accordion-header">Reading</button>
+                                  <button ngbPanelToggle class="btn container-fluid text-start pl-0 accordion-header">Reading</button>
                                   <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('reading-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
                                 </div>
                               </ng-template>
@@ -54,7 +54,7 @@
                                         <div class="form-group col-md-6 col-sm-12 pr-2">
                                             <label for="settings-reading-direction">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
-                                            <span class="sr-only" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
+                                            <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
                                             <select class="form-control" aria-describedby="manga-header" formControlName="readingDirection" id="settings-reading-direction">
                                                 <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
@@ -63,7 +63,7 @@
                                         <div class="form-group col-md-6 col-sm-12">
                                             <label for="settings-scaling-option">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
                                             <ng-template #taskBackupTooltip>How to scale the image to your screen.</ng-template>
-                                            <span class="sr-only" id="settings-scaling-option-help">How to scale the image to your screen.</span>
+                                            <span class="visually-hidden" id="settings-scaling-option-help">How to scale the image to your screen.</span>
                                             <select class="form-control" aria-describedby="manga-header" formControlName="scalingOption" id="settings-scaling-option">
                                                 <option *ngFor="let opt of scalingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
@@ -74,7 +74,7 @@
                                         <div class="form-group col-md-6 col-sm-12 pr-2">
                                             <label for="settings-pagesplit-option">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
-                                            <span class="sr-only" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
+                                            <span class="visually-hidden" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
                                             <select class="form-control" aria-describedby="manga-header" formControlName="pageSplitOption" id="settings-pagesplit-option">
                                                 <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
@@ -122,7 +122,7 @@
                                         <div class="form-group col-md-6 col-sm-12">
                                             <label id="taptopaginate-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #tapToPaginateOptionTooltip>Should the sides of the book reader screen allow tapping on it to move to prev/next page</ng-template>
-                                            <span class="sr-only" id="settings-taptopaginate-option-help">Should the sides of the book reader screen allow tapping on it to move to prev/next page</span>
+                                            <span class="visually-hidden" id="settings-taptopaginate-option-help">Should the sides of the book reader screen allow tapping on it to move to prev/next page</span>
                                             <div class="form-group">
                                                 <div class="custom-control custom-radio custom-control-inline">
                                                     <input type="radio" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="custom-control-input" [value]="true" aria-labelledby="taptopaginate-label">
@@ -140,7 +140,7 @@
                                         <div class="form-group col-md-6 col-sm-12 pr-2">
                                             <label for="settings-book-reading-direction">Book Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
-                                            <span class="sr-only" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
+                                            <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
                                             <select class="form-control" aria-describedby="settings-reading-direction-help" formControlName="bookReaderReadingDirection">
                                                 <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
@@ -150,7 +150,7 @@
                                         <div class="form-group col-md-6 col-sm-12">
                                             <label for="settings-fontfamily-option">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #fontFamilyOptionTooltip>Font familty to load up. Default will load the book's default font</ng-template>
-                                            <span class="sr-only" id="settings-fontfamily-option-help">Font familty to load up. Default will load the book's default font</span>
+                                            <span class="visually-hidden" id="settings-fontfamily-option-help">Font familty to load up. Default will load the book's default font</span>
                                             <select class="form-control" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
                                                 <option *ngFor="let opt of fontFamilies" [value]="opt">{{opt | titlecase}}</option>
                                             </select>
@@ -167,14 +167,14 @@
                                         <div class="form-group col-md-4 col-sm-12 pr-2">
                                             <label>Line Height</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookLineHeightOptionTooltip>How much spacing between the lines of the book</ng-template>
-                                            <span class="sr-only" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
+                                            <span class="visually-hidden" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderLineSpacingOptions" formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help"></ngx-slider></div>
                                         </div>
         
                                         <div class="form-group col-md-4 col-sm-12">
                                             <label>Margin</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReaderMarginOptionTooltip>How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</ng-template>
-                                            <span class="sr-only" id="settings-bookmargin-option-help">How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</span>
+                                            <span class="visually-hidden" id="settings-bookmargin-option-help">How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</span>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderMarginOptions" formControlName="bookReaderMargin" aria-describedby="bookmargin"></ngx-slider></div>
                                         </div>
                                     </div>

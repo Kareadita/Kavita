@@ -11,7 +11,7 @@
             [disabled]="isClearing" placement="top" ngbTooltip="Remove Bookmark" attr.aria-label="Remove Bookmark">
                 <ng-container *ngIf="isClearing; else notClearing">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="sr-only">Loading...</span>
+                    <span class="visually-hidden">Loading...</span>
                 </ng-container>
                 <ng-template #notClearing>
                     <i class="fa fa-trash-alt" aria-hidden="true"></i>

@@ -1,4 +1,4 @@
-@import '~bootstrap/scss/mixins/_breakpoints.scss';
+@use '../../theme/variables';
 
 $primary-color: white;
 $bg-color: rgb(22, 27, 34);
@@ -19,6 +19,7 @@ $bg-color: rgb(22, 27, 34);
 }
 
 // On Really small screens, hide the server settings wheel and show it in nav
+// TODO: Look into doing this with bootstrap 5
 .xs-only {
     display: none;
 }
@@ -75,17 +76,19 @@ $bg-color: rgb(22, 27, 34);
     width: 100%;
 }
 
-@media (min-width: 576px) {
+@media (min-width: variables.$grid-breakpoints-sm) {
     .form-inline .form-group {
         width: 100%;
     }
 }
 
-@include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
-    .ng-autocomplete {
-        width: 100%; // 232px
-    }
-}
+// we don't need this because we have fixed size that grows
+// @media (max-width: variables.$grid-breakpoints-sm) {
+//     .ng-autocomplete {
+//         width: 100%;
+//     }
+// }
+
 
 .scroll-to-top:hover {
     animation: MoveUpDown 1s linear infinite;

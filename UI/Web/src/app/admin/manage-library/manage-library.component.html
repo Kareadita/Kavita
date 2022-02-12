@@ -9,7 +9,7 @@
                 <h4>
                     <span id="library-name--{{idx}}">{{library.name}}</span>&nbsp;
                     <div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;" role="status" *ngIf="scanInProgress.hasOwnProperty(library.id) && scanInProgress[library.id].progress" title="Scan in progress. Started at {{scanInProgress[library.id].timestamp | date: 'short'}}">
-                        <span class="sr-only">Scan for {{library.name}} in progress</span>
+                        <span class="visually-hidden">Scan for {{library.name}} in progress</span>
                     </div>
                     <div class="float-end">
                         <button class="btn btn-secondary mr-2 btn-sm" (click)="scanLibrary(library)" placement="top" ngbTooltip="Scan Library" attr.aria-label="Scan Library"><i class="fa fa-sync-alt" title="Scan"></i></button>

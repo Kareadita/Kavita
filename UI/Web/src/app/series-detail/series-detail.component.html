@@ -11,7 +11,7 @@
                 </h2>
             </div>
             <div class="row g-0">
-                <div>
+                <div class="col-auto">
                     <button class="btn btn-primary" (click)="read()" [disabled]="isLoading">
                         <span>
                             <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
@@ -19,30 +19,30 @@
                         <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
-                <div class="ml-2" *ngIf="isAdmin">
+                <div class="col-auto ml-2" *ngIf="isAdmin">
                     <button class="btn btn-secondary" (click)="openEditSeriesModal()" title="Edit Series information">
                         <span>
                             <i class="fa fa-pen" aria-hidden="true"></i>
                         </span>
                     </button>
                 </div>
-                <div class="ml-2" *ngIf="isAdmin || hasDownloadingRole">
+                <div class="col-auto ml-2" *ngIf="isAdmin || hasDownloadingRole">
                     <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series" [disabled]="downloadInProgress">
                         <ng-container *ngIf="downloadInProgress; else notDownloading">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="sr-only">Downloading...</span>
+                            <span class="visually-hidden">Downloading...</span>
                         </ng-container>
                         <ng-template #notDownloading>
                             <i class="fa fa-arrow-alt-circle-down" aria-hidden="true"></i>
                         </ng-template>
                     </button>
                 </div>
-                <div class="ml-2">
+                <div class="col-auto ml-2">
                     <div class="card-actions">
                         <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
                     </div>
                 </div>
-                <div class="ml-2">
+                <div class="col-auto ml-2">
                     <ngb-rating class="rating-star" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
                     <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
                 </div>

@@ -1,5 +1,4 @@
 @use '../node_modules/swiper/swiper.scss' as swiper;
-@use '~bootstrap/scss/mixins/_breakpoints.scss' as breakpoints;
 
 // Import colors for overrides of bootstrap theme
 @import './theme/colors';
@@ -109,13 +108,13 @@ app-root {
 
 
 // Utiliities
-@include breakpoints.media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+@media(max-width: $grid-breakpoints-xs) {
   .phone-hidden {
     display: none;
   }
 }
 
-@include breakpoints.media-breakpoint-up(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
+@media(min-width: $grid-breakpoints-sm) {
   .not-phone-hidden {
     display: none;
   }

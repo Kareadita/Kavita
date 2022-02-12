@@ -12,7 +12,7 @@
         <div class="col-auto align-self-end">
             <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
                 <i class="fa fa-filter" aria-hidden="true"></i>
-                <span class="sr-only">Sort / Filter</span>
+                <span class="visually-hidden">Sort / Filter</span>
             </button>
         </div>
     </div>
@@ -46,7 +46,7 @@
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
                     <div class="form-group">
                         <label for="format">Format</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
-                        <span class="sr-only" id="filter-global-format-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
+                        <span class="visually-hidden" id="filter-global-format-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -75,7 +75,7 @@
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.collectionDisabled">
                     <div class="form-group">
                         <label for="collections">Collections</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
-                        <span class="sr-only" id="filter-global-collections-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
+                        <span class="visually-hidden" id="filter-global-collections-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
