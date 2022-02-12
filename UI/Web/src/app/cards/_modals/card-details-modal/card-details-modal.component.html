@@ -5,8 +5,8 @@
         <ng-template #comicHeader><h4 class="modal-title" id="modal-basic-title">
             {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}} Details</h4>
         </ng-template>
-        <button type="button" class="close" aria-label="Close" (click)="close()">
-        <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+        
         </button>
     </div>
     <div class="modal-body scrollable-modal" *ngIf="utilityService.isChapter(data)">
@@ -18,15 +18,15 @@
         <h4 *ngIf="utilityService.isVolume(data)">Information</h4>
 
         <ng-container *ngIf="utilityService.isVolume(data) || utilityService.isChapter(data)">
-            <div class="row no-gutters">
+            <div class="row g-0">
                 <div class="col">
                     Id: {{data.id}}
                 </div>
                 <div class="col" *ngIf="series !== undefined">
-                    Format: <span class="badge badge-secondary">{{utilityService.mangaFormat(series.format) | sentenceCase}}</span>
+                    Format: <span class="badge bg-secondary">{{utilityService.mangaFormat(series.format) | sentenceCase}}</span>
                 </div>
             </div>
-            <div class="row no-gutters">
+            <div class="row g-0">
                 <div class="col" *ngIf="data.hasOwnProperty('created')">
                     Added: {{(data.created | date: 'short') || '-'}}
                 </div>
@@ -49,7 +49,7 @@
                                 <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
                                 {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
                             </span>
-                            <span class="badge badge-primary badge-pill">
+                            <span class="badge bg-primary rounded-pill">
                                 <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
                                 <span *ngIf="chapter.pagesRead === 0">UNREAD</span>
                                 <span *ngIf="chapter.pagesRead === chapter.pages">READ</span>
@@ -60,7 +60,7 @@
                     <ul class="list-group">
                         <li *ngFor="let file of chapter.files" class="list-group-item">
                             <span>{{file.filePath}}</span>
-                            <div class="row no-gutters">
+                            <div class="row g-0">
                                 <div class="col">
                                     Pages: {{file.pages}}
                                 </div>

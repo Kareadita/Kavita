@@ -5,12 +5,40 @@
 @import './theme/colors';
 @import './theme/toastr';
 
+@import './theme/variables';
+
 // Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';
 
-
-
 @import './theme/dark.scss';
+
+
+
+// Default variables for light mode
+:root {
+  --primary-color: #4ac694;
+  --error-color: #ff4136;
+  --bs-body-bg: #fff; 
+}
+
+// Dark mode theme
+:root .bg-dark {
+  --primary-color: #4ac694;
+  --error-color: #ff4136;
+  --bs-body-bg: #343a40; 
+  --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+// E-ink theme
+:root .bg-eink {
+  --primary-color: black;
+  --bs-body-bg: white;
+}
+
+// Overrides on bootstrap
+.btn-close {
+  filter: var(--btn-icon-filter) !important;
+}
 
 
 

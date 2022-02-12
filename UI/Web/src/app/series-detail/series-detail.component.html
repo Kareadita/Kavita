@@ -4,13 +4,13 @@
             <app-image class="poster" maxWidth="300px" [imageUrl]="seriesImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
-            <div class="row no-gutters">
+            <div class="row g-0">
                 
                 <h2>
                     {{series?.name}}
                 </h2>
             </div>
-            <div class="row no-gutters">
+            <div class="row g-0">
                 <div>
                     <button class="btn btn-primary" (click)="read()" [disabled]="isLoading">
                         <span>
@@ -47,7 +47,7 @@
                     <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
                 </div>
             </div>
-            <div class="row no-gutters">
+            <div class="row g-0">
                 <!-- TODO: This will be the first of reviews section. Reviews will show your plus other peoples reviews in media cards like Plex does and this will be below metadata -->
                 <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
@@ -65,7 +65,7 @@
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
-                <div class="row no-gutters">
+                <div class="row g-0">
                     <div *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
                         <app-card-item class="col-auto" *ngIf="chapter.isSpecial" [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
                         [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
@@ -77,7 +77,7 @@
             <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (hasNonSpecialVolumeChapters || hasNonSpecialNonVolumeChapters)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
-                    <div class="row no-gutters">
+                    <div class="row g-0">
                         <div *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                             <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="formatVolumeTitle(volume)" (click)="openVolume(volume)"
                             [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
@@ -94,7 +94,7 @@
             <li [ngbNavItem]="TabID.Volumes" *ngIf="hasNonSpecialVolumeChapters">
                 <a ngbNavLink>Volumes</a>
                 <ng-template ngbNavContent>
-                    <div class="row no-gutters">
+                    <div class="row g-0">
                           <div *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                                   <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="formatVolumeTitle(volume)" (click)="openVolume(volume)"
                                   [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
@@ -106,7 +106,7 @@
             <li [ngbNavItem]="TabID.Chapters" *ngIf="hasNonSpecialNonVolumeChapters">
               <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
               <ng-template ngbNavContent>
-                  <div class="row no-gutters">
+                  <div class="row g-0">
                         <div *ngFor="let chapter of chapters; let idx = index; trackBy: trackByChapterIdentity">
                             <app-card-item class="col-auto" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="formatChapterTitle(chapter)" (click)="openChapter(chapter)"
                             [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"

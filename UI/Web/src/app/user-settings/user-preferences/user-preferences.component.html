@@ -32,7 +32,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="float-right mb-3">
+                                    <div class="float-end mb-3">
                                         <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
                                         <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="site-dark-mode-label" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
                                     </div>
@@ -50,7 +50,7 @@
                                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
                                     <h3 id="manga-header">Image Reader</h3>
                                     
-                                    <div class="row no-gutters">
+                                    <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pr-2">
                                             <label for="settings-reading-direction">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
@@ -70,7 +70,7 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="row no-gutters">
+                                    <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pr-2">
                                             <label for="settings-pagesplit-option">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
@@ -104,7 +104,7 @@
                                     </div>
                                     <hr>
                                     <h3>Book Reader</h3>
-                                    <div class="row no-gutters">
+                                    <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pr-2">
                                             <label id="dark-mode-label">Dark Mode</label>
                                             <div class="form-group">
@@ -136,7 +136,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="row no-gutters">
+                                    <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pr-2">
                                             <label for="settings-book-reading-direction">Book Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
@@ -159,7 +159,7 @@
 
                                     
 
-                                    <div class="row no-gutters">
+                                    <div class="row g-0">
                                         <div class="form-group col-md-4 col-sm-12 pr-2">
                                             <label id="font-size">Font Size</label>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderFontSizeOptions" formControlName="bookReaderFontSize" aria-labelledby="font-size"></ngx-slider></div>
@@ -181,7 +181,7 @@
 
                                     
     
-                                    <div class="float-right mb-3">
+                                    <div class="float-end mb-3">
                                         <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
                                         <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
                                     </div>
@@ -221,7 +221,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="float-right mb-3">
+                        <div class="float-end mb-3">
                             <button type="button" class="btn btn-secondary mr-2" aria-describedby="password-panel" (click)="resetPasswordForm()">Reset</button>
                             <button type="submit" class="btn btn-primary" aria-describedby="password-panel" (click)="savePasswordForm()" [disabled]="!passwordChangeForm.valid || !(passwordChangeForm.dirty || passwordChangeForm.touched)">Save</button>
                         </div>

@@ -1,7 +1,7 @@
 <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Invite User</h4>
-    <button type="button" class="close" aria-label="Close" (click)="close()">
-    <span aria-hidden="true">&times;</span>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+    
     </button>
 </div>
 <div class="modal-body">
@@ -16,7 +16,7 @@
     
 
     <form [formGroup]="inviteForm">
-        <div class="row no-gutters">
+        <div class="row g-0">
             <div class="form-group" style="width:100%">
                 <label for="email">Email</label>
                 <input class="form-control" type="email" id="email" formControlName="email" required>
@@ -33,7 +33,7 @@
             <a class="email-link" href="{{emailLink}}" target="_blank">{{emailLink}}</a>
         </ng-container>
     
-        <div class="row no-gutters">
+        <div class="row g-0">
             <div class="col-md-6">
                 <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
             </div>

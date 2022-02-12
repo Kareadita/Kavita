@@ -4,14 +4,14 @@
     <ng-container>
         <div class="row mb-2">
             <div class="col-8"><h3>Pending Invites</h3></div>
-            <div class="col-4"><button class="btn btn-primary float-right" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
+            <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
         </div>
         <ul class="list-group">
             <li  class="list-group-item" *ngFor="let invite of pendingInvites; let idx = index;">
                 <div>
                     <h4>
                         <span id="member-name--{{idx}}">{{invite.username | titlecase}} </span>
-                        <div class="float-right">
+                        <div class="float-end">
                             <button class="btn btn-danger mr-2" (click)="deleteUser(invite)">Cancel</button>
                             <button class="btn btn-secondary mr-2" (click)="resendEmail(invite)">Resend</button>
                         </div>
@@ -44,7 +44,7 @@
                         <i class="fas fa-star" aria-hidden="true"></i>
                         <span class="sr-only">(You)</span>
                     </span>
-                    <div class="float-right" *ngIf="canEditMember(member)">
+                    <div class="float-end" *ngIf="canEditMember(member)">
                         <button class="btn btn-danger mr-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
                         <button class="btn btn-secondary mr-2" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
                         <button class="btn btn-primary" (click)="openEditUser(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>

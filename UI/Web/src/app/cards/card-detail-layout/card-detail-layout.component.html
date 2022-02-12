@@ -1,18 +1,20 @@
 <div class="container-fluid" style="padding-top: 10px">
-    <div class="row no-gutters pb-2">
+    <div class="row g-0 pb-2">
         <div class="col mr-auto">
             <h2 style="display: inline-block">
                 <span *ngIf="actions.length > 0" class="">
                     <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
                 </span>{{header}}&nbsp;
-                <span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
+                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </h2>
         </div>
 
-        <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
-            <i class="fa fa-filter" aria-hidden="true"></i>
-            <span class="sr-only">Sort / Filter</span>
-        </button>
+        <div class="col-auto align-self-end">
+            <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
+                <i class="fa fa-filter" aria-hidden="true"></i>
+                <span class="sr-only">Sort / Filter</span>
+            </button>
+        </div>
     </div>
     
     <div class="phone-hidden">
@@ -25,8 +27,8 @@
         <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
-                    <button type="button" class="close" aria-label="Close" (click)="commentDrawer.close()">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()">
+                        
                     </button>
                 </h2>
                 
@@ -40,7 +42,7 @@
     <ng-template #filterSection>
         <ng-template #globalFilterTooltip>This is library agnostic</ng-template>
         <div class="filter-section mx-auto pb-3">
-            <div class="row justify-content-center no-gutters">
+            <div class="row justify-content-center g-0">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
                     <div class="form-group">
                         <label for="format">Format</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
@@ -113,7 +115,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-center no-gutters">
+            <div class="row justify-content-center g-0">
                 <!-- The People row -->
                 <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
                     <div class="form-group">
@@ -255,7 +257,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-center no-gutters">
+            <div class="row justify-content-center g-0">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.readProgressDisabled">
                     <label>Read Progress</label>
                     <form [formGroup]="readProgressGroup">
@@ -322,7 +324,7 @@
                 </div>
                 <div class="col-md-2 mr-3"></div>
             </div>
-            <div class="row justify-content-center no-gutters">
+            <div class="row justify-content-center g-0">
                 <div class="col-md-2 mr-3" *ngIf="!filterSettings.sortDisabled">
                     <form [formGroup]="sortGroup">
                         <div class="form-group">
@@ -357,7 +359,7 @@
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 
-    <div class="row no-gutters">
+    <div class="row g-0">
         <div class="col-auto" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>

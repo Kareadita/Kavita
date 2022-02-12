@@ -4,13 +4,13 @@
             <app-image class="poster" maxWidth="481px" [imageUrl]="tagImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
-            <div class="row no-gutters">
+            <div class="row g-0">
                 <h2>
 
                     {{collectionTag.title}}
                 </h2>
             </div>
-            <div class="row no-gutters mt-2 mb-2">
+            <div class="row g-0 mt-2 mb-2">
                 <div class="ml-2" *ngIf="isAdmin">
                     <button class="btn btn-secondary" (click)="openEditCollectionTagModal(collectionTag)" title="Edit Series information">
                         <span>
@@ -19,7 +19,7 @@
                     </button>
                 </div>
             </div>
-            <div class="row no-gutters">
+            <div class="row g-0">
                 <app-read-more [text]="collectionTag.summary" [maxLength]="250"></app-read-more>
             </div>
         </div>

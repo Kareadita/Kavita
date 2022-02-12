@@ -18,25 +18,8 @@ $dark-item-accent-bg: #292d32;
 
 $white-item-accent-bg: rgba(247, 247, 247, 1);
 
-// Default variables for light mode
-:root {
-  --primary-color: #4ac694;
-  --error-color: #ff4136;
-  --bs-body-bg: #fff; 
-}
 
-// Dark mode theme
-:root .bg-dark {
-  --primary-color: #4ac694;
-  --error-color: #ff4136;
-  --bs-body-bg: red; // This is bootstrap v5 only
-}
 
-// E-ink theme
-:root .bg-eink {
-  --primary-color: black;
-  --bs-body-bg: white;
-}
 
 
 //=========================

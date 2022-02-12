@@ -1,13 +1,13 @@
 <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Edit {{member.username | sentenceCase}}</h4>
-    <button type="button" class="close" aria-label="Close" (click)="close()">
-    <span aria-hidden="true">&times;</span>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+    
     </button>
 </div>
 <div class="modal-body">
 
     <form [formGroup]="userForm">
-        <div class="row no-gutters">
+        <div class="row g-0">
             <div class="col-md-6 col-sm-12 pr-2">
                 <div class="form-group">
                     <label for="username">Username</label>
@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <div class="row no-gutters">
+        <div class="row g-0">
             <div class="col-md-6">
                 <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
             </div>

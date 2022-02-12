@@ -27,7 +27,7 @@
       </div>
 
       <div class="count" *ngIf="count > 1">
-        <span class="badge badge-primary">{{count}}</span>
+        <span class="badge bg-primary">{{count}}</span>
       </div>
     </div>
 
@@ -41,7 +41,7 @@
           <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="sr-only">{{utilityService.mangaFormat(format)}}</span>
           &nbsp;{{title}}
         </span>
-        <span class="card-actions float-right">
+        <span class="card-actions float-end">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
         </span>
       </div>

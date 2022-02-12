@@ -2,8 +2,8 @@
     <div class="modal-header">
         <h4 class="modal-title">
             {{this.series.name}} Details</h4>
-        <button type="button" class="close" aria-label="Close" (click)="close()">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+            
         </button>
     </div>
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
@@ -13,28 +13,28 @@
                   <a ngbNavLink>{{tabs[0]}}</a>
                   <ng-template ngbNavContent>
                     <form [formGroup]="editSeriesForm">
-                    <div class="row no-gutters">
+                    <div class="row g-0">
                         <div class="form-group" style="width: 100%">
                             <label for="name">Name</label>
                             <input id="name" class="form-control" formControlName="name" type="text">
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
+                    <div class="row g-0">
                         <div class="form-group" style="width: 100%">
                             <label for="sort-name">Sort Name</label>
                             <input id="sort-name" class="form-control" formControlName="sortName" type="text">
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
+                    <div class="row g-0">
                         <div class="form-group" style="width: 100%">
                             <label for="localized-name">Localized Name</label>
                             <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
                         </div>
                     </div>
 
-                    <div class="row no-gutters" *ngIf="metadata">
+                    <div class="row g-0" *ngIf="metadata">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="author">Author</label>
@@ -49,7 +49,7 @@
                         </div>
                     </div>
 
-                    <div class="row no-gutters" *ngIf="metadata">
+                    <div class="row g-0" *ngIf="metadata">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="genres">Genres</label>
@@ -71,7 +71,7 @@
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
+                    <div class="row g-0">
                         <div class="form-group" style="width: 100%">
                             <label for="summary">Summary</label>
                             <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
@@ -94,7 +94,7 @@
                   <a ngbNavLink>{{tabs[2]}}</a>
                   <ng-template ngbNavContent>
                     <h4>Information</h4>
-                    <div class="row no-gutters mb-2">
+                    <div class="row g-0 mb-2">
                         <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | sentenceCase}}</div>
                         <div class="col-md-6">Format: <app-tag-badge>{{utilityService.mangaFormat(series.format)}}</app-tag-badge></div>
                     </div>
@@ -108,7 +108,7 @@
                               <div class="media-body">
                                   <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
                                   <div>
-                                      <div class="row no-gutters">
+                                      <div class="row g-0">
                                           <div class="col">
                                               Added: {{volume.created | date: 'short'}}
                                           </div>
@@ -116,7 +116,7 @@
                                               Last Modified: {{volume.lastModified | date: 'short'}}
                                           </div>
                                       </div>
-                                      <div class="row no-gutters">
+                                      <div class="row g-0">
                                           <div class="col">
                                               <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()" [attr.aria-expanded]="!volumeCollapsed[volume.name]">
                                                   View Files
@@ -131,7 +131,7 @@
                                           <ul class="list-group mt-2">
                                               <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
                                                   <span>{{file.filePath}}</span>
-                                                  <div class="row no-gutters">
+                                                  <div class="row g-0">
                                                       <div class="col">
                                                           Chapter: {{file.chapter}}
                                                       </div>

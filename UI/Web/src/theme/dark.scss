@@ -199,7 +199,13 @@
     background-color: $dark-form-background-no-opacity;
   }
 
+  // v4
   .bs-popover-bottom > .arrow::after, .bs-popover-bottom > .arrow::before {
+    border-bottom-color: transparent;
+  }
+
+  // v5
+  .bs-popover-bottom > .popover-arrow::after, .bs-popover-bottom > .popover-arrow::before {
     border-bottom-color: transparent;
   }
 

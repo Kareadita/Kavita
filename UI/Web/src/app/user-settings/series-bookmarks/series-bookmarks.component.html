@@ -6,8 +6,8 @@
         <div>
             <h4>
                 <a id="series--{{series.name}}" href="javascript:void(0);" (click)="viewBookmarks(series)">{{series.name | titlecase}}</a>
-                &nbsp;<span class="badge badge-secondary badge-pill">{{getBookmarkPages(series.id)}}</span>
-                <div class="float-right">
+                &nbsp;<span class="badge bg-secondary rounded-pill">{{getBookmarkPages(series.id)}}</span>
+                <div class="float-end">
                     <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-danger mr-2 btn-sm" (click)="clearBookmarks(series)" [disabled]="clearingSeries[series.id]" placement="top" ngbTooltip="Clear Bookmarks" attr.aria-label="Clear Bookmarks">
                         <ng-container *ngIf="clearingSeries[series.id]; else notClearing">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
