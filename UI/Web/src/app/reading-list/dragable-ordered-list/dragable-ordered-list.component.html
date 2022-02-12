@@ -7,7 +7,7 @@
         <ng-container  style="display: inline-block" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
 
         <div class="align-middle" style="padding-top: 40px">
-            <label for="reorder-{{i}}" class="visually-hidden">Reorder</label>
+            <label for="reorder-{{i}}" class="form-label visually-hidden">Reorder</label>
                     <input *ngIf="accessibilityMode" id="reorder-{{i}}" type="number" min="0" [max]="items.length - 1" [value]="i" style="width: 40px" (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
         </div>
         <button class="btn btn-icon pull-right" (click)="removeItem(item, i)">

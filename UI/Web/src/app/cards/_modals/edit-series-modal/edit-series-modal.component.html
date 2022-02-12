@@ -15,21 +15,21 @@
                     <form [formGroup]="editSeriesForm">
                     <div class="row g-0">
                         <div class="form-group" style="width: 100%">
-                            <label for="name">Name</label>
+                            <label for="name" class="form-label">Name</label>
                             <input id="name" class="form-control" formControlName="name" type="text">
                         </div>
                     </div>
 
                     <div class="row g-0">
                         <div class="form-group" style="width: 100%">
-                            <label for="sort-name">Sort Name</label>
+                            <label for="sort-name" class="form-label">Sort Name</label>
                             <input id="sort-name" class="form-control" formControlName="sortName" type="text">
                         </div>
                     </div>
 
                     <div class="row g-0">
                         <div class="form-group" style="width: 100%">
-                            <label for="localized-name">Localized Name</label>
+                            <label for="localized-name" class="form-label">Localized Name</label>
                             <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
                         </div>
                     </div>
@@ -37,13 +37,13 @@
                     <div class="row g-0" *ngIf="metadata">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="author">Author</label>
+                                <label for="author" class="form-label">Author</label>
                                 <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="artist">Artist</label>
+                                <label for="artist" class="form-label">Artist</label>
                                 <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
                             </div>
                         </div>
@@ -52,13 +52,13 @@
                     <div class="row g-0" *ngIf="metadata">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="genres">Genres</label>
+                                <label for="genres" class="form-label">Genres</label>
                                 <input id="genres" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="genres" type="text">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="collections">Collections</label>
+                                <label for="collections" class="form-label">Collections</label>
                                 <app-typeahead (selectedData)="updateCollections($event)" [settings]="settings">
                                     <ng-template #badgeItem let-item let-position="idx">
                                         {{item.title}}
@@ -73,7 +73,7 @@
 
                     <div class="row g-0">
                         <div class="form-group" style="width: 100%">
-                            <label for="summary">Summary</label>
+                            <label for="summary" class="form-label">Summary</label>
                             <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                         </div>
                     </div>

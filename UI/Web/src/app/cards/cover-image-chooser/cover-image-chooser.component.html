@@ -25,8 +25,9 @@
                 <ng-container *ngIf="mode === 'url'">
                     <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
                         <div class="input-group col-md-10 me-md-2" style="width: 100%">
+                            <!-- TOOD: Bootstrap migration: This should be replaced with just the label-->
                             <div class="input-group-prepend">
-                                <label class="input-group-text" for="load-image">Url</label>
+                                <label class="input-group-text form-label" for="load-image">Url</label>
                             </div>
                             <input type="text" autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
                             <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">

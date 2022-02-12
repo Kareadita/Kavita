@@ -18,7 +18,7 @@
     <form [formGroup]="inviteForm">
         <div class="row g-0">
             <div class="form-group" style="width:100%">
-                <label for="email">Email</label>
+                <label for="email" class="form-label">Email</label>
                 <input class="form-control" type="email" id="email" formControlName="email" required>
                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
                     <div *ngIf="email?.errors?.required">

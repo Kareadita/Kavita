@@ -11,12 +11,12 @@
             <strong>Error: </strong> {{errorMessage}}
         </div>
         <div class="form-group">
-            <label for="library-name">Name</label>
+            <label for="library-name" class="form-label">Name</label>
             <input id="library-name" class="form-control" formControlName="name" type="text">
         </div>
         
         <div class="form-group">
-            <label for="library-type">Type</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
+            <label for="library-type" class="form-label">Type</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
             <ng-template #typeTooltip>Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but fall back to embedded data.</ng-template>
             <span class="visually-hidden" id="library-type-help">Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but fall back to embedded data.</span>
             <select class="form-control" id="library-type" formControlName="type" [attr.disabled]="this.library" aria-describedby="library-type-help">

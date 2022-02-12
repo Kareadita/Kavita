@@ -9,7 +9,7 @@
     <div class="modal-body">
         <form [formGroup]="reviewGroup">
             <div class="row g-0">
-                <label for="rating">Rating</label>
+                <label for="rating" class="form-label">Rating</label>
                 <div>
                     <ngb-rating style="margin-top: 2px; font-size: 1.5rem;" formControlName="rating"></ngb-rating>
                     <button class="btn btn-information ms-2" (click)="clearRating()"><i aria-hidden="true" class="fa fa-ban"></i><span class="phone-hidden">&nbsp;Clear</span></button>
@@ -17,7 +17,7 @@
             </div>
 
             <div class="row g-0">
-                <label for="review">Review</label>
+                <label for="review" class="form-label">Review</label>
                 <textarea id="review" class="form-control" formControlName="review" rows="3"></textarea>
             </div>
         </form>

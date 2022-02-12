@@ -20,7 +20,7 @@
                             <ng-template ngbPanelContent>
                                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
                                     <div class="form-group">
-                                        <label id="site-dark-mode-label" aria-describedby="site-heading">Dark Mode</label>
+                                        <label id="site-dark-mode-label" aria-describedby="site-heading" class="form-label">Dark Mode</label>
                                         <div class="form-group">
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" id="site-dark-mode" formControlName="siteDarkMode" class="custom-control-input" [value]="true" aria-labelledby="site-dark-mode-label">
@@ -52,7 +52,7 @@
                                     
                                     <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pe-2">
-                                            <label for="settings-reading-direction">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
+                                            <label for="settings-reading-direction" class="form-label">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
                                             <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
                                             <select class="form-control" aria-describedby="manga-header" formControlName="readingDirection" id="settings-reading-direction">
@@ -61,7 +61,7 @@
                                         </div>
                                 
                                         <div class="form-group col-md-6 col-sm-12">
-                                            <label for="settings-scaling-option">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
+                                            <label for="settings-scaling-option" class="form-label">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
                                             <ng-template #taskBackupTooltip>How to scale the image to your screen.</ng-template>
                                             <span class="visually-hidden" id="settings-scaling-option-help">How to scale the image to your screen.</span>
                                             <select class="form-control" aria-describedby="manga-header" formControlName="scalingOption" id="settings-scaling-option">
@@ -72,7 +72,7 @@
                                     
                                     <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pe-2">
-                                            <label for="settings-pagesplit-option">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
+                                            <label for="settings-pagesplit-option" class="form-label">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
                                             <span class="visually-hidden" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
                                             <select class="form-control" aria-describedby="manga-header" formControlName="pageSplitOption" id="settings-pagesplit-option">
@@ -80,7 +80,7 @@
                                             </select>
                                         </div>
                                         <div class="form-group col-md-6 col-sm-12">
-                                            <label for="settings-readingmode-option">Reading Mode</label>
+                                            <label for="settings-readingmode-option" class="form-label">Reading Mode</label>
                                             <select class="form-control" aria-describedby="manga-header" formControlName="readerMode" id="settings-readingmode-option">
                                                 <option *ngFor="let opt of readingModes" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
@@ -90,7 +90,7 @@
                                     
                                     <div class="form-group">
                                         <!-- TODO: Turn this into a checkbox -->
-                                        <label id="auto-close-label">Auto Close Menu</label>
+                                        <label id="auto-close-label" class="form-label">Auto Close Menu</label>
                                         <div class="form-group">
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" id="auto-close" formControlName="autoCloseMenu" class="custom-control-input" [value]="true" aria-labelledby="auto-close-label">
@@ -106,7 +106,7 @@
                                     <h3>Book Reader</h3>
                                     <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pe-2">
-                                            <label id="dark-mode-label">Dark Mode</label>
+                                            <label id="dark-mode-label" class="form-label">Dark Mode</label>
                                             <div class="form-group">
                                                 <div class="custom-control custom-radio custom-control-inline">
                                                     <input type="radio" id="dark-mode" formControlName="bookReaderDarkMode" class="custom-control-input" [value]="true" aria-labelledby="dark-mode-label">
@@ -120,7 +120,7 @@
                                         </div>
     
                                         <div class="form-group col-md-6 col-sm-12">
-                                            <label id="taptopaginate-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
+                                            <label id="taptopaginate-label" class="form-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #tapToPaginateOptionTooltip>Should the sides of the book reader screen allow tapping on it to move to prev/next page</ng-template>
                                             <span class="visually-hidden" id="settings-taptopaginate-option-help">Should the sides of the book reader screen allow tapping on it to move to prev/next page</span>
                                             <div class="form-group">
@@ -138,7 +138,7 @@
 
                                     <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pe-2">
-                                            <label for="settings-book-reading-direction">Book Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
+                                            <label for="settings-book-reading-direction" class="form-label">Book Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
                                             <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
                                             <select class="form-control" aria-describedby="settings-reading-direction-help" formControlName="bookReaderReadingDirection">
@@ -148,7 +148,7 @@
                                         
                                         
                                         <div class="form-group col-md-6 col-sm-12">
-                                            <label for="settings-fontfamily-option">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
+                                            <label for="settings-fontfamily-option" class="form-label">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #fontFamilyOptionTooltip>Font familty to load up. Default will load the book's default font</ng-template>
                                             <span class="visually-hidden" id="settings-fontfamily-option-help">Font familty to load up. Default will load the book's default font</span>
                                             <select class="form-control" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
@@ -161,18 +161,18 @@
 
                                     <div class="row g-0">
                                         <div class="form-group col-md-4 col-sm-12 pe-2">
-                                            <label id="font-size">Font Size</label>
+                                            <label id="font-size" class="form-label">Font Size</label>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderFontSizeOptions" formControlName="bookReaderFontSize" aria-labelledby="font-size"></ngx-slider></div>
                                         </div>
                                         <div class="form-group col-md-4 col-sm-12 pe-2">
-                                            <label>Line Height</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
+                                            <label class="form-label">Line Height</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookLineHeightOptionTooltip>How much spacing between the lines of the book</ng-template>
                                             <span class="visually-hidden" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderLineSpacingOptions" formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help"></ngx-slider></div>
                                         </div>
         
                                         <div class="form-group col-md-4 col-sm-12">
-                                            <label>Margin</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
+                                            <label class="form-label">Margin</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReaderMarginOptionTooltip>How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</ng-template>
                                             <span class="visually-hidden" id="settings-bookmargin-option-help">How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</span>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderMarginOptions" formControlName="bookReaderMargin" aria-describedby="bookmargin"></ngx-slider></div>
