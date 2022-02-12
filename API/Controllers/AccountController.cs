@@ -409,7 +409,7 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
 
                 var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
-                _logger.LogInformation("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+                _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
                 if (dto.SendEmail)
                 {
                     await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
@@ -507,7 +507,7 @@ namespace API.Controllers
             }
 
             var emailLink = GenerateEmailLink(await _userManager.GeneratePasswordResetTokenAsync(user), "confirm-reset-password", user.Email);
-            _logger.LogInformation("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+            _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
             var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
             if (await _emailService.CheckIfAccessible(host))
             {
@@ -561,7 +561,7 @@ namespace API.Controllers
             if (user.EmailConfirmed) return BadRequest("User already confirmed");
 
             var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-email", user.Email);
-            _logger.LogInformation("[Email Migration]: Email Link: {Link}", emailLink);
+            _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
             await _emailService.SendMigrationEmail(new EmailMigrationDto()
             {
                 EmailAddress = user.Email,
@@ -615,21 +615,23 @@ namespace API.Controllers
             try
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
+                //if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
                 user.Email = dto.Email;
+                if (!await ConfirmEmailToken(token, user)) return BadRequest("There was a critical error during migration");
                 _unitOfWork.UserRepository.Update(user);
+
                 await _unitOfWork.CommitAsync();
 
-                var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-migration-email", user.Email);
-                _logger.LogInformation("[Email Migration]: Email Link for {UserName}: {Link}", dto.Username, emailLink);
-                // Always send an email, even if the user can't click it just to get them conformable with the system
-                await _emailService.SendMigrationEmail(new EmailMigrationDto()
-                {
-                    EmailAddress = dto.Email,
-                    Username = user.UserName,
-                    ServerConfirmationLink = emailLink
-                });
-                return Ok(emailLink);
+                //var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-migration-email", user.Email);
+                // _logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", dto.Username, emailLink);
+                // // Always send an email, even if the user can't click it just to get them conformable with the system
+                // await _emailService.SendMigrationEmail(new EmailMigrationDto()
+                // {
+                //     EmailAddress = dto.Email,
+                //     Username = user.UserName,
+                //     ServerConfirmationLink = emailLink
+                // });
+                return Ok();
             }
             catch (Exception ex)
             {
