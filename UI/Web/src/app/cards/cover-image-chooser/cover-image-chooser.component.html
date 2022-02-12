@@ -29,11 +29,9 @@
                                 <label class="input-group-text" for="load-image">Url</label>
                             </div>
                             <input type="text" autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">
-                                    Load
-                                </button>
-                            </div>
+                            <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">
+                                Load
+                            </button>
                         </div>
                         <button class="col btn btn-secondary" href="javascript:void(0)" (click)="mode = 'all'" aria-label="Back">
                             <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;

@@ -14,11 +14,9 @@
             <span class="visually-hidden" id="settings-bookmarksdir-help"><ng-container [ngTemplateOutlet]="bookmarksDirectoryTooltip"></ng-container></span>
             <div class="input-group">
                 <input readonly id="settings-bookmarksdir" aria-describedby="settings-bookmarksdir-help" class="form-control" formControlName="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir">
-                <div class="input-group-append">
-                    <button id="change-bookmarks-dir" class="btn btn-primary" (click)="openDirectoryChooser(settingsForm.get('bookmarksDirectory')?.value, 'bookmarksDirectory')">
-                        Change
-                    </button>
-                </div>
+                <button id="change-bookmarks-dir" class="btn btn-primary" (click)="openDirectoryChooser(settingsForm.get('bookmarksDirectory')?.value, 'bookmarksDirectory')">
+                    Change
+                </button>
             </div>
         </div>
 
@@ -76,14 +74,12 @@
             <span class="visually-hidden" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
             <div class="input-group">
                 <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="text" aria-describedby="change-bookmarks-dir">
-                <div class="input-group-append">
-                    <button class="btn btn-secondary" (click)="resetEmailServiceUrl()">
-                        Reset
-                    </button>
-                    <button class="btn btn-secondary" (click)="testEmailServiceUrl()">
-                        Test
-                    </button>
-                </div>
+                <button class="btn btn-outline-secondary" (click)="resetEmailServiceUrl()">
+                    Reset
+                </button>
+                <button class="btn btn-outline-secondary" (click)="testEmailServiceUrl()">
+                    Test
+                </button>
             </div>
         </div>
 

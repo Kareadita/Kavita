@@ -11,9 +11,7 @@
         <label for="filter">Filter</label>
         <div class="input-group">
             <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
-            </div>
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
         </div>
     </div>
     <ul class="list-group">
