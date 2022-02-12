@@ -33,7 +33,7 @@
                                         </div>
                                     </div>
                                     <div class="float-end mb-3">
-                                        <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
+                                        <button type="button" class="btn btn-secondary me-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
                                         <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="site-dark-mode-label" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
                                     </div>
                                 </form>
@@ -182,7 +182,7 @@
                                     
     
                                     <div class="float-end mb-3">
-                                        <button type="button" class="btn btn-secondary mr-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
+                                        <button type="button" class="btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
                                         <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
                                     </div>
                                 </form>
@@ -222,7 +222,7 @@
                             </div>
                         </div>
                         <div class="float-end mb-3">
-                            <button type="button" class="btn btn-secondary mr-2" aria-describedby="password-panel" (click)="resetPasswordForm()">Reset</button>
+                            <button type="button" class="btn btn-secondary me-2" aria-describedby="password-panel" (click)="resetPasswordForm()">Reset</button>
                             <button type="submit" class="btn btn-primary" aria-describedby="password-panel" (click)="savePasswordForm()" [disabled]="!passwordChangeForm.valid || !(passwordChangeForm.dirty || passwordChangeForm.touched)">Save</button>
                         </div>
                     </form>

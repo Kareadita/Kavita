@@ -40,7 +40,7 @@
         <ul class="list-unstyled">
             <li class="media my-4" *ngFor="let chapter of chapters">
                 <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
-                    <app-image class="mr-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                    <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
                 </a>
                 <div class="media-body">
                     <h5 class="mt-0 mb-1">

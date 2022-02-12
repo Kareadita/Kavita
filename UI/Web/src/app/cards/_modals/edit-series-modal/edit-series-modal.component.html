@@ -104,7 +104,7 @@
                       </div>
                       <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
                           <li class="media my-4" *ngFor="let volume of seriesVolumes">
-                              <app-image class="mr-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
+                              <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
                               <div class="media-body">
                                   <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
                                   <div>
@@ -153,7 +153,7 @@
                 </li>
             </ul>
         
-            <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ml-4 flex-fill'}}"></div>
+            <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="close()">Close</button>

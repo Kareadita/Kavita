@@ -12,8 +12,8 @@
                     <h4>
                         <span id="member-name--{{idx}}">{{invite.username | titlecase}} </span>
                         <div class="float-end">
-                            <button class="btn btn-danger mr-2" (click)="deleteUser(invite)">Cancel</button>
-                            <button class="btn btn-secondary mr-2" (click)="resendEmail(invite)">Resend</button>
+                            <button class="btn btn-danger me-2" (click)="deleteUser(invite)">Cancel</button>
+                            <button class="btn btn-secondary me-2" (click)="resendEmail(invite)">Resend</button>
                         </div>
                     </h4>
 
@@ -45,8 +45,8 @@
                         <span class="visually-hidden">(You)</span>
                     </span>
                     <div class="float-end" *ngIf="canEditMember(member)">
-                        <button class="btn btn-danger mr-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
-                        <button class="btn btn-secondary mr-2" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
+                        <button class="btn btn-danger me-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
+                        <button class="btn btn-secondary me-2" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
                         <button class="btn btn-primary" (click)="openEditUser(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>
                     </div>
                 </h4>

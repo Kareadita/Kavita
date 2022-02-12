@@ -13,7 +13,7 @@
     </div>
     <!-- Action row-->
     <div class="row g-0">
-      <div class="mr-2">
+      <div class="me-2">
         <button class="btn btn-primary" title="Read" (click)="read()">
             <span>
                 <i class="fa fa-book-open" aria-hidden="true"></i>
@@ -29,7 +29,7 @@
               <span class="read-btn--text">&nbsp;Remove Read</span>
           </button>
       </div>
-      <div class="ml-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
+      <div class="ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
           <label class="form-check-label" for="accessibilit-mode">Order Numbers</label>
@@ -49,7 +49,7 @@
     <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
         <ng-template #draggableItem let-item let-position="idx">
             <div class="media" style="width: 100%;">
-                <app-image width="74px" class="img-top mr-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
+                <app-image width="74px" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
                 <div class="media-body">
                   <h5 class="mt-0 mb-1" id="item.id--{{position}}">{{formatTitle(item)}}&nbsp;
                       <span class="badge bg-primary rounded-pill">

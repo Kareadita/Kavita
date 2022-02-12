@@ -2,7 +2,7 @@
     <div class="container-fluid">
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
       <a class="navbar-brand dark-exempt" routerLink="/library" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="phone-hidden"> Kavita</span></a>
-      <ul class="navbar-nav col mr-auto">
+      <ul class="navbar-nav col me-auto">
         
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
           <div>
@@ -24,7 +24,7 @@
 
                 <ng-template #libraryTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
-                    <div class="ml-1">
+                    <div class="ms-1">
                       <span>{{item.name}}</span>
                     </div>
                   </div>
@@ -32,10 +32,10 @@
 
                 <ng-template #seriesTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
-                    <div style="width: 24px" class="mr-1">
-                      <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                    <div style="width: 24px" class="me-1">
+                      <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
                     </div>
-                    <div class="ml-1">
+                    <div class="ms-1">
                       <app-series-format [format]="item.format"></app-series-format>
                       <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName">{{item.name}}</span>
                       <ng-template #localizedName>
@@ -48,10 +48,10 @@
 
                 <ng-template #collectionTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
-                    <div style="width: 24px" class="mr-1">
-                      <app-image class="mr-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
+                    <div style="width: 24px" class="me-1">
+                      <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
                     </div>
-                    <div class="ml-1">
+                    <div class="ms-1">
                       <span>{{item.title}}</span>
                       <span *ngIf="item.promoted">
                         &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
@@ -63,7 +63,7 @@
 
                 <ng-template #readingListTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
-                    <div class="ml-1">
+                    <div class="ms-1">
                       <span>{{item.title}}</span>
                       <span *ngIf="item.promoted">
                         &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
@@ -75,7 +75,7 @@
 
                 <ng-template #tagTemplate let-item>
                   <div style="display: flex;padding: 5px;" (click)="goTo('tags', item.id)">
-                    <div class="ml-1">
+                    <div class="ms-1">
                       <span>{{item.title}}</span>
                     </div>
                   </div>
@@ -83,7 +83,7 @@
 
                 <ng-template #personTemplate let-item>
                   <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
-                    <div class="ml-1">
+                    <div class="ms-1">
                       
                       <div [innerHTML]="item.name"></div>
                       <div>{{item.role | personRole}}</div>
@@ -93,7 +93,7 @@
 
                 <ng-template #genreTemplate let-item>
                   <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
-                    <div class="ml-1">
+                    <div class="ms-1">
                       <div [innerHTML]="item.title"></div>
                     </div>
                   </div>
