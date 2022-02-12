@@ -346,11 +346,9 @@
                 <div class="col-md-2 me-3" *ngIf="filterSettings.sortDisabled"></div>
                 <div class="col-md-2 me-3"></div>
                 <div class="col-md-2 me-3"></div>
-                <div class="col-md-2 me-3 mt-4">
-                    <button class="btn btn-secondary btn-block" (click)="clear()">Clear</button>
-                </div>
-                <div class="col-md-2 me-3 mt-4">
-                    <button class="btn btn-primary btn-block" (click)="apply()">Apply</button>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-secondary" (click)="clear()">Clear</button>
+                    <button class="btn btn-primary" (click)="apply()">Apply</button>
                 </div>
             </div>
         </div>
