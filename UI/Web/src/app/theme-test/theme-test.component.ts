@@ -9,6 +9,15 @@ import { NavService } from '../_services/nav.service';
 })
 export class ThemeTestComponent implements OnInit {
 
+  tabs: Array<{title: string, fragment: string}> = [
+    {title: 'General', fragment: ''},
+    {title: 'Users', fragment: 'users'},
+    {title: 'Libraries', fragment: 'libraries'},
+    {title: 'System', fragment: 'system'},
+    {title: 'Changelog', fragment: 'changelog'},
+  ];
+  active = this.tabs[0];
+
   constructor(public toastr: ToastrService, public navService: NavService) { }
 
   ngOnInit(): void {

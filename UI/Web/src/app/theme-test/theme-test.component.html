@@ -27,3 +27,58 @@
 <input type="text" placeholder="Hello, I'm a placeholder" class="form-control">
 <label>Disabled</label>
 <input type="text" placeholder="Hello, I'm a placeholder" [disabled]="true" class="form-control">
+
+<h2>Checkbox</h2>
+<div class="mb-3">
+    <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
+    <div class="form-check">
+        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection">
+        <label for="stat-collection" class="form-check-label">Normal Checkbox</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
+    <div class="form-check">
+        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" [disabled]="true">
+        <label for="stat-collection" class="form-check-label">Disabled Checkbox</label>
+    </div>
+</div>
+
+
+<h2>Nav tabs</h2>
+<h3>Tabs</h3>
+<ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs nav-pills">
+    <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
+      <a ngbNavLink routerLink=".">{{ tab.title | sentenceCase }}</a>
+      <ng-template ngbNavContent>
+        <ng-container>
+          Tab 1
+        </ng-container>
+        <ng-container>
+            Tab 2
+        </ng-container>
+      </ng-template>
+    </li>
+</ul>
+<div [ngbNavOutlet]="nav" class="mt-3"></div>
+
+<h3>Tabs</h3>
+<nav role="navigation">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills justify-content-center mt-3" role="tab">
+        <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class="nav-item">
+        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
+        <ng-template ngbNavContent>
+            <ng-container>
+                Tab 1
+              </ng-container>
+              <ng-container>
+                  Tab 2
+              </ng-container>
+        </ng-template>
+        </li>
+    </ul>
+</nav>
+<div [ngbNavOutlet]="nav" class="mt-3"></div>
+
+<h2></h2>

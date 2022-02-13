@@ -1,0 +1,14 @@
+.form-check-input {
+    background-color: var(--checkbox-bg-color);
+    border-color: var(--checkbox-border-color);
+
+    &:checked {
+        background-color: var(--checkbox-checked-bg-color);
+        border-color: var(--checkbox-checked-bg-color);
+    }
+
+    &:focus, &:hover {
+        border-color: var(--checkbox-focus-border-color);
+    }
+}
+

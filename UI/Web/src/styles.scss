@@ -24,6 +24,11 @@
   --nav-link-hover-text-color: var(--primary-color);
 
   --btn-primary-text-color: white;
+  
+  --checkbox-checked-bg-color: var(--primary-color);
+  --checkbox-bg-color: white;
+  --checkbox-border-color: var(--primary-color);
+  --checkbox-focus-border-color: var(--input-border-color);
 }
 
 // Dark mode theme
@@ -57,6 +62,11 @@
   --toast-info-bg-color: #2F96B4;
   --toast-warning-bg-color: #F89406;
 
+  // Checkboxes
+  --checkbox-checked-bg-color: var(--primary-color);
+  --checkbox-border-color: var(--input-focused-border-color);
+  --checkbox-focus-border-color: var(--primary-color);
+
 
 
   
@@ -81,6 +91,7 @@
 @import './theme/components/nav';
 @import './theme/components/buttons';
 @import './theme/components/toast';
+@import './theme/components/checkbox';
 
 
 @import './theme/utilities/utilities';
