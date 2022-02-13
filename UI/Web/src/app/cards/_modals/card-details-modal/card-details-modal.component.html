@@ -38,11 +38,11 @@
 
         <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
         <ul class="list-unstyled">
-            <li class="media my-4" *ngFor="let chapter of chapters">
+            <li class="d-flex my-4" *ngFor="let chapter of chapters">
                 <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
                     <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
                 </a>
-                <div class="media-body">
+                <div class="flex-grow-1">
                     <h5 class="mt-0 mb-1">
                         <span *ngIf="chapter.number !== '0'; else specialHeader">
                             <span >

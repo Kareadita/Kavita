@@ -103,9 +103,9 @@
                           <span class="invisible">Loading...</span>
                       </div>
                       <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
-                          <li class="media my-4" *ngFor="let volume of seriesVolumes">
+                          <li class="d-flex my-4" *ngFor="let volume of seriesVolumes">
                               <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
-                              <div class="media-body">
+                              <div class="flex-grow-1">
                                   <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
                                   <div>
                                       <div class="row g-0">
