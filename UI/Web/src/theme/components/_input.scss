@@ -16,6 +16,9 @@ input, .form-control {
         cursor: not-allowed;
         pointer-events: none;
     }
+    &::placeholder {
+        color: var(--input-placeholder-color);
+    }
 }
 
 // input:focus, .form-control:focus {

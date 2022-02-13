@@ -1,0 +1,18 @@
+<button class="btn btn-primary" (click)="navService?.toggleDarkMode()">Toggle Dark mode</button>
+
+<h2>Buttons</h2>
+<button class="btn btn-primary">Primary</button>
+<button class="btn btn-secondary">secondary</button>
+<button class="btn btn-outline-primary">outline primary</button>
+<button class="btn btn-outline-secondary">outline secondary</button>
+<button class="btn btn-link">btn link</button>
+<button class="btn btn-icon">
+    <i class="fa fa-angle-left"></i>&nbsp;Icon
+</button>
+
+<h2>Toastr</h2>
+
+<button class="btn btn-primary" (click)="toastr.success('Test')">Success</button>
+<button class="btn btn-danger" (click)="toastr.error('Test')">Error</button>
+<button class="btn btn-secondary" (click)="toastr.warning('Test')">Warning</button>
+<button class="btn btn-link" (click)="toastr.info('Test')">Info</button>

@@ -1,6 +1,10 @@
 .btn-close {
     filter: var(--btn-icon-filter) !important;
 }
+
+.btn-primary {
+    color: var(--btn-primary-text-color);
+}
   
 button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
     cursor: not-allowed;

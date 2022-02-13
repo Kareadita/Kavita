@@ -1,0 +1,24 @@
+.nav-link {
+    color: var(--nav-link-text-color);
+
+    &:hover, &:focus {
+        color: var(--nav-link-hover-text-color);
+    }
+}
+
+.nav-tabs {
+    border-color: var(--nav-tab-border-color);
+    
+    .nav-link {
+        
+        &.active {
+            color: var(--nav-tab-text-color);
+            background-color: var(--nav-tab-bg-color);
+        }
+    
+        &:hover, &:focus {
+            border-color: var(--nav-tab-hover-border-color);
+        }
+    }
+
+}

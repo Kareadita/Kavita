@@ -15,20 +15,26 @@
 
 // Default variables for light mode
 :root {
+  color-scheme: light;
   --primary-color: #4ac694;
   --error-color: #ff4136;
   --bs-body-bg: #fff; 
   --input-background-color: #fff;
   --input-focused-border-color: #ccc;
-  color-scheme: light;
+  
+  --nav-link-text-color: black;
+  --nav-link-hover-text-color: var(--primary-color);
+
+  --btn-primary-text-color: white;
 }
 
 // Dark mode theme
 :root .bg-dark {
   color-scheme: dark;
   --primary-color: #4ac694;
-  --error-color: #ff4136;
+  --error-color: #BD362F;
   --bs-body-bg: #343a40; 
+  --body-text-color: #efefef;
   --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
 
   // Inputs
@@ -36,6 +42,23 @@
   --input-background-readonly-color: #434648;
   --input-focused-border-color: #ccc;
   --input-text-color: #fff;
+  --input-placeholder-color: #efefef;
+
+  // Buttons
+  --btn-primary-text-color: white;
+
+  // Nav
+  --nav-tab-border-color: rgba(239, 239, 239, 0.125);
+  --nav-tab-text-color: var(--body-text-color);
+  --nav-tab-bg-color: rgba(74, 198, 148, 0.9);
+  --nav-tab-hover-border-color: #4ac694;
+
+  // Toasts
+  --toast-success-bg-color: rgba(74, 198, 148, 0.9);
+  --toast-error-bg-color: #BD362F;
+  --toast-info-bg-color: #2F96B4;
+  --toast-warning-bg-color: #F89406;
+
 
 
   
@@ -43,9 +66,13 @@
 
 // E-ink theme
 :root .bg-eink {
+  color-scheme: light;
   --primary-color: black;
   --bs-body-bg: white;
-  color-scheme: light;
+  
+
+  --nav-link-text-color: black;
+  --btn-primary-text-color: white;
 }
 
 // Overrides on bootstrap (for some reason these aren't overriding bootstrap styles)
@@ -53,10 +80,18 @@
 
 // Import all the customized theme overrides
 @import './theme/components/input';
+@import './theme/components/nav';
+@import './theme/components/buttons';
+@import './theme/components/toast';
+
+
 @import './theme/utilities/utilities';
 @import './theme/utilities/animations';
 
 
+body {
+  color: var(--body-text-color);
+}
 
 
 

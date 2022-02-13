@@ -2,12 +2,8 @@
 
 @use "./colors";
 
-// :root {
-//   --bs-body-color: #212529;
-// }
 
 .bg-dark {
-  color: $dark-text-color;
 
   h2, h4 {
       color: $dark-text-color;
@@ -67,18 +63,6 @@
     background-color: $dark-bg-color;
   }
 
-  // input:not(read-only), textarea, .autocomplete-container .input-container input, .form-control, .typeahead-input {
-  //   color: $dark-text-color;
-  //   background-color: $dark-bg-color;
-  // }
-
-  // input:read-only, input:disabled {
-  //     background-color: $dark-form-readonly;
-  // }
-
-  input::placeholder {
-    color: $dark-form-placeholder;
-  }
 
   .autocomplete-container .input-container .x {
     color: $dark-text-color;
@@ -126,18 +110,18 @@
     border-color: $dark-form-border;
   }
 
-  .nav-tabs, .tagbadge {
+  .tagbadge {
       border-color: $dark-form-border;
   }
 
-  .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link, .tagbadge {
+   .tagbadge { // .nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link,
       border-color: $dark-form-border;
       color: $dark-text-color;
       background-color: $dark-primary-color;
   }
-  .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
-    border-color: $dark-hover-color;
-  }
+  // .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
+  //   border-color: $dark-hover-color;
+  // }
   
 
   .dropdown-menu {
@@ -177,6 +161,7 @@
       color: #000;
     }
   }
+
   .card { 
     background-color: $dark-card-color;
     color: $dark-text-color;
@@ -199,34 +184,14 @@
     background-color: $dark-form-background-no-opacity;
   }
 
-  // v4
-  .bs-popover-bottom > .arrow::after, .bs-popover-bottom > .arrow::before {
-    border-bottom-color: transparent;
-  }
+  // // v4
+  // .bs-popover-bottom > .arrow::after, .bs-popover-bottom > .arrow::before {
+  //   border-bottom-color: transparent;
+  // }
 
   // v5
   .bs-popover-bottom > .popover-arrow::after, .bs-popover-bottom > .popover-arrow::before {
     border-bottom-color: transparent;
   }
 
-}
-
-
-/*
-// Dark mode Toastr Styles
-*/
-.bg-dark .toast-success {
-  background-color: $dark-primary-color
-}
-
-.bg-dark .toast-error {
-  background-color: #BD362F;
-}
-
-.bg-dark .toast-info {
-  background-color: #2F96B4;
-}
-
-.bg-dark .toast-warning {
-  background-color: #F89406;
 }
