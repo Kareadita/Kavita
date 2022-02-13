@@ -43,9 +43,11 @@ $nav-pills-link-active-bg: $primary-color;
 
 
 
+
 // Global theme colors 
 $theme-colors: (
   "primary": $primary-color,
   "danger": $error-color,
-  "secondary": #6c757d
+  "secondary": #6c757d,
+  "light": #f8f9fa
 );
