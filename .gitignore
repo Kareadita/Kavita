@@ -515,6 +515,7 @@ UI/Web/dist/
 /API/config/kavita.db
 /API/config/kavita.db-shm
 /API/config/kavita.db-wal
+/API/config/kavita.db-journal
 /API/config/Hangfire.db
 /API/config/Hangfire-log.db
 API/config/covers/
