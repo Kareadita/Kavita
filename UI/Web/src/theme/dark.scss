@@ -9,7 +9,7 @@
       color: $dark-text-color;
   }
 
-  a:not(.dark-exempt), .btn-link {
+  a:not(.dark-exempt) {
     color: $dark-hover-color;
     > i {
       color: $dark-hover-color !important;
@@ -50,13 +50,10 @@
     }
   }
 
-  .btn-information, .btn-outline-secondary, pre {
-      color: $dark-text-color;
-  }
-
   .rating-star, .close, i.fa {
     color: $dark-icon-color;
   }
+  
 
   .modal-content {
     color: $dark-text-color;
@@ -67,32 +64,10 @@
       color: $dark-text-color !important;
   }
 
-  .page-link {
-      background-color: $dark-form-background;
-      border-color: $dark-form-border;
-  }
 
-  .page-item.disabled .page-link {
-    background-color: $dark-form-background;
-    border-color: $dark-form-border;
-  }
-
-
-  // I don't see this in the codebase
-  // .dropdown-menu {
-  //   background-color: #171719;
-  //   .dropdown-item:hover, .dropdown-item:focus {
-  //       color: $dark-text-color;
-  //       background-color: $dark-hover-color;
-  //   }
-  //   .dropdown-item {
-  //       color: $dark-text-color;
-  //   }
+  // .error-banner { // , .dropdown-toggle
+  //   color: #efefef;
   // }
-
-  .error-banner, .dropdown-toggle {
-    color: #efefef;
-  }
 
   .read-more-link {
     color: $dark-text-color !important;

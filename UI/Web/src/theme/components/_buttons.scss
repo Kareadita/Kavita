@@ -1,23 +1,37 @@
 // TODO: Clean this code up
 
+.btn-primary {
+  color: var(--btn-primary-text-color);
+}
+
+.btn-secondary {
+
+}
+
 .btn-close {
     filter: var(--btn-icon-filter) !important;
 }
 
-.btn-primary {
-    color: var(--btn-primary-text-color);
-}
   
 button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
     cursor: not-allowed;
 }
-  
-.btn-primary {
-    color: white;
+
+.btn-link {
+    color: var(--btn-primary-color);
+    > i {
+      color: var(--btn-primary-color) !important;
+    }
 }
+
+
 .btn-icon {
-    cursor: pointer;
-    color: white;
+  cursor: pointer;
+  color: white;
+}
+
+.btn-outline-secondary {
+  color: var(--body-text-color);
 }
   
 .btn.btn-secondary.alt {
