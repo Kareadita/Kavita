@@ -10,6 +10,7 @@ input, .form-control {
 
     &:read-only {
         background-color: var(--input-background-readonly-color);
+        cursor: initial;
     }
 
     &:disabled {
@@ -20,20 +21,3 @@ input, .form-control {
         color: var(--input-placeholder-color);
     }
 }
-
-// input:focus, .form-control:focus {
-//     border-color: var(--input-focused-border-color);
-//     background-color: var(--input-background-color);
-//     color: var(--input-text-color);
-// }
-
-// input:read-only, .form-control:read-only {
-//     background-color: var(--input-background-readonly-color);
-// }
-  
-// input:disabled {
-//     cursor: not-allowed;
-//     pointer-events: none;
-// }
-
-// .form-control:disabled, .form-control[readonly]

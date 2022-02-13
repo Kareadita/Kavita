@@ -16,3 +16,14 @@
 <button class="btn btn-danger" (click)="toastr.error('Test')">Error</button>
 <button class="btn btn-secondary" (click)="toastr.warning('Test')">Warning</button>
 <button class="btn btn-link" (click)="toastr.info('Test')">Info</button>
+
+<h2>Inputs</h2>
+<p>Inputs should always have  class="form-control" on them</p>
+<label>Normal</label>
+<input type="text" class="form-control">
+<label>Readonly</label>
+<input type="text" readonly class="form-control">
+<label>Placeholder</label>
+<input type="text" placeholder="Hello, I'm a placeholder" class="form-control">
+<label>Disabled</label>
+<input type="text" placeholder="Hello, I'm a placeholder" [disabled]="true" class="form-control">
