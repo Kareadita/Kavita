@@ -35,8 +35,17 @@ $rating-empty: #b0c4de;
 //   --drawer-background-color: #FFF;
 // }
 
+// Override bootstrap styles (globally)
 
+// Nav header
+$nav-pills-link-active-color: #fff;
+$nav-pills-link-active-bg: $primary-color;
+
+
+
+// Global theme colors 
 $theme-colors: (
   "primary": $primary-color,
-  "danger": $error-color 
+  "danger": $error-color,
+  "secondary": #6c757d
 );
