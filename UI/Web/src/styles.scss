@@ -18,6 +18,7 @@
   --primary-color: #4ac694;
   --error-color: #ff4136;
   --bs-body-bg: #fff; 
+  --input-background-color: #fff;
 }
 
 // Dark mode theme
@@ -26,6 +27,8 @@
   --error-color: #ff4136;
   --bs-body-bg: #343a40; 
   --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
+  --input-background-color: #343a40;
+  --input-background-readonly-color: #434648;
 }
 
 // E-ink theme
@@ -34,9 +37,17 @@
   --bs-body-bg: white;
 }
 
-// Overrides on bootstrap
+// Overrides on bootstrap (for some reason these aren't overriding bootstrap styles)
 .btn-close {
   filter: var(--btn-icon-filter) !important;
+}
+
+// Inputs
+input {
+  background-color: var(--input-background-color);
+}
+input:read-only {
+  background-color: var(--input-background-readonly-color);
 }
 
 
