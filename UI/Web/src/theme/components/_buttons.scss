@@ -4,9 +4,7 @@
   color: var(--btn-primary-text-color);
 }
 
-.btn-secondary {
 
-}
 
 .btn-close {
     filter: var(--btn-icon-filter) !important;
@@ -18,16 +16,24 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 }
 
 .btn-link {
-    color: var(--btn-primary-color);
+    color: var(--body-text-color);
     > i {
-      color: var(--btn-primary-color) !important;
+      color: var(--body-text-color) !important;
+    }
+
+    &:hover, &:focus {
+      color: var(--primary-color);
     }
 }
 
 
 .btn-icon {
   cursor: pointer;
-  color: white;
+  color: var(--body-text-color);
+
+  &:hover, &:focus {
+    color: var(--body-text-color);
+  }
 }
 
 .btn-outline-secondary {
