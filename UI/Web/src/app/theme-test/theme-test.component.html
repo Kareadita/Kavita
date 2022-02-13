@@ -81,4 +81,9 @@
 </nav>
 <div [ngbNavOutlet]="nav" class="mt-3"></div>
 
-<h2></h2>
+<h2>Tag Badge</h2>
+<div class="g-2">
+    <app-tag-badge [selectionMode]="TagBadgeCursor.Selectable">Selectable</app-tag-badge>
+    <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable">Clickable</app-tag-badge>
+    <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">Non Allowed</app-tag-badge>
+</div>

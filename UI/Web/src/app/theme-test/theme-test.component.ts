@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { NavService } from '../_services/nav.service';
 
 @Component({
@@ -17,6 +18,10 @@ export class ThemeTestComponent implements OnInit {
     {title: 'Changelog', fragment: 'changelog'},
   ];
   active = this.tabs[0];
+
+  get TagBadgeCursor(): typeof TagBadgeCursor {
+    return TagBadgeCursor;
+  }
 
   constructor(public toastr: ToastrService, public navService: NavService) { }
 

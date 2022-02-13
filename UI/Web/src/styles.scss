@@ -29,6 +29,12 @@
   --checkbox-bg-color: white;
   --checkbox-border-color: var(--primary-color);
   --checkbox-focus-border-color: var(--input-border-color);
+
+  // Tagbadge
+  --tagbadge-bg-color: #c9c9c9;
+  
+ 
+  
 }
 
 // Dark mode theme
@@ -67,6 +73,12 @@
   --checkbox-border-color: var(--input-focused-border-color);
   --checkbox-focus-border-color: var(--primary-color);
 
+  // Tag Badge
+  --tagbadge-border-color: rgba(239, 239, 239, 0.125);
+  --tagbadge-text-color: var(--body-text-color);
+  --tagbadge-bg-color: var(--nav-tab-bg-color);
+
+
 
 
   
@@ -92,6 +104,7 @@
 @import './theme/components/buttons';
 @import './theme/components/toast';
 @import './theme/components/checkbox';
+@import './theme/components/tagbadge';
 
 
 @import './theme/utilities/utilities';
