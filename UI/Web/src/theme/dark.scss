@@ -20,14 +20,10 @@
     background-color: colors.$dark-form-border;
   }
 
-  a.btn {
-    color: white;
-  }
-
-  .accordion-header {
-    font-weight: bold;
-    color: $dark-primary-color;
-  }
+  // .accordion-header {
+  //   font-weight: bold;
+  //   color: $dark-primary-color;
+  // }
 
   
 
@@ -64,11 +60,6 @@
       color: $dark-text-color !important;
   }
 
-
-  // .error-banner { // , .dropdown-toggle
-  //   color: #efefef;
-  // }
-
   .read-more-link {
     color: $dark-text-color !important;
   }
@@ -96,6 +87,7 @@
     }
   }
 
+  // This is a card accordion. It needs migraiton for bootstrap 5
   .card { 
     background-color: $dark-card-color;
     color: $dark-text-color;
@@ -105,10 +97,4 @@
       background-color: rgba(52, 60, 70, 0.5); // This is a good accent color
     }
   }
-
-  .section-title {
-    color: $dark-text-color;
-  }
-
-
 }

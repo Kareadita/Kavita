@@ -110,6 +110,9 @@ input {
     background-color: colors.$dark-hover-color;
 } // TODO: Refactor to use css variables
 
+.section-title {
+    color: colors.$dark-text-color;
+  }
 
 .dropdown {
     width: 100vw;
