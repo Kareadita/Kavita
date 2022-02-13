@@ -113,6 +113,16 @@
   --dropdown-item-text-color: var(--navbar-text-color);
   --dropdown-item-bg-color: var(--navbar-bg-color);
 
+  // Accordion
+  --accordion-header-text-color: rgba(74, 198, 148, 0.9);
+  --accordion-header-bg-color: rgba(52, 60, 70, 0.5); // This is a good accent color
+  --accordion-body-bg-color: rgba(22,27,34,0.5);
+  --accordion-body-border-color: rgba(239, 239, 239, 0.125);
+  --accordion-body-text-color: var(--body-text-color);
+  --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
+  --accordion-header-collapsed-bg-color: rgba(22,27,34,0.5);
+
+
 
 
 
@@ -146,6 +156,7 @@
 @import './theme/components/popover';
 @import './theme/components/pagination';
 @import './theme/components/dropdown';
+@import './theme/components/accordion';
 
 
 @import './theme/utilities/utilities';

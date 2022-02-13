@@ -1,4 +1,24 @@
-// .accordion-header {
-//     font-weight: bold;
-//     color: $dark-primary-color;
-// }
+.accordion-header {
+    font-weight: bold;
+    color: var(--accordion-header-text-color); 
+}
+
+.accordion-item { 
+    background-color: var(--accordion-body-bg-color); //$dark-card-color;
+    color: var(--accordion-body-text-color);
+    border-color: var(--accordion-body-border-color);
+
+    div[role="tabpanel"] {
+      background-color: var(--accordion-header-bg-color); 
+    }
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--accordion-header-text-color); 
+    background-color: var(--accordion-body-bg-color);
+}
+
+.accordion-button.collapsed {
+    color: var(--accordion-header-collapsed-text-color); 
+    background-color: var(--accordion-header-collapsed-bg-color);
+}
