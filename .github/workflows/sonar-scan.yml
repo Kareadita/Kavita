@@ -224,7 +224,7 @@ jobs:
             severity: info
             description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
             details: '${{ steps.parse-body.outputs.BODY }}'
-            text: A new nightly build has been released for docker.
+            text: <@&939225350775406643> A new nightly build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
 
   stable:
@@ -338,5 +338,5 @@ jobs:
             severity: info
             description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
             details: '${{ steps.parse-body.outputs.BODY }}'
-            text: A new stable build has been released.
+            text: <@&939225192553644133> A new stable build has been released.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
