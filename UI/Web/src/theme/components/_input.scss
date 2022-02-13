@@ -1,0 +1,36 @@
+input, .form-control {
+    background-color: var(--input-background-color);
+    color: var(--input-text-color);
+
+    &:focus {
+        border-color: var(--input-focused-border-color);
+        background-color: var(--input-background-color);
+        color: var(--input-text-color);
+    }
+
+    &:read-only {
+        background-color: var(--input-background-readonly-color);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+// input:focus, .form-control:focus {
+//     border-color: var(--input-focused-border-color);
+//     background-color: var(--input-background-color);
+//     color: var(--input-text-color);
+// }
+
+// input:read-only, .form-control:read-only {
+//     background-color: var(--input-background-readonly-color);
+// }
+  
+// input:disabled {
+//     cursor: not-allowed;
+//     pointer-events: none;
+// }
+
+// .form-control:disabled, .form-control[readonly]

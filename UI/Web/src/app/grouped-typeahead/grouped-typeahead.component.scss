@@ -82,7 +82,7 @@ input {
 
 .typeahead-input.focused {
     width: 100%;
-    border-color: #ccc;
+    border-color: var(--input-focused-border-color);
 }
 
 /* small devices (phones, 650px and down) */

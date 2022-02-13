@@ -1,0 +1,28 @@
+.btn-close {
+    filter: var(--btn-icon-filter) !important;
+}
+  
+button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
+    cursor: not-allowed;
+}
+  
+.btn-primary {
+    color: white;
+}
+.btn-icon {
+    cursor: pointer;
+}
+  
+.btn.btn-secondary.alt {
+    background-color: #424c72;
+    border-color: #444f75;
+  
+    &:hover {
+      background-color: #3b4466; 
+    }
+  
+    &:focus {
+      background-color: #343c59;
+      box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%); 
+    }
+}

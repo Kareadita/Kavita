@@ -19,61 +19,52 @@
   --error-color: #ff4136;
   --bs-body-bg: #fff; 
   --input-background-color: #fff;
+  --input-focused-border-color: #ccc;
+  color-scheme: light;
 }
 
 // Dark mode theme
 :root .bg-dark {
+  color-scheme: dark;
   --primary-color: #4ac694;
   --error-color: #ff4136;
   --bs-body-bg: #343a40; 
   --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
+
+  // Inputs
   --input-background-color: #343a40;
   --input-background-readonly-color: #434648;
+  --input-focused-border-color: #ccc;
+  --input-text-color: #fff;
+
+
+  
 }
 
 // E-ink theme
 :root .bg-eink {
   --primary-color: black;
   --bs-body-bg: white;
+  color-scheme: light;
 }
 
 // Overrides on bootstrap (for some reason these aren't overriding bootstrap styles)
-.btn-close {
-  filter: var(--btn-icon-filter) !important;
-}
 
-// Inputs
-input {
-  background-color: var(--input-background-color);
-}
-input:read-only {
-  background-color: var(--input-background-readonly-color);
-}
+
+// Import all the customized theme overrides
+@import './theme/components/input';
+@import './theme/utilities/utilities';
+@import './theme/utilities/animations';
 
 
 
 
 
 // Global Styles
-button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
-  cursor: not-allowed;
-}
 
 label, select, .clickable {
   cursor: pointer;
 }
-
-.btn-primary {
-  color: white;
-}
-
-:root {
-  color-scheme: light;
-}
-
-// :root .bg-dark {
-//   color-scheme: dark;
-// }
 
 @font-face {
   font-family: "EBGarmond";
@@ -91,53 +82,7 @@ body {
   font-family: "EBGaramond", "Helvetica Neue", sans-serif;
 }
 
-
-.btn-icon {
-  cursor: pointer;
-}
-
-.btn.btn-secondary.alt {
-  background-color: #424c72;
-  border-color: #444f75;
-
-  &:hover {
-    background-color: #3b4466; 
-  }
-
-  &:focus {
-    background-color: #343c59;
-    box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%); 
-  }
-}
-
-
+// Needed for fullscreen
 app-root {
   background-color: inherit;
-}
-
-
-
-
-// Utiliities
-@media(max-width: $grid-breakpoints-xs) {
-  .phone-hidden {
-    display: none;
-  }
-}
-
-@media(min-width: $grid-breakpoints-sm) {
-  .not-phone-hidden {
-    display: none;
-  }
-}
-
-@keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-// Debug styles
-.redlines * {
-  outline: 1px solid red;
-  outline-offset: -1px;
 }

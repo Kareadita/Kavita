@@ -67,14 +67,14 @@
     background-color: $dark-bg-color;
   }
 
-  input:not(read-only), textarea, .autocomplete-container .input-container input, .form-control, .typeahead-input {
-    color: $dark-text-color;
-    background-color: $dark-bg-color;
-  }
+  // input:not(read-only), textarea, .autocomplete-container .input-container input, .form-control, .typeahead-input {
+  //   color: $dark-text-color;
+  //   background-color: $dark-bg-color;
+  // }
 
-  input:read-only, input:disabled {
-      background-color: $dark-form-readonly;
-  }
+  // input:read-only, input:disabled {
+  //     background-color: $dark-form-readonly;
+  // }
 
   input::placeholder {
     color: $dark-form-placeholder;

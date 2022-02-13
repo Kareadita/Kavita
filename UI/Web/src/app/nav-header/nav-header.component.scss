@@ -19,7 +19,7 @@ $bg-color: rgb(22, 27, 34);
 }
 
 // On Really small screens, hide the server settings wheel and show it in nav
-// TODO: Look into doing this with bootstrap 5
+// TODO: Look into doing this with bootstrap 5 (and moving to _utilities.scss)
 .xs-only {
     display: none;
 }
