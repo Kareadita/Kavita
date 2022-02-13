@@ -11,8 +11,6 @@
 
 @import './theme/dark.scss';
 
-
-
 // Default variables for light mode
 :root {
   color-scheme: light;
@@ -42,7 +40,7 @@
   --input-background-readonly-color: #434648;
   --input-focused-border-color: #ccc;
   --input-text-color: #fff;
-  --input-placeholder-color: #efefef;
+  --input-placeholder-color: #aeaeae;
 
   // Buttons
   --btn-primary-text-color: white;

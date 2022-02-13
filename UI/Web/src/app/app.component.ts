@@ -35,8 +35,15 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.setCurrentUser();
-  }
 
+    setDocHeight();
+    window.addEventListener('resize', function () {
+      setDocHeight();
+    });
+    window.addEventListener('orientationchange', function () {
+       setDocHeight();
+    });
+  }
 
   setCurrentUser() {
     const user = this.accountService.getUserFromLocalStorage();
@@ -50,5 +57,10 @@ export class AppComponent implements OnInit {
       this.navService.setDarkMode(true);
     }
   }
+}
+
+function setDocHeight() {
+  // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
+  document.documentElement.style.setProperty('--vh', `${window.innerHeight/100}px`);
 }
 
