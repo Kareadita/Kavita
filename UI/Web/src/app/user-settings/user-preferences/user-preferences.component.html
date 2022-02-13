@@ -19,9 +19,9 @@
                               </ng-template>
                             <ng-template ngbPanelContent>
                                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
-                                    <div class="form-group">
+                                    <div class="mb-3">
                                         <label id="site-dark-mode-label" aria-describedby="site-heading" class="form-label">Dark Mode</label>
-                                        <div class="form-group">
+                                        <div class="mb-3">
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" id="site-dark-mode" formControlName="siteDarkMode" class="custom-control-input" [value]="true" aria-labelledby="site-dark-mode-label">
                                                 <label class="custom-control-label" for="site-dark-mode">True</label>
@@ -88,10 +88,10 @@
                                     </div>
                             
                                     
-                                    <div class="form-group">
+                                    <div class="mb-3">
                                         <!-- TODO: Turn this into a checkbox -->
                                         <label id="auto-close-label" class="form-label">Auto Close Menu</label>
-                                        <div class="form-group">
+                                        <div class="mb-3">
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" id="auto-close" formControlName="autoCloseMenu" class="custom-control-input" [value]="true" aria-labelledby="auto-close-label">
                                                 <label class="custom-control-label" for="auto-close">True</label>
@@ -107,7 +107,7 @@
                                     <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pe-2">
                                             <label id="dark-mode-label" class="form-label">Dark Mode</label>
-                                            <div class="form-group">
+                                            <div class="mb-3">
                                                 <div class="custom-control custom-radio custom-control-inline">
                                                     <input type="radio" id="dark-mode" formControlName="bookReaderDarkMode" class="custom-control-input" [value]="true" aria-labelledby="dark-mode-label">
                                                     <label class="custom-control-label" for="dark-mode">True</label>
@@ -123,7 +123,7 @@
                                             <label id="taptopaginate-label" class="form-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #tapToPaginateOptionTooltip>Should the sides of the book reader screen allow tapping on it to move to prev/next page</ng-template>
                                             <span class="visually-hidden" id="settings-taptopaginate-option-help">Should the sides of the book reader screen allow tapping on it to move to prev/next page</span>
-                                            <div class="form-group">
+                                            <div class="mb-3">
                                                 <div class="custom-control custom-radio custom-control-inline">
                                                     <input type="radio" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="custom-control-input" [value]="true" aria-labelledby="taptopaginate-label">
                                                     <label class="custom-control-label" for="taptopaginate">True</label>
@@ -200,7 +200,7 @@
                         <div *ngFor="let error of resetPasswordErrors">{{error}}</div>
                     </div>
                     <form [formGroup]="passwordChangeForm">
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="new-password">New Password</label>
                             <input class="form-control" type="password" id="new-password" formControlName="password" required>
                             <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
@@ -209,7 +209,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="mb-3">
                             <label for="confirm-password">Confirm Password</label>
                             <input class="form-control" type="password" id="confirm-password" formControlName="confirmPassword" aria-describedby="password-validations" required>
                             <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">

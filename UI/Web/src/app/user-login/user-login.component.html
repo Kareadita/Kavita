@@ -4,12 +4,12 @@
         <ng-container *ngIf="isLoaded"> 
             <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
                 <div class="card-text">
-                    <div class="form-group" style="width:100%">
+                    <div class="mb-3" style="width:100%">
                         <label for="username" class="form-label">Username</label>
                         <input class="form-control" formControlName="username" id="username" type="text">
                     </div>
                     
-                    <div class="form-group" style="width:100%">
+                    <div class="mb-3" style="width:100%">
                         <label for="password" class="form-label">Password</label>
                         <input class="form-control" formControlName="password" id="password" type="password" autofocus>
                     </div>

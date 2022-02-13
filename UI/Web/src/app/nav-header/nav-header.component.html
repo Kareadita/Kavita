@@ -7,7 +7,7 @@
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
           <div>
             <fieldset class="form-inline">
-              <div class="form-group" style="margin-bottom: 0px;">
+              <div class="mb-3" style="margin-bottom: 0px;">
                 <label for="nav-search" class="form-label visually-hidden">Search series</label>
                 <div class="ng-autocomplete">
                   <app-grouped-typeahead
