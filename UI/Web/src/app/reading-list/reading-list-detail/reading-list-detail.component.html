@@ -13,7 +13,7 @@
     </div>
     <!-- Action row-->
     <div class="row g-0">
-      <div class="me-2">
+      <div class="col-auto me-2">
         <button class="btn btn-primary" title="Read" (click)="read()">
             <span>
                 <i class="fa fa-book-open" aria-hidden="true"></i>
@@ -21,7 +21,7 @@
             </span>
         </button>
       </div>
-      <div>
+      <div class="col-auto">
           <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList?.promoted && !this.isAdmin">
               <span>
                   <i class="fa fa-check"></i>
@@ -29,7 +29,7 @@
               <span class="read-btn--text">&nbsp;Remove Read</span>
           </button>
       </div>
-      <div class="ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
+      <div class="col-auto ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
           <label class="form-check-label" for="accessibilit-mode">Order Numbers</label>
