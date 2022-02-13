@@ -1,3 +1,5 @@
+// TODO: Clean this code up
+
 .btn-close {
     filter: var(--btn-icon-filter) !important;
 }
@@ -15,6 +17,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 }
 .btn-icon {
     cursor: pointer;
+    color: white;
 }
   
 .btn.btn-secondary.alt {

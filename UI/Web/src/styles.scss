@@ -94,6 +94,11 @@
   --list-group-hover-text-color: white;
   --list-group-hover-bg-color: #4ac694;
 
+  // Popover
+  --popover-body-bg-color: var(--navbar-bg-color);
+  --popover-body-text-color: var(--navbar-text-color);
+
+
 
 
 
@@ -124,6 +129,7 @@
 @import './theme/components/tagbadge';
 @import './theme/components/list';
 @import './theme/components/navbar';
+@import './theme/components/popover';
 
 
 @import './theme/utilities/utilities';

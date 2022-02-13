@@ -12,6 +12,15 @@
     border-color: rgba(1, 4, 9, 0.5);
 }
 
+// Popovers need to be their own component
+::ng-deep .bs-popover-bottom > .popover-arrow::after, .bs-popover-bottom > .popover-arrow::before {
+    border-bottom-color: transparent;
+}
+
+.nav-events {
+    background-color: var(--navbar-bg-color);
+}
+
 
 .btn:focus, .btn:hover {
     box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1); // TODO: Used in nav as well, move to dark for btn-icon focus

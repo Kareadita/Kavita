@@ -108,7 +108,7 @@ input {
 // Causes bleedover
 ::ng-deep .bg-dark .dropdown .list-group-item.hover {
     background-color: colors.$dark-hover-color;
-}
+} // TODO: Refactor to use css variables
 
 
 .dropdown {
