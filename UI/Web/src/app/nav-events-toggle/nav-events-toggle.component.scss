@@ -1,5 +1,17 @@
 @use "../../theme/colors";
 
+// These are customizations for events nav
+.dark-menu {
+    background-color: var(--navbar-bg-color);
+    border-color: rgba(1, 4, 9, 0.5);;
+}
+
+.dark-menu-item {
+    color: var(--body-text-color);
+    background-color: rgb(1, 4, 9);
+    border-color: rgba(1, 4, 9, 0.5);
+}
+
 
 .btn:focus, .btn:hover {
     box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1); // TODO: Used in nav as well, move to dark for btn-icon focus
@@ -23,7 +35,7 @@
 }
 
 .colored {
-    background-color: colors.$primary-color;
+    background-color: var(--primary-color);
     border-radius: 60px;
 }
 
@@ -31,7 +43,7 @@
     cursor: pointer;
     
     i.fa {
-        color: colors.$primary-color !important;
+        color: var(--primary-color) !important;
     }
-    color: colors.$primary-color;
+    color: var(--primary-color);
 }

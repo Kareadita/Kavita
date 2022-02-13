@@ -45,6 +45,27 @@
     </div>
 </div>
 
+<h2>Radio</h2>
+<p>Labels should have form-check-label on them and inputs form-check-input</p>
+<div class="mb-3">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-dark-mode" formControlName="siteDarkMode" class="custom-control-input" [value]="true" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-dark-mode">True</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" class="custom-control-input" [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode">False</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" class="custom-control-input" [disabled]="true" [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode">Disabled</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" class="custom-control-input" readonly [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode">Readonly</label>
+    </div>
+</div>
+
 
 <h2>Nav tabs</h2>
 <h3>Tabs</h3>
@@ -87,3 +108,19 @@
     <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable">Clickable</app-tag-badge>
     <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">Non Allowed</app-tag-badge>
 </div>
+
+<h2>Badge</h2>
+TODO
+
+<h2>Switch</h2>
+TODO: New component, will be used in place of 2 way radios
+
+<h2>Dropdown/List Group</h2>
+<div class="dropdown" >
+    <ul class="list-group" role="listbox" id="dropdown">
+        <li class="list-group-item">Item 1</li>
+        <li class="list-group-item">Item 2</li>
+    </ul>
+</div>
+
+

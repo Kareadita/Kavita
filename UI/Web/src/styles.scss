@@ -20,6 +20,9 @@
   --input-background-color: #fff;
   --input-focused-border-color: #ccc;
   
+  --navbar-bg-color: black;
+  --nvagbar-text-color: white;
+
   --nav-link-text-color: black;
   --nav-link-hover-text-color: var(--primary-color);
 
@@ -32,6 +35,8 @@
 
   // Tagbadge
   --tagbadge-bg-color: #c9c9c9;
+
+
   
  
   
@@ -45,6 +50,10 @@
   --bs-body-bg: #343a40; 
   --body-text-color: #efefef;
   --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
+
+  // Navbar
+  --navbar-bg-color: black;
+  --nvagbar-text-color: white;
 
   // Inputs
   --input-background-color: #343a40;
@@ -78,6 +87,14 @@
   --tagbadge-text-color: var(--body-text-color);
   --tagbadge-bg-color: var(--nav-tab-bg-color);
 
+  // List items
+  --list-group-item-text-color: var(--body-text-color); // rgba(74, 198, 148, 0.9)
+  --list-group-item-bg-color: #343a40;
+  --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+  --list-group-hover-text-color: white;
+  --list-group-hover-bg-color: #4ac694;
+
+
 
 
 
@@ -105,6 +122,8 @@
 @import './theme/components/toast';
 @import './theme/components/checkbox';
 @import './theme/components/tagbadge';
+@import './theme/components/list';
+@import './theme/components/navbar';
 
 
 @import './theme/utilities/utilities';
