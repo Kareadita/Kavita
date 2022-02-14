@@ -1,6 +1,7 @@
 :root .bg-dark {
     color-scheme: dark;
     --primary-color: #4ac694;
+    --primary-color-dark-shade: #3B9E76;
     --error-color: #BD362F;
     --bs-body-bg: #343a40; 
     --body-text-color: #efefef;
@@ -124,7 +125,9 @@
     --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);
     --manga-reader-prev-highlight-bg-color: rgba(65, 105, 225, 0.5);
     
-  
+    // Radios
+    --radio-accent-color: var(--primary-color);
+    --radio-hover-accent-color: var(--primary-color-dark-shade);
   
   
   

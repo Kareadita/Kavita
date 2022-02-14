@@ -38,6 +38,9 @@ input {
     transition-duration: 0.3s;
     display: block;
 
+    .search {
+        display: flex;
+    }
 
     .close {
         cursor: pointer;
@@ -65,7 +68,7 @@ input {
         text-indent: 0 !important;
         line-height: inherit !important;
         box-shadow: none !important;
-        width: 300px;
+        width: 100%;
         transition-property: all;
         transition-duration: 0.3s;
         display: block;
@@ -87,10 +90,6 @@ input {
 
 /* small devices (phones, 650px and down) */
 @media only screen and (max-width:650px) {
-    .typeahead-input {
-        width: 120px;
-    }
-
     input {
         width: 100%
     }

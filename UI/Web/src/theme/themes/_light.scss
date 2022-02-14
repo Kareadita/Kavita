@@ -2,6 +2,7 @@
 :root {
     color-scheme: light;
     --primary-color: #4ac694;
+    --primary-color-dark-shade: #3B9E76;
     --error-color: #ff4136;
     --bs-body-bg: #fff; 
     --input-bg-color: #fff;
@@ -82,5 +83,8 @@
     --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);
     --manga-reader-prev-highlight-bg-color: rgba(65, 105, 225, 0.5);
    
-    
+    // Radios
+    --radio-accent-color: var(--primary-color);
+    --radio-hover-accent-color: var(--primary-color-dark-shade);
+
   }
