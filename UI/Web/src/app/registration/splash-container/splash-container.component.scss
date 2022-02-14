@@ -33,7 +33,7 @@
     }
 
     .card {
-        background-color: colors.$primary-color;
+        background-color: var(--primary-color);
         color: #fff;
         min-width: 300px;
         max-width: 12rem;
@@ -71,6 +71,7 @@
         }
     }
 
+    // TODO: look at removing this
     ::ng-deep input {
         background-color: #fff !important;
         color: black;

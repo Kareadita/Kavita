@@ -42,6 +42,8 @@
   // Global
   --hr-color: rgba(239, 239, 239, 0.125);
 
+  // Card
+  --card-progress-bar-color: var(--primary-color);
 
   
  
@@ -140,7 +142,14 @@
   // Global
   --hr-color: rgba(239, 239, 239, 0.125);
 
+  // Card
+  --card-bg-color: rgba(22,27,34,0.5);
+  --card-text-color: var(--body-text-color);
+  --card-border-color: rgba(239, 239, 239, 0.125);
+  --card-progress-bar-color: var(--primary-color);
 
+  // Slider
+  --slider-text-color: white;
 
 
 
@@ -177,6 +186,8 @@
 @import './theme/components/ratingstar';
 @import './theme/components/modal';
 @import './theme/components/anchors';
+@import './theme/components/card';
+@import './theme/components/slider';
 
 
 @import './theme/utilities/utilities';

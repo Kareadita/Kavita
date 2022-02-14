@@ -1,4 +1,4 @@
-@use '../../../theme/colors';
+
 
 $triangle-size: 30px;
 $image-height: 230px;
@@ -7,7 +7,7 @@ $image-width: 160px;
 .error-banner {
     width: 160px;
     height: 18px;
-    background-color: colors.$error-color;
+    background-color: var(--toast-error-bg-color);
     font-size: 12px;
     color: white;
     text-transform: uppercase;
@@ -26,10 +26,9 @@ $image-width: 160px;
     padding-right: 0px;
     box-sizing: border-box;
 
-    background-color: colors.$dark-card-color;
-    color: colors.$dark-text-color;
-    border-color: colors.$dark-form-border;
-
+    background-color: var(--card-bg-color);
+    color: var(--card-text-color);
+    border-color: var(--card-border-color);
 
 }
 
@@ -45,7 +44,7 @@ $image-width: 160px;
 }
 
 .selected-highlight {
-    outline: 2px solid colors.$primary-color;
+    outline: 2px solid var(--primary-color);
 }
 
 
@@ -58,7 +57,7 @@ $image-width: 160px;
     height: 5px;
 
     .progress {
-        color: colors.$primary-color;
+        color: var(--card-progress-bar-color);
         background-color: transparent;
     }
 }
@@ -79,7 +78,7 @@ $image-width: 160px;
     height: 0;
     border-style: solid;
     border-width: 0 $triangle-size $triangle-size 0;
-    border-color: transparent colors.$primary-color transparent transparent;
+    border-color: transparent var(--primary-color) transparent transparent;
 }
 
 
