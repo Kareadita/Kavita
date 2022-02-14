@@ -38,9 +38,12 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="float-end mb-3">
-                                        <button type="button" class="btn btn-secondary me-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
-                                        <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="site-dark-mode-label" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                                    <div class="">
+                                        <!-- TODO: Fix accordion buttons, this is pure css issue-->
+                                        <div class="col-auto float-end mb-3">
+                                            <button type="button" class="btn btn-secondary me-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
+                                            <button type="submit" class="btn btn-primary" (click)="save()" aria-describedby="site-dark-mode-label" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                                        </div>
                                     </div>
                                 </form>
                             </ng-template>

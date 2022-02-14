@@ -11,7 +11,6 @@ import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
-import { Member } from 'src/app/_models/member';
 
 @Component({
   selector: 'app-user-preferences',

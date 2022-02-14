@@ -2,4 +2,8 @@
     background-color: var(--card-bg-color);
     color: var(--card-text-color);
     border-color: var(--card-border-color);
+
+    .overlay:hover {
+        background-color: var(--card-overlay-hover-bg-color);
+    }
 }

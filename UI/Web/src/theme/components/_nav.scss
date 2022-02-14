@@ -12,7 +12,7 @@
     .nav-link {
         
         &.active {
-            color: var(--nav-tab-text-color);
+            color: var(--nav-tab-active-text-color);
             background-color: var(--nav-tab-bg-color);
         }
     

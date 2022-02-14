@@ -44,6 +44,24 @@
 
   // Card
   --card-progress-bar-color: var(--primary-color);
+  --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.4);
+
+  // Nav
+  --nav-tab-active-text-color: white;
+  --nav-tab-text-color: var(--body-text-color);
+  --nav-tab-bg-color: rgba(74, 198, 148, 0.9);
+  --nav-tab-hover-border-color: #4ac694;
+
+  // List items
+  --list-group-item-text-color: var(--body-text-color);
+  --list-group-item-bg-color: white;
+  --list-group-hover-text-color: white;
+  --list-group-hover-bg-color: #4ac694;
+
+  // Dropdown
+  --dropdown-item-hover-text-color: white;
+  --dropdown-item-hover-bg-color: var(--primary-color);
+  --dropdown-overlay-color: rgba(0,0,0,0.5);
 
   
  
@@ -61,7 +79,7 @@
 
   // Navbar
   --navbar-bg-color: black;
-  --nvagbar-text-color: white;
+  --navbar-text-color: white;
 
   // Inputs
   --input-background-color: #343a40;
@@ -78,6 +96,7 @@
   --nav-tab-text-color: var(--body-text-color);
   --nav-tab-bg-color: rgba(74, 198, 148, 0.9);
   --nav-tab-hover-border-color: #4ac694;
+  --nav-tab-active-text-color: white;
 
   // Toasts
   --toast-success-bg-color: rgba(74, 198, 148, 0.9);
@@ -120,6 +139,7 @@
   --dropdown-item-hover-bg-color: var(--primary-color);
   --dropdown-item-text-color: var(--navbar-text-color);
   --dropdown-item-bg-color: var(--navbar-bg-color);
+  --dropdown-overlay-color: rgba(0,0,0,0.5);
 
   // Accordion
   --accordion-header-text-color: rgba(74, 198, 148, 0.9);
@@ -147,6 +167,7 @@
   --card-text-color: var(--body-text-color);
   --card-border-color: rgba(239, 239, 239, 0.125);
   --card-progress-bar-color: var(--primary-color);
+  --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.4);
 
   // Slider
   --slider-text-color: white;
@@ -171,6 +192,7 @@
 
 // Import all the customized theme overrides
 @import './theme/components/input';
+@import './theme/components/anchors';
 @import './theme/components/nav';
 @import './theme/components/buttons';
 @import './theme/components/toast';
@@ -185,7 +207,6 @@
 @import './theme/components/breadcrumb';
 @import './theme/components/ratingstar';
 @import './theme/components/modal';
-@import './theme/components/anchors';
 @import './theme/components/card';
 @import './theme/components/slider';
 

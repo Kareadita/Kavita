@@ -1,4 +1,3 @@
-@use "../../theme/colors";
 form {
     max-height: 38px;
 }
@@ -32,7 +31,7 @@ input {
     box-sizing: border-box;
     box-shadow: none;
     cursor: text;
-    background-color: #fff;
+    background-color: var(--input-background-color);
     min-height: 38px;
     transition-property: all;
     transition-duration: 0.3s;
@@ -101,23 +100,24 @@ input {
 }
 
 ::ng-deep .bg-dark .typeahead-input {
-    color: #efefef;
-    background-color: colors.$dark-bg-color;
+    color: var(--body-text-color);
+    background-color: var(--input-background-color);
 }
 
-// Causes bleedover
-::ng-deep .bg-dark .dropdown .list-group-item.hover {
-    background-color: colors.$dark-hover-color;
-} // TODO: Refactor to use css variables
 
-.section-title {
-    color: colors.$dark-text-color;
-  }
+.section-header {
+    color: var(--body-text-color);
+
+    &:hover {
+        background-color: var(--list-group-item-bg-color) !important;
+        cursor: default;
+    }
+}
 
 .dropdown {
     width: 100vw;
     height: calc(100vh - 57px); //header offset
-    background: rgba(0,0,0,0.5);
+    background: var(--dropdown-overlay-color);
     position: fixed;
     justify-content: center;
     left: 0;
@@ -167,35 +167,23 @@ ul ul {
     cursor: pointer;
 }
 
-::ng-deep .bg-dark {
-    & .section-header {
-    
-        background: colors.$dark-item-accent-bg;
-        cursor: default;
-    }
-    
-    & .section-header:hover {
-        background-color: colors.$dark-item-accent-bg !important;
-    }
-}
-
-::ng-deep .bg-light {
-    & .section-header {
-    
-        background: colors.$white-item-accent-bg;
-        cursor: default;
-    }
-
-    & .section-header:hover, .list-group-item.section-header:hover {
-        background: colors.$white-item-accent-bg !important;
-    }
-    
-    & .list-group-item:hover {
-        background-color: colors.$primary-color !important;
-    }
 
 
-}
+// ::ng-deep .bg-light {
+//     // & .section-header {
+    
+//     //     background: colors.$white-item-accent-bg;
+//     //     cursor: default;
+//     // }
+
+//     & .section-header:hover, .list-group-item.section-header:hover {
+//         background: colors.$white-item-accent-bg !important;
+//     }
+    
+//     & .list-group-item:hover {
+//         background-color: colors.$primary-color !important;
+//     }
+// }
 
 .spinner-border {
     position: absolute;
