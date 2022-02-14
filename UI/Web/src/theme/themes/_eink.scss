@@ -1,0 +1,26 @@
+:root .bg-eink {
+    color-scheme: light;
+    --primary-color: black;
+    --bs-body-bg: white;
+    
+  
+    --nav-link-text-color: black;
+    --btn-primary-text-color: white;
+  
+    // Manga Reader
+    //--manga-reader-overlay-filter: none;
+  
+    // Toasts
+    --toast-success-bg-color: rgba(74, 198, 148, 0.9);
+    --toast-error-bg-color: #BD362F;
+    --toast-info-bg-color: #2F96B4;
+    --toast-warning-bg-color: #F89406;
+    
+  
+    // Global
+    --grid-breakpoints-xs: $grid-breakpoint-xs;
+    --grid-breakpoints-sm: $grid-breakpoint-sm;
+    --grid-breakpoints-md: $grid-breakpoint-md;
+    --grid-breakpoints-lg: $grid-breakpoint-lg;
+    --grid-breakpoints-xl: $grid-breakpoint-xl;
+  }
