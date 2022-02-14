@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220214172932_SiteTheme")]
+    [Migration("20220214201439_SiteTheme")]
     partial class SiteTheme
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -203,10 +203,15 @@ namespace API.Data.Migrations
                     b.Property<bool>("SiteDarkMode")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ThemeId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId")
                         .IsUnique();
+
+                    b.HasIndex("ThemeId");
 
                     b.ToTable("AppUserPreferences");
                 });
@@ -689,6 +694,29 @@ namespace API.Data.Migrations
                     b.ToTable("ServerSetting");
                 });
 
+            modelBuilder.Entity("API.Entities.SiteTheme", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteTheme");
+                });
+
             modelBuilder.Entity("API.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -969,7 +997,13 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.SiteTheme", "Theme")
+                        .WithMany()
+                        .HasForeignKey("ThemeId");
+
                     b.Navigation("AppUser");
+
+                    b.Navigation("Theme");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserProgress", b =>

@@ -382,7 +382,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
-      if (this.user.preferences.siteDarkMode) {
+      if (this.user.preferences.theme.name.toLowerCase() === 'dark') {
         bodyNode.classList.add('bg-dark');
       }
     }
@@ -968,7 +968,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setOverrideStyles() {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
-      if (this.user.preferences.siteDarkMode) {
+      if (this.user.preferences.theme.name.toLowerCase() === 'dark') {
         bodyNode.classList.remove('bg-dark');
       }
       

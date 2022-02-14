@@ -1,11 +1,9 @@
 ﻿using API.Entities.Enums.Theme;
 using API.Services;
 
-namespace API.Entities;
-/// <summary>
-/// Represents a set of css overrides the user can upload to Kavita and will load into webui
-/// </summary>
-public class SiteTheme
+namespace API.DTOs.Theme;
+
+public class SiteThemeDto
 {
     public int Id { get; set; }
     /// <summary>
@@ -25,4 +23,5 @@ public class SiteTheme
     /// Where did the theme come from
     /// </summary>
     public ThemeProvider Provider { get; set; }
+    public string Selector => "bg-" + Name.ToLower();
 }

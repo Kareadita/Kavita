@@ -1,21 +1,38 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Theme;
 using API.Services;
+using API.Services.Tasks;
+using Kavita.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 public class ThemeController : BaseApiController
 {
-    private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly HtmlEncoder _htmlEncoder;
+    private readonly ISiteThemeService _siteThemeService;
+    private readonly ITaskScheduler _taskScheduler;
 
-    public ThemeController(IDirectoryService directoryService, IUnitOfWork unitOfWork, HtmlEncoder htmlEncoder)
+    public ThemeController(IUnitOfWork unitOfWork, ISiteThemeService siteThemeService, ITaskScheduler taskScheduler)
     {
-        _directoryService = directoryService;
         _unitOfWork = unitOfWork;
-        _htmlEncoder = htmlEncoder;
+        _siteThemeService = siteThemeService;
+        _taskScheduler = taskScheduler;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetThemes()
+    {
+        return Ok(await _unitOfWork.SiteThemeRepository.GetThemeDtos());
+    }
+
+    [HttpPost("scan")]
+    public ActionResult Scan()
+    {
+        _taskScheduler.ScanSiteThemes();
+        return Ok();
     }
 
     /// <summary>
@@ -23,10 +40,15 @@ public class ThemeController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("download-content")]
-    public ActionResult<string> GetThemeContent(int themeId)
+    public async Task<ActionResult<string>> GetThemeContent(int themeId)
     {
-        var text = System.IO.File.ReadAllText(
-            _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, "custom.css"));
-        return Ok(text);
+        try
+        {
+            return Ok(await _siteThemeService.GetContent(themeId));
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }

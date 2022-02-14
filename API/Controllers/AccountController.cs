@@ -106,7 +106,10 @@ namespace API.Controllers
                 {
                     UserName = registerDto.Username,
                     Email = registerDto.Email,
-                    UserPreferences = new AppUserPreferences(),
+                    UserPreferences = new AppUserPreferences
+                    {
+                        Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+                    },
                     ApiKey = HashUtil.ApiKey()
                 };
 
@@ -179,7 +182,10 @@ namespace API.Controllers
 
             // Update LastActive on account
             user.LastActive = DateTime.Now;
-            user.UserPreferences ??= new AppUserPreferences();
+            user.UserPreferences ??= new AppUserPreferences
+            {
+                Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+            };
 
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
@@ -358,7 +364,10 @@ namespace API.Controllers
                 UserName = dto.Email,
                 Email = dto.Email,
                 ApiKey = HashUtil.ApiKey(),
-                UserPreferences = new AppUserPreferences()
+                UserPreferences = new AppUserPreferences
+                {
+                    Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+                }
             };
 
             try

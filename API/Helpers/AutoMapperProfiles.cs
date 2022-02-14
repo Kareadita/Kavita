@@ -7,6 +7,7 @@ using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.DTOs.Settings;
+using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -144,6 +145,8 @@ namespace API.Helpers
                 .AfterMap((ps, pst, context) => context.Mapper.Map(ps.Libraries, pst.Libraries));
 
             CreateMap<RegisterDto, AppUser>();
+
+            CreateMap<SiteTheme, SiteThemeDto>();
 
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()

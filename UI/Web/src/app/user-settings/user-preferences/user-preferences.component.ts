@@ -57,6 +57,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'Bookmarks', fragment: 'bookmarks'},
     {title: 'Password', fragment: 'password'},
     {title: '3rd Party Clients', fragment: 'clients'},
+    {title: 'Theme', fragment: 'theme'},
   ];
   active = this.tabs[0];
   opdsEnabled: boolean = false;
@@ -103,9 +104,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []));
         this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
         this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
-        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.siteDarkMode, []));
+        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.bookReaderTapToPaginate, []));
 
-        this.settingsForm.addControl('siteDarkMode', new FormControl(!!user.preferences.siteDarkMode, []));
+        this.settingsForm.addControl('theme', new FormControl(!!user.preferences.theme, []));
       }
     });
 
@@ -139,7 +140,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
-    this.settingsForm.get('siteDarkMode')?.setValue(this.user.preferences.siteDarkMode);
+    this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
   }
 
   resetPasswordForm() {
@@ -164,14 +165,15 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
-      siteDarkMode: modelSettings.siteDarkMode
+      theme: modelSettings.theme
+      //siteDarkMode: modelSettings.siteDarkMode
     };
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
 
-        this.navService.setDarkMode(this.user.preferences.siteDarkMode);
+        //this.navService.setDarkMode(this.user.preferences.siteDarkMode);
       }
       this.resetForm();
     }));

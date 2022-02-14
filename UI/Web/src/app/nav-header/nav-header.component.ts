@@ -50,15 +50,15 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     private scrollService: ScrollService) { }
 
   ngOnInit(): void {
-    this.navService.darkMode$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
-      if (res) {
-        this.document.body.classList.remove('bg-light');
-        this.document.body.classList.add('bg-dark');
-      } else {
-        this.document.body.classList.remove('bg-dark');
-        this.document.body.classList.add('bg-light');
-      }
-    });
+    // this.navService.darkMode$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
+    //   if (res) {
+    //     this.document.body.classList.remove('bg-light');
+    //     this.document.body.classList.add('bg-dark');
+    //   } else {
+    //     this.document.body.classList.remove('bg-dark');
+    //     this.document.body.classList.add('bg-light');
+    //   }
+    // });
   }
 
   @HostListener("window:scroll", [])

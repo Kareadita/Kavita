@@ -63,6 +63,11 @@ namespace API.Entities
         /// UI Site Global Setting: Whether the UI should render in Dark mode or not.
         /// </summary>
         public bool SiteDarkMode { get; set; } = true;
+        /// <summary>
+        /// UI Site Global Setting: The UI theme the user should use.
+        /// </summary>
+        /// <remarks>Should default to Dark</remarks>
+        public SiteTheme Theme { get; set; }
 
 
 
