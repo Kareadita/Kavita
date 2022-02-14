@@ -41,6 +41,11 @@
 
   // Global
   --hr-color: rgba(239, 239, 239, 0.125);
+  --grid-breakpoints-xs: $grid-breakpoint-xs;
+  --grid-breakpoints-sm: $grid-breakpoint-sm;
+  --grid-breakpoints-md: $grid-breakpoint-md;
+  --grid-breakpoints-lg: $grid-breakpoint-lg;
+  --grid-breakpoints-xl: $grid-breakpoint-xl;
 
   // Card
   --card-progress-bar-color: var(--primary-color);
@@ -62,6 +67,7 @@
   --dropdown-item-hover-text-color: white;
   --dropdown-item-hover-bg-color: var(--primary-color);
   --dropdown-overlay-color: rgba(0,0,0,0.5);
+  
 
   
  

@@ -1,8 +1,5 @@
-@use '../../theme/variables';
-
 .user-review {
   font-style: italic;
-
 }
 
 .rating-star {
@@ -15,13 +12,13 @@
   max-width: 300px;
 }
 
-@media(max-width: variables.$grid-breakpoints-sm) {
+@media(max-width: var(--grid-breakpoints-sm)) {
   .poster {
     display: none;
   }
 }
 
-@media(max-width: variables.$grid-breakpoints-sm) {
+@media(max-width: var(--grid-breakpoints-sm)) {
   .read-btn--text {
     display: none;
   }
