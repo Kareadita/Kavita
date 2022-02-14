@@ -20,7 +20,7 @@ export class ImageService implements OnDestroy {
 
   private onDestroy: Subject<void> = new Subject();
 
-  constructor(private navSerivce: NavService, private accountService: AccountService, private themeService: ThemeService) {
+  constructor(private accountService: AccountService, private themeService: ThemeService) {
     // TODO: Figure out how to handle dark mode here (or to allow customization of images)
     this.themeService.currentTheme$.subscribe(res => {
       if (res.name.toLowerCase() === 'dark') {

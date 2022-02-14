@@ -4,6 +4,7 @@ import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityCon
 import { DomSanitizer } from '@angular/platform-browser';
 import { map, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { ConfirmService } from './shared/confirm.service';
 import { SiteTheme, ThemeProvider } from './_models/preferences/site-theme';
 import { EVENTS, MessageHubService } from './_services/message-hub.service';
 
@@ -16,7 +17,6 @@ export class ThemeService implements OnDestroy {
 
   public defaultTheme: string = 'dark';
 
-  private currentTheme: SiteTheme | undefined;
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
 
@@ -28,9 +28,10 @@ export class ThemeService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
   private renderer: Renderer2;
   private baseUrl = environment.apiUrl;
+  
 
   constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient, 
-  messageHub: MessageHubService, private domSantizer: DomSanitizer) {
+  messageHub: MessageHubService, private domSantizer: DomSanitizer, private confirmService: ConfirmService) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
@@ -64,9 +65,9 @@ export class ThemeService implements OnDestroy {
 
       if (theme.provider === ThemeProvider.User && !this.hasThemeInHead(theme.name)) {
         // We need to load the styles into the browser
-        this.fetchThemeContent(theme.id).subscribe((content) => {
+        this.fetchThemeContent(theme.id).subscribe(async (content) => {
           if (content === null) {
-            console.error('There is invalid or unsafe css in the theme!');
+            await this.confirmService.alert('There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.');
             this.setTheme('dark');
             return;
           }
@@ -75,14 +76,18 @@ export class ThemeService implements OnDestroy {
           styleElem.appendChild(this.document.createTextNode(content));
 
           this.renderer.appendChild(this.document.head, styleElem);
-          this.currentTheme = theme;
+          this.currentThemeSource.next(theme);
         });
+      } else {
+        this.currentThemeSource.next(theme);
       }
 
       this.renderer.addClass(this.document.querySelector('body'), theme.selector);
-      this.currentTheme = theme;
     } else {
-      // TODO: Do I need a flow for if theme isn't cached? 
+      // Only time themes isn't already loaded is on first load
+      this.getThemes().subscribe(themes => {
+        this.setTheme(themeName);
+      });
     }
   }
 
