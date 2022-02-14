@@ -9,3 +9,13 @@ div {
 a {
     font-size: 0.8rem;
 }
+
+.custom-input {
+    background-color: #fff !important;
+    color: black;
+}
+
+.invalid-feedback {
+    display: inline-block;
+    color: #343c59;
+}
