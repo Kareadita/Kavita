@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
@@ -7,6 +7,7 @@ import { MessageHubService } from './_services/message-hub.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,7 @@ export class AppComponent implements OnInit {
 
   constructor(private accountService: AccountService, public navService: NavService, 
     private messageHub: MessageHubService, private libraryService: LibraryService, 
-    private router: Router, private ngbModal: NgbModal, private ratingConfig: NgbRatingConfig) {
+    router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig, @Inject(DOCUMENT) private document: Document) {
 
     // Setup default rating config
     ratingConfig.max = 5;
@@ -33,16 +34,20 @@ export class AppComponent implements OnInit {
       });
   }
 
+  @HostListener('resize')
+  onResize() {
+    this.setDocHeight();
+  }
+
+  @HostListener('orientationchange')
+  onOrientationChange() {
+    this.setDocHeight();
+  }
+
   ngOnInit(): void {
     this.setCurrentUser();
 
-    setDocHeight();
-    window.addEventListener('resize', function () {
-      setDocHeight();
-    });
-    window.addEventListener('orientationchange', function () {
-       setDocHeight();
-    });
+    this.setDocHeight();
   }
 
   setCurrentUser() {
@@ -57,10 +62,9 @@ export class AppComponent implements OnInit {
       this.navService.setDarkMode(true);
     }
   }
-}
 
-function setDocHeight() {
-  // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
-  document.documentElement.style.setProperty('--vh', `${window.innerHeight/100}px`);
+  setDocHeight() {
+    // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
+    this.document.documentElement.style.setProperty('--vh', `${window.innerHeight/100}px`);
+  }
 }
-

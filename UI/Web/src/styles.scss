@@ -17,9 +17,9 @@ $theme-colors: (
 
 
 // Import themes which define the css variables we use to customize the app
-@import './theme/themes/light';
-@import './theme/themes/dark';
-@import './theme/themes/eink';
+@import './theme/themes/light.css';
+@import './theme/themes/dark.css';
+@import './theme/themes/eink.css';
 
 
 // Import all the customized theme overrides
@@ -63,7 +63,7 @@ label, select, .clickable {
   cursor: pointer;
 }
 
-html, body { height: 100%; }
+html, body { height: 100%; color-scheme: var(--color-scheme); }
 body {
   margin: 0; 
   font-family: var(--body-font-family);

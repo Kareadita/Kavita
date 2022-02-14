@@ -310,4 +310,8 @@
     <Reference Include="System.Drawing.Common" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="config\themes" />
+  </ItemGroup>
+
 </Project>

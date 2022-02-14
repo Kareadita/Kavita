@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
+import { ThemeService } from '../theme.service';
 import { NavService } from '../_services/nav.service';
 
 @Component({
@@ -23,7 +24,7 @@ export class ThemeTestComponent implements OnInit {
     return TagBadgeCursor;
   }
 
-  constructor(public toastr: ToastrService, public navService: NavService) { }
+  constructor(public toastr: ToastrService, public navService: NavService, public themeService: ThemeService) { }
 
   ngOnInit(): void {
   }

@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot } from '@angular/router';
-import { FilterSettings } from 'src/app/cards/card-detail-layout/card-detail-layout.component';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Series } from 'src/app/_models/series';
 import { SeriesFilter } from 'src/app/_models/series-filter';
 import { Volume } from 'src/app/_models/volume';

@@ -1,4 +1,10 @@
-<button class="btn btn-primary" (click)="navService?.toggleDarkMode()">Toggle Dark mode</button>
+<h1>Themes</h1>
+<button class="btn btn-primary" (click)="themeService?.setTheme('dark')">Dark</button>
+<button class="btn btn-primary" (click)="themeService?.setTheme('light')">Light</button>
+<button class="btn btn-primary" (click)="themeService?.setTheme('E-Ink')">E-ink</button>
+<button class="btn btn-primary" (click)="themeService?.setTheme('custom')">Custom</button>
+
+
 
 <h2>Buttons</h2>
 <button class="btn btn-primary">Primary</button>

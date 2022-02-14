@@ -1,9 +1,11 @@
-// Theme for the light mode of Kavita
+/* Theme for the light mode of Kavita */
 :root {
-    color-scheme: light;
+    --color-scheme: light;
     --primary-color: #4ac694;
     --error-color: #ff4136;
     --bs-body-bg: #fff; 
+    --body-text-color: black;
+
     --input-bg-color: #fff;
     --input-focused-border-color: #ccc;
     
@@ -13,7 +15,7 @@
     --nav-link-text-color: black;
     --nav-link-hover-text-color: var(--primary-color);
   
-    // Buttons
+    /* Buttons */
     --btn-primary-text-color: white;
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
@@ -26,21 +28,21 @@
     --checkbox-border-color: var(--primary-color);
     --checkbox-focus-border-color: var(--input-border-color);
   
-    // Tagbadge
+    /* Tagbadge */
     --tagbadge-bg-color: #c9c9c9;
   
-    // Toasts
+    /* Toasts */
     --toast-success-bg-color: rgba(74, 198, 148, 0.9);
     --toast-error-bg-color: #BD362F;
     --toast-info-bg-color: #2F96B4;
     --toast-warning-bg-color: #F89406;
     
   
-    // Rating star
+    /* Rating star */
     --ratingstar-star-empty: #b0c4de;
     --ratingstar-star-filled: var(--primary-color);
   
-    // Global
+    /* Global */
     --hr-color: rgba(239, 239, 239, 0.125);
     --grid-breakpoints-xs: $grid-breakpoint-xs;
     --grid-breakpoints-sm: $grid-breakpoint-sm;
@@ -50,11 +52,11 @@
     --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
     --brand-font-family: "Spartan", sans-serif;
   
-    // Card
+    /* Card */
     --card-progress-bar-color: var(--primary-color);
     --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.4);
   
-    // Nav
+    /* Nav */
     --nav-link-active-text-color: white;
     --nav-link-bg-color: rgba(74, 198, 148, 0.9);
     --nav-tab-active-text-color: white;
@@ -62,19 +64,19 @@
     --nav-tab-bg-color: rgba(74, 198, 148, 0.9);
     --nav-tab-hover-border-color: #4ac694;
   
-    // List items
+    /* List items */
     --list-group-item-text-color: var(--body-text-color);
     --list-group-item-bg-color: white;
     --list-group-hover-text-color: white;
     --list-group-hover-bg-color: #4ac694;
   
-    // Dropdown
+    /* Dropdown */
     --dropdown-item-hover-text-color: white;
     --dropdown-item-hover-bg-color: var(--primary-color);
     --dropdown-overlay-color: rgba(0,0,0,0.5);
     
   
-    // Manga Reader
+    /* Manga Reader */
     --manga-reader-overlay-filter: blur(10px);
     --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
     --manga-reader-overlay-text-color: white;
