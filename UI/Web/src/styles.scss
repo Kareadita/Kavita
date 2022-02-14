@@ -16,7 +16,7 @@
   --primary-color: #4ac694;
   --error-color: #ff4136;
   --bs-body-bg: #fff; 
-  --input-background-color: #fff;
+  --input-bg-color: #fff;
   --input-focused-border-color: #ccc;
   
   --navbar-bg-color: black;
@@ -82,11 +82,12 @@
   --navbar-text-color: white;
 
   // Inputs
-  --input-background-color: #343a40;
-  --input-background-readonly-color: #434648;
+  --input-bg-color: #343a40;
+  --input-bg-readonly-color: #434648;
   --input-focused-border-color: #ccc;
   --input-text-color: #fff;
   --input-placeholder-color: #aeaeae;
+  --input-border-color: #ccc;
 
   // Buttons
   --btn-primary-text-color: white;

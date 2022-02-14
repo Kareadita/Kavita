@@ -1,6 +1,4 @@
 
-@use '../../../theme/colors';
-
 .card {
     margin: 10px;
     max-width: 160px;
@@ -29,7 +27,6 @@
 .overlay {
     height: 160px;
     &:hover {
-        //background-color: rgba(0, 0, 0, 0.4);
         visibility: visible;
 
         .overlay-item {

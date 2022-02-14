@@ -7,4 +7,9 @@
     color: var(--list-group-hover-text-color);
     background-color: var(--list-group-hover-bg-color);
   }
+
+  &.active {
+    color: var(--list-group-hover-text-color);
+    background-color: var(--list-group-hover-bg-color);
+  }
 }

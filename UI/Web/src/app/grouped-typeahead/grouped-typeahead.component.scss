@@ -31,7 +31,8 @@ input {
     box-sizing: border-box;
     box-shadow: none;
     cursor: text;
-    background-color: var(--input-background-color);
+    background-color: var(--input-bg-color);
+    color: var(--body-text-color);
     min-height: 38px;
     transition-property: all;
     transition-duration: 0.3s;
@@ -97,11 +98,6 @@ input {
     input:focus-visible {
         width: 100% !important;
     }
-}
-
-::ng-deep .bg-dark .typeahead-input {
-    color: var(--body-text-color);
-    background-color: var(--input-background-color);
 }
 
 
