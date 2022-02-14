@@ -5,9 +5,9 @@ hr {
 }
 
 .accent {
-    background-color: $dark-form-background !important;
-    color: lightgray !important;
-    box-shadow: inset 0px 0px 8px 1px $dark-form-background !important;
+    background-color: var(--accent-bg-color) !important;
+    color: var(--accent-text-color) !important;
+    box-shadow: inset 0px 0px 8px 1px var(--accent-bg-color) !important;
 }
 
 .text-muted {
