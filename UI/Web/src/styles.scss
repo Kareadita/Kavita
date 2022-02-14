@@ -4,6 +4,7 @@
 @import './theme/toastr';
 @import './theme/variables';
 
+// NOTE: It currently isn't possible to swap out all bootstrap styles because of the scss generators. So we have some hardcoded stuff.
 $theme-colors: (
   "primary": #4ac694,
   "danger": #BD362F,
