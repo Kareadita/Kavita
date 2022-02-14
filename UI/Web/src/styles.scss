@@ -1,10 +1,15 @@
 @use '../node_modules/swiper/swiper.scss' as swiper;
 
 // Import colors for overrides of bootstrap theme
-//@import './theme/colors';
 @import './theme/toastr';
-
 @import './theme/variables';
+
+$theme-colors: (
+  "primary": #4ac694,
+  "danger": #BD362F,
+  "secondary": #6c757d,
+  "light": #f8f9fa
+);
 
 // Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';
