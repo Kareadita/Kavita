@@ -168,6 +168,11 @@
 
   // Global
   --hr-color: rgba(239, 239, 239, 0.125);
+  --grid-breakpoints-xs: $grid-breakpoint-xs;
+  --grid-breakpoints-sm: $grid-breakpoint-sm;
+  --grid-breakpoints-md: $grid-breakpoint-md;
+  --grid-breakpoints-lg: $grid-breakpoint-lg;
+  --grid-breakpoints-xl: $grid-breakpoint-xl;
 
   // Card
   --card-bg-color: rgba(22,27,34,0.5);
@@ -194,6 +199,13 @@
 
   --nav-link-text-color: black;
   --btn-primary-text-color: white;
+
+  // Global
+  --grid-breakpoints-xs: $grid-breakpoint-xs;
+  --grid-breakpoints-sm: $grid-breakpoint-sm;
+  --grid-breakpoints-md: $grid-breakpoint-md;
+  --grid-breakpoints-lg: $grid-breakpoint-lg;
+  --grid-breakpoints-xl: $grid-breakpoint-xl;
 }
 
 
