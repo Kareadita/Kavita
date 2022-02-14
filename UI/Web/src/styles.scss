@@ -40,6 +40,9 @@
   --ratingstar-star-empty: #b0c4de;
   --ratingstar-star-filled: var(--primary-color);
 
+  // Global
+  --hr-color: rgba(239, 239, 239, 0.125);
+
 
   
  
@@ -135,6 +138,9 @@
   --ratingstar-star-empty: #b0c4de;
   --ratingstar-star-filled: var(--primary-color);
 
+  // Global
+  --hr-color: rgba(239, 239, 239, 0.125);
+
 
 
 
@@ -154,8 +160,6 @@
   --btn-primary-text-color: white;
 }
 
-// Overrides on bootstrap (for some reason these aren't overriding bootstrap styles)
-
 
 // Import all the customized theme overrides
 @import './theme/components/input';
@@ -172,10 +176,13 @@
 @import './theme/components/accordion';
 @import './theme/components/breadcrumb';
 @import './theme/components/ratingstar';
+@import './theme/components/modal';
+@import './theme/components/anchors';
 
 
 @import './theme/utilities/utilities';
 @import './theme/utilities/animations';
+@import './theme/utilities/global';
 
 
 body {

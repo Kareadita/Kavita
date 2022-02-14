@@ -5,3 +5,11 @@
 //       color: $dark-hover-color !important;
 //     }
 //   }
+
+a.read-more-link {
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--body-text-color);
+    cursor: pointer;
+    color: var(--body-text-color) !important;
+}

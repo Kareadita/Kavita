@@ -5,10 +5,6 @@
 
 .bg-dark {
 
-  h2, h4 {
-      color: $dark-text-color;
-  }
-
   a:not(.dark-exempt) {
     color: $dark-hover-color;
     > i {
@@ -36,41 +32,11 @@
   i.fa {
     color: $dark-icon-color;
   }
-  
 
-  .modal-content {
-    color: $dark-text-color;
-    background-color: $dark-bg-color;
-  }
 
   .ngx-slider .ngx-slider-bubble {
+    // Slider to be removed in future story this release (v0.5.2)
       color: $dark-text-color !important;
   }
 
-  .read-more-link {
-    color: $dark-text-color !important;
-  }
-
-  .login {
-    // TODO: Move logic stuff to component
-    &::before {
-      content: "";
-      background-image: url('../assets/images/login-bg.jpg');
-      background-size: cover;
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      opacity: 0.05;
-      width: 100%;
-    }
-
-    .card {
-      background-color: $dark-primary-color !important;
-    }
-
-    input {
-      color: #000;
-    }
-  }
 }
