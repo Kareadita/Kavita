@@ -20,13 +20,6 @@
     background-color: colors.$dark-form-border;
   }
 
-  // .accordion-header {
-  //   font-weight: bold;
-  //   color: $dark-primary-color;
-  // }
-
-  
-
 
   .accent {
     background-color: $dark-form-background !important;
@@ -38,15 +31,9 @@
     color: #d7d7d7 !important;
   }
 
-  .breadcrumb {
-    background-color: $dark-item-accent-bg;
 
-    .breadcrumb-item {
-      color: $dark-text-color;
-    }
-  }
 
-  .rating-star, .close, i.fa {
+  i.fa {
     color: $dark-icon-color;
   }
   

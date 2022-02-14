@@ -36,6 +36,10 @@
   // Tagbadge
   --tagbadge-bg-color: #c9c9c9;
 
+  // Rating star
+  --ratingstar-star-empty: #b0c4de;
+  --ratingstar-star-filled: var(--primary-color);
+
 
   
  
@@ -122,6 +126,15 @@
   --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
   --accordion-header-collapsed-bg-color: rgba(22,27,34,0.5);
 
+  // Breadcrumb
+  --breadcrumb-bg-color: #292d32;
+  --breadcrumb-item-text-color: var(--body-text-color);
+
+  // Rating star
+  --ratingstar-color: white;
+  --ratingstar-star-empty: #b0c4de;
+  --ratingstar-star-filled: var(--primary-color);
+
 
 
 
@@ -157,6 +170,8 @@
 @import './theme/components/pagination';
 @import './theme/components/dropdown';
 @import './theme/components/accordion';
+@import './theme/components/breadcrumb';
+@import './theme/components/ratingstar';
 
 
 @import './theme/utilities/utilities';

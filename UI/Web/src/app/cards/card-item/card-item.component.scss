@@ -25,6 +25,12 @@ $image-width: 160px;
     padding-left: 0px;
     padding-right: 0px;
     box-sizing: border-box;
+
+    background-color: colors.$dark-card-color;
+    color: colors.$dark-text-color;
+    border-color: colors.$dark-form-border;
+
+
 }
 
 .card-title {

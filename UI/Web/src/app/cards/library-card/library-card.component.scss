@@ -1,9 +1,14 @@
-$primary-color: #cc7b19;
+
+@use '../../../theme/colors';
 
 .card {
     margin: 10px;
     max-width: 160px;
     cursor: pointer;
+
+    background-color: colors.$dark-card-color;
+    color: colors.$dark-text-color;
+    border-color: colors.$dark-form-border;
 }
 
 .card-title {
