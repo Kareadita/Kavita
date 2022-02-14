@@ -1,10 +1,10 @@
 // TODO: Figure this out
-// a:not(.dark-exempt) {
-//     color: $dark-hover-color;
-//     > i {
-//       color: $dark-hover-color !important;
-//     }
-//   }
+a:not(.dark-exempt) {
+    color: var(--primary-color);
+    > i {
+      color: var(--primary-color) !important;
+    }
+  }
 
 a.read-more-link {
     font-weight: bold;
