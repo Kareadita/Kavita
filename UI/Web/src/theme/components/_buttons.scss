@@ -41,15 +41,15 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 }
   
 .btn.btn-secondary.alt {
-    background-color: #424c72;
-    border-color: #444f75;
+    background-color: var(--btn-alt-bg-color);
+    border-color: var(--btn-alt-border-color);
   
     &:hover {
-      background-color: #3b4466; 
+      background-color: var(--btn-alt-hover-bg-color); 
     }
   
     &:focus {
-      background-color: #343c59;
-      box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%); 
+      background-color: var(--btn-alt-focus-bg-color);
+      box-shadow: 0 0 0 0.2rem var(--btn-alt-focus-boxshadow-color); 
     }
 }

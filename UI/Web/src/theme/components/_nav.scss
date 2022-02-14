@@ -4,7 +4,18 @@
     &:hover, &:focus {
         color: var(--nav-link-hover-text-color);
     }
+
+    &.active {
+        color: var(--nav-link-active-text-color);
+        background-color: var(--nav-link-bg-color);
+    }
 }
+
+.nav-pills .nav-link.active {
+    color: var(--nav-link-active-text-color);
+    background-color: var(--nav-link-bg-color);
+}
+
 
 .nav-tabs {
     border-color: var(--nav-tab-border-color);

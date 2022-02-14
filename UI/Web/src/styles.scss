@@ -25,7 +25,13 @@
   --nav-link-text-color: black;
   --nav-link-hover-text-color: var(--primary-color);
 
+  // Buttons
   --btn-primary-text-color: white;
+  --btn-alt-bg-color: #424c72;
+  --btn-alt-border-color: #444f75;
+  --btn-alt-hover-bg-color: #3b4466;
+  --btn-alt-focus-bg-color: #343c59;
+  --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
   
   --checkbox-checked-bg-color: var(--primary-color);
   --checkbox-bg-color: white;
@@ -46,12 +52,16 @@
   --grid-breakpoints-md: $grid-breakpoint-md;
   --grid-breakpoints-lg: $grid-breakpoint-lg;
   --grid-breakpoints-xl: $grid-breakpoint-xl;
+  --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+  --brand-font-family: "Spartan", sans-serif;
 
   // Card
   --card-progress-bar-color: var(--primary-color);
   --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.4);
 
   // Nav
+  --nav-link-active-text-color: white;
+  --nav-link-bg-color: rgba(74, 198, 148, 0.9);
   --nav-tab-active-text-color: white;
   --nav-tab-text-color: var(--body-text-color);
   --nav-tab-bg-color: rgba(74, 198, 148, 0.9);
@@ -97,6 +107,11 @@
 
   // Buttons
   --btn-primary-text-color: white;
+  --btn-alt-bg-color: #424c72;
+  --btn-alt-border-color: #444f75;
+  --btn-alt-hover-bg-color: #3b4466;
+  --btn-alt-focus-bg-color: #343c59;
+  --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
 
   // Nav
   --nav-tab-border-color: rgba(239, 239, 239, 0.125);
@@ -173,6 +188,8 @@
   --grid-breakpoints-md: $grid-breakpoint-md;
   --grid-breakpoints-lg: $grid-breakpoint-lg;
   --grid-breakpoints-xl: $grid-breakpoint-xl;
+  --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+  --brand-font-family: "Spartan", sans-serif;
 
   // Card
   --card-bg-color: rgba(22,27,34,0.5);
@@ -235,18 +252,7 @@
 @import './theme/utilities/global';
 
 
-body {
-  color: var(--body-text-color);
-}
-
-
-
 // Global Styles
-
-label, select, .clickable {
-  cursor: pointer;
-}
-
 @font-face {
   font-family: "EBGarmond";
   src: url("assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf") format("truetype");
@@ -257,10 +263,15 @@ label, select, .clickable {
   src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
 }
 
+label, select, .clickable {
+  cursor: pointer;
+}
+
 html, body { height: 100%; }
 body {
   margin: 0; 
-  font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+  font-family: var(--body-font-family);
+  color: var(--body-text-color);
 }
 
 // Needed for fullscreen

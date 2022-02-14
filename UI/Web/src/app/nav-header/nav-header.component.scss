@@ -1,4 +1,3 @@
-@use '../../theme/variables';
 
 $primary-color: white;
 $bg-color: rgb(22, 27, 34);
@@ -40,7 +39,7 @@ $bg-color: rgb(22, 27, 34);
 }
 
 .navbar-brand {
-    font-family: "Spartan", sans-serif;
+    font-family: var(--brand-font-family);
     font-weight: bold;
 
     .logo {
@@ -55,7 +54,7 @@ $bg-color: rgb(22, 27, 34);
 
 .focus-visible:focus {
     visibility: visible;
-    color: white;
+    color: $primary-color;
 }
 
 .ng-autocomplete {
@@ -76,18 +75,11 @@ $bg-color: rgb(22, 27, 34);
     width: 100%;
 }
 
-@media (min-width: variables.$grid-breakpoints-sm) {
+@media (min-width: var(--grid-breakpoints-sm)) {
     .form-inline .form-group {
         width: 100%;
     }
 }
-
-// we don't need this because we have fixed size that grows
-// @media (max-width: variables.$grid-breakpoints-sm) {
-//     .ng-autocomplete {
-//         width: 100%;
-//     }
-// }
 
 
 .scroll-to-top:hover {
