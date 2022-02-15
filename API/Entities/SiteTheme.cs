@@ -34,7 +34,4 @@ public class SiteTheme : IEntityDate
     public ThemeProvider Provider { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
-
-    // Relationship
-    //public ICollection<AppUserPreferences> Preferences { get; set; }
 }

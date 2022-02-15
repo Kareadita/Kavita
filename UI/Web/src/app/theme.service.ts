@@ -41,7 +41,6 @@ export class ThemeService implements OnDestroy {
     messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
       if (message.event === EVENTS.SiteThemeProgress) {
         if ((message.payload as SiteThemeProgressEvent).progress === 1) {
-          console.log('Repopulating theme cache');
           this.getThemes().subscribe(() => {});
         }
       }
@@ -49,10 +48,17 @@ export class ThemeService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.themesSource.complete();
-    this.currentThemeSource.complete();
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  getColorScheme() {
+    return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
+  }
+
+  isDarkTheme() {
+    console.log('color scheme: ', getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim().toLowerCase());
+    return this.getColorScheme().toLowerCase() === 'dark';
   }
 
   getThemes() {

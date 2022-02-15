@@ -155,7 +155,9 @@ public class SiteThemeServiceTests
 
         await siteThemeService.Scan();
 
-        Assert.Single((await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t => t.Name.ToLower().Equals("custom")));
+        var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
+            API.Parser.Parser.Normalize(t.Name).Equals(API.Parser.Parser.Normalize("custom")));
+        Assert.Single(customThemes);
     }
 
     [Fact]
@@ -173,7 +175,10 @@ public class SiteThemeServiceTests
         filesystem.RemoveFile($"{SiteThemeDirectory}custom.css");
         await siteThemeService.Scan();
 
-        Assert.Empty((await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t => t.Name.ToLower().Equals("custom")));
+        var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
+            API.Parser.Parser.Normalize(t.Name).Equals(API.Parser.Parser.Normalize("custom")));
+
+        Assert.Empty(customThemes);
     }
 
     [Fact]

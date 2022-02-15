@@ -1,4 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -21,9 +22,8 @@ export class ImageService implements OnDestroy {
   private onDestroy: Subject<void> = new Subject();
 
   constructor(private accountService: AccountService, private themeService: ThemeService) {
-    // TODO: Figure out how to handle dark mode here (or to allow customization of images)
-    this.themeService.currentTheme$.subscribe(res => {
-      if (res.name.toLowerCase() === 'dark') {
+    this.themeService.currentTheme$.pipe(takeUntil(this.onDestroy)).subscribe(theme => {
+      if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
       } else {

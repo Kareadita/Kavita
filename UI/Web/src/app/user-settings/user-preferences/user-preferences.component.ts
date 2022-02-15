@@ -166,14 +166,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
       theme: modelSettings.theme
-      //siteDarkMode: modelSettings.siteDarkMode
     };
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
-
-        //this.navService.setDarkMode(this.user.preferences.siteDarkMode);
       }
       this.resetForm();
     }));

@@ -79,7 +79,7 @@ namespace API.Controllers
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
             existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
-            existingPreferences.Theme = preferencesDto.Theme;
+            existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 
