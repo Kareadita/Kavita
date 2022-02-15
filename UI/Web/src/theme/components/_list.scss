@@ -14,6 +14,6 @@
   }
 
   &.no-hover:hover {
-    background-color: unset;
+    background-color: var(--list-group-item-bg-color);
   }
 }
