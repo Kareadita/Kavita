@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
+using API.Entities;
+using API.Entities.Enums.Theme;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.SignalR;
@@ -32,11 +35,35 @@ public class SiteThemeService : ISiteThemeService
         if (string.IsNullOrEmpty(themeFile) || !_directoryService.FileSystem.File.Exists(themeFile))
             throw new KavitaException("Theme file missing or invalid");
 
-        return await System.IO.File.ReadAllTextAsync(themeFile);
+        return await _directoryService.FileSystem.File.ReadAllTextAsync(themeFile);
     }
 
-    public Task Scan()
+    public async Task Scan()
     {
-        return Task.CompletedTask;
+        _directoryService.ExistOrCreate(_directoryService.SiteThemeDirectory);
+        var reservedNames = Seed.DefaultThemes.Select(t => t.Name.ToLower()).ToList();
+        var themeFiles = _directoryService.GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
+            .Where(name => !reservedNames.Contains(name.ToLower()));
+
+        var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes());
+        var allThemeNames = allThemes.Select(t => t.Name.ToLower()).ToList();
+        foreach (var themeFile in themeFiles)
+        {
+            if (allThemeNames.Contains(themeFile)) continue;
+            _unitOfWork.SiteThemeRepository.Add(new SiteTheme()
+            {
+                Name = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile),
+                FileName = themeFile,
+                Provider = ThemeProvider.User,
+                IsDefault = false
+            });
+        }
+
+        if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
+        {
+            // TODO: Emit an event that Scan has completed to theme cache can be updated
+            //_messageHub.
+        }
+
     }
 }
