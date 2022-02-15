@@ -12,4 +12,8 @@
     color: var(--list-group-hover-text-color);
     background-color: var(--list-group-hover-bg-color);
   }
+
+  &.no-hover:hover {
+    background-color: unset;
+  }
 }

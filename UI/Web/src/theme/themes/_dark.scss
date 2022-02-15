@@ -10,6 +10,7 @@
     // Navbar
     --navbar-bg-color: black;
     --navbar-text-color: white;
+    --navbar-fa-icon-color: white;
   
     // Inputs
     --input-bg-color: #343a40;
@@ -26,16 +27,30 @@
     --btn-alt-hover-bg-color: #3b4466;
     --btn-alt-focus-bg-color: #343c59;
     --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
+    --btn-fa-icon-color: white;
   
     // Nav
     --nav-tab-border-color: rgba(239, 239, 239, 0.125);
     --nav-tab-text-color: var(--body-text-color);
-    --nav-tab-bg-color: rgba(74, 198, 148, 0.9);
+    --nav-tab-bg-color: var(--bs-body-bg);
     --nav-tab-hover-border-color: #4ac694;
     --nav-tab-active-text-color: white;
+    --nav-link-bg-color: var(--primary-color-dark-shade);
+    --nav-link-active-text-color: white;
+    --nav-tab-hover-text-color: var(--body-text-color);
+    --nav-tab-hover-bg-color: var(--primary-color-dark-shade);
+    --nav-tab-border-top: var(--primary-color-dark-shade);
+    --nav-tab-border-left: var(--primary-color-dark-shade);
+    --nav-tab-border-bottom: var(--bs-body-bg);
+    --nav-tab-border-right: var(--primary-color-dark-shade);
+    --nav-tab-border-hover-top: var(--primary-color-dark-shade);
+    --nav-tab-border-hover-left: var(--primary-color-dark-shade);
+    --nav-tab-border-hover-bottom: var(--bs-body-bg);
+    --nav-tab-border-hover-right: var(--primary-color-dark-shade);
+  
   
     // Toasts
-    --toast-success-bg-color: rgba(74, 198, 148, 0.9);
+    --toast-success-bg-color: rgba(59, 158, 118, 0.9);
     --toast-error-bg-color: #BD362F;
     --toast-info-bg-color: #2F96B4;
     --toast-warning-bg-color: #F89406;
@@ -48,14 +63,14 @@
     // Tag Badge
     --tagbadge-border-color: rgba(239, 239, 239, 0.125);
     --tagbadge-text-color: var(--body-text-color);
-    --tagbadge-bg-color: var(--nav-tab-bg-color);
+    --tagbadge-bg-color: var(--nav-tab-hover-bg-color);
   
     // List items
     --list-group-item-text-color: var(--body-text-color); // rgba(74, 198, 148, 0.9)
     --list-group-item-bg-color: #343a40;
     --list-group-item-border-color: rgba(239, 239, 239, 0.125);
     --list-group-hover-text-color: white;
-    --list-group-hover-bg-color: #4ac694;
+    --list-group-hover-bg-color: var(--accordion-body-bg-color);
   
     // Popover
     --popover-body-bg-color: var(--navbar-bg-color);

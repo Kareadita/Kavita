@@ -51,3 +51,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
       box-shadow: 0 0 0 0.2rem var(--btn-alt-focus-boxshadow-color); 
     }
 }
+
+button i.fa {
+  color: var(--btn-fa-icon-color);
+}
