@@ -11,12 +11,13 @@ namespace API.Data.Repositories;
 
 public interface ISiteThemeRepository
 {
+    void Add(SiteTheme theme);
+    void Remove(SiteTheme theme);
     Task<IEnumerable<SiteThemeDto>> GetThemeDtos();
     Task<SiteThemeDto> GetThemeDto(int themeId);
     Task<SiteThemeDto> GetThemeDtoByName(string themeName);
     Task<SiteTheme> GetDefaultTheme();
     Task<IEnumerable<SiteTheme>> GetThemes();
-    void Add(SiteTheme theme);
 }
 
 public class SiteThemeRepository : ISiteThemeRepository
@@ -33,6 +34,11 @@ public class SiteThemeRepository : ISiteThemeRepository
     public void Add(SiteTheme theme)
     {
         _context.Add(theme);
+    }
+
+    public void Remove(SiteTheme theme)
+    {
+        _context.Remove(theme);
     }
 
     public async Task<IEnumerable<SiteThemeDto>> GetThemeDtos()

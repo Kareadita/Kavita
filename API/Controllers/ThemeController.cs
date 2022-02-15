@@ -5,6 +5,7 @@ using API.DTOs.Theme;
 using API.Services;
 using API.Services.Tasks;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -28,6 +29,7 @@ public class ThemeController : BaseApiController
         return Ok(await _unitOfWork.SiteThemeRepository.GetThemeDtos());
     }
 
+    [Authorize("RequireAdminRole")]
     [HttpPost("scan")]
     public ActionResult Scan()
     {

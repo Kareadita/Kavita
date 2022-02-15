@@ -54,70 +54,70 @@ public class SiteThemeServiceTests
 
     #region Setup
 
-        private static DbConnection CreateInMemoryDatabase()
+    private static DbConnection CreateInMemoryDatabase()
+    {
+        var connection = new SqliteConnection("Filename=:memory:");
+
+        connection.Open();
+
+        return connection;
+    }
+
+    private async Task<bool> SeedDb()
+    {
+        await _context.Database.MigrateAsync();
+        var filesystem = CreateFileSystem();
+
+        await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
+
+        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
+        setting.Value = CacheDirectory;
+
+        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
+        setting.Value = BackupDirectory;
+
+        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
+        setting.Value = BookmarkDirectory;
+
+        _context.ServerSetting.Update(setting);
+
+        _context.AppUser.Add(new AppUser()
         {
-            var connection = new SqliteConnection("Filename=:memory:");
-
-            connection.Open();
-
-            return connection;
-        }
-
-        private async Task<bool> SeedDb()
-        {
-            await _context.Database.MigrateAsync();
-            var filesystem = CreateFileSystem();
-
-            await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-            var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-            setting.Value = CacheDirectory;
-
-            setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-            setting.Value = BackupDirectory;
-
-            setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
-            setting.Value = BookmarkDirectory;
-
-            _context.ServerSetting.Update(setting);
-
-            _context.AppUser.Add(new AppUser()
+            UserName = "Joe",
+            UserPreferences = new AppUserPreferences
             {
-                UserName = "Joe",
-                UserPreferences = new AppUserPreferences
-                {
-                    Theme = Seed.DefaultThemes[1]
-                }
-            });
+                Theme = Seed.DefaultThemes[1]
+            }
+        });
 
-            _context.Library.Add(new Library()
-            {
-                Name = "Manga",
-                Folders = new List<FolderPath>()
-                {
-                    new FolderPath()
-                    {
-                        Path = "C:/data/"
-                    }
-                }
-            });
-            return await _context.SaveChangesAsync() > 0;
-        }
-
-        private static MockFileSystem CreateFileSystem()
+        _context.Library.Add(new Library()
         {
-            var fileSystem = new MockFileSystem();
-            fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-            fileSystem.AddDirectory("C:/kavita/config/");
-            fileSystem.AddDirectory(CacheDirectory);
-            fileSystem.AddDirectory(CoverImageDirectory);
-            fileSystem.AddDirectory(BackupDirectory);
-            fileSystem.AddDirectory(BookmarkDirectory);
-            fileSystem.AddDirectory(SiteThemeDirectory);
-            fileSystem.AddDirectory("C:/data/");
+            Name = "Manga",
+            Folders = new List<FolderPath>()
+            {
+                new FolderPath()
+                {
+                    Path = "C:/data/"
+                }
+            }
+        });
+        return await _context.SaveChangesAsync() > 0;
+    }
 
-            return fileSystem;
-        }
+    private static MockFileSystem CreateFileSystem()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
+        fileSystem.AddDirectory("C:/kavita/config/");
+        fileSystem.AddDirectory(CacheDirectory);
+        fileSystem.AddDirectory(CoverImageDirectory);
+        fileSystem.AddDirectory(BackupDirectory);
+        fileSystem.AddDirectory(BookmarkDirectory);
+        fileSystem.AddDirectory(SiteThemeDirectory);
+        fileSystem.AddDirectory("C:/data/");
+
+        return fileSystem;
+    }
 
     #endregion
 
@@ -147,6 +147,23 @@ public class SiteThemeServiceTests
         await siteThemeService.Scan();
 
         Assert.Single((await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t => t.Name.ToLower().Equals("custom")));
+    }
+
+    [Fact]
+    public async Task Scan_ShouldDeleteWhenFileDoesntExistOnSecondScan()
+    {
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        await siteThemeService.Scan();
+
+        Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
+
+        filesystem.RemoveFile($"{SiteThemeDirectory}custom.css");
+        await siteThemeService.Scan();
+
+        Assert.Empty((await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t => t.Name.ToLower().Equals("custom")));
     }
 
     [Fact]

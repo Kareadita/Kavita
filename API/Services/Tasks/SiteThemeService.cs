@@ -45,7 +45,22 @@ public class SiteThemeService : ISiteThemeService
         var themeFiles = _directoryService.GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
             .Where(name => !reservedNames.Contains(name.ToLower()));
 
-        var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes());
+        var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
+
+        // First remove any files from allThemes that are User Defined and not on disk
+        var userThemes = allThemes.Where(t => t.Provider == ThemeProvider.User).ToList();
+        foreach (var userTheme in userThemes)
+        {
+            var filepath = Parser.Parser.NormalizePath(
+                _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, userTheme.FileName));
+            if (!_directoryService.FileSystem.File.Exists(filepath))
+            {
+                allThemes.Remove(userTheme);
+                _unitOfWork.SiteThemeRepository.Remove(userTheme);
+            }
+        }
+
+        // Add new custom themes
         var allThemeNames = allThemes.Select(t => t.Name.ToLower()).ToList();
         foreach (var themeFile in themeFiles)
         {
@@ -58,7 +73,7 @@ public class SiteThemeService : ISiteThemeService
                 IsDefault = false
             });
         }
-        // TODO: Need to be able delete old entries
+
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
