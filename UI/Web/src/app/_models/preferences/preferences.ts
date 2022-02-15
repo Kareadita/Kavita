@@ -23,7 +23,6 @@ export interface Preferences {
     bookReaderReadingDirection: ReadingDirection;
 
     // Global
-    // siteDarkMode: boolean; // Deprecated
     theme: SiteTheme;
 }
 

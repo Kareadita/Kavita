@@ -22,7 +22,7 @@ namespace API.Data
         /// </summary>
         public static IList<ServerSetting> DefaultSettings;
 
-        public static IList<SiteTheme> DefaultThemes = new List<SiteTheme>()
+        public static readonly IList<SiteTheme> DefaultThemes = new List<SiteTheme>()
         {
             new SiteTheme()
             {

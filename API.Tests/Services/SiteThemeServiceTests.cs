@@ -134,6 +134,22 @@ public class SiteThemeServiceTests
     }
 
     [Fact]
+    public async Task Scan_ShouldOnlyInsertOnceOnSecondScan()
+    {
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        await siteThemeService.Scan();
+
+        Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
+
+        await siteThemeService.Scan();
+
+        Assert.Single((await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t => t.Name.ToLower().Equals("custom")));
+    }
+
+    [Fact]
     public async Task GetContent_ShouldReturnContent()
     {
         var filesystem = CreateFileSystem();

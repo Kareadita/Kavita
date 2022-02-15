@@ -58,6 +58,7 @@ public class SiteThemeService : ISiteThemeService
                 IsDefault = false
             });
         }
+        // TODO: Need to be able delete old entries
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {

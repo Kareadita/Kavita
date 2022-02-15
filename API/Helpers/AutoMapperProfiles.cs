@@ -120,9 +120,13 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
 
+            CreateMap<AppUser, UserDto>();
+            CreateMap<SiteTheme, SiteThemeDto>();
+            CreateMap<AppUserPreferences, UserPreferencesDto>()
+                .ForMember(dest => dest.Theme,
+                    opt =>
+                        opt.MapFrom(src => src.Theme));
 
-
-            CreateMap<AppUserPreferences, UserPreferencesDto>();
 
             CreateMap<AppUserBookmark, BookmarkDto>();
 
@@ -146,7 +150,6 @@ namespace API.Helpers
 
             CreateMap<RegisterDto, AppUser>();
 
-            CreateMap<SiteTheme, SiteThemeDto>();
 
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()

@@ -192,15 +192,20 @@ namespace API.Controllers
 
             _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
-            return new UserDto
-            {
-                Username = user.UserName,
-                Email = user.Email,
-                Token = await _tokenService.CreateToken(user),
-                RefreshToken = await _tokenService.CreateRefreshToken(user),
-                ApiKey = user.ApiKey,
-                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
-            };
+            var dto = _mapper.Map<UserDto>(user);
+            dto.Token = await _tokenService.CreateToken(user);
+            dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+            return dto;
+
+            // return new UserDto
+            // {
+            //     Username = user.UserName,
+            //     Email = user.Email,
+            //     Token = await _tokenService.CreateToken(user),
+            //     RefreshToken = await _tokenService.CreateRefreshToken(user),
+            //     ApiKey = user.ApiKey,
+            //     Preferences = _mapper.Map<UserPreferencesDto>(await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName))
+            // };
         }
 
         [HttpPost("refresh-token")]

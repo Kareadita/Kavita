@@ -18,7 +18,9 @@
                 <div class="card-body">
                   <h5 class="card-title">{{theme.name}}</h5>
                   <h6 class="card-subtitle mb-2 text-muted">{{theme.provider === ThemeProvider.System ? 'System' : 'User'}}</h6>
-                  <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                  <p class="card-text">
+                    <i class="far fa-file-code" style="font-size: 24px" aria-hidden="true"></i>
+                  </p>
                   <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" *ngIf="isAdmin">Set Default</button>
                   <button class="btn btn-primary" (click)="applyTheme(theme)" [disabled]="currentTheme?.id === theme.id">{{currentTheme?.id === theme.id ? 'Applied' : 'Apply'}}</button>
                 </div>

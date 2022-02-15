@@ -244,7 +244,8 @@ public class UserRepository : IUserRepository
 
     public async Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId)
     {
-        return await _context.AppUserRating.Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
+        return await _context.AppUserRating
+            .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();
     }
 
@@ -252,6 +253,8 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserPreferences
             .Include(p => p.AppUser)
+            .Include(p => p.Theme)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(p => p.AppUser.UserName == username);
     }
 
