@@ -5,6 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { map, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from './shared/confirm.service';
+import { SiteThemeProgressEvent } from './_models/events/site-theme-progress-event';
 import { SiteTheme, ThemeProvider } from './_models/preferences/site-theme';
 import { EVENTS, MessageHubService } from './_services/message-hub.service';
 
@@ -19,6 +20,9 @@ export class ThemeService implements OnDestroy {
 
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
+
+  private themesSource = new ReplaySubject<SiteTheme[]>(1);
+  public themes$ = this.themesSource.asObservable();
 
   /**
    * Maintain a cache of themes. SignalR will inform us if we need to refresh cache
@@ -35,13 +39,18 @@ export class ThemeService implements OnDestroy {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
-      // if (message.event === EVENTS.ThemeUpdate) {
-      //   // TODO
-      // }
+      if (message.event === EVENTS.SiteThemeProgress) {
+        if ((message.payload as SiteThemeProgressEvent).progress === 1) {
+          console.log('Repopulating theme cache');
+          this.getThemes().subscribe(() => {});
+        }
+      }
     });
   }
 
   ngOnDestroy(): void {
+    this.themesSource.complete();
+    this.currentThemeSource.complete();
     this.onDestroy.next();
     this.onDestroy.complete();
   }
@@ -49,7 +58,15 @@ export class ThemeService implements OnDestroy {
   getThemes() {
     return this.httpClient.get<SiteTheme[]>(this.baseUrl + 'theme').pipe(map(themes => {
       this.themeCache = themes;
+      this.themesSource.next(themes);
       return themes;
+    }));
+  }
+
+  setDefault(themeId: number) {
+    return this.httpClient.post(this.baseUrl + 'theme/update-default', {themeId: themeId}).pipe(map(() => {
+      // Refresh the cache when a default state is changed
+      this.getThemes().subscribe(() => {});
     }));
   }
 

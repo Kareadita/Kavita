@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220215135926_DropDarkMode")]
-    partial class DropDarkMode
+    [Migration("20220215163317_SiteTheme")]
+    partial class SiteTheme
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -697,13 +697,22 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Provider")

@@ -19,8 +19,9 @@ interface ProcessedEvent {
 
 type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress | EVENTS.BackupDatabaseProgress | EVENTS.CleanupProgress;
 
-const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress];
+const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress, EVENTS.SiteThemeProgress];
 
+// TODO: Rename this to events widget
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './nav-events-toggle.component.html',

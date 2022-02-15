@@ -130,6 +130,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanSiteThemes()
     {
+        _logger.LogInformation("Starting Site Theme scan");
         BackgroundJob.Enqueue(() => _siteThemeService.Scan());
     }
 

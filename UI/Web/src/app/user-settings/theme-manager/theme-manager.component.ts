@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { ServerSettings } from 'src/app/admin/_models/server-settings';
@@ -15,7 +16,7 @@ import { AccountService } from 'src/app/_services/account.service';
 })
 export class ThemeManagerComponent implements OnInit, OnDestroy {
 
-  themes: Array<SiteTheme> = [];
+  //themes: Array<SiteTheme> = [];
   currentTheme!: SiteTheme;
   isAdmin: boolean = false;
   user: User | undefined;
@@ -26,12 +27,16 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
     return ThemeProvider;
   }
 
-  constructor(public themeService: ThemeService, private accountService: AccountService, private settingsService: SettingsService) {
+  constructor(public themeService: ThemeService, private accountService: AccountService, private toastr: ToastrService) {
     themeService.currentTheme$.pipe(takeUntil(this.onDestroy), distinctUntilChanged()).subscribe(theme => {
       if (theme) {
         this.currentTheme = theme;
       }
     });
+
+    // themeService.themes$.pipe(takeUntil(this.onDestroy), distinctUntilChanged()).subscribe(themes => {
+    //   this.themes = themes;
+    // });
 
     accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -42,9 +47,9 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.themeService.getThemes().subscribe(themes => {
-      this.themes = themes;
-    });
+    // this.themeService.getThemes().subscribe(themes => {
+    //   this.themes = themes;
+    // });
   }
 
   ngOnDestroy(): void {
@@ -65,6 +70,20 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
       });
     }
     
+  }
+
+  updateDefault(theme: SiteTheme) {
+    this.themeService.setDefault(theme.id).subscribe(() => {
+      this.toastr.success('Site default has been updated to ' + theme.name);
+      //this.themes.forEach(t => t.isDefault = false); // TODO: Request new themes
+      //theme.isDefault = true;
+    });
+  }
+
+  scan() {
+    this.themeService.scan().subscribe(() => {
+      this.toastr.info('A site theme scan has been queued');
+    });
   }
 
 }

@@ -1,27 +1,23 @@
-<!-- <p>
-    You can manage the site themes here. A site theme is a custom look and feel for Kavita. Kavita supports 3 out of the box, while the instance can support a number of custom developed themes.
-</p> -->
-
 <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-8"><h3>Theme Manager</h3></div>
         <div class="col-4" *ngIf="isAdmin">
-            <button class="btn btn-primary float-end" (click)="themeService.scan()">
+            <button class="btn btn-primary float-end" (click)="scan()">
                 <i class="fa fa-refresh" aria-hidden="true"></i>&ngsp; Scan
             </button>
         </div>
     </div>
 
     <div class="row g-0">
-        <ng-container *ngFor="let theme of themes">
+        <ng-container *ngFor="let theme of (themeService.themes$ | async)">
             <div class="card col-auto me-3" style="width: 18rem;">
                 <div class="card-body">
-                  <h5 class="card-title">{{theme.name}}</h5>
+                  <h5 class="card-title">{{theme.name | sentenceCase}}</h5>
                   <h6 class="card-subtitle mb-2 text-muted">{{theme.provider === ThemeProvider.System ? 'System' : 'User'}}</h6>
-                  <p class="card-text">
+                  <!-- <p class="card-text">
                     <i class="far fa-file-code" style="font-size: 24px" aria-hidden="true"></i>
-                  </p>
-                  <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" *ngIf="isAdmin">Set Default</button>
+                  </p> -->
+                  <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" *ngIf="isAdmin" (click)="updateDefault(theme)">Set Default</button>
                   <button class="btn btn-primary" (click)="applyTheme(theme)" [disabled]="currentTheme?.id === theme.id">{{currentTheme?.id === theme.id ? 'Applied' : 'Apply'}}</button>
                 </div>
               </div>

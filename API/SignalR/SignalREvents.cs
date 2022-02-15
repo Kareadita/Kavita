@@ -54,5 +54,10 @@
         /// A cover was updated
         /// </summary>
         public const string CoverUpdate = "CoverUpdate";
+        /// <summary>
+        /// A custom site theme was removed or added
+        /// </summary>
+        public const string SiteThemeProgress = "SiteThemeProgress";
+
     }
 }

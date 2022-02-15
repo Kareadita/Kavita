@@ -13,11 +13,13 @@ public interface ISiteThemeRepository
 {
     void Add(SiteTheme theme);
     void Remove(SiteTheme theme);
+    void Update(SiteTheme siteTheme);
     Task<IEnumerable<SiteThemeDto>> GetThemeDtos();
     Task<SiteThemeDto> GetThemeDto(int themeId);
     Task<SiteThemeDto> GetThemeDtoByName(string themeName);
     Task<SiteTheme> GetDefaultTheme();
     Task<IEnumerable<SiteTheme>> GetThemes();
+
 }
 
 public class SiteThemeRepository : ISiteThemeRepository
@@ -39,6 +41,11 @@ public class SiteThemeRepository : ISiteThemeRepository
     public void Remove(SiteTheme theme)
     {
         _context.Remove(theme);
+    }
+
+    public void Update(SiteTheme siteTheme)
+    {
+        _context.Entry(siteTheme).State = EntityState.Modified;
     }
 
     public async Task<IEnumerable<SiteThemeDto>> GetThemeDtos()

@@ -55,6 +55,7 @@ public interface IUserRepository
     Task<AppUser> GetUserByEmailAsync(string email);
     Task<IEnumerable<AppUser>> GetAllUsers();
 
+    Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
 }
 
 public class UserRepository : IUserRepository
@@ -225,6 +226,15 @@ public class UserRepository : IUserRepository
     public async Task<IEnumerable<AppUser>> GetAllUsers()
     {
         return await _context.AppUser.ToListAsync();
+    }
+
+    public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId)
+    {
+        return await _context.AppUserPreferences
+            .Include(p => p.Theme)
+            .Where(p => p.Theme.Id == themeId)
+            .AsSplitQuery()
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

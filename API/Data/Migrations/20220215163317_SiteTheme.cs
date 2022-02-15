@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -8,6 +9,10 @@ namespace API.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "SiteDarkMode",
+                table: "AppUserPreferences");
+
             migrationBuilder.AddColumn<int>(
                 name: "ThemeId",
                 table: "AppUserPreferences",
@@ -21,9 +26,12 @@ namespace API.Data.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
+                    NormalizedName = table.Column<string>(type: "TEXT", nullable: true),
                     FileName = table.Column<string>(type: "TEXT", nullable: true),
                     IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Provider = table.Column<int>(type: "INTEGER", nullable: false)
+                    Provider = table.Column<int>(type: "INTEGER", nullable: false),
+                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    LastModified = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -59,6 +67,13 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "ThemeId",
                 table: "AppUserPreferences");
+
+            migrationBuilder.AddColumn<bool>(
+                name: "SiteDarkMode",
+                table: "AppUserPreferences",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
         }
     }
 }

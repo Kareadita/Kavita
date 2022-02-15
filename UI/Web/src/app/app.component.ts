@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
   constructor(private accountService: AccountService, public navService: NavService, 
     private messageHub: MessageHubService, private libraryService: LibraryService, 
     router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig, 
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
+    @Inject(DOCUMENT) private document: Document) {
 
     // Setup default rating config
     ratingConfig.max = 5;
@@ -57,13 +57,8 @@ export class AppComponent implements OnInit {
     this.accountService.setCurrentUser(user);
 
     if (user) {
-      //this.navService.setDarkMode(user.preferences.siteDarkMode);
-      this.themeService.setTheme(user.preferences.theme.name);
       this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
       this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
-    } else {
-      //this.navService.setDarkMode(true);
-      this.themeService.setTheme(this.themeService.defaultTheme);
     }
   }
 

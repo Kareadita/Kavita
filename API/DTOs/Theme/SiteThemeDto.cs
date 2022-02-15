@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums.Theme;
+﻿using System;
+using API.Entities.Enums.Theme;
 using API.Services;
 
 namespace API.DTOs.Theme;
@@ -23,5 +24,7 @@ public class SiteThemeDto
     /// Where did the theme come from
     /// </summary>
     public ThemeProvider Provider { get; set; }
+    public DateTime Created { get; set; }
+    public DateTime LastModified { get; set; }
     public string Selector => "bg-" + Name.ToLower();
 }

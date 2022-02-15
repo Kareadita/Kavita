@@ -27,23 +27,26 @@ namespace API.Data
             new SiteTheme()
             {
                 Name = "Dark",
+                NormalizedName = Parser.Parser.Normalize("Dark"),
                 Provider = ThemeProvider.System,
                 FileName = "dark.css",
-                IsDefault = true
+                IsDefault = true,
             },
             new SiteTheme()
             {
                 Name = "Light",
+                NormalizedName = Parser.Parser.Normalize("Light"),
                 Provider = ThemeProvider.System,
                 FileName = "light.css",
-                IsDefault = false
+                IsDefault = false,
             },
             new SiteTheme()
             {
                 Name = "E-Ink",
+                NormalizedName = Parser.Parser.Normalize("E-Ink"),
                 Provider = ThemeProvider.System,
                 FileName = "e-ink.css",
-                IsDefault = false
+                IsDefault = false,
             },
         };
 
