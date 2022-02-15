@@ -87,7 +87,7 @@
   
     // Dropdown
     --dropdown-item-hover-text-color: white;
-    --dropdown-item-hover-bg-color: var(--primary-color);
+    --dropdown-item-hover-bg-color: var(--primary-color-dark-shade);
     --dropdown-item-text-color: var(--navbar-text-color);
     --dropdown-item-bg-color: var(--navbar-bg-color);
     --dropdown-overlay-color: rgba(0,0,0,0.5);
@@ -127,7 +127,7 @@
     --card-text-color: var(--body-text-color);
     --card-border-color: rgba(239, 239, 239, 0.125);
     --card-progress-bar-color: var(--primary-color);
-    --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.4);
+    --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
   
     // Slider
     --slider-text-color: white;
