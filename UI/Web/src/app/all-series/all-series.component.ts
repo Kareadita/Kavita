@@ -1,16 +1,16 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { take, debounceTime, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
-import { KEY_CODES } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { SeriesFilter } from '../_models/series-filter';
+import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { ActionItem, Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { MessageHubService } from '../_services/message-hub.service';
@@ -70,14 +70,15 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router, private seriesService: SeriesService, 
     private titleService: Title, private actionService: ActionService, 
-    public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService) {
+    public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
+    private utilityService: UtilityService, private route: ActivatedRoute) {
     
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     this.titleService.setTitle('Kavita - All Series');
     this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-    
-    this.loadPage();
+
+    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
   }
 
   ngOnInit(): void {
@@ -105,9 +106,9 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFilter(data: SeriesFilter) {
-    this.filter = data;
-    if (this.pagination !== undefined && this.pagination !== null) {
+  updateFilter(data: FilterEvent) {
+    this.filter = data.filter;
+    if (this.pagination !== undefined && this.pagination !== null && !data.isFirst) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {
@@ -116,11 +117,10 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-    const page = this.getPage();
-    if (page != null) {
-      this.pagination.currentPage = parseInt(page, 10);
+    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
+    if (this.filter == undefined) {
+      this.filter = this.seriesService.createSeriesFilter();
     }
-    this.loadingSeries = true;
 
     this.seriesService.getAllSeries(this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;

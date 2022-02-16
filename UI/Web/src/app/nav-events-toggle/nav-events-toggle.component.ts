@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { User } from '../_models/user';
+import { AccountService } from '../_services/account.service';
 import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService, SignalRMessage } from '../_services/message-hub.service';
 
@@ -18,9 +19,11 @@ interface ProcessedEvent {
 
 type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress | EVENTS.BackupDatabaseProgress | EVENTS.CleanupProgress;
 
-const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, 
-  EVENTS.CleanupProgress, EVENTS.DownloadProgress];
+const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress,
+  EVENTS.CleanupProgress, EVENTS.DownloadProgress, EVENTS.SiteThemeProgress];
+//const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress, EVENTS.SiteThemeProgress];
 
+// TODO: Rename this to events widget
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './nav-events-toggle.component.html',
@@ -29,6 +32,7 @@ const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgre
 export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   @Input() user!: User;
+  isAdmin: boolean = false;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -49,8 +53,8 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     return Object.values(this.updates);
   }
 
-  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal) { }
-  
+  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal, private accountService: AccountService) { }
+
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
@@ -69,6 +73,13 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         // TODO: Show an error handle
       } else if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
+      }
+    });
+    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+      if (user) {
+        this.isAdmin = this.accountService.hasAdminRole(user);
+      } else {
+        this.isAdmin = false;
       }
     });
   }
@@ -107,7 +118,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     //     data.push(newEvent);
     //   }
 
-      
+
     //   this.progressEventsSource.next(data);
     // });
   }
@@ -115,8 +126,6 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   processProgressEvent(event: Message<ProgressEvent>, eventType: string) {
     const scanEvent = event.payload as ProgressEvent;
-    console.log(event.event, event.payload);
-
 
     this.libraryService.getLibraryNames().subscribe(names => {
       const data = this.progressEventsSource.getValue();
@@ -131,7 +140,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         data.push(newEvent);
       }
 
-      
+
       this.progressEventsSource.next(data);
     });
   }
@@ -155,7 +164,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   prettyPrintEvent(eventType: string, event: any) {
     switch(eventType) {
       case (EVENTS.ScanLibraryProgress): return 'Scanning ';
-      case (EVENTS.RefreshMetadataProgress): return 'Refreshing ';
+      case (EVENTS.RefreshMetadataProgress): return 'Refreshing Covers for ';
       case (EVENTS.CleanupProgress): return 'Clearing Cache';
       case (EVENTS.BackupDatabaseProgress): return 'Backing up Database';
       case (EVENTS.DownloadProgress): return event.rawBody.userName.charAt(0).toUpperCase() + event.rawBody.userName.substr(1) + ' is downloading ' + event.rawBody.downloadName;

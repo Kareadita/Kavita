@@ -11,6 +11,7 @@ import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
+import { ThemeTestComponent } from './theme-test/theme-test.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -65,8 +66,13 @@ const routes: Routes = [
 
     ]
   },
-  {path: 'login', component: UserLoginComponent},
+  {
+    path: 'registration',
+    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
+  },
+  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
   {path: 'no-connection', component: NotConnectedComponent},
+  {path: 'theme', component: ThemeTestComponent},
   {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];
 

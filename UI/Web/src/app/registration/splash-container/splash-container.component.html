@@ -1,0 +1,20 @@
+<div class="mx-auto login">
+    
+    <div class="row row-cols-4 row-cols-md-4 row-cols-sm-2 row-cols-xs-2">
+        <div class="col align-self-center card p-3">
+            <span>
+                <div class="logo-container">
+                    <h3 class="card-title text-center">
+                        <ng-content select="[title]"></ng-content>
+                    </h3>
+                </div>
+            </span>
+
+            <div class="card-text">
+                <ng-content select="[body]"></ng-content>
+            </div>
+        </div>
+
+    </div>
+
+</div>

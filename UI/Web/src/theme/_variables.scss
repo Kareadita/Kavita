@@ -1,0 +1,20 @@
+//Bootstrap Variables
+// NOTE: It currently isn't possible to swap out all bootstrap styles because of the scss generators. So we have some hardcoded stuff. (v5 has more css variables on the way to address this)
+
+$theme-colors: (
+  "primary": #4ac694,
+  "danger": #BD362F,
+  "secondary": #6c757d,
+  "light": #f8f9fa
+);
+
+$form-select-indicator-color:#cecece;
+
+$grid-breakpoints-xs: 0;
+$grid-breakpoints-sm: 576px;
+$grid-breakpoints-md: 768px;
+$grid-breakpoints-lg: 992px;
+$grid-breakpoints-xl: 1200px;
+
+$grid-breakpoints: (xs: $grid-breakpoints-xs, sm: $grid-breakpoints-sm, md: $grid-breakpoints-md, lg: $grid-breakpoints-lg, xl: $grid-breakpoints-xl);
+

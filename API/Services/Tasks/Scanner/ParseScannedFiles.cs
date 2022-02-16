@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Parser;
 using API.SignalR;
 using Microsoft.AspNetCore.SignalR;
@@ -45,23 +46,28 @@ namespace API.Services.Tasks.Scanner
             _logger = logger;
             _directoryService = directoryService;
             _readingItemService = readingItemService;
-            _eventHub = eventHub;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
             _defaultParser = new DefaultParser(_directoryService);
         }
 
         /// <summary>
-        /// Gets the list of parserInfos given a Series. If the series does not exist within, return empty list.
+        /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
         /// </summary>
         /// <param name="parsedSeries"></param>
         /// <param name="series"></param>
         /// <returns></returns>
         public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
         {
-            var existingKey = parsedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == series.Format && ps.NormalizedName.Equals(Parser.Parser.Normalize(series.OriginalName)));
+            var allKeys = parsedSeries.Keys.Where(ps =>
+                SeriesHelper.FindSeries(series, ps));
 
-            return existingKey != null ? parsedSeries[existingKey] : new List<ParserInfo>();
+            var infos = new List<ParserInfo>();
+            foreach (var key in allKeys)
+            {
+                infos.AddRange(parsedSeries[key]);
+            }
+
+            return infos;
         }
 
         /// <summary>
@@ -152,7 +158,7 @@ namespace API.Services.Tasks.Scanner
         /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
         /// </summary>
         /// <param name="info"></param>
-        /// <returns></returns>
+        /// <returns>Series Name to group this info into</returns>
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);

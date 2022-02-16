@@ -1,5 +1,4 @@
 using System.Linq;
-using API.Entities.Enums;
 using Xunit;
 using static API.Parser.Parser;
 
@@ -134,11 +133,26 @@ namespace API.Tests.Parser
         }
 
         [Theory]
+        [InlineData("12-14", 14)]
+        [InlineData("24", 24)]
+        [InlineData("18-04", 18)]
+        [InlineData("18-04.5", 18)]
+        [InlineData("40", 40)]
+        [InlineData("40a-040b", 0)]
+        [InlineData("40.1_a", 0)]
+        public void MaximumNumberFromRangeTest(string input, float expected)
+        {
+            Assert.Equal(expected, MaximumNumberFromRange(input));
+        }
+
+        [Theory]
         [InlineData("Darker Than Black", "darkerthanblack")]
         [InlineData("Darker Than Black - Something", "darkerthanblacksomething")]
         [InlineData("Darker Than_Black", "darkerthanblack")]
         [InlineData("Citrus", "citrus")]
         [InlineData("Citrus+", "citrus+")]
+        [InlineData("Again!!!!", "again")]
+        [InlineData("카비타", "카비타")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
@@ -152,7 +166,7 @@ namespace API.Tests.Parser
         [InlineData("test.jpeg", true)]
         [InlineData("test.png", true)]
         [InlineData(".test.jpg", false)]
-        [InlineData("!test.jpg", false)]
+        [InlineData("!test.jpg", true)]
         [InlineData("test.webp", true)]
         public void IsImageTest(string filename, bool expected)
         {
@@ -187,6 +201,18 @@ namespace API.Tests.Parser
         public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
+        }
+
+        [Theory]
+        [InlineData("/manga/1/1/1", "/manga/1/1/1")]
+        [InlineData("/manga/1/1/1.jpg", "/manga/1/1/1.jpg")]
+        [InlineData(@"/manga/1/1\1.jpg", @"/manga/1/1/1.jpg")]
+        [InlineData("/manga/1/1//1", "/manga/1/1//1")]
+        [InlineData("/manga/1\\1\\1", "/manga/1/1/1")]
+        [InlineData("C:/manga/1\\1\\1.jpg", "C:/manga/1/1/1.jpg")]
+        public void NormalizePathTest(string inputPath, string expected)
+        {
+            Assert.Equal(expected, NormalizePath(inputPath));
         }
     }
 }

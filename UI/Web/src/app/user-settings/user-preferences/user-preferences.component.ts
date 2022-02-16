@@ -28,7 +28,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
   isAdmin: boolean = false;
-  isAuthenticationEnabled: boolean = true;
+  hasChangePasswordRole: boolean = false;
 
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
@@ -57,6 +57,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'Bookmarks', fragment: 'bookmarks'},
     {title: 'Password', fragment: 'password'},
     {title: '3rd Party Clients', fragment: 'clients'},
+    {title: 'Theme', fragment: 'theme'},
   ];
   active = this.tabs[0];
   opdsEnabled: boolean = false;
@@ -78,17 +79,15 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
     });
-    this.settingsService.getAuthenticationEnabled().subscribe(res => {
-      this.isAuthenticationEnabled = res;
-    });
   }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - User Preferences');
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
+    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
       if (user) {
         this.user = user;
         this.isAdmin = this.accountService.hasAdminRole(user);
+        this.hasChangePasswordRole = this.accountService.hasChangePasswordRole(user);
 
         if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
           this.user.preferences.bookReaderFontFamily = 'default';
@@ -105,9 +104,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []));
         this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
         this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
-        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.siteDarkMode, []));
+        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.bookReaderTapToPaginate, []));
 
-        this.settingsForm.addControl('siteDarkMode', new FormControl(!!user.preferences.siteDarkMode, []));
+        this.settingsForm.addControl('theme', new FormControl(user.preferences.theme, []));
       }
     });
 
@@ -141,7 +140,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
-    this.settingsForm.get('siteDarkMode')?.setValue(this.user.preferences.siteDarkMode);
+    this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
   }
 
   resetPasswordForm() {
@@ -166,14 +165,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
-      siteDarkMode: modelSettings.siteDarkMode
+      theme: modelSettings.theme
     };
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
-
-        this.navService.setDarkMode(this.user.preferences.siteDarkMode);
       }
       this.resetForm();
     }));

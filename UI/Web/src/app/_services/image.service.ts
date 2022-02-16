@@ -1,7 +1,10 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { ThemeService } from '../theme.service';
+import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { AccountService } from './account.service';
 import { NavService } from './nav.service';
 
@@ -18,9 +21,9 @@ export class ImageService implements OnDestroy {
 
   private onDestroy: Subject<void> = new Subject();
 
-  constructor(private navSerivce: NavService, private accountService: AccountService) {
-    this.navSerivce.darkMode$.subscribe(res => {
-      if (res) {
+  constructor(private accountService: AccountService, private themeService: ThemeService) {
+    this.themeService.currentTheme$.pipe(takeUntil(this.onDestroy)).subscribe(theme => {
+      if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
       } else {
@@ -39,6 +42,25 @@ export class ImageService implements OnDestroy {
   ngOnDestroy(): void {
       this.onDestroy.next();
       this.onDestroy.complete();
+  }
+
+  getRecentlyAddedItem(item: RecentlyAddedItem) {
+    if (item.chapterId === 0) {
+      return this.getVolumeCoverImage(item.volumeId);
+    }
+    return this.getChapterCoverImage(item.chapterId);
+  }
+
+  /**
+   * Returns the entity type from a cover image url. Undefied if not applicable
+   * @param url 
+   * @returns 
+   */
+  getEntityTypeFromUrl(url: string) {
+    if (url.indexOf('?') < 0) return undefined;
+    const part = url.split('?')[1];
+    const equalIndex = part.indexOf('=');
+    return part.substring(0, equalIndex).replace('Id', '');
   }
 
   getVolumeCoverImage(volumeId: number) {
@@ -71,7 +93,7 @@ export class ImageService implements OnDestroy {
    * @returns Url with a random parameter attached
    */
   randomize(url: string) {
-    const r = Math.random() * 100 + 1;
+    const r = Math.round(Math.random() * 100 + 1);
     if (url.indexOf('&random') >= 0) {
       return url + 1;
     }

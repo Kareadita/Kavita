@@ -17,7 +17,6 @@ using API.Parser;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -44,7 +43,6 @@ public class ScannerService : IScannerService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly ICacheHelper _cacheHelper;
-    private readonly NaturalSortComparer _naturalSort = new ();
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
@@ -76,6 +74,7 @@ public class ScannerService : IScannerService
 
         if (!await CheckMounts(library.Folders.Select(f => f.Path).ToList()))
         {
+            _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
 
@@ -146,6 +145,7 @@ public class ScannerService : IScannerService
         // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
         if (parsedSeries.Count == 0) return;
 
+        // Merge any series together that might have different ParsedSeries but belong to another group of ParsedSeries
         try
         {
             await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
@@ -170,7 +170,7 @@ public class ScannerService : IScannerService
     {
         var keys = parsedSeries.Keys;
         foreach (var key in keys.Where(key =>
-                     !series.NameInParserInfo(parsedSeries[key].FirstOrDefault()) || series.Format != key.Format))
+                      series.Format != key.Format || !SeriesHelper.FindSeries(series, key)))
         {
             parsedSeries.Remove(key);
         }
@@ -283,6 +283,21 @@ public class ScannerService : IScannerService
 
         if (!await CheckMounts(library.Folders.Select(f => f.Path).ToList()))
         {
+            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
+                MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+            return;
+        }
+
+        // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
+        if (library.Folders.Any(f => _directoryService.IsDirectoryEmpty(f.Path)))
+        {
+            _logger.LogCritical("Some of the root folders for the library are empty. " +
+                             "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                             "Scan will be aborted. " +
+                             "Check that your mount is connected or change the library's root folder and rescan");
+            await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
+                MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
             return;
         }
 
@@ -292,6 +307,9 @@ public class ScannerService : IScannerService
 
 
         var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path));
+        // var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
+        // var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
+        _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
 
         foreach (var folderPath in library.Folders)
         {
@@ -317,9 +335,9 @@ public class ScannerService : IScannerService
 
         await CleanupDbEntities();
 
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
         await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
             MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
     }
 
     private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs)
@@ -349,7 +367,6 @@ public class ScannerService : IScannerService
     /// </summary>
     private async Task CleanupDbEntities()
     {
-        await RemoveAbandonedMetadataKeys();
         await CleanupAbandonedChapters();
         var cleanedUp = await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
         _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
@@ -440,6 +457,11 @@ public class ScannerService : IScannerService
                 await _eventHub.SendMessageAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
             }
 
+            foreach (var series in librarySeries)
+            {
+                await _eventHub.SendMessageAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(series.Id, series.Name));
+            }
+
             var progress =  Math.Max(0, Math.Min(1, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
             await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryProgress,
                 MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
@@ -526,6 +548,7 @@ public class ScannerService : IScannerService
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
+            // Get all associated ParsedInfos to the series. This includes infos that use a different filename that matches Series LocalizedName
             var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
             UpdateVolumes(series, parsedInfos, allPeople, allTags, allGenres);
             series.Pages = series.Volumes.Sum(v => v.Pages);
@@ -637,7 +660,7 @@ public class ScannerService : IScannerService
             PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Translator).Select(p => p.Name), PersonRole.Translator,
                 person => PersonHelper.AddPersonIfNotExists(series.Metadata.People, person));
 
-            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, added) =>
+            TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, _) =>
                 TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag));
 
             GenreHelper.UpdateGenre(allGenres, chapter.Genres.Select(t => t.Title), false, genre =>
@@ -783,7 +806,7 @@ public class ScannerService : IScannerService
                 // Ensure we remove any files that no longer exist AND order
                 existingChapter.Files = existingChapter.Files
                     .Where(f => parsedInfos.Any(p => p.FullFilePath == f.FilePath))
-                    .OrderBy(f => f.FilePath, _naturalSort).ToList();
+                    .OrderByNatural(f => f.FilePath).ToList();
                 existingChapter.Pages = existingChapter.Files.Sum(f => f.Pages);
             }
         }
@@ -890,7 +913,7 @@ public class ScannerService : IScannerService
             // Remove all tags that aren't matching between chapter tags and metadata
             TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
             TagHelper.UpdateTag(allTags, tags, false,
-                (tag, added) =>
+                (tag, _) =>
                 {
                     chapter.Tags.Add(tag);
                 });

@@ -22,7 +22,7 @@ your reading collection with your friends and family!
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
 - [x] Dark and Light themes
 - [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
-- [ ] Metadata should allow for collections, want to read integration from 3rd party services, genres.
+- [x] Metadata should allow for collections, want to read integration from 3rd party services, genres.
 - [x] Ability to manage users, access, and ratings
 - [ ] Ability to sync ratings and reviews to external services
 - [x] Fully Accessible with active accessibility audits
@@ -82,6 +82,8 @@ services:
 ## Feature Requests
 Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
 
+## Notice
+Kavita is being actively developed and should be considered beta software until the 1.0 release. Kavita may be subject to changes in how the platform functions as it is being built out toward the vision. You may lose data and have to restart. The Kavita team strives to avoid any data loss.
 
 ## Contributors
 
@@ -116,8 +118,12 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 * [<img src="/Logo/rider.svg" alt="" width="32"> Rider](http://www.jetbrains.com/rider/)
 * [<img src="/Logo/dottrace.svg" alt="" width="32"> dotTrace](http://www.jetbrains.com/dottrace/)
 
+## Palace-Designs
+We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png" alt="" width="128">](https://www.palace-designs.com/) who hosts our infrastructure pro-bono. 
+
+
 ### License
 
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
-* Copyright 2020-2021
+* Copyright 2020-2022
 

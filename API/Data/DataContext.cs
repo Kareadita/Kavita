@@ -40,6 +40,7 @@ namespace API.Data
         public DbSet<Person> Person { get; set; }
         public DbSet<Genre> Genre { get; set; }
         public DbSet<Tag> Tag { get; set; }
+        public DbSet<SiteTheme> SiteTheme { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

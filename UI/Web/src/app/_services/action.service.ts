@@ -76,7 +76,7 @@ export class ActionService implements OnDestroy {
       return;
     }
 
-    if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+    if (!await this.confirmService.confirm('Refresh covers will force all cover images to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
       if (callback) {
         callback(library);
       }
@@ -141,7 +141,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
-    if (!await this.confirmService.confirm('Refresh metadata will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+    if (!await this.confirmService.confirm('Refresh covers will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
       if (callback) {
         callback(series);
       }
@@ -149,7 +149,7 @@ export class ActionService implements OnDestroy {
     }
 
     this.seriesService.refreshMetadata(series).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.success('Refresh started for ' + series.name);
+      this.toastr.success('Refresh covers queued for ' + series.name);
       if (callback) {
         callback(series);
       }
@@ -214,7 +214,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   markChapterAsUnread(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
       this.toastr.success('Marked as unread');
       if (callback) {
@@ -375,7 +375,7 @@ export class ActionService implements OnDestroy {
    */
   addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: VoidActionCallback) {
     if (this.collectionModalRef != null) { return; }
-      this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md' });
+      this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
       this.collectionModalRef.componentInstance.title = 'New Collection';
 

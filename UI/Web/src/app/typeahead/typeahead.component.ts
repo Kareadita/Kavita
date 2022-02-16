@@ -3,9 +3,9 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
-import { TypeaheadSettings } from './typeahead-settings';
+import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
-export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
+//export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
 
 /**
    * SelectionModel<T> is used for keeping track of multiple selections. Simple interface with ability to toggle. 
@@ -60,13 +60,15 @@ export class SelectionModel<T> {
    * @param compareFn optional method to use to perform comparisons
    * @returns boolean
    */
-  isSelected(data: T, compareFn?: ((d: T) => boolean)): boolean {
+  isSelected(data: T, compareFn?: SelectionCompareFn<T>): boolean {
     let dataItem: Array<any>;
+
+    let lookupMethod = this.shallowEqual;
     if (compareFn != undefined || compareFn != null) {
-      dataItem = this._data.filter(d => compareFn(d.value));
-    } else {
-      dataItem = this._data.filter(d => this.shallowEqual(d.value, data));
+      lookupMethod = compareFn;
     }
+    
+    dataItem = this._data.filter(d => lookupMethod(d.value, data));
     
     if (dataItem.length > 0) {
       return dataItem[0].selected;
@@ -283,13 +285,17 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           if (item.classList.contains('active')) {
             this.filteredOptions.pipe(take(1)).subscribe((res: any[]) => {  
               // This isn't giving back the filtered array, but everything
-              const result = this.settings.compareFn(res, (item.textContent || '').trim());
+              
+              if (this.settings.addIfNonExisting && item.classList.contains('add-item')) {
+                this.addNewItem(this.typeaheadControl.value);
+                this.resetField();
+                this.focusedIndex = 0;
+                return;
+              }
+
+              const result = this.settings.compareFn(res, (this.typeaheadControl.value || '').trim());
               if (result.length === 1) {
-                if (item.classList.contains('add-item')) {
-                  this.addNewItem(this.typeaheadControl.value);
-                } else {
-                  this.toggleSelection(result[0]);
-                }
+                this.toggleSelection(result[0]);
                 this.resetField();
                 this.focusedIndex = 0;
               }
@@ -320,12 +326,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   toggleSelection(opt: any): void {
-    this.optionSelection.toggle(opt);
+    this.optionSelection.toggle(opt, undefined, this.settings.singleCompareFn);
     this.selectedData.emit(this.optionSelection.selected());
   }
 
   removeSelectedOption(opt: any) {
-    this.optionSelection.toggle(opt);
+    this.optionSelection.toggle(opt, undefined, this.settings.singleCompareFn);
     this.selectedData.emit(this.optionSelection.selected());
     this.resetField();
   }
@@ -351,7 +357,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   filterSelected(item: any) {
     if (this.settings.unique && this.settings.multiple) {
-      return !this.optionSelection.isSelected(item);
+      return !this.optionSelection.isSelected(item, this.settings.singleCompareFn);
     }
 
     return true;

@@ -18,7 +18,6 @@ import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { NotConnectedComponent } from './not-connected/not-connected.component';
-import { AutocompleteLibModule } from 'angular-ng-autocomplete';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
@@ -36,6 +35,9 @@ import { PersonRolePipe } from './person-role.pipe';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { PublicationStatusPipe } from './publication-status.pipe';
+import { RegistrationModule } from './registration/registration.module';
+import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
+import { ThemeTestComponent } from './theme-test/theme-test.component';
 
 
 @NgModule({
@@ -56,6 +58,8 @@ import { PublicationStatusPipe } from './publication-status.pipe';
     PublicationStatusPipe,
     SeriesMetadataDetailComponent,
     AllSeriesComponent,
+    GroupedTypeaheadComponent,
+    ThemeTestComponent,
   ],
   imports: [
     HttpClientModule,
@@ -66,7 +70,6 @@ import { PublicationStatusPipe } from './publication-status.pipe';
     FormsModule, // EditCollection Modal
 
     NgbDropdownModule, // Nav
-    AutocompleteLibModule, // Nav
     NgbPopoverModule, // Nav Events toggle
     NgbRatingModule, // Series Detail
     NgbNavModule,
@@ -80,6 +83,7 @@ import { PublicationStatusPipe } from './publication-status.pipe';
     CardsModule,
     CollectionsModule,
     ReadingListModule,
+    RegistrationModule,
 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -7,7 +6,7 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using API.Comparators;
+using API.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -20,8 +19,9 @@ namespace API.Services
         string LogDirectory { get; }
         string TempDirectory { get; }
         string ConfigDirectory { get; }
+        string SiteThemeDirectory { get; }
         /// <summary>
-        /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettings.BackupDirectory"/> for actual path.
+        /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
         /// </summary>
         string BookmarkDirectory { get; }
         /// <summary>
@@ -65,6 +65,7 @@ namespace API.Services
         public string TempDirectory { get; }
         public string ConfigDirectory { get; }
         public string BookmarkDirectory { get; }
+        public string SiteThemeDirectory { get; }
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
@@ -82,6 +83,7 @@ namespace API.Services
            TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
            ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
            BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
+           SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
        }
 
        /// <summary>
@@ -197,11 +199,10 @@ namespace API.Services
            try
            {
                var fileInfo = FileSystem.FileInfo.FromFileName(fullFilePath);
-               if (fileInfo.Exists)
-               {
-                   ExistOrCreate(targetDirectory);
-                   fileInfo.CopyTo(FileSystem.Path.Join(targetDirectory, fileInfo.Name), true);
-               }
+               if (!fileInfo.Exists) return;
+
+               ExistOrCreate(targetDirectory);
+               fileInfo.CopyTo(FileSystem.Path.Join(targetDirectory, fileInfo.Name), true);
            }
            catch (Exception ex)
            {
@@ -698,8 +699,7 @@ namespace API.Services
             {
                 var fileIndex = 1;
 
-                using var nc = new NaturalSortComparer();
-                foreach (var file in directory.EnumerateFiles().OrderBy(file => file.FullName, nc))
+                foreach (var file in directory.EnumerateFiles().OrderByNatural(file => file.FullName))
                 {
                     if (file.Directory == null) continue;
                     var paddedIndex = Parser.Parser.PadZeros(directoryIndex + "");
@@ -713,8 +713,7 @@ namespace API.Services
                 directoryIndex++;
             }
 
-            var sort = new NaturalSortComparer();
-            foreach (var subDirectory in directory.EnumerateDirectories().OrderBy(d => d.FullName, sort))
+            foreach (var subDirectory in directory.EnumerateDirectories().OrderByNatural(d => d.FullName))
             {
                 FlattenDirectory(root, subDirectory, ref directoryIndex);
             }

@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using API.Entities;
+using API.Entities.Enums;
 
 namespace API.DTOs
 {
@@ -16,6 +17,6 @@ namespace API.DTOs
         public string BookReaderFontFamily { get; set; }
         public bool BookReaderTapToPaginate { get; set; }
         public ReadingDirection BookReaderReadingDirection { get; set; }
-        public bool SiteDarkMode { get; set; }
+        public SiteTheme Theme { get; set; }
     }
 }

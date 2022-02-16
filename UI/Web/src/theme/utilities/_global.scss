@@ -1,0 +1,15 @@
+// Global styles for the site. Keep this as small as possible
+
+hr {
+    background-color: var(--hr-color);
+}
+
+.accent {
+    background-color: var(--accent-bg-color) !important;
+    color: var(--accent-text-color) !important;
+    box-shadow: inset 0px 0px 8px 1px var(--accent-bg-color) !important;
+}
+
+.text-muted {
+    color: #d7d7d7 !important;
+}

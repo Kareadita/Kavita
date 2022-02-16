@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -61,7 +60,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="chapter"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private bool UpdateChapterCoverImage(Chapter chapter, bool forceUpdate)
+    private async Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate)
     {
         var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
 
@@ -70,8 +69,9 @@ public class MetadataService : IMetadataService
 
         if (firstFile == null) return false;
 
-        _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile?.FilePath);
+        _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
+        await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(chapter.Id, "chapter"));
 
         return true;
     }
@@ -89,7 +89,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="volume"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private bool UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
+    private async Task<bool> UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
         if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(
@@ -101,6 +101,8 @@ public class MetadataService : IMetadataService
         if (firstChapter == null) return false;
 
         volume.CoverImage = firstChapter.CoverImage;
+        await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, "volume"));
+
         return true;
     }
 
@@ -109,7 +111,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private void UpdateSeriesCoverImage(Series series, bool forceUpdate)
+    private async Task UpdateSeriesCoverImage(Series series, bool forceUpdate)
     {
         if (series == null) return;
 
@@ -136,6 +138,7 @@ public class MetadataService : IMetadataService
             }
         }
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
+        await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"));
     }
 
 
@@ -144,7 +147,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
-    private void ProcessSeriesMetadataUpdate(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, bool forceUpdate)
+    private async Task ProcessSeriesMetadataUpdate(Series series, bool forceUpdate)
     {
         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
         try
@@ -157,7 +160,7 @@ public class MetadataService : IMetadataService
                 var index = 0;
                 foreach (var chapter in volume.Chapters)
                 {
-                    var chapterUpdated = UpdateChapterCoverImage(chapter, forceUpdate);
+                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate);
                     // If cover was update, either the file has changed or first scan and we should force a metadata update
                     UpdateChapterLastModified(chapter, forceUpdate || chapterUpdated);
                     if (index == 0 && chapterUpdated)
@@ -168,7 +171,7 @@ public class MetadataService : IMetadataService
                     index++;
                 }
 
-                var volumeUpdated = UpdateVolumeCoverImage(volume, firstChapterUpdated || forceUpdate);
+                var volumeUpdated = await UpdateVolumeCoverImage(volume, firstChapterUpdated || forceUpdate);
                 if (volumeIndex == 0 && volumeUpdated)
                 {
                     firstVolumeUpdated = true;
@@ -176,7 +179,7 @@ public class MetadataService : IMetadataService
                 volumeIndex++;
             }
 
-            UpdateSeriesCoverImage(series, firstVolumeUpdated || forceUpdate);
+            await UpdateSeriesCoverImage(series, firstVolumeUpdated || forceUpdate);
         }
         catch (Exception ex)
         {
@@ -220,17 +223,12 @@ public class MetadataService : IMetadataService
                 });
             _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
 
-            var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-            var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-            var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
-
-
             var seriesIndex = 0;
             foreach (var series in nonLibrarySeries)
             {
                 try
                 {
-                    ProcessSeriesMetadataUpdate(series, allPeople, allGenres, allTags, forceUpdate);
+                    await ProcessSeriesMetadataUpdate(series, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -245,10 +243,7 @@ public class MetadataService : IMetadataService
             }
 
             await _unitOfWork.CommitAsync();
-            foreach (var series in nonLibrarySeries)
-            {
-                await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(library.Id, series.Id));
-            }
+
             _logger.LogInformation(
                 "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                 chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
@@ -257,67 +252,18 @@ public class MetadataService : IMetadataService
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F));
 
+        await RemoveAbandonedMetadataKeys();
+
+
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
     }
 
-
-    // TODO: I can probably refactor RefreshMetadata and RefreshMetadataForSeries to be the same by utilizing chunk size of 1, so most of the code can be the same.
-    private async Task PerformScan(Library library, bool forceUpdate, Action<int, Chunk> action)
+    private async Task RemoveAbandonedMetadataKeys()
     {
-        var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
-        var stopwatch = Stopwatch.StartNew();
-        var totalTime = 0L;
-        _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
-        await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
-            MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F));
-
-        for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
-        {
-            if (chunkInfo.TotalChunks == 0) continue;
-            totalTime += stopwatch.ElapsedMilliseconds;
-            stopwatch.Restart();
-
-            action(chunk, chunkInfo);
-
-            // _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
-            //     chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
-            // var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
-            //     new UserParams()
-            //     {
-            //         PageNumber = chunk,
-            //         PageSize = chunkInfo.ChunkSize
-            //     });
-            // _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
-            //
-            // var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(nonLibrarySeries.Select(s => s.Id).ToArray());
-            // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-            // var allGenres = await _unitOfWork.GenreRepository.GetAllGenres();
-            //
-            //
-            // var seriesIndex = 0;
-            // foreach (var series in nonLibrarySeries)
-            // {
-            //     try
-            //     {
-            //         ProcessSeriesMetadataUpdate(series, chapterIds, allPeople, allGenres, forceUpdate);
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
-            //     }
-            //     var index = chunk * seriesIndex;
-            //     var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
-            //
-            //     await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
-            //         MessageFactory.RefreshMetadataProgressEvent(library.Id, progress));
-            //     seriesIndex++;
-            // }
-
-            await _unitOfWork.CommitAsync();
-        }
+        await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
+        await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
+        await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
     }
-
-
 
     /// <summary>
     /// Refreshes Metadata for a Series. Will always force updates.
@@ -337,19 +283,23 @@ public class MetadataService : IMetadataService
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F));
 
-        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        await ProcessSeriesMetadataUpdate(series, forceUpdate);
 
-        ProcessSeriesMetadataUpdate(series, allPeople, allGenres, allTags, forceUpdate);
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+        }
 
         await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadataProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F));
 
+        await RemoveAbandonedMetadataKeys();
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
-            await _messageHub.Clients.All.SendAsync(SignalREvents.RefreshMetadata, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
+            // TODO: Fix CoverUpdate/RefreshMetadata from merge
+            await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
         }
 
 

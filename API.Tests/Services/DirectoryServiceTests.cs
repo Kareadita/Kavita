@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Text;
@@ -775,6 +774,19 @@ namespace API.Tests.Services
         }
 
 
+        #endregion
+
+        #region GetHumanReadableBytes
+
+        [Theory]
+        [InlineData(1200, "1.17 KB")]
+        [InlineData(1, "1 B")]
+        [InlineData(10000000, "9.54 MB")]
+        [InlineData(10000000000, "9.31 GB")]
+        public void GetHumanReadableBytesTest(long bytes, string expected)
+        {
+            Assert.Equal(expected, DirectoryService.GetHumanReadableBytes(bytes));
+        }
         #endregion
     }
 }

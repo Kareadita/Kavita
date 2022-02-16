@@ -5,8 +5,10 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Parser;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -20,6 +22,40 @@ using Xunit;
 
 namespace API.Tests.Services
 {
+    internal class MockReadingItemServiceForCacheService : IReadingItemService
+    {
+        private readonly DirectoryService _directoryService;
+
+        public MockReadingItemServiceForCacheService(DirectoryService directoryService)
+        {
+            _directoryService = directoryService;
+        }
+
+        public ComicInfo GetComicInfo(string filePath)
+        {
+            return null;
+        }
+
+        public int GetNumberOfPages(string filePath, MangaFormat format)
+        {
+            return 1;
+        }
+
+        public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format)
+        {
+            return string.Empty;
+        }
+
+        public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public ParserInfo Parse(string path, string rootPath, LibraryType type)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
     public class CacheServiceTests
     {
         private readonly ILogger<CacheService> _logger = Substitute.For<ILogger<CacheService>>();
@@ -436,5 +472,37 @@ namespace API.Tests.Services
 
         #endregion
 
+        #region ExtractChapterFiles
+
+        // [Fact]
+        // public void ExtractChapterFiles_ShouldExtractOnlyImages()
+        // {
+        // const string testDirectory = "/manga/";
+        // var fileSystem = new MockFileSystem();
+        // for (var i = 0; i < 10; i++)
+        // {
+        //     fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+        // }
+        //
+        // fileSystem.AddDirectory(CacheDirectory);
+        //
+        // var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        // var cs = new CacheService(_logger, _unitOfWork, ds,
+        //     new MockReadingItemServiceForCacheService(ds));
+        //
+        //
+        //     cs.ExtractChapterFiles(CacheDirectory, new List<MangaFile>()
+        //     {
+        //         new MangaFile()
+        //         {
+        //             ChapterId = 1,
+        //             Format = MangaFormat.Archive,
+        //             Pages = 2,
+        //             FilePath =
+        //         }
+        //     })
+        // }
+
+        #endregion
     }
 }

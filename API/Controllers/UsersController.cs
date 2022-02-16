@@ -36,21 +36,16 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
         {
-            return Ok(await _unitOfWork.UserRepository.GetMembersAsync());
+            return Ok(await _unitOfWork.UserRepository.GetEmailConfirmedMemberDtosAsync());
         }
 
-        [AllowAnonymous]
-        [HttpGet("names")]
-        public async Task<ActionResult<IEnumerable<MemberDto>>> GetUserNames()
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpGet("pending")]
+        public async Task<ActionResult<IEnumerable<MemberDto>>> GetPendingUsers()
         {
-            var setting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            if (setting.EnableAuthentication)
-            {
-                return Unauthorized("This API cannot be used given your server's configuration");
-            }
-            var members = await _unitOfWork.UserRepository.GetMembersAsync();
-            return Ok(members.Select(m => m.Username));
+            return Ok(await _unitOfWork.UserRepository.GetPendingMemberDtosAsync());
         }
+
 
         [HttpGet("has-reading-progress")]
         public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
@@ -83,7 +78,8 @@ namespace API.Controllers
             existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
-            existingPreferences.SiteDarkMode = preferencesDto.SiteDarkMode;
+            existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
+            existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

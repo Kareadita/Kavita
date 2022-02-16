@@ -30,13 +30,6 @@ namespace API.Tests.Services
             _archiveService = new ArchiveService(_logger, _directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService));
         }
 
-        // [Fact]
-        // public void CleanComicInfo_ShouldMapVolumeAndChapterNormally()
-        // {
-        //     // TODO: Implement this
-        //     Assert.False(true);
-        // }
-
         [Theory]
         [InlineData("flat file.zip", false)]
         [InlineData("file in folder in folder.zip", true)]
@@ -138,7 +131,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c060 (v10) - p200 [Digital] [LuCaZ].jpg", "folder.jpg"}, "folder.jpg")]
         public void FindFolderEntry(string[] files, string expected)
         {
-            var foundFile = _archiveService.FindFolderEntry(files);
+            var foundFile = ArchiveService.FindFolderEntry(files);
             Assert.Equal(expected, string.IsNullOrEmpty(foundFile) ? "" : foundFile);
         }
 
@@ -151,6 +144,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"__MACOSX/cover.jpg", "vol1/page 01.jpg"}, "vol1/page 01.jpg")]
         [InlineData(new [] {"Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg", "Akame ga KILL! ZERO - c060 (v10) - p200 [Digital] [LuCaZ].jpg", "folder.jpg"}, "Akame ga KILL! ZERO - c055 (v10) - p000 [Digital] [LuCaZ].jpg")]
         [InlineData(new [] {"001.jpg", "001 - chapter 1/001.jpg"}, "001.jpg")]
+        [InlineData(new [] {"chapter 1/001.jpg", "chapter 2/002.jpg", "somefile.jpg"}, "somefile.jpg")]
         public void FindFirstEntry(string[] files, string expected)
         {
             var foundFile = ArchiveService.FirstFileEntry(files, string.Empty);
@@ -203,48 +197,80 @@ namespace API.Tests.Services
         [InlineData("sorting.zip", "sorting.expected.jpg")]
         public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
         {
-            var archiveService =  Substitute.For<ArchiveService>(_logger, new DirectoryService(_directoryServiceLogger, new MockFileSystem()));
+            var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService);
+            var archiveService =  Substitute.For<ArchiveService>(_logger,
+                new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService);
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
             var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
 
+            var outputDir = Path.Join(testDirectory, "output");
+            _directoryService.ClearDirectory(outputDir);
+            _directoryService.ExistOrCreate(outputDir);
+
             archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.SharpCompress);
-            Stopwatch sw = Stopwatch.StartNew();
-            //Assert.Equal(expectedBytes, File.ReadAllBytes(archiveService.GetCoverImage(Path.Join(testDirectory, inputFile), Path.GetFileNameWithoutExtension(inputFile) + "_output")));
-            _testOutputHelper.WriteLine($"Processed in {sw.ElapsedMilliseconds} ms");
+            var actualBytes = File.ReadAllBytes(archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),
+                Path.GetFileNameWithoutExtension(inputFile) + "_output", outputDir));
+            Assert.Equal(expectedBytes, actualBytes);
+
+            _directoryService.ClearAndDeleteDirectory(outputDir);
         }
 
-        // TODO: This is broken on GA due to DirectoryService.CoverImageDirectory
-        //[Theory]
+        [Theory]
         [InlineData("Archives/macos_native.zip")]
         [InlineData("Formats/One File with DB_Supported.zip")]
         public void CanParseCoverImage(string inputFile)
         {
+            var imageService = Substitute.For<IImageService>();
+            imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>()).Returns(x => "cover.jpg");
+            var archiveService = new ArchiveService(_logger, _directoryService, imageService);
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
-            //Assert.NotEmpty(File.ReadAllBytes(_archiveService.GetCoverImage(Path.Join(testDirectory, inputFile), Path.GetFileNameWithoutExtension(inputFile) + "_output")));
+            var inputPath = Path.GetFullPath(Path.Join(testDirectory, inputFile));
+            var outputPath = Path.Join(testDirectory, Path.GetFileNameWithoutExtension(inputFile) + "_output");
+            new DirectoryInfo(outputPath).Create();
+            var expectedImage = archiveService.GetCoverImage(inputPath, inputFile, outputPath);
+            Assert.Equal("cover.jpg", expectedImage);
+            new DirectoryInfo(outputPath).Delete();
         }
 
-        [Fact]
-        public void ShouldHaveComicInfo()
-        {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
-            var archive = Path.Join(testDirectory, "ComicInfo.zip");
-            const string summaryInfo = "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?";
+        #region ShouldHaveComicInfo
 
-            var comicInfo = _archiveService.GetComicInfo(archive);
-            Assert.NotNull(comicInfo);
-            Assert.Equal(summaryInfo, comicInfo.Summary);
-        }
+            [Fact]
+            public void ShouldHaveComicInfo()
+            {
+                var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+                var archive = Path.Join(testDirectory, "ComicInfo.zip");
+                const string summaryInfo = "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?";
 
-        [Fact]
-        public void ShouldHaveComicInfo_WithAuthors()
-        {
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
-            var archive = Path.Join(testDirectory, "ComicInfo_authors.zip");
+                var comicInfo = _archiveService.GetComicInfo(archive);
+                Assert.NotNull(comicInfo);
+                Assert.Equal(summaryInfo, comicInfo.Summary);
+            }
 
-            var comicInfo = _archiveService.GetComicInfo(archive);
-            Assert.NotNull(comicInfo);
-            Assert.Equal("Junya Inoue", comicInfo.Writer);
-        }
+            [Fact]
+            public void ShouldHaveComicInfo_WithAuthors()
+            {
+                var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+                var archive = Path.Join(testDirectory, "ComicInfo_authors.zip");
+
+                var comicInfo = _archiveService.GetComicInfo(archive);
+                Assert.NotNull(comicInfo);
+                Assert.Equal("Junya Inoue", comicInfo.Writer);
+            }
+
+            [Fact]
+            public void ShouldHaveComicInfo_TopLevelFileOnly()
+            {
+                var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+                var archive = Path.Join(testDirectory, "ComicInfo_duplicateInfos.zip");
+
+                var comicInfo = _archiveService.GetComicInfo(archive);
+                Assert.NotNull(comicInfo);
+                Assert.Equal("BTOOOM!", comicInfo.Series);
+            }
+
+        #endregion
+
+        #region CanParseComicInfo
 
         [Fact]
         public void CanParseComicInfo()
@@ -268,5 +294,38 @@ namespace API.Tests.Services
 
             Assert.NotStrictEqual(expected, actual);
         }
+
+        #endregion
+
+        #region FindCoverImageFilename
+
+        [Theory]
+        [InlineData(new string[] {}, "", null)]
+        [InlineData(new [] {"001.jpg", "002.jpg"}, "Test.zip", "001.jpg")]
+        [InlineData(new [] {"001.jpg", "!002.jpg"}, "Test.zip", "!002.jpg")]
+        [InlineData(new [] {"001.jpg", "!001.jpg"}, "Test.zip", "!001.jpg")]
+        [InlineData(new [] {"001.jpg", "cover.jpg"}, "Test.zip", "cover.jpg")]
+        [InlineData(new [] {"001.jpg", "Chapter 20/cover.jpg", "Chapter 21/0001.jpg"}, "Test.zip", "Chapter 20/cover.jpg")]
+        [InlineData(new [] {"._/001.jpg", "._/cover.jpg", "010.jpg"}, "Test.zip", "010.jpg")]
+        [InlineData(new [] {"001.txt", "002.txt", "a.jpg"}, "Test.zip", "a.jpg")]
+        public void FindCoverImageFilename(string[] filenames, string archiveName, string expected)
+        {
+            Assert.Equal(expected, _archiveService.FindCoverImageFilename(archiveName, filenames));
+        }
+
+
+        #endregion
+
+        #region CreateZipForDownload
+
+        //[Fact]
+        public void CreateZipForDownloadTest()
+        {
+            var fileSystem = new MockFileSystem();
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            //_archiveService.CreateZipForDownload(new []{}, outputDirectory)
+        }
+
+        #endregion
     }
 }

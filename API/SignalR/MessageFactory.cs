@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using API.DTOs.Update;
 using API.Entities;
 
@@ -49,11 +50,9 @@ namespace API.SignalR
 
         public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
         {
-            // TODO: Remove this?
             return new SignalRMessage()
             {
                 Name = SignalREvents.ScanLibraryProgress,
-                Title = $"Scanning {libraryId}",
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -68,28 +67,11 @@ namespace API.SignalR
             return new SignalRMessage()
             {
                 Name = SignalREvents.RefreshMetadataProgress,
-                Title = "Refreshing Cover Images",
                 Body = new
                 {
                     LibraryId = libraryId,
                     Progress = progress,
                     EventTime = DateTime.Now
-                }
-            };
-        }
-
-
-
-        public static SignalRMessage RefreshMetadataEvent(int libraryId, int seriesId)
-        {
-            return new SignalRMessage()
-            {
-                Name = SignalREvents.RefreshMetadata,
-                Title = "Refreshing Cover Images", // This doesn't need a title, it doesn't display on the UI widget
-                Body = new
-                {
-                    SeriesId = seriesId,
-                    LibraryId = libraryId
                 }
             };
         }
@@ -203,6 +185,36 @@ namespace API.SignalR
                 {
                     Title = "Updating Series",
                     SubTitle = series.Name
+                }
+            };
+        }
+
+        public static SignalRMessage CoverUpdateEvent(int id, string entityType)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.CoverUpdate,
+                Title = "Updating Cover",
+                //SubTitle = series.Name, // TODO: Refactor this
+                Body = new
+                {
+                    Id = id,
+                    EntityType = entityType,
+                }
+            };
+        }
+
+        public static SignalRMessage SiteThemeProgressEvent(int themeIteratedCount, int totalThemesToIterate, string themeName, float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.SiteThemeProgress,
+                Body = new
+                {
+                    TotalUpdates = totalThemesToIterate,
+                    CurrentCount = themeIteratedCount,
+                    ThemeName = themeName,
+                    Progress = progress
                 }
             };
         }

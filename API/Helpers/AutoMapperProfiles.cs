@@ -5,7 +5,9 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
+using API.DTOs.Search;
 using API.DTOs.Settings;
+using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -63,7 +65,7 @@ namespace API.Helpers
                 .ForMember(dest => dest.Writers,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Writer)))
-                .ForMember(dest => dest.Artists,
+                .ForMember(dest => dest.CoverArtists,
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.CoverArtist)))
                 .ForMember(dest => dest.Characters,
@@ -118,9 +120,13 @@ namespace API.Helpers
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
 
+            CreateMap<AppUser, UserDto>();
+            CreateMap<SiteTheme, SiteThemeDto>();
+            CreateMap<AppUserPreferences, UserPreferencesDto>()
+                .ForMember(dest => dest.Theme,
+                    opt =>
+                        opt.MapFrom(src => src.Theme));
 
-
-            CreateMap<AppUserPreferences, UserPreferencesDto>();
 
             CreateMap<AppUserBookmark, BookmarkDto>();
 
@@ -145,9 +151,9 @@ namespace API.Helpers
             CreateMap<RegisterDto, AppUser>();
 
 
+
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();
-
         }
     }
 }

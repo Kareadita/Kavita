@@ -8,6 +8,7 @@ import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
@@ -25,7 +26,15 @@ export enum EVENTS {
   CleanupProgress = 'CleanupProgress',
   DownloadProgress = 'DownloadProgress',
   NotificationProgress = 'NotificationProgress',
-  FileScanProgress = 'FileScanProgress'
+  FileScanProgress = 'FileScanProgress',
+  /**
+   * A custom user site theme is added or removed during a scan
+   */
+  SiteThemeProgress = 'SiteThemeProgress',
+  /**
+   * A cover is updated
+   */
+  CoverUpdate = 'CoverUpdate'
 }
 
 export interface Message<T> {
@@ -37,7 +46,7 @@ export interface SignalRMessage {
   body: any;
   name: string;
   title: string;
-  subTitle: string; 
+  subTitle: string;
   eventType: 'single' | 'started' | 'updated' | 'ended';
   eventTime: string;
 }
@@ -58,12 +67,11 @@ export class MessageHubService {
   public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
   public scanLibrary: EventEmitter<ProgressEvent> = new EventEmitter<ProgressEvent>(); // TODO: Refactor this name to be generic
   public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
-  public refreshMetadata: EventEmitter<RefreshMetadataEvent> = new EventEmitter<RefreshMetadataEvent>();
 
   isAdmin: boolean = false;
 
   constructor(private toastr: ToastrService, private router: Router) {
-    
+
   }
 
   createHubConnection(user: User, isAdmin: boolean) {
@@ -84,6 +92,44 @@ export class MessageHubService {
       this.onlineUsersSource.next(usernames);
     });
 
+
+    this.hubConnection.on(EVENTS.ScanSeries, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanSeries,
+        payload: resp.body
+      });
+      this.scanSeries.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanLibraryProgress,
+        payload: resp.body
+      });
+      this.scanLibrary.emit(resp.body);
+    });
+
+    this.hubConnection.on(EVENTS.BackupDatabaseProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.BackupDatabaseProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.CleanupProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.CleanupProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.DownloadProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.DownloadProgress,
+        payload: resp.body
+      });
+    });
+
     this.hubConnection.on(EVENTS.NotificationProgress, (resp: SignalRMessage) => {
       this.messagesSource.next({
         event: EVENTS.NotificationProgress,
@@ -91,102 +137,73 @@ export class MessageHubService {
       });
     });
 
+    this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.RefreshMetadataProgress,
+        payload: resp.body
+      });
+    });
 
-    // this.hubConnection.on(EVENTS.ScanSeries, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.ScanSeries,
-    //     payload: resp.body
-    //   });
-    //   this.scanSeries.emit(resp.body);
-    // });
+    this.hubConnection.on(EVENTS.SiteThemeProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SiteThemeProgress,
+        payload: resp.body as SiteThemeProgressEvent
+      });
+    });
 
-    // this.hubConnection.on(EVENTS.ScanLibraryProgress, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.ScanLibraryProgress,
-    //     payload: resp.body
-    //   });
-    //   this.scanLibrary.emit(resp.body);
-    // });
+    this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesAddedToCollection,
+        payload: resp.body
+      });
+    });
 
-    // this.hubConnection.on(EVENTS.BackupDatabaseProgress, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.BackupDatabaseProgress,
-    //     payload: resp.body
-    //   });
-    // });
+    this.hubConnection.on(EVENTS.ScanLibraryError, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScanLibraryError,
+        payload: resp.body
+      });
+      if (this.isAdmin) {
+        this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
+      }
+    });
 
-    // this.hubConnection.on(EVENTS.CleanupProgress, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.CleanupProgress,
-    //     payload: resp.body
-    //   });
-    // });
+    this.hubConnection.on(EVENTS.SeriesAdded, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesAdded,
+        payload: resp.body
+      });
+      this.seriesAdded.emit(resp.body);
+    });
 
-    // this.hubConnection.on(EVENTS.DownloadProgress, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.DownloadProgress,
-    //     payload: resp.body
-    //   });
-    // });
+    this.hubConnection.on(EVENTS.SeriesRemoved, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesRemoved,
+        payload: resp.body
+      });
+    });
 
-    // this.hubConnection.on(EVENTS.RefreshMetadataProgress, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.RefreshMetadataProgress,
-    //     payload: resp.body
-    //   });
-    // });
-
-
-    // this.hubConnection.on(EVENTS.SeriesAddedToCollection, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.SeriesAddedToCollection,
-    //     payload: resp.body
-    //   });
-    // });
-
-    // this.hubConnection.on(EVENTS.ScanLibraryError, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.ScanLibraryError,
-    //     payload: resp.body
-    //   });
-    //   if (this.isAdmin) {
-    //     this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
-    //   }
-    // });
-
-    // this.hubConnection.on(EVENTS.SeriesAdded, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.SeriesAdded,
-    //     payload: resp.body
-    //   });
-    //   this.seriesAdded.emit(resp.body);
-    //   // Don't show the toast when user has reader open
-    //   if (this.isAdmin && this.router.url.match(/\d+\/manga|book\/\d+/gi) !== null) {
-    //     this.toastr.info('Series ' + (resp.body as SeriesAddedEvent).seriesName + ' added');
-    //   }
-    // });
-
-    // this.hubConnection.on(EVENTS.SeriesRemoved, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.SeriesRemoved,
-    //     payload: resp.body
-    //   });
-    // });
-
-    // this.hubConnection.on(EVENTS.RefreshMetadata, (resp: SignalRMessage) => {
+    // this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
     //   this.messagesSource.next({
     //     event: EVENTS.RefreshMetadata,
     //     payload: resp.body
     //   });
-    //   this.refreshMetadata.emit(resp.body);
+    //   this.refreshMetadata.emit(resp.body); // TODO: Remove this
     // });
 
-    // this.hubConnection.on(EVENTS.UpdateAvailable, (resp: SignalRMessage) => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.UpdateAvailable,
-    //     payload: resp.body
-    //   });
-    // });
+    this.hubConnection.on(EVENTS.CoverUpdate, resp => {
+      this.messagesSource.next({
+        event: EVENTS.CoverUpdate,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.UpdateAvailable, resp => {
+      this.messagesSource.next({
+        event: EVENTS.UpdateAvailable,
+        payload: resp.body
+      });
+    });
   }
 
   stopHubConnection() {
@@ -198,5 +215,5 @@ export class MessageHubService {
   sendMessage(methodName: string, body?: any) {
     return this.hubConnection.invoke(methodName, body);
   }
-  
+
 }

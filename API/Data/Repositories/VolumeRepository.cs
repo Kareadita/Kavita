@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -178,6 +178,7 @@ public class VolumeRepository : IVolumeRepository
             .OrderBy(volume => volume.Number)
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
+            .AsSplitQuery()
             .ToListAsync();
 
         await AddVolumeModifiers(userId, volumes);
@@ -194,10 +195,9 @@ public class VolumeRepository : IVolumeRepository
 
     private static void SortSpecialChapters(IEnumerable<VolumeDto> volumes)
     {
-        var sorter = new NaturalSortComparer();
         foreach (var v in volumes.Where(vDto => vDto.Number == 0))
         {
-            v.Chapters = v.Chapters.OrderBy(x => x.Range, sorter).ToList();
+            v.Chapters = v.Chapters.OrderByNatural(x => x.Range).ToList();
         }
     }
 

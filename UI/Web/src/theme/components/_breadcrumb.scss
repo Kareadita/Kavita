@@ -1,0 +1,9 @@
+.breadcrumb {
+    background-color: var(--breadcrumb-bg-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+
+    .breadcrumb-item {
+      color: var(--breadcrumb-item-text-color);
+    }
+  }

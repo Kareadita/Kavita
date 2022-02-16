@@ -89,6 +89,22 @@ namespace API.Data.Metadata
                 .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
         }
 
+        public static void CleanComicInfo(ComicInfo info)
+        {
+            if (info == null) return;
+
+            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
+            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
+            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
+            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
+            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
+            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
+            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
+            info.Characters = Parser.Parser.CleanAuthor(info.Characters);
+            info.Translator = Parser.Parser.CleanAuthor(info.Translator);
+            info.CoverArtist = Parser.Parser.CleanAuthor(info.CoverArtist);
+        }
+
 
     }
 }

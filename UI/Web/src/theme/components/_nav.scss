@@ -1,0 +1,45 @@
+.nav-link {
+    color: var(--nav-link-text-color);
+
+    &:hover, &:focus {
+        color: var(--nav-link-hover-text-color);
+    }
+
+    &.active {
+        color: var(--nav-link-active-text-color);
+        background-color: var(--nav-link-bg-color);
+    }
+}
+
+.nav-pills .nav-link.active {
+    color: var(--nav-link-active-text-color);
+    background-color: var(--nav-link-bg-color);
+}
+
+.nav-tabs {
+    border-color: var(--nav-tab-border-color);
+    
+    .nav-link {
+        color: var(--nav-link-text-color);
+        
+        &.active, &:focus {
+            color: var(--nav-tab-active-text-color);
+            background-color: var(--nav-tab-bg-color);
+            border-top-color: var(--nav-tab-border-top);
+            border-left-color: var(--nav-tab-border-left);
+            border-bottom-color: var(--nav-tab-border-bottom);
+            border-right-color: var(--nav-tab-border-right);
+        }
+    
+        &:hover {
+            color: var(--nav-tab-hover-text-color);
+            background-color: var(--nav-tab-hover-bg-color);
+            border-top-color: var(--nav-tab-hover-border-top);
+            border-left-color: var(--nav-tab-hover-border-left);
+            border-bottom-color: var(--nav-tab-border-hover-bottom);
+            border-right-color: var(--nav-tab-border-hover-right);
+            border-color: var(--nav-tab-border-hover-color);
+        }
+    }
+
+}

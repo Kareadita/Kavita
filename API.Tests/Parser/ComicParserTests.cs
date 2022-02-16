@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
-using API.Entities.Enums;
 using API.Parser;
 using API.Services;
 using Microsoft.Extensions.Logging;
@@ -68,8 +66,8 @@ namespace API.Tests.Parser
         [InlineData("Demon 012 (Sep 1973) c2c", "Demon")]
         [InlineData("Dragon Age - Until We Sleep 01 (of 03)", "Dragon Age - Until We Sleep")]
         [InlineData("Green Lantern v2 017 - The Spy-Eye that doomed Green Lantern v2", "Green Lantern")]
-        [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire  - Adam Strange")]
-        [InlineData("Identity Crisis Extra - Rags Morales Sketches (2005)", "Identity Crisis  - Rags Morales Sketches")]
+        [InlineData("Green Lantern - Circle of Fire Special - Adam Strange (2000)", "Green Lantern - Circle of Fire - Adam Strange")]
+        [InlineData("Identity Crisis Extra - Rags Morales Sketches (2005)", "Identity Crisis - Rags Morales Sketches")]
         [InlineData("Daredevil - t6 - 10 - (2019)", "Daredevil")]
         [InlineData("Batgirl T2000 #57", "Batgirl")]
         [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "Teen Titans")]
@@ -186,6 +184,10 @@ namespace API.Tests.Parser
         [InlineData("Asterix - HS - Les 12 travaux d'Astérix", true)]
         [InlineData("Sillage Hors Série - Le Collectionneur - Concordance-DKFR", true)]
         [InlineData("laughs", false)]
+        [InlineData("Annual Days of Summer", false)]
+        [InlineData("Adventure Time 2013 Annual #001 (2013)", true)]
+        [InlineData("Adventure Time 2013_Annual_#001 (2013)", true)]
+        [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));

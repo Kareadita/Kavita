@@ -11,7 +11,7 @@ export class PersonRolePipe implements PipeTransform {
       case PersonRole.Artist: return 'Artist';
       case PersonRole.Character: return 'Character';
       case PersonRole.Colorist: return 'Colorist';
-      case PersonRole.CoverArtist: return 'CoverArtist';
+      case PersonRole.CoverArtist: return 'Cover Artist';
       case PersonRole.Editor: return 'Editor';
       case PersonRole.Inker: return 'Inker';
       case PersonRole.Letterer: return 'Letterer';

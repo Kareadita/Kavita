@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot } from '@angular/router';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Series } from 'src/app/_models/series';
+import { SeriesFilter } from 'src/app/_models/series-filter';
 import { Volume } from 'src/app/_models/volume';
 
 export enum KEY_CODES {
@@ -16,6 +17,7 @@ export enum KEY_CODES {
   ENTER = 'Enter',
   G = 'g',
   B = 'b',
+  F = 'f',
   BACKSPACE = 'Backspace',
   DELETE = 'Delete',
   SHIFT = 'Shift'
@@ -92,6 +94,122 @@ export class UtilityService {
     if (input === null || filter === null) return false;
     const reg = /[_\.\-]/gi;
     return input.toUpperCase().replace(reg, '').includes(filter.toUpperCase().replace(reg, ''));
+  }
+
+  /**
+   * Returns a new instance of a filterSettings that is populated with filter presets from URL
+   * @param snapshot 
+   * @param blankFilter Filter to start with 
+   * @returns The Preset filter and if something was set within
+   */
+   filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot, blankFilter: SeriesFilter): [SeriesFilter, boolean] {
+    const filter = Object.assign({}, blankFilter);
+    let anyChanged = false;
+
+    const format = snapshot.queryParamMap.get('format');
+    if (format !== undefined && format !== null) {
+      filter.formats = [...filter.formats, ...format.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const genres = snapshot.queryParamMap.get('genres');
+    if (genres !== undefined && genres !== null) {
+      filter.genres = [...filter.genres, ...genres.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const ageRating = snapshot.queryParamMap.get('ageRating');
+    if (ageRating !== undefined && ageRating !== null) {
+      filter.ageRating = [...filter.ageRating, ...ageRating.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const publicationStatus = snapshot.queryParamMap.get('publicationStatus');
+    if (publicationStatus !== undefined && publicationStatus !== null) {
+      filter.publicationStatus = [...filter.publicationStatus, ...publicationStatus.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const tags = snapshot.queryParamMap.get('tags');
+    if (tags !== undefined && tags !== null) {
+      filter.tags = [...filter.tags, ...tags.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const languages = snapshot.queryParamMap.get('languages');
+    if (languages !== undefined && languages !== null) {
+      filter.languages = [...filter.languages, ...languages.split(',')];
+      anyChanged = true;
+    }
+
+    const writers = snapshot.queryParamMap.get('writers');
+    if (writers !== undefined && writers !== null) {
+      filter.writers = [...filter.writers, ...writers.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const artists = snapshot.queryParamMap.get('artists');
+    if (artists !== undefined && artists !== null) {
+      filter.artists = [...filter.artists, ...artists.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const character = snapshot.queryParamMap.get('character');
+    if (character !== undefined && character !== null) {
+      filter.character = [...filter.character, ...character.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const colorist = snapshot.queryParamMap.get('colorist');
+    if (colorist !== undefined && colorist !== null) {
+      filter.colorist = [...filter.colorist, ...colorist.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const coverArtists = snapshot.queryParamMap.get('coverArtists');
+    if (coverArtists !== undefined && coverArtists !== null) {
+      filter.coverArtist = [...filter.coverArtist, ...coverArtists.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const editor = snapshot.queryParamMap.get('editor');
+    if (editor !== undefined && editor !== null) {
+      filter.editor = [...filter.editor, ...editor.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const inker = snapshot.queryParamMap.get('inker');
+    if (inker !== undefined && inker !== null) {
+      filter.inker = [...filter.inker, ...inker.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const letterer = snapshot.queryParamMap.get('letterer');
+    if (letterer !== undefined && letterer !== null) {
+      filter.letterer = [...filter.letterer, ...letterer.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const penciller = snapshot.queryParamMap.get('penciller');
+    if (penciller !== undefined && penciller !== null) {
+      filter.penciller = [...filter.penciller, ...penciller.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const publisher = snapshot.queryParamMap.get('publisher');
+    if (publisher !== undefined && publisher !== null) {
+      filter.publisher = [...filter.publisher, ...publisher.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+
+    const translators = snapshot.queryParamMap.get('translators');
+    if (translators !== undefined && translators !== null) {
+      filter.translators = [...filter.translators, ...translators.split(',').map(item => parseInt(item, 10))];
+      anyChanged = true;
+    }
+    
+
+    return [filter, anyChanged];
   }
 
   mangaFormat(format: MangaFormat): string {

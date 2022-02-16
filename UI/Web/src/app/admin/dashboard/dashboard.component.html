@@ -1,7 +1,7 @@
 <div class="container">
   <h2>Admin Dashboard</h2>
 
-  <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs nav-pills">
+  <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
       <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
         <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
         <ng-template ngbNavContent>

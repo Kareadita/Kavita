@@ -36,6 +36,7 @@ public interface ILibraryRepository
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
+    Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -106,6 +107,13 @@ public class LibraryRepository : ILibraryRepository
             .AsNoTracking()
             .Select(l => l.Type)
             .SingleAsync();
+    }
+
+    public async Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds)
+    {
+        return await _context.Library
+            .Where(x => libraryIds.Contains(x.Id))
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()

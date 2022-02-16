@@ -1,0 +1,20 @@
+<h4>Libraries</h4>
+<div class="list-group" *ngIf="!isLoading">
+    <div class="form-check" *ngIf="allLibraries.length > 0">
+        <input id="selectall" type="checkbox" class="form-check-input" 
+            [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+        <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>
+    </div>
+    <ul>
+        <li class="list-group-item" *ngFor="let library of allLibraries; let i = index">
+            <div class="form-check">
+                <input id="library-{{i}}" type="checkbox" class="form-check-input" attr.aria-label="Library {{library.name}}"
+                    [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
+                <label attr.for="library-{{i}}" class="form-check-label">{{library.name}}</label>
+            </div>
+        </li>
+        <li class="list-group-item" *ngIf="allLibraries.length === 0">
+            There are no libraries setup yet.
+        </li>
+    </ul>
+</div>

@@ -4,7 +4,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NgbCollapseModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 import { SafeHtmlPipe } from './safe-html.pipe';
-import { RegisterMemberComponent } from '../register-member/register-member.component';
 import { ReadMoreComponent } from './read-more/read-more.component';
 import { RouterModule } from '@angular/router';
 import { DrawerComponent } from './drawer/drawer.component';
@@ -18,10 +17,10 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SentenceCasePipe } from './sentence-case.pipe';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { BadgeExpanderComponent } from './badge-expander/badge-expander.component';
+import { ImageComponent } from './image/image.component';
 
 @NgModule({
   declarations: [
-    RegisterMemberComponent,
     ConfirmDialogComponent,
     SafeHtmlPipe,
     ReadMoreComponent,
@@ -34,7 +33,8 @@ import { BadgeExpanderComponent } from './badge-expander/badge-expander.componen
     CircularLoaderComponent,
     SentenceCasePipe,
     PersonBadgeComponent,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    ImageComponent
   ],
   imports: [
     CommonModule,
@@ -45,7 +45,6 @@ import { BadgeExpanderComponent } from './badge-expander/badge-expander.componen
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
-    RegisterMemberComponent,
     SafeHtmlPipe,
     SentenceCasePipe,
     ReadMoreComponent,
@@ -58,7 +57,8 @@ import { BadgeExpanderComponent } from './badge-expander/badge-expander.componen
     TagBadgeComponent,
     CircularLoaderComponent,
     PersonBadgeComponent,
-    BadgeExpanderComponent
+    BadgeExpanderComponent,
+    ImageComponent
   ],
 })
 export class SharedModule { }

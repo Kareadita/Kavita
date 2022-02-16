@@ -1,14 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { first, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { SettingsService } from '../admin/settings.service';
+import { AddEmailToAccountMigrationModalComponent } from '../registration/add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { MemberService } from '../_services/member.service';
 import { NavService } from '../_services/nav.service';
 
+// TODO: Move this into registration module
 @Component({
   selector: 'app-user-login',
   templateUrl: './user-login.component.html',
@@ -19,12 +22,11 @@ export class UserLoginComponent implements OnInit {
   model: any = {username: '', password: ''};
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required]) 
+      password: new FormControl('', [Validators.required])
   });
 
   memberNames: Array<string> = [];
   isCollapsed: {[key: string]: boolean} = {};
-  authDisabled: boolean = false;
   /**
    * If there are no admins on the server, this will enable the registration to kick in.
    */
@@ -34,8 +36,8 @@ export class UserLoginComponent implements OnInit {
    */
   isLoaded: boolean = false;
 
-  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService, 
-    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService) { }
+  constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
+    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     this.navService.showNavBar();
@@ -45,30 +47,17 @@ export class UserLoginComponent implements OnInit {
       }
     });
 
-    this.settingsService.getAuthenticationEnabled().pipe(take(1)).subscribe((enabled: boolean) => {
-      // There is a bug where this is coming back as a string not a boolean.
-      this.authDisabled = !enabled;
-      if (this.authDisabled) {
-        this.loginForm.get('password')?.setValidators([]);
+    this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
+      this.firstTimeFlow = !adminExists;
 
-        // This API is only useable on disabled authentication
-        this.memberService.getMemberNames().pipe(take(1)).subscribe(members => {
-          this.memberNames = members;
-          const isOnlyOne = this.memberNames.length === 1;
-          this.memberNames.forEach(name => this.isCollapsed[name] = !isOnlyOne);
-          this.firstTimeFlow = members.length === 0;
-          this.isLoaded = true;
-        });
-      } else {
-        this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
-          this.firstTimeFlow = !adminExists;
-          this.setupAuthenticatedLoginFlow();
-          this.isLoaded = true;
-        });
+      if (this.firstTimeFlow) {
+        this.router.navigateByUrl('registration/register');
+        return;
       }
-    });
 
-    
+      this.setupAuthenticatedLoginFlow();
+      this.isLoaded = true;
+    });
   }
 
   setupAuthenticatedLoginFlow() {
@@ -84,18 +73,13 @@ export class UserLoginComponent implements OnInit {
   onAdminCreated(user: User | null) {
     if (user != null) {
       this.firstTimeFlow = false;
-      if (this.authDisabled) {
-        this.isCollapsed[user.username] = true;
-        this.select(user.username);
-        this.memberNames.push(user.username);
-      }
     } else {
       this.toastr.error('There was an issue creating the new user. Please refresh and try again.');
     }
   }
 
   login() {
-    this.model = {username: this.loginForm.get('username')?.value, password: this.loginForm.get('password')?.value};
+    this.model = this.loginForm.getRawValue();
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
       this.navService.showNavBar();
@@ -109,33 +93,14 @@ export class UserLoginComponent implements OnInit {
         this.router.navigateByUrl('/library');
       }
     }, err => {
-      this.toastr.error(err.error);
-    });
+      if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {
+        const modalRef = this.modalService.open(AddEmailToAccountMigrationModalComponent, { scrollable: true, size: 'md' });
+        modalRef.componentInstance.username = this.model.username;
+        modalRef.closed.pipe(take(1)).subscribe(() => {
 
-    this.accountService.currentUser$
-      .pipe(first(x => (x !== null && x !== undefined && typeof x !== 'undefined')))
-      .subscribe(currentUser => {
-        this.navService.setDarkMode(currentUser.preferences.siteDarkMode);
-      });
-  }
-
-  select(member: string) {
-    // This is a special case
-    if (member === ' Login ' && !this.authDisabled) {
-      return;
-    }
-
-    this.loginForm.get('username')?.setValue(member);
-
-    this.isCollapsed[member] = !this.isCollapsed[member];
-    this.collapseAllButName(member);
-    // ?! Scroll to the newly opened element? 
-  }
-
-  collapseAllButName(name: string) {
-    Object.keys(this.isCollapsed).forEach(key => {
-      if (key !== name) {
-        this.isCollapsed[key] = true;
+        });
+      } else {
+        this.toastr.error(err.error);
       }
     });
   }

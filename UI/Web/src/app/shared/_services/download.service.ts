@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
@@ -10,7 +10,7 @@ import { asyncScheduler, Observable } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
-import { throttleTime } from 'rxjs/operators';
+import { catchError, throttleTime } from 'rxjs/operators';
 
 const DEBOUNCE_TIME = 100;
 

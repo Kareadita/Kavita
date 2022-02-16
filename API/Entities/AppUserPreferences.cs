@@ -58,11 +58,11 @@ namespace API.Entities
         /// Book Reader Option: What direction should the next/prev page buttons go
         /// </summary>
         public ReadingDirection BookReaderReadingDirection { get; set; } = ReadingDirection.LeftToRight;
-
         /// <summary>
-        /// UI Site Global Setting: Whether the UI should render in Dark mode or not.
+        /// UI Site Global Setting: The UI theme the user should use.
         /// </summary>
-        public bool SiteDarkMode { get; set; } = true;
+        /// <remarks>Should default to Dark</remarks>
+        public SiteTheme Theme { get; set; }
 
 
 

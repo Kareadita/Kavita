@@ -502,16 +502,21 @@ UI/Web/dist/
 /API.Tests/Extensions/Test Data/modified on run.txt
 
 # All config files/folders in config except appsettings.json
+/API/config-bak/
+/API/config-bak/*.*
+/API/config-bak/**/
 /API/config/covers/
 /API/config/logs/
 /API/config/backups/
 /API/config/cache/
 /API/config/temp/
+/API/config/themes/
 /API/config/stats/
 /API/config/bookmarks/
 /API/config/kavita.db
 /API/config/kavita.db-shm
 /API/config/kavita.db-wal
+/API/config/kavita.db-journal
 /API/config/Hangfire.db
 /API/config/Hangfire-log.db
 API/config/covers/
@@ -522,3 +527,5 @@ API/config/pre-metadata/
 API/config/post-metadata/
 API.Tests/TestResults/
 UI/Web/.vscode/settings.json
+/API.Tests/Services/Test Data/ArchiveService/CoverImages/output/*
+UI/Web/.angular/

@@ -1,8 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { ServerSettings } from './_models/server-settings';
+
+/**
+ * Used only for the Test Email Service call
+ */
+export interface EmailTestResult {
+  successful: boolean;
+  errorMessage: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +32,14 @@ export class SettingsService {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset', {});
   }
 
+  resetEmailServerSettings() {
+    return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-email-url', {});
+  }
+
+  testEmailServerSettings(emailUrl: string) {
+    return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {url: emailUrl});
+  }
+
   getTaskFrequencies() {
     return this.http.get<string[]>(this.baseUrl + 'settings/task-frequencies');
   }
@@ -39,11 +54,5 @@ export class SettingsService {
 
   getOpdsEnabled() {
     return this.http.get<boolean>(this.baseUrl + 'settings/opds-enabled', {responseType: 'text' as 'json'});
-  }
-
-  getAuthenticationEnabled() {
-    return this.http.get<string>(this.baseUrl + 'settings/authentication-enabled', {responseType: 'text' as 'json'}).pipe(map((res: string) => {
-      return res === 'true';
-    }));
   }
 }

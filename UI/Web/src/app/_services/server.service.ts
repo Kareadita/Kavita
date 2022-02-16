@@ -36,4 +36,8 @@ export class ServerService {
   getChangelog() {
     return this.httpClient.get<UpdateVersionEvent[]>(this.baseUrl + 'server/changelog', {});
   }
+
+  isServerAccessible() {
+    return this.httpClient.get<boolean>(this.baseUrl + 'server/accessible');
+  }
 }

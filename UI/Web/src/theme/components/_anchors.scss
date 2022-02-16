@@ -1,0 +1,15 @@
+// TODO: Figure this out, it causes a lot of style conflicts
+a:not(.dark-exempt) {
+    color: var(--primary-color);
+    > i {
+      color: var(--primary-color) !important;
+    }
+  }
+
+a.read-more-link {
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--body-text-color);
+    cursor: pointer;
+    color: var(--body-text-color) !important;
+}

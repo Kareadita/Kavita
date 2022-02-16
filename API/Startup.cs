@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Extensions;
@@ -25,7 +26,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -146,45 +146,15 @@ namespace API
                 Task.Run(async () =>
                 {
                     // Apply all migrations on startup
-                    // If we have pending migrations, make a backup first
-                    //var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-                    var context = serviceProvider.GetRequiredService<DataContext>();
-                    // var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                    // if (pendingMigrations.Any())
-                    // {
-                    //     logger.LogInformation("Performing backup as migrations are needed");
-                    //     await backupService.BackupDatabase();
-                    // }
-                    //
-                    // await context.Database.MigrateAsync();
-                    // var roleManager = serviceProvider.GetRequiredService<RoleManager<AppRole>>();
-                    //
-                    // await Seed.SeedRoles(roleManager);
-                    // await Seed.SeedSettings(context, directoryService);
-                    // await Seed.SeedUserApiKeys(context);
+                    var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+
 
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
 
-                    var requiresCoverImageMigration = !Directory.Exists(directoryService.CoverImageDirectory);
-                    try
-                    {
-                        // If this is a new install, tables wont exist yet
-                        if (requiresCoverImageMigration)
-                        {
-                            MigrateCoverImages.ExtractToImages(context, directoryService, imageService);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        requiresCoverImageMigration = false;
-                    }
-
-                    if (requiresCoverImageMigration)
-                    {
-                        await MigrateCoverImages.UpdateDatabaseWithImages(context, directoryService);
-                    }
+                    // Only run this if we are upgrading
+                    await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
                 }).GetAwaiter()
                     .GetResult();
             }

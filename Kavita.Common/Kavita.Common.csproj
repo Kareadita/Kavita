@@ -4,11 +4,12 @@
         <TargetFramework>net6.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.4.9.41</AssemblyVersion>
+        <AssemblyVersion>0.5.1.7</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="Flurl.Http" Version="3.2.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />
       <PackageReference Include="SonarAnalyzer.CSharp" Version="8.33.0.40503">

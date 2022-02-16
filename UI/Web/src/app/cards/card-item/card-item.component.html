@@ -1,15 +1,18 @@
 <div class="card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
-      <img *ngIf="total > 0 || supressArchiveWarning" class="img-top lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
-            (error)="imageService.updateErroredImage($event)" aria-hidden="true" height="230px" width="158px">
-      <img *ngIf="total === 0 && !supressArchiveWarning" class="img-top lazyload" [src]="imageService.errorImage" [attr.data-src]="imageUrl" 
-            aria-hidden="true" height="230px" width="158px">
+      <ng-container *ngIf="total > 0 || supressArchiveWarning">
+        <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageUrl"></app-image>
+      </ng-container>
+      <ng-container *ngIf="total === 0 && !supressArchiveWarning">
+        <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageService.errorImage"></app-image>
+      </ng-container>
+      
       <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
         <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
 
         <span class="download" *ngIf="download$ | async as download">
           <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
-          <span class="sr-only" role="status">
+          <span class="visually-hidden" role="status">
             {{download.progress}}% downloaded
           </span>
         </span>
@@ -22,6 +25,11 @@
       <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
         <input type="checkbox" attr.aria-labelledby="{{title}}_{{entity?.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
       </div>
+
+      <div class="count" *ngIf="count > 1">
+        <span class="badge bg-primary">{{count}}</span>
+      </div>
+      <div class="card-overlay"></div>
     </div>
 
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
@@ -29,15 +37,16 @@
         <span class="card-title" placement="top" id="{{title}}_{{entity?.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick()" tabindex="0">
           <span *ngIf="isPromoted()">
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>
-            <span class="sr-only">(promoted)</span>
+            <span class="visually-hidden">(promoted)</span>
           </span>
-          <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="sr-only">{{utilityService.mangaFormat(format)}}</span>
+          <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="visually-hidden">{{utilityService.mangaFormat(format)}}</span>
           &nbsp;{{title}}
         </span>
-        <span class="card-actions float-right">
+        <span class="card-actions float-end">
           <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="title"></app-card-actionables>
         </span>
       </div>
+      <span class="card-title library" [ngbTooltip]="subtitle" placement="top" *ngIf="subtitle.length > 0">{{subtitle}}</span>
       <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | sentenceCase}}</a>
     </div>
 </div>

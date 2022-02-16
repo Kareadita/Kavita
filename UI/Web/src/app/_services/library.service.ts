@@ -5,6 +5,7 @@ import { map, take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Library, LibraryType } from '../_models/library';
 import { SearchResult } from '../_models/search-result';
+import { SearchResultGroup } from '../_models/search/search-result-group';
 
 
 @Injectable({
@@ -31,6 +32,21 @@ export class LibraryService {
         }        
       });
       return this.libraryNames;
+    }));
+  }
+
+  getLibraryName(libraryId: number) {
+    if (this.libraryNames != undefined && this.libraryNames.hasOwnProperty(libraryId)) {
+      return of(this.libraryNames[libraryId]);
+    }
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library').pipe(map(l => {
+      this.libraryNames = {};
+      l.forEach(lib => {
+        if (this.libraryNames !== undefined) {
+          this.libraryNames[lib.id] = lib.name;
+        }        
+      });
+      return this.libraryNames[libraryId];
     }));
   }
 
@@ -91,9 +107,9 @@ export class LibraryService {
 
   search(term: string) {
     if (term === '') {
-      return of([]);
+      return of(new SearchResultGroup());
     }
-    return this.httpClient.get<SearchResult[]>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
+    return this.httpClient.get<SearchResultGroup>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
   }
 
 }

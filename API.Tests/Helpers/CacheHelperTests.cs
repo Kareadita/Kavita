@@ -287,4 +287,5 @@ public class CacheHelperTests
         };
         Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
     }
+
 }

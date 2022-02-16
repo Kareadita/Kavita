@@ -24,6 +24,7 @@ import { ScrollService } from 'src/app/scroll.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
+import { ThemeService } from 'src/app/theme.service';
 
 
 interface PageStyle {
@@ -42,6 +43,15 @@ interface HistoryPoint {
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
 const CHAPTER_ID_NOT_FETCHED = -2;
 const CHAPTER_ID_DOESNT_EXIST = -1;
+
+/**
+ * Styles that should be applied on the top level book-content tag
+ */
+const pageLevelStyles = ['margin-left', 'margin-right', 'font-size'];
+/**
+ * Styles that should be applied on every element within book-content tag
+ */
+const elementLevelStyles = ['line-height', 'font-family'];
 
 @Component({
   selector: 'app-book-reader',
@@ -235,6 +245,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  get IsNextChapter(): boolean {
+    return this.pageNum + 1 >= this.maxPages;
+  }
+  get IsPrevChapter(): boolean {
+    return this.pageNum === 0;
+  }
+
   get drawerBackgroundColor() {
     return this.darkMode ? '#010409': '#fff';
   }
@@ -244,7 +261,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
     private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
-    @Inject(DOCUMENT) private document: Document) {
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -344,17 +361,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.lastSeenScrollPartPath = path;
         }
 
-        if (this.lastSeenScrollPartPath !== '' && !this.incognitoMode) {
-          this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+        if (this.lastSeenScrollPartPath !== '') {
+          this.saveProgress();
         }
     });
+  }
+
+  saveProgress() {
+    let tempPageNum = this.pageNum;
+    if (this.pageNum == this.maxPages - 1) {
+      tempPageNum = this.pageNum + 1;
+    }
+
+    if (!this.incognitoMode) {
+      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, tempPageNum, this.lastSeenScrollPartPath).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
+
   }
 
   ngOnDestroy(): void {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
-      if (this.user.preferences.siteDarkMode) {
+      if (this.themeService.isDarkTheme()) {
         bodyNode.classList.add('bg-dark');
       }
     }
@@ -450,9 +479,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
         if (this.pageNum >= this.maxPages) {
           this.pageNum = this.maxPages - 1;
-          if (!this.incognitoMode) {
-            this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
-          }
+          this.saveProgress();
         }
   
         this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -494,6 +521,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault(); 
     } else if (event.key === KEY_CODES.G) {
       this.goToPage();
+    } else if (event.key === KEY_CODES.F) {
+      this.toggleFullscreen()
     }
   }
 
@@ -587,7 +616,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let margin = '15%';
     if (windowWidth <= 700) {
-      margin = '0%';
+      margin = '5%';
     }
     if (this.user) {
       if (windowWidth > 700) {
@@ -702,9 +731,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    if (!this.incognitoMode) {
-      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
-    }
+    this.saveProgress();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
@@ -747,13 +774,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.scrollService.scrollTo(0, this.reader.nativeElement);
     }
+
+    // we need to click the document before arrow keys will scroll down.
+    this.reader.nativeElement.focus();
   }
 
   setPageNum(pageNum: number) {
     if (pageNum < 0) {
       this.pageNum = 0;
-    } else if (pageNum >= this.maxPages) {
-      this.pageNum = this.maxPages - 1;
+    } else if (pageNum >= this.maxPages - 1) { // This case handles when we are using the pager to move to the next volume/chapter, the pageNum will get incremented past maxPages // NOTE: I made a change where I removed - 1 in comparison, it's breaking page progress
+      this.pageNum = this.maxPages; // 
     } else {
       this.pageNum = pageNum;
     }
@@ -782,6 +812,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   prevPage() {
     const oldPageNum = this.pageNum;
+    
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       this.setPageNum(this.pageNum - 1);
     } else {
@@ -804,18 +835,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-
     const oldPageNum = this.pageNum;
+    if (oldPageNum + 1 === this.maxPages) {
+      // Move to next volume/chapter automatically
+      this.loadNextChapter();
+      return;
+    }
+
+
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       this.setPageNum(this.pageNum + 1);
     } else {
       this.setPageNum(this.pageNum - 1);
     }
 
-    if (oldPageNum + 1 === this.maxPages) {
-      // Move to next volume/chapter automatically
-      this.loadNextChapter();
-    }
+    
 
     if (oldPageNum === this.pageNum) { return; }
 
@@ -872,17 +906,41 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateReaderStyles();
   }
 
+  /**
+   * Applies styles onto the html of the book page
+   */
   updateReaderStyles() {
-    if (this.readingHtml != undefined && this.readingHtml.nativeElement) {
-      Object.entries(this.pageStyles).forEach(item => {
-        if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
-          // Remove the style or skip
-          this.renderer.removeStyle(this.readingHtml.nativeElement, item[0]);
-          return;
-        }
+    if (this.readingHtml === undefined || !this.readingHtml.nativeElement)  return;
+
+    // Line Height must be placed on each element in the page
+    
+    // Apply page level overrides
+    Object.entries(this.pageStyles).forEach(item => {
+      if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
+        // Remove the style or skip
+        this.renderer.removeStyle(this.readingHtml.nativeElement, item[0]);
+        return;
+      }
+      if (pageLevelStyles.includes(item[0])) {
         this.renderer.setStyle(this.readingHtml.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
-      });
+      }
+    });
+
+    const individualElementStyles = Object.entries(this.pageStyles).filter(item => elementLevelStyles.includes(item[0]));
+    for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
+      const elem = this.readingHtml.nativeElement.children.item(i);
+      if (elem?.tagName === 'STYLE') continue;
+      individualElementStyles.forEach(item => {
+          if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
+            // Remove the style or skip
+            this.renderer.removeStyle(elem, item[0]);
+            return;
+          }
+          this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
+        });
+      
     }
+
   }
 
 
@@ -911,7 +969,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setOverrideStyles() {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
-      if (this.user.preferences.siteDarkMode) {
+      if (this.themeService.isDarkTheme()) {
         bodyNode.classList.remove('bg-dark');
       }
       
@@ -1025,7 +1083,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
     this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
-    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    this.saveProgress();
   }
 
   toggleFullscreen() {

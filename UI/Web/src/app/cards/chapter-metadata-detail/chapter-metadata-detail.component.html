@@ -4,9 +4,13 @@
         
         
         <!-- Arc Information -->
-        
+        <div class="row g-0">
+            <div class="col">
+                Id: {{chapter.id}} 
+            </div>
+        </div>
     
-        <div class="row no-gutters">
+        <div class="row g-0">
             <div class="col">
                 Title: {{chapter.titleName || '-'}} 
             </div>
@@ -15,7 +19,7 @@
             </div>
         </div>
     
-        <div class="row no-gutters">
+        <div class="row g-0">
             <div class="col" *ngIf="chapter.hasOwnProperty('created')">
                 Added: {{(chapter.created | date: 'short') || '-'}}
             </div>
@@ -26,11 +30,11 @@
     </div>
 
     <ul class="list-unstyled" >
-        <li class="media my-4">
+        <li class="d-flex my-4">
             <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
-                <img class="mr-3" style="width: 74px" [src]="chapter.coverImage">
+                <app-image class="me-3" width="74px" [imageUrl]="chapter.coverImage"></app-image>
             </a>
-            <div class="media-body">
+            <div class="flex-grow-1">
                 <h5 class="mt-0 mb-1">
                     <span *ngIf="chapter.number !== '0'; else specialHeader">
                         <!-- TODO: Add back in 
@@ -38,7 +42,7 @@
                             <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
                             {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
                         </span> -->
-                        <span class="badge badge-primary badge-pill">
+                        <span class="badge bg-primary rounded-pill">
                             <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
                             <span *ngIf="chapter.pagesRead === 0">UNREAD</span>
                             <span *ngIf="chapter.pagesRead === chapter.pages">READ</span>
@@ -52,7 +56,7 @@
     
     
                 <ng-container>
-                    <div class="row no-gutters mt-1"  *ngIf="chapter.writers && chapter.writers.length > 0">
+                    <div class="row g-0 mt-1"  *ngIf="chapter.writers && chapter.writers.length > 0">
                         <div class="col-md-4">
                             <h5>Writers</h5>
                         </div>
@@ -61,7 +65,7 @@
                         </div>
                     </div>
                 
-                    <div class="row no-gutters mt-1"  *ngIf="chapter.coverArtist && chapter.coverArtist.length > 0">
+                    <div class="row g-0 mt-1"  *ngIf="chapter.coverArtist && chapter.coverArtist.length > 0">
                         <div class="col-md-4">
                             <h5>Artists</h5>
                         </div>
@@ -70,7 +74,7 @@
                         </div>
                     </div>
                 
-                    <div class="row no-gutters mt-1"  *ngIf="chapter.publisher && chapter.publisher.length > 0">
+                    <div class="row g-0 mt-1"  *ngIf="chapter.publisher && chapter.publisher.length > 0">
                         <div class="col-md-4">
                             <h5>Publishers</h5>
                         </div>
@@ -94,7 +98,7 @@
     Arc Information
     
 
-    <div class="row no-gutters">
+    <div class="row g-0">
         <div class="col">
             Id: {{chapter.id}}
         </div>
@@ -103,7 +107,7 @@
         </div>
     </div>
 
-    <div class="row no-gutters">
+    <div class="row g-0">
         <div class="col" *ngIf="chapter.hasOwnProperty('created')">
             Added: {{(chapter.created | date: 'short') || '-'}}
         </div>

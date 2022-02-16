@@ -24,12 +24,16 @@ namespace API.Extensions
                     opt.Password.RequireUppercase = false;
                     opt.Password.RequireNonAlphanumeric = false;
                     opt.Password.RequiredLength = 6;
+
+                    opt.SignIn.RequireConfirmedEmail = true;
                 })
+                .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider)
                 .AddRoles<AppRole>()
                 .AddRoleManager<RoleManager<AppRole>>()
                 .AddSignInManager<SignInManager<AppUser>>()
                 .AddRoleValidator<RoleValidator<AppRole>>()
                 .AddEntityFrameworkStores<DataContext>();
+
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -39,7 +43,8 @@ namespace API.Extensions
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"])),
                         ValidateIssuer = false,
-                        ValidateAudience = false
+                        ValidateAudience = false,
+                        ValidIssuer = "Kavita"
                     };
 
                     options.Events = new JwtBearerEvents()
@@ -62,6 +67,7 @@ namespace API.Extensions
             {
                 opt.AddPolicy("RequireAdminRole", policy => policy.RequireRole(PolicyConstants.AdminRole));
                 opt.AddPolicy("RequireDownloadRole", policy => policy.RequireRole(PolicyConstants.DownloadRole, PolicyConstants.AdminRole));
+                opt.AddPolicy("RequireChangePasswordRole", policy => policy.RequireRole(PolicyConstants.ChangePasswordRole, PolicyConstants.AdminRole));
             });
 
             return services;

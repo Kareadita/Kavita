@@ -1,4 +1,4 @@
-@use '../../../theme/colors';
+
 
 $triangle-size: 30px;
 $image-height: 230px;
@@ -7,7 +7,7 @@ $image-width: 160px;
 .error-banner {
     width: 160px;
     height: 18px;
-    background-color: colors.$error-color;
+    background-color: var(--toast-error-bg-color);
     font-size: 12px;
     color: white;
     text-transform: uppercase;
@@ -25,6 +25,11 @@ $image-width: 160px;
     padding-left: 0px;
     padding-right: 0px;
     box-sizing: border-box;
+    position: relative;
+    background-color: var(--card-bg-color);
+    color: var(--card-text-color);
+    border-color: var(--card-border-color);
+
 }
 
 .card-title {
@@ -39,7 +44,7 @@ $image-width: 160px;
 }
 
 .selected-highlight {
-    outline: 2px solid colors.$primary-color;
+    outline: 2px solid var(--primary-color);
 }
 
 
@@ -52,7 +57,7 @@ $image-width: 160px;
     height: 5px;
 
     .progress {
-        color: colors.$primary-color;
+        color: var(--card-progress-bar-color);
         background-color: transparent;
     }
 }
@@ -73,7 +78,7 @@ $image-width: 160px;
     height: 0;
     border-style: solid;
     border-width: 0 $triangle-size $triangle-size 0;
-    border-color: transparent colors.$primary-color transparent transparent;
+    border-color: transparent var(--primary-color) transparent transparent;
 }
 
 
@@ -106,10 +111,12 @@ $image-width: 160px;
 
         .bulk-mode {
             visibility: visible;
+            z-index: 110;
         }
 
         .overlay-item {
             visibility: visible;
+            z-index: 100;
         }
     }
     
@@ -118,6 +125,12 @@ $image-width: 160px;
     }
     
     z-index: 10;
+
+    .count {
+        top: 5px;
+        right: 10px;
+        position: absolute;
+    }
 }
 
 .card-actions {
@@ -135,4 +148,18 @@ $image-width: 160px;
     font-size: 13px;
     text-decoration: none;
     margin-top: 0px;
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 230px;
+    z-index: 10;
+    transition: opacity 0.2s;
+}
+
+.card-overlay:hover {
+    opacity: 0;
 }

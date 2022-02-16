@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -198,13 +198,15 @@ namespace API.Data.Migrations
                     b.Property<int>("ScalingOption")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("SiteDarkMode")
+                    b.Property<int?>("ThemeId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId")
                         .IsUnique();
+
+                    b.HasIndex("ThemeId");
 
                     b.ToTable("AppUserPreferences");
                 });
@@ -687,6 +689,38 @@ namespace API.Data.Migrations
                     b.ToTable("ServerSetting");
                 });
 
+            modelBuilder.Entity("API.Entities.SiteTheme", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteTheme");
+                });
+
             modelBuilder.Entity("API.Entities.Tag", b =>
                 {
                     b.Property<int>("Id")
@@ -967,7 +1001,13 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.SiteTheme", "Theme")
+                        .WithMany()
+                        .HasForeignKey("ThemeId");
+
                     b.Navigation("AppUser");
+
+                    b.Navigation("Theme");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserProgress", b =>

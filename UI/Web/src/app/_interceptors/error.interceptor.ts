@@ -62,9 +62,15 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (Array.isArray(error.error)) {
       const modalStateErrors: any[] = [];
       if (error.error.length > 0 && error.error[0].hasOwnProperty('message')) {
-        error.error.forEach((issue: {status: string, details: string, message: string}) => {
-          modalStateErrors.push(issue.details);
-        });
+        if (error.error[0].details === null) {
+          error.error.forEach((issue: {status: string, details: string, message: string}) => {
+            modalStateErrors.push(issue.message);
+          });
+        } else {
+          error.error.forEach((issue: {status: string, details: string, message: string}) => {
+            modalStateErrors.push(issue.details);
+          });
+        }
       } else {
         error.error.forEach((issue: {code: string, description: string}) => {
           modalStateErrors.push(issue.description);
@@ -83,6 +89,10 @@ export class ErrorInterceptor implements HttpInterceptor {
     } else {
       console.error('error:', error);
       if (error.statusText === 'Bad Request') {
+        if (error.error instanceof Blob) {
+          this.toastr.error('There was an issue downloading this file or you do not have permissions', error.status);         
+          return; 
+        }
         this.toastr.error(error.error, error.status);
       } else {
         this.toastr.error(error.statusText === 'OK' ? error.error : error.statusText, error.status);
@@ -101,7 +111,13 @@ export class ErrorInterceptor implements HttpInterceptor {
         console.log('500 error: ', error);
       }
       this.toastr.error(err.message);
-    } else {
+    } else if (error.hasOwnProperty('message') && error.message.trim() !== '') {
+      if (error.message != 'User is not authenticated') {
+        console.log('500 error: ', error);
+      }
+      this.toastr.error(error.message);
+    }
+     else {
       this.toastr.error('There was an unknown critical error.');
       console.error('500 error:', error);
     }

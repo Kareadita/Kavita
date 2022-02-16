@@ -5,12 +5,12 @@ import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
-import { KEY_CODES } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { SeriesFilter } from '../_models/series-filter';
+import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
@@ -73,12 +73,14 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
-    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService) {
+    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
+    private utilityService: UtilityService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
       return;
     }
+
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
@@ -87,9 +89,11 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-    this.filterSettings.presetLibraryId = this.libraryId;
     
-    this.loadPage();
+    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
+    this.filterSettings.presets.libraries = [this.libraryId];
+    
+    //this.loadPage();
   }
 
   ngOnInit(): void {
@@ -134,9 +138,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFilter(data: SeriesFilter) {
-    this.filter = data;
-    if (this.pagination !== undefined && this.pagination !== null) {
+  updateFilter(event: FilterEvent) {
+    this.filter = event.filter;
+    const page = this.getPage();
+    if (page === undefined || page === null || !event.isFirst) {
       this.pagination.currentPage = 1;
       this.onPageChange(this.pagination);
     } else {
@@ -151,6 +156,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
     this.loadingSeries = true;
 
+    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
       this.filter.libraries.push(this.libraryId);
@@ -165,7 +171,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
+    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?' + 'page=' + this.pagination.currentPage);
     this.loadPage();
   }
 

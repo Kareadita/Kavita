@@ -23,11 +23,6 @@ namespace API.DTOs.Settings
         /// Enables OPDS connections to be made to the server.
         /// </summary>
         public bool EnableOpds { get; set; }
-
-        /// <summary>
-        /// Enables Authentication on the server. Defaults to true.
-        /// </summary>
-        public bool EnableAuthentication { get; set; }
         /// <summary>
         /// Base Url for the kavita. Requires restart to take effect.
         /// </summary>
@@ -37,5 +32,10 @@ namespace API.DTOs.Settings
         /// </summary>
         /// <remarks>If null or empty string, will default back to default install setting aka <see cref="DirectoryService.BookmarkDirectory"/></remarks>
         public string BookmarksDirectory { get; set; }
+        /// <summary>
+        /// Email service to use for the invite user flow, forgot password, etc.
+        /// </summary>
+        /// <remarks>If null or empty string, will default back to default install setting aka <see cref="EmailService.DefaultApiUrl"/></remarks>
+        public string EmailServiceUrl { get; set; }
     }
 }
