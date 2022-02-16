@@ -25,7 +25,7 @@
     </ng-template>
 </app-carousel-reel>
 
-<app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added">
+<app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
         <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)" 
         [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)"></app-card-item>
