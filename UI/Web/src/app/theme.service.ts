@@ -38,6 +38,8 @@ export class ThemeService implements OnDestroy {
   messageHub: MessageHubService, private domSantizer: DomSanitizer, private confirmService: ConfirmService) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
+    this.getThemes();
+
     messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
       if (message.event === EVENTS.SiteThemeProgress) {
         if ((message.payload as SiteThemeProgressEvent).progress === 1) {
@@ -86,7 +88,7 @@ export class ThemeService implements OnDestroy {
     if (theme) {
       this.unsetThemes();
       this.renderer.addClass(this.document.querySelector('body'), theme.selector);
-      
+
       if (theme.provider === ThemeProvider.User && !this.hasThemeInHead(theme.name)) {
         // We need to load the styles into the browser
         this.fetchThemeContent(theme.id).subscribe(async (content) => {

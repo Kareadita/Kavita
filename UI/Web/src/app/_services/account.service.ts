@@ -79,9 +79,7 @@ export class AccountService implements OnDestroy {
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(this.lastLoginKey, user.username);
-      console.log('user pref: ', user.preferences);
       if (user.preferences) {
-        console.log('user theme: ', user.preferences.theme);
         this.themeService.setTheme(user.preferences.theme.name);
       } else {
         this.themeService.setTheme(this.themeService.defaultTheme);
