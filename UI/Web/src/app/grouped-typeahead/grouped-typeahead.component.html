@@ -85,7 +85,8 @@
                 </ul>
             </ng-container>
 
-            <ng-container *ngIf="noResultsTemplate != undefined && searchTerm.length > 0 && !grouppedData.persons.length && !grouppedData.collections.length && !grouppedData.series.length && !grouppedData.persons.length && !grouppedData.tags.length && !grouppedData.genres.length">
+            <ng-container *ngIf="noResultsTemplate != undefined && searchTerm.length > 0 && !grouppedData.persons.length && !grouppedData.collections.length 
+                && !grouppedData.series.length && !grouppedData.persons.length && !grouppedData.tags.length && !grouppedData.genres.length && !grouppedData.libraries.length">
               <ul class="list-group results">
                 <li class="list-group-item">
                   <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
