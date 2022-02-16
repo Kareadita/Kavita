@@ -85,7 +85,8 @@ export class ThemeService implements OnDestroy {
     const theme = this.themeCache.find(t => t.name.toLowerCase() === themeName.toLowerCase());
     if (theme) {
       this.unsetThemes();
-
+      this.renderer.addClass(this.document.querySelector('body'), theme.selector);
+      
       if (theme.provider === ThemeProvider.User && !this.hasThemeInHead(theme.name)) {
         // We need to load the styles into the browser
         this.fetchThemeContent(theme.id).subscribe(async (content) => {
@@ -104,8 +105,6 @@ export class ThemeService implements OnDestroy {
       } else {
         this.currentThemeSource.next(theme);
       }
-      console.log('selector: ', theme.selector);
-      this.renderer.addClass(this.document.querySelector('body'), theme.selector);
     } else {
       // Only time themes isn't already loaded is on first load
       this.getThemes().subscribe(themes => {
