@@ -1,13 +1,10 @@
 
-$primary-color: white;
-$bg-color: rgb(22, 27, 34);
-
 .btn:focus, .btn:hover {
     box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1);
 }
 
 .navbar {
-    background-color: $bg-color;
+    background-color: var(--nav-header-bg-color);
 }
 
 /* small devices (phones, 650px and down) */
@@ -54,7 +51,7 @@ $bg-color: rgb(22, 27, 34);
 
 .focus-visible:focus {
     visibility: visible;
-    color: $primary-color;
+    color:  var(--nav-header-text-color);
 }
 
 .ng-autocomplete {
@@ -62,7 +59,7 @@ $bg-color: rgb(22, 27, 34);
 }
 
 .primary-text {
-    color: $primary-color;
+    color:  var(--nav-header-text-color);
     border: none;
 }
 

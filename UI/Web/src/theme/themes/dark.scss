@@ -39,12 +39,14 @@
     --btn-disabled-text-color: white;
     --btn-disabled-border-color: #6c757d;
   
-    /* Nav */
+    /* Nav (Tabs) */
     --nav-tab-border-color: rgba(44, 118, 88, 0.7);
     --nav-tab-text-color: var(--body-text-color);
     --nav-tab-bg-color: var(--bs-body-bg);
     --nav-tab-hover-border-color: var(--primary-color-dark-shade);
     --nav-tab-active-text-color: white;
+    --nav-tab-border-hover-color: transparent;
+
     --nav-link-bg-color: var(--primary-color-dark-shade);
     --nav-link-active-text-color: white;
     --nav-link-text-color: white;
@@ -58,7 +60,10 @@
     --nav-tab-border-hover-left: var(--primary-color-dark-shade);
     --nav-tab-border-hover-bottom: rgba(44, 118, 88, 0.7);
     --nav-tab-border-hover-right: var(--primary-color-dark-shade);
-  
+
+    /* Header */    
+    --nav-header-text-color: white;
+    --nav-header-bg-color: rgb(22, 27, 34);
   
     /* Toasts */
     --toast-success-bg-color: rgba(59, 158, 118, 0.9);
