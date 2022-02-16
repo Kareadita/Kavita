@@ -1,7 +1,6 @@
 import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { SwiperComponent } from 'swiper/angular';
-//import Swiper from 'swiper';
-//import { SwiperEvents, Swiper } from 'swiper/types';
+import { Swiper, SwiperEvents } from 'swiper/types';
 
 @Component({
   selector: 'app-carousel-reel',
@@ -15,18 +14,17 @@ export class CarouselReelComponent implements OnInit {
   @Input() title = '';
   @Output() sectionClick = new EventEmitter<string>();
 
-  @ViewChild('swiper', { static: false }) swiper?: SwiperComponent;
+  swiper: Swiper | undefined;
 
 
-  //swiper!: Swiper;
   trackByIdentity: (index: number, item: any) => string;
 
   get isEnd() {
-    return this.swiper?.swiperRef.isEnd;
+    return this.swiper?.isEnd;
   }
 
   get isBeginning() {
-    return this.swiper?.swiperRef.isBeginning;
+    return this.swiper?.isBeginning;
   }
 
   constructor() { 
@@ -36,14 +34,16 @@ export class CarouselReelComponent implements OnInit {
   ngOnInit(): void {}
 
   nextPage() {
+    if (this.isEnd) return;
     if (this.swiper) {
-      this.swiper.swiperRef.setProgress(this.swiper.swiperRef.progress + 0.25, 600);
+      this.swiper.setProgress(this.swiper.progress + 0.25, 600);
     }
   }
 
   prevPage() {
+    if (this.isBeginning) return;
     if (this.swiper) {
-      this.swiper.swiperRef.setProgress(this.swiper.swiperRef.progress - 0.25, 600);
+      this.swiper.setProgress(this.swiper.progress - 0.25, 600);
     }
   }
 
@@ -51,14 +51,7 @@ export class CarouselReelComponent implements OnInit {
     this.sectionClick.emit(this.title);
   }
 
-  // onSwiper(eventParams: Parameters<SwiperEvents['init']>) {
-  //   console.log('swiper: ', eventParams);
-  //   [this.swiper] = eventParams;
-  // }
-
-  // onSwiper(params: Swiper) {
-  //   // const [swiper] = params;
-  //   // console.log(swiper);
-  //   // return params;
-  // }
+  onSwiper(eventParams: Parameters<SwiperEvents['init']>) {
+    [this.swiper] = eventParams;
+  }
 }

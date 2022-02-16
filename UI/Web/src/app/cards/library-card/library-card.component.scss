@@ -1,4 +1,3 @@
-$primary-color: #cc7b19;
 
 .card {
     margin: 10px;
@@ -28,7 +27,6 @@ $primary-color: #cc7b19;
 .overlay {
     height: 160px;
     &:hover {
-        background-color: rgba(0, 0, 0, 0.4);
         visibility: visible;
 
         .overlay-item {

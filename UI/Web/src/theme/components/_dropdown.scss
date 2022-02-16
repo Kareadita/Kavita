@@ -1,0 +1,15 @@
+// Dropdown is the nav bar user profile component
+.dropdown-menu {
+    background-color: var(--dropdown-item-bg-color);
+
+    .dropdown-item {
+        color: var(--dropdown-item-text-color); 
+        background-color: var(--dropdown-item-bg-color);
+        cursor: pointer;
+
+        &:hover, &:focus {
+            color: var(--dropdown-item-hover-text-color); 
+            background-color: var(--dropdown-item-hover-bg-color);
+        }
+    }
+}

@@ -1,23 +1,18 @@
-@use '../../../theme/colors';
-
-$bg-color: #c9c9c9;
-$bdr-color: #f2f2f2;
-
-.badge {
-    //background-color: $bg-color;
+.tagbadge {
+    background-color: var(--tagbadge-bg-color);
     transition: all .3s ease-out;
     margin: 3px 5px 3px 0px;
-    padding: 2px 15px;
+    padding: 2px 10px;
     border-radius: 6px;
     font-size: 14px;
-    border: 1px solid $bdr-color;
+    border: 1px solid var(--tagbadge-border-color);
     display: inline-block;
+    cursor: pointer;
+    width: auto;
 
     i {
-        color: colors.$primary-color;
         font-size: 14px;
         font-weight: bold;
-        margin-left: 10px;
         margin-right: 0px;
         cursor: pointer;
     }

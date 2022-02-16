@@ -1,5 +1,3 @@
-@use '../../theme/colors';
-
 $center-width: 50%;
 $side-width: 25%;
 
@@ -16,16 +14,16 @@ $pointer-offset: 5px;
     }
 } 
 
-.btn-icon {
-    color: white;
-}
+// .btn-icon {
+//     color: white;
+// }
 
 canvas {
     position: absolute;
 }
 
 .reader {
-    background-color: black;
+    background-color: var(--manga-reader-bg-color);
     overflow: auto;
 
     img {
@@ -58,9 +56,9 @@ canvas {
 
 
 .overlay {
-  background-color: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px); // BUG: This doesn't work on Firefox
-  color: white;
+  background-color: var(--manga-reader-overlay-bg-color);
+  backdrop-filter: var(--manga-reader-overlay-filter); // BUG: This doesn't work on Firefox
+  color: var(--manga-reader-overlay-text-color);
 }
 
 // Fitting Options
@@ -175,7 +173,7 @@ canvas {
       height: 2px;
     }
     .custom-slider .ngx-slider .ngx-slider-selection {
-      background: colors.$primary-color;
+      background: var(--primary-color);
     }
   
     .custom-slider .ngx-slider .ngx-slider-pointer {
@@ -183,7 +181,7 @@ canvas {
       height: 16px;
       top: auto; /* to remove the default positioning */
       bottom: 0;
-      background-color: colors.$primary-color; // #333;
+      background-color: var(--primary-color); // #333;
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
     }
@@ -214,7 +212,7 @@ canvas {
     }
   
     .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
-      background: colors.$primary-color;
+      background: var(--primary-color);
     }
   }
 
@@ -235,12 +233,12 @@ canvas {
   }
 
 .highlight {
-  background-color: rgba(65, 225, 100, 0.5) !important;
+  background-color: var(--manga-reader-next-highlight-bg-color) !important;
   animation: fadein .5s both;
   backdrop-filter: blur(10px);
 }
 .highlight-2 {
-  background-color: rgba(65, 105, 225, 0.5) !important;
+  background-color: var(--manga-reader-prev-highlight-bg-color) !important;
   animation: fadein .5s both;
   backdrop-filter: blur(10px);
 }
@@ -255,6 +253,6 @@ canvas {
         border: 0px;
     }
     50% {
-        border: 5px solid colors.$primary-color;
+        border: 5px solid var(--primary-color);
     }
 }

@@ -77,6 +77,7 @@ namespace API
 
                 await Seed.SeedRoles(roleManager);
                 await Seed.SeedSettings(context, directoryService);
+                await Seed.SeedThemes(context);
                 await Seed.SeedUserApiKeys(context);
 
 

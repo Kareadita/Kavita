@@ -1,13 +1,8 @@
-@use "../../../theme/colors";
-
-
-
 .login {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: -61px; // To offset the navbar
-    height: calc(100vh);
+    height: calc(var(--vh, 1vh) * 100 - 57px);
     min-height: 289px;
     position: relative;
     width: 100vw;
@@ -33,14 +28,11 @@
         }
     }
 
-    .row {
-        margin-top: 10vh;
-    }
-
     .card {
-        background-color: colors.$primary-color;
+        background-color: var(--primary-color);
         color: #fff;
         min-width: 300px;
+        max-width: 12rem;
 
         &:focus {
             border: 2px solid white;
@@ -59,34 +51,5 @@
         .card-text {
             font-family: "EBGaramond", "Helvetica Neue", sans-serif;
         }
-
-        .alt {
-            background-color: #424c72;
-            border-color: #444f75;
-        }
-
-        .alt:hover {
-            background-color: #3b4466;
-        }
-
-        .alt:focus {
-            background-color: #343c59;
-            box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%);
-        }
-    }
-
-    ::ng-deep input {
-        background-color: #fff !important;
-        color: black;
-    }
-
-    ::ng-deep a {
-        color: white;
     }
 }
-
-.invalid-feedback {
-    display: inline-block;
-    color: #343c59;
-}
-

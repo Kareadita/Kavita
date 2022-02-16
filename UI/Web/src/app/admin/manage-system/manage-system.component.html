@@ -1,11 +1,11 @@
 <div class="container-fluid">
 
-    <div class="float-right">
+    <div class="float-end">
         <div class="d-inline-block" ngbDropdown #myDrop="ngbDropdown">
-            <button class="btn btn-outline-primary mr-2" id="dropdownManual" ngbDropdownToggle>
+            <button class="btn btn-outline-primary me-2" id="dropdownManual" ngbDropdownToggle>
                 <ng-container *ngIf="backupDBInProgress || clearCacheInProgress || isCheckingForUpdate || downloadLogsInProgress">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="sr-only">Loading...</span>
+                    <span class="visually-hidden">Loading...</span>
                 </ng-container>
                 Actions
             </button>
@@ -28,7 +28,7 @@
 
     <h3>About System</h3>
     <hr/>
-    <div class="form-group" *ngIf="serverInfo">
+    <div class="mb-3" *ngIf="serverInfo">
         <dl>
             <dt>Version</dt>
             <dd>{{serverInfo.kavitaVersion}}</dd>

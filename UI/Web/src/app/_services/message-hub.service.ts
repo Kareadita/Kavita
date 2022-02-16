@@ -1,15 +1,13 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
-import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
@@ -25,6 +23,10 @@ export enum EVENTS {
   BackupDatabaseProgress = 'BackupDatabaseProgress',
   CleanupProgress = 'CleanupProgress',
   DownloadProgress = 'DownloadProgress',
+  /**
+   * A custom user site theme is added or removed during a scan
+   */
+  SiteThemeProgress = 'SiteThemeProgress',
   /**
    * A cover is updated
    */
@@ -119,6 +121,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.RefreshMetadataProgress,
         payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.SiteThemeProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SiteThemeProgress,
+        payload: resp.body as SiteThemeProgressEvent
       });
     });
 

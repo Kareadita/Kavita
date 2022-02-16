@@ -1,42 +1,47 @@
 @use '../node_modules/swiper/swiper.scss' as swiper;
-@use '~bootstrap/scss/mixins/_breakpoints.scss' as breakpoints;
+
+// Import themes which define the css variables we use to customize the app
+@import './theme/themes/light';
+@import './theme/themes/dark';
+@import './theme/themes/eink';
 
 // Import colors for overrides of bootstrap theme
-@import './theme/colors';
 @import './theme/toastr';
+@import './theme/variables';
 
 // Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';
 
 
+// Import all the customized theme overrides
+@import './theme/components/input';
+@import './theme/components/anchors';
+@import './theme/components/nav';
+@import './theme/components/buttons';
+@import './theme/components/toast';
+@import './theme/components/checkbox';
+@import './theme/components/tagbadge';
+@import './theme/components/list';
+@import './theme/components/navbar';
+@import './theme/components/popover';
+@import './theme/components/pagination';
+@import './theme/components/dropdown';
+@import './theme/components/accordion';
+@import './theme/components/breadcrumb';
+@import './theme/components/ratingstar';
+@import './theme/components/modal';
+@import './theme/components/card';
+@import './theme/components/slider';
+@import './theme/components/radios';
+@import './theme/components/selects';
 
-@import './theme/dark.scss';
 
-
-
+@import './theme/utilities/utilities';
+@import './theme/utilities/animations';
+@import './theme/utilities/global';
 
 
 // Global Styles
-button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
-  cursor: not-allowed;
-}
-
-label, select, .clickable {
-  cursor: pointer;
-}
-
-.btn-primary {
-  color: white;
-}
-
-:root {
-  color-scheme: light;
-}
-
-// :root .bg-dark {
-//   color-scheme: dark;
-// }
-
 @font-face {
   font-family: "EBGarmond";
   src: url("assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf") format("truetype");
@@ -47,59 +52,18 @@ label, select, .clickable {
   src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
 }
 
-html, body { height: 100%; }
-body {
-  margin: 0; 
-  font-family: "EBGaramond", "Helvetica Neue", sans-serif;
-}
-
-
-.btn-icon {
+label, select, .clickable {
   cursor: pointer;
 }
 
-.btn.btn-secondary.alt {
-  background-color: #424c72;
-  border-color: #444f75;
-
-  &:hover {
-    background-color: #3b4466; 
-  }
-
-  &:focus {
-    background-color: #343c59;
-    box-shadow: 0 0 0 0.2rem rgb(68 79 117 / 50%); 
-  }
+html, body { height: 100%; color-scheme: var(--color-scheme); }
+body {
+  margin: 0; 
+  font-family: var(--body-font-family);
+  color: var(--body-text-color);
 }
 
-
+// Needed for fullscreen
 app-root {
   background-color: inherit;
-}
-
-
-
-
-// Utiliities
-@include breakpoints.media-breakpoint-down(xs, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
-  .phone-hidden {
-    display: none;
-  }
-}
-
-@include breakpoints.media-breakpoint-up(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
-  .not-phone-hidden {
-    display: none;
-  }
-}
-
-@keyframes fadein {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-// Debug styles
-.redlines * {
-  outline: 1px solid red;
-  outline-offset: -1px;
 }

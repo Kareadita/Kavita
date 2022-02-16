@@ -1,18 +1,20 @@
 <div class="container-fluid" style="padding-top: 10px">
-    <div class="row no-gutters pb-2">
-        <div class="col mr-auto">
+    <div class="row g-0 pb-2">
+        <div class="col me-auto">
             <h2 style="display: inline-block">
                 <span *ngIf="actions.length > 0" class="">
                     <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
                 </span>{{header}}&nbsp;
-                <span class="badge badge-primary badge-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
+                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </h2>
         </div>
 
-        <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
-            <i class="fa fa-filter" aria-hidden="true"></i>
-            <span class="sr-only">Sort / Filter</span>
-        </button>
+        <div class="col-auto align-self-end">
+            <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
+                <i class="fa fa-filter" aria-hidden="true"></i>
+                <span class="visually-hidden">Sort / Filter</span>
+            </button>
+        </div>
     </div>
     
     <div class="phone-hidden">
@@ -25,8 +27,8 @@
         <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
-                    <button type="button" class="close" aria-label="Close" (click)="commentDrawer.close()">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()">
+                        
                     </button>
                 </h2>
                 
@@ -40,11 +42,11 @@
     <ng-template #filterSection>
         <ng-template #globalFilterTooltip>This is library agnostic</ng-template>
         <div class="filter-section mx-auto pb-3">
-            <div class="row justify-content-center no-gutters">
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.formatDisabled">
-                    <div class="form-group">
-                        <label for="format">Format</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
-                        <span class="sr-only" id="filter-global-format-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
+            <div class="row justify-content-center g-0">
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.formatDisabled">
+                    <div class="mb-3">
+                        <label for="format" class="form-label">Format</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
+                        <span class="visually-hidden" id="filter-global-format-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateFormatFilters($event)" [settings]="formatSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -56,9 +58,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3"*ngIf="!filterSettings.libraryDisabled">
-                    <div class="form-group">
-                        <label for="libraries">Libraries</label>
+                <div class="col-md-2 me-3"*ngIf="!filterSettings.libraryDisabled">
+                    <div class="mb-3">
+                        <label for="libraries" class="form-label">Libraries</label>
                         <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -70,10 +72,10 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.collectionDisabled">
-                    <div class="form-group">
-                        <label for="collections">Collections</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
-                        <span class="sr-only" id="filter-global-collections-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.collectionDisabled">
+                    <div class="mb-3">
+                        <label for="collections" class="form-label">Collections</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="globalFilterTooltip" role="button" tabindex="0"></i>
+                        <span class="visually-hidden" id="filter-global-collections-help"><ng-container [ngTemplateOutlet]="globalFilterTooltip"></ng-container></span>
                         <app-typeahead (selectedData)="updateCollectionFilters($event)" [settings]="collectionSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -85,9 +87,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.genresDisabled">
-                    <div class="form-group">
-                        <label for="genres">Genres</label>
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.genresDisabled">
+                    <div class="mb-3">
+                        <label for="genres" class="form-label">Genres</label>
                         <app-typeahead (selectedData)="updateGenreFilters($event)" [settings]="genreSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -99,9 +101,9 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.tagsDisabled">
-                    <div class="form-group">
-                        <label for="tags">Tags</label>
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.tagsDisabled">
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags</label>
                         <app-typeahead (selectedData)="updateTagFilters($event)" [settings]="tagsSettings" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.title}}
@@ -113,11 +115,11 @@
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-center no-gutters">
+            <div class="row justify-content-center g-0">
                 <!-- The People row -->
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
-                    <div class="form-group">
-                        <label for="cover-artist">Cover Artists</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
+                    <div class="mb-3">
+                        <label for="cover-artist" class="form-label">Cover Artists</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -129,9 +131,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Writer)">
-                    <div class="form-group">
-                        <label for="writers">Writers</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Writer)">
+                    <div class="mb-3">
+                        <label for="writers" class="form-label">Writers</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -143,9 +145,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Publisher)">
-                    <div class="form-group">
-                        <label for="publisher">Publisher</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Publisher)">
+                    <div class="mb-3">
+                        <label for="publisher" class="form-label">Publisher</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -157,9 +159,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Penciller)">
-                    <div class="form-group">
-                        <label for="penciller">Penciller</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Penciller)">
+                    <div class="mb-3">
+                        <label for="penciller" class="form-label">Penciller</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -171,9 +173,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Letterer)">
-                    <div class="form-group">
-                        <label for="letterer">Letterer</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Letterer)">
+                    <div class="mb-3">
+                        <label for="letterer" class="form-label">Letterer</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -185,9 +187,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Inker)">
-                    <div class="form-group">
-                        <label for="inker">Inker</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Inker)">
+                    <div class="mb-3">
+                        <label for="inker" class="form-label">Inker</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -199,9 +201,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Editor)">
-                    <div class="form-group">
-                        <label for="editor">Editor</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Editor)">
+                    <div class="mb-3">
+                        <label for="editor" class="form-label">Editor</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -213,9 +215,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Colorist)">
-                    <div class="form-group">
-                        <label for="colorist">Colorist</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Colorist)">
+                    <div class="mb-3">
+                        <label for="colorist" class="form-label">Colorist</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -227,9 +229,9 @@
                     </div>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Character)">
-                    <div class="form-group">
-                        <label for="character">Character</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Character)">
+                    <div class="mb-3">
+                        <label for="character" class="form-label">Character</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -241,9 +243,9 @@
                     </div>
                 </div>
 
-                <div class="col-md-2 mr-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Translator)">
-                    <div class="form-group">
-                        <label for="translators">Translators</label>
+                <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.Translator)">
+                    <div class="mb-3">
+                        <label for="translators" class="form-label">Translators</label>
                         <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)" [reset]="resetTypeaheads">
                             <ng-template #badgeItem let-item let-position="idx">
                                 {{item.name}}
@@ -255,9 +257,9 @@
                     </div>
                 </div>
             </div>
-            <div class="row justify-content-center no-gutters">
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.readProgressDisabled">
-                    <label>Read Progress</label>
+            <div class="row justify-content-center g-0">
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.readProgressDisabled">
+                    <label class="form-label">Read Progress</label>
                     <form [formGroup]="readProgressGroup">
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead">
@@ -274,8 +276,8 @@
                     </form>
                 </div>
     
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.ratingDisabled">
-                    <label for="ratings">Rating</label>
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.ratingDisabled">
+                    <label for="ratings" class="form-label">Rating</label>
                     <form class="form-inline">
                         <ngb-rating class="rating-star" [(rate)]="filter.rating" (rateChange)="updateRating($event)" [resettable]="true">
                             <ng-template let-fill="fill" let-index="index">
@@ -285,8 +287,8 @@
                     </form>
                 </div>
 
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.ageRatingDisabled">
-                    <label for="age-rating">Age Rating</label>
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.ageRatingDisabled">
+                    <label for="age-rating" class="form-label">Age Rating</label>
                     <app-typeahead (selectedData)="updateAgeRating($event)" [settings]="ageRatingSettings" [reset]="resetTypeaheads">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.title}}
@@ -297,8 +299,8 @@
                     </app-typeahead>
                 </div>
 
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.languageDisabled">
-                    <label for="languages">Language</label>
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.languageDisabled">
+                    <label for="languages" class="form-label">Language</label>
                     <app-typeahead (selectedData)="updateLanguageRating($event)" [settings]="languageSettings" [reset]="resetTypeaheads">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.title}}
@@ -309,8 +311,8 @@
                     </app-typeahead>
                 </div>
 
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.publicationStatusDisabled">
-                    <label for="publication-status">Publication Status</label>
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.publicationStatusDisabled">
+                    <label for="publication-status" class="form-label">Publication Status</label>
                     <app-typeahead (selectedData)="updatePublicationStatus($event)" [settings]="publicationStatusSettings" [reset]="resetTypeaheads">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.title}}
@@ -320,13 +322,13 @@
                         </ng-template>
                     </app-typeahead>
                 </div>
-                <div class="col-md-2 mr-3"></div>
+                <div class="col-md-2 me-3"></div>
             </div>
-            <div class="row justify-content-center no-gutters">
-                <div class="col-md-2 mr-3" *ngIf="!filterSettings.sortDisabled">
+            <div class="row justify-content-center g-0">
+                <div class="col-md-2 me-3" *ngIf="!filterSettings.sortDisabled">
                     <form [formGroup]="sortGroup">
-                        <div class="form-group">
-                            <label for="sort-options">Sort By</label>
+                        <div class="mb-3">
+                            <label for="sort-options" class="form-label">Sort By</label>
                             <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
                                 <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
                                 <ng-template #descSort>
@@ -341,14 +343,14 @@
                         </div>
                     </form>
                 </div>  
-                <div class="col-md-2 mr-3" *ngIf="filterSettings.sortDisabled"></div>
-                <div class="col-md-2 mr-3"></div>
-                <div class="col-md-2 mr-3"></div>
-                <div class="col-md-2 mr-3 mt-4">
-                    <button class="btn btn-secondary btn-block" (click)="clear()">Clear</button>
+                <div class="col-md-2 me-3" *ngIf="filterSettings.sortDisabled"></div>
+                <div class="col-md-2 me-3"></div>
+                <div class="col-md-2 me-3"></div>
+                <div class="col-md-2 me-3">
+                    <button class="btn btn-secondary col-12" (click)="clear()">Clear</button>
                 </div>
-                <div class="col-md-2 mr-3 mt-4">
-                    <button class="btn btn-primary btn-block" (click)="apply()">Apply</button>
+                <div class="col-md-2 me-3">
+                    <button class="btn btn-primary col-12" (click)="apply()">Apply</button>
                 </div>
             </div>
         </div>
@@ -357,7 +359,7 @@
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 
-    <div class="row no-gutters">
+    <div class="row g-0">
         <div class="col-auto" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
@@ -388,7 +390,7 @@
                       <label
                           id="paginationInputLabel-{{id}}"
                           for="paginationInput-{{id}}"
-                          class="col-form-label mr-2 ml-1"
+                          class="col-form-label me-2 ms-1 form-label"
                       >Page</label>
                       <input #i
                           type="text"

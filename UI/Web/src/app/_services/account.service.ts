@@ -7,6 +7,7 @@ import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
+import { ThemeService } from '../theme.service';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +34,7 @@ export class AccountService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(private httpClient: HttpClient, private router: Router, 
-    private messageHub: MessageHubService) {}
+    private messageHub: MessageHubService, private themeService: ThemeService) {}
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -61,6 +62,7 @@ export class AccountService implements OnDestroy {
       map((response: User) => {
         const user = response;
         if (user) {
+          console.log('Login: ', user);
           this.setCurrentUser(user);
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
@@ -77,6 +79,11 @@ export class AccountService implements OnDestroy {
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
       localStorage.setItem(this.lastLoginKey, user.username);
+      if (user.preferences) {
+        this.themeService.setTheme(user.preferences.theme.name);
+      } else {
+        this.themeService.setTheme(this.themeService.defaultTheme);
+      }
     }
 
     this.currentUserSource.next(user);

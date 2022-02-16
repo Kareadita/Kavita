@@ -9,7 +9,7 @@
 
           <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead">
           <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoadingOptions">
-            <span class="sr-only">Loading...</span>
+            <span class="visually-hidden">Loading...</span>
           </div>
           <!-- TODO: Add a clear all button -->
         </div>

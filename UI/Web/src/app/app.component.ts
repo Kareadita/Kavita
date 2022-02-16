@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
@@ -7,6 +7,8 @@ import { MessageHubService } from './_services/message-hub.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { DOCUMENT } from '@angular/common';
+import { ThemeService } from './theme.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +19,8 @@ export class AppComponent implements OnInit {
 
   constructor(private accountService: AccountService, public navService: NavService, 
     private messageHub: MessageHubService, private libraryService: LibraryService, 
-    private router: Router, private ngbModal: NgbModal, private ratingConfig: NgbRatingConfig) {
+    router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig, 
+    @Inject(DOCUMENT) private document: Document) {
 
     // Setup default rating config
     ratingConfig.max = 5;
@@ -33,22 +36,34 @@ export class AppComponent implements OnInit {
       });
   }
 
-  ngOnInit(): void {
-    this.setCurrentUser();
+  @HostListener('resize')
+  onResize() {
+    this.setDocHeight();
   }
 
+  @HostListener('orientationchange')
+  onOrientationChange() {
+    this.setDocHeight();
+  }
+
+  ngOnInit(): void {
+    this.setCurrentUser();
+
+    this.setDocHeight();
+  }
 
   setCurrentUser() {
     const user = this.accountService.getUserFromLocalStorage();
     this.accountService.setCurrentUser(user);
 
     if (user) {
-      this.navService.setDarkMode(user.preferences.siteDarkMode);
       this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
       this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
-    } else {
-      this.navService.setDarkMode(true);
     }
   }
-}
 
+  setDocHeight() {
+    // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
+    this.document.documentElement.style.setProperty('--vh', `${window.innerHeight/100}px`);
+  }
+}

@@ -1,15 +1,9 @@
-@use "../../../theme/colors";
-
 .bulk-select {
-    background-color: colors.$dark-form-background-no-opacity;
-    border-bottom: 2px solid colors.$primary-color;
-    color: white;
-}
-
-.btn-icon {
-    color: white;
+    background-color: var(--navbar-bg-color);
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--navbar-text-color);
 }
 
 .highlight {
-    color: colors.$primary-color !important;
+    color: var(--primary-color) !important;
 }

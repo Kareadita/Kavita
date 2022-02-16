@@ -106,7 +106,10 @@ namespace API.Controllers
                 {
                     UserName = registerDto.Username,
                     Email = registerDto.Email,
-                    UserPreferences = new AppUserPreferences(),
+                    UserPreferences = new AppUserPreferences
+                    {
+                        Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+                    },
                     ApiKey = HashUtil.ApiKey()
                 };
 
@@ -179,22 +182,23 @@ namespace API.Controllers
 
             // Update LastActive on account
             user.LastActive = DateTime.Now;
-            user.UserPreferences ??= new AppUserPreferences();
+            user.UserPreferences ??= new AppUserPreferences
+            {
+                Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+            };
 
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
-            return new UserDto
-            {
-                Username = user.UserName,
-                Email = user.Email,
-                Token = await _tokenService.CreateToken(user),
-                RefreshToken = await _tokenService.CreateRefreshToken(user),
-                ApiKey = user.ApiKey,
-                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
-            };
+            var dto = _mapper.Map<UserDto>(user);
+            dto.Token = await _tokenService.CreateToken(user);
+            dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+            var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName);
+            pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+            dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
+            return dto;
         }
 
         [HttpPost("refresh-token")]
@@ -358,7 +362,10 @@ namespace API.Controllers
                 UserName = dto.Email,
                 Email = dto.Email,
                 ApiKey = HashUtil.ApiKey(),
-                UserPreferences = new AppUserPreferences()
+                UserPreferences = new AppUserPreferences
+                {
+                    Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+                }
             };
 
             try

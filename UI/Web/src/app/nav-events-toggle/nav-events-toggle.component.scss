@@ -1,4 +1,28 @@
-@use "../../theme/colors";
+// NOTE: I'm leaving this not fully customized because I'm planning to rewrite the whole design in v0.5.2/3
+// These are customizations for events nav
+.dark-menu {
+    background-color: var(--navbar-bg-color);
+    border-color: rgba(1, 4, 9, 0.5);
+}
+
+.dark-menu-item {
+    color: var(--body-text-color);
+    background-color: rgb(1, 4, 9);
+    border-color: rgba(1, 4, 9, 0.5);
+}
+
+// Popovers need to be their own component
+::ng-deep .bs-popover-bottom > .popover-arrow::after, .bs-popover-bottom > .popover-arrow::before {
+    border-bottom-color: transparent;
+}
+
+.nav-events {
+    background-color: var(--navbar-bg-color);
+}
+
+// .nav-events {
+//     background-color: white;
+// }
 
 
 .btn:focus, .btn:hover {
@@ -10,9 +34,7 @@
     height: 1rem;
 }
 
-.nav-events {
-    background-color: white;
-}
+
 
 .nav-events .popover-body {
     padding: 0px;
@@ -23,7 +45,7 @@
 }
 
 .colored {
-    background-color: colors.$primary-color;
+    background-color: var(--primary-color);
     border-radius: 60px;
 }
 
@@ -31,7 +53,7 @@
     cursor: pointer;
     
     i.fa {
-        color: colors.$primary-color !important;
+        color: var(--primary-color) !important;
     }
-    color: colors.$primary-color;
+    color: var(--primary-color);
 }

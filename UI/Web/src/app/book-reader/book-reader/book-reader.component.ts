@@ -24,6 +24,7 @@ import { ScrollService } from 'src/app/scroll.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
+import { ThemeService } from 'src/app/theme.service';
 
 
 interface PageStyle {
@@ -260,7 +261,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
     private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
-    @Inject(DOCUMENT) private document: Document) {
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
       this.navService.hideNavBar();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
@@ -382,7 +383,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
-      if (this.user.preferences.siteDarkMode) {
+      if (this.themeService.isDarkTheme()) {
         bodyNode.classList.add('bg-dark');
       }
     }
@@ -968,7 +969,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setOverrideStyles() {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
-      if (this.user.preferences.siteDarkMode) {
+      if (this.themeService.isDarkTheme()) {
         bodyNode.classList.remove('bg-dark');
       }
       

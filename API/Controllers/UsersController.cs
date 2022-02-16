@@ -78,7 +78,8 @@ namespace API.Controllers
             existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
-            existingPreferences.SiteDarkMode = preferencesDto.SiteDarkMode;
+            existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
+            existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

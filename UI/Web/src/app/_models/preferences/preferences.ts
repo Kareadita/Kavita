@@ -3,6 +3,7 @@ import { PageSplitOption } from './page-split-option';
 import { READER_MODE } from './reader-mode';
 import { ReadingDirection } from './reading-direction';
 import { ScalingOption } from './scaling-option';
+import { SiteTheme } from './site-theme';
 
 export interface Preferences {
     // Manga Reader
@@ -22,7 +23,7 @@ export interface Preferences {
     bookReaderReadingDirection: ReadingDirection;
 
     // Global
-    siteDarkMode: boolean;
+    theme: SiteTheme;
 }
 
 export const readingDirections = [{text: 'Left to Right', value: ReadingDirection.LeftToRight}, {text: 'Right to Left', value: ReadingDirection.RightToLeft}];

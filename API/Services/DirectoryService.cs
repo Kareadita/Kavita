@@ -19,6 +19,7 @@ namespace API.Services
         string LogDirectory { get; }
         string TempDirectory { get; }
         string ConfigDirectory { get; }
+        string SiteThemeDirectory { get; }
         /// <summary>
         /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
         /// </summary>
@@ -64,6 +65,7 @@ namespace API.Services
         public string TempDirectory { get; }
         public string ConfigDirectory { get; }
         public string BookmarkDirectory { get; }
+        public string SiteThemeDirectory { get; }
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
@@ -81,6 +83,7 @@ namespace API.Services
            TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
            ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
            BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
+           SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
        }
 
        /// <summary>

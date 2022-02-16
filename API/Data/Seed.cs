@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.Theme;
 using API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -20,6 +22,34 @@ namespace API.Data
         /// Generated on Startup. Seed.SeedSettings must run before
         /// </summary>
         public static IList<ServerSetting> DefaultSettings;
+
+        public static readonly IList<SiteTheme> DefaultThemes = new List<SiteTheme>
+        {
+            new()
+            {
+                Name = "Dark",
+                NormalizedName = Parser.Parser.Normalize("Dark"),
+                Provider = ThemeProvider.System,
+                FileName = "dark.scss",
+                IsDefault = true,
+            },
+            new()
+            {
+                Name = "Light",
+                NormalizedName = Parser.Parser.Normalize("Light"),
+                Provider = ThemeProvider.System,
+                FileName = "light.scss",
+                IsDefault = false,
+            },
+            new()
+            {
+                Name = "E-Ink",
+                NormalizedName = Parser.Parser.Normalize("E-Ink"),
+                Provider = ThemeProvider.System,
+                FileName = "eink.scss",
+                IsDefault = false,
+            },
+        };
 
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
         {
@@ -39,6 +69,22 @@ namespace API.Data
                     await roleManager.CreateAsync(role);
                 }
             }
+        }
+
+        public static async Task SeedThemes(DataContext context)
+        {
+            await context.Database.EnsureCreatedAsync();
+
+            foreach (var theme in DefaultThemes)
+            {
+                var existing = context.SiteTheme.FirstOrDefault(s => s.Name.Equals(theme.Name));
+                if (existing == null)
+                {
+                    await context.SiteTheme.AddAsync(theme);
+                }
+            }
+
+            await context.SaveChangesAsync();
         }
 
         public static async Task SeedSettings(DataContext context, IDirectoryService directoryService)

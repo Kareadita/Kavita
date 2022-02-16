@@ -3,13 +3,13 @@
         <ngx-file-drop (onFileDrop)="dropped($event)" 
         (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" accept=".png,.jpg,.jpeg" [directory]="false" dropZoneClassName="file-upload" contentClassName="file-upload-zone" [directory]="false">
             <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-                <div class="row no-gutters mt-3 pb-3" *ngIf="mode === 'all'">
+                <div class="row g-0 mt-3 pb-3" *ngIf="mode === 'all'">
                     <div class="mx-auto">
-                        <div class="row no-gutters mb-3">
+                        <div class="row g-0 mb-3">
                             <i class="fa fa-file-upload mx-auto" style="font-size: 24px;" aria-hidden="true"></i>
                         </div>
                         
-                        <div class="row no-gutters">
+                        <div class="row g-0">
                             <div class="mx-auto">
                                 <a class="col" style="padding-right:0px" href="javascript:void(0)" (click)="mode = 'url'; setupEnterHandler()"><span class="phone-hidden">Enter a </span>Url</a>
                                 <span class="col" style="padding-right:0px">•</span>
@@ -23,17 +23,16 @@
                 
 
                 <ng-container *ngIf="mode === 'url'">
-                    <div class="row no-gutters mt-3 pb-3 ml-md-2 mr-md-2">
-                        <div class="input-group col-md-10 mr-md-2" style="width: 100%">
+                    <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
+                        <div class="input-group col-md-10 me-md-2" style="width: 100%">
+                            <!-- TOOD: Bootstrap migration: This should be replaced with just the label-->
                             <div class="input-group-prepend">
-                                <label class="input-group-text" for="load-image">Url</label>
+                                <label class="input-group-text form-label" for="load-image">Url</label>
                             </div>
                             <input type="text" autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">
-                                    Load
-                                </button>
-                            </div>
+                            <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">
+                                Load
+                            </button>
                         </div>
                         <button class="col btn btn-secondary" href="javascript:void(0)" (click)="mode = 'all'" aria-label="Back">
                             <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;
@@ -51,7 +50,7 @@
         </ng-template>
     </form>
 
-    <div class="row no-gutters chooser" style="padding-top: 10px">
+    <div class="row g-0 chooser" style="padding-top: 10px">
         <div class="image-card col-auto {{selectedIndex === idx ? 'selected' : ''}}" *ngFor="let url of imageUrls; let idx = index;" tabindex="0" attr.aria-label="Image {{idx + 1}}" (click)="selectImage(idx)">
             <app-image class="card-img-top" height="230px" width="158px" [imageUrl]="url"></app-image>
         </div>

@@ -3,17 +3,17 @@
         <div style="display: flex; margin-top: 5px;">
             <button class="btn btn-icon" style="height: 100%" title="Back" (click)="closeReader()">
                 <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                <span class="sr-only">Back</span>
+                <span class="visually-hidden">Back</span>
             </button>
             
             <div>
-                <div style="font-weight: bold;">{{title}} <span class="clickable" *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode:</span>)</span></div>
+                <div style="font-weight: bold;">{{title}} <span class="clickable" *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode:</span>)</span></div>
                 <div class="subtitle">
                     {{subtitle}}
                 </div>
             </div>
             <div style="margin-left: auto; padding-right: 3%;">
-                <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="pageBookmarked" title="{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{pageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="sr-only">{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
+                <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="pageBookmarked" title="{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{pageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
             </div>
         </div>
     </div>
@@ -56,9 +56,9 @@
     </div>
     
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
-        <div class="form-group" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
-            <span class="sr-only" id="slider-info"></span>
-            <div class="row no-gutters">
+        <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
+            <span class="visually-hidden" id="slider-info"></span>
+            <div class="row g-0">
                 <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
                 <button class="btn btn-small btn-icon col-1" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
                 <div class="col custom-slider" *ngIf="pageOptions.ceil > 0; else noSlider">
@@ -75,29 +75,29 @@
             
             
         </div>
-        <div class="row pt-4 ml-2 mr-2">
+        <div class="row pt-4 ms-2 me-2">
             <div class="col">
                 <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
-                    <span id="reading-direction" class="sr-only">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
+                    <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>
             </div>
             <div class="col">
                 <button class="btn btn-icon" title="Reading Mode" (click)="toggleReaderMode();resetMenuCloseTimer();">
                     <i class="fa {{readerModeIcon}}" aria-hidden="true"></i>
-                    <span class="sr-only">Reading Mode</span>
+                    <span class="visually-hidden">Reading Mode</span>
                 </button>
             </div>
             <div class="col">
                 <button class="btn btn-icon" title="{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
                     <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}}" aria-hidden="true"></i>
-                    <span class="sr-only">{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}</span>
+                    <span class="visually-hidden">{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}</span>
                 </button>
             </div>
             <div class="col">
                 <button class="btn btn-icon" title="Settings" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
                     <i class="fa fa-sliders-h" aria-hidden="true"></i>
-                    <span class="sr-only">Settings</span>
+                    <span class="visually-hidden">Settings</span>
                 </button>
             </div>
         </div>
@@ -105,13 +105,13 @@
             <form [formGroup]="generalSettingsForm">
                 <div class="row">
                     <div class="col-6">
-                        <label for="page-splitting">Image Splitting</label>&nbsp;
+                        <label for="page-splitting" class="form-label">Image Splitting</label>&nbsp;
                         <div class="split fa fa-image">
                             <div class="{{splitIconClass}}"></div> 
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="form-group">
+                        <div class="mb-3">
                             <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
                                 <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
                             </select>
@@ -121,7 +121,7 @@
 
                 <div class="row">
                     <div class="col-6">
-                        <label for="page-fitting">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
+                        <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
                     </div>
                     <div class="col-6">
                         <select class="form-control" id="page-fitting" formControlName="fittingOption">

@@ -8,6 +8,7 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
 import { SharedModule } from '../shared/shared.module';
+import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 
 
 
@@ -15,7 +16,8 @@ import { SharedModule } from '../shared/shared.module';
   declarations: [
     SeriesBookmarksComponent,
     UserPreferencesComponent,
-    ApiKeyComponent
+    ApiKeyComponent,
+    ThemeManagerComponent
   ],
   imports: [
     CommonModule,

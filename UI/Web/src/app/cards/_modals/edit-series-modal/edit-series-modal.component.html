@@ -2,8 +2,8 @@
     <div class="modal-header">
         <h4 class="modal-title">
             {{this.series.name}} Details</h4>
-        <button type="button" class="close" aria-label="Close" (click)="close()">
-            <span aria-hidden="true">&times;</span>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+            
         </button>
     </div>
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
@@ -13,52 +13,52 @@
                   <a ngbNavLink>{{tabs[0]}}</a>
                   <ng-template ngbNavContent>
                     <form [formGroup]="editSeriesForm">
-                    <div class="row no-gutters">
-                        <div class="form-group" style="width: 100%">
-                            <label for="name">Name</label>
+                    <div class="row g-0">
+                        <div class="mb-3" style="width: 100%">
+                            <label for="name" class="form-label">Name</label>
                             <input id="name" class="form-control" formControlName="name" type="text">
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
-                        <div class="form-group" style="width: 100%">
-                            <label for="sort-name">Sort Name</label>
+                    <div class="row g-0">
+                        <div class="mb-3" style="width: 100%">
+                            <label for="sort-name" class="form-label">Sort Name</label>
                             <input id="sort-name" class="form-control" formControlName="sortName" type="text">
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
-                        <div class="form-group" style="width: 100%">
-                            <label for="localized-name">Localized Name</label>
+                    <div class="row g-0">
+                        <div class="mb-3" style="width: 100%">
+                            <label for="localized-name" class="form-label">Localized Name</label>
                             <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
                         </div>
                     </div>
 
-                    <div class="row no-gutters" *ngIf="metadata">
+                    <div class="row g-0" *ngIf="metadata">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="author">Author</label>
+                            <div class="mb-3">
+                                <label for="author" class="form-label">Author</label>
                                 <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="artist">Artist</label>
+                            <div class="mb-3">
+                                <label for="artist" class="form-label">Artist</label>
                                 <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
                             </div>
                         </div>
                     </div>
 
-                    <div class="row no-gutters" *ngIf="metadata">
+                    <div class="row g-0" *ngIf="metadata">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="genres">Genres</label>
+                            <div class="mb-3">
+                                <label for="genres" class="form-label">Genres</label>
                                 <input id="genres" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="genres" type="text">
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="collections">Collections</label>
+                            <div class="mb-3">
+                                <label for="collections" class="form-label">Collections</label>
                                 <app-typeahead (selectedData)="updateCollections($event)" [settings]="settings">
                                     <ng-template #badgeItem let-item let-position="idx">
                                         {{item.title}}
@@ -71,9 +71,9 @@
                         </div>
                     </div>
 
-                    <div class="row no-gutters">
-                        <div class="form-group" style="width: 100%">
-                            <label for="summary">Summary</label>
+                    <div class="row g-0">
+                        <div class="mb-3" style="width: 100%">
+                            <label for="summary" class="form-label">Summary</label>
                             <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                         </div>
                     </div>
@@ -94,7 +94,7 @@
                   <a ngbNavLink>{{tabs[2]}}</a>
                   <ng-template ngbNavContent>
                     <h4>Information</h4>
-                    <div class="row no-gutters mb-2">
+                    <div class="row g-0 mb-2">
                         <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | sentenceCase}}</div>
                         <div class="col-md-6">Format: <app-tag-badge>{{utilityService.mangaFormat(series.format)}}</app-tag-badge></div>
                     </div>
@@ -103,12 +103,12 @@
                           <span class="invisible">Loading...</span>
                       </div>
                       <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
-                          <li class="media my-4" *ngFor="let volume of seriesVolumes">
-                              <app-image class="mr-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
-                              <div class="media-body">
+                          <li class="d-flex my-4" *ngFor="let volume of seriesVolumes">
+                              <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
+                              <div class="flex-grow-1">
                                   <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
                                   <div>
-                                      <div class="row no-gutters">
+                                      <div class="row g-0">
                                           <div class="col">
                                               Added: {{volume.created | date: 'short'}}
                                           </div>
@@ -116,7 +116,7 @@
                                               Last Modified: {{volume.lastModified | date: 'short'}}
                                           </div>
                                       </div>
-                                      <div class="row no-gutters">
+                                      <div class="row g-0">
                                           <div class="col">
                                               <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()" [attr.aria-expanded]="!volumeCollapsed[volume.name]">
                                                   View Files
@@ -131,7 +131,7 @@
                                           <ul class="list-group mt-2">
                                               <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
                                                   <span>{{file.filePath}}</span>
-                                                  <div class="row no-gutters">
+                                                  <div class="row g-0">
                                                       <div class="col">
                                                           Chapter: {{file.chapter}}
                                                       </div>
@@ -153,7 +153,7 @@
                 </li>
             </ul>
         
-            <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ml-4 flex-fill'}}"></div>
+            <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="close()">Close</button>

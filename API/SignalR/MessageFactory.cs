@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using API.DTOs.Update;
 
 namespace API.SignalR
@@ -157,6 +158,21 @@ namespace API.SignalR
                 {
                     Id = id,
                     EntityType = entityType,
+                }
+            };
+        }
+
+        public static SignalRMessage SiteThemeProgressEvent(int themeIteratedCount, int totalThemesToIterate, string themeName, float progress)
+        {
+            return new SignalRMessage()
+            {
+                Name = SignalREvents.SiteThemeProgress,
+                Body = new
+                {
+                    TotalUpdates = totalThemesToIterate,
+                    CurrentCount = themeIteratedCount,
+                    ThemeName = themeName,
+                    Progress = progress
                 }
             };
         }

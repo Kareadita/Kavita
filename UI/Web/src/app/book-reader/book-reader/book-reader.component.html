@@ -1,12 +1,12 @@
 <div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container" tabindex="0" #reader>
     <div class="fixed-top" #stickyTop>
-        <a class="sr-only sr-only-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+        <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="drawerBackgroundColor" (drawerClosed)="closeDrawer()">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
-                    <button type="button" class="close" aria-label="Close" (click)="commentDrawer.close()">
-                        <span aria-hidden="true">&times;</span>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()">
+                        
                     </button>
                 </h2>
                 
@@ -16,8 +16,8 @@
                     <div class="controls">
 
                         <form [formGroup]="settingsForm">
-                            <div class="form-group">
-                                <label for="library-type">Font Family</label>
+                            <div class="mb-3">
+                                <label for="library-type" class="form-label">Font Family</label>
                                 <select class="form-control" id="library-type" formControlName="bookReaderFontFamily">
                                     <option [value]="opt" *ngFor="let opt of fontFamilies; let i = index">{{opt | titlecase}}</option>
                                 </select>
@@ -25,42 +25,42 @@
                         </form>
                     </div>
                     <div class="controls">
-                        <label id="fontsize">Font Size</label>
+                        <label id="fontsize" class="form-label">Font Size</label>
                         <button (click)="updateFontSize(-10)" class="btn btn-icon" title="Decrease" aria-labelledby="fontsize"><i class="fa fa-minus" aria-hidden="true"></i></button>
                         <span>{{pageStyles['font-size']}}</span>
                         <button (click)="updateFontSize(10)"  class="btn btn-icon" title="Increase" aria-labelledby="fontsize"><i class="fa fa-plus" aria-hidden="true"></i></button>
                     </div>
                     <div class="controls">
-                        <label id="linespacing">Line Spacing</label>
+                        <label id="linespacing" class="form-label">Line Spacing</label>
                         <button (click)="updateLineSpacing(-10)" class="btn btn-icon" title="Decrease" aria-labelledby="linespacing"><i class="fa fa-minus" aria-hidden="true"></i></button>
                         <span>{{pageStyles['line-height']}}</span>
                         <button (click)="updateLineSpacing(10)"  class="btn btn-icon" title="Increase" aria-labelledby="linespacing"><i class="fa fa-plus" aria-hidden="true"></i></button>
                     </div>
                     <div class="controls">
-                        <label id="margin">Margin</label>
+                        <label id="margin" class="form-label">Margin</label>
                         <button (click)="updateMargin(-5)" class="btn btn-icon" title="Remove Margin" aria-labelledby="margin"><i class="fa fa-minus" aria-hidden="true"></i></button>
                         <span>{{pageStyles['margin-right']}}</span>
                         <button (click)="updateMargin(5)"  class="btn btn-icon" title="Add Margin" aria-labelledby="margin"><i class="fa fa-plus" aria-hidden="true"></i></button>
                     </div>
                     <div class="controls">
-                        <label id="readingdirection">Reading Direction</label>
+                        <label id="readingdirection" class="form-label">Reading Direction</label>
                         <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}"><i class="fa {{readingDirection === 0 ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</span></button>
                     </div>
                     <div class="controls">
-                        <label id="darkmode">Dark Mode</label>
+                        <label id="darkmode" class="form-label">Dark Mode</label>
                         <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
                         <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button>
                     </div>
                     <div class="controls">
-                        <label id="tap-pagination">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
+                        <label id="tap-pagination" class="form-label">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
                         <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
-                        <span class="sr-only" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
+                        <span class="visually-hidden" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
                         <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
                     </div>
                     <div class="controls">
-                        <label id="fullscreen">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
+                        <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
                         <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
-                        <span class="sr-only" id="fullscreen-help">
+                        <span class="visually-hidden" id="fullscreen-help">
                             <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
                         </span>
                         <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
@@ -68,11 +68,11 @@
                             <span *ngIf="darkMode">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
                         </button>
                     </div>
-                    <div class="row no-gutters justify-content-between">
+                    <div class="row g-0 justify-content-between">
                         <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
                     </div>
                 </div>
-                <div class="row no-gutters">
+                <div class="row g-0">
                     <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
                     <div class="col-1 page-stub">{{pageNum}}</div>
                     <div class="col-8" style="margin-top: 15px;padding-right:10px">
@@ -125,7 +125,7 @@
     </div>
 
     <ng-template #actionBar>
-        <div class="reading-bar row no-gutters justify-content-between">
+        <div class="reading-bar row g-0 justify-content-between">
             <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" 
                 [disabled]="IsPrevDisabled" 
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
@@ -137,12 +137,12 @@
             <div class="book-title col-2 phone-hidden">
                 <ng-container *ngIf="isLoading; else showTitle">
                     <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
-                        <span class="sr-only">Loading book...</span>
+                        <span class="visually-hidden">Loading book...</span>
                     </div>
                 </ng-container>
                 <ng-template #showTitle>
                     {{bookTitle}}
-                    <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="sr-only">Incognito Mode</span>)</span>
+                    <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode</span>)</span>
                 </ng-template>
             </div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Close</span></button>

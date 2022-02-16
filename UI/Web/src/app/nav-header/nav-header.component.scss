@@ -1,24 +1,21 @@
-@import '~bootstrap/scss/mixins/_breakpoints.scss';
-
-$primary-color: white;
-$bg-color: rgb(22, 27, 34);
 
 .btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1);
+    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
 }
 
 .navbar {
-    background-color: $bg-color;
+    background-color: var(--navbar-bg-color);
 }
 
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width:650px) { //370
+@media only screen and (max-width:650px) {
     .navbar-nav {
         width: 0;
     }
 }
 
 // On Really small screens, hide the server settings wheel and show it in nav
+// TODO: Look into doing this with bootstrap 5 (and moving to _utilities.scss)
 .xs-only {
     display: none;
 }
@@ -39,7 +36,7 @@ $bg-color: rgb(22, 27, 34);
 }
 
 .navbar-brand {
-    font-family: "Spartan", sans-serif;
+    font-family: var(--brand-font-family);
     font-weight: bold;
 
     .logo {
@@ -54,7 +51,7 @@ $bg-color: rgb(22, 27, 34);
 
 .focus-visible:focus {
     visibility: visible;
-    color: white;
+    color:  var(--nav-header-text-color);
 }
 
 .ng-autocomplete {
@@ -62,7 +59,7 @@ $bg-color: rgb(22, 27, 34);
 }
 
 .primary-text {
-    color: $primary-color;
+    color:  var(--nav-header-text-color);
     border: none;
 }
 
@@ -75,27 +72,12 @@ $bg-color: rgb(22, 27, 34);
     width: 100%;
 }
 
-@media (min-width: 576px) {
+@media (min-width: var(--grid-breakpoints-sm)) {
     .form-inline .form-group {
         width: 100%;
     }
 }
 
-@include media-breakpoint-down(sm, (xs: 0, sm: 576px, md: 768px, lg: 992px, xl: 1200px)) {
-    .ng-autocomplete {
-        width: 100%; // 232px
-    }
-}
-
 .scroll-to-top:hover {
     animation: MoveUpDown 1s linear infinite;
-}
-
-@keyframes MoveUpDown {
-    0%, 100% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
 }

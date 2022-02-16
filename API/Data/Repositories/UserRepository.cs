@@ -55,6 +55,7 @@ public interface IUserRepository
     Task<AppUser> GetUserByEmailAsync(string email);
     Task<IEnumerable<AppUser>> GetAllUsers();
 
+    Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
 }
 
 public class UserRepository : IUserRepository
@@ -227,6 +228,15 @@ public class UserRepository : IUserRepository
         return await _context.AppUser.ToListAsync();
     }
 
+    public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId)
+    {
+        return await _context.AppUserPreferences
+            .Include(p => p.Theme)
+            .Where(p => p.Theme.Id == themeId)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
@@ -244,7 +254,8 @@ public class UserRepository : IUserRepository
 
     public async Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId)
     {
-        return await _context.AppUserRating.Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
+        return await _context.AppUserRating
+            .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();
     }
 
@@ -252,6 +263,8 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserPreferences
             .Include(p => p.AppUser)
+            .Include(p => p.Theme)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(p => p.AppUser.UserName == username);
     }
 
