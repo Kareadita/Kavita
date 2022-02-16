@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } 
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { take, takeUntil, takeWhile } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
@@ -11,7 +11,6 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
-import { RefreshMetadataEvent } from 'src/app/_models/events/refresh-metadata-event';
 import { MessageHubService } from 'src/app/_services/message-hub.service';
 import { Subject } from 'rxjs';
 
