@@ -98,15 +98,11 @@
                                     
                                     <div class="mb-3">
                                         <!-- TODO: Turn this into a checkbox -->
-                                        <label id="auto-close-label" class="form-label">Auto Close Menu</label>
+                                        <label id="auto-close-label" class="form-label"></label>
                                         <div class="mb-3">
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input type="radio" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
-                                                <label class="form-check-label" for="auto-close">True</label>
-                                            </div>
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input type="radio" id="not-auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="false" aria-labelledby="auto-close-label">
-                                                <label class="form-check-label" for="not-auto-close">False</label>
+                                            <div class="form-check form-switch">
+                                                <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                                <label class="form-check-label" for="auto-close">Auto Close Menu</label>
                                             </div>
                                         </div>
                                     </div>
@@ -114,31 +110,23 @@
                                     <h3>Book Reader</h3>
                                     <div class="row g-0">
                                         <div class="form-group col-md-6 col-sm-12 pe-2 mb-3">
-                                            <label id="dark-mode-label" class="form-label">Dark Mode</label>
+                                            <label id="dark-mode-label" class="form-label"></label>
                                             <div class="mb-3">
-                                                <div class="custom-control custom-radio custom-control-inline">
-                                                    <input type="radio" id="dark-mode" formControlName="bookReaderDarkMode" class="form-check-input" [value]="true" aria-labelledby="dark-mode-label">
-                                                    <label class="form-check-label" for="dark-mode">True</label>
-                                                </div>
-                                                <div class="custom-control custom-radio custom-control-inline">
-                                                    <input type="radio" id="not-dark-mode" formControlName="bookReaderDarkMode" class="form-check-input" [value]="false" aria-labelledby="dark-mode-label">
-                                                    <label class="form-check-label" for="not-dark-mode">False</label>
+                                                <div class="form-check form-switch">
+                                                    <input type="checkbox" id="dark-mode" formControlName="bookReaderDarkMode" class="form-check-input" [value]="true" aria-labelledby="dark-mode-label">
+                                                    <label class="form-check-label" for="dark-mode">Dark Mode</label>
                                                 </div>
                                             </div>
                                         </div>
     
                                         <div class="form-group col-md-6 col-sm-12 pe-2 mb-3">
-                                            <label id="taptopaginate-label" class="form-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
+                                            <label id="taptopaginate-label" class="form-label"></label>
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input type="checkbox" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="taptopaginate-label">
+                                                    <label id="taptopaginate" class="form-check-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #tapToPaginateOptionTooltip>Should the sides of the book reader screen allow tapping on it to move to prev/next page</ng-template>
                                             <span class="visually-hidden" id="settings-taptopaginate-option-help">Should the sides of the book reader screen allow tapping on it to move to prev/next page</span>
-                                            <div class="mb-3">
-                                                <div class="custom-control custom-radio custom-control-inline">
-                                                    <input type="radio" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="taptopaginate-label">
-                                                    <label class="form-check-label" for="taptopaginate">True</label>
-                                                </div>
-                                                <div class="custom-control custom-radio custom-control-inline">
-                                                    <input type="radio" id="not-taptopaginate" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="false" aria-labelledby="taptopaginate-label">
-                                                    <label class="form-check-label" for="not-taptopaginate">False</label>
                                                 </div>
                                             </div>
                                         </div>

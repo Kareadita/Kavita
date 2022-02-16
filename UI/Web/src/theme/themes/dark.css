@@ -30,22 +30,23 @@
     --btn-fa-icon-color: white;
   
     /* Nav */
-    --nav-tab-border-color: rgba(239, 239, 239, 0.125);
+    --nav-tab-border-color: rgba(44, 118, 88, 0.7);
     --nav-tab-text-color: var(--body-text-color);
     --nav-tab-bg-color: var(--bs-body-bg);
-    --nav-tab-hover-border-color: #4ac694;
+    --nav-tab-hover-border-color: var(--primary-color-dark-shade);
     --nav-tab-active-text-color: white;
     --nav-link-bg-color: var(--primary-color-dark-shade);
     --nav-link-active-text-color: white;
+    --nav-link-text-color: white;
     --nav-tab-hover-text-color: var(--body-text-color);
     --nav-tab-hover-bg-color: var(--primary-color-dark-shade);
-    --nav-tab-border-top: var(--primary-color-dark-shade);
-    --nav-tab-border-left: var(--primary-color-dark-shade);
+    --nav-tab-border-top: rgba(44, 118, 88, 0.7);
+    --nav-tab-border-left: rgba(44, 118, 88, 0.7);
     --nav-tab-border-bottom: var(--bs-body-bg);
-    --nav-tab-border-right: var(--primary-color-dark-shade);
+    --nav-tab-border-right: rgba(44, 118, 88, 0.7);
     --nav-tab-border-hover-top: var(--primary-color-dark-shade);
     --nav-tab-border-hover-left: var(--primary-color-dark-shade);
-    --nav-tab-border-hover-bottom: var(--bs-body-bg);
+    --nav-tab-border-hover-bottom: rgba(44, 118, 88, 0.7);
     --nav-tab-border-hover-right: var(--primary-color-dark-shade);
   
   

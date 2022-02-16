@@ -20,6 +20,7 @@
     border-color: var(--nav-tab-border-color);
     
     .nav-link {
+        color: var(--nav-link-text-color);
         
         &.active, &:focus {
             color: var(--nav-tab-active-text-color);

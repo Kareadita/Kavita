@@ -48,7 +48,7 @@
         <div class="mb-3">
             <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
             <p class="accent" id="collection-info">Send anonymous usage and error information to Kavita's servers. This includes information on your browser, error reporting as well as OS and runtime version. We will use this information to prioritize features, bug fixes, and preformance tuning. Requires restart to take effect.</p>
-            <div class="form-check">
+            <div class="form-check form-switch">
                 <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection">
                 <label for="stat-collection" class="form-check-label">Send Data</label>
             </div>
@@ -57,7 +57,7 @@
         <div class="mb-3">
             <label for="opds" aria-describedby="opds-info" class="form-label">OPDS</label>
             <p class="accent" id="opds-info">OPDS support will allow all users to use OPDS to read and download content from the server. If OPDS is enabled, a user will not need download permissions to download media while using it.</p>
-            <div class="form-check">
+            <div class="form-check form-switch">
                 <input id="opds" type="checkbox" aria-label="OPDS Support" class="form-check-input" formControlName="enableOpds">
                 <label for="opds" class="form-check-label">Enable OPDS</label>
             </div>
