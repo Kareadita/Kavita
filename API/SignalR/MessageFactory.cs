@@ -204,11 +204,13 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage SiteThemeProgressEvent(int themeIteratedCount, int totalThemesToIterate, string themeName, float progress)
+        public static SignalRMessage SiteThemeProgressEvent(string subtitle, int themeIteratedCount, int totalThemesToIterate, string themeName, float progress)
         {
             return new SignalRMessage()
             {
                 Name = SignalREvents.SiteThemeProgress,
+                Title = "Scanning Site Theme",
+                SubTitle = subtitle,
                 Body = new
                 {
                     TotalUpdates = totalThemesToIterate,

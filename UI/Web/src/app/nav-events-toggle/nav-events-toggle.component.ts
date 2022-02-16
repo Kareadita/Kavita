@@ -97,7 +97,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
       this.updates[message.name] = message;
       console.log('Updated: ', message.name);
     } else if (message.eventType === 'ended') {
-      //delete this.updates[message.name];
+      delete this.updates[message.name];
       console.log('Ended: ', message.name);
     }
 

@@ -22,6 +22,8 @@
             </li>
         </ul>
 
+        <!-- Idea create a renderer component for different Interfaces of events. ie) Progress, Activity, Information, Update -->
+
         <ul class="list-group list-group-flush dark-menu">
             <li class="list-group-item dark-menu-item" *ngFor="let message of updateEvents">
                 <div class="spinner-border text-primary small-spinner"
@@ -30,7 +32,7 @@
                 </div>
                 {{prettyPrintProgress(message.body.progress)}}%
                 {{message.title}}
-                {{message.subTitle}}
+                {{message.subTitle}} <!-- Hide if this is empty -->
             </li>
             <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0 && !updateAvailable">Not much going on here</li>
             <li class="list-group-item dark-menu-item update-available" *ngIf="updateAvailable" (click)="handleUpdateAvailableClick()">

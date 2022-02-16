@@ -4,7 +4,6 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ProgressEvent } from '../_models/events/scan-library-progress-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
