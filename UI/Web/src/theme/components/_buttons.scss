@@ -5,12 +5,18 @@
 }
 
 .btn-close {
-    filter: var(--btn-icon-filter) !important;
+  filter: var(--btn-icon-filter) !important;
 }
 
-  
+.btn-primary:disabled, .btn-primary.disabled {
+  background-color: var(--btn-disabled-bg-color);
+  color: var(--btn-disabled-text-color);
+  border-color: var(--btn-disabled-border-color);
+}
+
 button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
-    cursor: not-allowed;
+  cursor: not-allowed;
+
 }
 
 .btn-link {

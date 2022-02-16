@@ -28,6 +28,9 @@
     --btn-alt-focus-bg-color: #343c59;
     --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
     --btn-fa-icon-color: white;
+    --btn-disabled-bg-color: #343a40;
+    --btn-disabled-text-color: white;
+    --btn-disabled-border-color: #6c757d;
   
     /* Nav */
     --nav-tab-border-color: rgba(44, 118, 88, 0.7);
