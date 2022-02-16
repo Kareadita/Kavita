@@ -48,6 +48,7 @@ namespace API.Services.Tasks.Scanner
             _readingItemService = readingItemService;
             _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
             _defaultParser = new DefaultParser(_directoryService);
+            _eventHub = eventHub;
         }
 
         /// <summary>
