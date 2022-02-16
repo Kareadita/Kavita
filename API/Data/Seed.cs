@@ -29,7 +29,7 @@ namespace API.Data
                 Name = "Dark",
                 NormalizedName = Parser.Parser.Normalize("Dark"),
                 Provider = ThemeProvider.System,
-                FileName = "dark.css",
+                FileName = "dark.scss",
                 IsDefault = true,
             },
             new SiteTheme()
@@ -37,7 +37,7 @@ namespace API.Data
                 Name = "Light",
                 NormalizedName = Parser.Parser.Normalize("Light"),
                 Provider = ThemeProvider.System,
-                FileName = "light.css",
+                FileName = "light.scss",
                 IsDefault = false,
             },
             new SiteTheme()
@@ -45,7 +45,7 @@ namespace API.Data
                 Name = "E-Ink",
                 NormalizedName = Parser.Parser.Normalize("E-Ink"),
                 Provider = ThemeProvider.System,
-                FileName = "e-ink.css",
+                FileName = "eink.scss",
                 IsDefault = false,
             },
         };
