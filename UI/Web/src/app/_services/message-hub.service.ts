@@ -58,19 +58,36 @@ export class MessageHubService {
   private hubConnection!: HubConnection;
 
   private messagesSource = new ReplaySubject<Message<any>>(1);
-  public messages$ = this.messagesSource.asObservable();
-
   private onlineUsersSource = new BehaviorSubject<string[]>([]);
-  onlineUsers$ = this.onlineUsersSource.asObservable();
 
-  public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
-  public scanLibrary: EventEmitter<ProgressEvent> = new EventEmitter<ProgressEvent>(); // TODO: Refactor this name to be generic
-  public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
+  /**
+   * Any events that come from the backend
+   */
+  public messages$ = this.messagesSource.asObservable();
+  /**
+   * Users that are online
+   */
+  public onlineUsers$ = this.onlineUsersSource.asObservable();
+
 
   isAdmin: boolean = false;
 
   constructor(private toastr: ToastrService, private router: Router) {
 
+  }
+
+  /**
+   * Tests that an event is of the type passed
+   * @param event 
+   * @param eventType 
+   * @returns 
+   */
+  public isEventType(event: Message<any>, eventType: EVENTS) {
+    if (event.event == EVENTS.NotificationProgress) {
+      const notification = event.payload as SignalRMessage;
+      return notification.eventType.toLowerCase() == eventType.toLowerCase();
+    } 
+    return event.event === eventType;
   }
 
   createHubConnection(user: User, isAdmin: boolean) {
@@ -97,7 +114,6 @@ export class MessageHubService {
         event: EVENTS.ScanSeries,
         payload: resp.body
       });
-      this.scanSeries.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
@@ -105,7 +121,6 @@ export class MessageHubService {
         event: EVENTS.ScanLibraryProgress,
         payload: resp.body
       });
-      this.scanLibrary.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.BackupDatabaseProgress, resp => {
@@ -134,6 +149,10 @@ export class MessageHubService {
         event: EVENTS.NotificationProgress,
         payload: resp
       });
+
+
+
+
     });
 
     this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {
@@ -172,7 +191,6 @@ export class MessageHubService {
         event: EVENTS.SeriesAdded,
         payload: resp.body
       });
-      this.seriesAdded.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.SeriesRemoved, resp => {
@@ -181,14 +199,6 @@ export class MessageHubService {
         payload: resp.body
       });
     });
-
-    // this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.RefreshMetadata,
-    //     payload: resp.body
-    //   });
-    //   this.refreshMetadata.emit(resp.body); // TODO: Remove this
-    // });
 
     this.hubConnection.on(EVENTS.CoverUpdate, resp => {
       this.messagesSource.next({

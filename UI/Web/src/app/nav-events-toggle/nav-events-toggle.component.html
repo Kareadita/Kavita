@@ -6,7 +6,7 @@
     </button>
 
     <ng-template #popContent>
-        <ul class="list-group list-group-flush dark-menu">
+        <!-- <ul class="list-group list-group-flush dark-menu">
             <li class="list-group-item dark-menu-item" *ngFor="let event of progressEvents$ | async">
                 <div class="spinner-border text-primary small-spinner"
                 role="status" title="Started at {{event.timestamp | date: 'short'}}" 
@@ -20,11 +20,12 @@
             <li class="list-group-item dark-menu-item update-available" *ngIf="updateAvailable" (click)="handleUpdateAvailableClick()">
                 <i class="fa fa-chevron-circle-up" aria-hidden="true"></i>&nbsp;Update available
             </li>
-        </ul>
+        </ul> -->
 
         <!-- Idea create a renderer component for different Interfaces of events. ie) Progress, Activity, Information, Update -->
 
         <ul class="list-group list-group-flush dark-menu">
+            <!-- Progress Events-->
             <li class="list-group-item dark-menu-item" *ngFor="let message of updateEvents">
                 <div class="spinner-border text-primary small-spinner"
                 role="status" title="Started at {{message.eventTime | date: 'short'}}" 
@@ -34,10 +35,18 @@
                 {{message.title}}
                 {{message.subTitle}} <!-- Hide if this is empty -->
             </li>
-            <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0 && !updateAvailable">Not much going on here</li>
+
             <li class="list-group-item dark-menu-item update-available" *ngIf="updateAvailable" (click)="handleUpdateAvailableClick()">
                 <i class="fa fa-chevron-circle-up" aria-hidden="true"></i>&nbsp;Update available
             </li>
+
+            <ng-container *ngIf="messageHub.onlineUsers$ | async as onlineUsers">
+                <li class="list-group-item dark-menu-item" *ngIf="onlineUsers.length > 1">
+                    <div>{{onlineUsers.length}} Users online</div>
+                    <!-- Users: {{onlineUsers.join(', ')}} -->
+                </li>
+                <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0 && !updateAvailable && onlineUsers.length <= 1">Not much going on here</li>
+            </ng-container>
         </ul>
     </ng-template>
 </ng-container>

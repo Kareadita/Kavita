@@ -21,7 +21,8 @@ type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress 
 
 const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress,
   EVENTS.CleanupProgress, EVENTS.DownloadProgress, EVENTS.SiteThemeProgress];
-//const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress, EVENTS.SiteThemeProgress];
+//const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, 
+//EVENTS.DownloadProgress, EVENTS.SiteThemeProgress];
 
 // TODO: Rename this to events widget
 @Component({
@@ -53,7 +54,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     return Object.values(this.updates);
   }
 
-  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal, private accountService: AccountService) { }
+  constructor(public messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal, private accountService: AccountService) { }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -82,6 +83,10 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         this.isAdmin = false;
       }
     });
+
+    // this.messageHub.onlineUsers$.pipe(takeUntil(this.onDestroy)).subscribe(users => {
+
+    // });
   }
 
   processNotificationProgressEvent(event: Message<SignalRMessage>) {
