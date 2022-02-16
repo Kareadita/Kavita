@@ -13,6 +13,7 @@
     --navbar-bg-color: black;
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
+    --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
   
     /* Inputs */
     --input-bg-color: #343a40;
@@ -46,10 +47,6 @@
     --nav-tab-hover-border-color: var(--primary-color-dark-shade);
     --nav-tab-active-text-color: white;
     --nav-tab-border-hover-color: transparent;
-
-    --nav-link-bg-color: var(--primary-color-dark-shade);
-    --nav-link-active-text-color: white;
-    --nav-link-text-color: white;
     --nav-tab-hover-text-color: var(--body-text-color);
     --nav-tab-hover-bg-color: var(--primary-color-dark-shade);
     --nav-tab-border-top: rgba(44, 118, 88, 0.7);
@@ -60,6 +57,11 @@
     --nav-tab-border-hover-left: var(--primary-color-dark-shade);
     --nav-tab-border-hover-bottom: rgba(44, 118, 88, 0.7);
     --nav-tab-border-hover-right: var(--primary-color-dark-shade);
+
+    --nav-link-bg-color: var(--primary-color-dark-shade);
+    --nav-link-active-text-color: white;
+    --nav-link-text-color: white;
+    
 
     /* Header */    
     --nav-header-text-color: white;
@@ -164,7 +166,4 @@
     --carousel-header-text-color: var(--body-text-color);
     --carousel-header-text-decoration: none;
     --carousel-hover-header-text-decoration: underline;
-
-    /* Nav Header */
-    --nav-header-btn-hover-outline-color: rgba(255, 255, 255, 1);
   }

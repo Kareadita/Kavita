@@ -1,10 +1,10 @@
 
 .btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem var(--nav-header-btn-hover-outline-color);
+    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
 }
 
 .navbar {
-    background-color: var(--nav-header-bg-color);
+    background-color: var(--navbar-bg-color);
 }
 
 /* small devices (phones, 650px and down) */
