@@ -104,7 +104,7 @@ export class ThemeService implements OnDestroy {
       } else {
         this.currentThemeSource.next(theme);
       }
-
+      console.log('selector: ', theme.selector);
       this.renderer.addClass(this.document.querySelector('body'), theme.selector);
     } else {
       // Only time themes isn't already loaded is on first load
