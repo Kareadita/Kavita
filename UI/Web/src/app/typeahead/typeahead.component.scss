@@ -41,7 +41,8 @@ input {
 }
 
 .dropdown {
-    width: 100%;
+    //width: 100%;
+    min-width: 10rem;
     background: var(--input-bg-color);
     z-index:1000;
     margin: 2px 0 0;

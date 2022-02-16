@@ -12,6 +12,7 @@
   &.active {
     color: var(--list-group-hover-text-color);
     background-color: var(--list-group-hover-bg-color);
+    border-color: var(--list-group-active-border-color);
   }
 
   &.no-hover:hover {
