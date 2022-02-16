@@ -2,6 +2,8 @@
     --color-scheme: dark;
     --primary-color: #4ac694;
     --primary-color-dark-shade: #3B9E76;
+    --primary-color-darker-shade: #338A67;
+    --primary-color-darkest-shade: #25624A;
     --error-color: #BD362F;
     --bs-body-bg: #343a40; 
     --body-text-color: #efefef;
@@ -22,6 +24,11 @@
   
     /* Buttons */
     --btn-primary-text-color: white;
+    --btn-primary-bg-color: var(--primary-color-darker-shade);
+    --btn-primary-border-color: var(--primary-color-darker-shade);
+    --btn-primary-hover-text-color: white;
+    --btn-primary-hover-bg-color: var(--primary-color-darkest-shade);
+    --btn-primary-hover-border-color: var(--primary-color-darkest-shade);
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;

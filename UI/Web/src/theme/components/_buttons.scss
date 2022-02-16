@@ -2,6 +2,14 @@
 
 .btn-primary {
   color: var(--btn-primary-text-color);
+  background-color: var(--btn-primary-bg-color);
+  border-color: var(--btn-primary-border-color);
+
+  &:hover {
+    color: var(--btn-primary-hover-text-color);
+    background-color: var(--btn-primary-hover-bg-color);
+    border-color: var(--btn-primary-hover-border-color);
+  }
 }
 
 .btn-close {
