@@ -299,7 +299,7 @@ public class MetadataService : IMetadataService
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
             // TODO: Fix CoverUpdate/RefreshMetadata from merge
-            await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.RefreshMetadataEvent(series.LibraryId, series.Id));
+            await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"));
         }
 
 
