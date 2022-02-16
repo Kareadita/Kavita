@@ -7,7 +7,7 @@
             <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
         </div>
         <ul class="list-group">
-            <li  class="list-group-item" *ngFor="let invite of pendingInvites; let idx = index;">
+            <li  class="list-group-item no-hover" *ngFor="let invite of pendingInvites; let idx = index;">
                 <div>
                     <h4>
                         <span id="member-name--{{idx}}">{{invite.username | titlecase}} </span>
@@ -20,12 +20,12 @@
                     <div>Invited: {{invite.created | date: 'short'}}</div>
                 </div>
             </li>
-            <li *ngIf="loadingMembers" class="list-group-item">
+            <li *ngIf="loadingMembers" class="list-group-item no-hover">
                 <div class="spinner-border text-secondary" role="status">
                     <span class="invisible">Loading...</span>
                 </div>
             </li>
-            <li class="list-group-item" *ngIf="pendingInvites.length === 0 && !loadingMembers">
+            <li class="list-group-item no-hover" *ngIf="pendingInvites.length === 0 && !loadingMembers">
                 There are no invited Users
             </li>
         </ul>
@@ -35,7 +35,7 @@
 
     <h3 class="mt-3">Active Users</h3>
     <ul class="list-group">
-        <li *ngFor="let member of members; let idx = index;" class="list-group-item">
+        <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
             <div>
                 <h4>
                     <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.username)"></i>

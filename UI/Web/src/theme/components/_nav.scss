@@ -16,19 +16,27 @@
     background-color: var(--nav-link-bg-color);
 }
 
-
 .nav-tabs {
     border-color: var(--nav-tab-border-color);
     
     .nav-link {
         
-        &.active {
+        &.active, &:focus {
             color: var(--nav-tab-active-text-color);
             background-color: var(--nav-tab-bg-color);
+            border-top-color: var(--nav-tab-border-top);
+            border-left-color: var(--nav-tab-border-left);
+            border-bottom-color: var(--nav-tab-border-bottom);
+            border-right-color: var(--nav-tab-border-right);
         }
     
-        &:hover, &:focus {
-            border-color: var(--nav-tab-hover-border-color);
+        &:hover {
+            color: var(--nav-tab-hover-text-color);
+            background-color: var(--nav-tab-hover-bg-color);
+            border-top-color: var(--nav-tab-hover-border-top);
+            border-left-color: var(--nav-tab-hover-border-left);
+            border-bottom-color: var(--nav-tab-border-hover-bottom);
+            border-right-color: var(--nav-tab-border-hover-right);
         }
     }
 

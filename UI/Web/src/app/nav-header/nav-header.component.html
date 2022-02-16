@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
     <div class="container-fluid">
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
-      <a class="navbar-brand dark-exempt" routerLink="/library" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="phone-hidden"> Kavita</span></a>
+      <a class="navbar-brand dark-exempt" routerLink="/library" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="d-none d-md-inline"> Kavita</span></a>
       <ul class="navbar-nav col me-auto">
         
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
@@ -108,7 +108,7 @@
       <ng-container *ngIf="!searchFocused">
         <div class="back-to-top">
           <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()" *ngIf="backToTopNeeded">
-            <i class="fa fa-angle-double-up" style="color: white" aria-hidden="true"></i>
+            <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
             <span class="visually-hidden">Scroll to Top</span>
           </button>
         </div>
@@ -119,7 +119,7 @@
           </div>
           <div class="nav-item pe-2 not-xs-only">
             <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon" title="Server Settings">
-              <i class="fa fa-cogs" aria-hidden="true" style="color: white"></i>
+              <i class="fa fa-cogs nav" aria-hidden="true"></i>
               <span class="visually-hidden">Server Settings</span>
             </a>
           </div>

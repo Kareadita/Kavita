@@ -1,25 +1,16 @@
 @use '../node_modules/swiper/swiper.scss' as swiper;
 
+// Import themes which define the css variables we use to customize the app
+@import './theme/themes/light';
+@import './theme/themes/dark';
+@import './theme/themes/eink';
+
 // Import colors for overrides of bootstrap theme
 @import './theme/toastr';
 @import './theme/variables';
 
-// NOTE: It currently isn't possible to swap out all bootstrap styles because of the scss generators. So we have some hardcoded stuff.
-$theme-colors: (
-  "primary": #4ac694,
-  "danger": #BD362F,
-  "secondary": #6c757d,
-  "light": #f8f9fa
-);
-
 // Bootstrap must be after _colors since we define the colors there
 @import '~bootstrap/scss/bootstrap';
-
-
-// Import themes which define the css variables we use to customize the app
-@import './theme/themes/light.css';
-@import './theme/themes/dark.css';
-@import './theme/themes/eink.css';
 
 
 // Import all the customized theme overrides
@@ -41,6 +32,8 @@ $theme-colors: (
 @import './theme/components/modal';
 @import './theme/components/card';
 @import './theme/components/slider';
+@import './theme/components/radios';
+@import './theme/components/selects';
 
 
 @import './theme/utilities/utilities';
