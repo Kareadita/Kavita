@@ -106,7 +106,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
         this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.bookReaderTapToPaginate, []));
 
-        this.settingsForm.addControl('theme', new FormControl(!!user.preferences.theme, []));
+        this.settingsForm.addControl('theme', new FormControl(user.preferences.theme, []));
       }
     });
 
