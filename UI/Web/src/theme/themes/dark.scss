@@ -154,4 +154,9 @@
     /* Radios */
     --radio-accent-color: var(--primary-color);
     --radio-hover-accent-color: var(--primary-color-dark-shade);
+
+    /* Carousel */
+    --carousel-header-text-color: var(--body-text-color);
+    --carousel-header-text-decoration: none;
+    --carousel-hover-header-text-decoration: underline;
   }

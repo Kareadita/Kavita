@@ -24,7 +24,7 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
-    <button type="button" class="btn btn-info" (click)="togglePromotion()">{{readingList.promoted ? 'Demote' : 'Promote'}}</button>
+    <button type="button" class="btn btn-secondary alt" (click)="togglePromotion()">{{readingList.promoted ? 'Demote' : 'Promote'}}</button>
     <button type="submit" class="btn btn-primary" [disabled]="reviewGroup.get('title')?.value.trim().length === 0" (click)="save()">Save</button>
 </div>
 

@@ -2,13 +2,13 @@ form {
     max-height: 38px;
 }
 
-input {
-    width: 15px;
-    opacity: 1;
-    position: relative;
-    left: 4px;
-    border: none;
-}
+// input {
+//     width: 15px;
+//     opacity: 1;
+//     position: relative;
+//     left: 4px;
+//     border: none;
+// }
 
 .search-result img {
     width: 100% !important;
@@ -42,25 +42,24 @@ input {
         display: flex;
     }
 
-    .close {
-        cursor: pointer;
-        position: absolute;
-        top: 7px;
-        right: 10px;
-    }
+    // .close {
+    //     cursor: pointer;
+    //     position: absolute;
+    //     top: 7px;
+    //     right: 10px;
+    // }
 
-    @media only screen and (max-width:650px) {
-        .close {
-            top: 50%;
-            transform: translate(0, -60%);
-        }
-    }
+    // @media only screen and (max-width:650px) {
+    //     .close {
+    //         top: 50%;
+    //         transform: translate(0, -60%);
+    //     }
+    // }
 
 
     input {
         outline: 0 !important;
         border-radius: .28571429rem;
-        display: inline-block !important;
         padding: 0px !important;
         min-height: 0px !important;
         max-width: 100% !important;
@@ -68,25 +67,32 @@ input {
         text-indent: 0 !important;
         line-height: inherit !important;
         box-shadow: none !important;
-        width: 100%;
+        width: 200px;
         transition-property: all;
         transition-duration: 0.3s;
         display: block;
+        opacity: 1;
+        position: relative;
+        left: 4px;
+        border: none;
+
+        &:focus-visible {
+            width: calc(100vw - 400px);
+        }
+
+        &:empty {
+            padding-top: 6px !important;
+        }
     }
 
-    input:focus-visible {
-        width: calc(100vw - 400px);
+    &.focused {
+        width: 100%;
+        border-color: var(--input-focused-border-color);
     }
 
-    input:empty {
-        padding-top: 6px !important;
-    }
 }
 
-.typeahead-input.focused {
-    width: 100%;
-    border-color: var(--input-focused-border-color);
-}
+
 
 /* small devices (phones, 650px and down) */
 @media only screen and (max-width:650px) {
@@ -156,10 +162,6 @@ li {
 
 ul ul {
     border-radius: 0px !important;
-}
-
-.list-group-item {
-    cursor: pointer;
 }
 
 
