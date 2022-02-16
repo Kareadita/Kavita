@@ -59,7 +59,7 @@ public class SiteThemeService : ISiteThemeService
             .Where(name => !reservedNames.Contains(Parser.Parser.Normalize(name))).ToList();
 
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
-        var totalThemesToIterate = themeFiles.Count();
+        var totalThemesToIterate = themeFiles.Count;
         var themeIteratedCount = 0;
 
         // First remove any files from allThemes that are User Defined and not on disk
@@ -70,7 +70,7 @@ public class SiteThemeService : ISiteThemeService
                 _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, userTheme.FileName));
             if (!_directoryService.FileSystem.File.Exists(filepath))
             {
-                // TODO: I need to do the removal different. I need to update all userpreferences to use DefaultTheme
+                // I need to do the removal different. I need to update all userpreferences to use DefaultTheme
                 allThemes.Remove(userTheme);
                 await RemoveTheme(userTheme);
 

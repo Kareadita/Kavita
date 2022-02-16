@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,9 +23,9 @@ namespace API.Data
         /// </summary>
         public static IList<ServerSetting> DefaultSettings;
 
-        public static readonly IList<SiteTheme> DefaultThemes = new List<SiteTheme>()
+        public static readonly IList<SiteTheme> DefaultThemes = new List<SiteTheme>
         {
-            new SiteTheme()
+            new()
             {
                 Name = "Dark",
                 NormalizedName = Parser.Parser.Normalize("Dark"),
@@ -32,7 +33,7 @@ namespace API.Data
                 FileName = "dark.scss",
                 IsDefault = true,
             },
-            new SiteTheme()
+            new()
             {
                 Name = "Light",
                 NormalizedName = Parser.Parser.Normalize("Light"),
@@ -40,7 +41,7 @@ namespace API.Data
                 FileName = "light.scss",
                 IsDefault = false,
             },
-            new SiteTheme()
+            new()
             {
                 Name = "E-Ink",
                 NormalizedName = Parser.Parser.Normalize("E-Ink"),

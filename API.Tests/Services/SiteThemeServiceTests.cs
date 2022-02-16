@@ -256,7 +256,7 @@ public class SiteThemeServiceTests
 
 
         var ex = await Assert.ThrowsAsync<KavitaException>(async () => await siteThemeService.UpdateDefault(10));
-        Assert.Equal(ex.Message, "Theme file missing or invalid");
+        Assert.Equal("Theme file missing or invalid", ex.Message);
 
     }
 
