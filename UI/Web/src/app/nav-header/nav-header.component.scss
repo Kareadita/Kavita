@@ -1,6 +1,6 @@
 
 .btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1);
+    box-shadow: 0 0 0 0.1rem var(--nav-header-btn-hover-outline-color);
 }
 
 .navbar {
@@ -8,7 +8,7 @@
 }
 
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width:650px) { //370
+@media only screen and (max-width:650px) {
     .navbar-nav {
         width: 0;
     }
