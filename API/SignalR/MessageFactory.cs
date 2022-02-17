@@ -125,42 +125,14 @@ namespace API.SignalR
             };
         }
 
-        // public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
-        // {
-        //     // How does this differ from DBupdateEvent?
-        //     return new SignalRMessage()
-        //     {
-        //         Name = ScanLibraryProgress,
-        //         Title = "Library Scan", // TODO: Use Library Name here
-        //         SubTitle = "",
-        //         EventType = progress switch
-        //         {
-        //             0f => "started",
-        //             1f => "ended",
-        //             _ => "updated"
-        //         },
-        //         Body = new
-        //         {
-        //             LibraryId = libraryId,
-        //             Progress = progress,
-        //             EventTime = DateTime.Now
-        //         }
-        //     };
-        // }
-
-        public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress, string subtitle = "")
+        public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
         {
             return new SignalRMessage()
             {
                 Name = RefreshMetadataProgress,
                 Title = "Refreshing Covers",
                 SubTitle = subtitle,
-                EventType = progress switch
-                {
-                    0f => "started",
-                    1f => "ended",
-                    _ => "updated"
-                },
+                EventType = eventType,
                 Progress = ProgressType.Determinate,
                 Body = new
                 {
@@ -316,6 +288,20 @@ namespace API.SignalR
                     Title = "Updating Series",
                     SubTitle = series.Name
                 }
+            };
+        }
+
+        public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "")
+        {
+            // TODO: I want this as a detail of a Scanning Series and we can put more information like Volume or Chapter here
+            return new SignalRMessage()
+            {
+                Name = ScanProgress,
+                Title = $"Scanning {libraryName}",
+                SubTitle = seriesName,
+                EventType = eventType,
+                Progress = ProgressType.Indeterminate,
+                Body = null
             };
         }
 

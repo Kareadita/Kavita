@@ -203,8 +203,9 @@ public class MetadataService : IMetadataService
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
         _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
+
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F, $"Starting {library.Name}"));
+            MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"));
 
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
@@ -230,7 +231,7 @@ public class MetadataService : IMetadataService
                 var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
 
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.RefreshMetadataProgressEvent(library.Id, progress, series.Name));
+                    MessageFactory.RefreshMetadataProgressEvent(library.Id, progress, ProgressEventType.Updated, series.Name));
 
                 try
                 {
@@ -251,7 +252,7 @@ public class MetadataService : IMetadataService
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F, $"Complete"));
+            MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F, ProgressEventType.Ended, $"Complete"));
 
         await RemoveAbandonedMetadataKeys();
 
@@ -282,7 +283,7 @@ public class MetadataService : IMetadataService
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F, series.Name));
+            MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F, ProgressEventType.Started, series.Name));
 
         await ProcessSeriesMetadataUpdate(series, forceUpdate);
 
@@ -293,7 +294,7 @@ public class MetadataService : IMetadataService
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F, series.Name));
+            MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F, ProgressEventType.Ended, series.Name));
 
         await RemoveAbandonedMetadataKeys();
 
@@ -302,7 +303,6 @@ public class MetadataService : IMetadataService
             // TODO: Fix CoverUpdate/RefreshMetadata from merge
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
         }
-
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }

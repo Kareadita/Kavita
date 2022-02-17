@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, throttleTime } from 'rxjs/operators';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
@@ -21,7 +21,7 @@ import { EVENTS, Message, MessageHubService } from '../_services/message-hub.ser
 export class NavEventsToggleComponent implements OnInit, OnDestroy {
   @Input() user!: User;
 
-  isAdmin: boolean = false; // TODO: Make this observable listener
+  isAdmin: boolean = false;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -37,6 +37,8 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   private updateNotificationModalRef: NgbModalRef | null = null;
 
   activeEvents: number = 0;
+
+  debugMode: boolean = false;
 
 
   get EVENTS() {
@@ -54,7 +56,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Debounce for testing. Kavita's too fast
-    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), debounceTime(10)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       console.log(event.event);
       if (event.event.endsWith('error')) {
         // TODO: Show an error handle
@@ -69,10 +71,6 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         this.isAdmin = false;
       }
     });
-
-
-
-
   }
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
@@ -91,21 +89,22 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         data = this.progressEventsSource.getValue();
         data.push(message);
         this.progressEventsSource.next(data);
-        console.log('Started: ', message.name);
         this.activeEvents += 1;
         break;
       case 'updated':
         data = this.progressEventsSource.getValue();
         const index = data.findIndex(m => m.name === message.name);
-        data[index] = message;
+        if (index < 0) {
+          data.push(message);
+        } else {
+          data[index] = message;
+        }
         this.progressEventsSource.next(data);
-        console.log('Updated: ', message.name);
         break;
       case 'ended':
         data = this.progressEventsSource.getValue();
         data = data.filter(m => m.name !== message.name); // This does not work //  && m.title !== message.title
         this.progressEventsSource.next(data);
-        console.log('Ended: ', message.name);
         this.activeEvents =  Math.max(this.activeEvents - 1, 0);
         break;
       default:
