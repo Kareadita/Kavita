@@ -26,14 +26,15 @@ namespace API.Controllers
         private readonly ILogger<SeriesController> _logger;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubContext<MessageHub> _messageHub;
+        private readonly IEventHub _eventHub;
 
-        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
+
+        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEventHub eventHub)
         {
             _logger = logger;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
-            _messageHub = messageHub;
+            _eventHub = eventHub;
         }
 
         [HttpPost]
@@ -93,8 +94,9 @@ namespace API.Controllers
                 await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
                 await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
-                await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(seriesId, series.Name, series.LibraryId));
+
+                await _eventHub.SendMessageAsync(SignalREvents.SeriesRemoved,
+                    MessageFactory.SeriesRemovedEvent(seriesId, series.Name, series.LibraryId), false);
             }
             return Ok(result);
         }
@@ -378,9 +380,9 @@ namespace API.Controllers
                 {
                     foreach (var tag in updateSeriesMetadataDto.Tags)
                     {
-                        await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAddedToCollection,
+                        await _eventHub.SendMessageAsync(SignalREvents.SeriesAddedToCollection,
                             MessageFactory.SeriesAddedToCollection(tag.Id,
-                                updateSeriesMetadataDto.SeriesMetadata.SeriesId));
+                                updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
                     }
                     return Ok("Successfully updated");
                 }

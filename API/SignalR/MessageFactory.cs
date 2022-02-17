@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using API.DTOs.Update;
 using API.Entities;
@@ -53,6 +54,12 @@ namespace API.SignalR
             return new SignalRMessage()
             {
                 Name = SignalREvents.ScanLibraryProgress,
+                EventType = progress switch
+                {
+                    0f => "started",
+                    1f => "ended",
+                    _ => "updated"
+                },
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -62,11 +69,19 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress)
+        public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress, string subtitle = "")
         {
             return new SignalRMessage()
             {
                 Name = SignalREvents.RefreshMetadataProgress,
+                Title = "Refreshing Covers",
+                SubTitle = subtitle,
+                EventType = progress switch
+                {
+                    0f => "started",
+                    1f => "ended",
+                    _ => "updated"
+                },
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -76,24 +91,38 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage BackupDatabaseProgressEvent(float progress)
+        public static SignalRMessage BackupDatabaseProgressEvent(float progress, string subtitle = "")
         {
             return new SignalRMessage()
             {
                 Name = SignalREvents.BackupDatabaseProgress,
                 Title = "Backing up Database",
+                SubTitle = subtitle,
+                EventType = progress switch
+                {
+                    0f => "started",
+                    1f => "ended",
+                    _ => "updated"
+                },
                 Body = new
                 {
                     Progress = progress
                 }
             };
         }
-        public static SignalRMessage CleanupProgressEvent(float progress)
+        public static SignalRMessage CleanupProgressEvent(float progress, string subtitle = "")
         {
             return new SignalRMessage()
             {
                 Name = SignalREvents.CleanupProgress,
-                Title = "Cleaning up Server", // TODO: Find a better word for this
+                Title = "Performing Cleanup",
+                SubTitle = subtitle,
+                EventType = progress switch
+                {
+                    0f => "started",
+                    1f => "ended",
+                    _ => "updated"
+                },
                 Body = new
                 {
                     Progress = progress
@@ -108,6 +137,8 @@ namespace API.SignalR
             {
                 Name = SignalREvents.UpdateAvailable,
                 Title = "Update Available",
+                SubTitle = update.UpdateTitle,
+                EventType = "single",
                 Body = update
             };
         }
@@ -139,13 +170,14 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage DownloadProgressEvent(string username, string downloadName, float progress)
+        public static SignalRMessage DownloadProgressEvent(string username, string downloadName, float progress, string eventType = "updated")
         {
             return new SignalRMessage()
             {
                 Name = SignalREvents.DownloadProgress,
                 Title = $"Downloading {downloadName}",
-                SubTitle = $"{username} is downloading",
+                SubTitle = $"{username} is downloading {downloadName}",
+                EventType = eventType,
                 Body = new
                 {
                     UserName = username,
@@ -177,7 +209,7 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.ScanSeries,
+                Name = SignalREvents.ScanProgress,
                 Title = "Updating Series",
                 SubTitle = series.Name,
                 EventType = eventType,

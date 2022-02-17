@@ -1,20 +1,16 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { ProgressEvent } from '../_models/events/scan-library-progress-event';
-import { ScanSeriesEvent } from '../_models/events/scan-series-event';
-import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
 import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
   ScanSeries = 'ScanSeries',
-  RefreshMetadata = 'RefreshMetadata',
-  RefreshMetadataProgress = 'RefreshMetadataProgress',
   SeriesAdded = 'SeriesAdded',
   SeriesRemoved = 'SeriesRemoved',
   ScanLibraryProgress = 'ScanLibraryProgress',
@@ -22,9 +18,21 @@ export enum EVENTS {
   SeriesAddedToCollection = 'SeriesAddedToCollection',
   ScanLibraryError = 'ScanLibraryError',
   BackupDatabaseProgress = 'BackupDatabaseProgress',
+  /**
+   * A subtype of NotificationProgress that represents maintenance cleanup on server-owned resources
+   */
   CleanupProgress = 'CleanupProgress',
+  /**
+   * A subtype of NotificationProgress that represnts a user downloading a file or group of files
+   */
   DownloadProgress = 'DownloadProgress',
+  /**
+   * A generic progress event 
+   */
   NotificationProgress = 'NotificationProgress',
+  /**
+   * A subtype of NotificationProgress that represents the underlying file being processed during a scan
+   */
   FileScanProgress = 'FileScanProgress',
   /**
    * A custom user site theme is added or removed during a scan
@@ -33,7 +41,11 @@ export enum EVENTS {
   /**
    * A cover is updated
    */
-  CoverUpdate = 'CoverUpdate'
+  CoverUpdate = 'CoverUpdate',
+  /**
+   * A subtype of NotificationProgress that represents a file being processed for cover image extraction
+   */
+  RefreshMetadataProgress = 'RefreshMetadataProgress',
 }
 
 export interface Message<T> {
@@ -41,14 +53,6 @@ export interface Message<T> {
   payload: T;
 }
 
-export interface SignalRMessage {
-  body: any;
-  name: string;
-  title: string;
-  subTitle: string;
-  eventType: 'single' | 'started' | 'updated' | 'ended';
-  eventTime: string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -84,7 +88,7 @@ export class MessageHubService {
    */
   public isEventType(event: Message<any>, eventType: EVENTS) {
     if (event.event == EVENTS.NotificationProgress) {
-      const notification = event.payload as SignalRMessage;
+      const notification = event.payload as NotificationProgressEvent;
       return notification.eventType.toLowerCase() == eventType.toLowerCase();
     } 
     return event.event === eventType;
@@ -123,42 +127,11 @@ export class MessageHubService {
       });
     });
 
-    this.hubConnection.on(EVENTS.BackupDatabaseProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.BackupDatabaseProgress,
-        payload: resp.body
-      });
-    });
 
-    this.hubConnection.on(EVENTS.CleanupProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.CleanupProgress,
-        payload: resp.body
-      });
-    });
-
-    this.hubConnection.on(EVENTS.DownloadProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.DownloadProgress,
-        payload: resp.body
-      });
-    });
-
-    this.hubConnection.on(EVENTS.NotificationProgress, (resp: SignalRMessage) => {
+    this.hubConnection.on(EVENTS.NotificationProgress, (resp: NotificationProgressEvent) => {
       this.messagesSource.next({
         event: EVENTS.NotificationProgress,
         payload: resp
-      });
-
-
-
-
-    });
-
-    this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.RefreshMetadataProgress,
-        payload: resp.body
       });
     });
 
@@ -182,6 +155,7 @@ export class MessageHubService {
         payload: resp.body
       });
       if (this.isAdmin) {
+        // TODO: Just show the error, RBS is done in eventhub
         this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
       }
     });

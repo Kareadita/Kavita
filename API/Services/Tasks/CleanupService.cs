@@ -28,16 +28,16 @@ namespace API.Services.Tasks
     {
         private readonly ILogger<CleanupService> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubContext<MessageHub> _messageHub;
+        private readonly IEventHub _eventHub;
         private readonly IDirectoryService _directoryService;
 
         public CleanupService(ILogger<CleanupService> logger,
-            IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub,
+            IUnitOfWork unitOfWork, IEventHub eventHub,
             IDirectoryService directoryService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _messageHub = messageHub;
+            _eventHub = eventHub;
             _directoryService = directoryService;
         }
 
@@ -49,25 +49,23 @@ namespace API.Services.Tasks
         public async Task Cleanup()
         {
             _logger.LogInformation("Starting Cleanup");
-            await SendProgress(0F);
+            await SendProgress(0F, "Starting cleanup");
             _logger.LogInformation("Cleaning temp directory");
             _directoryService.ClearDirectory(_directoryService.TempDirectory);
-            await SendProgress(0.1F);
+            await SendProgress(0.1F, "Cleaning temp directory");
             CleanupCacheDirectory();
-            await SendProgress(0.25F);
+            await SendProgress(0.25F, "Cleaning old database backups");
             _logger.LogInformation("Cleaning old database backups");
             await CleanupBackups();
-            await SendProgress(0.50F);
+            await SendProgress(0.50F, "Cleaning deleted cover images");
             _logger.LogInformation("Cleaning deleted cover images");
             await DeleteSeriesCoverImages();
-            await SendProgress(0.6F);
+            await SendProgress(0.6F, "Cleaning deleted cover images");
             await DeleteChapterCoverImages();
-            await SendProgress(0.7F);
+            await SendProgress(0.7F, "Cleaning deleted cover images");
             await DeleteTagCoverImages();
-            await SendProgress(0.8F);
-            //_logger.LogInformation("Cleaning old bookmarks");
-            //await CleanupBookmarks();
-            await SendProgress(1F);
+            await SendProgress(0.8F, "Cleaning deleted cover images");
+            await SendProgress(1F, "Cleanup finished");
             _logger.LogInformation("Cleanup finished");
         }
 
@@ -82,10 +80,10 @@ namespace API.Services.Tasks
             await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
         }
 
-        private async Task SendProgress(float progress)
+        private async Task SendProgress(float progress, string subtitle)
         {
-            await _messageHub.Clients.All.SendAsync(SignalREvents.CleanupProgress,
-                MessageFactory.CleanupProgressEvent(progress));
+            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                MessageFactory.CleanupProgressEvent(progress, subtitle));
         }
 
         /// <summary>

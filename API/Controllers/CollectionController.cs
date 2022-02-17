@@ -19,13 +19,13 @@ namespace API.Controllers
     public class CollectionController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubContext<MessageHub> _messageHub;
+        private readonly IEventHub _eventHub;
 
         /// <inheritdoc />
-        public CollectionController(IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
+        public CollectionController(IUnitOfWork unitOfWork, IEventHub eventHub)
         {
             _unitOfWork = unitOfWork;
-            _messageHub = messageHub;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -156,7 +156,8 @@ namespace API.Controllers
                 {
                     tag.CoverImageLocked = false;
                     tag.CoverImage = string.Empty;
-                    await _messageHub.Clients.All.SendAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(tag.Id, "collectionTag"));
+                    await _eventHub.SendMessageAsync(SignalREvents.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(tag.Id, "collectionTag"), false);
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
 

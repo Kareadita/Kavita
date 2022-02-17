@@ -68,6 +68,10 @@
         /// A generic error that can occur in background processing
         /// </summary>
         public const string Error = "Error";
+        /// <summary>
+        /// When DB updates are occuring during a library/series scan
+        /// </summary>
+        public const string ScanProgress = "ScanProgress";
 
     }
 }

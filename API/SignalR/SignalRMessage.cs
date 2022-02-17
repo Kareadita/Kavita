@@ -24,10 +24,6 @@ namespace API.SignalR
         /// </summary>
         public string EventType { get; set; } = "updated";
         /// <summary>
-        /// The type of event this is. information | update |
-        /// </summary>
-        public string EventPriority { get; set; } = "information";
-        /// <summary>
         /// When event took place
         /// </summary>
         public DateTime EventTime = DateTime.Now;
