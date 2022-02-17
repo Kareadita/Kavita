@@ -20,6 +20,10 @@ export interface NotificationProgressEvent {
      */
     eventType: 'single' | 'started' | 'updated' | 'ended';
     /**
+     * Type of progress. Helps widget understand how to display spinner
+     */
+    progress: 'none' | 'indeterminate' | 'determinate';
+    /**
      * When event was sent
      */
     eventTime: string;

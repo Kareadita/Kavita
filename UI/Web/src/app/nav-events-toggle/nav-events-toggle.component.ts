@@ -19,10 +19,7 @@ import { EVENTS, Message, MessageHubService } from '../_services/message-hub.ser
   styleUrls: ['./nav-events-toggle.component.scss']
 })
 export class NavEventsToggleComponent implements OnInit, OnDestroy {
-
   @Input() user!: User;
-
-  @ViewChild('popContent', {static: true}) popover!: NgbPopover;
 
   isAdmin: boolean = false; // TODO: Make this observable listener
 
@@ -57,9 +54,8 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Debounce for testing. Kavita's too fast
-    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), debounceTime(50)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), debounceTime(10)).subscribe(event => {
       console.log(event.event);
-      this.popover?.open();
       if (event.event.endsWith('error')) {
         // TODO: Show an error handle
       } else if (event.event === EVENTS.NotificationProgress) {
@@ -73,6 +69,10 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         this.isAdmin = false;
       }
     });
+
+
+
+
   }
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
@@ -106,13 +106,13 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         data = data.filter(m => m.name !== message.name); // This does not work //  && m.title !== message.title
         this.progressEventsSource.next(data);
         console.log('Ended: ', message.name);
-        this.activeEvents -= 1;
+        this.activeEvents =  Math.max(this.activeEvents - 1, 0);
         break;
       default:
         break;
     }
 
-    console.log('Active Events: ', this.activeEvents);
+    //console.log('Active Events: ', this.activeEvents);
 
   }
 

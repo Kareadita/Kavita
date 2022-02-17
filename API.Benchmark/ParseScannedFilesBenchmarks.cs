@@ -4,6 +4,7 @@ using API.Entities.Enums;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner;
+using API.SignalR;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
 using Microsoft.Extensions.Logging;
@@ -28,7 +29,8 @@ namespace API.Benchmark
             _parseScannedFiles = new ParseScannedFiles(
                 Substitute.For<ILogger>(),
                 directoryService,
-                new ReadingItemService(_archiveService, new BookService(_bookLogger, directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService)), Substitute.For<ImageService>(), directoryService));
+                new ReadingItemService(_archiveService, new BookService(_bookLogger, directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService)), Substitute.For<ImageService>(), directoryService),
+                Substitute.For<IEventHub>());
         }
 
         // [Benchmark]

@@ -191,7 +191,7 @@ public class BackupService : IBackupService
 
     private async Task SendProgress(float progress, string subtitle)
     {
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.BackupDatabaseProgressEvent(progress, subtitle));
     }
 

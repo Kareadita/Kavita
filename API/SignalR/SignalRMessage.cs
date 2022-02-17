@@ -7,6 +7,9 @@ namespace API.SignalR
     /// </summary>
     public class SignalRMessage
     {
+        /// <summary>
+        /// Body of the event type
+        /// </summary>
         public object Body { get; set; }
         public string Name { get; set; }
         /// <summary>
@@ -21,8 +24,13 @@ namespace API.SignalR
         public string SubTitle { get; set; } = string.Empty;
         /// <summary>
         /// Represents what this represents. started | updated | ended | single
+        /// <see cref="ProgressEventType"/>
         /// </summary>
-        public string EventType { get; set; } = "updated";
+        public string EventType { get; set; } = ProgressEventType.Updated;
+        /// <summary>
+        /// How should progress be represented. If Determinate, the Body MUST have a Progress float on it.
+        /// </summary>
+        public string Progress { get; set; } = ProgressType.None;
         /// <summary>
         /// When event took place
         /// </summary>

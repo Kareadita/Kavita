@@ -82,7 +82,7 @@ namespace API.Services.Tasks
 
         private async Task SendProgress(float progress, string subtitle)
         {
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.CleanupProgressEvent(progress, subtitle));
         }
 

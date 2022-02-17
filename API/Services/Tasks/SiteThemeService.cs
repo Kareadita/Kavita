@@ -59,8 +59,6 @@ public class SiteThemeService : ISiteThemeService
             .Where(name => !reservedNames.Contains(Parser.Parser.Normalize(name))).ToList();
 
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
-        var totalThemesToIterate = themeFiles.Count;
-        var themeIteratedCount = 0;
 
         // First remove any files from allThemes that are User Defined and not on disk
         var userThemes = allThemes.Where(t => t.Provider == ThemeProvider.User).ToList();
@@ -68,15 +66,11 @@ public class SiteThemeService : ISiteThemeService
         {
             var filepath = Parser.Parser.NormalizePath(
                 _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, userTheme.FileName));
-            if (!_directoryService.FileSystem.File.Exists(filepath))
-            {
-                // I need to do the removal different. I need to update all user preferences to use DefaultTheme
-                allThemes.Remove(userTheme);
-                await RemoveTheme(userTheme);
+            if (_directoryService.FileSystem.File.Exists(filepath)) continue;
 
-                await _eventHub.SendMessageAsync(SignalREvents.SiteThemeProgress,
-                    MessageFactory.SiteThemeProgressEvent(userTheme.FileName, 1, totalThemesToIterate, userTheme.FileName, 0F));
-            }
+            // I need to do the removal different. I need to update all user preferences to use DefaultTheme
+            allThemes.Remove(userTheme);
+            await RemoveTheme(userTheme);
         }
 
         // Add new custom themes
@@ -85,11 +79,8 @@ public class SiteThemeService : ISiteThemeService
         {
             var themeName =
                 Parser.Parser.Normalize(_directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile));
-            if (allThemeNames.Contains(themeName))
-            {
-                themeIteratedCount += 1;
-                continue;
-            }
+            if (allThemeNames.Contains(themeName)) continue;
+
             _unitOfWork.SiteThemeRepository.Add(new SiteTheme()
             {
                 Name = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile),
@@ -99,9 +90,8 @@ public class SiteThemeService : ISiteThemeService
                 IsDefault = false,
             });
 
-            await _eventHub.SendMessageAsync(SignalREvents.SiteThemeProgress,
-                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeIteratedCount, totalThemesToIterate, themeName, themeIteratedCount / (totalThemesToIterate * 1.0f)));
-            themeIteratedCount += 1;
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeName, ProgressEventType.Updated));
         }
 
 
@@ -110,8 +100,8 @@ public class SiteThemeService : ISiteThemeService
             await _unitOfWork.CommitAsync();
         }
 
-        await _eventHub.SendMessageAsync(SignalREvents.SiteThemeProgress,
-            MessageFactory.SiteThemeProgressEvent("", totalThemesToIterate, totalThemesToIterate, "", 1F));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.SiteThemeProgressEvent("",  "", ProgressEventType.Ended));
 
     }
 

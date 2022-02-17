@@ -71,7 +71,7 @@ public class MetadataService : IMetadataService
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
-        await _eventHub.SendMessageAsync(SignalREvents.CoverUpdate,
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
             MessageFactory.CoverUpdateEvent(chapter.Id, "chapter"), false);
         return true;
     }
@@ -101,7 +101,7 @@ public class MetadataService : IMetadataService
         if (firstChapter == null) return false;
 
         volume.CoverImage = firstChapter.CoverImage;
-        await _eventHub.SendMessageAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, "volume"), false);
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, "volume"), false);
 
         return true;
     }
@@ -138,7 +138,7 @@ public class MetadataService : IMetadataService
             }
         }
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
-        await _eventHub.SendMessageAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
     }
 
 
@@ -203,7 +203,7 @@ public class MetadataService : IMetadataService
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
         _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F, $"Starting {library.Name}"));
 
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
@@ -229,7 +229,7 @@ public class MetadataService : IMetadataService
                 var index = chunk * seriesIndex;
                 var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
 
-                await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.RefreshMetadataProgressEvent(library.Id, progress, series.Name));
 
                 try
@@ -250,7 +250,7 @@ public class MetadataService : IMetadataService
                 chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
         }
 
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F, $"Complete"));
 
         await RemoveAbandonedMetadataKeys();
@@ -281,7 +281,7 @@ public class MetadataService : IMetadataService
             return;
         }
 
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 0F, series.Name));
 
         await ProcessSeriesMetadataUpdate(series, forceUpdate);
@@ -292,7 +292,7 @@ public class MetadataService : IMetadataService
             await _unitOfWork.CommitAsync();
         }
 
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.RefreshMetadataProgressEvent(libraryId, 1F, series.Name));
 
         await RemoveAbandonedMetadataKeys();
@@ -300,7 +300,7 @@ public class MetadataService : IMetadataService
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
             // TODO: Fix CoverUpdate/RefreshMetadata from merge
-            await _eventHub.SendMessageAsync(SignalREvents.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
         }
 
 

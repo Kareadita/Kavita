@@ -122,13 +122,13 @@ public class VersionUpdaterService : IVersionUpdaterService
         if (BuildInfo.Version < updateVersion)
         {
             _logger.LogInformation("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
-            await _eventHub.SendMessageAsync(SignalREvents.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
+            await _eventHub.SendMessageAsync(MessageFactory.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
                 true);
         }
         else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development)
         {
             _logger.LogInformation("Server is up to date. Current: {CurrentVersion}", BuildInfo.Version);
-            await _eventHub.SendMessageAsync(SignalREvents.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
+            await _eventHub.SendMessageAsync(MessageFactory.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
                 true);
         }
     }

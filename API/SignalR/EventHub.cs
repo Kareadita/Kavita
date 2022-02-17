@@ -24,10 +24,14 @@ public class EventHub : IEventHub
         _messageHub = messageHub;
         _presenceTracker = presenceTracker;
         _unitOfWork = unitOfWork;
+
+        // TODO: When sending a message, queue the message up and on re-connect, reply the queued messages. Queue messages expire on a rolling basis (rolling array)
     }
 
     public async Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true)
     {
+        // TODO: If libraryId and NOT onlyAdmins, then perform RBS check before sending the event
+
         var users = _messageHub.Clients.All;
         if (onlyAdmins)
         {

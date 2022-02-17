@@ -46,7 +46,7 @@ namespace API.SignalR
             await _tracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId);
 
             var currentUsers = await PresenceTracker.GetOnlineUsers();
-            await Clients.All.SendAsync(SignalREvents.OnlineUsers, currentUsers);
+            await Clients.All.SendAsync(MessageFactory.OnlineUsers, currentUsers);
 
 
             await base.OnConnectedAsync();
@@ -62,7 +62,7 @@ namespace API.SignalR
             await _tracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId);
 
             var currentUsers = await PresenceTracker.GetOnlineUsers();
-            await Clients.All.SendAsync(SignalREvents.OnlineUsers, currentUsers);
+            await Clients.All.SendAsync(MessageFactory.OnlineUsers, currentUsers);
 
 
             await base.OnDisconnectedAsync(exception);

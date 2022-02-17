@@ -8,11 +8,87 @@ namespace API.SignalR
 {
     public static class MessageFactory
     {
+        /// <summary>
+        /// An update is available for the Kavita instance
+        /// </summary>
+        public const string UpdateAvailable = "UpdateAvailable";
+        /// <summary>
+        /// Used to tell when a scan series completes
+        /// </summary>
+        public const string ScanSeries = "ScanSeries";
+        /// <summary>
+        /// Event sent out during Refresh Metadata for progress tracking
+        /// </summary>
+        private const string RefreshMetadataProgress = "RefreshMetadataProgress";
+        /// <summary>
+        /// Series is added to server
+        /// </summary>
+        public const string SeriesAdded = "SeriesAdded";
+        /// <summary>
+        /// Series is removed from server
+        /// </summary>
+        public const string SeriesRemoved = "SeriesRemoved";
+        /// <summary>
+        /// Progress event for Scan library. Deprecated in favor of ScanProgress
+        /// </summary>
+        //public const string ScanLibraryProgress = "ScanLibraryProgress";
+        /// <summary>
+        /// When a user is connects/disconnects from server
+        /// </summary>
+        public const string OnlineUsers = "OnlineUsers";
+        /// <summary>
+        /// When a series is added to a collection
+        /// </summary>
+        public const string SeriesAddedToCollection = "SeriesAddedToCollection";
+        /// <summary>
+        /// When an error occurs during a scan library task
+        /// </summary>
+        public const string ScanLibraryError = "ScanLibraryError";
+        /// <summary>
+        /// Event sent out during backing up the database
+        /// </summary>
+        private const string BackupDatabaseProgress = "BackupDatabaseProgress";
+        /// <summary>
+        /// Event sent out during cleaning up temp and cache folders
+        /// </summary>
+        private const string CleanupProgress = "CleanupProgress";
+        /// <summary>
+        /// Event sent out during downloading of files
+        /// </summary>
+        private const string DownloadProgress = "DownloadProgress";
+        /// <summary>
+        /// A cover was updated
+        /// </summary>
+        public const string CoverUpdate = "CoverUpdate";
+        /// <summary>
+        /// A custom site theme was removed or added
+        /// </summary>
+        private const string SiteThemeProgress = "SiteThemeProgress";
+
+        /// <summary>
+        /// A type of event that has progress (determinate or indeterminate).
+        /// The underlying event will have a name to give details on how to handle.
+        /// </summary>
+        public const string NotificationProgress = "NotificationProgress";
+        /// <summary>
+        /// Event sent out when Scan Loop is parsing a file
+        /// </summary>
+        private const string FileScanProgress = "FileScanProgress";
+        /// <summary>
+        /// A generic error that can occur in background processing
+        /// </summary>
+        public const string Error = "Error";
+        /// <summary>
+        /// When DB updates are occuring during a library/series scan
+        /// </summary>
+        private const string ScanProgress = "ScanProgress";
+
+
         public static SignalRMessage ScanSeriesEvent(int seriesId, string seriesName)
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.ScanSeries,
+                Name = ScanSeries,
                 Body = new
                 {
                     SeriesId = seriesId,
@@ -25,7 +101,7 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.SeriesAdded,
+                Name = SeriesAdded,
                 Body = new
                 {
                     SeriesId = seriesId,
@@ -39,7 +115,7 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.SeriesRemoved,
+                Name = SeriesRemoved,
                 Body = new
                 {
                     SeriesId = seriesId,
@@ -54,7 +130,7 @@ namespace API.SignalR
         //     // How does this differ from DBupdateEvent?
         //     return new SignalRMessage()
         //     {
-        //         Name = SignalREvents.ScanLibraryProgress,
+        //         Name = ScanLibraryProgress,
         //         Title = "Library Scan", // TODO: Use Library Name here
         //         SubTitle = "",
         //         EventType = progress switch
@@ -76,7 +152,7 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.RefreshMetadataProgress,
+                Name = RefreshMetadataProgress,
                 Title = "Refreshing Covers",
                 SubTitle = subtitle,
                 EventType = progress switch
@@ -85,6 +161,7 @@ namespace API.SignalR
                     1f => "ended",
                     _ => "updated"
                 },
+                Progress = ProgressType.Determinate,
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -98,7 +175,7 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.BackupDatabaseProgress,
+                Name = BackupDatabaseProgress,
                 Title = "Backing up Database",
                 SubTitle = subtitle,
                 EventType = progress switch
@@ -107,6 +184,7 @@ namespace API.SignalR
                     1f => "ended",
                     _ => "updated"
                 },
+                Progress = ProgressType.Determinate,
                 Body = new
                 {
                     Progress = progress
@@ -117,7 +195,7 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.CleanupProgress,
+                Name = CleanupProgress,
                 Title = "Performing Cleanup",
                 SubTitle = subtitle,
                 EventType = progress switch
@@ -126,6 +204,7 @@ namespace API.SignalR
                     1f => "ended",
                     _ => "updated"
                 },
+                Progress = ProgressType.Determinate,
                 Body = new
                 {
                     Progress = progress
@@ -138,19 +217,22 @@ namespace API.SignalR
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.UpdateAvailable,
+                Name = UpdateAvailable,
                 Title = "Update Available",
                 SubTitle = update.UpdateTitle,
-                EventType = "single",
+                EventType = ProgressEventType.Single,
+                Progress = ProgressType.None,
                 Body = update
             };
         }
 
-        public static SignalRMessage SeriesAddedToCollection(int tagId, int seriesId)
+        public static SignalRMessage SeriesAddedToCollectionEvent(int tagId, int seriesId)
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.SeriesAddedToCollection,
+                Name = SeriesAddedToCollection,
+                Progress = ProgressType.None,
+                EventType = ProgressEventType.Single,
                 Body = new
                 {
                     TagId = tagId,
@@ -159,13 +241,15 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryError(int libraryId, string libraryName)
+        public static SignalRMessage ScanLibraryErrorEvent(int libraryId, string libraryName)
         {
             return new SignalRMessage
             {
-                Name = SignalREvents.ScanLibraryError,
+                Name = ScanLibraryError,
                 Title = "Error",
                 SubTitle = $"Error Scanning {libraryName}",
+                Progress = ProgressType.None,
+                EventType = ProgressEventType.Single,
                 Body = new
                 {
                     LibraryId = libraryId,
@@ -177,10 +261,11 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.DownloadProgress,
+                Name = DownloadProgress,
                 Title = $"Downloading {downloadName}",
                 SubTitle = $"{username} is downloading {downloadName}",
                 EventType = eventType,
+                Progress = ProgressType.Determinate,
                 Body = new
                 {
                     UserName = username,
@@ -202,28 +287,30 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.FileScanProgress,
+                Name = FileScanProgress,
                 Title = $"Scanning {libraryName}",
                 SubTitle = filename,
                 EventType = eventType,
+                Progress = ProgressType.Indeterminate,
                 Body = new
                 {
                     Title = $"Scanning {libraryName}",
                     Subtitle = filename,
                     EventTime = DateTime.Now,
-                    Progress = -1
                 }
             };
         }
 
         public static SignalRMessage DbUpdateProgressEvent(Series series, string eventType)
         {
+            // TODO: I want this as a detail of a Scanning Series and we can put more information like Volume or Chapter here
             return new SignalRMessage()
             {
-                Name = SignalREvents.ScanProgress,
-                Title = "Updating Series",
+                Name = ScanProgress,
+                Title = $"Scanning {series.Library.Name}",
                 SubTitle = series.Name,
                 EventType = eventType,
+                Progress = ProgressType.Indeterminate,
                 Body = new
                 {
                     Title = "Updating Series",
@@ -236,9 +323,10 @@ namespace API.SignalR
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.CoverUpdate,
+                Name = CoverUpdate,
                 Title = "Updating Cover",
                 //SubTitle = series.Name, // TODO: Refactor this
+                Progress = ProgressType.None,
                 Body = new
                 {
                     Id = id,
@@ -247,19 +335,18 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage SiteThemeProgressEvent(string subtitle, int themeIteratedCount, int totalThemesToIterate, string themeName, float progress)
+        public static SignalRMessage SiteThemeProgressEvent(string subtitle, string themeName, string eventType)
         {
             return new SignalRMessage()
             {
-                Name = SignalREvents.SiteThemeProgress,
+                Name = SiteThemeProgress,
                 Title = "Scanning Site Theme",
                 SubTitle = subtitle,
+                EventType = eventType,
+                Progress = ProgressType.Indeterminate,
                 Body = new
                 {
-                    TotalUpdates = totalThemesToIterate,
-                    CurrentCount = themeIteratedCount,
                     ThemeName = themeName,
-                    Progress = progress
                 }
             };
         }

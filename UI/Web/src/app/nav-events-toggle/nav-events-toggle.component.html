@@ -1,29 +1,54 @@
 <ng-container *ngIf="isAdmin">
     
-    <button type="button" class="btn btn-icon {{activeEvents > 0 ? 'colored' : ''}}" 
+    <button type="button" class="btn btn-icon {{progressEventsSource.getValue().length > 0 ? 'colored' : ''}}" 
         [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'">
         <i aria-hidden="true" class="fa fa-wave-square nav"></i>
     </button>
 
     <ng-template #popContent>
         <ul class="list-group list-group-flush dark-menu">
+
+            <ng-container *ngIf="true">
+                <li class="list-group-item dark-menu-item">
+                    <!-- <div class="spinner-grow text-primary small-spinner" role="status"></div> -->
+                    Title goes here
+                    <div class="accent-text">Subtitle goes here</div> 
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </li>
+                <li class="list-group-item dark-menu-item">
+                    Title goes here
+                    <div class="accent-text">Subtitle goes here</div> 
+                </li>
+                <li class="list-group-item dark-menu-item">
+                    <div>
+                        <div>{{prettyPrintProgress(0.1)}}% Title goes here</div>
+                        <div class="accent-text">Subtitle goes here</div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar" role="progressbar" [ngStyle]="{'width': 0.1 * 100 + '%'}" [attr.aria-valuenow]="0.1 * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                  </div>
+                        
+                </li>
+            </ng-container>
             <!-- Progress Events-->
             <ng-container *ngIf="progressEvents$ | async as progressUpdates">
                 <ng-container *ngFor="let message of progressUpdates">
-                    <li class="list-group-item dark-menu-item" *ngIf="message.body.progress < 0; else progressEvent">
-                        <div class="spinner-grow text-primary small-spinner" role="status"></div>&nbsp;{{message.title}}
+                    <li class="list-group-item dark-menu-item" *ngIf="message.progress === 'indeterminate' || message.progress === 'none'; else progressEvent">
+                        {{message.title}}
                         <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div> 
+                        <div class="progress" style="height: 5px;" *ngIf="message.progress === 'indeterminate'">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
                     </li>
                     <ng-template #progressEvent>
                         <li class="list-group-item dark-menu-item">
-                            <div class="spinner-border text-primary small-spinner"
-                            role="status" title="Started at {{message.eventTime | date: 'short'}}" 
-                            attr.aria-valuetext="{{prettyPrintProgress(message.body.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(message.body.progress)">
-                            </div>
-                            <!-- TODO: Put the progress bar on div -->
-                            <div>{{prettyPrintProgress(message.body.progress)}}% {{message.body.progress}}&nbsp;{{message.title}}</div>
-                            
+                            <div>{{message.title}}</div>
                             <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': message.body.progress * 100 + '%'}" [attr.aria-valuenow]="message.body.progress * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         </li>
                     </ng-template>
                 </ng-container>

@@ -95,7 +95,7 @@ namespace API.Controllers
                 await _unitOfWork.CommitAsync();
                 _taskScheduler.CleanupChapters(chapterIds);
 
-                await _eventHub.SendMessageAsync(SignalREvents.SeriesRemoved,
+                await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
                     MessageFactory.SeriesRemovedEvent(seriesId, series.Name, series.LibraryId), false);
             }
             return Ok(result);
@@ -380,8 +380,8 @@ namespace API.Controllers
                 {
                     foreach (var tag in updateSeriesMetadataDto.Tags)
                     {
-                        await _eventHub.SendMessageAsync(SignalREvents.SeriesAddedToCollection,
-                            MessageFactory.SeriesAddedToCollection(tag.Id,
+                        await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
+                            MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
                                 updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
                     }
                     return Ok("Successfully updated");

@@ -119,12 +119,12 @@ namespace API.Controllers
         {
             try
             {
-                await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.DownloadProgressEvent(User.GetUsername(),
                         Path.GetFileNameWithoutExtension(downloadName), 0F, "started"));
                 if (files.Count == 1)
                 {
-                    await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                         MessageFactory.DownloadProgressEvent(User.GetUsername(),
                             Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
                     return await GetFirstFileDownload(files);
@@ -132,7 +132,7 @@ namespace API.Controllers
 
                 var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
                     tempFolder);
-                await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.DownloadProgressEvent(User.GetUsername(),
                         Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
                 return File(fileBytes, DefaultContentType, downloadName);
@@ -140,7 +140,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "There was an exception when trying to download files");
-                await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.DownloadProgressEvent(User.GetUsername(),
                         Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
                 throw;
@@ -181,11 +181,11 @@ namespace API.Controllers
                 .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory, $"{b.ChapterId}_{b.FileName}")));
 
             var filename = $"{series.Name} - Bookmarks.zip";
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 0F));
             var (fileBytes, _) = await _archiveService.CreateZipForDownload(files,
                 $"download_{user.Id}_{series.Id}_bookmarks");
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 1F));
             return File(fileBytes, DefaultContentType, filename);
         }

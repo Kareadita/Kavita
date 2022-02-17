@@ -159,7 +159,7 @@ public class ScannerService : IScannerService
             await _unitOfWork.RollbackAsync();
         }
         // Tell UI that this series is done
-        await _eventHub.SendMessageAsync(SignalREvents.ScanSeries,
+        await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
             MessageFactory.ScanSeriesEvent(seriesId, series.Name));
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
@@ -221,9 +221,11 @@ public class ScannerService : IScannerService
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                              "Scan will be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
-            await _eventHub.SendMessageAsync(SignalREvents.Error, new SignalRMessage()
+
+            // TODO: Use a factory method
+            await _eventHub.SendMessageAsync(MessageFactory.Error, new SignalRMessage()
             {
-                Name = SignalREvents.Error,
+                Name = MessageFactory.Error,
                 Title = "Some of the root folders for the library are empty.",
                 SubTitle = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                            "Scan will be aborted. " +
@@ -440,10 +442,10 @@ public class ScannerService : IScannerService
                 _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the DB. Chunk {ChunkNumber} did not save to DB. If debug mode, series to check will be printed", chunk);
                 foreach (var series in nonLibrarySeries)
                 {
-                    _logger.LogDebug("[ScannerService] There may be a constraint issue with {SeriesName}", series.OriginalName);
+                    _logger.LogCritical("[ScannerService] There may be a constraint issue with {SeriesName}", series.OriginalName);
                 }
-                await _eventHub.SendMessageAsync(SignalREvents.ScanLibraryError,
-                    MessageFactory.ScanLibraryError(library.Id, library.Name));
+                await _eventHub.SendMessageAsync(MessageFactory.ScanLibraryError,
+                    MessageFactory.ScanLibraryErrorEvent(library.Id, library.Name));
                 continue;
             }
             _logger.LogInformation(
@@ -453,14 +455,14 @@ public class ScannerService : IScannerService
             // Emit any series removed
             foreach (var missing in missingSeries)
             {
-                await _eventHub.SendMessageAsync(SignalREvents.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
+                await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved, MessageFactory.SeriesRemovedEvent(missing.Id, missing.Name, library.Id));
             }
 
             foreach (var series in librarySeries)
             {
                 // TODO: Do I need this? Shouldn't this be NotificationProgress
                 // This is something more like, the series has finished updating in the backend. It may or may not have been modified.
-                await _eventHub.SendMessageAsync(SignalREvents.ScanSeries, MessageFactory.ScanSeriesEvent(series.Id, series.Name));
+                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.Id, series.Name));
             }
 
             var progress =  Math.Max(0, Math.Min(1, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
@@ -523,7 +525,7 @@ public class ScannerService : IScannerService
                     newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
 
                 // Inform UI of new series added
-                await _eventHub.SendMessageAsync(SignalREvents.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
+                await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded, MessageFactory.SeriesAddedEvent(series.Id, series.Name, library.Id));
             }
             catch (Exception ex)
             {
@@ -548,7 +550,7 @@ public class ScannerService : IScannerService
         try
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Started));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Started));
 
             // Get all associated ParsedInfos to the series. This includes infos that use a different filename that matches Series LocalizedName
             var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
@@ -563,7 +565,7 @@ public class ScannerService : IScannerService
             }
             series.OriginalName ??= parsedInfos[0].Series;
             series.SortName ??= parsedInfos[0].SeriesSort;
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Updated));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Updated));
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, libraryType);
         }
@@ -571,7 +573,7 @@ public class ScannerService : IScannerService
         {
             _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
         }
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Ended));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Ended));
     }
 
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
