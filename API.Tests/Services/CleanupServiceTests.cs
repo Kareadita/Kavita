@@ -26,7 +26,7 @@ public class CleanupServiceTests
 {
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
+    private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
 
     private readonly DbConnection _connection;
     private readonly DataContext _context;
