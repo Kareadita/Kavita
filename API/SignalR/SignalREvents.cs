@@ -23,9 +23,9 @@
         /// </summary>
         public const string SeriesRemoved = "SeriesRemoved";
         /// <summary>
-        /// Progress event for Scan library
+        /// Progress event for Scan library. Deprecated in favor of ScanProgress
         /// </summary>
-        public const string ScanLibraryProgress = "ScanLibraryProgress";
+        //public const string ScanLibraryProgress = "ScanLibraryProgress";
         /// <summary>
         /// When a user is connects/disconnects from server
         /// </summary>

@@ -284,8 +284,8 @@ public class ScannerService : IScannerService
         if (!await CheckMounts(library.Folders.Select(f => f.Path).ToList()))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-                MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+            // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+            //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
             return;
         }
 
@@ -296,14 +296,14 @@ public class ScannerService : IScannerService
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
                              "Scan will be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-                MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+            // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+            //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
             return;
         }
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-            MessageFactory.ScanLibraryProgressEvent(libraryId, 0F));
+        // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        //     MessageFactory.ScanLibraryProgressEvent(libraryId, 0F));
 
 
         var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path));
@@ -335,8 +335,8 @@ public class ScannerService : IScannerService
 
         await CleanupDbEntities();
 
-        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-            MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+        // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
     }
 
@@ -422,9 +422,13 @@ public class ScannerService : IScannerService
             // Now, we only have to deal with series that exist on disk. Let's recalculate the volumes for each series
             var librarySeries = cleanedSeries.ToList();
 
+            //var index = 0;
             foreach (var series in librarySeries)
             {
                 await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+                // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                //     MessageFactory.ScanLibraryProgressEvent(library.Id, (1F * index) / librarySeries.Count));
+                // index += 1;
             }
 
             try
@@ -460,8 +464,8 @@ public class ScannerService : IScannerService
             }
 
             var progress =  Math.Max(0, Math.Min(1, ((chunk + 1F) * chunkInfo.ChunkSize) / chunkInfo.TotalSize));
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-                MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
+            // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+            //     MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
         }
 
 
@@ -528,8 +532,8 @@ public class ScannerService : IScannerService
             }
 
             var progress =  Math.Max(0F, Math.Min(1F, i * 1F / newSeries.Count));
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-                MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
+            // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+            //     MessageFactory.ScanLibraryProgressEvent(library.Id, progress));
             i++;
         }
 
@@ -562,12 +566,12 @@ public class ScannerService : IScannerService
             await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Updated));
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, libraryType);
-            await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Ended));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
         }
+        await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Ended));
     }
 
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)

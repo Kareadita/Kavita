@@ -1,23 +1,14 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, take, takeUntil, throttleTime } from 'rxjs/operators';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
-import { ProgressEvent } from '../_models/events/progress-event';
 import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
-import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 
-interface ProcessedEvent {
-  eventType: string;
-  timestamp?: string;
-  progress: number;
-  libraryId: number;
-  libraryName: string;
-}
 
 
 
@@ -46,24 +37,16 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   singleUpdateSource = new BehaviorSubject<NotificationProgressEvent[]>([]);
   singleUpdates$ = this.singleUpdateSource.asObservable();
 
-  //updateAvailable: boolean = false;
-  //updateBody!: UpdateVersionEvent;
   private updateNotificationModalRef: NgbModalRef | null = null;
 
   activeEvents: number = 0;
 
-  // Debug code
-  updates: any = {}; // TODO: Remove the updates for progressEvents
-
-  get updateEvents(): Array<NotificationProgressEvent> {
-    return Object.values(this.updates);
-  }
 
   get EVENTS() {
     return EVENTS;
   }
 
-  constructor(public messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal, private accountService: AccountService) { }
+  constructor(public messageHub: MessageHubService, private modalService: NgbModal, private accountService: AccountService) { }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -73,7 +56,8 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
+    // Debounce for testing. Kavita's too fast
+    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), debounceTime(50)).subscribe(event => {
       console.log(event.event);
       this.popover?.open();
       if (event.event.endsWith('error')) {
@@ -93,38 +77,34 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
     const message = event.payload as NotificationProgressEvent;
-    console.log('Notification Progress Event: ', event.event, message);
-    console.log('Type: ', message.name);
+    console.log('Notification Progress Event: ', event.event, message, event.payload.eventType);
     let data;
 
     switch (event.payload.eventType) {
       case 'single':
-        const values = this.singleUpdateSource.value;
+        const values = this.singleUpdateSource.getValue();
         values.push(message);
         this.singleUpdateSource.next(values);
         this.activeEvents += 1;
         break;
       case 'started':
-        this.updates[message.name] = message;
-        data = this.progressEventsSource.value;
+        data = this.progressEventsSource.getValue();
         data.push(message);
-        this.singleUpdateSource.next(data);
+        this.progressEventsSource.next(data);
         console.log('Started: ', message.name);
         this.activeEvents += 1;
         break;
       case 'updated':
-        this.updates[message.name] = message;
-        data = this.progressEventsSource.value;
+        data = this.progressEventsSource.getValue();
         const index = data.findIndex(m => m.name === message.name);
         data[index] = message;
-        this.singleUpdateSource.next(data);
+        this.progressEventsSource.next(data);
         console.log('Updated: ', message.name);
         break;
       case 'ended':
-        delete this.updates[message.name];
-        data = this.progressEventsSource.value;
-        data = data.filter(m => m.name !== message.name);
-        this.singleUpdateSource.next(data);
+        data = this.progressEventsSource.getValue();
+        data = data.filter(m => m.name !== message.name); // This does not work //  && m.title !== message.title
+        this.progressEventsSource.next(data);
         console.log('Ended: ', message.name);
         this.activeEvents -= 1;
         break;

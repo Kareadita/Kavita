@@ -8,27 +8,25 @@
     <ng-template #popContent>
         <ul class="list-group list-group-flush dark-menu">
             <!-- Progress Events-->
-            <!-- <li class="list-group-item dark-menu-item" *ngFor="let message of updateEvents">
-                <div class="spinner-border text-primary small-spinner"
-                role="status" title="Started at {{message.eventTime | date: 'short'}}" 
-                attr.aria-valuetext="{{prettyPrintProgress(message.body.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(message.body.progress)">
-                </div>
-                 TODO: Put the progress bar on div 
-                <div>{{prettyPrintProgress(message.body.progress)}}% {{message.body.progress}} &nbsp;{{message.title}}</div>
-                
-                <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
-            </li> -->
             <ng-container *ngIf="progressEvents$ | async as progressUpdates">
-                <li class="list-group-item dark-menu-item" *ngFor="let message of progressUpdates">
-                    <div class="spinner-border text-primary small-spinner"
-                    role="status" title="Started at {{message.eventTime | date: 'short'}}" 
-                    attr.aria-valuetext="{{prettyPrintProgress(message.body.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(message.body.progress)">
-                    </div>
-                    <!-- TODO: Put the progress bar on div -->
-                    <div>{{prettyPrintProgress(message.body.progress)}}% {{message.body.progress}} &nbsp;{{message.title}}</div>
-                    
-                    <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div> <!-- Hide if this is empty -->
-                </li>
+                <ng-container *ngFor="let message of progressUpdates">
+                    <li class="list-group-item dark-menu-item" *ngIf="message.body.progress < 0; else progressEvent">
+                        <div class="spinner-grow text-primary small-spinner" role="status"></div>&nbsp;{{message.title}}
+                        <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div> 
+                    </li>
+                    <ng-template #progressEvent>
+                        <li class="list-group-item dark-menu-item">
+                            <div class="spinner-border text-primary small-spinner"
+                            role="status" title="Started at {{message.eventTime | date: 'short'}}" 
+                            attr.aria-valuetext="{{prettyPrintProgress(message.body.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(message.body.progress)">
+                            </div>
+                            <!-- TODO: Put the progress bar on div -->
+                            <div>{{prettyPrintProgress(message.body.progress)}}% {{message.body.progress}}&nbsp;{{message.title}}</div>
+                            
+                            <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                        </li>
+                    </ng-template>
+                </ng-container>
             </ng-container>
 
             <!-- Single updates (Informational/Update available)-->
@@ -49,7 +47,7 @@
                 <li class="list-group-item dark-menu-item" *ngIf="onlineUsers.length > 1">
                     <div>{{onlineUsers.length}} Users online</div>
                 </li>
-                <li class="list-group-item dark-menu-item" *ngIf="activeEvents === 0 && onlineUsers.length <= 1">Not much going on here</li>
+                <li class="list-group-item dark-menu-item" *ngIf="activeEvents < 1 && onlineUsers.length <= 1">Not much going on here</li>
             </ng-container>
         </ul>
     </ng-template>

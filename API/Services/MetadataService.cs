@@ -204,7 +204,7 @@ public class MetadataService : IMetadataService
         var totalTime = 0L;
         _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
         await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-            MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F));
+            MessageFactory.RefreshMetadataProgressEvent(library.Id, 0F, $"Starting {library.Name}"));
 
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
@@ -226,6 +226,12 @@ public class MetadataService : IMetadataService
             var seriesIndex = 0;
             foreach (var series in nonLibrarySeries)
             {
+                var index = chunk * seriesIndex;
+                var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
+
+                await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+                    MessageFactory.RefreshMetadataProgressEvent(library.Id, progress, series.Name));
+
                 try
                 {
                     await ProcessSeriesMetadataUpdate(series, forceUpdate);
@@ -234,11 +240,6 @@ public class MetadataService : IMetadataService
                 {
                     _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
                 }
-                var index = chunk * seriesIndex;
-                var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
-
-                await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-                    MessageFactory.RefreshMetadataProgressEvent(library.Id, progress, series.Name));
                 seriesIndex++;
             }
 
@@ -250,7 +251,7 @@ public class MetadataService : IMetadataService
         }
 
         await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-            MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F));
+            MessageFactory.RefreshMetadataProgressEvent(library.Id, 1F, $"Complete"));
 
         await RemoveAbandonedMetadataKeys();
 

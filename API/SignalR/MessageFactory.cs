@@ -49,25 +49,28 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
-        {
-            return new SignalRMessage()
-            {
-                Name = SignalREvents.ScanLibraryProgress,
-                EventType = progress switch
-                {
-                    0f => "started",
-                    1f => "ended",
-                    _ => "updated"
-                },
-                Body = new
-                {
-                    LibraryId = libraryId,
-                    Progress = progress,
-                    EventTime = DateTime.Now
-                }
-            };
-        }
+        // public static SignalRMessage ScanLibraryProgressEvent(int libraryId, float progress)
+        // {
+        //     // How does this differ from DBupdateEvent?
+        //     return new SignalRMessage()
+        //     {
+        //         Name = SignalREvents.ScanLibraryProgress,
+        //         Title = "Library Scan", // TODO: Use Library Name here
+        //         SubTitle = "",
+        //         EventType = progress switch
+        //         {
+        //             0f => "started",
+        //             1f => "ended",
+        //             _ => "updated"
+        //         },
+        //         Body = new
+        //         {
+        //             LibraryId = libraryId,
+        //             Progress = progress,
+        //             EventTime = DateTime.Now
+        //         }
+        //     };
+        // }
 
         public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress, string subtitle = "")
         {
@@ -187,7 +190,14 @@ namespace API.SignalR
             };
         }
 
-
+        /// <summary>
+        /// Represents a file being scanned by Kavita for processing and grouping
+        /// </summary>
+        /// <remarks>Does not have a progress as it's unknown how many files there are. Instead sends -1 to represent indeterminate</remarks>
+        /// <param name="filename"></param>
+        /// <param name="libraryName"></param>
+        /// <param name="eventType"></param>
+        /// <returns></returns>
         public static SignalRMessage FileScanProgressEvent(string filename, string libraryName, string eventType)
         {
             return new SignalRMessage()
@@ -200,7 +210,8 @@ namespace API.SignalR
                 {
                     Title = $"Scanning {libraryName}",
                     Subtitle = filename,
-                    EventTime = DateTime.Now
+                    EventTime = DateTime.Now,
+                    Progress = -1
                 }
             };
         }
