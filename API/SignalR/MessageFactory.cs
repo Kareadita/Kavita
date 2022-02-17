@@ -19,7 +19,7 @@ namespace API.SignalR
         /// <summary>
         /// Event sent out during Refresh Metadata for progress tracking
         /// </summary>
-        private const string RefreshMetadataProgress = "RefreshMetadataProgress";
+        private const string CoverUpdateProgress = "CoverUpdateProgress";
         /// <summary>
         /// Series is added to server
         /// </summary>
@@ -28,10 +28,6 @@ namespace API.SignalR
         /// Series is removed from server
         /// </summary>
         public const string SeriesRemoved = "SeriesRemoved";
-        /// <summary>
-        /// Progress event for Scan library. Deprecated in favor of ScanProgress
-        /// </summary>
-        //public const string ScanLibraryProgress = "ScanLibraryProgress";
         /// <summary>
         /// When a user is connects/disconnects from server
         /// </summary>
@@ -64,7 +60,6 @@ namespace API.SignalR
         /// A custom site theme was removed or added
         /// </summary>
         private const string SiteThemeProgress = "SiteThemeProgress";
-
         /// <summary>
         /// A type of event that has progress (determinate or indeterminate).
         /// The underlying event will have a name to give details on how to handle.
@@ -125,11 +120,11 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage RefreshMetadataProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
+        public static SignalRMessage CoverUpdateProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
         {
             return new SignalRMessage()
             {
-                Name = RefreshMetadataProgress,
+                Name = CoverUpdateProgress,
                 Title = "Refreshing Covers",
                 SubTitle = subtitle,
                 EventType = eventType,

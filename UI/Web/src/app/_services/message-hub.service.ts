@@ -45,7 +45,7 @@ export enum EVENTS {
   /**
    * A subtype of NotificationProgress that represents a file being processed for cover image extraction
    */
-  RefreshMetadataProgress = 'RefreshMetadataProgress',
+   CoverUpdateProgress = 'CoverUpdateProgress',
 }
 
 export interface Message<T> {
