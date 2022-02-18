@@ -4,11 +4,11 @@
     border-color: var(--card-border-color);
     position: relative;
 
-    .overlay:hover {
-        background-color: var(--card-overlay-hover-bg-color);
-    }
-
     .card-overlay {
-        background-color: var(--card-overlay-hover-bg-color);
+        background-color: var(--card-overlay-bg-color);
+
+        &:hover {
+            background-color: var(--card-overlay-hover-bg-color);
+        }
     }
 }

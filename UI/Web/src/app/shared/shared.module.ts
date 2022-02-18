@@ -45,20 +45,18 @@ import { ImageComponent } from './image/image.component';
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
-    SafeHtmlPipe,
-    SentenceCasePipe,
-    ReadMoreComponent,
-    DrawerComponent,
-    TagBadgeComponent,
-    ShowIfScrollbarDirective,
-    A11yClickDirective,
-    SeriesFormatComponent,
-    SeriesFormatComponent,
-    TagBadgeComponent,
-    CircularLoaderComponent,
-    PersonBadgeComponent,
-    BadgeExpanderComponent,
-    ImageComponent
+    SafeHtmlPipe, // Used globally
+    SentenceCasePipe, // Used globablly
+    ReadMoreComponent, // Used globably
+    DrawerComponent, // Can be replaced with boostrap offscreen canvas (v5)
+    ShowIfScrollbarDirective, // Used book reader only?
+    A11yClickDirective, // Used globally
+    SeriesFormatComponent, // Used globally
+    TagBadgeComponent, // Used globally
+    CircularLoaderComponent, // Used in Cards only
+    PersonBadgeComponent,  // Used Series Detail
+    BadgeExpanderComponent, // Used globally
+    ImageComponent // Used globally
   ],
 })
 export class SharedModule { }

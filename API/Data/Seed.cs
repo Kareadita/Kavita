@@ -46,7 +46,7 @@ namespace API.Data
                 Name = "E-Ink",
                 NormalizedName = Parser.Parser.Normalize("E-Ink"),
                 Provider = ThemeProvider.System,
-                FileName = "eink.scss",
+                FileName = "e-ink.scss",
                 IsDefault = false,
             },
         };

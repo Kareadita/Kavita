@@ -8,8 +8,13 @@
         border-color: var(--checkbox-checked-bg-color);
     }
 
-    &:focus, &:hover {
+    &:hover {
         border-color: var(--checkbox-focus-border-color);
+    }
+
+    &:focus {
+        border-color: var(--checkbox-focus-border-color);
+        box-shadow: 0 0 0 0.25rem var(--checkbox-focus-boxshadow-color);
     }
 }
 

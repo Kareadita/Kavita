@@ -39,6 +39,10 @@
     font-family: var(--brand-font-family);
     font-weight: bold;
 
+    &:hover {
+        text-decoration: none;
+    }
+
     .logo {
         max-height: 28px;
         vertical-align: top;

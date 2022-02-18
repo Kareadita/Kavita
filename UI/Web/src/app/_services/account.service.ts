@@ -84,6 +84,8 @@ export class AccountService implements OnDestroy {
       } else {
         this.themeService.setTheme(this.themeService.defaultTheme);
       }
+    } else {
+      this.themeService.setTheme(this.themeService.defaultTheme);
     }
 
     this.currentUserSource.next(user);

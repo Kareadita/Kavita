@@ -42,20 +42,6 @@ form {
         display: flex;
     }
 
-    // .close {
-    //     cursor: pointer;
-    //     position: absolute;
-    //     top: 7px;
-    //     right: 10px;
-    // }
-
-    // @media only screen and (max-width:650px) {
-    //     .close {
-    //         top: 50%;
-    //         transform: translate(0, -60%);
-    //     }
-    // }
-
 
     input {
         outline: 0 !important;
@@ -67,7 +53,7 @@ form {
         text-indent: 0 !important;
         line-height: inherit !important;
         box-shadow: none !important;
-        width: 200px;
+        width: 300px;
         transition-property: all;
         transition-duration: 0.3s;
         display: block;

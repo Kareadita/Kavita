@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { PublicationStatus } from './_models/metadata/publication-status';
+import { PublicationStatus } from '../_models/metadata/publication-status';
 
 @Pipe({
   name: 'publicationStatus'
