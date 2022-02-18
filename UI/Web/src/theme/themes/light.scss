@@ -22,7 +22,7 @@
     --input-border-color: #ccc;
   
     /* Buttons */
-    --btn-primary-text-color: white;
+    --btn-primary-text-color: black;
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;
@@ -41,7 +41,7 @@
     --nav-tab-border-hover-color: transparent;
     
     /* Checkboxes */
-    --checkbox-checked-bg-color: var(--primary-color);
+    --checkbox-checked-bg-color: black;
     --checkbox-bg-color: white;
     --checkbox-border-color: var(--primary-color);
     --checkbox-focus-border-color: var(--input-border-color);
@@ -70,6 +70,7 @@
     --grid-breakpoints-xl: $grid-breakpoint-xl;
     --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
     --brand-font-family: "Spartan", sans-serif;
+    --text-muted-color: #aaa;
   
     /* Breadcrumb */
     --breadcrumb-bg-color: #eaeaea;
