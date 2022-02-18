@@ -31,12 +31,12 @@ import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { ConfigData } from './_models/config-data';
 import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
-import { PersonRolePipe } from './person-role.pipe';
+import { PersonRolePipe } from './_pipes/person-role.pipe';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
-import { PublicationStatusPipe } from './publication-status.pipe';
 import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
+import { PublicationStatusPipe } from './_pipes/publication-status.pipe';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 
 
@@ -71,7 +71,7 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
 
     NgbDropdownModule, // Nav
     NgbPopoverModule, // Nav Events toggle
-    NgbRatingModule, // Series Detail
+    NgbRatingModule, // Series Detail & Filter
     NgbNavModule,
     NgbPaginationModule,
 
@@ -84,6 +84,7 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
     CollectionsModule,
     ReadingListModule,
     RegistrationModule,
+
 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',

@@ -3,7 +3,6 @@
   background-color: var(--list-group-item-bg-color);
   border-color: var(--list-group-item-border-color);
 
-  // TODO: We need a css class where we can exclude hover effects, like when list is just used for layout purposes
   &:hover {
     color: var(--list-group-hover-text-color);
     background-color: var(--list-group-hover-bg-color);
@@ -12,6 +11,7 @@
   &.active {
     color: var(--list-group-hover-text-color);
     background-color: var(--list-group-hover-bg-color);
+    border-color: var(--list-group-active-border-color);
   }
 
   &.no-hover:hover {

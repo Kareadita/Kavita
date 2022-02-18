@@ -10,6 +10,7 @@
         &:hover, &:focus {
             color: var(--dropdown-item-hover-text-color); 
             background-color: var(--dropdown-item-hover-bg-color);
+            text-decoration: none;
         }
     }
 }

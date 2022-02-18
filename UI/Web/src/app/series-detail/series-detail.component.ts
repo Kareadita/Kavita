@@ -15,7 +15,6 @@ import { DownloadService } from '../shared/_services/download.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
-import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { LibraryType } from '../_models/library';

@@ -1,4 +1,4 @@
-:root .bg-eink {
+:root .bg-e-ink {
   --color-scheme: light;
   --primary-color: black;
   --primary-color-dark-shade: #3B9E76;
@@ -22,12 +22,22 @@
   --input-border-color: #ccc;
 
   /* Buttons */
-  --btn-primary-text-color: white;
+  --btn-primary-text-color: black;
+  --btn-primary-bg-color: white;
+  --btn-primary-border-color: black;
+  --btn-primary-hover-text-color: white;
+  --btn-primary-hover-bg-color: black;
+  --btn-primary-hover-border-color: black;
   --btn-alt-bg-color: #424c72;
   --btn-alt-border-color: #444f75;
   --btn-alt-hover-bg-color: #3b4466;
   --btn-alt-focus-bg-color: #343c59;
   --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
+  --btn-fa-icon-color: black;
+  --btn-disabled-bg-color: #020202;
+  --btn-disabled-text-color: white;
+  --btn-disabled-border-color: #6c757d;
+
 
   /* Nav */
   --nav-link-active-text-color: white;
@@ -87,6 +97,7 @@
   --list-group-hover-text-color: black;
   --list-group-hover-bg-color: #eaeaea;
   --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+  --list-group-active-border-color: none;
 
   /* Dropdown */
   --dropdown-item-hover-text-color: white;

@@ -9,6 +9,8 @@ import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
 import { SharedModule } from '../shared/shared.module';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
+import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
+
 
 
 
@@ -17,7 +19,8 @@ import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
     SeriesBookmarksComponent,
     UserPreferencesComponent,
     ApiKeyComponent,
-    ThemeManagerComponent
+    ThemeManagerComponent,
+    SiteThemeProviderPipe,
   ],
   imports: [
     CommonModule,
@@ -28,6 +31,9 @@ import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
     NgxSliderModule,
     UserSettingsRoutingModule,
     SharedModule // SentenceCase pipe
+  ], 
+  exports: [
+    SiteThemeProviderPipe
   ]
 })
 export class UserSettingsModule { }

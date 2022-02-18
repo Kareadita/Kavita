@@ -22,7 +22,7 @@
     --input-border-color: #ccc;
   
     /* Buttons */
-    --btn-primary-text-color: white;
+    --btn-primary-text-color: black;
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;
@@ -41,7 +41,7 @@
     --nav-tab-border-hover-color: transparent;
     
     /* Checkboxes */
-    --checkbox-checked-bg-color: var(--primary-color);
+    --checkbox-checked-bg-color: black;
     --checkbox-bg-color: white;
     --checkbox-border-color: var(--primary-color);
     --checkbox-focus-border-color: var(--input-border-color);
@@ -70,6 +70,7 @@
     --grid-breakpoints-xl: $grid-breakpoint-xl;
     --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
     --brand-font-family: "Spartan", sans-serif;
+    --text-muted-color: #aaa;
   
     /* Breadcrumb */
     --breadcrumb-bg-color: #eaeaea;
@@ -79,6 +80,7 @@
     --card-text-color: #000;
     --card-border-color: #ccc;
     --card-progress-bar-color: var(--primary-color);
+    --card-overlay-bg-color: rgba(0, 0, 0, 0);
     --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
   
     /* List items */
@@ -87,6 +89,7 @@
     --list-group-hover-text-color: inherit;
     --list-group-hover-bg-color: #eaeaea;
     --list-group-item-border-color: rgba(239, 239, 239, 0.125);
+    --list-group-active-border-color: none;
   
     /* Dropdown */
     --dropdown-item-hover-text-color: white;
