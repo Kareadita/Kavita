@@ -300,7 +300,6 @@ public class MetadataService : IMetadataService
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
-            // TODO: Fix CoverUpdate/RefreshMetadata from merge
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
         }
 
