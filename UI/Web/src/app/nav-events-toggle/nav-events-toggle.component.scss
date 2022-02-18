@@ -16,17 +16,22 @@
     border-bottom-color: transparent;
 }
 
-.nav-events {
-    background-color: var(--navbar-bg-color);
+::ng-deep .nav-events {
+    
+    .popover-body {
+        padding: 0px;
+        min-width: 300px;
+    }
+
+    .popover {
+        min-width: 300px;
+    }
 }
 
-// .nav-events {
-//     background-color: white;
-// }
 
 
 .btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1); // TODO: Used in nav as well, move to dark for btn-icon focus
+    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
 }
 
 .small-spinner {
@@ -36,9 +41,6 @@
 
 
 
-.nav-events .popover-body {
-    padding: 0px;
-}
 
 .btn-icon {
     color: white;
