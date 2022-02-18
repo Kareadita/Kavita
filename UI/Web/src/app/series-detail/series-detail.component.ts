@@ -352,32 +352,50 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+      this.seriesService.getSeriesDetail(this.series.id).subscribe(detail => {
+        this.hasSpecials = detail.specials.length > 0
+        this.specials = detail.specials;
 
-      this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.volumes = volumes; // volumes are already be sorted in the backend
-        const vol0 = this.volumes.filter(v => v.number === 0);
-        this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
-        this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10)));
+        this.chapters = detail.chapters;
+        this.volumes = detail.volumes;
+        this.storyChapters = detail.storylineChapters;
 
 
+        //const vol0 = this.volumes.filter(v => v.number === 0);
+        //this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
         this.setContinuePoint();
-
-
-        const specials = this.storyChapters.filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
-        this.hasSpecials = specials.length > 0
-        if (this.hasSpecials) {
-          this.specials = specials
-          .map(c => {
-            c.title = this.utilityService.cleanSpecialTitle(c.title);
-            c.range = this.utilityService.cleanSpecialTitle(c.range);
-            return c;
-          });
-        }
-
         this.updateSelectedTab();
-
         this.isLoading = false;
+
+        // this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
+        //   //this.volumes = volumes; // volumes are already be sorted in the backend
+        //   const vol0 = this.volumes.filter(v => v.number === 0);
+        //   this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
+        //   //this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10)));
+  
+  
+        //   this.setContinuePoint();
+  
+  
+        //   // const specials = this.storyChapters.filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
+        //   // this.hasSpecials = specials.length > 0
+        //   // if (this.hasSpecials) {
+        //   //   this.specials = specials
+        //   //   .map(c => {
+        //   //     c.title = this.utilityService.cleanSpecialTitle(c.title);
+        //   //     c.range = this.utilityService.cleanSpecialTitle(c.range);
+        //   //     return c;
+        //   //   });
+        //   // }
+  
+        //   this.updateSelectedTab();
+  
+        //   this.isLoading = false;
+        // });
       });
+
+
+      
     }, err => {
       this.router.navigateByUrl('/libraries');
     });
@@ -598,6 +616,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   formatChapterTitle(chapter: Chapter) {
+    //if (chapter.title.startsWith('Volume')) return chapter.title;
+    //return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.title;
     return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
   }
 
