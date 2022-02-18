@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
     <div class="container-fluid">
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+      <a id="side-nav-toggle" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
       <a class="navbar-brand dark-exempt" routerLink="/library" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="d-none d-md-inline"> Kavita</span></a>
       <ul class="navbar-nav col me-auto">
         

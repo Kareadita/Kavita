@@ -38,6 +38,7 @@ import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { PublicationStatusPipe } from './_pipes/publication-status.pipe';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
+import { SideNavComponent } from './side-nav/side-nav.component';
 
 
 @NgModule({
@@ -60,6 +61,7 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
     AllSeriesComponent,
     GroupedTypeaheadComponent,
     ThemeTestComponent,
+    SideNavComponent,
   ],
   imports: [
     HttpClientModule,

@@ -1,0 +1,34 @@
+<div class="side-nav">
+    <div class="side-nav-item" routerLink="/library">
+        <span class="phone-hidden">
+            <div>
+                <i class="fa fa-home" aria-hidden="true"></i>&nbsp;
+            </div>
+        </span>
+        <span class="side-nav-text">
+            <div>
+                Home
+            </div>
+        </span>
+        <span class="card-actions">
+            <div></div>
+        </span>
+    </div>
+    <div class="side-nav-item" *ngFor="let library of libraries" (click)="handleClick($event, library)">
+        <span class="phone-hidden">
+            <div>
+                <i class="fa {{utilityService.getLibraryTypeIcon(library.type)}}" aria-hidden="true"></i>
+            </div>
+        </span>
+        <span class="side-nav-text">
+            <div class="side-nav-name">
+                {{library.name}}
+            </div>
+        </span>
+        <span class="card-actions">
+            <div>
+                <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>
+            </div>
+        </span>
+    </div>
+</div>

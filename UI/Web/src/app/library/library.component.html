@@ -31,9 +31,3 @@
         [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)"></app-card-item>
     </ng-template>
 </app-carousel-reel>
-
-<app-carousel-reel [items]="libraries" title="Libraries" (sectionClick)="handleSectionClick($event)">
-    <ng-template #carouselItem let-item let-position="idx">
-        <app-library-card [data]="item"></app-library-card>
-    </ng-template>
-</app-carousel-reel>

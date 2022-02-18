@@ -388,6 +388,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
     this.navService.showNavBar();
+    this.navService.showSideNav();
 
     const head = this.document.querySelector('head');
     this.renderer.removeChild(head, this.darkModeStyleElem);

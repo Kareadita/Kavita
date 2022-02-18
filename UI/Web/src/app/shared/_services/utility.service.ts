@@ -242,6 +242,16 @@ export class UtilityService {
     }
   }
 
+  getLibraryTypeIcon(format: LibraryType) {
+    switch (format) {
+      case LibraryType.Book:
+        return 'fa-book';
+      case LibraryType.Comic:
+      case LibraryType.Manga:
+        return 'fa-book-open';
+    }
+  }
+
   isVolume(d: any) {
     return d != null && d.hasOwnProperty('chapters');
   }

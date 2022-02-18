@@ -79,6 +79,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   logout() {
     this.accountService.logout();
     this.navService.hideNavBar();
+    this.navService.hideSideNav();
     this.router.navigateByUrl('/login');
   }
 
@@ -193,5 +194,14 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     return searchFocused;
   }
 
-  
+  hideSideNav() {
+    const sideNav = this.document.querySelector('.side-nav');
+    if (sideNav?.classList.contains('closed')){
+      sideNav?.classList.remove('closed');
+      this.navService.showSideNav();
+    } else {
+      sideNav?.classList.add('closed');
+      this.navService.hideSideNav();
+    }
+  }
 }

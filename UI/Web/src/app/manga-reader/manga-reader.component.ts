@@ -361,6 +361,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.readerService.resetOverrideStyles();
     this.navService.showNavBar();
+    this.navService.showSideNav();
     this.onDestroy.next();
     this.onDestroy.complete();
     this.goToPageEvent.complete();
