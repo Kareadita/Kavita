@@ -16,7 +16,6 @@ export class CarouselReelComponent implements OnInit {
 
   swiper: Swiper | undefined;
 
-
   trackByIdentity: (index: number, item: any) => string;
 
   get isEnd() {
