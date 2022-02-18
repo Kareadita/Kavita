@@ -429,7 +429,7 @@ public class ScannerService : IScannerService
             //var index = 0;
             foreach (var series in librarySeries)
             {
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started));
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
                 await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
                 // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
                 //     MessageFactory.ScanLibraryProgressEvent(library.Id, (1F * index) / librarySeries.Count));
