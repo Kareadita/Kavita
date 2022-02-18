@@ -6,10 +6,22 @@ a:not(.dark-exempt) {
     }
   }
 
+a.btn {
+  color: inherit;
+}
+
 a.read-more-link {
     font-weight: bold;
     text-decoration: none;
     color: var(--body-text-color);
     cursor: pointer;
     color: var(--body-text-color) !important;
+}
+
+a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

@@ -69,3 +69,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 button i.fa {
   color: var(--btn-fa-icon-color);
 }
+
+.btn-check:focus + .btn, .btn:focus {
+  box-shadow: 0 0 0 0.25rem var(--btn-focus-boxshadow-color);
+}

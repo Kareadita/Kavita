@@ -22,8 +22,10 @@
     --input-text-color: #fff;
     --input-placeholder-color: #aeaeae;
     --input-border-color: #ccc;
+    --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
   
     /* Buttons */
+    --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
     --btn-primary-text-color: white;
     --btn-primary-bg-color: var(--primary-color-darker-shade);
     --btn-primary-border-color: var(--primary-color-darker-shade);
@@ -34,7 +36,7 @@
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;
     --btn-alt-focus-bg-color: #343c59;
-    --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
+    --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
     --btn-fa-icon-color: white;
     --btn-disabled-bg-color: #343a40;
     --btn-disabled-text-color: white;
@@ -43,25 +45,25 @@
     /* Nav (Tabs) */
     --nav-tab-border-color: rgba(44, 118, 88, 0.7);
     --nav-tab-text-color: var(--body-text-color);
-    --nav-tab-bg-color: var(--bs-body-bg);
+    --nav-tab-bg-color: var(--primary-color-dark-shade);
     --nav-tab-hover-border-color: var(--primary-color-dark-shade);
     --nav-tab-active-text-color: white;
     --nav-tab-border-hover-color: transparent;
     --nav-tab-hover-text-color: var(--body-text-color);
-    --nav-tab-hover-bg-color: var(--primary-color-dark-shade);
+    --nav-tab-hover-bg-color: transparent;
     --nav-tab-border-top: rgba(44, 118, 88, 0.7);
     --nav-tab-border-left: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-bottom: var(--bs-body-bg);
+    --nav-tab-border-bottom: rgba(44, 118, 88, 0.7);
     --nav-tab-border-right: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-hover-top: var(--primary-color-dark-shade);
-    --nav-tab-border-hover-left: var(--primary-color-dark-shade);
-    --nav-tab-border-hover-bottom: rgba(44, 118, 88, 0.7);
-    --nav-tab-border-hover-right: var(--primary-color-dark-shade);
+    --nav-tab-hover-border-top: rgba(44, 118, 88, 0.7);
+    --nav-tab-hover-border-left: rgba(44, 118, 88, 0.7);
+    --nav-tab-hover-border-bottom: var(--bs-body-bg);
+    --nav-tab-hover-border-right: rgba(44, 118, 88, 0.7);
+    --nav-tab-active-hover-bg-color: var(--primary-color-dark-shade);
 
     --nav-link-bg-color: var(--primary-color-dark-shade);
     --nav-link-active-text-color: white;
     --nav-link-text-color: white;
-    
 
     /* Header */    
     --nav-header-text-color: white;
@@ -77,6 +79,7 @@
     --checkbox-checked-bg-color: var(--primary-color);
     --checkbox-border-color: var(--input-focused-border-color);
     --checkbox-focus-border-color: var(--primary-color);
+    --checkbox-focus-boxshadow-color: rgb(255 255 255 / 50%);
   
     /* Tag Badge */
     --tagbadge-border-color: rgba(239, 239, 239, 0.125);
@@ -165,6 +168,7 @@
     /* Radios */
     --radio-accent-color: var(--primary-color);
     --radio-hover-accent-color: var(--primary-color-dark-shade);
+    --radio-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
     /* Carousel */
     --carousel-header-text-color: var(--body-text-color);

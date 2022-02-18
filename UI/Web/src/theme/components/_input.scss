@@ -7,6 +7,7 @@ input, .form-control {
         border-color: var(--input-focused-border-color);
         background-color: var(--input-bg-color);
         color: var(--input-text-color);
+        box-shadow: 0 0 0 0.25rem var(--input-focus-boxshadow-color);
     }
 
     &:read-only {

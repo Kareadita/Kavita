@@ -1,3 +1,7 @@
+form {
+    position: relative;
+}
+
 input {
     width: 15px;
     opacity: 1px;
@@ -41,7 +45,7 @@ input {
 }
 
 .dropdown {
-    //width: 100%;
+    width: 100%;
     min-width: 10rem;
     background: var(--input-bg-color);
     z-index:1000;
