@@ -28,13 +28,15 @@ namespace API.Controllers
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHubContext<MessageHub> _messageHub;
+        private readonly ISeriesService _seriesService;
 
-        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
+        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub, ISeriesService seriesService)
         {
             _logger = logger;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
             _messageHub = messageHub;
+            _seriesService = seriesService;
         }
 
         [HttpPost]
@@ -442,35 +444,8 @@ namespace API.Controllers
         [HttpGet("series-detail")]
         public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
         {
-            // Validate user has access to this series
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-
-            var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-            var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
-            var chapters = volumes.SelectMany(v => v.Chapters).ToList();
-
-
-            var specials = new List<ChapterDto>();
-            foreach (var chapter in chapters.Where(c => c.IsSpecial))
-            {
-                chapter.Title = Parser.Parser.CleanSpecialTitle(chapter.Title);
-                specials.Add(chapter);
-            }
-            return new SeriesDetailDto()
-            {
-                Specials = specials,
-                // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
-                Chapters = chapters.Where(c => !c.IsSpecial &&
-                                               (!c.Number.Equals(Parser.Parser.DefaultChapter) ||
-                                                (c.Number.All(c2 =>
-                                                     char.IsNumber(c2) || char.IsDigit(c2)) &&
-                                                 libraryType == LibraryType.Book)))
-                    .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()),
-                Volumes = volumes,
-                StorylineChapters = volumes.Where(v => v.Number == 0).SelectMany(v => v.Chapters).OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
-
-            };
+            return await _seriesService.GetSeriesDetail(seriesId, userId);
         }
     }
 }
