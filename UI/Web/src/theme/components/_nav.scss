@@ -3,6 +3,7 @@
 
     &:hover, &:focus {
         color: var(--nav-link-hover-text-color);
+        text-decoration: none;
     }
 
     &.active {
