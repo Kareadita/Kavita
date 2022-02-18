@@ -978,8 +978,7 @@ namespace API.Parser
                 cleaned = cleaned.Substring(0, cleaned.LastIndexOf('.')).Trim();
             }
 
-            if (string.IsNullOrEmpty(cleaned)) return name;
-            return cleaned;
+            return string.IsNullOrEmpty(cleaned) ? name : cleaned;
         }
 
 

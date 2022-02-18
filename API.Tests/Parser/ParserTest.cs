@@ -16,6 +16,16 @@ namespace API.Tests.Parser
         }
 
         [Theory]
+        [InlineData("", "")]
+        [InlineData("DEAD Tube Prologue", "DEAD Tube Prologue")]
+        [InlineData("DEAD Tube Prologue SP01", "DEAD Tube Prologue")]
+        [InlineData("DEAD_Tube_Prologue SP01", "DEAD Tube Prologue")]
+        public void CleanSpecialTitleTest(string input, string expected)
+        {
+            Assert.Equal(expected, CleanSpecialTitle(input));
+        }
+
+        [Theory]
         [InlineData("Beastars - SP01", true)]
         [InlineData("Beastars SP01", true)]
         [InlineData("Beastars Special 01", false)]
