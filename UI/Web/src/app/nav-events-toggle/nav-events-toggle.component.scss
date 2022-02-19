@@ -8,7 +8,7 @@
 .dark-menu-item {
     color: var(--body-text-color);
     background-color: rgb(1, 4, 9);
-    border-color: rgba(1, 4, 9, 0.5);
+    border-color: rgba(53, 53, 53, 0.5);
 }
 
 // Popovers need to be their own component
@@ -20,7 +20,7 @@
     
     .popover-body {
         padding: 0px;
-        min-width: 300px;
+        box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
     }
 
     .popover {
@@ -28,7 +28,16 @@
     }
 }
 
+.progress {
+    padding: 0;
+}
 
+.accent-text {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space:nowrap; 
+}
 
 .btn:focus, .btn:hover {
     box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);

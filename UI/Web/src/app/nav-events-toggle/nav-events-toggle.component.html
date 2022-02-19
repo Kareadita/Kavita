@@ -11,23 +11,27 @@
             <ng-container *ngIf="debugMode">
                 <li class="list-group-item dark-menu-item">
                     <!-- <div class="spinner-grow text-primary small-spinner" role="status"></div> -->
-                    Title goes here
-                    <div class="accent-text">Subtitle goes here</div> 
+                    <div class="h6 mb-1">Title goes here</div>
+                    <div class="accent-text mb-1">Subtitle goes here</div> 
                     <div class="progress" style="height: 5px;">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </li>
                 <li class="list-group-item dark-menu-item">
-                    Title goes here
-                    <div class="accent-text">Subtitle goes here</div> 
+                    <div class="h6 mb-1">Title goes here</div>
+                    <div class="accent-text mb-1">Subtitle goes here</div> 
                 </li>
                 <li class="list-group-item dark-menu-item">
                     <div>
-                        <div>{{prettyPrintProgress(0.1)}}% Scanning Books</div>
-                        <div class="accent-text">E:\\Books\\Demon King Daimaou\\Demon King Daimaou - Volume 11.epub</div>
-                        <div class="progress" style="height: 5px;">
-                            <div class="progress-bar" role="progressbar" [ngStyle]="{'width': 0.1 * 100 + '%'}" [attr.aria-valuenow]="0.1 * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="h6 mb-1">Scanning Books</div>
+                        <div class="accent-text mb-1">E:\\Books\\Demon King Daimaou\\Demon King Daimaou - Volume 11.epub</div>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-2">{{prettyPrintProgress(0.1)}}%</div>
+                            <div class="col-10 progress" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': 0.1 * 100 + '%'}" [attr.aria-valuenow]="0.1 * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         </div>
+
                   </div>
                         
                 </li>
@@ -37,10 +41,11 @@
                 <ng-container *ngFor="let message of progressUpdates">
                     <li class="list-group-item dark-menu-item" *ngIf="message.progress === 'indeterminate' || message.progress === 'none'; else progressEvent">
                         {{message.title}}
-                        <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div> 
-                        <div class="progress" style="height: 5px;" *ngIf="message.progress === 'indeterminate'">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
+                        <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                        <div class="row g-3 align-items-center"></div> 
+                            <div class="progress" style="height: 5px;" *ngIf="message.progress === 'indeterminate'">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                     </li>
                     <ng-template #progressEvent>
                         <li class="list-group-item dark-menu-item">
