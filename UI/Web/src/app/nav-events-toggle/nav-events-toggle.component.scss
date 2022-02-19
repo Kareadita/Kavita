@@ -19,6 +19,8 @@
 ::ng-deep .nav-events {
     
     .popover-body {
+        min-width: 250px;
+        max-width: 250px;
         padding: 0px;
         box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
     }
@@ -26,6 +28,10 @@
     .popover {
         min-width: 300px;
     }
+}
+
+.progress-container {
+    width: 100%;
 }
 
 .progress {

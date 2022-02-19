@@ -13,8 +13,10 @@
                     <!-- <div class="spinner-grow text-primary small-spinner" role="status"></div> -->
                     <div class="h6 mb-1">Title goes here</div>
                     <div class="accent-text mb-1">Subtitle goes here</div> 
-                    <div class="progress" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-container row g-0 align-items-center">
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
                     </div>
                 </li>
                 <li class="list-group-item dark-menu-item">
@@ -25,7 +27,7 @@
                     <div>
                         <div class="h6 mb-1">Scanning Books</div>
                         <div class="accent-text mb-1">E:\\Books\\Demon King Daimaou\\Demon King Daimaou - Volume 11.epub</div>
-                        <div class="row g-3 align-items-center">
+                        <div class="progress-container row g-0 align-items-center">
                             <div class="col-2">{{prettyPrintProgress(0.1)}}%</div>
                             <div class="col-10 progress" style="height: 5px;">
                                 <div class="progress-bar" role="progressbar" [ngStyle]="{'width': 0.1 * 100 + '%'}" [attr.aria-valuenow]="0.1 * 100" aria-valuemin="0" aria-valuemax="100"></div>
@@ -40,19 +42,23 @@
             <ng-container *ngIf="progressEvents$ | async as progressUpdates">
                 <ng-container *ngFor="let message of progressUpdates">
                     <li class="list-group-item dark-menu-item" *ngIf="message.progress === 'indeterminate' || message.progress === 'none'; else progressEvent">
-                        {{message.title}}
-                        <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
-                        <div class="row g-3 align-items-center"></div> 
+                        <div class="h6 mb-1">{{message.title}}</div>
+                        <div class="accent-text mb-1" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                        <div class="progress-container row g-0 align-items-center">
                             <div class="progress" style="height: 5px;" *ngIf="message.progress === 'indeterminate'">
                                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
+                        </div> 
                     </li>
                     <ng-template #progressEvent>
                         <li class="list-group-item dark-menu-item">
-                            <div>{{message.title}}</div>
-                            <div class="accent-text" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
-                            <div class="progress" style="height: 5px;">
-                                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': message.body.progress * 100 + '%'}" [attr.aria-valuenow]="message.body.progress * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="h6 mb-1">{{message.title}}</div>
+                            <div class="accent-text mb-1" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                            <div class="progress-container row g-0 align-items-center">
+                                <div class="col-2">{{prettyPrintProgress(message.body.progress) + '%'}}</div>
+                                <div class="col-10 progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" [ngStyle]="{'width': message.body.progress * 100 + '%'}" [attr.aria-valuenow]="message.body.progress * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
                             </div>
                         </li>
                     </ng-template>
