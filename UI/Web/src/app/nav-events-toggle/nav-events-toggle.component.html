@@ -1,25 +1,90 @@
 <ng-container *ngIf="isAdmin">
     
-    <button type="button" class="btn btn-icon {{(progressEventsSource.getValue().length > 0 || updateAvailable) ? 'colored' : ''}}" 
+    <button type="button" class="btn btn-icon {{activeEvents > 0 ? 'colored' : ''}}" 
         [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'">
         <i aria-hidden="true" class="fa fa-wave-square nav"></i>
     </button>
 
     <ng-template #popContent>
         <ul class="list-group list-group-flush dark-menu">
-            <li class="list-group-item dark-menu-item" *ngFor="let event of progressEvents$ | async">
-                <div class="spinner-border text-primary small-spinner"
-                role="status" title="Started at {{event.timestamp | date: 'short'}}" 
-                attr.aria-valuetext="{{prettyPrintProgress(event.progress)}}%" [attr.aria-valuenow]="prettyPrintProgress(event.progress)">
-                    <span class="visually-hidden">Scan for {{event.libraryName}} in progress</span>
-                </div>
-                {{prettyPrintProgress(event.progress)}}%
-                {{prettyPrintEvent(event.eventType, event)}} {{event.libraryName}}
-            </li>
-            <li class="list-group-item dark-menu-item" *ngIf="progressEventsSource.getValue().length === 0 && !updateAvailable">Not much going on here</li>
-            <li class="list-group-item dark-menu-item update-available" *ngIf="updateAvailable" (click)="handleUpdateAvailableClick()">
-                <i class="fa fa-chevron-circle-up" aria-hidden="true"></i>&nbsp;Update available
-            </li>
+
+            <ng-container *ngIf="debugMode">
+                <li class="list-group-item dark-menu-item">
+                    <!-- <div class="spinner-grow text-primary small-spinner" role="status"></div> -->
+                    <div class="h6 mb-1">Title goes here</div>
+                    <div class="accent-text mb-1">Subtitle goes here</div> 
+                    <div class="progress-container row g-0 align-items-center">
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </li>
+                <li class="list-group-item dark-menu-item">
+                    <div class="h6 mb-1">Title goes here</div>
+                    <div class="accent-text mb-1">Subtitle goes here</div> 
+                </li>
+                <li class="list-group-item dark-menu-item">
+                    <div>
+                        <div class="h6 mb-1">Scanning Books</div>
+                        <div class="accent-text mb-1">E:\\Books\\Demon King Daimaou\\Demon King Daimaou - Volume 11.epub</div>
+                        <div class="progress-container row g-0 align-items-center">
+                            <div class="col-2">{{prettyPrintProgress(0.1)}}%</div>
+                            <div class="col-10 progress" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': 0.1 * 100 + '%'}" [attr.aria-valuenow]="0.1 * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+
+                  </div>
+                        
+                </li>
+            </ng-container>
+            <!-- Progress Events-->
+            <ng-container *ngIf="progressEvents$ | async as progressUpdates">
+                <ng-container *ngFor="let message of progressUpdates">
+                    <li class="list-group-item dark-menu-item" *ngIf="message.progress === 'indeterminate' || message.progress === 'none'; else progressEvent">
+                        <div class="h6 mb-1">{{message.title}}</div>
+                        <div class="accent-text mb-1" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                        <div class="progress-container row g-0 align-items-center">
+                            <div class="progress" style="height: 5px;" *ngIf="message.progress === 'indeterminate'">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" [attr.aria-valuenow]="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div> 
+                    </li>
+                    <ng-template #progressEvent>
+                        <li class="list-group-item dark-menu-item">
+                            <div class="h6 mb-1">{{message.title}}</div>
+                            <div class="accent-text mb-1" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                            <div class="progress-container row g-0 align-items-center">
+                                <div class="col-2">{{prettyPrintProgress(message.body.progress) + '%'}}</div>
+                                <div class="col-10 progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" [ngStyle]="{'width': message.body.progress * 100 + '%'}" [attr.aria-valuenow]="message.body.progress * 100" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </li>
+                    </ng-template>
+                </ng-container>
+            </ng-container>
+
+            <!-- Single updates (Informational/Update available)-->
+            <ng-container *ngIf="singleUpdates$ | async as singleUpdates">
+                <ng-container *ngFor="let singleUpdate of singleUpdates">
+                    <li class="list-group-item dark-menu-item update-available" *ngIf="singleUpdate.name === EVENTS.UpdateAvailable" (click)="handleUpdateAvailableClick(singleUpdate)">
+                        <i class="fa fa-chevron-circle-up" aria-hidden="true"></i>&nbsp;Update available
+                    </li>
+                    <li class="list-group-item dark-menu-item update-available" *ngIf="singleUpdate.name !== EVENTS.UpdateAvailable">
+                        <div>{{singleUpdate.title}}</div>
+                        <div class="accent-text" *ngIf="singleUpdate.subTitle !== ''">{{singleUpdate.subTitle}}</div>
+                    </li>
+                </ng-container>
+            </ng-container>
+
+            <!-- Online Users -->
+            <ng-container *ngIf="messageHub.onlineUsers$ | async as onlineUsers">
+                <li class="list-group-item dark-menu-item" *ngIf="onlineUsers.length > 1">
+                    <div>{{onlineUsers.length}} Users online</div>
+                </li>
+                <li class="list-group-item dark-menu-item" *ngIf="activeEvents < 1 && onlineUsers.length <= 1">Not much going on here</li>
+            </ng-container>
         </ul>
     </ng-template>
 </ng-container>

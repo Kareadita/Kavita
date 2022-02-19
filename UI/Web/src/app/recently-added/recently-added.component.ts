@@ -12,7 +12,7 @@ import { Series } from '../_models/series';
 import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 /**
@@ -63,7 +63,10 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
+      if (event.event !== EVENTS.SeriesAdded) return;
+      const seriesAdded = event.payload as SeriesAddedEvent;
+      if (seriesAdded.libraryId !== this.libraryId) return;
       this.loadPage();
     });
   }

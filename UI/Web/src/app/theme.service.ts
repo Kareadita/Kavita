@@ -5,6 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { map, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from './shared/confirm.service';
+import { NotificationProgressEvent } from './_models/events/notification-progress-event';
 import { SiteThemeProgressEvent } from './_models/events/site-theme-progress-event';
 import { SiteTheme, ThemeProvider } from './_models/preferences/site-theme';
 import { EVENTS, MessageHubService } from './_services/message-hub.service';
@@ -41,10 +42,13 @@ export class ThemeService implements OnDestroy {
     this.getThemes();
 
     messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
-      if (message.event === EVENTS.SiteThemeProgress) {
-        if ((message.payload as SiteThemeProgressEvent).progress === 1) {
-          this.getThemes().subscribe(() => {});
-        }
+
+      if (message.event !== EVENTS.NotificationProgress) return;
+      const notificationEvent = (message.payload as NotificationProgressEvent);
+      if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
+
+      if (notificationEvent.eventType === 'ended') {
+        this.getThemes().subscribe(() => {});
       }
     });
   }
@@ -59,7 +63,6 @@ export class ThemeService implements OnDestroy {
   }
 
   isDarkTheme() {
-    console.log('color scheme: ', getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim().toLowerCase());
     return this.getColorScheme().toLowerCase() === 'dark';
   }
 

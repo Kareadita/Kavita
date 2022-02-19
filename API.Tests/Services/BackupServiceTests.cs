@@ -26,7 +26,7 @@ public class BackupServiceTests
 {
     private readonly ILogger<BackupService> _logger = Substitute.For<ILogger<BackupService>>();
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IHubContext<MessageHub> _messageHub = Substitute.For<IHubContext<MessageHub>>();
+    private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
     private readonly IConfiguration _config;
 
     private readonly DbConnection _connection;
