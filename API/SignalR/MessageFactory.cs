@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using API.DTOs.Update;
 using API.Entities;
@@ -256,13 +257,14 @@ namespace API.SignalR
             {
                 Name = FileScanProgress,
                 Title = $"Scanning {libraryName}",
-                SubTitle = filename,
+                SubTitle = Path.GetFileName(filename),
                 EventType = eventType,
                 Progress = ProgressType.Indeterminate,
                 Body = new
                 {
                     Title = $"Scanning {libraryName}",
                     Subtitle = filename,
+                    Filename = filename,
                     EventTime = DateTime.Now,
                 }
             };
