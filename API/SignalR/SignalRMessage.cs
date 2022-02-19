@@ -1,14 +1,39 @@
-﻿namespace API.SignalR
+﻿using System;
+
+namespace API.SignalR
 {
     /// <summary>
     /// Payload for SignalR messages to Frontend
     /// </summary>
     public class SignalRMessage
     {
+        /// <summary>
+        /// Body of the event type
+        /// </summary>
         public object Body { get; set; }
         public string Name { get; set; }
-
-        //[JsonIgnore]
-        //public ModelAction Action { get; set; } // This will be for when we add new flows
+        /// <summary>
+        /// User friendly Title of the Event
+        /// </summary>
+        /// <example>Scanning Manga</example>
+        public string Title { get; set; } = string.Empty;
+        /// <summary>
+        /// User friendly subtitle. Should have extra info
+        /// </summary>
+        /// <example>C:/manga/Accel World V01.cbz</example>
+        public string SubTitle { get; set; } = string.Empty;
+        /// <summary>
+        /// Represents what this represents. started | updated | ended | single
+        /// <see cref="ProgressEventType"/>
+        /// </summary>
+        public string EventType { get; set; } = ProgressEventType.Updated;
+        /// <summary>
+        /// How should progress be represented. If Determinate, the Body MUST have a Progress float on it.
+        /// </summary>
+        public string Progress { get; set; } = ProgressType.None;
+        /// <summary>
+        /// When event took place
+        /// </summary>
+        public DateTime EventTime = DateTime.Now;
     }
 }

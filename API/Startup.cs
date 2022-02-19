@@ -18,6 +18,7 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -129,6 +130,8 @@ namespace API
             // Add IHostedService for startup tasks
             // Any services that should be bootstrapped go here
             services.AddHostedService<StartupTasksHostedService>();
+
+            services.AddMediatR(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

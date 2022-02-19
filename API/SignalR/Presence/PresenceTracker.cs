@@ -15,13 +15,20 @@ namespace API.SignalR.Presence
 
     }
 
+    internal class ConnectionDetail
+    {
+        public List<string> ConnectionIds { get; set; }
+        public bool IsAdmin { get; set; }
+    }
+
+    // TODO: This can respond to UserRoleUpdate events to handle online users
     /// <summary>
     /// This is a singleton service for tracking what users have a SignalR connection and their difference connectionIds
     /// </summary>
     public class PresenceTracker : IPresenceTracker
     {
         private readonly IUnitOfWork _unitOfWork;
-        private static readonly Dictionary<string, List<string>> OnlineUsers = new Dictionary<string, List<string>>();
+        private static readonly Dictionary<string, ConnectionDetail> OnlineUsers = new Dictionary<string, ConnectionDetail>();
 
         public PresenceTracker(IUnitOfWork unitOfWork)
         {
@@ -30,20 +37,25 @@ namespace API.SignalR.Presence
 
         public async Task UserConnected(string username, string connectionId)
         {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             lock (OnlineUsers)
             {
                 if (OnlineUsers.ContainsKey(username))
                 {
-                    OnlineUsers[username].Add(connectionId);
+                    OnlineUsers[username].ConnectionIds.Add(connectionId);
                 }
                 else
                 {
-                    OnlineUsers.Add(username, new List<string>() { connectionId });
+                    OnlineUsers.Add(username, new ConnectionDetail()
+                    {
+                        ConnectionIds = new List<string>() {connectionId},
+                        IsAdmin = isAdmin
+                    });
                 }
             }
 
             // Update the last active for the user
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
             user.LastActive = DateTime.Now;
             await _unitOfWork.CommitAsync();
         }
@@ -54,9 +66,9 @@ namespace API.SignalR.Presence
             {
                 if (!OnlineUsers.ContainsKey(username)) return Task.CompletedTask;
 
-                OnlineUsers[username].Remove(connectionId);
+                OnlineUsers[username].ConnectionIds.Remove(connectionId);
 
-                if (OnlineUsers[username].Count == 0)
+                if (OnlineUsers[username].ConnectionIds.Count == 0)
                 {
                     OnlineUsers.Remove(username);
                 }
@@ -75,18 +87,16 @@ namespace API.SignalR.Presence
             return Task.FromResult(onlineUsers);
         }
 
-        public async Task<string[]> GetOnlineAdmins()
+        public Task<string[]> GetOnlineAdmins()
         {
             string[] onlineUsers;
             lock (OnlineUsers)
             {
-                onlineUsers = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
+                onlineUsers = OnlineUsers.Where(pair => pair.Value.IsAdmin).OrderBy(k => k.Key).Select(k => k.Key).ToArray();
             }
 
-            var admins = await _unitOfWork.UserRepository.GetAdminUsersAsync();
-            var result = admins.Select(a => a.UserName).Intersect(onlineUsers).ToArray();
 
-            return result;
+            return Task.FromResult(onlineUsers);
         }
 
         public Task<List<string>> GetConnectionsForUser(string username)
@@ -94,7 +104,7 @@ namespace API.SignalR.Presence
             List<string> connectionIds;
             lock (OnlineUsers)
             {
-                connectionIds = OnlineUsers.GetValueOrDefault(username);
+                connectionIds = OnlineUsers.GetValueOrDefault(username)?.ConnectionIds;
             }
 
             return Task.FromResult(connectionIds);

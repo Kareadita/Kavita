@@ -1,0 +1,13 @@
+.progress {
+    background-color: var(--progress-bg-color);
+
+}
+
+.progress-bar {
+    background-color: var(--progress-bar-color);
+}
+
+.progress-bar-striped {
+    background-image: var(--progress-striped-animated-color);
+    background-color: unset;
+}
