@@ -38,7 +38,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   activeEvents: number = 0;
 
-  debugMode: boolean = false;
+  debugMode: boolean = true;
 
 
   get EVENTS() {
@@ -55,7 +55,9 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Debounce for testing. Kavita's too fast
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
+      console.log(event.event);
       if (event.event.endsWith('error')) {
         // TODO: Show an error handle
       } else if (event.event === EVENTS.NotificationProgress) {
@@ -73,6 +75,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
     const message = event.payload as NotificationProgressEvent;
+    console.log('Notification Progress Event: ', event.event, message, event.payload.eventType);
     let data;
 
     switch (event.payload.eventType) {
@@ -107,6 +110,9 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
       default:
         break;
     }
+
+    //console.log('Active Events: ', this.activeEvents);
+
   }
 
 

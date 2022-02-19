@@ -110,6 +110,11 @@
     --pagination-link-bg-color: rgba(1, 4, 9, 0.5);
     --pagination-focus-border-color: var(--primary-color);
 
+    /* Progress Bar */
+    --progress-striped-animated-color: linear-gradient(45deg, rgba(74,198,148, 0.75) 25%, rgba(51, 138, 103, 0.75) 25%, rgba(51, 138, 103, 0.75) 50%, rgba(74,198,148, 0.75) 50%, rgba(74,198,148, 0.75) 75%, rgba(51, 138, 103, 0.75) 75%, rgba(51, 138, 103, 0.75));
+    --progress-bg-color: var(--nav-header-bg-color);
+    --progress-bar-color: var(--primary-color-dark-shade);
+
     /* Dropdown */
     --dropdown-item-hover-text-color: white;
     --dropdown-item-hover-bg-color: var(--primary-color);
