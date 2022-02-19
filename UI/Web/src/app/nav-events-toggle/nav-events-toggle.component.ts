@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { debounceTime, take, takeUntil, throttleTime } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
 import { UpdateVersionEvent } from '../_models/events/update-version-event';
@@ -38,7 +38,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   activeEvents: number = 0;
 
-  debugMode: boolean = true;
+  debugMode: boolean = false;
 
 
   get EVENTS() {
@@ -57,7 +57,6 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Debounce for testing. Kavita's too fast
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
-      console.log(event.event);
       if (event.event.endsWith('error')) {
         // TODO: Show an error handle
       } else if (event.event === EVENTS.NotificationProgress) {
@@ -75,7 +74,6 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
     const message = event.payload as NotificationProgressEvent;
-    console.log('Notification Progress Event: ', event.event, message, event.payload.eventType);
     let data;
 
     switch (event.payload.eventType) {
@@ -110,9 +108,6 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
       default:
         break;
     }
-
-    //console.log('Active Events: ', this.activeEvents);
-
   }
 
 
