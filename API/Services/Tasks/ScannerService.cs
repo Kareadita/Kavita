@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -149,7 +149,7 @@ public class ScannerService : IScannerService
         try
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
-            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type, library);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
@@ -430,7 +430,7 @@ public class ScannerService : IScannerService
             foreach (var series in librarySeries)
             {
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
-                await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+                await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type, library);
                 // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
                 //     MessageFactory.ScanLibraryProgressEvent(library.Id, (1F * index) / librarySeries.Count));
                 // index += 1;
@@ -518,7 +518,7 @@ public class ScannerService : IScannerService
         foreach(var series in newSeries)
         {
             _logger.LogDebug("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type);
+            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library.Type, library);
             _unitOfWork.SeriesRepository.Attach(series);
             try
             {
@@ -550,14 +550,14 @@ public class ScannerService : IScannerService
     }
 
     private async Task UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries,
-        ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, LibraryType libraryType)
+        ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, LibraryType libraryType, Library library)
     {
         try
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
             //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Started));
             //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Updated));
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(series.Library.Name, ProgressEventType.Ended, series.Name));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             // Get all associated ParsedInfos to the series. This includes infos that use a different filename that matches Series LocalizedName
             var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
@@ -573,7 +573,7 @@ public class ScannerService : IScannerService
             series.OriginalName ??= parsedInfos[0].Series;
             series.SortName ??= parsedInfos[0].SeriesSort;
             //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Updated));
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(series.Library.Name, ProgressEventType.Ended, series.Name));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, libraryType);
         }
@@ -582,7 +582,7 @@ public class ScannerService : IScannerService
             _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
         }
         //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.DbUpdateProgressEvent(series, ProgressEventType.Ended));
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(series.Library.Name, ProgressEventType.Ended, series.Name));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
     }
 
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
