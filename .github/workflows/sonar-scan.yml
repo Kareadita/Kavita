@@ -186,9 +186,7 @@ jobs:
       - name: Parse Version
         run: |
           version='${{steps.get-version.outputs.assembly-version}}'
-          newVersion=${version%.*}
-          echo $newVersion
-          echo "::set-output name=VERSION::$newVersion"
+          echo "::set-output name=VERSION::$version"
         id: parse-version
 
       - name: Echo csproj version
