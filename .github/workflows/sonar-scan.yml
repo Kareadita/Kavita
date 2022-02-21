@@ -183,6 +183,14 @@ jobs:
         with:
           proj-path: Kavita.Common/Kavita.Common.csproj
 
+      - name: Parse Version
+        run: |
+          version='${{steps.get-version.outputs.assembly-version}}'
+          newVersion=${version%.*}
+          echo $newVersion
+          echo "::set-output name=VERSION::$newVersion"
+        id: parse-version
+
       - name: Echo csproj version
         run: echo "${{steps.get-version.outputs.assembly-version}}"
 
