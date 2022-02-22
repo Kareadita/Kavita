@@ -61,7 +61,7 @@
 
     <ng-container>
         <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
