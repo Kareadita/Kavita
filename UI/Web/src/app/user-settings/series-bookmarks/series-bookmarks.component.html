@@ -1,6 +1,29 @@
 <p *ngIf="series.length === 0 && !loadingBookmarks">
     There are no bookmarks. Try creating <a href="https://wiki.kavitareader.com/guides/webreader/bookmarks" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a>.
 </p>
+<ngb-accordion [closeOthers]="true" activeIds="site-panel" #acc="ngbAccordion">
+    <ngb-panel *ngFor="let series of series">
+        <ng-template ngbPanelHeader>
+            <h2 class="accordion-header" id="series--{{series.name}}">
+                <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('series--{{series.name}}')" aria-controls="collapseOne">
+                    {{series.name | titlecase}} &nbsp; <span class="badge bg-secondary rounded-pill">{{getBookmarkPages(series.id)}}</span>
+                  </button>
+            </h2>
+          </ng-template>
+        <ng-template ngbPanelContent>
+            <!-- Show Bookmark Images here-->
+            
+            <div *ngIf="loadingBookmarks">
+                <div class="spinner-border text-secondary" role="status">
+                    <span class="invisible">Loading...</span>
+                </div>
+            </div>
+        </ng-template>
+    </ngb-panel>
+</ngb-accordion>
+
+
+<!--
 <ul class="list-group">
     <li *ngFor="let series of series" class="list-group-item">
         <div>
@@ -39,4 +62,4 @@
         </div>
     </li>
 </ul>
-
+-->
