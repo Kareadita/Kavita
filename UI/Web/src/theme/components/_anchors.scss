@@ -21,6 +21,10 @@ a.read-more-link {
     color: var(--body-text-color);
     cursor: pointer;
     color: var(--body-text-color) !important;
+
+    &:hover {
+      text-decoration: none;
+    }
 }
 
 a {
