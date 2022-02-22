@@ -56,7 +56,7 @@
     </div>
 </div>
 
-<div class="row">
+<div class="row g-0">
     <hr class="col mt-3" *ngIf="hasExtendedProperites" >
     <a [class.hidden]="hasExtendedProperites" *ngIf="hasExtendedProperites" class="col col-md-auto align-self-end read-more-link" (click)="toggleView()">&nbsp;<i aria-hidden="true" class="fa fa-caret-{{isCollapsed ? 'down' : 'up'}}" aria-controls="extended-series-metadata"></i>&nbsp;See {{isCollapsed ? 'More' : 'Less'}}</a>
 </div>
