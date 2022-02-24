@@ -302,7 +302,8 @@ public class ReaderService : IReaderService
 
         if (currentVolume.Number == 0)
         {
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Number, dto => dto.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Range,
+                dto => dto.Range);
             if (chapterId > 0) return chapterId;
         }
 
@@ -311,7 +312,7 @@ public class ReaderService : IReaderService
             if (volume.Number == currentVolume.Number)
             {
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(),
-                    currentChapter.Number, dto => dto.Number);
+                    currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
             }
             if (volume.Number == currentVolume.Number - 1)

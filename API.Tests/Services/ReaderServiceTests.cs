@@ -820,7 +820,7 @@ public class ReaderServiceTests
     }
 
     [Fact]
-    public async Task GetPrevChapterIdAsync_ShouldMoveFromVolumeToSpecial()
+    public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToVolume()
     {
         await ResetDB();
 
@@ -856,10 +856,10 @@ public class ReaderServiceTests
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
-        Assert.NotEqual(-1, prevChapter);
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
+        Assert.Equal(2, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
-        Assert.Equal("B.cbz", actualChapter.Range);
+        Assert.Equal("2", actualChapter.Range);
     }
 
     [Fact]
