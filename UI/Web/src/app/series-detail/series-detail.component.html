@@ -63,7 +63,7 @@
         <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
-              <a ngbNavLink>Specials</a>
+              <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Specials'}}</a>
               <ng-template ngbNavContent>
                 <div class="row g-0">
                     <ng-container *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
@@ -92,7 +92,7 @@
                 </ng-template>
             </li>
             <li [ngbNavItem]="TabID.Volumes" *ngIf="hasNonSpecialVolumeChapters">
-                <a ngbNavLink>Volumes</a>
+                <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Volumes'}}</a>
                 <ng-template ngbNavContent>
                     <div class="row g-0">
                           <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">

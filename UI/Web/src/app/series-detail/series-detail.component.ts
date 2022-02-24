@@ -359,8 +359,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
 
-        console.log('Detail: ', detail);
-
         this.updateSelectedTab();
         this.isLoading = false;
       });
