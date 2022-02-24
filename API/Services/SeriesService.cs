@@ -209,7 +209,9 @@ public class SeriesService : ISeriesService
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).OrderBy(v => float.Parse(v.Name)).ToList();
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
+            .OrderBy(v => float.Parse(v.Name))
+            .ToList();
         var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
@@ -233,10 +235,14 @@ public class SeriesService : ISeriesService
         {
             Specials = specials,
             // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
-            Chapters = chapters.Where(ShouldIncludeChapter)
+            Chapters = chapters
+                .Where(ShouldIncludeChapter)
                 .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()),
             Volumes = volumes,
-            StorylineChapters = volumes.Where(v => v.Number == 0).SelectMany(v => v.Chapters).OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
+            StorylineChapters = volumes
+                .Where(v => v.Number == 0)
+                .SelectMany(v => v.Chapters)
+                .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
 
         };
     }

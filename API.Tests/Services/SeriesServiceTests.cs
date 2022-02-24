@@ -528,10 +528,4 @@ public class SeriesServiceTests
     }
 
     #endregion
-
-    #region DeleteMultipleSeries
-
-
-
-    #endregion
 }
