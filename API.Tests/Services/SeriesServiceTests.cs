@@ -119,7 +119,7 @@ public class SeriesServiceTests
     #endregion
 
     #region SeriesDetail
-    
+
     [Fact]
     public async Task SeriesDetail_ShouldReturnSpecials()
     {
@@ -245,7 +245,41 @@ public class SeriesServiceTests
         Assert.Equal(3, detail.Volumes.Count());
     }
 
-    
+    [Fact]
+    public async Task SeriesDetail_ShouldReturnVolumesOnly_WhenBookLibrary()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.Empty(detail.Chapters); // A book library where all books are Volumes, will show no "chapters" on the UI because it doesn't make sense
+
+        Assert.NotEmpty(detail.Volumes);
+        Assert.Equal(2, detail.Volumes.Count());
+    }
+
+
     #endregion
 
 
@@ -460,7 +494,7 @@ public class SeriesServiceTests
 
     #region DeleteMultipleSeries
 
-    
+
 
     #endregion
 }

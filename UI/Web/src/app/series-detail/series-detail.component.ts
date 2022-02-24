@@ -595,6 +595,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   formatVolumeTitle(volume: Volume) {
-    return 'Volume ' + volume.name;
+    // if (this.libraryType === LibraryType.Book) {
+    //   return volume.chapters?[0].;
+    // }
+    return volume.name;
+
+    //return 'Volume ' + volume.name;
   }
 }
