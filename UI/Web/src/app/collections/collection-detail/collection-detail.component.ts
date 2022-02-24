@@ -40,6 +40,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   isAdmin: boolean = false;
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
+  summary: string = '';
 
   private onDestory: Subject<void> = new Subject<void>();
 
@@ -149,6 +150,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         return;
       }
       this.collectionTag = matchingTags[0];
+      this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
       this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
     });

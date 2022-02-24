@@ -46,6 +46,10 @@ enum TabID {
 })
 export class SeriesDetailComponent implements OnInit, OnDestroy {
 
+  /**
+   * Series Id. Set at load before UI renders
+   */
+  seriesId!: number;
   series!: Series;
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
@@ -185,34 +189,26 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // this.messageHub.messages$.pipe(takeUntil(this.onDestroy), takeWhile(e => this.messageHub.isEventType(e, EVENTS.ScanSeries))).subscribe((e) => {
-    //   const event = e.payload as ScanSeriesEvent;
-    //   if (event.seriesId == this.series.id)
-    //   this.loadSeries(seriesId);
-    //   this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
-    //   this.toastr.success('Scan series completed');
-    // });
-
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
-        if (seriesRemovedEvent.seriesId === this.series.id) {
+        if (seriesRemovedEvent.seriesId === this.seriesId) {
           this.toastr.info('This series no longer exists');
           this.router.navigateByUrl('/libraries');
         }
       } else if (event.event === EVENTS.ScanSeries) {
         const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
-        if (seriesCoverUpdatedEvent.seriesId === this.series.id) {
-          this.loadSeries(seriesId);
-          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id)); // NOTE: Is this needed as cover update will update the image for us
+        if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
+          this.loadSeries(this.seriesId);
+          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.seriesId)); // NOTE: Is this needed as cover update will update the image for us
         }
       }
     });
 
-    const seriesId = parseInt(routeId, 10);
+    this.seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
-    this.seriesImage = this.imageService.getSeriesCoverImage(seriesId);
-    this.loadSeries(seriesId);
+    this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
+    this.loadSeries(this.seriesId);
   }
 
   ngOnDestroy() {
@@ -288,7 +284,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.openViewInfo(volume);
         break;
       case(Action.AddToReadingList):
-        this.actionService.addVolumeToReadingList(volume, this.series.id, () => {/* No Operation */ });
+        this.actionService.addVolumeToReadingList(volume, this.seriesId, () => {/* No Operation */ });
         break;
       case(Action.IncognitoRead):
         if (volume.chapters != undefined && volume.chapters?.length >= 1) {
@@ -312,7 +308,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.openViewInfo(chapter);
         break;
       case(Action.AddToReadingList):
-        this.actionService.addChapterToReadingList(chapter, this.series.id, () => {/* No Operation */ });
+        this.actionService.addChapterToReadingList(chapter, this.seriesId, () => {/* No Operation */ });
         break;
       case(Action.IncognitoRead):
         this.openChapter(chapter, true);
@@ -336,6 +332,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.coverImageOffset = 0;
 
     this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
+    this.setContinuePoint();
 
     forkJoin([
       this.libraryService.getLibraryType(this.libraryId),
@@ -354,30 +351,15 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+      this.seriesService.getSeriesDetail(this.seriesId).subscribe(detail => {
+        this.hasSpecials = detail.specials.length > 0
+        this.specials = detail.specials;
 
-      this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-        this.volumes = volumes; // volumes are already be sorted in the backend
-        const vol0 = this.volumes.filter(v => v.number === 0);
-        this.storyChapters = vol0.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters);
-        this.chapters = volumes.map(v => v.chapters || []).flat().sort(this.utilityService.sortChapters).filter(c => !c.isSpecial || isNaN(parseInt(c.range, 10)));
-
-
-        this.setContinuePoint();
-
-
-        const specials = this.storyChapters.filter(c => c.isSpecial || isNaN(parseInt(c.range, 10)));
-        this.hasSpecials = specials.length > 0
-        if (this.hasSpecials) {
-          this.specials = specials
-          .map(c => {
-            c.title = this.utilityService.cleanSpecialTitle(c.title);
-            c.range = this.utilityService.cleanSpecialTitle(c.range);
-            return c;
-          });
-        }
+        this.chapters = detail.chapters;
+        this.volumes = detail.volumes;
+        this.storyChapters = detail.storylineChapters;
 
         this.updateSelectedTab();
-
         this.isLoading = false;
       });
     }, err => {
@@ -422,8 +404,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   setContinuePoint() {
-    this.readerService.hasSeriesProgress(this.series.id).subscribe(hasProgress => this.hasReadingProgress = hasProgress);
-    this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.currentlyReadingChapter = chapter);
+    this.readerService.hasSeriesProgress(this.seriesId).subscribe(hasProgress => this.hasReadingProgress = hasProgress);
+    this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => this.currentlyReadingChapter = chapter);
   }
 
   markVolumeAsRead(vol: Volume) {
@@ -431,7 +413,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.actionService.markVolumeAsRead(this.series.id, vol, () => {
+    this.actionService.markVolumeAsRead(this.seriesId, vol, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -442,7 +424,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.actionService.markVolumeAsUnread(this.series.id, vol, () => {
+    this.actionService.markVolumeAsUnread(this.seriesId, vol, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -453,7 +435,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.actionService.markChapterAsRead(this.series.id, chapter, () => {
+    this.actionService.markChapterAsRead(this.seriesId, chapter, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
@@ -464,14 +446,21 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.actionService.markChapterAsUnread(this.series.id, chapter, () => {
+    this.actionService.markChapterAsUnread(this.seriesId, chapter, () => {
       this.setContinuePoint();
       this.actionInProgress = false;
     });
   }
 
   read() {
-    if (this.currentlyReadingChapter !== undefined) { this.openChapter(this.currentlyReadingChapter); }
+    if (this.currentlyReadingChapter !== undefined) { 
+      this.openChapter(this.currentlyReadingChapter);
+      return;
+    }
+
+    this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => {
+      this.openChapter(chapter);
+    });
   }
 
   updateRating(rating: any) {
@@ -509,7 +498,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
       // Find the continue point chapter and load it
-      this.readerService.getCurrentChapter(this.series.id).subscribe(chapter => this.openChapter(chapter));
+      this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => this.openChapter(chapter));
       return;
     }
 
@@ -540,10 +529,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
-        this.loadSeries(this.series.id);
+        this.loadSeries(this.seriesId);
         if (closeResult.coverImageUpdate) {
           // Random triggers a load change without any problems with API
-          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.seriesId));
         }
       }
     });
@@ -585,7 +574,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   downloadSeries() {
-    this.downloadService.downloadSeriesSize(this.series.id).pipe(take(1)).subscribe(async (size) => {
+    this.downloadService.downloadSeriesSize(this.seriesId).pipe(take(1)).subscribe(async (size) => {
       const wantToDownload = await this.downloadService.confirmSize(size, 'series');
       if (!wantToDownload) { return; }
       this.downloadInProgress = true;
@@ -604,6 +593,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   formatVolumeTitle(volume: Volume) {
+    if (this.libraryType === LibraryType.Book) {
+      return volume.name;
+    }
+
     return 'Volume ' + volume.name;
   }
 }

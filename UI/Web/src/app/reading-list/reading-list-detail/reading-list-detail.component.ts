@@ -34,6 +34,8 @@ export class ReadingListDetailComponent implements OnInit {
   hasDownloadingRole: boolean = false;
   downloadInProgress: boolean = false;
 
+  readingListSummary: string = '';
+
   libraryTypes: {[key: number]: LibraryType} = {};
 
   get MangaFormat(): typeof MangaFormat {
@@ -77,6 +79,7 @@ export class ReadingListDetailComponent implements OnInit {
         return;
       }
       this.readingList = readingList;
+      this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
 
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
@@ -113,6 +116,7 @@ export class ReadingListDetailComponent implements OnInit {
         this.actionService.editReadingList(readingList, (readingList: ReadingList) => {
           // Reload information around list
           this.readingList = readingList;
+          this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
         });
         break;
     }
