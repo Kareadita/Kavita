@@ -11,6 +11,7 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
+using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,8 @@ public class SeriesServiceTests
     private readonly DbConnection _connection;
     private readonly DataContext _context;
 
+    private readonly ISeriesService _seriesService;
+
     private const string CacheDirectory = "C:/kavita/config/cache/";
     private const string CoverImageDirectory = "C:/kavita/config/covers/";
     private const string BackupDirectory = "C:/kavita/config/backups/";
@@ -44,6 +47,9 @@ public class SeriesServiceTests
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, mapper, null);
+
+        _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
     }
     #region Setup
 
@@ -72,17 +78,26 @@ public class SeriesServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
+        var lib = new Library()
         {
             Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
+        };
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = new List<Library>()
+            {
+                lib
+            }
         });
+
         return await _context.SaveChangesAsync() > 0;
     }
 
     private async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
-        _context.AppUser.RemoveRange(_context.AppUser.ToList());
         _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
 
         await _context.SaveChangesAsync();
@@ -104,18 +119,133 @@ public class SeriesServiceTests
     #endregion
 
     #region SeriesDetail
+    
+    [Fact]
+    public async Task SeriesDetail_ShouldReturnSpecials()
+    {
+        await ResetDb();
 
-    // private Task SetupSeriesDetailDBForTests()
-    // {
-    //
-    // }
-    //
-    // [Fact]
-    // public Task SeriesDetail_ShouldReturnSpecials()
-    // {
-    //
-    // }
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("Omake", true, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("Something SP02", true, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                }),
+            }
+        });
 
+        await _context.SaveChangesAsync();
+
+        var expectedRanges = new[] {"Omake", "Something SP02"};
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.NotEmpty(detail.Specials);
+        Assert.True(2 == detail.Specials.Count());
+        Assert.All(detail.Specials, dto => Assert.Contains(dto.Range, expectedRanges));
+    }
+
+    [Fact]
+    public async Task SeriesDetail_ShouldReturnVolumesAndChapters()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.NotEmpty(detail.Chapters);
+        Assert.Equal(6, detail.Chapters.Count());
+
+        Assert.NotEmpty(detail.Volumes);
+        Assert.Equal(3, detail.Volumes.Count()); // This returns 3 because 0 volume will still come
+        Assert.All(detail.Volumes, dto => Assert.Contains(dto.Name, new[] {"0", "2", "3"}));
+    }
+
+    [Fact]
+    public async Task SeriesDetail_ShouldReturnVolumesAndChapters_ButRemove0Chapter()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.NotEmpty(detail.Chapters);
+        Assert.Equal(3, detail.Chapters.Count()); // volume 2 has a 0 chapter aka a single chapter that is represented as a volume. We don't show in Chapters area
+
+        Assert.NotEmpty(detail.Volumes);
+        Assert.Equal(3, detail.Volumes.Count());
+    }
+
+    
     #endregion
 
 
@@ -148,19 +278,12 @@ public class SeriesServiceTests
             }
         });
 
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007"
-        });
-
         await _context.SaveChangesAsync();
 
-        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
         {
             SeriesId = 1,
             UserRating = 3,
@@ -203,19 +326,12 @@ public class SeriesServiceTests
             }
         });
 
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007"
-        });
 
         await _context.SaveChangesAsync();
 
-        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
         {
             SeriesId = 1,
             UserRating = 3,
@@ -232,7 +348,7 @@ public class SeriesServiceTests
 
         // Update the DB again
 
-        var result2 = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        var result2 = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
         {
             SeriesId = 1,
             UserRating = 5,
@@ -276,19 +392,11 @@ public class SeriesServiceTests
             }
         });
 
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007"
-        });
-
         await _context.SaveChangesAsync();
-
-        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
         {
             SeriesId = 1,
             UserRating = 10,
@@ -331,19 +439,11 @@ public class SeriesServiceTests
             }
         });
 
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007"
-        });
-
         await _context.SaveChangesAsync();
-
-        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
-        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
         {
             SeriesId = 2,
             UserRating = 5,
@@ -355,6 +455,12 @@ public class SeriesServiceTests
         var ratings = user.Ratings;
         Assert.Empty(ratings);
     }
+
+    #endregion
+
+    #region DeleteMultipleSeries
+
+    
 
     #endregion
 }

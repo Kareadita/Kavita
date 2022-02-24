@@ -125,6 +125,12 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     public async Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto)
     {
+        if (user == null)
+        {
+            _logger.LogError("Cannot update rating of null user");
+            return false;
+        }
+
         var userRating =
             await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
             new AppUserRating();
