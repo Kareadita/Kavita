@@ -17,7 +17,7 @@ public interface ISeriesService
 {
     Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId);
     Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto);
-    Task<bool> UpdateSeriesRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
+    Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
 
 }
@@ -27,9 +27,9 @@ public class SeriesService : ISeriesService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ITaskScheduler _taskScheduler;
-    private readonly Logger<SeriesService> _logger;
+    private readonly ILogger<SeriesService> _logger;
 
-    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler, Logger<SeriesService> logger)
+    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler, ILogger<SeriesService> logger)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -51,6 +51,7 @@ public class SeriesService : ISeriesService
             }
             else
             {
+
                 series.Metadata.CollectionTags ??= new List<CollectionTag>();
                 // TODO: Move this merging logic into a reusable code as it can be used for any Tag
                 var newTags = new List<CollectionTag>();
@@ -122,25 +123,36 @@ public class SeriesService : ISeriesService
     /// <param name="user">User with Ratings includes</param>
     /// <param name="updateSeriesRatingDto"></param>
     /// <returns></returns>
-    public async Task<bool> UpdateSeriesRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto)
+    public async Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto)
     {
-        var userRating = await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
-                         new AppUserRating();
-
-        userRating.Rating = updateSeriesRatingDto.UserRating;
-        userRating.Review = updateSeriesRatingDto.UserReview;
-        userRating.SeriesId = updateSeriesRatingDto.SeriesId;
-
-        if (userRating.Id == 0)
+        var userRating =
+            await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
+            new AppUserRating();
+        try
         {
-            user.Ratings ??= new List<AppUserRating>();
-            user.Ratings.Add(userRating);
+            userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0, 5);
+            userRating.Review = updateSeriesRatingDto.UserReview;
+            userRating.SeriesId = updateSeriesRatingDto.SeriesId;
+
+            if (userRating.Id == 0)
+            {
+                user.Ratings ??= new List<AppUserRating>();
+                user.Ratings.Add(userRating);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
+
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync()) return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception saving rating");
         }
 
-        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.RollbackAsync();
+        user.Ratings?.Remove(userRating);
 
-        if (!_unitOfWork.HasChanges()) return true;
-        return await _unitOfWork.CommitAsync();
+        return false;
     }
 
     public async Task<bool> DeleteMultipleSeries(IList<int> seriesIds)

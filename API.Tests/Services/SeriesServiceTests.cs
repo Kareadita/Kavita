@@ -4,10 +4,13 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
+using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Services;
+using API.SignalR;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -76,9 +79,11 @@ public class SeriesServiceTests
         return await _context.SaveChangesAsync() > 0;
     }
 
-    private async Task ResetDB()
+    private async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
+        _context.AppUser.RemoveRange(_context.AppUser.ToList());
+        _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
 
         await _context.SaveChangesAsync();
     }
@@ -110,6 +115,246 @@ public class SeriesServiceTests
     // {
     //
     // }
+
+    #endregion
+
+
+    #region UpdateRating
+
+    [Fact]
+    public async Task UpdateRating_ShouldSetRating()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+
+        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        {
+            SeriesId = 1,
+            UserRating = 3,
+            UserReview = "Average"
+        });
+
+        Assert.True(result);
+
+        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+            .Ratings;
+        Assert.NotEmpty(ratings);
+        Assert.Equal(3, ratings.First().Rating);
+        Assert.Equal("Average", ratings.First().Review);
+    }
+
+    [Fact]
+    public async Task UpdateRating_ShouldUpdateExistingRating()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+
+        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        {
+            SeriesId = 1,
+            UserRating = 3,
+            UserReview = "Average"
+        });
+
+        Assert.True(result);
+
+        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+            .Ratings;
+        Assert.NotEmpty(ratings);
+        Assert.Equal(3, ratings.First().Rating);
+        Assert.Equal("Average", ratings.First().Review);
+
+        // Update the DB again
+
+        var result2 = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        {
+            SeriesId = 1,
+            UserRating = 5,
+            UserReview = "Average"
+        });
+
+        Assert.True(result2);
+
+        var ratings2 = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+            .Ratings;
+        Assert.NotEmpty(ratings2);
+        Assert.True(ratings2.Count == 1);
+        Assert.Equal(5, ratings2.First().Rating);
+        Assert.Equal("Average", ratings2.First().Review);
+    }
+
+    [Fact]
+    public async Task UpdateRating_ShouldClampRatingAt5()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+
+        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        {
+            SeriesId = 1,
+            UserRating = 10,
+            UserReview = "Average"
+        });
+
+        Assert.True(result);
+
+        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+            .Ratings;
+        Assert.NotEmpty(ratings);
+        Assert.Equal(5, ratings.First().Rating);
+        Assert.Equal("Average", ratings.First().Review);
+    }
+
+    [Fact]
+    public async Task UpdateRating_ShouldReturnFalseWhenSeriesDoesntExist()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Pages = 1
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
+
+        var result = await seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
+        {
+            SeriesId = 2,
+            UserRating = 5,
+            UserReview = "Average"
+        });
+
+        Assert.False(result);
+
+        var ratings = user.Ratings;
+        Assert.Empty(ratings);
+    }
 
     #endregion
 }

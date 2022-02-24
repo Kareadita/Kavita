@@ -126,7 +126,7 @@ namespace API.Controllers
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-            if (!await _seriesService.UpdateSeriesRating(user, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
+            if (!await _seriesService.UpdateRating(user, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
             return Ok();
         }
 
