@@ -66,7 +66,8 @@ export class LibraryEditorModalComponent implements OnInit {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       model.type = parseInt(model.type, 10);
       this.libraryService.create(model).subscribe(() => {
-        this.toastr.success('Library created, a scan has been started');
+        this.toastr.success('Library created successfully.');
+        this.toastr.info('A scan has been started.');
         this.close(true);
       }, err => {
         this.errorMessage = err;

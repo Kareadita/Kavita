@@ -109,7 +109,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
 
   scanLibrary(library: Library) {
     this.libraryService.scan(library.id).pipe(take(1)).subscribe(() => {
-      this.toastr.success('A scan has been queued for ' + library.name);
+      this.toastr.info('A scan has been queued for ' + library.name);
     });
   }
 
