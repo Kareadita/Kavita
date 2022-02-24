@@ -2,12 +2,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { take, takeUntil, takeWhile } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { ProgressEvent } from 'src/app/_models/events/scan-library-progress-event';
+import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
+import { ProgressEvent } from 'src/app/_models/events/progress-event';
 import { Library, LibraryType } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
+import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
 
 @Component({
@@ -37,18 +38,20 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
     this.getLibraries();
 
     // when a progress event comes in, show it on the UI next to library
-    this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
-      if (event.event !== EVENTS.ScanLibraryProgress) return;
+    this.hubService.messages$.pipe(takeUntil(this.onDestroy), takeWhile(event => event.event === EVENTS.NotificationProgress))
+      .subscribe((event: Message<NotificationProgressEvent>) => {
+      if (event.event !== EVENTS.NotificationProgress && (event.payload as NotificationProgressEvent).name === EVENTS.ScanSeries) return;
 
       console.log('scan event: ', event.payload);
+      // TODO: Refactor this to use EventyType on NotificationProgress interface rather than float comparison
       
-      const scanEvent = event.payload as ProgressEvent;
+      const scanEvent = event.payload.body as ProgressEvent;
       this.scanInProgress[scanEvent.libraryId] = {progress: scanEvent.progress !== 1};
       if (scanEvent.progress === 0) {
         this.scanInProgress[scanEvent.libraryId].timestamp = scanEvent.eventTime;
       }
       
-      if (this.scanInProgress[scanEvent.libraryId].progress === false && scanEvent.progress === 1) {
+      if (this.scanInProgress[scanEvent.libraryId].progress === false && (scanEvent.progress === 1 || event.payload.eventType === 'ended')) {
         this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
           const newLibrary = libraries.find(lib => lib.id === scanEvent.libraryId);
           const existingLibrary = this.libraries.find(lib => lib.id === scanEvent.libraryId);
@@ -106,7 +109,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
 
   scanLibrary(library: Library) {
     this.libraryService.scan(library.id).pipe(take(1)).subscribe(() => {
-      this.toastr.success('A scan has been queued for ' + library.name);
+      this.toastr.info('A scan has been queued for ' + library.name);
     });
   }
 

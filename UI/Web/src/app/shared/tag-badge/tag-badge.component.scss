@@ -1,11 +1,9 @@
 .tagbadge {
-    background-color: var(--tagbadge-bg-color);
     transition: all .3s ease-out;
     margin: 3px 5px 3px 0px;
     padding: 2px 10px;
     border-radius: 6px;
     font-size: 14px;
-    border: 1px solid var(--tagbadge-border-color);
     display: inline-block;
     cursor: default;
     width: auto;

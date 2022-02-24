@@ -80,6 +80,7 @@ namespace API.Parser
         /// <summary>
         /// Merges non empty/null properties from info2 into this entity.
         /// </summary>
+        /// <remarks>This does not merge ComicInfo as they should always be the same</remarks>
         /// <param name="info2"></param>
         public void Merge(ParserInfo info2)
         {

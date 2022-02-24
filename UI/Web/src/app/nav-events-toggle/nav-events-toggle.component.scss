@@ -8,7 +8,7 @@
 .dark-menu-item {
     color: var(--body-text-color);
     background-color: rgb(1, 4, 9);
-    border-color: rgba(1, 4, 9, 0.5);
+    border-color: rgba(53, 53, 53, 0.5);
 }
 
 // Popovers need to be their own component
@@ -16,17 +16,37 @@
     border-bottom-color: transparent;
 }
 
-.nav-events {
-    background-color: var(--navbar-bg-color);
+::ng-deep .nav-events {
+    
+    .popover-body {
+        min-width: 250px;
+        max-width: 250px;
+        padding: 0px;
+        box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
+    }
+
+    .popover {
+        min-width: 300px;
+    }
 }
 
-// .nav-events {
-//     background-color: white;
-// }
+.progress-container {
+    width: 100%;
+}
 
+.progress {
+    padding: 0;
+}
+
+.accent-text {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space:nowrap; 
+}
 
 .btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem rgba(255, 255, 255, 1); // TODO: Used in nav as well, move to dark for btn-icon focus
+    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
 }
 
 .small-spinner {
@@ -36,9 +56,6 @@
 
 
 
-.nav-events .popover-body {
-    padding: 0px;
-}
 
 .btn-icon {
     color: white;

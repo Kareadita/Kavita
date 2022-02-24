@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
-import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { finalize, map, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -185,12 +185,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.messageHub.scanSeries.pipe(takeUntil(this.onDestroy)).subscribe((event: ScanSeriesEvent) => {
-      if (event.seriesId == this.series.id)
-      this.loadSeries(seriesId);
-      this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
-      this.toastr.success('Scan series completed');
-    });
+    // this.messageHub.messages$.pipe(takeUntil(this.onDestroy), takeWhile(e => this.messageHub.isEventType(e, EVENTS.ScanSeries))).subscribe((e) => {
+    //   const event = e.payload as ScanSeriesEvent;
+    //   if (event.seriesId == this.series.id)
+    //   this.loadSeries(seriesId);
+    //   this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id));
+    //   this.toastr.success('Scan series completed');
+    // });
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
@@ -203,6 +204,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
         if (seriesCoverUpdatedEvent.seriesId === this.series.id) {
           this.loadSeries(seriesId);
+          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.series.id)); // NOTE: Is this needed as cover update will update the image for us
         }
       }
     });

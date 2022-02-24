@@ -13,7 +13,7 @@ import { Series } from '../_models/series';
 import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { ActionItem, Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -82,7 +82,8 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.seriesAdded.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: Message<any>) => {
+      if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();
     });
   }

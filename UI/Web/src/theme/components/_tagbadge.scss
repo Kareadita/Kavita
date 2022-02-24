@@ -3,3 +3,9 @@
     color: var(--tagbadge-text-color);
     background-color: var(--tagbadge-bg-color);
 }
+
+.typeahead-input .tagbadge {
+    border-color: var(--tagbadge-typeahead-border-color); 
+    color: var(--tagbadge-typeahead-text-color);
+    background-color: var(--tagbadge-typeahead-bg-color);
+}

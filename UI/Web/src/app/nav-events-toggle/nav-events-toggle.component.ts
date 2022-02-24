@@ -1,25 +1,16 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
-import { ProgressEvent } from '../_models/events/scan-library-progress-event';
+import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
+import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
-import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 
-interface ProcessedEvent {
-  eventType: string;
-  timestamp?: string;
-  progress: number;
-  libraryId: number;
-  libraryName: string;
-}
 
-type ProgressType = EVENTS.ScanLibraryProgress | EVENTS.RefreshMetadataProgress | EVENTS.BackupDatabaseProgress | EVENTS.CleanupProgress;
 
-const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgress, EVENTS.BackupDatabaseProgress, EVENTS.CleanupProgress, EVENTS.DownloadProgress, EVENTS.SiteThemeProgress];
 
 // TODO: Rename this to events widget
 @Component({
@@ -28,37 +19,48 @@ const acceptedEvents = [EVENTS.ScanLibraryProgress, EVENTS.RefreshMetadataProgre
   styleUrls: ['./nav-events-toggle.component.scss']
 })
 export class NavEventsToggleComponent implements OnInit, OnDestroy {
-
   @Input() user!: User;
+
   isAdmin: boolean = false;
 
   private readonly onDestroy = new Subject<void>();
 
   /**
-   * Events that come through and are merged (ie progress event gets merged into a progress event)
+   * Progress events (Event Type: 'started', 'ended', 'updated' that have progress property)
    */
-  progressEventsSource = new BehaviorSubject<ProcessedEvent[]>([]);
+  progressEventsSource = new BehaviorSubject<NotificationProgressEvent[]>([]);
   progressEvents$ = this.progressEventsSource.asObservable();
 
-  updateAvailable: boolean = false;
-  updateBody: any;
+  singleUpdateSource = new BehaviorSubject<NotificationProgressEvent[]>([]);
+  singleUpdates$ = this.singleUpdateSource.asObservable();
+
   private updateNotificationModalRef: NgbModalRef | null = null;
 
-  constructor(private messageHub: MessageHubService, private libraryService: LibraryService, private modalService: NgbModal, private accountService: AccountService) { }
-  
+  activeEvents: number = 0;
+
+  debugMode: boolean = false;
+
+
+  get EVENTS() {
+    return EVENTS;
+  }
+
+  constructor(public messageHub: MessageHubService, private modalService: NgbModal, private accountService: AccountService) { }
+
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
     this.progressEventsSource.complete();
+    this.singleUpdateSource.complete();
   }
 
   ngOnInit(): void {
+    // Debounce for testing. Kavita's too fast
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
-      if (acceptedEvents.includes(event.event)) {
-        this.processProgressEvent(event, event.event);
-      } else if (event.event === EVENTS.UpdateAvailable) {
-        this.updateAvailable = true;
-        this.updateBody = event.payload;
+      if (event.event.endsWith('error')) {
+        // TODO: Show an error handle
+      } else if (event.event === EVENTS.NotificationProgress) {
+        this.processNotificationProgressEvent(event);
       }
     });
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
@@ -70,32 +72,49 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     });
   }
 
+  processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
+    const message = event.payload as NotificationProgressEvent;
+    let data;
 
-  processProgressEvent(event: Message<ProgressEvent>, eventType: string) {
-    const scanEvent = event.payload as ProgressEvent;
-
-    this.libraryService.getLibraryNames().subscribe(names => {
-      const data = this.progressEventsSource.getValue();
-      const index = data.findIndex(item => item.eventType === eventType && item.libraryId === event.payload.libraryId);
-      if (index >= 0) {
-        data.splice(index, 1);
-      }
-
-      if (scanEvent.progress !== 1) {
-        const libraryName = names[scanEvent.libraryId] || '';
-        const newEvent = {eventType: eventType, timestamp: scanEvent.eventTime, progress: scanEvent.progress, libraryId: scanEvent.libraryId, libraryName, rawBody: event.payload};
-        data.push(newEvent);
-      }
-
-      
-      this.progressEventsSource.next(data);
-    });
+    switch (event.payload.eventType) {
+      case 'single':
+        const values = this.singleUpdateSource.getValue();
+        values.push(message);
+        this.singleUpdateSource.next(values);
+        this.activeEvents += 1;
+        break;
+      case 'started':
+        data = this.progressEventsSource.getValue();
+        data.push(message);
+        this.progressEventsSource.next(data);
+        this.activeEvents += 1;
+        break;
+      case 'updated':
+        data = this.progressEventsSource.getValue();
+        const index = data.findIndex(m => m.name === message.name);
+        if (index < 0) {
+          data.push(message);
+        } else {
+          data[index] = message;
+        }
+        this.progressEventsSource.next(data);
+        break;
+      case 'ended':
+        data = this.progressEventsSource.getValue();
+        data = data.filter(m => m.name !== message.name); // This does not work //  && m.title !== message.title
+        this.progressEventsSource.next(data);
+        this.activeEvents =  Math.max(this.activeEvents - 1, 0);
+        break;
+      default:
+        break;
+    }
   }
 
-  handleUpdateAvailableClick() {
+
+  handleUpdateAvailableClick(message: NotificationProgressEvent) {
     if (this.updateNotificationModalRef != null) { return; }
     this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
-    this.updateNotificationModalRef.componentInstance.updateData = this.updateBody;
+    this.updateNotificationModalRef.componentInstance.updateData = message.body as UpdateVersionEvent;
     this.updateNotificationModalRef.closed.subscribe(() => {
       this.updateNotificationModalRef = null;
     });
@@ -107,16 +126,4 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   prettyPrintProgress(progress: number) {
     return Math.trunc(progress * 100);
   }
-
-  prettyPrintEvent(eventType: string, event: any) {
-    switch(eventType) {
-      case (EVENTS.ScanLibraryProgress): return 'Scanning ';
-      case (EVENTS.RefreshMetadataProgress): return 'Refreshing Covers for ';
-      case (EVENTS.CleanupProgress): return 'Clearing Cache';
-      case (EVENTS.BackupDatabaseProgress): return 'Backing up Database';
-      case (EVENTS.DownloadProgress): return event.rawBody.userName.charAt(0).toUpperCase() + event.rawBody.userName.substr(1) + ' is downloading ' + event.rawBody.downloadName;
-      default: return eventType;
-    }
-  }
-
 }

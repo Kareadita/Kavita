@@ -14,7 +14,7 @@ import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -92,12 +92,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
     this.filterSettings.presets.libraries = [this.libraryId];
-    
-    //this.loadPage();
   }
 
   ngOnInit(): void {
-    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
+      if (event.event !== EVENTS.SeriesAdded) return;
+      const seriesAdded = event.payload as SeriesAddedEvent;
+      if (seriesAdded.libraryId !== this.libraryId) return;
       this.loadPage();
     });
   }

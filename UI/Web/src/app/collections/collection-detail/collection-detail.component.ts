@@ -109,7 +109,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
 
-    this.messageHub.messages$.pipe(takeWhile(event => event.event === EVENTS.SeriesAddedToCollection), takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
       if (event.event == EVENTS.SeriesAddedToCollection) {
         const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
         if (collectionEvent.tagId === this.collectionTag.id) {
