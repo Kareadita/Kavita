@@ -28,7 +28,7 @@ namespace API.Tests.Helpers
             return new Volume()
             {
                 Name = volumeNumber,
-                Number = int.Parse(volumeNumber),
+                Number = (int) API.Parser.Parser.MinimumNumberFromRange(volumeNumber),
                 Pages = 0,
                 Chapters = chapters ?? new List<Chapter>()
             };

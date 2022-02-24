@@ -8,6 +8,7 @@ import { CollectionTag } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
+import { SeriesDetail } from '../_models/series-detail/series-detail';
 import { SeriesFilter } from '../_models/series-filter';
 import { SeriesGroup } from '../_models/series-group';
 import { SeriesMetadata } from '../_models/series-metadata';
@@ -183,6 +184,10 @@ export class SeriesService {
         return this._cachePaginatedResults(response, this.paginatedSeriesForTagsResults);
       })
     );
+  }
+
+  getSeriesDetail(seriesId: number) {
+    return this.httpClient.get<SeriesDetail>(this.baseUrl + 'series/series-detail?seriesId=' + seriesId);
   }
 
   _addPaginationIfExists(params: HttpParams, pageNum?: number, itemsPerPage?: number) {

@@ -962,6 +962,25 @@ namespace API.Parser
             return string.IsNullOrEmpty(normalized) ? name : normalized;
         }
 
+        /// <summary>
+        /// Responsible for preparing special title for rendering to the UI. Replaces _ with ' ' and strips out SP\d+
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string CleanSpecialTitle(string name)
+        {
+            // TODO: Optimize this code & Test
+            if (string.IsNullOrEmpty(name)) return name;
+            var cleaned = new Regex(@"SP\d+").Replace(name.Replace('_', ' '), string.Empty).Trim();
+            var lastIndex = cleaned.LastIndexOf('.');
+            if (lastIndex > 0)
+            {
+                cleaned = cleaned.Substring(0, cleaned.LastIndexOf('.')).Trim();
+            }
+
+            return string.IsNullOrEmpty(cleaned) ? name : cleaned;
+        }
+
 
         /// <summary>
         /// Tests whether the file is a cover image such that: contains "cover", is named "folder", and is an image

@@ -30,7 +30,7 @@ namespace API.DTOs
         /// <summary>
         /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
         /// </summary>
-        public string Title { get; init; }
+        public string Title { get; set; }
         /// <summary>
         /// The files that represent this Chapter
         /// </summary>
