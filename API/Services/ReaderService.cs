@@ -316,6 +316,7 @@ public class ReaderService : IReaderService
             }
             if (volume.Number == currentVolume.Number - 1)
             {
+                if (currentVolume.Number - 1 == 0) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
                 var lastChapter = volume.Chapters
                     .OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
                 if (lastChapter == null) return -1;
