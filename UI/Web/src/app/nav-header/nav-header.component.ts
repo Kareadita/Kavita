@@ -195,13 +195,6 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   hideSideNav() {
-    const sideNav = this.document.querySelector('.side-nav');
-    if (sideNav?.classList.contains('closed')){
-      sideNav?.classList.remove('closed');
-      this.navService.showSideNav();
-    } else {
-      sideNav?.classList.add('closed');
-      this.navService.hideSideNav();
-    }
+    this.navService.toggleSideNav();
   }
 }

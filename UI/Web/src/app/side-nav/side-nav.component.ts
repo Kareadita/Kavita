@@ -8,6 +8,7 @@ import { AccountService } from '../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
+import { NavService } from '../_services/nav.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -23,7 +24,7 @@ export class SideNavComponent implements OnInit {
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private router: Router,
-    private actionFactoryService: ActionFactoryService, private actionService: ActionService) { }
+    private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -36,6 +37,17 @@ export class SideNavComponent implements OnInit {
       });
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     });
+
+    this.navService.sideNavVisible$.subscribe()
+
+    // const sideNav = this.document.querySelector('.side-nav');
+    // if (sideNav?.classList.contains('closed')){
+    //   sideNav?.classList.remove('closed');
+    //   this.navService.showSideNav();
+    // } else {
+    //   sideNav?.classList.add('closed');
+    //   this.navService.hideSideNav();
+    // }
   }
 
   handleClick(event: Event, library: Library) {

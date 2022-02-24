@@ -1,4 +1,6 @@
-<div class="side-nav mt-3 ms-1 mb-3" *ngIf="accountService.currentUser$ | async as user">
+<ng-container *ngIf="navService.sideNavVisible$ | async as sideNavVisible">
+
+<div class="side-nav mt-3 ms-1 mb-3 {{sideNavVisible ? '' : 'closed'}}" *ngIf="accountService.currentUser$ | async as user">
     <div class="side-nav-item mb-3">
         <span class="side-nav-text">
             <h3>
@@ -49,3 +51,4 @@
         </div>
     </ng-container>
 </div>
+</ng-container>

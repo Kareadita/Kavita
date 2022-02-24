@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, take } from 'rxjs';
 import { UtilityService } from '../shared/_services/utility.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NavService {
+
+  public localStorageSideNavKey = 'kavita--sidenav--collapsed';
 
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
   navbarVisible$ = this.navbarVisibleSource.asObservable();
@@ -19,7 +21,8 @@ export class NavService {
 
   constructor(private utilityService: UtilityService) {
     this.showNavBar();
-    this.showSideNav();
+    // TODO: Once we refactor sidenav to have some sticking out, we can use localstorage instead of this
+    this.sidenavVisibleSource.next(false);
   }
  
   showNavBar() {
@@ -30,12 +33,25 @@ export class NavService {
     this.navbarVisibleSource.next(false);
   }
 
-  showSideNav() {
-    this.sidenavVisibleSource.next(true);
+  toggleSideNav() {
+    this.sidenavVisibleSource.pipe(take(1)).subscribe(val => {
+      if (val === undefined) val = false;
+      const newVal = !(val || false);
+      this.sidenavVisibleSource.next(newVal);
+      localStorage.setItem(this.localStorageSideNavKey, newVal + '');
+    });
   }
 
-  hideSideNav() {
+  showSideNav(supressSaveState: boolean = true) {
+    this.sidenavVisibleSource.next(true);
+    if (supressSaveState) return;
+    localStorage.setItem(this.localStorageSideNavKey, true + '');
+  }
+
+  hideSideNav(supressSaveState: boolean = true) {
     this.sidenavVisibleSource.next(false);
+    if (supressSaveState) return;
+    localStorage.setItem(this.localStorageSideNavKey, false + '');
   }
 
   toggleDarkMode() {
