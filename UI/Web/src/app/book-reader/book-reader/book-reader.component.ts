@@ -383,9 +383,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
-      if (this.themeService.isDarkTheme()) {
-        bodyNode.classList.add('bg-dark');
-      }
+      this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
+        this.themeService.setTheme(theme.name);
+      });
     }
     this.navService.showNavBar();
 
