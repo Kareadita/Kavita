@@ -12,6 +12,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
+import { AnnouncementsComponent } from './announcements/announcements.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -36,6 +37,14 @@ const routes: Routes = [
     path: 'lists',
     canActivate: [AuthGuard],
     loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
+  },
+  {
+    path: 'registration',
+    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
+  },
+  {
+    path: 'announcements',
+    loadChildren: () => import('../app/announcements/announcements.module').then(m => m.AnnouncementsModule)
   },
   {
     path: '',
@@ -66,10 +75,7 @@ const routes: Routes = [
 
     ]
   },
-  {
-    path: 'registration',
-    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
-  },
+  
   {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
   {path: 'no-connection', component: NotConnectedComponent},
   {path: 'theme', component: ThemeTestComponent},

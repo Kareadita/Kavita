@@ -39,6 +39,8 @@ import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead
 import { PublicationStatusPipe } from './_pipes/publication-status.pipe';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { SideNavComponent } from './side-nav/side-nav.component';
+import { SideNavCompanionBarComponent } from './side-nav-companion-bar/side-nav-companion-bar.component';
+import { AnnouncementsComponent } from './announcements/announcements.component';
 
 
 @NgModule({
@@ -62,6 +64,7 @@ import { SideNavComponent } from './side-nav/side-nav.component';
     GroupedTypeaheadComponent,
     ThemeTestComponent,
     SideNavComponent,
+    SideNavCompanionBarComponent,
   ],
   imports: [
     HttpClientModule,
