@@ -359,6 +359,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
 
+        console.log('Detail: ', detail);
+
         this.updateSelectedTab();
         this.isLoading = false;
       });
@@ -589,17 +591,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   formatChapterTitle(chapter: Chapter) {
-    //if (chapter.title.startsWith('Volume')) return chapter.title;
-    //return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.title;
     return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
   }
 
   formatVolumeTitle(volume: Volume) {
-    // if (this.libraryType === LibraryType.Book) {
-    //   return volume.chapters?[0].;
-    // }
-    return volume.name;
+    if (this.libraryType === LibraryType.Book) {
+      return volume.name;
+    }
 
-    //return 'Volume ' + volume.name;
+    return 'Volume ' + volume.name;
   }
 }

@@ -246,7 +246,7 @@ public class SeriesServiceTests
     }
 
     [Fact]
-    public async Task SeriesDetail_ShouldReturnVolumesOnly_WhenBookLibrary()
+    public async Task SeriesDetail_ShouldReturnChaptersOnly_WhenBookLibrary()
     {
         await ResetDb();
 
@@ -273,10 +273,47 @@ public class SeriesServiceTests
         await _context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
-        Assert.Empty(detail.Chapters); // A book library where all books are Volumes, will show no "chapters" on the UI because it doesn't make sense
-
         Assert.NotEmpty(detail.Volumes);
+
+        Assert.Empty(detail.Chapters); // A book library where all books are Volumes, will show no "chapters" on the UI because it doesn't make sense
         Assert.Equal(2, detail.Volumes.Count());
+    }
+
+    [Fact]
+    public async Task SeriesDetail_ShouldSortVolumesByName()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("1.2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.Equal("1", detail.Volumes.ElementAt(0).Name);
+        Assert.Equal("1.2", detail.Volumes.ElementAt(1).Name);
+        Assert.Equal("2", detail.Volumes.ElementAt(2).Name);
     }
 
 

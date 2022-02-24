@@ -209,7 +209,7 @@ public class SeriesService : ISeriesService
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).OrderBy(v => float.Parse(v.Name)).ToList();
         var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
@@ -218,7 +218,7 @@ public class SeriesService : ISeriesService
             foreach (var volume in volumes)
             {
                 var firstChapter = volume.Chapters.First();
-                volume.Name = $"{volume.Number} - {firstChapter.TitleName}";
+                if (!string.IsNullOrEmpty(firstChapter.TitleName)) volume.Name += $" - {firstChapter.TitleName}";
             }
         }
 
@@ -251,7 +251,7 @@ public class SeriesService : ISeriesService
     {
         return libraryType switch
         {
-            LibraryType.Book => !IsBookChapterAVolume(c, libraryType),
+            //LibraryType.Book => !IsBookChapterAVolume(c, libraryType),
             _ => !c.IsSpecial && !c.Number.Equals(Parser.Parser.DefaultChapter)
         };
     }
