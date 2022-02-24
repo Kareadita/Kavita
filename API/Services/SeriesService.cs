@@ -233,7 +233,7 @@ public class SeriesService : ISeriesService
         {
             Specials = specials,
             // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
-            Chapters = chapters.Where(c => ShouldIncludeChapter(c, libraryType))
+            Chapters = chapters.Where(ShouldIncludeChapter)
                 .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()),
             Volumes = volumes,
             StorylineChapters = volumes.Where(v => v.Number == 0).SelectMany(v => v.Chapters).OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
@@ -245,25 +245,9 @@ public class SeriesService : ISeriesService
     /// Should we show the given chapter on the UI. We only show non-specials and non-zero chapters.
     /// </summary>
     /// <param name="c"></param>
-    /// <param name="libraryType"></param>
     /// <returns></returns>
-    private static bool ShouldIncludeChapter(ChapterDto c, LibraryType libraryType)
+    private static bool ShouldIncludeChapter(ChapterDto c)
     {
-        return libraryType switch
-        {
-            //LibraryType.Book => !IsBookChapterAVolume(c, libraryType),
-            _ => !c.IsSpecial && !c.Number.Equals(Parser.Parser.DefaultChapter)
-        };
-    }
-
-    /// <summary>
-    /// Is the chapter (in a book library) the sole file of a book that is represented as a volume in the UI
-    /// </summary>
-    /// <param name="c"></param>
-    /// <param name="libraryType"></param>
-    /// <returns></returns>
-    private static bool IsBookChapterAVolume(ChapterDto c, LibraryType libraryType)
-    {
-        return libraryType == LibraryType.Book && c.Range.All(c2 => char.IsNumber(c2) || char.IsDigit(c2));
+        return !c.IsSpecial && !c.Number.Equals(Parser.Parser.DefaultChapter);
     }
 }
