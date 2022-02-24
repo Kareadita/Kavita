@@ -302,7 +302,8 @@ public class ReaderService : IReaderService
 
         if (currentVolume.Number == 0)
         {
-            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Number, dto => dto.Number);
+            var chapterId = GetNextChapterId(currentVolume.Chapters.OrderByNatural(x => x.Range).Reverse(), currentChapter.Range,
+                dto => dto.Range);
             if (chapterId > 0) return chapterId;
         }
 
@@ -311,11 +312,12 @@ public class ReaderService : IReaderService
             if (volume.Number == currentVolume.Number)
             {
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(),
-                    currentChapter.Number, dto => dto.Number);
+                    currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
             }
             if (volume.Number == currentVolume.Number - 1)
             {
+                if (currentVolume.Number - 1 == 0) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
                 var lastChapter = volume.Chapters
                     .OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
                 if (lastChapter == null) return -1;
