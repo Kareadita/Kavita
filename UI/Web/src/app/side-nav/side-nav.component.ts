@@ -21,7 +21,7 @@ export class SideNavComponent implements OnInit {
   isAdmin = false;
   actions: ActionItem<Library>[] = [];
 
-  constructor(private accountService: AccountService, private libraryService: LibraryService,
+  constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private router: Router,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService) { }
 
