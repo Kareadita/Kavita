@@ -1,15 +1,31 @@
+<app-side-nav-companion-bar>
+    <ng-container title>
+        <h1>
+            <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+            {{series?.name}}
+        </h1>
+        <h2 *ngIf="series?.localizedName !== series?.name">{{series?.localizedName}}</h2>
+        <!-- TODO: Put LocalizedName and library here-->
+        <!-- <h2>{{libraryName}}</h2>  -->
+    </ng-container>
+    
+
+    <div main>
+        <!-- TODO: Implement Tabs here for Recommended and Library view -->
+    </div>
+</app-side-nav-companion-bar>
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6">            
             <app-image class="poster" maxWidth="300px" [imageUrl]="seriesImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
-            <div class="row g-0">
+            <!-- <div class="row g-0">
                 
                 <h2>
                     {{series?.name}}
                 </h2>
-            </div>
+            </div> -->
             <div class="row g-0">
                 <div class="col-auto">
                     <button class="btn btn-primary" (click)="read()">
@@ -37,11 +53,11 @@
                         </ng-template>
                     </button>
                 </div>
-                <div class="col-auto ms-2">
+                <!-- <div class="col-auto ms-2">
                     <div class="card-actions">
                         <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-auto ms-2">
                     <ngb-rating class="rating-star" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
                     <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
