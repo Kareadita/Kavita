@@ -131,9 +131,11 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.filterSettings = new FilterSettings();
     }
 
-    this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
-      this.filteringCollapsed = !openState;
-    });
+    if (this.filterOpen) {
+      this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
+        this.filteringCollapsed = !openState;
+      });
+    }
 
     this.setupTypeaheads();
   }

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -30,6 +30,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   filter: SeriesFilter | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');

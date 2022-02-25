@@ -63,10 +63,4 @@ export class AllCollectionsComponent implements OnInit {
         break;
     }
   }
-
-  toggleFilter(state: boolean) {
-    console.log('all collections: ', state);
-    this.filterOpen.emit(state);
-  }
-
 }

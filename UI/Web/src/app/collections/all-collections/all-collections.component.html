@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="toggleFilter($event)">
+<app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
     <h1 title>
         <app-card-actionables [actions]="collectionTagActions"></app-card-actionables>
         Collections
