@@ -1,4 +1,15 @@
-<div class="side-nav-item" [routerLink]="routerLink">
+<ng-container *ngIf="routerLink != ''; else noLink">
+    <div class="side-nav-item" [routerLink]="routerLink">
+        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+    </div>
+</ng-container>
+<ng-template #noLink>
+    <div class="side-nav-item">
+        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+    </div>
+</ng-template>
+
+<ng-template #inner>
     <span class="phone-hidden">
         <div>
             <i class="fa {{icon}}" aria-hidden="true"></i>&nbsp;
@@ -12,4 +23,4 @@
     <span class="card-actions">
         <ng-content select="[actions]"></ng-content>
     </span>
-</div>
+</ng-template>
