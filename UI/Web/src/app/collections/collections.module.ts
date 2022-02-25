@@ -5,6 +5,7 @@ import { SharedModule } from '../shared/shared.module';
 import { CollectionsRoutingModule } from './collections-routing.module';
 import { CardsModule } from '../cards/cards.module';
 import { AllCollectionsComponent } from './all-collections/all-collections.component';
+import { SidenavModule } from '../sidenav/sidenav.module';
 
 
 
@@ -18,6 +19,7 @@ import { AllCollectionsComponent } from './all-collections/all-collections.compo
     SharedModule,
     CardsModule,
     CollectionsRoutingModule,
+    SidenavModule
   ],
   exports: [
     AllCollectionsComponent

@@ -1,62 +1,48 @@
-import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
+import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { forkJoin, Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
-import { CollectionTag } from 'src/app/_models/collection-tag';
-import { Genre } from 'src/app/_models/genre';
-import { Library } from 'src/app/_models/library';
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
-import { Language } from 'src/app/_models/metadata/language';
-import { PublicationStatusDto } from 'src/app/_models/metadata/publication-status-dto';
-import { Pagination } from 'src/app/_models/pagination';
-import { Person, PersonRole } from 'src/app/_models/person';
-import { FilterEvent, FilterItem, mangaFormatFilters, SeriesFilter, SortField } from 'src/app/_models/series-filter';
-import { Tag } from 'src/app/_models/tag';
-import { ActionItem } from 'src/app/_services/action-factory.service';
-import { CollectionTagService } from 'src/app/_services/collection-tag.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { MetadataService } from 'src/app/_services/metadata.service';
-import { SeriesService } from 'src/app/_services/series.service';
-
-const FILTER_PAG_REGEX = /[^0-9]/g;
-
-const ANIMATION_SPEED = 300;
-
+import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import { forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
+import { UtilityService } from '../shared/_services/utility.service';
+import { TypeaheadSettings } from '../typeahead/typeahead-settings';
+import { CollectionTag } from '../_models/collection-tag';
+import { Genre } from '../_models/genre';
+import { Library } from '../_models/library';
+import { MangaFormat } from '../_models/manga-format';
+import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
+import { Language } from '../_models/metadata/language';
+import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
+import { Person, PersonRole } from '../_models/person';
+import { FilterEvent, FilterItem, mangaFormatFilters, SeriesFilter, SortField } from '../_models/series-filter';
+import { Tag } from '../_models/tag';
+import { CollectionTagService } from '../_services/collection-tag.service';
+import { LibraryService } from '../_services/library.service';
+import { MetadataService } from '../_services/metadata.service';
+import { SeriesService } from '../_services/series.service';
+import { FilterSettings } from './filter-settings';
 
 @Component({
-  selector: 'app-card-detail-layout',
-  templateUrl: './card-detail-layout.component.html',
-  styleUrls: ['./card-detail-layout.component.scss']
+  selector: 'app-metadata-filter',
+  templateUrl: './metadata-filter.component.html',
+  styleUrls: ['./metadata-filter.component.scss']
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy {
+export class MetadataFilterComponent implements OnInit, OnDestroy {
 
-  @Input() header: string = '';
-  @Input() isLoading: boolean = false; 
-  @Input() items: any[] = [];
-  @Input() pagination!: Pagination;
+  /**
+   * This toggles the opening/collapsing of the metadata filter code
+   */
+  @Input() filterOpen: EventEmitter<boolean> = new EventEmitter();
+
   /**
    * Should filtering be shown on the page
    */
   @Input() filteringDisabled: boolean = false;
-  /**
-   * Any actions to exist on the header for the parent collection (library, collection)
-   */
-  @Input() actions: ActionItem<any>[] = [];
-  @Input() trackByIdentity!: (index: number, item: any) => string;
+
   @Input() filterSettings!: FilterSettings;
-  @Output() itemClicked: EventEmitter<any> = new EventEmitter();
-  @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
+
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
-  
-  @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
 
+  @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
 
-  // Filter Code
-  @Input() filterOpen!: EventEmitter<boolean>;
 
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
   librarySettings: TypeaheadSettings<Library> = new TypeaheadSettings();
@@ -69,7 +55,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   resetTypeaheads: Subject<boolean> = new ReplaySubject(1);
 
-  /**
+   /**
    * Controls the visiblity of extended controls that sit below the main header.
    */
   filteringCollapsed: boolean = true;
@@ -97,7 +83,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
-    this.filter = this.seriesService.createSeriesFilter();
+      this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl(this.filter.readStatus.read, []),
       notRead: new FormControl(this.filter.readStatus.notRead, []),
@@ -138,16 +124,16 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       }
       this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
     });
-
-    
   }
 
   ngOnInit(): void {
-    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}`;
-
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
     }
+
+    this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
+      this.filteringCollapsed = !openState;
+    });
 
     this.setupTypeaheads();
   }
@@ -155,6 +141,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.onDestory.next();
     this.onDestory.complete();
+  }
+
+  getPersonsSettings(role: PersonRole) {
+    return this.peopleSettings[role];
   }
 
   setupTypeaheads() {
@@ -178,7 +168,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       this.apply();
     });
   }
-
 
   setupFormatTypeahead() {
     this.formatSettings.minCharacters = 0;
@@ -452,27 +441,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     return personSettings;
   }
 
-
-  onPageChange(page: number) {
-    this.pageChange.emit(this.pagination);
-  }
-
-  selectPageStr(page: string) {
-    this.pagination.currentPage = parseInt(page, 10) || 1;
-    this.onPageChange(this.pagination.currentPage);
-  }
-
-  formatInput(input: HTMLInputElement) {
-    input.value = input.value.replace(FILTER_PAG_REGEX, '');
-  }
-
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action.action, undefined);
-    }
-  }
-
-
   updateFormatFilters(formats: MangaFormat[]) {
     this.filter.formats = formats.map(item => item) || [];
   }
@@ -564,10 +532,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     }
 
     this.filter.sortOptions.isAscending = this.isAscendingSort;
-  }
-
-  getPersonsSettings(role: PersonRole) {
-    return this.peopleSettings[role];
   }
 
   clear() {

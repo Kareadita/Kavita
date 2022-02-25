@@ -12,15 +12,15 @@
             </h2>
         </div>
 
-        <div class="col-auto align-self-end">
+        <!-- <div class="col-auto align-self-end">
             <button *ngIf="!filteringDisabled" class="btn btn-secondary btn-small" (click)="collapse.toggle()" [attr.aria-expanded]="!filteringCollapsed" placement="left" ngbTooltip="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filteringCollapsed ? 'Open' : 'Close'}} Filtering and Sorting">
                 <i class="fa fa-filter" aria-hidden="true"></i>
                 <span class="visually-hidden">Sort / Filter</span>
             </button>
-        </div>
+        </div> -->
     </div>
     
-    <div class="phone-hidden">
+    <!-- <div class="phone-hidden">
         <div #collapse="ngbCollapse" [(ngbCollapse)]="filteringCollapsed">
             <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
         </div>
@@ -119,7 +119,6 @@
                 </div>
             </div>
             <div class="row justify-content-center g-0">
-                <!-- The People row -->
                 <div class="col-md-2 me-3" *ngIf="peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
                     <div class="mb-3">
                         <label for="cover-artist" class="form-label">Cover Artists</label>
@@ -357,7 +356,9 @@
                 </div>
             </div>
         </div>
-    </ng-template>
+    </ng-template> -->
+
+    <app-metadata-filter [filterOpen]="filterOpen"></app-metadata-filter>
     
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 

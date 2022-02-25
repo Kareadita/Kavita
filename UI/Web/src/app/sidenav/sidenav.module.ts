@@ -6,6 +6,7 @@ import { SideNavComponent } from './side-nav/side-nav.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { CardsModule } from '../cards/cards.module';
 import { FormsModule } from '@angular/forms';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 
@@ -20,6 +21,7 @@ import { FormsModule } from '@angular/forms';
     PipeModule,
     CardsModule,
     FormsModule,
+    NgbTooltipModule,
   ],
   exports: [
     SideNavCompanionBarComponent,

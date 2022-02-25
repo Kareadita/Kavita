@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +19,8 @@ export class AllCollectionsComponent implements OnInit {
   isLoading: boolean = true;
   collections: CollectionTag[] = [];
   collectionTagActions: ActionItem<CollectionTag>[] = [];
+
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private collectionService: CollectionTagService, private router: Router,
     private actionFactoryService: ActionFactoryService, private modalService: NgbModal, 
@@ -60,6 +62,11 @@ export class AllCollectionsComponent implements OnInit {
       default:
         break;
     }
+  }
+
+  toggleFilter(state: boolean) {
+    console.log('all collections: ', state);
+    this.filterOpen.emit(state);
   }
 
 }

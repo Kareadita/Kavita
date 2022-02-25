@@ -23,6 +23,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
 import { FileInfoComponent } from './file-info/file-info.component';
 import { BookmarkComponent } from './bookmark/bookmark.component';
+import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 
 
 
@@ -53,12 +54,16 @@ import { BookmarkComponent } from './bookmark/bookmark.component';
     
     PipeModule,
     SharedModule,
-    TypeaheadModule,
+    TypeaheadModule, // edit series modal
+
+    MetadataFilterModule,
     
     NgbNavModule,
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,
+
+
 
     NgbNavModule, //Series Detail
     NgbPaginationModule, // CardDetailLayoutComponent

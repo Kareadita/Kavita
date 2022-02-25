@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
+import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';

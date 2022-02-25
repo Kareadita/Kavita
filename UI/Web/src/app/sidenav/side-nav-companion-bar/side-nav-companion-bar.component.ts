@@ -1,4 +1,4 @@
-import { Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/core';
+import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -16,14 +16,18 @@ export class SideNavCompanionBarComponent implements OnInit {
    */
   @Input() showGoBack: boolean = false;
   /**
-   * Title of the Page. Should be simple.
-   */
-  //@Input() pageHeader: string = '';
-
-  /**
    * If the page should show a filter
    */
   @Input() hasFilter: boolean = false;
+
+  /**
+   * Should be passed through from Filter component.
+   */
+  //@Input() filterDisabled: EventEmitter<boolean> = new EventEmitter();
+
+  @Output() filterOpen: EventEmitter<boolean> = new EventEmitter();
+
+  isFilterOpen = false;
 
   constructor() { }
 
@@ -32,6 +36,12 @@ export class SideNavCompanionBarComponent implements OnInit {
 
   goBack() {
 
+  }
+
+  toggleFilter() {
+    //collapse.toggle()
+    this.isFilterOpen = !this.isFilterOpen;
+    this.filterOpen.emit(this.isFilterOpen);
   }
 
 }
