@@ -19,6 +19,7 @@ import { InviteUserComponent } from './invite-user/invite-user.component';
 import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
+import { SidenavModule } from '../sidenav/sidenav.module';
 
 
 
@@ -48,7 +49,8 @@ import { EditUserComponent } from './edit-user/edit-user.component';
     NgbTooltipModule,
     NgbDropdownModule,
     SharedModule,
-    PipeModule
+    PipeModule,
+    SidenavModule
   ],
   providers: []
 })

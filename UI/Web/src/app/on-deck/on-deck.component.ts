@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { take } from 'rxjs/operators';
@@ -25,6 +25,7 @@ export class OnDeckComponent implements OnInit {
   libraryId!: number;
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService) {

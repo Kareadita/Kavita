@@ -1,8 +1,8 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES } from '../shared/_services/utility.service';
@@ -33,6 +33,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
 
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   onDestroy: Subject<void> = new Subject();
 

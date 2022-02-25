@@ -1,6 +1,9 @@
-<div class="container">
-  <h2>Admin Dashboard</h2>
-
+<app-side-nav-companion-bar>
+  <h1 title>
+    Admin Dashboard
+  </h1>
+</app-side-nav-companion-bar>
+<div class="container-fluid">
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
       <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
         <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>

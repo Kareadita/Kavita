@@ -10,6 +10,7 @@ import { ApiKeyComponent } from './api-key/api-key.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
+import { SidenavModule } from '../sidenav/sidenav.module';
 
 
 
@@ -31,6 +32,7 @@ import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
     NgxSliderModule,
     UserSettingsRoutingModule,
     PipeModule,
+    SidenavModule
   ], 
   exports: [
     SiteThemeProviderPipe
