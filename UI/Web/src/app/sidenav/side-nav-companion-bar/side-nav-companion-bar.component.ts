@@ -20,6 +20,11 @@ export class SideNavCompanionBarComponent implements OnInit {
    */
   //@Input() pageHeader: string = '';
 
+  /**
+   * If the page should show a filter
+   */
+  @Input() hasFilter: boolean = false;
+
   constructor() { }
 
   ngOnInit(): void {

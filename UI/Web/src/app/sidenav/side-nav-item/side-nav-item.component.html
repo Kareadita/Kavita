@@ -1,6 +1,15 @@
-<div class="side-nav-item">
-    <ng-container [ngTemplateOutlet]="inner"></ng-container>
-</div>
+<ng-container *ngIf="link === undefined || link.length === 0; else useLink">
+    <div class="side-nav-item">
+        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+    </div>
+</ng-container>
+
+<ng-template #useLink>
+    <a class="side-nav-item" [href]="link">
+        <ng-container [ngTemplateOutlet]="inner"></ng-container>
+    </a>
+</ng-template>
+
 
 <ng-template #inner>
     <span class="phone-hidden">

@@ -12,7 +12,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
-import { AnnouncementsComponent } from './announcements/announcements.component';
+import { ReadingListsComponent } from './reading-list/reading-lists/reading-lists.component';
+import { AllCollectionsComponent } from './collections/all-collections/all-collections.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 

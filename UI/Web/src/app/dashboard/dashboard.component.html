@@ -1,30 +1,6 @@
-<app-side-nav-companion-bar [showGoBack]="true" pageHeader="Home">
+<app-side-nav-companion-bar>
     <h1 title>
         Home
     </h1>
-    <div main *ngIf="false">
-        <nav role="navigation">
-            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills justify-content-center" role="tab">
-                <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class="nav-item">
-                <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
-                <ng-template ngbNavContent>
-                    <ng-container *ngIf="tab.fragment === ''">
-                        <app-library></app-library>
-                    </ng-container>
-                    <ng-container *ngIf="tab.fragment === 'lists'">
-                        <app-reading-lists></app-reading-lists>
-                    </ng-container>
-                    <ng-container *ngIf="tab.fragment === 'collections'">
-                        <app-all-collections></app-all-collections>
-                    </ng-container>
-                </ng-template>
-                </li>
-            </ul>
-        </nav>
-    </div>
 </app-side-nav-companion-bar>
-
-
-<!-- <div class="container-fluid">
-    <div [ngbNavOutlet]="nav" class="mt-3"></div>
-</div> -->
+<app-library></app-library>

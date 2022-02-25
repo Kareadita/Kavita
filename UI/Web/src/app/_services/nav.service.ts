@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { ReplaySubject, take } from 'rxjs';
-import { UtilityService } from '../shared/_services/utility.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,10 +18,10 @@ export class NavService {
   private darkModeSource = new ReplaySubject<boolean>(1);
   darkMode$ = this.darkModeSource.asObservable();
 
-  constructor(private utilityService: UtilityService) {
+  constructor() {
     this.showNavBar();
-    // TODO: Once we refactor sidenav to have some sticking out, we can use localstorage instead of this
-    this.sidenavVisibleSource.next(false);
+    const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
+    this.sidenavVisibleSource.next(sideNavState);
   }
  
   showNavBar() {

@@ -16,6 +16,11 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() title: string = '';
 
+  /**
+   * If a link should be generated when clicked. By default (undefined), no link will be generated
+   */
+  @Input() link: string | undefined;
+
   constructor() { }
 
   ngOnInit(): void {

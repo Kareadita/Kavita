@@ -46,12 +46,6 @@ export class SideNavComponent implements OnInit {
     this.navService.sideNavVisible$.subscribe()
   }
 
-  
-
-  handleClick(event: Event, library: Library) {
-    this.router.navigate(['library', library.id]);
-  }
-
   handleAction(action: Action, library: Library) {
     switch (action) {
       case(Action.ScanLibrary):
