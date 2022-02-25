@@ -1,6 +1,6 @@
-<ng-container *ngIf="navService.sideNavVisible$ | async as sideNavVisible">
+<ng-container>
 
-<div class="side-nav {{sideNavVisible ? '' : 'closed'}}" *ngIf="accountService.currentUser$ | async as user">
+<div class="side-nav" [ngClass]="{'closed' : !(navService?.sideNavVisible$ | async)}"  *ngIf="accountService.currentUser$ | async as user">
     <app-side-nav-item icon="fa-user-circle align-self-center me-2 phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
         <ng-container actions>
             <!-- Todo: This will be customize dashboard/side nav controls-->
