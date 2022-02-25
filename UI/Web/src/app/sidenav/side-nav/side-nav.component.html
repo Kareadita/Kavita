@@ -10,6 +10,8 @@
 
     <div class="mt-3">
         <app-side-nav-item icon="fa-home" title="Home" routerLink="/library"></app-side-nav-item>
+        <app-side-nav-item icon="fa-list" title="Collections" routerLink="/library" fragment="collections"></app-side-nav-item>
+        <app-side-nav-item icon="fa-list-ol" title="Reading Lists" routerLink="/library" fragment="lists"></app-side-nav-item>
         <div class="mb-3" * ngIf="libraries.length > 10">
             <label for="filter" class="form-label">Filter</label>
             <div class="input-group">

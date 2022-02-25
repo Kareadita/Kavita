@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { TypeaheadComponent } from './typeahead.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
+import { PipeModule } from '../pipe/pipe.module';
 
 
 
@@ -14,7 +15,8 @@ import { SharedModule } from '../shared/shared.module';
     CommonModule,
     SharedModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    PipeModule
   ],
   exports: [
     TypeaheadComponent

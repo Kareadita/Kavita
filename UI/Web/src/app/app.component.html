@@ -2,7 +2,6 @@
 <div [ngStyle]="(navService?.navbarVisible$ | async) ? {'padding-top': 'calc(56px)', 'height': '100%'} : {}">
     <a id="content"></a>
     <app-side-nav></app-side-nav>
-    <router-outlet></router-outlet>
     <div class="side-nav" [ngClass]="{'side-nav-content': (navService?.sideNavVisible$ | async)}">
         <router-outlet></router-outlet>
     </div>

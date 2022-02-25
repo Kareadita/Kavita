@@ -11,6 +11,7 @@ import { ReadingListsComponent } from './reading-lists/reading-lists.component';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { SharedModule } from '../shared/shared.module';
+import { SidenavModule } from '../sidenav/sidenav.module';
 
 
 
@@ -29,7 +30,8 @@ import { SharedModule } from '../shared/shared.module';
     DragDropModule,
     CardsModule,
     PipeModule,
-    SharedModule
+    SharedModule,
+    SidenavModule
   ],
   exports: [
     AddToListModalComponent,

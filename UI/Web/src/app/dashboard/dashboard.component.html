@@ -2,7 +2,7 @@
     <h1 title>
         Home
     </h1>
-    <div main>
+    <div main *ngIf="false">
         <nav role="navigation">
             <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills justify-content-center" role="tab">
                 <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class="nav-item">
@@ -25,6 +25,6 @@
 </app-side-nav-companion-bar>
 
 
-<div class="container-fluid">
+<!-- <div class="container-fluid">
     <div [ngbNavOutlet]="nav" class="mt-3"></div>
-</div>
+</div> -->

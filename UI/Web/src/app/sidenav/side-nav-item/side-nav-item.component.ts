@@ -12,10 +12,6 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() icon: string = '';
   /**
-   * Route to load on click. This should start with /
-   */
-  @Input() routerLink: string = '';
-  /**
    * Text for the item
    */
   @Input() title: string = '';

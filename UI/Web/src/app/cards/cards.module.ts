@@ -51,6 +51,7 @@ import { BookmarkComponent } from './bookmark/bookmark.component';
     ReactiveFormsModule,
     FormsModule, // EditCollectionsModal
     
+    PipeModule,
     SharedModule,
     TypeaheadModule,
     

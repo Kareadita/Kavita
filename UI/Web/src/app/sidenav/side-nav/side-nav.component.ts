@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { take } from 'rxjs/operators';
-import { UtilityService } from '../shared/_services/utility.service';
-import { Library } from '../_models/library';
-import { User } from '../_models/user';
-import { AccountService } from '../_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
-import { ActionService } from '../_services/action.service';
-import { LibraryService } from '../_services/library.service';
-import { NavService } from '../_services/nav.service';
+import { UtilityService } from '../../shared/_services/utility.service';
+import { Library } from '../../_models/library';
+import { User } from '../../_models/user';
+import { AccountService } from '../../_services/account.service';
+import { Action, ActionFactoryService, ActionItem } from '../../_services/action-factory.service';
+import { ActionService } from '../../_services/action.service';
+import { LibraryService } from '../../_services/library.service';
+import { NavService } from '../../_services/nav.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -37,7 +37,7 @@ export class SideNavComponent implements OnInit {
       if (this.user) {
         this.isAdmin = this.accountService.hasAdminRole(this.user);
       }
-      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
+      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
       });
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));

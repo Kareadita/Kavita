@@ -1,13 +1,6 @@
-<ng-container *ngIf="routerLink != ''; else noLink">
-    <div class="side-nav-item" [routerLink]="routerLink">
-        <ng-container [ngTemplateOutlet]="inner"></ng-container>
-    </div>
-</ng-container>
-<ng-template #noLink>
-    <div class="side-nav-item">
-        <ng-container [ngTemplateOutlet]="inner"></ng-container>
-    </div>
-</ng-template>
+<div class="side-nav-item">
+    <ng-container [ngTemplateOutlet]="inner"></ng-container>
+</div>
 
 <ng-template #inner>
     <span class="phone-hidden">

@@ -38,10 +38,8 @@ import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { PublicationStatusPipe } from './_pipes/publication-status.pipe';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
-import { SideNavComponent } from './side-nav/side-nav.component';
-import { SideNavCompanionBarComponent } from './side-nav-companion-bar/side-nav-companion-bar.component';
-import { SideNavItemComponent } from './side-nav/side-nav-item/side-nav-item.component';
 import { PipeModule } from './pipe/pipe.module';
+import { SidenavModule } from './sidenav/sidenav.module';
 
 
 @NgModule({
@@ -64,9 +62,6 @@ import { PipeModule } from './pipe/pipe.module';
     AllSeriesComponent,
     GroupedTypeaheadComponent,
     ThemeTestComponent,
-    SideNavComponent,
-    SideNavCompanionBarComponent,
-    SideNavItemComponent
   ],
   imports: [
     HttpClientModule,
@@ -92,7 +87,8 @@ import { PipeModule } from './pipe/pipe.module';
     ReadingListModule,
     RegistrationModule,
 
-    PipeModule, // For sidenav
+    PipeModule,
+    SidenavModule, // For sidenav
 
 
     ToastrModule.forRoot({
