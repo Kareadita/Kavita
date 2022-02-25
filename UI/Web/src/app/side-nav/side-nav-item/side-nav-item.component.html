@@ -1,0 +1,15 @@
+<div class="side-nav-item" [routerLink]="routerLink">
+    <span class="phone-hidden">
+        <div>
+            <i class="fa {{icon}}" aria-hidden="true"></i>&nbsp;
+        </div>
+    </span>
+    <span class="side-nav-text">
+        <div>
+            {{title}}
+        </div>
+    </span>
+    <span class="card-actions">
+        <ng-content select="[actions]"></ng-content>
+    </span>
+</div>

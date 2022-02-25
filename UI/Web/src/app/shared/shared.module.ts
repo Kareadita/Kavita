@@ -34,7 +34,7 @@ import { ImageComponent } from './image/image.component';
     SentenceCasePipe,
     PersonBadgeComponent,
     BadgeExpanderComponent,
-    ImageComponent
+    ImageComponent,
   ],
   imports: [
     CommonModule,
