@@ -2,7 +2,7 @@
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding: 0;
+    padding: 0 10px;
     width: 100%;
     height: auto;
     min-height: 40px;
@@ -34,10 +34,6 @@
             flex-grow: 1;
             justify-content: end;
         }
-    }
-
-    &:hover {
-        color: var(--dark-text-accent);
     }
 }
 

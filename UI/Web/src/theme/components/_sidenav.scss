@@ -1,0 +1,11 @@
+.side-nav {
+    background-color: var(--side-nav-bg-color);
+    box-shadow: var(--side-nav-box-shadow);
+}
+
+.side-nav-item {
+    &:hover {
+        color: var(--side-nav-hover-color);
+        background-color: var(--side-nav-hover-bg-color);
+    }
+}

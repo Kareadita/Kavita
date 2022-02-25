@@ -1,7 +1,7 @@
 <ng-container *ngIf="navService.sideNavVisible$ | async as sideNavVisible">
 
-<div class="side-nav mt-3 ms-1 mb-3 {{sideNavVisible ? '' : 'closed'}}" *ngIf="accountService.currentUser$ | async as user">
-    <app-side-nav-item icon="fa-user-circle align-self-center me-2 phone-hidden" [title]="user.username | sentenceCase">
+<div class="side-nav {{sideNavVisible ? '' : 'closed'}}" *ngIf="accountService.currentUser$ | async as user">
+    <app-side-nav-item icon="fa-user-circle align-self-center me-2 phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
         <ng-container actions>
             <!-- Todo: This will be customize dashboard/side nav controls-->
             <a href="/preferences/" title="User Settings" style="color: white;"><i class="fa fa-cogs" style="color: white !important" aria-hidden="true"></i><span class="visually-hidden">User Settings</span></a>
