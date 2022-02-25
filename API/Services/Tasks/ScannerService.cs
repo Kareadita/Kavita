@@ -439,6 +439,11 @@ public class ScannerService : IScannerService
             try
             {
                 await _unitOfWork.CommitAsync();
+
+                // Update the people, genres, and tags after committing as we might have inserted new ones.
+                allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+                allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+                allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
             }
             catch (Exception ex)
             {
@@ -463,7 +468,6 @@ public class ScannerService : IScannerService
 
             foreach (var series in librarySeries)
             {
-                // TODO: Do I need this? Shouldn't this be NotificationProgress
                 // This is something more like, the series has finished updating in the backend. It may or may not have been modified.
                 await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.Id, series.Name));
             }

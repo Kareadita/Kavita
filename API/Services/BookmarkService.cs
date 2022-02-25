@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -16,6 +17,7 @@ public interface IBookmarkService
     Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark> bookmarks);
     Task<bool> BookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto, string imageToBookmark);
     Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto);
+    Task<IEnumerable<string>> GetBookmarkFilesById(int userId, IEnumerable<int> bookmarkIds);
 }
 
 public class BookmarkService : IBookmarkService
@@ -23,12 +25,16 @@ public class BookmarkService : IBookmarkService
     private readonly ILogger<BookmarkService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
+    private readonly IArchiveService _archiveService;
+    private readonly IEventHub _eventHub;
 
-    public BookmarkService(ILogger<BookmarkService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService)
+    public BookmarkService(ILogger<BookmarkService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService, IArchiveService archiveService, IEventHub eventHub)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
+        _archiveService = archiveService;
+        _eventHub = eventHub;
     }
 
     /// <summary>
@@ -137,6 +143,17 @@ public class BookmarkService : IBookmarkService
         }
 
         return true;
+    }
+
+    public async Task<IEnumerable<string>> GetBookmarkFilesById(int userId, IEnumerable<int> bookmarkIds)
+    {
+        var bookmarkDirectory =
+            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+
+        var bookmarks = await _unitOfWork.UserRepository.GetAllBookmarksByIds(bookmarkIds.ToList());
+        return bookmarks
+            .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
+                b.FileName)));
     }
 
     private static string BookmarkStem(int userId, int seriesId, int chapterId)
