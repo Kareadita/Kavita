@@ -40,8 +40,8 @@ import { PublicationStatusPipe } from './_pipes/publication-status.pipe';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { SideNavComponent } from './side-nav/side-nav.component';
 import { SideNavCompanionBarComponent } from './side-nav-companion-bar/side-nav-companion-bar.component';
-import { AnnouncementsComponent } from './announcements/announcements.component';
 import { SideNavItemComponent } from './side-nav/side-nav-item/side-nav-item.component';
+import { PipeModule } from './pipe/pipe.module';
 
 
 @NgModule({
@@ -91,6 +91,8 @@ import { SideNavItemComponent } from './side-nav/side-nav-item/side-nav-item.com
     CollectionsModule,
     ReadingListModule,
     RegistrationModule,
+
+    PipeModule, // For sidenav
 
 
     ToastrModule.forRoot({

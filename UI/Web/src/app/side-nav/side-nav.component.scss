@@ -1,12 +1,12 @@
 .side-nav {
     padding: 10px;
     width: 190px;
-    background-color: rgba(0,0,0,0.6);
+    background-color: var(--sidenav-bg-color);
     height: calc(100vh - 58px);
     position: fixed;
     margin: 0;
     left: 0;
-    transition:left 0.1s linear;
+    transition: left var(--sidenav-openclose-transition);
     box-shadow: inset -3px 0em 5px 0em rgb(0 0 0 / 50%);
 
     &.closed {

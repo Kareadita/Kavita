@@ -6,7 +6,8 @@
     width: 100%;
     height: auto;
     min-height: 40px;
-    cursor: pointer;
+
+    cursor: pointer; // This needs to be based a flag
 
     span {
         align-items: center;

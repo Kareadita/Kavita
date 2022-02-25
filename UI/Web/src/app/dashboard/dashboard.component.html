@@ -1,5 +1,8 @@
 <app-side-nav-companion-bar [showGoBack]="true" pageHeader="Home">
-    <div class="container-fluid" main>
+    <h1 title>
+        Home
+    </h1>
+    <div main>
         <nav role="navigation">
             <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills justify-content-center" role="tab">
                 <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class="nav-item">

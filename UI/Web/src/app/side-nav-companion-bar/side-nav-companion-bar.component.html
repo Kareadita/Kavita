@@ -1,10 +1,18 @@
 <div class="mt-3 ms-1 me-1">
-    <ng-container *ngIf="showGoBack">
-        <button class="btn btn-icon" (click)="goBack()">
-            <i class="fa-solid fa-left-long" aria-hidden="true"></i>
-            <span class="phone-hidden">Go Back</span>
-        </button>
-    </ng-container>
-    <h1 *ngIf="pageHeader.length > 0">{{pageHeader}}</h1>
-    <ng-content select="[main]"></ng-content>
+    <div class="row g-0">
+        <div class="col-auto">
+            <ng-container *ngIf="showGoBack">
+                <button class="btn btn-icon" (click)="goBack()">
+                    <i class="fa-solid fa-left-long" aria-hidden="true"></i>
+                    <span class="phone-hidden">Go Back</span>
+                </button>
+            </ng-container>
+        </div>
+        <div class="col-auto">
+            <ng-content select="[title]"></ng-content>
+        </div>
+        <div class="col-auto offset-md-4">
+            <ng-content select="[main]"></ng-content>
+        </div>   
+    </div>
 </div>

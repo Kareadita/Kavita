@@ -18,7 +18,7 @@ export class SideNavCompanionBarComponent implements OnInit {
   /**
    * Title of the Page. Should be simple.
    */
-  @Input() pageHeader: string = '';
+  //@Input() pageHeader: string = '';
 
   constructor() { }
 

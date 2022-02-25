@@ -22,6 +22,11 @@ export class SideNavComponent implements OnInit {
   isAdmin = false;
   actions: ActionItem<Library>[] = [];
 
+  filterQuery: string = '';
+  filterLibrary = (library: Library) => {
+    return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
+  }
+
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private router: Router,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService) { }
@@ -39,16 +44,9 @@ export class SideNavComponent implements OnInit {
     });
 
     this.navService.sideNavVisible$.subscribe()
-
-    // const sideNav = this.document.querySelector('.side-nav');
-    // if (sideNav?.classList.contains('closed')){
-    //   sideNav?.classList.remove('closed');
-    //   this.navService.showSideNav();
-    // } else {
-    //   sideNav?.classList.add('closed');
-    //   this.navService.hideSideNav();
-    // }
   }
+
+  
 
   handleClick(event: Event, library: Library) {
     this.router.navigate(['library', library.id]);

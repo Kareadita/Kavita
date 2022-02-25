@@ -58,6 +58,10 @@
     /* Rating star */
     --ratingstar-star-empty: #b0c4de;
     --ratingstar-star-filled: var(--primary-color);
+
+    /* Side Nav */
+    --sidenav-bg-color: rgba(0,0,0,0.6);
+    --sidenav-openclose-transition: 0.1s linear;
   
     /* Global */
     --accent-bg-color: rgba(206, 206, 206, 0.5);
