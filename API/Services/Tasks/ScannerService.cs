@@ -882,9 +882,9 @@ public class ScannerService : IScannerService
             chapter.TotalCount = comicInfo.Count;
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.Number) && int.Parse(comicInfo.Number) > 0)
+        if (!string.IsNullOrEmpty(comicInfo.Number) && float.Parse(comicInfo.Number) > 0)
         {
-            chapter.Count = int.Parse(comicInfo.Number);
+            chapter.Count = (int) Math.Floor(float.Parse(comicInfo.Number));
         }
 
 

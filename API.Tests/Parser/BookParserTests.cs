@@ -6,6 +6,7 @@ namespace API.Tests.Parser
     {
         [Theory]
         [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown]", "Gifting The Wonderful World With Blessings!")]
+        [InlineData("BBC Focus 00 The Science of Happiness 2nd Edition (2018)", "BBC Focus 00 The Science of Happiness 2nd Edition")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
