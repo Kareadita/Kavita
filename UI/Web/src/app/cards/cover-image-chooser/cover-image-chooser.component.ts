@@ -103,6 +103,14 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       this.form.get('coverImageUrl')?.setValue('');
     }
   }
+
+  changeMode(mode: 'url') {
+    this.mode = mode; 
+    this.setupEnterHandler();
+    setTimeout(() => {
+      
+    })
+  }
   
 
 
