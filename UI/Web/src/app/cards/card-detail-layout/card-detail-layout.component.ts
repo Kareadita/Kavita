@@ -156,7 +156,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}`;
+    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}_${item?.libraryId}`;
+
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();

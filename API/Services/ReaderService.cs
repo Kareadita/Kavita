@@ -394,7 +394,7 @@ public class ReaderService : IReaderService
         {
             var chapters = volume.Chapters
                 .OrderBy(c => float.Parse(c.Number))
-                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber && Parser.Parser.MaximumNumberFromRange(c.Range) > 0.0);
+                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber);
             MarkChaptersAsRead(user, volume.SeriesId, chapters);
         }
     }

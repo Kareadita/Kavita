@@ -6,15 +6,15 @@
                 <div class="row g-0 mt-3 pb-3" *ngIf="mode === 'all'">
                     <div class="mx-auto">
                         <div class="row g-0 mb-3">
-                            <i class="fa fa-file-upload mx-auto" style="font-size: 24px;" aria-hidden="true"></i>
+                            <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
                         </div>
                         
                         <div class="row g-0">
-                            <div class="mx-auto">
-                                <a class="col" style="padding-right:0px" href="javascript:void(0)" (click)="mode = 'url'; setupEnterHandler()"><span class="phone-hidden">Enter a </span>Url</a>
-                                <span class="col" style="padding-right:0px">•</span>
+                            <div class="mx-auto" style="width: 350px;">
+                                <a class="col" style="padding-right:0px" href="javascript:void(0)" (click)="changeMode('url')"><span class="phone-hidden">Enter a </span>Url</a>
+                                <span class="col ps-1 pe-1">•</span>
                                 <span class="col" style="padding-right:0px" href="javascript:void(0)">Drag and drop</span>
-                                <span class="col" style="padding-right:0px">•</span>
+                                <span class="col ps-1 pe-1" style="padding-right:0px">•</span>
                                 <a class="col" style="padding-right:0px" href="javascript:void(0)" (click)="openFileSelector()">Upload<span class="phone-hidden"> an image</span></a>
                             </div>
                         </div>
@@ -24,17 +24,14 @@
 
                 <ng-container *ngIf="mode === 'url'">
                     <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
-                        <div class="input-group col-md-10 me-md-2" style="width: 100%">
-                            <!-- TOOD: Bootstrap migration: This should be replaced with just the label-->
-                            <div class="input-group-prepend">
-                                <label class="input-group-text form-label" for="load-image">Url</label>
-                            </div>
-                            <input type="text" autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
+                        <div class="input-group col-auto me-md-2" style="width: 83%">
+                            <label class="input-group-text" for="load-image">Url</label>
+                            <input type="text" autofocus autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
                             <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">
                                 Load
                             </button>
                         </div>
-                        <button class="col btn btn-secondary" href="javascript:void(0)" (click)="mode = 'all'" aria-label="Back">
+                        <button class="btn btn-secondary col-auto" href="javascript:void(0)" (click)="mode = 'all'" aria-label="Back">
                             <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;
                             <span class="phone-hidden">Back</span>
                         </button>

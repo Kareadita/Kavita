@@ -105,6 +105,8 @@ public class SeriesService : ISeriesService
                             updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
                 }
 
+                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+
                 return true;
             }
         }

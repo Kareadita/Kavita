@@ -7,7 +7,6 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Downloads;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.SignalR;
@@ -15,7 +14,6 @@ using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -30,10 +28,11 @@ namespace API.Controllers
         private readonly IEventHub _eventHub;
         private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<DownloadController> _logger;
+        private readonly IBookmarkService _bookmarkService;
         private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
-            IDownloadService downloadService, IEventHub eventHub, UserManager<AppUser> userManager, ILogger<DownloadController> logger)
+            IDownloadService downloadService, IEventHub eventHub, UserManager<AppUser> userManager, ILogger<DownloadController> logger, IBookmarkService bookmarkService)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
@@ -42,6 +41,7 @@ namespace API.Controllers
             _eventHub = eventHub;
             _userManager = userManager;
             _logger = logger;
+            _bookmarkService = bookmarkService;
         }
 
         [HttpGet("volume-size")]
@@ -172,13 +172,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
 
-            var bookmarkDirectory =
-                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-
-            var files = (await _unitOfWork.UserRepository.GetAllBookmarksByIds(downloadBookmarkDto.Bookmarks
-                .Select(b => b.Id)
-                .ToList()))
-                .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory, $"{b.ChapterId}_{b.FileName}")));
+            var files = await _bookmarkService.GetBookmarkFilesById(user.Id, downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
             var filename = $"{series.Name} - Bookmarks.zip";
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -187,6 +181,8 @@ namespace API.Controllers
                 $"download_{user.Id}_{series.Id}_bookmarks");
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 1F));
+
+
             return File(fileBytes, DefaultContentType, filename);
         }
 
