@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
 export class DrawerOptions {
   /**
@@ -13,19 +13,24 @@ export class DrawerOptions {
   styleUrls: ['./drawer.component.scss'],
   exportAs: "drawer"
 })
-export class DrawerComponent {
-
+export class DrawerComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() width: number = 400;
   /**
    * Side of the screen the drawer should animate from
    */
-  @Input() position: 'left' | 'right' | 'bottom' = 'left';
+  @Input() position: 'start' | 'end' | 'bottom' | 'top' = 'start';
   @Input() options: Partial<DrawerOptions> = new DrawerOptions();
   @Output() drawerClosed = new EventEmitter();
 
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log('Drawer Open: ', this.isOpen);
+  }
+
+
 
   close() {
+    this.isOpen = false;
     this.drawerClosed.emit();
   }
 }
