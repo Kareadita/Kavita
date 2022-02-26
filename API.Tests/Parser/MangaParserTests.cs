@@ -159,7 +159,6 @@ namespace API.Tests.Parser
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You")]
         [InlineData("Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 1-10", "Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo")]
         [InlineData("The Duke of Death and His Black Maid - Ch. 177 - The Ball (3).cbz", "The Duke of Death and His Black Maid")]
-        [InlineData("A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)", "A Compendium of Ghosts")]
         [InlineData("The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake", "The Duke of Death and His Black Maid")]
         [InlineData("Vol. 04 Ch. 054.5", "")]
         [InlineData("Great_Teacher_Onizuka_v16[TheSpectrum]", "Great Teacher Onizuka")]
@@ -168,6 +167,7 @@ namespace API.Tests.Parser
         [InlineData("Kaiju No. 8 036 (2021) (Digital)", "Kaiju No. 8")]
         [InlineData("Seraph of the End - Vampire Reign 093  (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
         [InlineData("Love Hina - Volume 01 [Scans].pdf", "Love Hina")]
+        [InlineData("It's Witching Time! 001 (Digital) (Anonymous1234)", "It's Witching Time!")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));

@@ -120,7 +120,7 @@ namespace API.Parser
                 RegexTimeout),
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             new Regex(
-                @"(?<Series>.*)( - )(?:v|vo|c)\d",
+                @"(?<Series>.*)( - )(?:v|vo|c|chapters)\d",
                 MatchOptions, RegexTimeout),
             // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
             new Regex(
@@ -153,16 +153,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(?<Series>.*) (\b|_|-)(v|ch\.?|c)\d+",
-                MatchOptions, RegexTimeout),
-            //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
-            // due to duplicate version identifiers in file.
-            new Regex(
-                @"(?<Series>.*)(v|s)\d+(-\d+)?(_|\s)",
-                MatchOptions, RegexTimeout),
-            //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
-            new Regex(
-                @"(?<Series>.*)(v|s)\d+(-\d+)?",
+                @"(?<Series>.*) (\b|_|-)(v|ch\.?|c|s)\d+",
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
@@ -170,7 +161,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
-                @"(?<Series>.*) (?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
+                @"(?<Series>.*) (-)?(?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
                 MatchOptions, RegexTimeout),
             // Noblesse - Episode 429 (74 Pages).7z
             new Regex(
@@ -183,6 +174,23 @@ namespace API.Parser
             // Tonikaku Kawaii (Ch 59-67) (Ongoing)
             new Regex(
                 @"(?<Series>.*)(\s|_)\((c\s|ch\s|chapter\s)",
+                MatchOptions, RegexTimeout),
+            // Fullmetal Alchemist chapters 101-108
+            new Regex(
+                @"(?<Series>.+?)(\s|_|\-)+?chapters(\s|_|\-)+?\d+(\s|_|\-)+?",
+                MatchOptions, RegexTimeout),
+            // It's Witching Time! 001 (Digital) (Anonymous1234)
+            new Regex(
+                @"(?<Series>.+?)(\s|_|\-)+?\d+(\s|_|\-)\(",
+                MatchOptions, RegexTimeout),
+            //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
+            // due to duplicate version identifiers in file.
+            new Regex(
+                @"(?<Series>.*)(v|s)\d+(-\d+)?(_|\s)",
+                MatchOptions, RegexTimeout),
+            //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
+            new Regex(
+                @"(?<Series>.*)(v|s)\d+(-\d+)?",
                 MatchOptions, RegexTimeout),
             // Black Bullet (This is very loose, keep towards bottom)
             new Regex(
