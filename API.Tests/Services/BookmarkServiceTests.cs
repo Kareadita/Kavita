@@ -157,7 +157,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds, Substitute.For<IArchiveService>(), Substitute.For<IEventHub>());
+        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
 
         var result = await bookmarkService.BookmarkPage(user, new BookmarkDto()
@@ -227,7 +227,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds, Substitute.For<IArchiveService>(), Substitute.For<IEventHub>());
+        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
 
         var result = await bookmarkService.RemoveBookmarkPage(user, new BookmarkDto()
@@ -319,7 +319,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds, Substitute.For<IArchiveService>(), Substitute.For<IEventHub>());
+        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
 
         await bookmarkService.DeleteBookmarkFiles(new [] {new AppUserBookmark()
         {
@@ -378,7 +378,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds, Substitute.For<IArchiveService>(), Substitute.For<IEventHub>());
+        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
 
         await bookmarkService.BookmarkPage(user, new BookmarkDto()

@@ -25,16 +25,12 @@ public class BookmarkService : IBookmarkService
     private readonly ILogger<BookmarkService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
-    private readonly IArchiveService _archiveService;
-    private readonly IEventHub _eventHub;
 
-    public BookmarkService(ILogger<BookmarkService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService, IArchiveService archiveService, IEventHub eventHub)
+    public BookmarkService(ILogger<BookmarkService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
-        _archiveService = archiveService;
-        _eventHub = eventHub;
     }
 
     /// <summary>
