@@ -1568,7 +1568,7 @@ public class ReaderServiceTests
     }
 
     [Fact]
-    public async Task MarkChaptersUntilAsRead_ShouldNotReadOnlyVolumesWithChapter0()
+    public async Task MarkChaptersUntilAsRead_ShouldMarkAsRead_OnlyVolumesWithChapter0()
     {
         _context.Series.Add(new Series()
         {
@@ -1604,7 +1604,7 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         // Validate correct chapters have read status
-        Assert.False(await _unitOfWork.AppUserProgressRepository.UserHasProgress(LibraryType.Manga, 1));
+        Assert.True(await _unitOfWork.AppUserProgressRepository.UserHasProgress(LibraryType.Manga, 1));
     }
 
     #endregion
