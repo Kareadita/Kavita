@@ -231,6 +231,45 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       filter: brightness(0.85) !important;
       background-color: initial !important;
     }
+
+      .reading-section {
+        color: #dcdcdc !important;
+        background-image: none !important;
+        background-color: #010409 !important;
+      }
+  
+      *:not(code), *:not(a) {
+          background-color: #010409;
+          box-shadow: none;
+          text-shadow: none;
+          border-radius: unset;
+          color: #dcdcdc !important;
+      }
+  
+      *:not(input), *:not(code), *:not(:link) {
+          color: #dcdcdc !important;
+      }
+  
+      code {
+          color: #e83e8c !important;
+      }
+  
+      .btn-icon {
+          background-color: transparent;
+      }
+  
+      :link, a {
+          color: #8db2e5 !important;
+      }
+  
+      img, img[src] {
+          z-index: 1;
+          filter: brightness(0.85) !important;
+          background-color: initial !important;
+      }
+        
+      :visited, :visited *, :visited *[class] {color: rgb(211, 138, 138) !important}
+      :link:not(cite), :link *:not(cite) {color: #8db2e5 !important}
   `;
 
   get TabID(): typeof TabID {
@@ -275,6 +314,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
       this.navService.hideNavBar();
+      this.themeService.clearThemes();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
@@ -353,22 +393,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // const bodyNode = this.document.querySelector('body');
-    // if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
-    //   bodyNode.style.background = this.originalBodyColor;
-    //   this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
-    //     this.themeService.setTheme(theme.name);
-    //   });
-    // }
-
     this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
       this.themeService.setTheme(theme.name);
     });
 
     this.navService.showNavBar();
 
-    const head = this.document.querySelector('head');
-    this.renderer.removeChild(head, this.darkModeStyleElem);
+    // const head = this.document.querySelector('head');
+    // this.renderer.removeChild(head, this.darkModeStyleElem);
 
     if (this.clickToPaginateVisualOverlayTimeout !== undefined) {
       clearTimeout(this.clickToPaginateVisualOverlayTimeout);
@@ -856,6 +888,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.darkMode ? '#010409': '#fff';
   }
 
+  get drawerTextColor() {
+    return this.darkMode ? 'white': 'black';
+  }
+
   getDarkModeBackgroundColor() {
     return this.darkMode ? '#292929' : '#fff';
   }
@@ -871,13 +907,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //   bodyNode.style.background = this.getDarkModeBackgroundColor();
     // }
     // this.backgroundColor = this.getDarkModeBackgroundColor();
-    //const head = this.document.querySelector('head');
+    const head = this.document.querySelector('head');
     
     // Inject Dark Mode styles into the book content area
     if (darkMode) {
-      this.renderer.appendChild(this.document.querySelector('.book-content'), this.darkModeStyleElem)
+      console.log('Injected dark styles into book-content')
+      this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem)
     } else {
-      this.renderer.removeChild(this.document.querySelector('.book-content'), this.darkModeStyleElem);
+      this.renderer.removeChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem);
     }
   }
 

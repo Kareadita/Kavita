@@ -78,6 +78,13 @@ export class ThemeService implements OnDestroy {
     }));
   }
 
+  /**
+   * Used in book reader to remove all themes so book reader can provide custom theming options
+   */
+  clearThemes() {
+    this.unsetThemes();
+  }
+
   setDefault(themeId: number) {
     return this.httpClient.post(this.baseUrl + 'theme/update-default', {themeId: themeId}).pipe(map(() => {
       // Refresh the cache when a default state is changed

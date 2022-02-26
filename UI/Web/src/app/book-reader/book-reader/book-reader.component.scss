@@ -53,45 +53,7 @@ $primary-color: #0062cc;
     z-index: 1022;
 }
 
-.dark-mode {
 
-    color: #dcdcdc !important;
-    background-image: none !important;
-    background-color: #292929 !important;
-
-    *:not(code), *:not(a) {
-        background-color: #292929;
-        box-shadow: none;
-        text-shadow: none;
-        border-radius: unset;
-        color: #dcdcdc !important;
-    }
-
-    *:not(input), *:not(code), *:not(:link) {
-        color: #dcdcdc !important;
-    }
-
-    code {
-        color: #e83e8c !important;
-    }
-
-    .btn-icon {
-        background-color: transparent;
-    }
-
-    :link, a {
-        color: #8db2e5 !important;
-    }
-
-    img, img[src] {
-        z-index: 1;
-        filter: brightness(0.85) !important;
-        background-color: initial !important;
-    }
-      
-    :visited, :visited *, :visited *[class] {color: rgb(211, 138, 138) !important}
-    :link:not(cite), :link *:not(cite) {color: #8db2e5 !important}
-}
 
 .reading-bar {
     background-color: white;
@@ -99,46 +61,53 @@ $primary-color: #0062cc;
     box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
 }
 
+// TODO: MOve this to css-var
 .dark-mode {
     .reading-bar, .book-title, .drawer-body, .drawer-container {
         background-color: $dark-form-background-no-opacity;
     }
-    button {
-        background-color: $dark-form-background-no-opacity;
-    }
+}
 
-    .btn {
-        &.btn-secondary {
-            border-color: transparent;
+// .dark-mode {
+//     .reading-bar, .book-title, .drawer-body, .drawer-container {
+//         background-color: $dark-form-background-no-opacity;
+//     }
+//     button {
+//         background-color: $dark-form-background-no-opacity;
+//     }
+
+//     .btn {
+//         &.btn-secondary {
+//             border-color: transparent;
     
-            &:hover, &:focus {
-                border-color: #545b62;
-            }
-        }
+//             &:hover, &:focus {
+//                 border-color: #545b62;
+//             }
+//         }
         
-        &.btn-outline-secondary {
-            border-color: transparent;
+//         &.btn-outline-secondary {
+//             border-color: transparent;
     
-            &:hover, &:focus {
-                border-color: #545b62;
-            }
-        }
+//             &:hover, &:focus {
+//                 border-color: #545b62;
+//             }
+//         }
     
-        span {
-            background-color: unset;
-        }
+//         span {
+//             background-color: unset;
+//         }
     
-        i {
-            background-color: unset;
-        }
-    }
-}
+//         i {
+//             background-color: unset;
+//         }
+//     }
+// }
 
-::ng-deep .dark-mode .drawer-container {
-    .header, body, *:not(.progress-bar) {
-        background-color: $dark-form-background-no-opacity !important;
-    }
-}
+// ::ng-deep .dark-mode .drawer-container {
+//     .header, body, *:not(.progress-bar) {
+//         background-color: $dark-form-background-no-opacity !important;
+//     }
+// }
 
 @media(max-width: 875px) {
     .book-title {
