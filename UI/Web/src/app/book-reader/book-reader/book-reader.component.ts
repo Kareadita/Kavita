@@ -26,6 +26,11 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { ThemeService } from 'src/app/theme.service';
 
+enum TabID {
+  Settings = 1,
+  TableOfContents = 2
+}
+
 
 interface PageStyle {
   'font-family': string;
@@ -102,6 +107,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @see Stack
    */
    continuousChaptersStack: Stack<number> = new Stack();
+
+  activeTabId: TabID = TabID.Settings;
   
   user!: User;
 
@@ -221,6 +228,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   `;
 
+  get TabID(): typeof TabID {
+    return TabID;
+  }
+
   get ReadingDirection(): typeof ReadingDirection {
     return ReadingDirection;
   }
@@ -290,9 +301,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
           this.readingDirection = this.user.preferences.bookReaderReadingDirection;
 
-          this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
           
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
+          
+          this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
+          this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+            this.pageStyles['font-size'] = value;
+          });
+
+          this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
+          this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
+          this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+            this.clickToPaginate = value;
+
+            if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
+              clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+              this.clickToPaginateVisualOverlayTimeout2 = undefined;
+            }
+            if (!this.clickToPaginate) { return; }
+        
+            this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
+              this.showClickToPaginateVisualOverlay();
+            }, 200);
+          });
+
   
           this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
             this.updateFontFamily(changes);
@@ -1001,6 +1033,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  handleSliderChange(event: any) {
+    console.log(event);
+  }
+
 
   scrollTo(partSelector: string) {
     if (partSelector.startsWith('#')) {
@@ -1020,19 +1056,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET, this.reader.nativeElement);
   }
 
-  toggleClickToPaginate() {
-    this.clickToPaginate = !this.clickToPaginate;
+  // toggleClickToPaginate() {
+  //   this.clickToPaginate = !this.clickToPaginate;
 
-    if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
-      clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-      this.clickToPaginateVisualOverlayTimeout2 = undefined;
-    }
-    if (!this.clickToPaginate) { return; }
+  //   if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
+  //     clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+  //     this.clickToPaginateVisualOverlayTimeout2 = undefined;
+  //   }
+  //   if (!this.clickToPaginate) { return; }
 
-    this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
-      this.showClickToPaginateVisualOverlay();
-    }, 200);
-  }
+  //   this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
+  //     this.showClickToPaginateVisualOverlay();
+  //   }, 200);
+  // }
 
   showClickToPaginateVisualOverlay() {
     this.clickToPaginateVisualOverlay = true;

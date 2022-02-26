@@ -5,7 +5,7 @@ import { BookReaderRoutingModule } from './book-reader.router.module';
 import { SharedModule } from '../shared/shared.module';
 import { SafeStylePipe } from './safe-style.pipe';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 @NgModule({
@@ -16,7 +16,9 @@ import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstr
     ReactiveFormsModule,
     SharedModule,
     NgbProgressbarModule,
-    NgbTooltipModule
+    NgbTooltipModule,
+    NgbAccordionModule, // Drawer
+    NgbNavModule, // Drawer
   ], exports: [
     BookReaderComponent,
     SafeStylePipe

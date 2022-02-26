@@ -10,44 +10,8 @@
                 </p>
                  
                 <ngb-accordion [closeOthers]="true" activeIds="reading-panel" #acc="ngbAccordion">
-                        <!-- <ngb-panel id="site-panel" title="Site">
-                            <ng-template ngbPanelHeader>
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('site-panel')" aria-controls="collapseOne">
-                                        Site
-                                      </button>
-                                </h2>
-                              </ng-template>
-                            <ng-template ngbPanelContent>
-                                <form [formGroup]="settingsForm" *ngIf="user !== undefined">
-                                    <div class="mb-3">
-                                        <label id="site-dark-mode-label" aria-describedby="site-heading" class="form-label">Dark Mode</label>
-                                        <div class="mb-3">
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input type="radio" id="site-dark-mode" formControlName="siteDarkMode" class=" form-check-input" [value]="true" aria-labelledby="site-dark-mode-label">
-                                                <label class="form-check-label" for="site-dark-mode">True</label>
-                                            </div>
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" class="form-check-input" [value]="false" aria-labelledby="site-dark-mode-label">
-                                                <label class="form-check-label" for="site-not-dark-mode">False</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="">
-                                        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                                            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
-                                            <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="site-dark-mode-label" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </ng-template>
-                        </ngb-panel> -->
                         <ngb-panel id="reading-panel" title="Reading">
                             <ng-template ngbPanelHeader>
-                                <!-- <div class="d-flex align-items-center justify-content-between">
-                                  <button ngbPanelToggle class="btn container-fluid text-start ps-0 accordion-header">Reading</button>
-                                  <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('reading-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
-                                </div> -->
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
                                         Reading

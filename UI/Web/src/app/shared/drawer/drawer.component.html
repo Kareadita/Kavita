@@ -4,6 +4,7 @@
       <ng-content select="[header]"></ng-content>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" (click)="close()"></button>
     </h5>
+    <ng-content select="[subheader]"></ng-content>
   </div>
   <div class="offcanvas-body">
     <ng-content select="[body]"></ng-content>
