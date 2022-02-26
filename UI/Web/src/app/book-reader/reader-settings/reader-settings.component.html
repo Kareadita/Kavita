@@ -10,44 +10,44 @@
             </ng-template>
             <ng-template ngbPanelContent>
                 <div class="control-container">
-                        <div class="controls">
-                                <div class="mb-3">
-                                    <label for="library-type" class="form-label">Font Family</label>
-                                    <select class="form-control" id="library-type" formControlName="bookReaderFontFamily">
-                                        <option [value]="opt" *ngFor="let opt of fontFamilies; let i = index">{{opt | titlecase}}</option>
-                                    </select>
-                                </div>
+                    <div class="controls">
+                        <div class="mb-3">
+                            <label for="library-type" class="form-label">Font Family</label>
+                            <select class="form-control" id="library-type" formControlName="bookReaderFontFamily">
+                                <option [value]="opt" *ngFor="let opt of fontFamilies; let i = index">{{opt | titlecase}}</option>
+                            </select>
                         </div>
-                        <div class="row g-0 controls">
-                            <label for="fontsize" class="form-label col-auto">Font Size</label>
-                            <span class="col-auto float-end" style="display: inline-flex;">
-                                <i class="fa-solid fa-font"  style="font-size: 12px;"></i>
-                                <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="settingsForm.get('bookReaderFontSize')?.value + '%'">
-                                <i class="fa-solid fa-font" style="font-size: 24px;"></i>
-                            </span>
-                        </div>
+                    </div>
+                    <div class="row g-0 controls">
+                        <label for="fontsize" class="form-label col-auto">Font Size</label>
+                        <span class="col-auto float-end" style="display: inline-flex;">
+                            <i class="fa-solid fa-font"  style="font-size: 12px;"></i>
+                            <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="settingsForm.get('bookReaderFontSize')?.value + '%'">
+                            <i class="fa-solid fa-font" style="font-size: 24px;"></i>
+                        </span>
+                    </div>
 
-                        <div class="row g-0 controls">
-                            <label for="linespacing" class="form-label col-auto">Line Spacing</label>
-                            <span class="col-auto float-end" style="display: inline-flex;">
-                                1x
-                                <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
-                                2.5x
-                            </span>
-                        </div>
+                    <div class="row g-0 controls">
+                        <label for="linespacing" class="form-label col-auto">Line Spacing</label>
+                        <span class="col-auto float-end" style="display: inline-flex;">
+                            1x
+                            <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
+                            2.5x
+                        </span>
+                    </div>
 
-                        <div class="row g-0 controls">
-                            <label for="margin" class="form-label col-auto">Margin</label>
-                            <span class="col-auto float-end" style="display: inline-flex;">
-                                <i class="fa-solid fa-outdent"></i>
-                                <input type="range" class="form-range ms-2 me-2" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" [ngbTooltip]="settingsForm.get('bookReaderMargin')?.value + '%'">
-                                <i class="fa-solid fa-indent"></i>
-                            </span>
-                        </div>
+                    <div class="row g-0 controls">
+                        <label for="margin" class="form-label col-auto">Margin</label>
+                        <span class="col-auto float-end" style="display: inline-flex;">
+                            <i class="fa-solid fa-outdent"></i>
+                            <input type="range" class="form-range ms-2 me-2" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" [ngbTooltip]="settingsForm.get('bookReaderMargin')?.value + '%'">
+                            <i class="fa-solid fa-indent"></i>
+                        </span>
+                    </div>
 
-                        <div class="row g-0 justify-content-between">
-                            <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
-                        </div>
+                    <div class="row g-0 justify-content-between">
+                        <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
+                    </div>
                 </div>
             </ng-template>
 
@@ -67,9 +67,6 @@
                     <div class="form-check form-switch">
                         <input type="checkbox" id="tap-pagination" formControlName="bookReaderDarkMode" class="form-check-input" [value]="true" aria-labelledby="darkmode">
                     </div>
-<!-- 
-                    <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
-                    <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button> -->
                 </div>
             </ng-template>
         </ngb-panel>

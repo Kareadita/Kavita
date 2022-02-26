@@ -37,6 +37,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
    * Outputs when a theme/dark mode is updated
    */
   @Output() colorThemeUpdate: EventEmitter<boolean> = new EventEmitter();
+  /**
+   * Outputs when fullscreen is toggled
+   */
+  @Output() fullscreen: EventEmitter<void> = new EventEmitter();
   
   user!: User;
   /**
@@ -90,10 +94,25 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
           }
 
+
           this.readingDirection = this.user.preferences.bookReaderReadingDirection;
+          this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
+          this.settingsForm.get('bookReaderReadingDirection')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+            // TODO: Figure out what to do
+            this.readingDirection = value;
+          });
 
           
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
+          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(familyName => {
+            if (familyName === 'default') {
+              this.pageStyles['font-family'] = 'inherit';
+            } else {
+              this.pageStyles['font-family'] = "'" + familyName + "'";
+            }
+
+            this.styleUpdate.emit(this.pageStyles);
+          });
           
           this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
           this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
@@ -126,12 +145,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.colorThemeUpdate.emit(this.darkMode);
           });
 
-
-
-  
-          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
-            this.updateFontFamily(changes);
-          });
         }
 
         this.resetSettings();
@@ -143,56 +156,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  updateFontSize(amount: number) {
-    // Migrated
-    let val = parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10);
-    
-    if (val + amount > 300 || val + amount < 50) {
-      return;
-    }
 
-    this.pageStyles['font-size'] = val + amount + '%';
-    this.styleUpdate.emit(this.pageStyles);
-  }
-
-  updateFontFamily(familyName: string) {
-    if (familyName === null) familyName = '';
-    let cleanedName = familyName.replace(' ', '_').replace('!important', '').trim();
-    if (cleanedName === 'default') {
-      this.pageStyles['font-family'] = 'inherit';
-    } else {
-      this.pageStyles['font-family'] = "'" + cleanedName + "'";
-    }
-
-    this.styleUpdate.emit(this.pageStyles);
-  }
-
-  // updateMargin(amount: number) {
-  //   let cleanedValue = this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim();
-  //   let val = parseInt(cleanedValue, 10);
-
-  //   if (val + amount > 30 || val + amount < 0) {
-  //     return;
-  //   }
-
-  //   this.pageStyles['margin-left'] = (val + amount) + '%';
-  //   this.pageStyles['margin-right'] = (val + amount) + '%';
-
-  //   this.styleUpdate.emit(this.pageStyles);
-  // }
-
-  // updateLineSpacing(amount: number) {
-  //   const cleanedValue = parseInt(this.pageStyles['line-height'].replace('%', '').replace('!important', '').trim(), 10);
-
-  //   if (cleanedValue + amount > 250 || cleanedValue + amount < 100) {
-  //     return;
-  //   }
-
-  //   this.pageStyles['line-height'] = (cleanedValue + amount) + '%';
-
-  //   this.styleUpdate.emit(this.pageStyles);
-  // }
-
+  // TODO: Refactor this so that we first reset the form to user's settings then rebuild pageStyles
   resetSettings() {
     const windowWidth = window.innerWidth
       || this.document.documentElement.clientWidth
@@ -240,6 +205,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
   toggleFullscreen() {
     // TODO: Emit event so main reader can handle
+    this.fullscreen.emit();
     // this.isFullscreen = this.readerService.checkFullscreenMode();
     
     // if (this.isFullscreen) {
