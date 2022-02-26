@@ -892,6 +892,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (!this.shouldRenderAsFitSplit()) {
         this.setCanvasSize();
         this.ctx.drawImage(this.canvasImage, 0, 0);
+
+        // Reset scroll on non HEIGHT Fits
+        if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+          window.scrollTo(0, 0);
+        }
+
         this.isLoading = false;
         return;
       }
