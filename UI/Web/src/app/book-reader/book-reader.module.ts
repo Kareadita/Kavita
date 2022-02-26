@@ -6,10 +6,11 @@ import { SharedModule } from '../shared/shared.module';
 import { SafeStylePipe } from './safe-style.pipe';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { TableOfContentsComponent } from './table-of-contents/table-of-contents.component';
 
 
 @NgModule({
-  declarations: [BookReaderComponent, SafeStylePipe],
+  declarations: [BookReaderComponent, SafeStylePipe, TableOfContentsComponent],
   imports: [
     CommonModule,
     BookReaderRoutingModule,

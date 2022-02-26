@@ -628,9 +628,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  loadChapterPage(pageNum: number, part: string) {
-    this.setPageNum(pageNum);
-    this.loadPage('id("' + part + '")');
+  loadChapterPage(event: {pageNum: number, part: string}) {
+    this.setPageNum(event.pageNum);
+    this.loadPage('id("' + event.part + '")');
   }
 
   closeReader() {
