@@ -1,4 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Inject, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
+import { ScrollService } from 'src/app/scroll.service';
 import { BookService } from '../book.service';
 import { BookChapterItem } from '../_models/book-chapter-item';
 
@@ -7,23 +10,30 @@ import { BookChapterItem } from '../_models/book-chapter-item';
   templateUrl: './table-of-contents.component.html',
   styleUrls: ['./table-of-contents.component.scss']
 })
-export class TableOfContentsComponent implements OnInit {
+export class TableOfContentsComponent implements OnInit, OnDestroy {
 
   @Input() chapterId!: number;
   @Input() pageNum!: number;
   @Input() currentPageAnchor!: string;
+  @Input() chapters:Array<BookChapterItem> = [];
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
+  
 
-  chapters: Array<BookChapterItem> = [];
+  private onDestroy: Subject<void> = new Subject();
 
-  constructor(private bookService: BookService) {}
+
+  pageAnchors: {[n: string]: number } = {};
+
+  constructor() {}
 
   ngOnInit(): void {
-    this.bookService.getBookChapters(this.chapterId).subscribe(chapters => {
-      this.chapters = chapters;
-    });
+  }
+
+  ngOnDestroy(): void {
+      this.onDestroy.next();
+      this.onDestroy.complete();
   }
 
   cleanIdSelector(id: string) {
@@ -36,8 +46,6 @@ export class TableOfContentsComponent implements OnInit {
 
   loadChapterPage(pageNum: number, part: string) {
     this.loadChapter.emit({pageNum, part});
-    // this.setPageNum(pageNum);
-    // this.loadPage('id("' + part + '")');
   }
 
 }

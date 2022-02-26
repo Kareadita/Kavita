@@ -25,6 +25,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { ThemeService } from 'src/app/theme.service';
+import { PageStyle } from '../reader-settings/reader-settings.component';
 
 enum TabID {
   Settings = 1,
@@ -32,13 +33,13 @@ enum TabID {
 }
 
 
-interface PageStyle {
-  'font-family': string;
-  'font-size': string; 
-  'line-height': string;
-  'margin-left': string;
-  'margin-right': string;
-}
+// interface PageStyle {
+//   'font-family': string;
+//   'font-size': string; 
+//   'line-height': string;
+//   'margin-left': string;
+//   'margin-right': string;
+// }
 
 interface HistoryPoint {
   page: number;
@@ -97,6 +98,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     */
   readingListMode: boolean = false;
 
+  /**
+   * The actual pages from the epub, used for showing on table of contents
+   */
   chapters: Array<BookChapterItem> = [];
 
   pageNum = 0;
@@ -115,7 +119,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   drawerOpen = false;
   isLoading = true; 
   bookTitle: string = '';
-  settingsForm: FormGroup = new FormGroup({});
+  //settingsForm: FormGroup = new FormGroup({});
   clickToPaginate = false;
 
   clickToPaginateVisualOverlay = false;
@@ -164,13 +168,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    nextPageDisabled = false;
 
   /**
-   * Internal property used to capture all the different css properties to render on all elements
+   * Internal property used to capture all the different css properties to render on all elements. This is a cached version that is updated from reader-settings component
    */
   pageStyles!: PageStyle;
   /**
    * List of all font families user can select from
    */
-  fontFamilies: Array<string> = [];
+  //fontFamilies: Array<string> = [];
 
   
   darkMode = false;
@@ -277,65 +281,66 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
-      this.fontFamilies = this.bookService.getFontFamilies();
+      //this.fontFamilies = this.bookService.getFontFamilies();
 
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.user = user;
           
-          if (this.user.preferences.bookReaderFontFamily === undefined) {
-            this.user.preferences.bookReaderFontFamily = 'default';
-          }
-          if (this.user.preferences.bookReaderFontSize === undefined) {
-            this.user.preferences.bookReaderFontSize = 100;
-          }
-          if (this.user.preferences.bookReaderLineSpacing === undefined) {
-            this.user.preferences.bookReaderLineSpacing = 100;
-          }
-          if (this.user.preferences.bookReaderMargin === undefined) {
-            this.user.preferences.bookReaderMargin = 0;
-          }
-          if (this.user.preferences.bookReaderReadingDirection === undefined) {
-            this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
-          }
+          // if (this.user.preferences.bookReaderFontFamily === undefined) {
+          //   this.user.preferences.bookReaderFontFamily = 'default';
+          // }
+          // if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
+          //   this.user.preferences.bookReaderFontSize = 100;
+          // }
+          // if (this.user.preferences.bookReaderLineSpacing === undefined) {
+          //   this.user.preferences.bookReaderLineSpacing = 100;
+          // }
+          // if (this.user.preferences.bookReaderMargin === undefined) {
+          //   this.user.preferences.bookReaderMargin = 0;
+          // }
+          // if (this.user.preferences.bookReaderReadingDirection === undefined) {
+          //   this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
+          // }
 
-          this.readingDirection = this.user.preferences.bookReaderReadingDirection;
+          // this.readingDirection = this.user.preferences.bookReaderReadingDirection;
 
           
-          this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
+          // this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
           
-          this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
-          this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            this.pageStyles['font-size'] = value;
-          });
+          // this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
+          // this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          //   this.pageStyles['font-size'] = value + '%';
+          //   this.updateReaderStyles();
+          // });
 
-          this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
-          this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
-          this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            this.clickToPaginate = value;
+          // this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
+          // this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
+          // this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          //   this.clickToPaginate = value;
 
-            if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
-              clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-              this.clickToPaginateVisualOverlayTimeout2 = undefined;
-            }
-            if (!this.clickToPaginate) { return; }
+          //   if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
+          //     clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+          //     this.clickToPaginateVisualOverlayTimeout2 = undefined;
+          //   }
+          //   if (!this.clickToPaginate) { return; }
         
-            this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
-              this.showClickToPaginateVisualOverlay();
-            }, 200);
-          });
+          //   this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
+          //     this.showClickToPaginateVisualOverlay();
+          //   }, 200);
+          // });
 
   
-          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
-            this.updateFontFamily(changes);
-          });
+          // this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
+          //   this.updateFontFamily(changes);
+          // });
         }
 
         const bodyNode = this.document.querySelector('body');
         if (bodyNode !== undefined && bodyNode !== null) {
           this.originalBodyColor = bodyNode.style.background;
         }
-        this.resetSettings();
+        //this.resetSettings();
       });
   }
 
@@ -629,6 +634,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadChapterPage(event: {pageNum: number, part: string}) {
+    console.log('loading page', event.pageNum);
     this.setPageNum(event.pageNum);
     this.loadPage('id("' + event.part + '")');
   }
@@ -641,30 +647,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  resetSettings() {
-    const windowWidth = window.innerWidth
-      || this.document.documentElement.clientWidth
-      || this.document.body.clientWidth;
+  // resetSettings() {
+  //   const windowWidth = window.innerWidth
+  //     || this.document.documentElement.clientWidth
+  //     || this.document.body.clientWidth;
 
-    let margin = '15%';
-    if (windowWidth <= 700) {
-      margin = '5%';
-    }
-    if (this.user) {
-      if (windowWidth > 700) {
-        margin = this.user.preferences.bookReaderMargin + '%';
-      }
-      this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
+  //   let margin = '15%';
+  //   if (windowWidth <= 700) {
+  //     margin = '5%';
+  //   }
+  //   if (this.user) {
+  //     if (windowWidth > 700) {
+  //       margin = this.user.preferences.bookReaderMargin + '%';
+  //     }
+  //     this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
       
-      this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
-    } else {
-      this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};
-      this.toggleDarkMode(false);
-    }
+  //     this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
+  //   } else {
+  //     this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};
+  //     this.toggleDarkMode(false);
+  //   }
     
-    this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
-    this.updateReaderStyles();
-  }
+  //   this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
+  //   this.updateReaderStyles();
+  // }
 
   /**
    * Adds a click handler for any anchors that have 'kavita-page'. If 'kavita-page' present, changes page to kavita-page and optionally passes a part value 
@@ -731,34 +737,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-  cleanIdSelector(id: string) {
-    const tokens = id.split('/');
-    if (tokens.length > 0) {
-      return tokens[0];
-    }
-    return id;
-  }
 
-  getPageMarkers(ids: Array<string>) {
-    try {
-      return this.document.querySelectorAll(ids.map(id => '#' + this.cleanIdSelector(id)).join(', '));
-    } catch (Exception) {
-      // Fallback to anchors instead. Some books have ids that are not valid for querySelectors, so anchors should be used instead
-      return this.document.querySelectorAll(ids.map(id => '[href="#' + id + '"]').join(', '));
-    }
-  }
 
-  setupPageAnchors() {
-    this.pageAnchors = {};
-    this.currentPageAnchor = '';
-    const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part).filter(item => item.length > 0);
-    if (ids.length > 0) {
-      const elems = this.getPageMarkers(ids);
-      elems.forEach(elem => {
-        this.pageAnchors[elem.id] = elem.getBoundingClientRect().top;
-      });
-    }
-  }
 
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
@@ -769,7 +749,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
       setTimeout(() => {
         this.addLinkClickHandlers();
-        this.updateReaderStyles();
+        this.updateReaderStyles(this.pageStyles);
         this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
@@ -796,7 +776,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
     // Find all the part ids and their top offset
-    this.setupPageAnchors();
+    //this.setupPageAnchors();
     
 
     if (part !== undefined && part !== '') {
@@ -889,59 +869,60 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadPage();
   }
 
-  updateFontSize(amount: number) {
-    let val = parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10);
+  // updateFontSize(amount: number) {
+  //   let val = parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10);
     
-    if (val + amount > 300 || val + amount < 50) {
-      return;
-    }
+  //   if (val + amount > 300 || val + amount < 50) {
+  //     return;
+  //   }
 
-    this.pageStyles['font-size'] = val + amount + '%';
-    this.updateReaderStyles();
-  }
+  //   this.pageStyles['font-size'] = val + amount + '%';
+  //   this.updateReaderStyles();
+  // }
 
-  updateFontFamily(familyName: string) {
-    if (familyName === null) familyName = '';
-    let cleanedName = familyName.replace(' ', '_').replace('!important', '').trim();
-    if (cleanedName === 'default') {
-      this.pageStyles['font-family'] = 'inherit';
-    } else {
-      this.pageStyles['font-family'] = "'" + cleanedName + "'";
-    }
+  // updateFontFamily(familyName: string) {
+  //   if (familyName === null) familyName = '';
+  //   let cleanedName = familyName.replace(' ', '_').replace('!important', '').trim();
+  //   if (cleanedName === 'default') {
+  //     this.pageStyles['font-family'] = 'inherit';
+  //   } else {
+  //     this.pageStyles['font-family'] = "'" + cleanedName + "'";
+  //   }
 
-    this.updateReaderStyles();
-  }
+  //   this.updateReaderStyles();
+  // }
 
-  updateMargin(amount: number) {
-    let cleanedValue = this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim();
-    let val = parseInt(cleanedValue, 10);
+  // updateMargin(amount: number) {
+  //   let cleanedValue = this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim();
+  //   let val = parseInt(cleanedValue, 10);
 
-    if (val + amount > 30 || val + amount < 0) {
-      return;
-    }
+  //   if (val + amount > 30 || val + amount < 0) {
+  //     return;
+  //   }
 
-    this.pageStyles['margin-left'] = (val + amount) + '%';
-    this.pageStyles['margin-right'] = (val + amount) + '%';
+  //   this.pageStyles['margin-left'] = (val + amount) + '%';
+  //   this.pageStyles['margin-right'] = (val + amount) + '%';
 
-    this.updateReaderStyles();
-  }
+  //   this.updateReaderStyles();
+  // }
 
-  updateLineSpacing(amount: number) {
-    const cleanedValue = parseInt(this.pageStyles['line-height'].replace('%', '').replace('!important', '').trim(), 10);
+  // updateLineSpacing(amount: number) {
+  //   const cleanedValue = parseInt(this.pageStyles['line-height'].replace('%', '').replace('!important', '').trim(), 10);
 
-    if (cleanedValue + amount > 250 || cleanedValue + amount < 100) {
-      return;
-    }
+  //   if (cleanedValue + amount > 250 || cleanedValue + amount < 100) {
+  //     return;
+  //   }
 
-    this.pageStyles['line-height'] = (cleanedValue + amount) + '%';
+  //   this.pageStyles['line-height'] = (cleanedValue + amount) + '%';
 
-    this.updateReaderStyles();
-  }
+  //   this.updateReaderStyles();
+  // }
 
   /**
    * Applies styles onto the html of the book page
    */
-  updateReaderStyles() {
+  updateReaderStyles(pageStyles: PageStyle) {
+    this.pageStyles = pageStyles;
     if (this.readingHtml === undefined || !this.readingHtml.nativeElement)  return;
 
     // Line Height must be placed on each element in the page
@@ -976,29 +957,29 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  toggleDarkMode(force?: boolean) {
-    if (force !== undefined) {
-      this.darkMode = force;
-    } else {
-      this.darkMode = !this.darkMode;
-    }
+  // toggleDarkMode(force?: boolean) {
+  //   if (force !== undefined) {
+  //     this.darkMode = force;
+  //   } else {
+  //     this.darkMode = !this.darkMode;
+  //   }
 
-    this.setOverrideStyles();
-  }
+  //   this.setOverrideStyles();
+  // }
 
-  toggleReadingDirection() {
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      this.readingDirection = ReadingDirection.RightToLeft;
-    } else {
-      this.readingDirection = ReadingDirection.LeftToRight;
-    }
-  }
+  // toggleReadingDirection() {
+  //   if (this.readingDirection === ReadingDirection.LeftToRight) {
+  //     this.readingDirection = ReadingDirection.RightToLeft;
+  //   } else {
+  //     this.readingDirection = ReadingDirection.LeftToRight;
+  //   }
+  // }
 
   getDarkModeBackgroundColor() {
     return this.darkMode ? '#292929' : '#fff';
   }
 
-  setOverrideStyles() {
+  setOverrideStyles(darkMode: boolean) {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
       if (this.themeService.isDarkTheme()) {
@@ -1009,7 +990,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.backgroundColor = this.getDarkModeBackgroundColor();
     const head = this.document.querySelector('head');
-    if (this.darkMode) {
+    if (darkMode) {
       this.renderer.appendChild(head, this.darkModeStyleElem)
     } else {
       this.renderer.removeChild(head, this.darkModeStyleElem);
@@ -1138,5 +1119,48 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
+  }
+
+  // Table of Contents
+  cleanIdSelector(id: string) {
+    const tokens = id.split('/');
+    if (tokens.length > 0) {
+      return tokens[0];
+    }
+    return id;
+  }
+
+  getPageMarkers(ids: Array<string>) {
+    try {
+      return this.document.querySelectorAll(ids.map(id => '#' + this.cleanIdSelector(id)).join(', '));
+    } catch (Exception) {
+      // Fallback to anchors instead. Some books have ids that are not valid for querySelectors, so anchors should be used instead
+      return this.document.querySelectorAll(ids.map(id => '[href="#' + id + '"]').join(', '));
+    }
+  }
+
+  setupPageAnchors() {
+    this.pageAnchors = {};
+    this.currentPageAnchor = '';
+    const ids = this.chapters.map(item => item.children).flat().filter(item => item.page === this.pageNum).map(item => item.part).filter(item => item.length > 0);
+    if (ids.length > 0) {
+      const elems = this.getPageMarkers(ids);
+      elems.forEach(elem => {
+        this.pageAnchors[elem.id] = elem.getBoundingClientRect().top;
+      });
+    }
+  }
+
+  // Settings Handlers
+  showPaginationOverlay(clickToPaginate: boolean) {
+    if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
+      clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+      this.clickToPaginateVisualOverlayTimeout2 = undefined;
+    }
+    if (!clickToPaginate) { return; }
+
+    this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
+      this.showClickToPaginateVisualOverlay();
+    }, 200);
   }
 }

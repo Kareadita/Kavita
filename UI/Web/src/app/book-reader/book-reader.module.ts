@@ -7,10 +7,11 @@ import { SafeStylePipe } from './safe-style.pipe';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableOfContentsComponent } from './table-of-contents/table-of-contents.component';
+import { ReaderSettingsComponent } from './reader-settings/reader-settings.component';
 
 
 @NgModule({
-  declarations: [BookReaderComponent, SafeStylePipe, TableOfContentsComponent],
+  declarations: [BookReaderComponent, SafeStylePipe, TableOfContentsComponent, ReaderSettingsComponent],
   imports: [
     CommonModule,
     BookReaderRoutingModule,

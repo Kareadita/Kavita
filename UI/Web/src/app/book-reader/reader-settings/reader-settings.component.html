@@ -1,0 +1,105 @@
+<form [formGroup]="settingsForm">
+    <ngb-accordion [closeOthers]="false" #acc="ngbAccordion" activeIds="general-panel">
+        <ngb-panel id="general-panel" title="General Settings">
+            <ng-template ngbPanelHeader>
+                <h2 class="accordion-header">
+                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('general-panel')" aria-controls="collapseOne">
+                        General Settings
+                    </button>
+                </h2>
+            </ng-template>
+            <ng-template ngbPanelContent>
+                <div class="control-container">
+                        <div class="controls">
+                                <div class="mb-3">
+                                    <label for="library-type" class="form-label">Font Family</label>
+                                    <select class="form-control" id="library-type" formControlName="bookReaderFontFamily">
+                                        <option [value]="opt" *ngFor="let opt of fontFamilies; let i = index">{{opt | titlecase}}</option>
+                                    </select>
+                                </div>
+                        </div>
+                        <div class="row g-0 controls">
+                            <label for="fontsize" class="form-label col-auto">Font Size</label>
+                            <span class="col-auto float-end" style="display: inline-flex;">
+                                <i class="fa-solid fa-font"  style="font-size: 12px;"></i>
+                                <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="pageStyles['font-size']">
+                                <i class="fa-solid fa-font" style="font-size: 24px;"></i>
+                            </span>
+                        </div>
+                        <div class="controls">
+                            <label id="linespacing" class="form-label">Line Spacing</label>
+                            <button (click)="updateLineSpacing(-10)" class="btn btn-icon" title="Decrease" aria-labelledby="linespacing"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                            <span>{{pageStyles['line-height']}}</span>
+                            <button (click)="updateLineSpacing(10)"  class="btn btn-icon" title="Increase" aria-labelledby="linespacing"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                        </div>
+                        <div class="controls">
+                            <label id="margin" class="form-label">Margin</label>
+                            <button (click)="updateMargin(-5)" class="btn btn-icon" title="Remove Margin" aria-labelledby="margin"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                            <span>{{pageStyles['margin-right']}}</span>
+                            <button (click)="updateMargin(5)"  class="btn btn-icon" title="Add Margin" aria-labelledby="margin"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                        </div>
+                        
+                        <div class="controls">
+                            <label id="darkmode" class="form-label">Dark Mode</label>
+                            <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
+                            <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button>
+                        </div>
+                        
+                        <div class="row g-0 justify-content-between">
+                            <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
+                        </div>
+                </div>
+            </ng-template>
+
+        </ngb-panel>
+
+        <ngb-panel id="color-panel" title="Color Theme">
+            <ng-template ngbPanelHeader>
+                <h2 class="accordion-header">
+                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('color-panel')" aria-controls="collapseOne">
+                        Color Theme
+                    </button>
+                </h2>
+            </ng-template>
+            <ng-template ngbPanelContent>
+                Not Implemented
+            </ng-template>
+        </ngb-panel>
+
+        <ngb-panel id="reader-panel" title="Reader Settings">
+            <ng-template ngbPanelHeader>
+                <h2 class="accordion-header">
+                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reader-panel')" aria-controls="collapseOne">
+                        Reader Settings
+                    </button>
+                </h2>
+            </ng-template>
+            <ng-template ngbPanelContent>
+                <div class="controls">
+                    <label id="readingdirection" class="form-label">Reading Direction</label>
+                    <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}"><i class="fa {{readingDirection === 0 ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</span></button>
+                </div>
+                <div class="controls">
+                    <label for="tap-pagination" class="form-label">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
+                    <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
+                    <span class="visually-hidden" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
+                    <div class="form-check form-switch">
+                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="tap-pagination-help">
+                    </div>
+                </div>
+                <div class="controls">
+                    <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
+                    <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
+                    <span class="visually-hidden" id="fullscreen-help">
+                        <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
+                    </span>
+                    <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
+                        <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
+                        <span *ngIf="darkMode">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
+                    </button>
+                </div>
+            </ng-template>
+        </ngb-panel>
+
+    </ngb-accordion>
+</form>
