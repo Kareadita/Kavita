@@ -13,7 +13,7 @@ export class DrawerOptions {
   styleUrls: ['./drawer.component.scss'],
   exportAs: "drawer"
 })
-export class DrawerComponent implements OnChanges {
+export class DrawerComponent {
   @Input() isOpen = false;
   @Input() width: number = 400;
   /**
@@ -22,11 +22,6 @@ export class DrawerComponent implements OnChanges {
   @Input() position: 'start' | 'end' | 'bottom' | 'top' = 'start';
   @Input() options: Partial<DrawerOptions> = new DrawerOptions();
   @Output() drawerClosed = new EventEmitter();
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log('Drawer Open: ', this.isOpen);
-  }
-
 
 
   close() {

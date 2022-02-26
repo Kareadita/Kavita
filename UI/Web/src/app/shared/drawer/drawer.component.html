@@ -1,20 +1,3 @@
-<!-- <div
-  class="drawer-container"
-  [ngStyle]="{'top': options.topOffset + 'px'}"
-  [class.is-open]="isOpen"
-  [class.position-right]="position === 'right'"
-  [class.position-left]="position === 'left'"
-  [class.position-bottom]="position === 'bottom'"
->
-  <div class="header">
-    <ng-content select="[header]"></ng-content>
-  </div>
-  <div class="body">
-    <ng-content select="[body]"></ng-content>
-  </div>
-</div> -->
-
-
 <div class="offcanvas offcanvas-{{position}}" [class.show]="isOpen" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel" [ngStyle]="{'top': options.topOffset + 'px', 'visibility': isOpen ? 'visible' : 'hidden'}" role="dialog">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasLabel">
