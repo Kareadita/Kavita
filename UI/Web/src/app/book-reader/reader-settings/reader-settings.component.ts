@@ -80,7 +80,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
           if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
             this.user.preferences.bookReaderFontSize = 100;
           }
-          if (this.user.preferences.bookReaderLineSpacing === undefined) {
+          if (this.user.preferences.bookReaderLineSpacing === undefined || this.user.preferences.bookReaderLineSpacing < 100) {
             this.user.preferences.bookReaderLineSpacing = 100;
           }
           if (this.user.preferences.bookReaderMargin === undefined) {
@@ -106,6 +106,28 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.clickToPaginateChanged.emit(value);
           });
 
+
+          this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
+          this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+            this.pageStyles['line-height'] = value + '%';
+            this.styleUpdate.emit(this.pageStyles);
+          });
+
+          this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
+          this.settingsForm.get('bookReaderMargin')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+            this.pageStyles['margin-left'] = value + '%';
+            this.pageStyles['margin-right'] = value + '%';
+            this.styleUpdate.emit(this.pageStyles);
+          });
+
+          this.settingsForm.addControl('bookReaderDarkMode', new FormControl(this.user.preferences.bookReaderDarkMode, []));
+          this.settingsForm.get('bookReaderDarkMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+            this.darkMode = value;
+            this.colorThemeUpdate.emit(this.darkMode);
+          });
+
+
+
   
           this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
             this.updateFontFamily(changes);
@@ -122,6 +144,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   }
 
   updateFontSize(amount: number) {
+    // Migrated
     let val = parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10);
     
     if (val + amount > 300 || val + amount < 50) {
@@ -144,31 +167,31 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.styleUpdate.emit(this.pageStyles);
   }
 
-  updateMargin(amount: number) {
-    let cleanedValue = this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim();
-    let val = parseInt(cleanedValue, 10);
+  // updateMargin(amount: number) {
+  //   let cleanedValue = this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim();
+  //   let val = parseInt(cleanedValue, 10);
 
-    if (val + amount > 30 || val + amount < 0) {
-      return;
-    }
+  //   if (val + amount > 30 || val + amount < 0) {
+  //     return;
+  //   }
 
-    this.pageStyles['margin-left'] = (val + amount) + '%';
-    this.pageStyles['margin-right'] = (val + amount) + '%';
+  //   this.pageStyles['margin-left'] = (val + amount) + '%';
+  //   this.pageStyles['margin-right'] = (val + amount) + '%';
 
-    this.styleUpdate.emit(this.pageStyles);
-  }
+  //   this.styleUpdate.emit(this.pageStyles);
+  // }
 
-  updateLineSpacing(amount: number) {
-    const cleanedValue = parseInt(this.pageStyles['line-height'].replace('%', '').replace('!important', '').trim(), 10);
+  // updateLineSpacing(amount: number) {
+  //   const cleanedValue = parseInt(this.pageStyles['line-height'].replace('%', '').replace('!important', '').trim(), 10);
 
-    if (cleanedValue + amount > 250 || cleanedValue + amount < 100) {
-      return;
-    }
+  //   if (cleanedValue + amount > 250 || cleanedValue + amount < 100) {
+  //     return;
+  //   }
 
-    this.pageStyles['line-height'] = (cleanedValue + amount) + '%';
+  //   this.pageStyles['line-height'] = (cleanedValue + amount) + '%';
 
-    this.styleUpdate.emit(this.pageStyles);
-  }
+  //   this.styleUpdate.emit(this.pageStyles);
+  // }
 
   resetSettings() {
     const windowWidth = window.innerWidth
@@ -183,7 +206,9 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       if (windowWidth > 700) {
         margin = this.user.preferences.bookReaderMargin + '%';
       }
-      this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
+      this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 
+      'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
+      console.log('line spacing: ', this.user.preferences.bookReaderLineSpacing);
       
       this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
     } else {

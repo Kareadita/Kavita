@@ -498,7 +498,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         chapter: this.seriesService.getChapter(this.chapterId),
         progress: this.readerService.getProgress(this.chapterId),
         chapters: this.bookService.getBookChapters(this.chapterId),
-      }).pipe(take(1)).subscribe(results => {
+      }).subscribe(results => {
         this.chapter = results.chapter;
         this.volumeId = results.chapter.volumeId;
         this.maxPages = results.chapter.pages;
@@ -924,6 +924,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateReaderStyles(pageStyles: PageStyle) {
     this.pageStyles = pageStyles;
     if (this.readingHtml === undefined || !this.readingHtml.nativeElement)  return;
+
+    console.log('[Style Update] page styles: ', this.pageStyles);
 
     // Line Height must be placed on each element in the page
     

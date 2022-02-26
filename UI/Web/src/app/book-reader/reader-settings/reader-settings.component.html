@@ -22,29 +22,29 @@
                             <label for="fontsize" class="form-label col-auto">Font Size</label>
                             <span class="col-auto float-end" style="display: inline-flex;">
                                 <i class="fa-solid fa-font"  style="font-size: 12px;"></i>
-                                <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="pageStyles['font-size']">
+                                <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="settingsForm.get('bookReaderFontSize')?.value + '%'">
                                 <i class="fa-solid fa-font" style="font-size: 24px;"></i>
                             </span>
                         </div>
-                        <div class="controls">
-                            <label id="linespacing" class="form-label">Line Spacing</label>
-                            <button (click)="updateLineSpacing(-10)" class="btn btn-icon" title="Decrease" aria-labelledby="linespacing"><i class="fa fa-minus" aria-hidden="true"></i></button>
-                            <span>{{pageStyles['line-height']}}</span>
-                            <button (click)="updateLineSpacing(10)"  class="btn btn-icon" title="Increase" aria-labelledby="linespacing"><i class="fa fa-plus" aria-hidden="true"></i></button>
+
+                        <div class="row g-0 controls">
+                            <label for="linespacing" class="form-label col-auto">Line Spacing</label>
+                            <span class="col-auto float-end" style="display: inline-flex;">
+                                1x
+                                <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
+                                2.5x
+                            </span>
                         </div>
-                        <div class="controls">
-                            <label id="margin" class="form-label">Margin</label>
-                            <button (click)="updateMargin(-5)" class="btn btn-icon" title="Remove Margin" aria-labelledby="margin"><i class="fa fa-minus" aria-hidden="true"></i></button>
-                            <span>{{pageStyles['margin-right']}}</span>
-                            <button (click)="updateMargin(5)"  class="btn btn-icon" title="Add Margin" aria-labelledby="margin"><i class="fa fa-plus" aria-hidden="true"></i></button>
+
+                        <div class="row g-0 controls">
+                            <label for="margin" class="form-label col-auto">Margin</label>
+                            <span class="col-auto float-end" style="display: inline-flex;">
+                                <i class="fa-solid fa-outdent"></i>
+                                <input type="range" class="form-range ms-2 me-2" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" [ngbTooltip]="settingsForm.get('bookReaderMargin')?.value + '%'">
+                                <i class="fa-solid fa-indent"></i>
+                            </span>
                         </div>
-                        
-                        <div class="controls">
-                            <label id="darkmode" class="form-label">Dark Mode</label>
-                            <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
-                            <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button>
-                        </div>
-                        
+
                         <div class="row g-0 justify-content-between">
                             <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
                         </div>
@@ -62,7 +62,15 @@
                 </h2>
             </ng-template>
             <ng-template ngbPanelContent>
-                Not Implemented
+                <div class="controls">
+                    <label id="darkmode" class="form-label">Dark Mode</label>
+                    <div class="form-check form-switch">
+                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderDarkMode" class="form-check-input" [value]="true" aria-labelledby="darkmode">
+                    </div>
+<!-- 
+                    <button (click)="toggleDarkMode(false)" class="btn btn-icon" aria-labelledby="darkmode" title="Off"><i class="fa fa-sun" aria-hidden="true"></i></button>
+                    <button (click)="toggleDarkMode(true)" class="btn btn-icon" aria-labelledby="darkmode" title="On"><i class="fa fa-moon" aria-hidden="true"></i></button> -->
+                </div>
             </ng-template>
         </ngb-panel>
 
@@ -75,6 +83,8 @@
                 </h2>
             </ng-template>
             <ng-template ngbPanelContent>
+
+
                 <div class="controls">
                     <label id="readingdirection" class="form-label">Reading Direction</label>
                     <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}"><i class="fa {{readingDirection === 0 ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</span></button>
