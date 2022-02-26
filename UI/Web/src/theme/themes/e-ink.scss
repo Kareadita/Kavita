@@ -2,6 +2,8 @@
   --color-scheme: light;
   --primary-color: black;
   --primary-color-dark-shade: #3B9E76;
+  --primary-color-darker-shade: #338A67;
+  --primary-color-darkest-shade: #25624A;
   --error-color: #ff4136;
   --bs-body-bg: #fff; 
   --body-text-color: black;
@@ -20,6 +22,8 @@
   --input-bg-readonly-color: unset;
   --input-placeholder-color: #aeaeae;
   --input-border-color: #ccc;
+  --input-range-color: var(--primary-color);
+  --input-range-active-color: var(--primary-color-darker-shade);
 
   /* Buttons */
   --btn-primary-text-color: black;

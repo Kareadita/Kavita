@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -205,12 +205,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Hack: Override background color for reader and restore it onDestroy
    */
-  originalBodyColor: string | undefined;
+  //originalBodyColor: string | undefined;
 
   /**
    * If the web browser is in fullscreen mode
    */
   isFullscreen: boolean = false;
+
 
   darkModeStyles = `
     *:not(input), *:not(select), *:not(code), *:not(:link), *:not(.ngx-toastr) {
@@ -267,10 +268,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.pageNum === 0;
   }
 
-  get drawerBackgroundColor() {
-    return this.darkMode ? '#010409': '#fff';
-  }
-
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
@@ -281,66 +278,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
-      //this.fontFamilies = this.bookService.getFontFamilies();
 
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.user = user;
-          
-          // if (this.user.preferences.bookReaderFontFamily === undefined) {
-          //   this.user.preferences.bookReaderFontFamily = 'default';
-          // }
-          // if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
-          //   this.user.preferences.bookReaderFontSize = 100;
-          // }
-          // if (this.user.preferences.bookReaderLineSpacing === undefined) {
-          //   this.user.preferences.bookReaderLineSpacing = 100;
-          // }
-          // if (this.user.preferences.bookReaderMargin === undefined) {
-          //   this.user.preferences.bookReaderMargin = 0;
-          // }
-          // if (this.user.preferences.bookReaderReadingDirection === undefined) {
-          //   this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
-          // }
-
-          // this.readingDirection = this.user.preferences.bookReaderReadingDirection;
-
-          
-          // this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
-          
-          // this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
-          // this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-          //   this.pageStyles['font-size'] = value + '%';
-          //   this.updateReaderStyles();
-          // });
-
-          // this.clickToPaginate = this.user.preferences.bookReaderTapToPaginate;
-          // this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
-          // this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-          //   this.clickToPaginate = value;
-
-          //   if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
-          //     clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-          //     this.clickToPaginateVisualOverlayTimeout2 = undefined;
-          //   }
-          //   if (!this.clickToPaginate) { return; }
-        
-          //   this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
-          //     this.showClickToPaginateVisualOverlay();
-          //   }, 200);
-          // });
-
-  
-          // this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
-          //   this.updateFontFamily(changes);
-          // });
         }
 
-        const bodyNode = this.document.querySelector('body');
-        if (bodyNode !== undefined && bodyNode !== null) {
-          this.originalBodyColor = bodyNode.style.background;
-        }
-        //this.resetSettings();
+        // const bodyNode = this.document.querySelector('body');
+        // if (bodyNode !== undefined && bodyNode !== null) {
+        //   this.originalBodyColor = bodyNode.style.background; // TODO: I can use theme service here
+        // }
       });
   }
 
@@ -376,18 +323,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
                                   return this.utilityService.isInViewport(entry, this.topOffset);
                                 });
 
-        intersectingEntries.sort((a: Element, b: Element) => {
-          const aTop = a.getBoundingClientRect().top;
-          const bTop = b.getBoundingClientRect().top;
-          if (aTop < bTop) {
-            return -1;
-          }
-          if (aTop > bTop) {
-            return 1;
-          }
-    
-          return 0;
-        });
+        intersectingEntries.sort(this.sortElements);
         
         if (intersectingEntries.length > 0) {
           let path = this.getXPathTo(intersectingEntries[0]);
@@ -417,13 +353,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    const bodyNode = this.document.querySelector('body');
-    if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
-      bodyNode.style.background = this.originalBodyColor;
-      this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
-        this.themeService.setTheme(theme.name);
-      });
-    }
+    // const bodyNode = this.document.querySelector('body');
+    // if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
+    //   bodyNode.style.background = this.originalBodyColor;
+    //   this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
+    //     this.themeService.setTheme(theme.name);
+    //   });
+    // }
+
+    this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
+      this.themeService.setTheme(theme.name);
+    });
+
     this.navService.showNavBar();
 
     const head = this.document.querySelector('head');
@@ -705,6 +646,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  
   promptForPage() {
     const question = 'There are ' + (this.maxPages - 1) + ' pages. What page do you want to go to?';
     const goToPageNum = window.prompt(question, '');
@@ -734,7 +676,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pageNum = page;
     this.loadPage();
-
   }
 
 
@@ -746,7 +687,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.saveProgress();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
-      this.page = this.domSanitizer.bypassSecurityTrustHtml(content);
+      this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
+      
       setTimeout(() => {
         this.addLinkClickHandlers();
         this.updateReaderStyles(this.pageStyles);
@@ -776,7 +718,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
     // Find all the part ids and their top offset
-    //this.setupPageAnchors();
+    this.setupPageAnchors();
     
 
     if (part !== undefined && part !== '') {
@@ -791,15 +733,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.reader.nativeElement.focus();
   }
 
-  setPageNum(pageNum: number) {
-    if (pageNum < 0) {
-      this.pageNum = 0;
-    } else if (pageNum >= this.maxPages - 1) { // This case handles when we are using the pager to move to the next volume/chapter, the pageNum will get incremented past maxPages // NOTE: I made a change where I removed - 1 in comparison, it's breaking page progress
-      this.pageNum = this.maxPages; // 
-    } else {
-      this.pageNum = pageNum;
-    }
-  }
 
   goBack() {
     if (!this.adhocPageHistory.isEmpty()) {
@@ -812,6 +745,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   clickOverlayClass(side: 'right' | 'left') {
+    // TODO: See if we can use RXjs or a component to manage this
     if (!this.clickToPaginateVisualOverlay) {
       return '';
     }
@@ -820,6 +754,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return side === 'right' ? 'highlight' : 'highlight-2';
     }
     return side === 'right' ? 'highlight-2' : 'highlight';
+  }
+
+  setPageNum(pageNum: number) {
+    if (pageNum < 0) {
+      this.pageNum = 0;
+    } else if (pageNum >= this.maxPages - 1) { // This case handles when we are using the pager to move to the next volume/chapter, the pageNum will get incremented past maxPages // NOTE: I made a change where I removed - 1 in comparison, it's breaking page progress
+      this.pageNum = this.maxPages; // 
+    } else {
+      this.pageNum = pageNum;
+    }
   }
 
   prevPage() {
@@ -861,62 +805,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum - 1);
     }
 
-    
-
     if (oldPageNum === this.pageNum) { return; }
-
 
     this.loadPage();
   }
-
-  // updateFontSize(amount: number) {
-  //   let val = parseInt(this.pageStyles['font-size'].substr(0, this.pageStyles['font-size'].length - 1), 10);
-    
-  //   if (val + amount > 300 || val + amount < 50) {
-  //     return;
-  //   }
-
-  //   this.pageStyles['font-size'] = val + amount + '%';
-  //   this.updateReaderStyles();
-  // }
-
-  // updateFontFamily(familyName: string) {
-  //   if (familyName === null) familyName = '';
-  //   let cleanedName = familyName.replace(' ', '_').replace('!important', '').trim();
-  //   if (cleanedName === 'default') {
-  //     this.pageStyles['font-family'] = 'inherit';
-  //   } else {
-  //     this.pageStyles['font-family'] = "'" + cleanedName + "'";
-  //   }
-
-  //   this.updateReaderStyles();
-  // }
-
-  // updateMargin(amount: number) {
-  //   let cleanedValue = this.pageStyles['margin-left'].replace('%', '').replace('!important', '').trim();
-  //   let val = parseInt(cleanedValue, 10);
-
-  //   if (val + amount > 30 || val + amount < 0) {
-  //     return;
-  //   }
-
-  //   this.pageStyles['margin-left'] = (val + amount) + '%';
-  //   this.pageStyles['margin-right'] = (val + amount) + '%';
-
-  //   this.updateReaderStyles();
-  // }
-
-  // updateLineSpacing(amount: number) {
-  //   const cleanedValue = parseInt(this.pageStyles['line-height'].replace('%', '').replace('!important', '').trim(), 10);
-
-  //   if (cleanedValue + amount > 250 || cleanedValue + amount < 100) {
-  //     return;
-  //   }
-
-  //   this.pageStyles['line-height'] = (cleanedValue + amount) + '%';
-
-  //   this.updateReaderStyles();
-  // }
 
   /**
    * Applies styles onto the html of the book page
@@ -959,43 +851,33 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  // toggleDarkMode(force?: boolean) {
-  //   if (force !== undefined) {
-  //     this.darkMode = force;
-  //   } else {
-  //     this.darkMode = !this.darkMode;
-  //   }
-
-  //   this.setOverrideStyles();
-  // }
-
-  // toggleReadingDirection() {
-  //   if (this.readingDirection === ReadingDirection.LeftToRight) {
-  //     this.readingDirection = ReadingDirection.RightToLeft;
-  //   } else {
-  //     this.readingDirection = ReadingDirection.LeftToRight;
-  //   }
-  // }
+  // Color Theme 
+  get drawerBackgroundColor() {
+    return this.darkMode ? '#010409': '#fff';
+  }
 
   getDarkModeBackgroundColor() {
     return this.darkMode ? '#292929' : '#fff';
   }
 
   setOverrideStyles(darkMode: boolean) {
-    const bodyNode = this.document.querySelector('body');
-    if (bodyNode !== undefined && bodyNode !== null) {
-      if (this.themeService.isDarkTheme()) {
-        bodyNode.classList.remove('bg-dark');
-      }
+    this.darkMode = darkMode;
+    // const bodyNode = this.document.querySelector('.reader-container');
+    // if (bodyNode !== undefined && bodyNode !== null) {
+    //   if (this.themeService.isDarkTheme()) {
+    //     bodyNode.classList.remove('bg-dark');
+    //   }
       
-      bodyNode.style.background = this.getDarkModeBackgroundColor();
-    }
-    this.backgroundColor = this.getDarkModeBackgroundColor();
-    const head = this.document.querySelector('head');
+    //   bodyNode.style.background = this.getDarkModeBackgroundColor();
+    // }
+    // this.backgroundColor = this.getDarkModeBackgroundColor();
+    //const head = this.document.querySelector('head');
+    
+    // Inject Dark Mode styles into the book content area
     if (darkMode) {
-      this.renderer.appendChild(head, this.darkModeStyleElem)
+      this.renderer.appendChild(this.document.querySelector('.book-content'), this.darkModeStyleElem)
     } else {
-      this.renderer.removeChild(head, this.darkModeStyleElem);
+      this.renderer.removeChild(this.document.querySelector('.book-content'), this.darkModeStyleElem);
     }
   }
 
@@ -1003,23 +885,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
     this.drawerOpen = !this.drawerOpen;
   }
-
-  closeDrawer() {
-    this.drawerOpen = false;
-  }
-
-  handleReaderClick(event: MouseEvent) {
-    if (this.drawerOpen) {
-      this.closeDrawer();
-      event.stopPropagation();
-      event.preventDefault();
-    }
-  }
-
-  handleSliderChange(event: any) {
-    console.log(event);
-  }
-
 
   scrollTo(partSelector: string) {
     if (partSelector.startsWith('#')) {
@@ -1039,32 +904,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET, this.reader.nativeElement);
   }
 
-  // toggleClickToPaginate() {
-  //   this.clickToPaginate = !this.clickToPaginate;
-
-  //   if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
-  //     clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-  //     this.clickToPaginateVisualOverlayTimeout2 = undefined;
-  //   }
-  //   if (!this.clickToPaginate) { return; }
-
-  //   this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
-  //     this.showClickToPaginateVisualOverlay();
-  //   }, 200);
-  // }
-
-  showClickToPaginateVisualOverlay() {
-    this.clickToPaginateVisualOverlay = true;
-
-    if (this.clickToPaginateVisualOverlay && this.clickToPaginateVisualOverlayTimeout !== undefined) {
-      clearTimeout(this.clickToPaginateVisualOverlayTimeout);
-      this.clickToPaginateVisualOverlayTimeout = undefined;
-    }
-    this.clickToPaginateVisualOverlayTimeout = setTimeout(() => {
-      this.clickToPaginateVisualOverlay = false;
-    }, 1000);
-
-  }
 
   getElementFromXPath(path: string) {
     const node = this.document.evaluate(path, this.document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -1116,8 +955,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         // HACK: This is a bug with how browsers change the background color for fullscreen mode
+        //this.renderer.setStyle(this.reader.nativeElement, 'background', this.themeService.getCssVariable('--bs-body-color')); // This works
         if (!this.darkMode) {
-          this.renderer.setStyle(this.reader.nativeElement, 'background', 'white');
+          this.renderer.setStyle(this.reader.nativeElement, 'background', 'white'); // TODO: CHange this to theme background color
         }
       });
     }
@@ -1155,6 +995,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Settings Handlers
   showPaginationOverlay(clickToPaginate: boolean) {
+    this.clickToPaginate = clickToPaginate;
     if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
       clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
       this.clickToPaginateVisualOverlayTimeout2 = undefined;
@@ -1164,5 +1005,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
       this.showClickToPaginateVisualOverlay();
     }, 200);
+  }
+
+  showClickToPaginateVisualOverlay() {
+    this.clickToPaginateVisualOverlay = true;
+
+    if (this.clickToPaginateVisualOverlay && this.clickToPaginateVisualOverlayTimeout !== undefined) {
+      clearTimeout(this.clickToPaginateVisualOverlayTimeout);
+      this.clickToPaginateVisualOverlayTimeout = undefined;
+    }
+    this.clickToPaginateVisualOverlayTimeout = setTimeout(() => {
+      this.clickToPaginateVisualOverlay = false;
+    }, 1000);
+
   }
 }

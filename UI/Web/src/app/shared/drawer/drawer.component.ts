@@ -22,10 +22,12 @@ export class DrawerComponent {
   @Input() position: 'start' | 'end' | 'bottom' | 'top' = 'start';
   @Input() options: Partial<DrawerOptions> = new DrawerOptions();
   @Output() drawerClosed = new EventEmitter();
+  @Output() isOpenChange: EventEmitter<boolean> = new EventEmitter();
 
 
   close() {
     this.isOpen = false;
+    this.drawerClosed.emit(this.isOpen);
     this.drawerClosed.emit();
   }
 }

@@ -62,6 +62,10 @@ export class ThemeService implements OnDestroy {
     return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
   }
 
+  getCssVariable(variable: string) {
+    return getComputedStyle(this.document.body).getPropertyValue(variable).trim();
+  }
+
   isDarkTheme() {
     return this.getColorScheme().toLowerCase() === 'dark';
   }

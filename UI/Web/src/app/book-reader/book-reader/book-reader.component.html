@@ -2,7 +2,7 @@
     <div class="fixed-top" #stickyTop>
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
-        <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="drawerBackgroundColor" (drawerClosed)="closeDrawer()">
+        <app-drawer #commentDrawer="drawer" [(isOpen)]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="drawerBackgroundColor">
             <span header>
                 Book Settings
             </span>
@@ -16,8 +16,6 @@
                     <div class="col-1 btn-icon page-stub" (click)="goToPage(maxPages - 1)" title="Go to last page">{{maxPages - 1}}</div>
                     <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter()" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
                 </div>
-
-                
 
                 <nav role="navigation">
                     <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-pills mb-2" [destroyOnHide]="false">
@@ -47,7 +45,7 @@
     </div>
 
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" 
-        [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
+        [@isLoading]="isLoading ? true : false">
 
         <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}" 
             [innerHtml]="page" *ngIf="page !== undefined"></div>
