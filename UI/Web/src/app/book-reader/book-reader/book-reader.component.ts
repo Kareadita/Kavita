@@ -99,29 +99,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readingListMode: boolean = false;
 
   /**
-   * The actual pages from the epub, used for showing on table of contents
+   * The actual pages from the epub, used for showing on table of contents. This must be here as we need access to it for scroll anchors
    */
   chapters: Array<BookChapterItem> = [];
-
+  /**
+   * Current Page
+   */
   pageNum = 0;
+  /**
+   * Max Pages
+   */
   maxPages = 1;
+  /**
+   * This allows for exploration into different chapters 
+   */
   adhocPageHistory: Stack<HistoryPoint> = new Stack<HistoryPoint>();
   /**
    * A stack of the chapter ids we come across during continuous reading mode. When we traverse a boundary, we use this to avoid extra API calls.
    * @see Stack
    */
-   continuousChaptersStack: Stack<number> = new Stack();
+  continuousChaptersStack: Stack<number> = new Stack(); // TODO: See if this can be moved into reader service so we can reduce code duplication between readers
 
   activeTabId: TabID = TabID.Settings;
-  
-  user!: User;
 
   drawerOpen = false;
   isLoading = true; 
   bookTitle: string = '';
-  //settingsForm: FormGroup = new FormGroup({});
-  clickToPaginate = false;
 
+  clickToPaginate = false;
   clickToPaginateVisualOverlay = false;
   clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
   clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
@@ -171,10 +176,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Internal property used to capture all the different css properties to render on all elements. This is a cached version that is updated from reader-settings component
    */
   pageStyles!: PageStyle;
-  /**
-   * List of all font families user can select from
-   */
-  //fontFamilies: Array<string> = [];
 
   
   darkMode = false;
@@ -201,11 +202,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Library Type used for rendering chapter or issue
    */
    libraryType: LibraryType = LibraryType.Book;
-
-  /**
-   * Hack: Override background color for reader and restore it onDestroy
-   */
-  //originalBodyColor: string | undefined;
 
   /**
    * If the web browser is in fullscreen mode
@@ -319,16 +315,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
 
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-        if (user) {
-          this.user = user;
-        }
-
-        // const bodyNode = this.document.querySelector('body');
-        // if (bodyNode !== undefined && bodyNode !== null) {
-        //   this.originalBodyColor = bodyNode.style.background; // TODO: I can use theme service here
-        // }
-      });
+      // this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      //   if (user) {
+      //     this.user = user;
+      //   }
+      // });
   }
 
   /**
@@ -398,10 +389,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.navService.showNavBar();
-
-    // const head = this.document.querySelector('head');
-    // this.renderer.removeChild(head, this.darkModeStyleElem);
-
+    
     if (this.clickToPaginateVisualOverlayTimeout !== undefined) {
       clearTimeout(this.clickToPaginateVisualOverlayTimeout);
       this.clickToPaginateVisualOverlayTimeout = undefined;
@@ -620,30 +608,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // resetSettings() {
-  //   const windowWidth = window.innerWidth
-  //     || this.document.documentElement.clientWidth
-  //     || this.document.body.clientWidth;
-
-  //   let margin = '15%';
-  //   if (windowWidth <= 700) {
-  //     margin = '5%';
-  //   }
-  //   if (this.user) {
-  //     if (windowWidth > 700) {
-  //       margin = this.user.preferences.bookReaderMargin + '%';
-  //     }
-  //     this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
-      
-  //     this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
-  //   } else {
-  //     this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};
-  //     this.toggleDarkMode(false);
-  //   }
-    
-  //   this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
-  //   this.updateReaderStyles();
-  // }
 
   /**
    * Adds a click handler for any anchors that have 'kavita-page'. If 'kavita-page' present, changes page to kavita-page and optionally passes a part value 
