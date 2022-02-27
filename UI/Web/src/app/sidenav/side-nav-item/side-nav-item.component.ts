@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { NavService } from '../../_services/nav.service';
 
 @Component({
   selector: 'app-side-nav-item',
@@ -6,6 +7,7 @@ import { Component, Input, OnInit } from '@angular/core';
   styleUrls: ['./side-nav-item.component.scss']
 })
 export class SideNavItemComponent implements OnInit {
+  
 
   /**
    * Icon to display next to item. ie) 'fa-home'
@@ -21,9 +23,10 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() link: string | undefined;
 
-  constructor() { }
+  constructor(public navService: NavService) { }
 
   ngOnInit(): void {
+    this.navService.sideNavVisible$.subscribe()
   }
 
 }

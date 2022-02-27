@@ -1,18 +1,18 @@
 <ng-container *ngIf="link === undefined || link.length === 0; else useLink">
-    <div class="side-nav-item">
+    <div class="side-nav-item" [ngClass]="{'closed': !(navService?.sideNavVisible$ | async)}">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
     </div>
 </ng-container>
 
 <ng-template #useLink>
-    <a class="side-nav-item" [href]="link">
+    <a class="side-nav-item" [ngClass]="{'closed': !(navService?.sideNavVisible$ | async)}" [href]="link">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
     </a>
 </ng-template>
 
 
 <ng-template #inner>
-    <span class="phone-hidden">
+    <span class="phone-hidden" title="{{title}}">
         <div>
             <i class="fa {{icon}}" aria-hidden="true"></i>&nbsp;
         </div>

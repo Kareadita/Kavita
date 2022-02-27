@@ -6,11 +6,12 @@
     position: fixed;
     margin: 0;
     left: 0;
-    transition: left var(--sidenav-openclose-transition);
+    transition: width var(--sidenav-openclose-transition);
     box-shadow: inset -3px 0em 5px 0em rgb(0 0 0 / 50%);
 
     &.closed {
-        left: -20%;
+        width: 50px;
+        overflow: hidden;
     }
 }
 
