@@ -8,7 +8,7 @@
     --error-color: #ff4136;
     --bs-body-bg: #fff; 
     --body-text-color: #333;
-    --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
+    --btn-icon-filter: none;
     
     /* Navbar */
     --navbar-bg-color: black;
@@ -116,4 +116,16 @@
     --carousel-header-text-color: black;
     --carousel-header-text-decoration: none;
     --carousel-hover-header-text-decoration: underline;
+
+    /* Accordion */
+    --accordion-header-text-color: rgba(74, 198, 148, 0.9);
+    --accordion-header-bg-color: rgba(52, 60, 70, 0.5); /* This is a good accent color */
+    --accordion-body-bg-color: var(--bs-body-bg);
+    --accordion-active-body-bg-color: var(--bs-body-bg);
+    --accordion-body-border-color: rgba(239, 239, 239, 0.125);
+    --accordion-body-text-color: var(--body-text-color);
+    --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
+    --accordion-header-collapsed-bg-color: rgba(22,27,34,0.5);
+    --accordion-button-focus-border-color: rgba(74, 198, 148, 0.9);
+    --accordion-button-focus-box-shadow: unset;
   }

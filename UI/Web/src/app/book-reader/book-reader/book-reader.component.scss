@@ -35,13 +35,7 @@ $primary-color: #0062cc;
     padding-bottom: 5px;
 }
 
-.table-of-contents li {
-    cursor: pointer;
 
-    &.active {
-        font-weight: bold;
-    }
-}
 
 .page-stub {
     margin-top: 6px;
@@ -146,10 +140,6 @@ $primary-color: #0062cc;
 
 .drawer-body {
     padding-bottom: 20px;
-}
-
-.chapter-title {
-    padding-inline-start: 0px
 }
 
 ::ng-deep .scale-width {

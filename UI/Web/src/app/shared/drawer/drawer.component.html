@@ -1,9 +1,11 @@
 <div class="offcanvas offcanvas-{{position}}" [class.show]="isOpen" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel" [ngStyle]="{'top': options.topOffset + 'px', 'visibility': isOpen ? 'visible' : 'hidden'}" role="dialog">
   <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="offcanvasLabel">
+    <div class="offcanvas-title" id="offcanvasLabel">
       <ng-content select="[header]"></ng-content>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" (click)="close()"></button>
-    </h5>
+    </div>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" (click)="close()"></button>
+  </div>
+  <div class="row pe-2">
     <ng-content select="[subheader]"></ng-content>
   </div>
   <div class="offcanvas-body">
