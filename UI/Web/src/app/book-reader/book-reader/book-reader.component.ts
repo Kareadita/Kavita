@@ -33,15 +33,6 @@ enum TabID {
   TableOfContents = 2
 }
 
-
-// interface PageStyle {
-//   'font-family': string;
-//   'font-size': string; 
-//   'line-height': string;
-//   'margin-left': string;
-//   'margin-right': string;
-// }
-
 interface HistoryPoint {
   page: number;
   scrollOffset: number;

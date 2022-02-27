@@ -122,6 +122,7 @@ namespace API.Helpers
 
             CreateMap<AppUser, UserDto>();
             CreateMap<SiteTheme, SiteThemeDto>();
+            CreateMap<BookTheme, BookThemeDto>();
             CreateMap<AppUserPreferences, UserPreferencesDto>()
                 .ForMember(dest => dest.Theme,
                     opt =>

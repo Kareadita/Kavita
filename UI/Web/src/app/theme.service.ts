@@ -152,30 +152,35 @@ export class ThemeService implements OnDestroy {
     }
   }
 
-  setBookTheme(themeName: string) {
-    const theme = this.bookThemeCache.find(t => t.name.toLowerCase() === themeName.toLowerCase());
-      if (theme) {
-        this.currentBookThemeSource.pipe(take(1)).subscribe(currentBookTheme => {
-          if (theme.name === currentBookTheme.name) return;
+  /**
+   * This only works on User Themes. System themes are handled differently
+   * @param themeName 
+   * @returns 
+   */
+  // setBookTheme(themeName: string) {
+  //   const theme = this.bookThemeCache.find(t => t.name.toLowerCase() === themeName.toLowerCase());
+  //     if (theme) {
+  //       this.currentBookThemeSource.pipe(take(1)).subscribe(currentBookTheme => {
+  //         if (theme.name === currentBookTheme.name) return;
 
-          // Remove previous theme
-          this.removeThemesFromBookReader()
+  //         // Remove previous theme
+  //         this.removeThemesFromBookReader()
 
-          // Now load theme
-          const styleElem = document.createElement('style');
-          styleElem.id = 'booktheme-' + theme.name;
-          styleElem.appendChild(this.document.createTextNode(theme.contents));
+  //         // Now load theme
+  //         const styleElem = document.createElement('style');
+  //         styleElem.id = 'booktheme-' + theme.name;
+  //         styleElem.appendChild(this.document.createTextNode(theme.contents));
 
-          this.renderer.appendChild(this.document.querySelector('.book-contents'), styleElem);
-          this.currentBookThemeSource.next(theme);
-        });
-      } else {
-        // Only time themes isn't already loaded is on first load
-        this.getBookThemes().subscribe(themes => {
-          this.setBookTheme(themeName);
-        });
-      }
-  }
+  //         this.renderer.appendChild(this.document.querySelector('.book-contents'), styleElem);
+  //         this.currentBookThemeSource.next(theme);
+  //       });
+  //     } else {
+  //       // Only time themes isn't already loaded is on first load
+  //       this.getBookThemes().subscribe(themes => {
+  //         this.setBookTheme(themeName);
+  //       });
+  //     }
+  // }
 
   private hasThemeInHead(themeName: string) {
     const id = 'theme-' + themeName.toLowerCase();

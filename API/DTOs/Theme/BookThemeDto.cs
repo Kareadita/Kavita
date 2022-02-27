@@ -23,9 +23,11 @@ public class BookThemeDto
     /// </summary>
     public string ColorHash { get; set; }
     /// <summary>
-    /// Contents of the theme.
+    /// File path to the content.
+    /// Must be a .css file
     /// </summary>
-    public string Contents { get; set; }
+    /// <remarks>System provided themes use an alternative location as they are packaged with the app. This will be empty</remarks>
+    public string FilePath { get; set; }
     /// <summary>
     /// Only one theme can have this. Will auto-set this as default for new user accounts
     /// </summary>
@@ -36,4 +38,5 @@ public class BookThemeDto
     public ThemeProvider Provider { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public string Selector => "brtheme-" + Name.ToLower();
 }

@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
+import { ThemeService } from 'src/app/theme.service';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
@@ -74,21 +75,22 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup = new FormGroup({});
 
   themes: Array<BookTheme> = [
-    {
-      id: 1,
-      name: 'Dark',
-      selector: 'brtheme-dark',
-      colorHash: '#010409',
-      provider: ThemeProvider.System
-    },
-    {
-      id: 2,
-      name: 'White',
-      selector: 'brtheme-white',
-      colorHash: '#FFFFFF',
-      provider: ThemeProvider.System
-    }
+    // {
+    //   id: 1,
+    //   name: 'Dark',
+    //   selector: 'brtheme-dark',
+    //   colorHash: '#010409',
+    //   provider: ThemeProvider.System
+    // },
+    // {
+    //   id: 2,
+    //   name: 'White',
+    //   selector: 'brtheme-white',
+    //   colorHash: '#FFFFFF',
+    //   provider: ThemeProvider.System
+    // }
   ];
+  userThemes: Array<BookTheme> = [];
 
 
 
@@ -96,7 +98,12 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
 
-  constructor(private bookService: BookService, private accountService: AccountService, @Inject(DOCUMENT) private document: Document) { }
+  constructor(private bookService: BookService, private accountService: AccountService, @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
+    this.themeService.getBookThemes().subscribe(themes => {
+      this.themes = themes.filter(t => t.provider === ThemeProvider.System);
+      this.userThemes = themes.filter(t => t.provider === ThemeProvider.User);
+    });
+  }
 
   ngOnInit(): void {
     

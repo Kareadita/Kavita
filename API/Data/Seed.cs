@@ -121,7 +121,7 @@ namespace API.Data
 
             foreach (var theme in DefaultBookThemes)
             {
-                var existing = context.SiteTheme.FirstOrDefault(s => s.Name.Equals(theme.Name));
+                var existing = context.BookTheme.FirstOrDefault(s => s.Name.Equals(theme.Name));
                 if (existing == null)
                 {
                     await context.BookTheme.AddAsync(theme);
