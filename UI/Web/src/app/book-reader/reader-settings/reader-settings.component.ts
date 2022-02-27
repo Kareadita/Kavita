@@ -3,9 +3,18 @@ import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } fro
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
+import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { BookService } from '../book.service';
+
+// Temp used until I merge Theme support
+export interface BookTheme {
+  colorHash: string;
+  name: string;
+  selector: string;
+  provider: ThemeProvider;
+}
 
 /**
  * Used for book reader. Do not use for other components
@@ -36,7 +45,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * Outputs when a theme/dark mode is updated
    */
-  @Output() colorThemeUpdate: EventEmitter<boolean> = new EventEmitter();
+  @Output() colorThemeUpdate: EventEmitter<{theme: BookTheme, darkMode: boolean}> = new EventEmitter();
   /**
    * Outputs when fullscreen is toggled
    */
@@ -54,13 +63,29 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
   /**
-   * Dark mode for reader. Will be replaced with custom theme. 
+   * Dark mode for reader. Will be replaced with custom theme.
+   * @deprecated Use themes instead
    */
   darkMode: boolean = true;
 
   isFullscreen: boolean = false;
 
   settingsForm: FormGroup = new FormGroup({});
+
+  themes: Array<BookTheme> = [
+    {
+      name: 'Dark',
+      selector: 'brtheme-dark',
+      colorHash: '#010409',
+      provider: ThemeProvider.System
+    },
+    {
+      name: 'White',
+      selector: 'brtheme-white',
+      colorHash: '#FFFFFF',
+      provider: ThemeProvider.System
+    }
+  ];
 
 
 
@@ -138,13 +163,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.pageStyles['margin-right'] = value + '%';
             this.styleUpdate.emit(this.pageStyles);
           });
-
-          this.settingsForm.addControl('bookReaderDarkMode', new FormControl(this.user.preferences.bookReaderDarkMode, []));
-          this.settingsForm.get('bookReaderDarkMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            this.darkMode = value;
-            this.colorThemeUpdate.emit(this.darkMode);
-          });
-
         }
 
         this.resetSettings();
@@ -185,14 +203,31 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.styleUpdate.emit(this.pageStyles);
   }
 
+  setTheme(theme: BookTheme) {
+    if (theme.name === 'Dark') {
+      this.toggleDarkMode(true);
+      this.settingsForm.get('bookReaderDarkMode')?.setValue(true);
+    } else if (theme.name === 'White') {
+      this.toggleDarkMode(false);
+      this.settingsForm.get('bookReaderDarkMode')?.setValue(false);
+    }
+    //this.colorThemeUpdate.emit({theme, 'darkMode': this.darkMode});
+  }
+
   toggleDarkMode(force?: boolean) {
+    let theme = this.themes[0];
     if (force !== undefined) {
       this.darkMode = force;
     } else {
       this.darkMode = !this.darkMode;
     }
+    if (this.darkMode) {
+      theme = this.themes.filter(t => t.name === 'Dark')[0];
+    } else {
+      theme = this.themes.filter(t => t.name === 'White')[0];
+    }
 
-    this.colorThemeUpdate.emit(this.darkMode);
+    this.colorThemeUpdate.emit({theme, 'darkMode': this.darkMode});
   }
 
   toggleReadingDirection() {

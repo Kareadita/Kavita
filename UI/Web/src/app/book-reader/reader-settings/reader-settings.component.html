@@ -63,10 +63,12 @@
             </ng-template>
             <ng-template ngbPanelContent>
                 <div class="controls">
-                    <label id="darkmode" class="form-label">Dark Mode</label>
-                    <div class="form-check form-switch">
-                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderDarkMode" class="form-check-input" [value]="true" aria-labelledby="darkmode">
-                    </div>
+                    <ng-container *ngFor="let theme of themes">
+                        <button class="btn btn-icon" (click)="setTheme(theme)">
+                            <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
+                            {{theme.name}}
+                        </button>
+                    </ng-container>
                 </div>
             </ng-template>
         </ngb-panel>

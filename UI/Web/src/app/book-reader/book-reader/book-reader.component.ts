@@ -25,7 +25,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { ThemeService } from 'src/app/theme.service';
-import { PageStyle } from '../reader-settings/reader-settings.component';
+import { BookTheme, PageStyle } from '../reader-settings/reader-settings.component';
 
 enum TabID {
   Settings = 1,
@@ -315,8 +315,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
 
-      this.darkModeStyleElem = this.renderer.createElement('style');
-      this.darkModeStyleElem.innerHTML = this.darkModeStyles;
+      // this.darkModeStyleElem = this.renderer.createElement('style');
+      // this.darkModeStyleElem.id = 'brtheme-default';
+      // this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem)
 
       // this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       //   if (user) {
@@ -331,6 +332,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * based on the last seen scroll part (xpath).
    */
   ngAfterViewInit() {
+    // this.darkModeStyleElem = this.renderer.createElement('style');
+    // this.darkModeStyleElem.id = 'brtheme-default';
+    // this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem);
+    //this.darkModeStyleElem = this.document.querySelector('#brtheme-default');
+
     // check scroll offset and if offset is after any of the "id" markers, save progress
     fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
@@ -389,7 +395,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-    
+
     this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
       this.themeService.setTheme(theme.name);
     });
@@ -844,26 +850,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.darkMode ? '#292929' : '#fff';
   }
 
-  setOverrideStyles(darkMode: boolean) {
-    this.darkMode = darkMode;
-    // const bodyNode = this.document.querySelector('.reader-container');
-    // if (bodyNode !== undefined && bodyNode !== null) {
-    //   if (this.themeService.isDarkTheme()) {
-    //     bodyNode.classList.remove('bg-dark');
-    //   }
-      
-    //   bodyNode.style.background = this.getDarkModeBackgroundColor();
-    // }
-    // this.backgroundColor = this.getDarkModeBackgroundColor();
-    const head = this.document.querySelector('head');
-    
-    // Inject Dark Mode styles into the book content area
-    if (darkMode) {
-      console.log('Injected dark styles into book-content')
-      this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem)
+  setOverrideStyles(event: {theme: BookTheme, darkMode: boolean}) {
+    this.darkMode = event.darkMode;
+
+    // Remove all themes 
+    Array.from(this.document.querySelectorAll('style[id^="brtheme-"]')).forEach(elem => elem.remove());
+
+
+    this.darkModeStyleElem = this.renderer.createElement('style');
+    this.darkModeStyleElem.id = event.theme.selector;
+    if (event.theme.name === 'Dark') {
+      this.darkModeStyleElem.innerHTML = this.darkModeStyles;
     } else {
-      this.renderer.removeChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem);
+      this.darkModeStyleElem.innerHTML = '';
     }
+    
+    console.log('Injected dark styles into book-content')
+    this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem);
   }
 
   toggleDrawer() {
