@@ -64,8 +64,9 @@
     --ratingstar-star-filled: var(--primary-color);
   
     /* Global */
-    --accent-bg-color: rgba(206, 206, 206, 0.5);
-    --accent-text-color: black;
+    --accent-bg-color: var(--bs-body-bg);
+    --accent-text-color: grey;
+    --accent-text-size: 0.8rem;
     --hr-color: rgba(239, 239, 239, 0.125);
     --grid-breakpoints-xs: $grid-breakpoint-xs;
     --grid-breakpoints-sm: $grid-breakpoint-sm;

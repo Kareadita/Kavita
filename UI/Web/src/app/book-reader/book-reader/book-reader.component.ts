@@ -127,6 +127,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   bookTitle: string = '';
 
   clickToPaginate = false;
+  /**
+   * The boolean that decides if the clickToPaginate overlay is visible or not.
+   */
   clickToPaginateVisualOverlay = false;
   clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
   clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
@@ -384,21 +387,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
+    this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+    
     this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
       this.themeService.setTheme(theme.name);
     });
 
     this.navService.showNavBar();
-    
-    if (this.clickToPaginateVisualOverlayTimeout !== undefined) {
-      clearTimeout(this.clickToPaginateVisualOverlayTimeout);
-      this.clickToPaginateVisualOverlayTimeout = undefined;
-    }
-    if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
-      clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-      this.clickToPaginateVisualOverlayTimeout2 = undefined;
-    }
-
     this.readerService.exitFullscreen();
 
     this.onDestroy.next();
@@ -740,18 +736,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  clickOverlayClass(side: 'right' | 'left') {
-    // TODO: See if we can use RXjs or a component to manage this
-    if (!this.clickToPaginateVisualOverlay) {
-      return '';
-    }
-
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      return side === 'right' ? 'highlight' : 'highlight-2';
-    }
-    return side === 'right' ? 'highlight-2' : 'highlight';
-  }
-
   setPageNum(pageNum: number) {
     if (pageNum < 0) {
       this.pageNum = 0;
@@ -997,15 +981,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // Settings Handlers
   showPaginationOverlay(clickToPaginate: boolean) {
     this.clickToPaginate = clickToPaginate;
-    if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
-      clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-      this.clickToPaginateVisualOverlayTimeout2 = undefined;
-    }
+
+    // if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
+    //   clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+    //   this.clickToPaginateVisualOverlayTimeout2 = undefined;
+    // }
+    this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
     if (!clickToPaginate) { return; }
 
     this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
       this.showClickToPaginateVisualOverlay();
     }, 200);
+  }
+
+  clearTimeout(timeoutId: number | undefined) {
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId);
+      timeoutId = undefined;
+    }
   }
 
   showClickToPaginateVisualOverlay() {
@@ -1019,5 +1012,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.clickToPaginateVisualOverlay = false;
     }, 1000);
 
+  }
+
+  /**
+   * Responsible for returning the class to show an overlay or not
+   * @param side 
+   * @returns 
+   */
+  clickOverlayClass(side: 'right' | 'left') {
+    // TODO: See if we can use RXjs or a component to manage this
+    if (!this.clickToPaginateVisualOverlay) {
+      return '';
+    }
+
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      return side === 'right' ? 'highlight' : 'highlight-2';
+    }
+    return side === 'right' ? 'highlight-2' : 'highlight';
   }
 }
