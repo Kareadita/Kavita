@@ -25,7 +25,8 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { ThemeService } from 'src/app/theme.service';
-import { BookTheme, PageStyle } from '../reader-settings/reader-settings.component';
+import { PageStyle } from '../reader-settings/reader-settings.component';
+import { BookTheme } from 'src/app/_models/preferences/book-theme';
 
 enum TabID {
   Settings = 1,
@@ -852,6 +853,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setOverrideStyles(event: {theme: BookTheme, darkMode: boolean}) {
     this.darkMode = event.darkMode;
+
+    // TODO: Put optimization in to avoid any work if the theme is the same as selected (or have reading settings control handle that)
 
     // Remove all themes 
     Array.from(this.document.querySelectorAll('style[id^="brtheme-"]')).forEach(elem => elem.remove());

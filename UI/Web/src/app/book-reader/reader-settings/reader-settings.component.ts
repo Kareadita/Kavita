@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
+import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
@@ -9,12 +10,12 @@ import { AccountService } from 'src/app/_services/account.service';
 import { BookService } from '../book.service';
 
 // Temp used until I merge Theme support
-export interface BookTheme {
-  colorHash: string;
-  name: string;
-  selector: string;
-  provider: ThemeProvider;
-}
+// export interface BookTheme {
+//   colorHash: string;
+//   name: string;
+//   selector: string;
+//   provider: ThemeProvider;
+// }
 
 /**
  * Used for book reader. Do not use for other components
@@ -74,12 +75,14 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
   themes: Array<BookTheme> = [
     {
+      id: 1,
       name: 'Dark',
       selector: 'brtheme-dark',
       colorHash: '#010409',
       provider: ThemeProvider.System
     },
     {
+      id: 2,
       name: 'White',
       selector: 'brtheme-white',
       colorHash: '#FFFFFF',
