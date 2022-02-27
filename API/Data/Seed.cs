@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -51,6 +52,40 @@ namespace API.Data
             },
         };
 
+        public static readonly IList<BookTheme> DefaultBookThemes = new List<BookTheme>
+        {
+            new()
+            {
+                Name = "Dark",
+                NormalizedName = Parser.Parser.Normalize("Dark"),
+                ColorHash = "#010409",
+                Provider = ThemeProvider.System,
+                FileName = string.Empty,
+                IsDefault = true,
+                SortOrder = 1
+            },
+            new()
+            {
+                Name = "Black",
+                NormalizedName = Parser.Parser.Normalize("Black"),
+                ColorHash = "#000000",
+                Provider = ThemeProvider.System,
+                FileName = string.Empty,
+                IsDefault = false,
+                SortOrder = 2
+            },
+            new()
+            {
+                Name = "White",
+                NormalizedName = Parser.Parser.Normalize("White"),
+                ColorHash = "#FFFFFF",
+                Provider = ThemeProvider.System,
+                FileName = string.Empty,
+                IsDefault = false,
+                SortOrder = 3
+            },
+        };
+
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
         {
             var roles = typeof(PolicyConstants)
@@ -81,6 +116,15 @@ namespace API.Data
                 if (existing == null)
                 {
                     await context.SiteTheme.AddAsync(theme);
+                }
+            }
+
+            foreach (var theme in DefaultBookThemes)
+            {
+                var existing = context.SiteTheme.FirstOrDefault(s => s.Name.Equals(theme.Name));
+                if (existing == null)
+                {
+                    await context.BookTheme.AddAsync(theme);
                 }
             }
 

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Theme;
+using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -27,6 +28,17 @@ public class ThemeController : BaseApiController
     public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetThemes()
     {
         return Ok(await _unitOfWork.SiteThemeRepository.GetThemeDtos());
+    }
+
+    /// <summary>
+    /// Gets the book themes associated with the user + the default ones provided by Kavita
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("book-themes")]
+    public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetBookThemes()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        return Ok(await _unitOfWork.BookThemeRepository.GetThemeDtosForUser(user.Id));
     }
 
     [Authorize("RequireAdminRole")]
@@ -55,6 +67,23 @@ public class ThemeController : BaseApiController
         try
         {
             return Ok(await _siteThemeService.GetContent(themeId));
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Returns css content to the UI. UI is expected to escape the content
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("book-download-content")]
+    public async Task<ActionResult<string>> GetBookThemeContent(int themeId)
+    {
+        try
+        {
+            return Ok(await _siteThemeService.GetBookThemeContent(themeId));
         }
         catch (KavitaException ex)
         {

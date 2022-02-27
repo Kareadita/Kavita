@@ -14,6 +14,7 @@ namespace API.Services.Tasks;
 public interface ISiteThemeService
 {
     Task<string> GetContent(int themeId);
+    Task<string> GetBookThemeContent(int bookThemeId);
     Task Scan();
     Task UpdateDefault(int themeId);
 }
@@ -36,12 +37,31 @@ public class SiteThemeService : ISiteThemeService
     /// </summary>
     /// <param name="themeId"></param>
     /// <returns></returns>
-    /// <exception cref="KavitaException"></exception>
     public async Task<string> GetContent(int themeId)
     {
         var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId);
         if (theme == null) throw new KavitaException("Theme file missing or invalid");
         var themeFile = _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, theme.FileName);
+        if (string.IsNullOrEmpty(themeFile) || !_directoryService.FileSystem.File.Exists(themeFile))
+            throw new KavitaException("Theme file missing or invalid");
+
+        return await _directoryService.FileSystem.File.ReadAllTextAsync(themeFile);
+    }
+
+    /// <summary>
+    /// Given a bookThemeId, return the content inside that file
+    /// </summary>
+    /// <param name="bookThemeId"></param>
+    /// <returns></returns>
+    public async Task<string> GetBookThemeContent(int bookThemeId)
+    {
+        var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(bookThemeId);
+        if (theme == null) throw new KavitaException("Theme file missing or invalid");
+
+        //var directory = theme.Provider == ThemeProvider.System ? "wwwroot/" : _directoryService.BookThemeDirectory;
+
+
+        var themeFile = _directoryService.FileSystem.Path.Join(_directoryService.BookThemeDirectory, theme.FileName);
         if (string.IsNullOrEmpty(themeFile) || !_directoryService.FileSystem.File.Exists(themeFile))
             throw new KavitaException("Theme file missing or invalid");
 

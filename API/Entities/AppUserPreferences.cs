@@ -63,7 +63,11 @@ namespace API.Entities
         /// </summary>
         /// <remarks>Should default to Dark</remarks>
         public SiteTheme Theme { get; set; }
-
+        /// <summary>
+        /// Book Reader Option: The color theme to decorate the book contents
+        /// </summary>
+        /// <remarks>Should default to Dark</remarks>
+        public BookTheme BookTheme { get; set; }
 
 
         public AppUser AppUser { get; set; }
