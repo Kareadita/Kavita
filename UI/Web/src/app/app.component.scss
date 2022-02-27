@@ -8,3 +8,15 @@
     margin-left: 200px;
     width: auto;
 }
+
+@media (max-width: 576px) {
+    .companion-bar {
+        margin-left: 10px;
+        padding-left: 10px;
+    }
+
+    .companion-bar-content {
+        margin-left: 10px;
+        width: auto;
+    }
+}
