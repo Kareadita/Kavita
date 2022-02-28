@@ -1,13 +1,13 @@
 .side-nav {
     padding: 10px 0;
     width: 190px;
-    background-color: var(--sidenav-bg-color);
+    background-color: var(--side-nav-bg-color);
     height: calc(100vh - 56px);
     position: fixed;
     margin: 0;
     left: 0;
-    transition: width var(--sidenav-openclose-transition);
-    box-shadow: inset -3px 0em 5px 0em rgb(0 0 0 / 50%);
+    transition: width var(--side-nav-openclose-transition);
+    box-shadow: var(--side-nav-box-shadow);
     overflow: auto;
 
     &.closed {
@@ -21,13 +21,13 @@
     .side-nav {
         padding: 10px 0;
         width: 90vw;
-        background-color: var(--sidenav-mobile-bg-color);
+        background-color: var(--side-nav-mobile-bg-color);
         height: calc(100vh - 56px);
         position: fixed;
         margin: 0;
         left: 0;
-        transition: width var(--sidenav-openclose-transition);
-        box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
+        transition: width var(--side-nav-openclose-transition);
+        box-shadow: var(--side-nav-mobile-box-shadow);
         z-index: 999;
         overflow: auto;
     
