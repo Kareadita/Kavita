@@ -30,6 +30,10 @@ export class ReadingListService {
     );
   }
 
+  getReadingListsForSeries(seriesId: number) {
+    return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists-for-series?seriesId=' + seriesId);
+  }
+
   getListItems(readingListId: number) {
     return this.httpClient.get<ReadingListItem[]>(this.baseUrl + 'readinglist/items?readingListId=' + readingListId);
   }
@@ -47,7 +51,7 @@ export class ReadingListService {
   }
 
   updateByMultipleSeries(readingListId: number, seriesIds: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds});
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds}, { responseType: 'text' as 'json' });
   }
 
   updateBySeries(readingListId: number, seriesId: number) {
