@@ -72,16 +72,6 @@
     margin-top: 5px;
 }
 
-.form-inline .form-group {
-    width: 100%;
-}
-
-@media (min-width: var(--grid-breakpoints-sm)) {
-    .form-inline .form-group {
-        width: 100%;
-    }
-}
-
 .scroll-to-top:hover {
     animation: MoveUpDown 1s linear infinite;
 }
