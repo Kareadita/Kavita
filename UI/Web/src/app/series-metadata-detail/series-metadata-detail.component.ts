@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { UtilityService } from '../shared/_services/utility.service';
 import { MangaFormat } from '../_models/manga-format';
+import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { MetadataService } from '../_services/metadata.service';
@@ -15,6 +16,10 @@ import { MetadataService } from '../_services/metadata.service';
 export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   @Input() seriesMetadata!: SeriesMetadata;
+  /**
+   * Reading lists with a connection to the Series
+   */
+  @Input() readingLists: Array<ReadingList> = [];
   @Input() series!: Series;
 
   isCollapsed: boolean = true;

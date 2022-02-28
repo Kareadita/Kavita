@@ -201,8 +201,8 @@ public class SeriesServiceTests
         Assert.Equal(6, detail.Chapters.Count());
 
         Assert.NotEmpty(detail.Volumes);
-        Assert.Equal(3, detail.Volumes.Count()); // This returns 3 because 0 volume will still come
-        Assert.All(detail.Volumes, dto => Assert.Contains(dto.Name, new[] {"0", "2", "3"}));
+        Assert.Equal(2, detail.Volumes.Count()); // Volume 0 shouldn't be sent in Volumes
+        Assert.All(detail.Volumes, dto => Assert.Contains(dto.Name, new[] {"2", "3"}));
     }
 
     [Fact]
@@ -239,10 +239,11 @@ public class SeriesServiceTests
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
         Assert.NotEmpty(detail.Chapters);
-        Assert.Equal(3, detail.Chapters.Count()); // volume 2 has a 0 chapter aka a single chapter that is represented as a volume. We don't show in Chapters area
+        // volume 2 has a 0 chapter aka a single chapter that is represented as a volume. We don't show in Chapters area
+        Assert.Equal(3, detail.Chapters.Count());
 
         Assert.NotEmpty(detail.Volumes);
-        Assert.Equal(3, detail.Volumes.Count());
+        Assert.Equal(2, detail.Volumes.Count());
     }
 
     [Fact]
@@ -277,6 +278,46 @@ public class SeriesServiceTests
 
         Assert.Empty(detail.Chapters); // A book library where all books are Volumes, will show no "chapters" on the UI because it doesn't make sense
         Assert.Equal(2, detail.Volumes.Count());
+    }
+
+    [Fact]
+    public async Task SeriesDetail_WhenBookLibrary_ShouldReturnVolumesAndSpecial()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", true, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.NotEmpty(detail.Volumes);
+        Assert.Equal("2 - Ano Orokamono ni mo Kyakkou wo! - Volume 2", detail.Volumes.ElementAt(0).Name);
+
+        Assert.NotEmpty(detail.Specials);
+        Assert.Equal("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", detail.Specials.ElementAt(0).Range);
+
+        // A book library where all books are Volumes, will show no "chapters" on the UI because it doesn't make sense
+        Assert.Empty(detail.Chapters);
+
+        Assert.Equal(1, detail.Volumes.Count());
     }
 
     [Fact]

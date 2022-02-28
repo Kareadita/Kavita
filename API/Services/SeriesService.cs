@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -217,13 +218,33 @@ public class SeriesService : ISeriesService
         var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
+        var processedVolumes = new List<VolumeDto>();
         if (libraryType == LibraryType.Book)
         {
             foreach (var volume in volumes)
             {
                 var firstChapter = volume.Chapters.First();
-                if (!string.IsNullOrEmpty(firstChapter.TitleName)) volume.Name += $" - {firstChapter.TitleName}";
+                // On Books, skip volumes that are specials, since these will be shown
+                if (firstChapter.IsSpecial) continue;
+                if (string.IsNullOrEmpty(firstChapter.TitleName))
+                {
+                    if (!firstChapter.Range.Equals(Parser.Parser.DefaultVolume))
+                    {
+                        var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
+                        if (string.IsNullOrEmpty(title)) continue;
+                        volume.Name += $" - {title}";
+                    }
+                }
+                else
+                {
+                    volume.Name += $" - {firstChapter.TitleName}";
+                }
+                processedVolumes.Add(volume);
             }
+        }
+        else
+        {
+            processedVolumes = volumes.Where(v => v.Number > 0).ToList();
         }
 
 
@@ -233,14 +254,26 @@ public class SeriesService : ISeriesService
             chapter.Title = Parser.Parser.CleanSpecialTitle(chapter.Title);
             specials.Add(chapter);
         }
+
+        // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
+        IEnumerable<ChapterDto> retChapters;
+        if (libraryType == LibraryType.Book)
+        {
+            retChapters = Array.Empty<ChapterDto>();
+        } else
+        {
+            retChapters = chapters
+                .Where(ShouldIncludeChapter)
+                .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
+        }
+
+
+
         return new SeriesDetailDto()
         {
             Specials = specials,
-            // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
-            Chapters = chapters
-                .Where(ShouldIncludeChapter)
-                .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()),
-            Volumes = volumes,
+            Chapters = retChapters,
+            Volumes = processedVolumes,
             StorylineChapters = volumes
                 .Where(v => v.Number == 0)
                 .SelectMany(v => v.Chapters)

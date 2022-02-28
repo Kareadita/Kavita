@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
-import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -16,7 +15,6 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
 const routes: Routes = [
-  {path: '', component: UserLoginComponent},
   {
     path: 'admin',
     canActivate: [AdminGuard],
@@ -36,6 +34,10 @@ const routes: Routes = [
     path: 'lists',
     canActivate: [AuthGuard],
     loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
+  },
+  {
+    path: 'registration',
+    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
   },
   {
     path: '',
@@ -66,13 +68,10 @@ const routes: Routes = [
 
     ]
   },
-  {
-    path: 'registration',
-    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
-  },
-  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
-  {path: 'no-connection', component: NotConnectedComponent},
   {path: 'theme', component: ThemeTestComponent},
+  
+  {path: '', component: UserLoginComponent},
+  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
   {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];
 

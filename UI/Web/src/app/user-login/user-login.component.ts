@@ -86,7 +86,7 @@ export class UserLoginComponent implements OnInit {
 
       // Check if user came here from another url, else send to library route
       const pageResume = localStorage.getItem('kavita--auth-intersection-url');
-      if (pageResume && pageResume !== '/no-connection' && pageResume !== '/login') {
+      if (pageResume && pageResume !== '/login') {
         localStorage.setItem('kavita--auth-intersection-url', '');
         this.router.navigateByUrl(pageResume);
       } else {
