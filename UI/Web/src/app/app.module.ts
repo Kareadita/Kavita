@@ -17,7 +17,6 @@ import { LibraryComponent } from './library/library.component';
 import { SharedModule } from './shared/shared.module';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
-import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
@@ -29,7 +28,6 @@ import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
 import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
-import { ConfigData } from './_models/config-data';
 import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
 import { PersonRolePipe } from './_pipes/person-role.pipe';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
@@ -48,7 +46,6 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
     LibraryComponent, 
     LibraryDetailComponent, 
     SeriesDetailComponent, 
-    NotConnectedComponent, // Move into ExtrasModule
     ReviewSeriesModalComponent,
     RecentlyAddedComponent,
     OnDeckComponent,
@@ -99,7 +96,7 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     Title,
     {provide: SAVER, useFactory: getSaver},
-    { provide: APP_BASE_HREF, useFactory: (config: ConfigData) => config.baseUrl, deps: [ConfigData] },
+    // { provide: APP_BASE_HREF, useFactory: (config: ConfigData) => config.baseUrl, deps: [ConfigData] },
   ],
   entryComponents: [],
   bootstrap: [AppComponent]
