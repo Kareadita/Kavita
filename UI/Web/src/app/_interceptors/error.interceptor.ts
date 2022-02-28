@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
@@ -8,14 +8,12 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, take } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
-import { environment } from 'src/environments/environment';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
-  public urlKey: string = 'kavita--no-connection-url';
   constructor(private router: Router, private toastr: ToastrService, private accountService: AccountService) {}
 
 
@@ -120,8 +118,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   private handleAuthError(error: any) {
     // NOTE: Signin has error.error or error.statusText available. 
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      this.accountService.logout();
-    });
+    this.accountService.logout();
+    this.router.navigateByUrl('/login');
   }
 }
