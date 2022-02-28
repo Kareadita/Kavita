@@ -74,8 +74,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   hasSpecials = false;
   specials: Array<Chapter> = [];
   activeTabId = TabID.Storyline;
-  hasNonSpecialVolumeChapters = false;
-  hasNonSpecialNonVolumeChapters = false;
 
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
@@ -359,7 +357,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
       this.seriesService.getSeriesDetail(this.seriesId).subscribe(detail => {
-        this.hasSpecials = detail.specials.length > 0
+        this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
 
         this.chapters = detail.chapters;
@@ -380,30 +378,23 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
-    // This shows Chapters/Issues tab
-
-    // If this has chapters that are not specials
-    if (this.chapters.filter(c => !c.isSpecial).length > 0) {
-      this.hasNonSpecialNonVolumeChapters = true;
+    
+    // Book libraries only have Volumes or Specials enabled
+    if (this.libraryType === LibraryType.Book) {
+      if (this.volumes.length === 0) {
+        this.activeTabId = TabID.Specials;
+      } else {
+        this.activeTabId = TabID.Volumes;
+      }
+      return;
     }
 
-    // This shows Volumes tab
-    if (this.volumes.filter(v => v.number !== 0).length !== 0) {
-      this.hasNonSpecialVolumeChapters = true;
-    }
-
-    // If an update occured and we were on specials, re-activate Volumes/Chapters
-    if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != TabID.Storyline) {
-      this.activeTabId = TabID.Storyline;
-    }
-
-    if (this.libraryType == LibraryType.Book && !this.hasSpecials){
-      this.activeTabId = TabID.Volumes;
-    } else if (this.hasNonSpecialVolumeChapters || this.hasNonSpecialNonVolumeChapters) {
-      this.activeTabId = TabID.Storyline;
-    } else {
+    if (this.volumes.length === 0 && this.chapters.length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
+    } else {
+      this.activeTabId = TabID.Storyline;
     }
+
   }
 
   createHTML() {
