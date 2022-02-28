@@ -2,12 +2,13 @@
     padding: 10px 0;
     width: 190px;
     background-color: var(--sidenav-bg-color);
-    height: calc(100vh - 58px);
+    height: calc(100vh - 56px);
     position: fixed;
     margin: 0;
     left: 0;
     transition: width var(--sidenav-openclose-transition);
     box-shadow: inset -3px 0em 5px 0em rgb(0 0 0 / 50%);
+    overflow: auto;
 
     &.closed {
         width: 50px;
@@ -20,17 +21,19 @@
         padding: 10px 0;
         width: 90vw;
         background-color: var(--sidenav-mobile-bg-color);
-        height: calc(100vh - 58px);
+        height: calc(100vh - 56px);
         position: fixed;
         margin: 0;
         left: 0;
         transition: width var(--sidenav-openclose-transition);
-        box-shadow: inset -3px 0em 5px 0em rgb(0 0 0 / 50%);
+        box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
         z-index: 999;
+        overflow: auto;
     
         &.closed {
             width: 0;
             overflow: hidden;
+            box-shadow: none;
         }
     }
 }
