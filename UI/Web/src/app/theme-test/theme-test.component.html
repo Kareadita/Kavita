@@ -147,5 +147,37 @@
     </ul>
 </div>
 
-<h2></h2>
+<h2>Accordion</h2>
+<ngb-accordion [closeOthers]="true" activeIds="reading-panel" #acc="ngbAccordion">
+    <ngb-panel id="reading-panel" title="Reading">
+        <ng-template ngbPanelHeader>
+            <h2 class="accordion-header">
+                <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
+                    Reading
+                  </button>
+            </h2>
+          </ng-template>
+        <ng-template ngbPanelContent>
+            <p>This is the body of the accordion...........This is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf as</p>
+        </ng-template>
+    </ngb-panel>
+
+    <ngb-panel id="reading-panel2">
+        <ng-template ngbPanelHeader>
+            <h2 class="accordion-header">
+                <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
+                    Header 2
+                  </button>
+            </h2>
+          </ng-template>
+        <ng-template ngbPanelContent>
+            <p>This is the body of the accordion asdfasdf as
+                dfas 
+                f asdfasdfasdf asdfasdfaaff asdf
+                as fd
+                asfasf asdfasdfafd 
+            </p>
+        </ng-template>
+    </ngb-panel>
+</ngb-accordion>
 
