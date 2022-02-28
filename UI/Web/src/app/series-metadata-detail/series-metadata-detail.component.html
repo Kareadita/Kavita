@@ -14,6 +14,9 @@
         <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo('format', series.format)" [selectionMode]="TagBadgeCursor.Clickable">
             <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
         </app-tag-badge>
+        <app-tag-badge title="Last Read" class="col-auto" *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'"  [selectionMode]="TagBadgeCursor.Selectable">
+            Last Read: {{series.latestReadDate | date:'shortDate'}}
+        </app-tag-badge>
     </ng-container>
 </div>
 

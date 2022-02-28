@@ -469,6 +469,7 @@ public class SeriesRepository : ISeriesRepository
             if (rating == null) continue;
             s.UserRating = rating.Rating;
             s.UserReview = rating.Review;
+            s.LatestReadDate = userProgress.Max(p => p.LastModified);
         }
     }
 
