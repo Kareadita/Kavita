@@ -52,7 +52,7 @@
                 <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
             <div *ngIf="seriesMetadata" class="mt-2">
-                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [series]="series"></app-series-metadata-detail>
+                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"></app-series-metadata-detail>
             </div>
 
 

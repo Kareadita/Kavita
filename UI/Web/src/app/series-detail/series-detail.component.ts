@@ -19,6 +19,7 @@ import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { LibraryType } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
+import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
@@ -29,6 +30,7 @@ import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
+import { ReadingListService } from '../_services/reading-list.service';
 import { SeriesService } from '../_services/series.service';
 
 
@@ -78,6 +80,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
+  readingLists: Array<ReadingList> = [];
   /**
    * Poster image for the Series
    */
@@ -171,6 +174,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
+              private readingListService: ReadingListService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -332,6 +336,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.coverImageOffset = 0;
 
     this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
+    this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
+      this.readingLists = lists;
+    });
     this.setContinuePoint();
 
     forkJoin([
