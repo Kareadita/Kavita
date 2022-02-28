@@ -6,9 +6,12 @@
 .navbar {
     background-color: var(--navbar-bg-color);
 
-    #side-nav-toggle {
+    .side-nav-toggle {
         cursor: pointer;
         font-size: 25px;
+        i {
+            color: var(--btn-primary-text-color);
+        }
     }
 }
 

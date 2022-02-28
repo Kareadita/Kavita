@@ -2,18 +2,22 @@
     padding: 10px 0;
     width: 190px;
     background-color: var(--side-nav-bg-color);
-    height: calc(100vh - 56px);
+    height: calc(100vh - 76px);
     position: fixed;
     margin: 0;
-    left: 0;
-    transition: width var(--side-nav-openclose-transition);
+    left: 10px;
+    top: 66px;
+    border-radius: var(--side-nav-border-radius);
+    transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition);
     box-shadow: var(--side-nav-box-shadow);
     overflow: auto;
+    border: var(--side-nav-border);
 
     &.closed {
         width: 50px;
         overflow-x: hidden;
         overflow-y: auto;
+        background-color: var(--side-nav-closed-bg-color);
     }
 }
 
@@ -30,6 +34,7 @@
         box-shadow: var(--side-nav-mobile-box-shadow);
         z-index: 999;
         overflow: auto;
+        border: var(--side-nav-mobile-border);
     
         &.closed {
             width: 0;

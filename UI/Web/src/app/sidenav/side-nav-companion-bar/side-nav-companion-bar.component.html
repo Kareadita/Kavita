@@ -1,6 +1,6 @@
 <div class="mt-3 ms-1 me-1">
     <div class="row g-0">
-        <div class="col-auto">
+        <div class="col-auto mr-auto">
             <ng-container *ngIf="showGoBack">
                 <button class="btn btn-icon" (click)="goBack()">
                     <i class="fa-solid fa-left-long" aria-hidden="true"></i>
@@ -8,18 +8,20 @@
                 </button>
             </ng-container>
         </div>
-        <div class="col-auto">
+        <div class="col mr-auto">
             <ng-content select="[title]"></ng-content>
         </div>
-        <div class="col-auto offset-md-4">
+        <div class="col mr-auto">
             <ng-content select="[main]"></ng-content>
         </div>
-        <div class="col-auto offset-md-4" *ngIf="hasFilter">
-            <div class="col-auto align-self-end">
-                <button *ngIf="hasFilter" class="btn btn-secondary btn-small" (click)="toggleFilter()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
-                    <i class="fa fa-filter" aria-hidden="true"></i>
-                    <span class="visually-hidden">Sort / Filter</span>
-                </button>
+        <div class="col" *ngIf="hasFilter">
+            <div class="row justify-content-end">
+                <div class="col-auto align-self-end">
+                    <button *ngIf="hasFilter" class="btn btn-secondary btn-small" (click)="toggleFilter()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
+                        <i class="fa fa-filter" aria-hidden="true"></i>
+                        <span class="visually-hidden">Sort / Filter</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

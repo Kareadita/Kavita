@@ -2,7 +2,7 @@
 a:not(.dark-exempt) {
     color: var(--primary-color);
     > i {
-      color: var(--primary-color) !important;
+      color: var(--primary-color);
     }
   }
 
@@ -20,7 +20,7 @@ a.read-more-link {
     text-decoration: none;
     color: var(--body-text-color);
     cursor: pointer;
-    color: var(--body-text-color) !important;
+    color: var(--body-text-color);
 
     &:hover {
       text-decoration: none;
