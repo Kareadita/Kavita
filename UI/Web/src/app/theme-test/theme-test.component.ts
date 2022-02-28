@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { ThemeService } from '../theme.service';
+import { MangaFormat } from '../_models/manga-format';
+import { Person, PersonRole } from '../_models/person';
+import { Series } from '../_models/series';
 import { NavService } from '../_services/nav.service';
 
 @Component({
@@ -19,6 +22,47 @@ export class ThemeTestComponent implements OnInit {
     {title: 'Changelog', fragment: 'changelog'},
   ];
   active = this.tabs[0];
+
+  people: Array<Person> = [
+    {id: 1, name: 'Joe', role: PersonRole.Artist},
+    {id: 2, name: 'Joe 2', role: PersonRole.Artist},
+  ];
+
+  seriesNotRead: Series = {
+    id: 1,
+    name: 'Test Series',
+    pages: 0,
+    pagesRead: 10,
+    format: MangaFormat.ARCHIVE,
+    libraryId: 1,
+    coverImageLocked: false,
+    created: '',
+    latestReadDate: '',
+    localizedName: '',
+    originalName: '',
+    sortName: '', 
+    userRating: 0,
+    userReview: '', 
+    volumes: []
+  }
+
+  seriesWithProgress: Series = {
+    id: 1,
+    name: 'Test Series',
+    pages: 5,
+    pagesRead: 10,
+    format: MangaFormat.ARCHIVE,
+    libraryId: 1,
+    coverImageLocked: false,
+    created: '',
+    latestReadDate: '',
+    localizedName: '',
+    originalName: '',
+    sortName: '', 
+    userRating: 0,
+    userReview: '', 
+    volumes: []
+  }
 
   get TagBadgeCursor(): typeof TagBadgeCursor {
     return TagBadgeCursor;

@@ -20,22 +20,15 @@
             </div>
         </div>
 
-        <!-- <div class="mb-3">
-            <label for="settings-baseurl">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
-            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</ng-template>
-            <span class="visually-hidden" id="settings-baseurl-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</span>
-            <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text">
-        </div> -->
-
         <div class="row g-0 mb-2">
-            <div class="form-group col-md-6 col-sm-12 pe-2">
+            <div class="col-md-6 col-sm-12 pe-2">
                 <label for="settings-port" class="form-label">Port</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="portTooltip" role="button" tabindex="0"></i>
                 <ng-template #portTooltip>Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</ng-template>
                 <span class="visually-hidden" id="settings-port-help">Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</span>
                 <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
             </div>
     
-            <div class="form-group col-md-6 col-sm-12">
+            <div class="col-md-6 col-sm-12">
                 <label for="logging-level-port" class="form-label">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
                 <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space. Requires restart to take effect.</ng-template>
                 <span class="visually-hidden" id="logging-level-port-help">Port the server listens on. Requires restart to take effect.</span>

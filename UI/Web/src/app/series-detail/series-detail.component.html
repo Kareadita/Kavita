@@ -52,7 +52,7 @@
                 <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
             <div *ngIf="seriesMetadata" class="mt-2">
-                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [series]="series"></app-series-metadata-detail>
+                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"></app-series-metadata-detail>
             </div>
 
 
@@ -63,7 +63,7 @@
         <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
-              <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Specials'}}</a>
+              <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
                 <div class="row g-0">
                     <ng-container *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
@@ -74,7 +74,7 @@
                 </div>
               </ng-template>
             </li>
-            <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (hasNonSpecialVolumeChapters || hasNonSpecialNonVolumeChapters)">
+            <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
                     <div class="row g-0">
@@ -91,7 +91,7 @@
                     </div>
                 </ng-template>
             </li>
-            <li [ngbNavItem]="TabID.Volumes" *ngIf="hasNonSpecialVolumeChapters">
+            <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
                 <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Volumes'}}</a>
                 <ng-template ngbNavContent>
                     <div class="row g-0">
@@ -103,7 +103,7 @@
                     </div>
                 </ng-template>
               </li>
-            <li [ngbNavItem]="TabID.Chapters" *ngIf="hasNonSpecialNonVolumeChapters">
+            <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
                 <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
                 <ng-template ngbNavContent>
                     <div class="row g-0">

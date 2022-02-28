@@ -18,6 +18,10 @@ namespace API.DTOs
         /// </summary>
         public int PagesRead { get; set; }
         /// <summary>
+        /// DateTime representing last time the series was Read. Calculated at API-time.
+        /// </summary>
+        public DateTime LatestReadDate { get; set; }
+        /// <summary>
         /// Rating from logged in user. Calculated at API-time.
         /// </summary>
         public int UserRating { get; set; }
