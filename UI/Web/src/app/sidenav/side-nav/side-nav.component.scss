@@ -12,7 +12,8 @@
 
     &.closed {
         width: 50px;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 }
 

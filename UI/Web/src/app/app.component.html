@@ -1,5 +1,5 @@
 <app-nav-header></app-nav-header>
-<div [ngStyle]="(navService?.navbarVisible$ | async) ? {'padding-top': 'calc(56px)', 'height': '100%'} : {}">
+<div [ngStyle]="(navService?.navbarVisible$ | async) ? {'padding': 'calc(56px) 10px 0', 'height': '100%'} : {}">
     <a id="content"></a>
     <app-side-nav></app-side-nav>
     <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService?.sideNavVisible$ | async)}" [ngStyle]="(navService?.sideNavVisible$ | async) ? {} : {}">

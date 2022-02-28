@@ -1,22 +1,21 @@
 .companion-bar {
     transition: all 0.15s linear;
-    margin-left: 60px;
-    padding-left: 10px;
+    margin-left: 50px;
 }
 
 .companion-bar-content {
-    margin-left: 200px;
+    margin-left: 190px;
     width: auto;
 }
 
 @media (max-width: 576px) {
     .companion-bar {
-        margin-left: 10px;
-        padding-left: 10px;
+        margin-left: 0px;
+        padding-left: 0px;
     }
 
     .companion-bar-content {
-        margin-left: 10px;
+        margin-left: 0px;
         width: auto;
     }
 }
