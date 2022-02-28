@@ -68,7 +68,8 @@ public class ReadingListRepository : IReadingListRepository
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId, bool includePromoted)
     {
         var query = _context.ReadingList
-            .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ) && l.Items.Any(i => i.SeriesId == seriesId))
+            .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
+            .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
             .OrderBy(l => l.LastModified)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
