@@ -14,13 +14,13 @@ namespace API.Controllers;
 public class ThemeController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ISiteThemeService _siteThemeService;
+    private readonly IThemeService _themeService;
     private readonly ITaskScheduler _taskScheduler;
 
-    public ThemeController(IUnitOfWork unitOfWork, ISiteThemeService siteThemeService, ITaskScheduler taskScheduler)
+    public ThemeController(IUnitOfWork unitOfWork, IThemeService themeService, ITaskScheduler taskScheduler)
     {
         _unitOfWork = unitOfWork;
-        _siteThemeService = siteThemeService;
+        _themeService = themeService;
         _taskScheduler = taskScheduler;
     }
 
@@ -51,9 +51,16 @@ public class ThemeController : BaseApiController
 
     [Authorize("RequireAdminRole")]
     [HttpPost("update-default")]
-    public async Task<ActionResult> UpdateDefault(UpdateDefaultSiteThemeDto dto)
+    public async Task<ActionResult> UpdateDefault(UpdateDefaultThemeDto dto)
     {
-        await _siteThemeService.UpdateDefault(dto.ThemeId);
+        await _themeService.UpdateDefault(dto.ThemeId);
+        return Ok();
+    }
+    [Authorize("RequireAdminRole")]
+    [HttpPost("update-default-book")]
+    public async Task<ActionResult> UpdateDefaultBookTheme(UpdateDefaultThemeDto dto)
+    {
+        await _themeService.UpdateDefaultBookTheme(dto.ThemeId);
         return Ok();
     }
 
@@ -66,7 +73,7 @@ public class ThemeController : BaseApiController
     {
         try
         {
-            return Ok(await _siteThemeService.GetContent(themeId));
+            return Ok(await _themeService.GetContent(themeId));
         }
         catch (KavitaException ex)
         {
@@ -83,7 +90,7 @@ public class ThemeController : BaseApiController
     {
         try
         {
-            return Ok(await _siteThemeService.GetBookThemeContent(themeId));
+            return Ok(await _themeService.GetBookThemeContent(themeId));
         }
         catch (KavitaException ex)
         {

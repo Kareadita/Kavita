@@ -56,6 +56,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAllUsers();
 
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
+    Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByBookThemeAsync(int bookThemeId);
 }
 
 public class UserRepository : IUserRepository
@@ -233,6 +234,15 @@ public class UserRepository : IUserRepository
         return await _context.AppUserPreferences
             .Include(p => p.Theme)
             .Where(p => p.Theme.Id == themeId)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByBookThemeAsync(int bookThemeId)
+    {
+        return await _context.AppUserPreferences
+            .Include(p => p.BookTheme)
+            .Where(p => p.BookTheme.Id == bookThemeId)
             .AsSplitQuery()
             .ToListAsync();
     }

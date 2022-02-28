@@ -11,13 +11,13 @@ import { SiteTheme, ThemeProvider } from './_models/preferences/site-theme';
 import { EVENTS, MessageHubService } from './_services/message-hub.service';
 
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class ThemeService implements OnDestroy {
 
   public defaultTheme: string = 'dark';
+  public defaultBookTheme!: BookTheme;
 
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
@@ -29,7 +29,7 @@ export class ThemeService implements OnDestroy {
   public themes$ = this.themesSource.asObservable();
 
   private bookThemesSource = new ReplaySubject<BookTheme[]>(1);
-  public bookThemes$ = this.themesSource.asObservable();
+  public bookThemes$ = this.bookThemesSource.asObservable();
 
   /**
    * Maintain a cache of themes. SignalR will inform us if we need to refresh cache
@@ -56,10 +56,11 @@ export class ThemeService implements OnDestroy {
 
       if (message.event !== EVENTS.NotificationProgress) return;
       const notificationEvent = (message.payload as NotificationProgressEvent);
-      if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
+      if (notificationEvent.name !== EVENTS.SiteThemeProgress && notificationEvent.name !== EVENTS.BookThemeProgress) return;
 
       if (notificationEvent.eventType === 'ended') {
-        this.getThemes().subscribe(() => {});
+        if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe(() => {});
+        else if (notificationEvent.name === EVENTS.BookThemeProgress) this.getBookThemes().subscribe(() => {});
       }
     });
   }
@@ -93,6 +94,7 @@ export class ThemeService implements OnDestroy {
     return this.httpClient.get<BookTheme[]>(this.baseUrl + 'theme/book-themes').pipe(map(themes => {
       this.bookThemeCache = themes;
       this.bookThemesSource.next(themes);
+      this.defaultBookTheme = themes.find(t => t.isDefault)!;
       return themes;
     }));
   }
@@ -108,6 +110,13 @@ export class ThemeService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'theme/update-default', {themeId: themeId}).pipe(map(() => {
       // Refresh the cache when a default state is changed
       this.getThemes().subscribe(() => {});
+    }));
+  }
+
+  setDefaultBookTheme(themeId: number) {
+    return this.httpClient.post(this.baseUrl + 'theme/update-default-book', {themeId: themeId}).pipe(map(() => {
+      // Refresh the cache when a default state is changed
+      this.getBookThemes().subscribe(() => {});
     }));
   }
 
@@ -203,4 +212,5 @@ export class ThemeService implements OnDestroy {
   private unsetThemes() {
     this.themeCache.forEach(theme => this.document.body.classList.remove(theme.selector));
   }
+  
 }

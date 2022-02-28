@@ -47,7 +47,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * Outputs when a theme/dark mode is updated
    */
-  @Output() colorThemeUpdate: EventEmitter<{theme: BookTheme, darkMode: boolean}> = new EventEmitter();
+  @Output() colorThemeUpdate: EventEmitter<BookTheme> = new EventEmitter();
   /**
    * Outputs when fullscreen is toggled
    */
@@ -74,22 +74,13 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
   settingsForm: FormGroup = new FormGroup({});
 
-  themes: Array<BookTheme> = [
-    // {
-    //   id: 1,
-    //   name: 'Dark',
-    //   selector: 'brtheme-dark',
-    //   colorHash: '#010409',
-    //   provider: ThemeProvider.System
-    // },
-    // {
-    //   id: 2,
-    //   name: 'White',
-    //   selector: 'brtheme-white',
-    //   colorHash: '#FFFFFF',
-    //   provider: ThemeProvider.System
-    // }
-  ];
+  /**
+   * System provided themes
+   */
+  themes: Array<BookTheme> = [];
+  /**
+   * User provided themes
+   */
   userThemes: Array<BookTheme> = [];
 
 
@@ -203,10 +194,12 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
       console.log('line spacing: ', this.user.preferences.bookReaderLineSpacing);
       
-      this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
+      //this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
+      this.setTheme(this.user.preferences.bookReaderTheme || this.themeService.defaultBookTheme);
     } else {
       this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};
-      this.toggleDarkMode(false);
+      //this.toggleDarkMode(false);
+      this.setTheme(this.themeService.defaultBookTheme);
     }
     
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
@@ -214,31 +207,24 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   }
 
   setTheme(theme: BookTheme) {
-    if (theme.name === 'Dark') {
-      this.toggleDarkMode(true);
-      this.settingsForm.get('bookReaderDarkMode')?.setValue(true);
-    } else if (theme.name === 'White') {
-      this.toggleDarkMode(false);
-      this.settingsForm.get('bookReaderDarkMode')?.setValue(false);
-    }
-    //this.colorThemeUpdate.emit({theme, 'darkMode': this.darkMode});
+    this.colorThemeUpdate.emit(theme);
   }
 
-  toggleDarkMode(force?: boolean) {
-    let theme = this.themes[0];
-    if (force !== undefined) {
-      this.darkMode = force;
-    } else {
-      this.darkMode = !this.darkMode;
-    }
-    if (this.darkMode) {
-      theme = this.themes.filter(t => t.name === 'Dark')[0];
-    } else {
-      theme = this.themes.filter(t => t.name === 'White')[0];
-    }
+  // toggleDarkMode(force?: boolean) {
+  //   let theme = this.themes[0];
+  //   if (force !== undefined) {
+  //     this.darkMode = force;
+  //   } else {
+  //     this.darkMode = !this.darkMode;
+  //   }
+  //   if (this.darkMode) {
+  //     theme = this.themes.filter(t => t.name === 'Dark')[0];
+  //   } else {
+  //     theme = this.themes.filter(t => t.name === 'White')[0];
+  //   }
 
-    this.colorThemeUpdate.emit({theme, 'darkMode': this.darkMode});
-  }
+  //   this.colorThemeUpdate.emit({theme, 'darkMode': this.darkMode});
+  // }
 
   toggleReadingDirection() {
     if (this.readingDirection === ReadingDirection.LeftToRight) {

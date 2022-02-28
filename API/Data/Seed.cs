@@ -58,10 +58,11 @@ namespace API.Data
             {
                 Name = "Dark",
                 NormalizedName = Parser.Parser.Normalize("Dark"),
-                ColorHash = "#010409",
+                ColorHash = "#292929",
                 Provider = ThemeProvider.System,
                 FileName = string.Empty,
                 IsDefault = true,
+                IsDarkTheme = true,
                 SortOrder = 1
             },
             new()
@@ -72,6 +73,7 @@ namespace API.Data
                 Provider = ThemeProvider.System,
                 FileName = string.Empty,
                 IsDefault = false,
+                IsDarkTheme = true,
                 SortOrder = 2
             },
             new()
@@ -82,6 +84,7 @@ namespace API.Data
                 Provider = ThemeProvider.System,
                 FileName = string.Empty,
                 IsDefault = false,
+                IsDarkTheme = false,
                 SortOrder = 3
             },
         };
@@ -125,6 +128,14 @@ namespace API.Data
                 if (existing == null)
                 {
                     await context.BookTheme.AddAsync(theme);
+                }
+                else
+                {
+                    existing.ColorHash = theme.ColorHash;
+                    existing.IsDefault = theme.IsDefault;
+                    existing.SortOrder = theme.SortOrder;
+                    existing.IsDarkTheme = theme.IsDarkTheme;
+                    context.BookTheme.Attach(existing);
                 }
             }
 

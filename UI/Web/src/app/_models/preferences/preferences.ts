@@ -1,4 +1,5 @@
 
+import { BookTheme } from './book-theme';
 import { PageSplitOption } from './page-split-option';
 import { READER_MODE } from './reader-mode';
 import { ReadingDirection } from './reading-direction';
@@ -21,6 +22,7 @@ export interface Preferences {
     bookReaderFontFamily: string;
     bookReaderTapToPaginate: boolean;
     bookReaderReadingDirection: ReadingDirection;
+    bookReaderTheme?: BookTheme;
 
     // Global
     theme: SiteTheme;

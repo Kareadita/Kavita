@@ -129,6 +129,12 @@ $primary-color: #0062cc;
 
 .book-content {
     position: relative;
+
+    a, :link {
+        color: var(--brtheme-link-text-color);
+    }
+
+    background-color: var(--brtheme-bg-color);
 }
 
 // A bunch of resets so books render correctly

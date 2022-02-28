@@ -8,7 +8,7 @@ namespace API.Entities;
 /// <summary>
 /// Represents a set of css overrides the user can upload to Kavita and will load into webui
 /// </summary>
-public class SiteTheme : IEntityDate
+public class SiteTheme : IEntityDate, ITheme
 {
     public int Id { get; set; }
     /// <summary>

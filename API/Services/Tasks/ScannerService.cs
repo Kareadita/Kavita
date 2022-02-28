@@ -341,6 +341,7 @@ public class ScannerService : IScannerService
 
         // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
         //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
     }
 

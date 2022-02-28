@@ -5,27 +5,32 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums.Theme;
+using API.Entities.Interfaces;
 using API.SignalR;
+using ExCSS;
 using Kavita.Common;
 using Microsoft.AspNetCore.SignalR;
 
 namespace API.Services.Tasks;
 
-public interface ISiteThemeService
+public interface IThemeService
 {
     Task<string> GetContent(int themeId);
     Task<string> GetBookThemeContent(int bookThemeId);
     Task Scan();
     Task UpdateDefault(int themeId);
+    Task UpdateDefaultBookTheme(int themeId);
 }
 
-public class SiteThemeService : ISiteThemeService
+public class ThemeService : IThemeService
 {
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
 
-    public SiteThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork, IEventHub eventHub)
+    private readonly StylesheetParser _cssParser = new ();
+
+    public ThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork, IEventHub eventHub)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
@@ -57,8 +62,7 @@ public class SiteThemeService : ISiteThemeService
     {
         var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(bookThemeId);
         if (theme == null) throw new KavitaException("Theme file missing or invalid");
-
-        //var directory = theme.Provider == ThemeProvider.System ? "wwwroot/" : _directoryService.BookThemeDirectory;
+        if (theme.Provider == ThemeProvider.System) throw new KavitaException("System themes are not loaded via API");
 
 
         var themeFile = _directoryService.FileSystem.Path.Join(_directoryService.BookThemeDirectory, theme.FileName);
@@ -73,9 +77,16 @@ public class SiteThemeService : ISiteThemeService
     /// </summary>
     public async Task Scan()
     {
+        await ScanSiteTheme();
+        await ScanBookTheme();
+    }
+
+    private async Task ScanSiteTheme()
+    {
         _directoryService.ExistOrCreate(_directoryService.SiteThemeDirectory);
         var reservedNames = Seed.DefaultThemes.Select(t => t.NormalizedName).ToList();
-        var themeFiles = _directoryService.GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
+        var themeFiles = _directoryService
+            .GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
             .Where(name => !reservedNames.Contains(Parser.Parser.Normalize(name))).ToList();
 
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
@@ -111,7 +122,8 @@ public class SiteThemeService : ISiteThemeService
             });
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeName, ProgressEventType.Updated));
+                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeName,
+                    ProgressEventType.Updated));
         }
 
 
@@ -121,8 +133,66 @@ public class SiteThemeService : ISiteThemeService
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SiteThemeProgressEvent("",  "", ProgressEventType.Ended));
+            MessageFactory.SiteThemeProgressEvent("", "", ProgressEventType.Ended));
+    }
 
+    private async Task ScanBookTheme()
+    {
+        _directoryService.ExistOrCreate(_directoryService.BookThemeDirectory);
+        var reservedNames = Seed.DefaultBookThemes.Select(t => t.NormalizedName).ToList();
+        var themeFiles = _directoryService
+            .GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.BookThemeDirectory), @"\.css")
+            .Where(name => !reservedNames.Contains(Parser.Parser.Normalize(name))).ToList();
+
+        var allThemes = (await _unitOfWork.BookThemeRepository.GetThemes()).ToList();
+
+        // First remove any files from allThemes that are User Defined and not on disk
+        var userThemes = allThemes.Where(t => t.Provider == ThemeProvider.User).ToList();
+        foreach (var userTheme in userThemes)
+        {
+            var filepath = Parser.Parser.NormalizePath(
+                _directoryService.FileSystem.Path.Join(_directoryService.BookThemeDirectory, userTheme.FileName));
+            if (_directoryService.FileSystem.File.Exists(filepath)) continue;
+
+            // I need to do the removal different. I need to update all user preferences to use DefaultTheme
+            allThemes.Remove(userTheme);
+            await RemoveBookTheme(userTheme);
+        }
+
+        // Add new custom themes
+        var allThemeNames = allThemes.Select(t => t.NormalizedName).ToList();
+        foreach (var themeFile in themeFiles)
+        {
+            var themeName =
+                Parser.Parser.Normalize(_directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile));
+            if (allThemeNames.Contains(themeName)) continue;
+
+            //var styles = await _cssParser.ParseAsync(themeFile);
+
+            _unitOfWork.BookThemeRepository.Add(new BookTheme()
+            {
+                Name = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile),
+                NormalizedName = themeName,
+                FileName = _directoryService.FileSystem.Path.GetFileName(themeFile),
+                Provider = ThemeProvider.User,
+                IsDefault = false,
+                ColorHash = "#FFFFFF", // Should I load css and parse it?
+                IsDarkTheme = false
+            });
+
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.BookThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeName,
+                    ProgressEventType.Updated));
+        }
+
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+        }
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.BookThemeProgressEvent("", "", ProgressEventType.Ended));
     }
 
     /// <summary>
@@ -144,6 +214,24 @@ public class SiteThemeService : ISiteThemeService
     }
 
     /// <summary>
+    /// Removes the theme and any references to it from Pref and sets them to the default at the time.
+    /// This commits to DB.
+    /// </summary>
+    /// <param name="theme"></param>
+    private async Task RemoveBookTheme(BookTheme theme)
+    {
+        var prefs = await _unitOfWork.UserRepository.GetAllPreferencesByBookThemeAsync(theme.Id);
+        var defaultTheme = await _unitOfWork.BookThemeRepository.GetDefaultTheme();
+        foreach (var pref in prefs)
+        {
+            pref.BookTheme = defaultTheme;
+            _unitOfWork.UserRepository.Update(pref);
+        }
+        _unitOfWork.BookThemeRepository.Remove(theme);
+        await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
     /// Updates the themeId to the default theme, all others are marked as non-default
     /// </summary>
     /// <param name="themeId"></param>
@@ -160,6 +248,29 @@ public class SiteThemeService : ISiteThemeService
             {
                 siteTheme.IsDefault = (siteTheme.Id == themeId);
                 _unitOfWork.SiteThemeRepository.Update(siteTheme);
+            }
+
+            if (!_unitOfWork.HasChanges()) return;
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task UpdateDefaultBookTheme(int themeId)
+    {
+        try
+        {
+            var theme = await _unitOfWork.BookThemeRepository.GetThemeDto(themeId);
+            if (theme == null) throw new KavitaException("Theme file missing or invalid");
+
+            foreach (var siteTheme in await _unitOfWork.BookThemeRepository.GetThemes())
+            {
+                siteTheme.IsDefault = (siteTheme.Id == themeId);
+                _unitOfWork.BookThemeRepository.Update(siteTheme);
             }
 
             if (!_unitOfWork.HasChanges()) return;

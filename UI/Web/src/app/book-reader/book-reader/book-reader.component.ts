@@ -27,6 +27,93 @@ import { LibraryType } from 'src/app/_models/library';
 import { ThemeService } from 'src/app/theme.service';
 import { PageStyle } from '../reader-settings/reader-settings.component';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
+import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
+
+// Important note about themes. Must have one section with .reader-container that contains color, background-color and rest of the styles must be scoped to .book-content
+const BookDarkTheme = `
+.book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
+  color: #dcdcdc !important;
+}
+
+.book-content code {
+  color: #e83e8c !important;
+}
+
+.book-content :link, .book-content a {
+  color: #8db2e5 !important;
+}
+
+.book-content img, .book-content img[src] {
+z-index: 1;
+filter: brightness(0.85) !important;
+background-color: initial !important;
+}
+
+.reader-container {
+  color: #dcdcdc !important;
+  background-image: none !important;
+  background-color: #292929 !important;
+}
+
+.book-content *:not(code), .book-content *:not(a) {
+    background-color: #292929;
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: unset;
+    color: #dcdcdc !important;
+}
+  
+.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
+.book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
+`;
+
+const BookBlackTheme = `
+.reader-container {
+  color: #dcdcdc !important;
+  background-image: none !important;
+  background-color: #010409 !important;
+}
+
+.book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
+  color: #dcdcdc !important;
+}
+
+.book-content code {
+  color: #e83e8c !important;
+}
+
+.book-content :link, .book-content a {
+  color: #8db2e5 !important;
+}
+
+.book-content img, .book-content img[src] {
+z-index: 1;
+filter: brightness(0.85) !important;
+background-color: initial !important;
+}
+
+.book-content *:not(code), .book-content *:not(a) {
+    background-color: #010409;
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: unset;
+    color: #dcdcdc !important;
+}
+
+.book-content *:not(input), .book-content *:not(code), .book-content *:not(:link) {
+    color: #dcdcdc !important;
+}
+
+.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
+.book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
+`;
+
+const BookWhiteTheme = `
+  :root() .brtheme-white {
+    --brtheme-link-text-color: green;
+    --brtheme-bg-color: lightgrey;
+  }
+`;
 
 enum TabID {
   Settings = 1,
@@ -175,8 +262,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
   darkMode = false;
   backgroundColor: string = 'white';
-  readerStyles: string = '';
-  darkModeStyleElem!: HTMLElement;
   topOffset: number = 0; // Offset for drawer and rendering canvas
   /**
    * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
@@ -203,65 +288,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isFullscreen: boolean = false;
 
-
-  darkModeStyles = `
-    *:not(input), *:not(select), *:not(code), *:not(:link), *:not(.ngx-toastr) {
-        color: #dcdcdc !important;
-    }
-
-    code {
-        color: #e83e8c !important;
-    }
-
-    :link, a {
-        color: #8db2e5 !important;
-    }
-
-    img, img[src] {
-      z-index: 1;
-      filter: brightness(0.85) !important;
-      background-color: initial !important;
-    }
-
-      .reading-section {
-        color: #dcdcdc !important;
-        background-image: none !important;
-        background-color: #010409 !important;
-      }
-  
-      *:not(code), *:not(a) {
-          background-color: #010409;
-          box-shadow: none;
-          text-shadow: none;
-          border-radius: unset;
-          color: #dcdcdc !important;
-      }
-  
-      *:not(input), *:not(code), *:not(:link) {
-          color: #dcdcdc !important;
-      }
-  
-      code {
-          color: #e83e8c !important;
-      }
-  
-      .btn-icon {
-          background-color: transparent;
-      }
-  
-      :link, a {
-          color: #8db2e5 !important;
-      }
-  
-      img, img[src] {
-          z-index: 1;
-          filter: brightness(0.85) !important;
-          background-color: initial !important;
-      }
-        
-      :visited, :visited *, :visited *[class] {color: rgb(211, 138, 138) !important}
-      :link:not(cite), :link *:not(cite) {color: #8db2e5 !important}
-  `;
 
   get TabID(): typeof TabID {
     return TabID;
@@ -324,11 +350,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * based on the last seen scroll part (xpath).
    */
   ngAfterViewInit() {
-    // this.darkModeStyleElem = this.renderer.createElement('style');
-    // this.darkModeStyleElem.id = 'brtheme-default';
-    // this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem);
-    //this.darkModeStyleElem = this.document.querySelector('#brtheme-default');
-
     // check scroll offset and if offset is after any of the "id" markers, save progress
     fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
@@ -842,25 +863,35 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.darkMode ? '#292929' : '#fff';
   }
 
-  setOverrideStyles(event: {theme: BookTheme, darkMode: boolean}) {
-    this.darkMode = event.darkMode;
+  setOverrideStyles(theme: BookTheme) {
+    
 
     // TODO: Put optimization in to avoid any work if the theme is the same as selected (or have reading settings control handle that)
 
     // Remove all themes 
     Array.from(this.document.querySelectorAll('style[id^="brtheme-"]')).forEach(elem => elem.remove());
 
+    console.log('Setting Theme: ', theme);
+    this.darkMode = theme.isDarkTheme;
 
-    this.darkModeStyleElem = this.renderer.createElement('style');
-    this.darkModeStyleElem.id = event.theme.selector;
-    if (event.theme.name === 'Dark') {
-      this.darkModeStyleElem.innerHTML = this.darkModeStyles;
+    const styleElem = this.renderer.createElement('style');
+    styleElem.id = theme.selector;
+    if (theme.provider === ThemeProvider.System) {
+      if (theme.name === 'Dark') {
+        styleElem.innerHTML = BookDarkTheme;
+      } else if (theme.name === 'Black') {
+        styleElem.innerHTML = BookBlackTheme;
+      } else if (theme.name === 'White') {
+        styleElem.innerHTML = BookWhiteTheme;
+      }
     } else {
-      this.darkModeStyleElem.innerHTML = '';
+      alert('TODO: Implement Custom theme support');
+
     }
     
+    
     console.log('Injected dark styles into book-content')
-    this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem);
+    this.renderer.appendChild(this.document.querySelector('.reading-section'), styleElem);
   }
 
   toggleDrawer() {

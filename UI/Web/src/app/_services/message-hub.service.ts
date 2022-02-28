@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
-import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
+import { ThemeProgressEvent } from '../_models/events/theme-progress-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
@@ -38,6 +38,10 @@ export enum EVENTS {
    * A custom user site theme is added or removed during a scan
    */
   SiteThemeProgress = 'SiteThemeProgress',
+  /**
+   * A custom user book theme is added or removed during a scan
+   */
+  BookThemeProgress = 'BookThemeProgress',
   /**
    * A cover is updated
    */
@@ -138,7 +142,14 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SiteThemeProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.SiteThemeProgress,
-        payload: resp.body as SiteThemeProgressEvent
+        payload: resp.body as ThemeProgressEvent
+      });
+    });
+
+    this.hubConnection.on(EVENTS.BookThemeProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.BookThemeProgress,
+        payload: resp.body as ThemeProgressEvent
       });
     });
 

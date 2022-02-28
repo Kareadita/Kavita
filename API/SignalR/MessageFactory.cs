@@ -62,6 +62,10 @@ namespace API.SignalR
         /// </summary>
         private const string SiteThemeProgress = "SiteThemeProgress";
         /// <summary>
+        /// A custom book theme was removed or added
+        /// </summary>
+        private const string BookThemeProgress = "BookThemeProgress";
+        /// <summary>
         /// A type of event that has progress (determinate or indeterminate).
         /// The underlying event will have a name to give details on how to handle.
         /// </summary>
@@ -324,6 +328,22 @@ namespace API.SignalR
             {
                 Name = SiteThemeProgress,
                 Title = "Scanning Site Theme",
+                SubTitle = subtitle,
+                EventType = eventType,
+                Progress = ProgressType.Indeterminate,
+                Body = new
+                {
+                    ThemeName = themeName,
+                }
+            };
+        }
+
+        public static SignalRMessage BookThemeProgressEvent(string subtitle, string themeName, string eventType)
+        {
+            return new SignalRMessage()
+            {
+                Name = BookThemeProgress,
+                Title = "Scanning Book Theme",
                 SubTitle = subtitle,
                 EventType = eventType,
                 Progress = ProgressType.Indeterminate,

@@ -33,6 +33,10 @@ public class BookThemeDto
     /// </summary>
     public bool IsDefault { get; set; }
     /// <summary>
+    /// Is this theme providing dark mode to the reader aka Should we style the reader controls to be dark mode
+    /// </summary>
+    public bool IsDarkTheme { get; set; }
+    /// <summary>
     /// Where did the theme come from
     /// </summary>
     public ThemeProvider Provider { get; set; }

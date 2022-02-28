@@ -8,7 +8,7 @@ namespace API.Entities;
 /// <summary>
 /// Represents a set of css overrides the user can upload to Kavita and will load into the book reader. This affects styling of the content, not the UI controls.
 /// </summary>
-public class BookTheme : IEntityDate
+public class BookTheme : IEntityDate, ITheme
 {
     public int Id { get; set; }
     /// <summary>
@@ -34,7 +34,11 @@ public class BookTheme : IEntityDate
     /// </summary>
     public bool IsDefault { get; set; }
     /// <summary>
-    /// Internal order for sorting. Not changeable by the user.
+    /// Is this theme providing dark mode to the reader aka Should we style the reader controls to be dark mode
+    /// </summary>
+    public bool IsDarkTheme { get; set; }
+    /// <summary>
+    /// Internal order for sorting. Not changeable by the user. Only applies to System provided themes
     /// </summary>
     public int SortOrder { get; set; }
     /// <summary>
