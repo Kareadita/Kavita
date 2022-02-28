@@ -8,6 +8,7 @@ import { Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/co
 export class BadgeExpanderComponent implements OnInit {
 
   @Input() items: Array<any> = [];
+  @Input() itemsTillExpander: number = 4;
   @ContentChild('badgeExpanderItem') itemTemplate!: TemplateRef<any>;
 
 
@@ -15,12 +16,12 @@ export class BadgeExpanderComponent implements OnInit {
   isCollapsed: boolean = false;
 
   get itemsLeft() {
-    return Math.max(this.items.length - 4, 0);
+    return Math.max(this.items.length - this.itemsTillExpander, 0);
   }
   constructor() { }
 
   ngOnInit(): void {
-    this.visibleItems = this.items.slice(0, 4);
+    this.visibleItems = this.items.slice(0, this.itemsTillExpander);
   }
 
   toggleVisible() {

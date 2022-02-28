@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { ThemeService } from '../theme.service';
+import { Person, PersonRole } from '../_models/person';
 import { NavService } from '../_services/nav.service';
 
 @Component({
@@ -19,6 +20,11 @@ export class ThemeTestComponent implements OnInit {
     {title: 'Changelog', fragment: 'changelog'},
   ];
   active = this.tabs[0];
+
+  people: Array<Person> = [
+    {id: 1, name: 'Joe', role: PersonRole.Artist},
+    {id: 2, name: 'Joe 2', role: PersonRole.Artist},
+  ];
 
   get TagBadgeCursor(): typeof TagBadgeCursor {
     return TagBadgeCursor;
