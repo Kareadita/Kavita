@@ -21,6 +21,8 @@ export interface PageStyle {
   'margin-right': string;
 }
 
+const mobileBreakpointMarginOverride = 700;
+
 @Component({
   selector: 'app-reader-settings',
   templateUrl: './reader-settings.component.html',
@@ -184,56 +186,43 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   }
 
 
-  // TODO: Refactor this so that we first reset the form to user's settings then rebuild pageStyles
   resetSettings() {
-    const windowWidth = window.innerWidth
-      || this.document.documentElement.clientWidth
-      || this.document.body.clientWidth;
-
-    let margin = '15%';
-    if (windowWidth <= 700) {
-      margin = '5%';
-    }
     if (this.user) {
-      if (windowWidth > 700) {
-        margin = this.user.preferences.bookReaderMargin + '%';
-      }
-      this.pageStyles = {'font-family': this.user.preferences.bookReaderFontFamily, 'font-size': this.user.preferences.bookReaderFontSize + '%', 
-      'margin-left': margin, 'margin-right': margin, 'line-height': this.user.preferences.bookReaderLineSpacing + '%'};
-      console.log('line spacing: ', this.user.preferences.bookReaderLineSpacing);
-      
-      //this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
-      this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
+      this.setPageStyles(this.user.preferences.bookReaderFontFamily, this.user.preferences.bookReaderFontSize + '%', this.user.preferences.bookReaderMargin + '%', this.user.preferences.bookReaderLineSpacing + '%');
     } else {
-      this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};
-      //this.toggleDarkMode(false);
-      this.setTheme(this.themeService.defaultBookTheme);
+      this.setPageStyles();
     }
     
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
     this.styleUpdate.emit(this.pageStyles);
   }
 
+  /**
+   * Internal method to be used by resetSettings. Pass items in with quantifiers
+   */
+  setPageStyles(fontFamily?: string, fontSize?: string, margin?: string, lineHeight?: string, colorTheme?: string) {
+    const windowWidth = window.innerWidth
+      || this.document.documentElement.clientWidth
+      || this.document.body.clientWidth;
+
+    let defaultMargin = '15%';
+    if (windowWidth <= mobileBreakpointMarginOverride) {
+      defaultMargin = '5%';
+    }
+    this.pageStyles = {
+      'font-family': fontFamily || this.pageStyles['font-family'] || 'default',
+      'font-size': fontSize || this.pageStyles['font-size'] || '100%',
+      'margin-left': margin || this.pageStyles['margin-left']  || defaultMargin,
+      'margin-right': margin || this.pageStyles['margin-right']  || defaultMargin,
+      'line-height': lineHeight || this.pageStyles['line-height'] || '100%'
+    };
+
+  }
+
   setTheme(themeName: string) {
     const theme = this.themes.find(t => t.name == themeName);
     this.colorThemeUpdate.emit(theme);
   }
-
-  // toggleDarkMode(force?: boolean) {
-  //   let theme = this.themes[0];
-  //   if (force !== undefined) {
-  //     this.darkMode = force;
-  //   } else {
-  //     this.darkMode = !this.darkMode;
-  //   }
-  //   if (this.darkMode) {
-  //     theme = this.themes.filter(t => t.name === 'Dark')[0];
-  //   } else {
-  //     theme = this.themes.filter(t => t.name === 'White')[0];
-  //   }
-
-  //   this.colorThemeUpdate.emit({theme, 'darkMode': this.darkMode});
-  // }
 
   toggleReadingDirection() {
     if (this.readingDirection === ReadingDirection.LeftToRight) {
@@ -244,26 +233,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   }
 
   toggleFullscreen() {
-    // TODO: Emit event so main reader can handle
     this.fullscreen.emit();
-    // this.isFullscreen = this.readerService.checkFullscreenMode();
-    
-    // if (this.isFullscreen) {
-    //   this.readerService.exitFullscreen(() => {
-    //     this.isFullscreen = false;
-    //     this.renderer.removeStyle(this.reader.nativeElement, 'background');
-    //   });
-    // } else {
-    //   this.readerService.enterFullscreen(this.reader.nativeElement, () => {
-    //     this.isFullscreen = true;
-    //     // HACK: This is a bug with how browsers change the background color for fullscreen mode
-    //     if (!this.darkMode) {
-    //       this.renderer.setStyle(this.reader.nativeElement, 'background', 'white');
-    //     }
-    //   });
-    // }
   }
-
-
-
 }

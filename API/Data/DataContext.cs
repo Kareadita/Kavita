@@ -59,6 +59,10 @@ namespace API.Data
                 .WithOne(u => u.Role)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
+
+            builder.Entity<AppUserPreferences>()
+                .Property(b => b.BookThemeName)
+                .HasDefaultValue("Dark");
         }
 
 
