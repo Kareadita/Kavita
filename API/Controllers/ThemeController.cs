@@ -30,17 +30,6 @@ public class ThemeController : BaseApiController
         return Ok(await _unitOfWork.SiteThemeRepository.GetThemeDtos());
     }
 
-    /// <summary>
-    /// Gets the book themes associated with the user + the default ones provided by Kavita
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("book-themes")]
-    public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetBookThemes()
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.BookThemeRepository.GetThemeDtosForUser(user.Id));
-    }
-
     [Authorize("RequireAdminRole")]
     [HttpPost("scan")]
     public ActionResult Scan()
@@ -56,13 +45,6 @@ public class ThemeController : BaseApiController
         await _themeService.UpdateDefault(dto.ThemeId);
         return Ok();
     }
-    [Authorize("RequireAdminRole")]
-    [HttpPost("update-default-book")]
-    public async Task<ActionResult> UpdateDefaultBookTheme(UpdateDefaultThemeDto dto)
-    {
-        await _themeService.UpdateDefaultBookTheme(dto.ThemeId);
-        return Ok();
-    }
 
     /// <summary>
     /// Returns css content to the UI. UI is expected to escape the content
@@ -74,23 +56,6 @@ public class ThemeController : BaseApiController
         try
         {
             return Ok(await _themeService.GetContent(themeId));
-        }
-        catch (KavitaException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// Returns css content to the UI. UI is expected to escape the content
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("book-download-content")]
-    public async Task<ActionResult<string>> GetBookThemeContent(int themeId)
-    {
-        try
-        {
-            return Ok(await _themeService.GetBookThemeContent(themeId));
         }
         catch (KavitaException ex)
         {

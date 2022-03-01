@@ -64,15 +64,9 @@
             <ng-template ngbPanelContent>
                 <div class="controls">
                     <ng-container *ngFor="let theme of themes">
-                        <button class="btn btn-icon" (click)="setTheme(theme)">
+                        <button class="btn btn-icon" (click)="setTheme(theme.name)">
                             <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
                             {{theme.name}}
-                        </button>
-                    </ng-container>
-                    <ng-container *ngIf="userThemes.length > 0">
-                        <button class="btn btn-icon">
-                            <div class="dot" [ngStyle]="{'background-color': 'green'}"></div>
-                            Custom
                         </button>
                     </ng-container>
                 </div>

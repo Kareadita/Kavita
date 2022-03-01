@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
 import { ThemeService } from 'src/app/theme.service';
@@ -9,14 +9,6 @@ import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { BookService } from '../book.service';
-
-// Temp used until I merge Theme support
-// export interface BookTheme {
-//   colorHash: string;
-//   name: string;
-//   selector: string;
-//   provider: ThemeProvider;
-// }
 
 /**
  * Used for book reader. Do not use for other components
@@ -77,11 +69,32 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * System provided themes
    */
-  themes: Array<BookTheme> = [];
-  /**
-   * User provided themes
-   */
-  userThemes: Array<BookTheme> = [];
+  themes: Array<BookTheme> = [
+    {
+      name: 'Dark',
+      colorHash: '#292929',
+      isDarkTheme: true,
+      isDefault: true,
+      provider: ThemeProvider.System,
+      selector: 'brtheme-dark'
+    },
+    {
+      name: 'Black',
+      colorHash: '#000000',
+      isDarkTheme: true,
+      isDefault: false,
+      provider: ThemeProvider.System,
+      selector: 'brtheme-black'
+    },
+    {
+      name: 'White',
+      colorHash: '#FFFFFF',
+      isDarkTheme: false,
+      isDefault: false,
+      provider: ThemeProvider.System,
+      selector: 'brtheme-white'
+    },
+  ];
 
 
 
@@ -89,12 +102,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
 
-  constructor(private bookService: BookService, private accountService: AccountService, @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
-    this.themeService.getBookThemes().subscribe(themes => {
-      this.themes = themes.filter(t => t.provider === ThemeProvider.System);
-      this.userThemes = themes.filter(t => t.provider === ThemeProvider.User);
-    });
-  }
+  constructor(private bookService: BookService, private accountService: AccountService, @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
 
   ngOnInit(): void {
     
@@ -195,7 +203,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       console.log('line spacing: ', this.user.preferences.bookReaderLineSpacing);
       
       //this.toggleDarkMode(this.user.preferences.bookReaderDarkMode);
-      this.setTheme(this.user.preferences.bookReaderTheme || this.themeService.defaultBookTheme);
+      this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
     } else {
       this.pageStyles = {'font-family': 'default', 'font-size': '100%', 'margin-left': margin, 'margin-right': margin, 'line-height': '100%'};
       //this.toggleDarkMode(false);
@@ -206,7 +214,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.styleUpdate.emit(this.pageStyles);
   }
 
-  setTheme(theme: BookTheme) {
+  setTheme(themeName: string) {
+    const theme = this.themes.find(t => t.name == themeName);
     this.colorThemeUpdate.emit(theme);
   }
 

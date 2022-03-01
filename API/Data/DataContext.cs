@@ -41,7 +41,6 @@ namespace API.Data
         public DbSet<Genre> Genre { get; set; }
         public DbSet<Tag> Tag { get; set; }
         public DbSet<SiteTheme> SiteTheme { get; set; }
-        public DbSet<BookTheme> BookTheme { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

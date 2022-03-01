@@ -22,6 +22,6 @@ namespace API.DTOs
         public bool BookReaderTapToPaginate { get; set; }
         public ReadingDirection BookReaderReadingDirection { get; set; }
         public SiteThemeDto Theme { get; set; }
-        public BookThemeDto BookReaderTheme { get; set; }
+        public string BookReaderThemeName { get; set; }
     }
 }

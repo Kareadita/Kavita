@@ -39,10 +39,6 @@ export enum EVENTS {
    */
   SiteThemeProgress = 'SiteThemeProgress',
   /**
-   * A custom user book theme is added or removed during a scan
-   */
-  BookThemeProgress = 'BookThemeProgress',
-  /**
    * A cover is updated
    */
   CoverUpdate = 'CoverUpdate',
@@ -142,13 +138,6 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SiteThemeProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.SiteThemeProgress,
-        payload: resp.body as ThemeProgressEvent
-      });
-    });
-
-    this.hubConnection.on(EVENTS.BookThemeProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.BookThemeProgress,
         payload: resp.body as ThemeProgressEvent
       });
     });

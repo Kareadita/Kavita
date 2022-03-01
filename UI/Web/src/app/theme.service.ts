@@ -17,28 +17,18 @@ import { EVENTS, MessageHubService } from './_services/message-hub.service';
 export class ThemeService implements OnDestroy {
 
   public defaultTheme: string = 'dark';
-  public defaultBookTheme!: BookTheme;
+  public defaultBookTheme: string = 'dark';
 
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
 
-  private currentBookThemeSource = new ReplaySubject<BookTheme>(1);
-  public currentBookTheme$ = this.currentThemeSource.asObservable();
-
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();
-
-  private bookThemesSource = new ReplaySubject<BookTheme[]>(1);
-  public bookThemes$ = this.bookThemesSource.asObservable();
 
   /**
    * Maintain a cache of themes. SignalR will inform us if we need to refresh cache
    */
   private themeCache: Array<SiteTheme> = [];
-  /**
-   * Maintain a cache of book themes. SignalR will inform us if we need to refresh cache
-   */
-  private bookThemeCache: Array<BookTheme> = [];
 
   private readonly onDestroy = new Subject<void>();
   private renderer: Renderer2;
@@ -50,17 +40,15 @@ export class ThemeService implements OnDestroy {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     this.getThemes();
-    this.getBookThemes();
 
     messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
 
       if (message.event !== EVENTS.NotificationProgress) return;
       const notificationEvent = (message.payload as NotificationProgressEvent);
-      if (notificationEvent.name !== EVENTS.SiteThemeProgress && notificationEvent.name !== EVENTS.BookThemeProgress) return;
+      if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
 
       if (notificationEvent.eventType === 'ended') {
         if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe(() => {});
-        else if (notificationEvent.name === EVENTS.BookThemeProgress) this.getBookThemes().subscribe(() => {});
       }
     });
   }
@@ -90,15 +78,6 @@ export class ThemeService implements OnDestroy {
     }));
   }
 
-  getBookThemes() {
-    return this.httpClient.get<BookTheme[]>(this.baseUrl + 'theme/book-themes').pipe(map(themes => {
-      this.bookThemeCache = themes;
-      this.bookThemesSource.next(themes);
-      this.defaultBookTheme = themes.find(t => t.isDefault)!;
-      return themes;
-    }));
-  }
-
   /**
    * Used in book reader to remove all themes so book reader can provide custom theming options
    */
@@ -110,13 +89,6 @@ export class ThemeService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'theme/update-default', {themeId: themeId}).pipe(map(() => {
       // Refresh the cache when a default state is changed
       this.getThemes().subscribe(() => {});
-    }));
-  }
-
-  setDefaultBookTheme(themeId: number) {
-    return this.httpClient.post(this.baseUrl + 'theme/update-default-book', {themeId: themeId}).pipe(map(() => {
-      // Refresh the cache when a default state is changed
-      this.getBookThemes().subscribe(() => {});
     }));
   }
 
@@ -161,45 +133,9 @@ export class ThemeService implements OnDestroy {
     }
   }
 
-  /**
-   * This only works on User Themes. System themes are handled differently
-   * @param themeName 
-   * @returns 
-   */
-  // setBookTheme(themeName: string) {
-  //   const theme = this.bookThemeCache.find(t => t.name.toLowerCase() === themeName.toLowerCase());
-  //     if (theme) {
-  //       this.currentBookThemeSource.pipe(take(1)).subscribe(currentBookTheme => {
-  //         if (theme.name === currentBookTheme.name) return;
-
-  //         // Remove previous theme
-  //         this.removeThemesFromBookReader()
-
-  //         // Now load theme
-  //         const styleElem = document.createElement('style');
-  //         styleElem.id = 'booktheme-' + theme.name;
-  //         styleElem.appendChild(this.document.createTextNode(theme.contents));
-
-  //         this.renderer.appendChild(this.document.querySelector('.book-contents'), styleElem);
-  //         this.currentBookThemeSource.next(theme);
-  //       });
-  //     } else {
-  //       // Only time themes isn't already loaded is on first load
-  //       this.getBookThemes().subscribe(themes => {
-  //         this.setBookTheme(themeName);
-  //       });
-  //     }
-  // }
-
   private hasThemeInHead(themeName: string) {
     const id = 'theme-' + themeName.toLowerCase();
     return Array.from(this.document.head.children).filter(el => el.tagName === 'STYLE' && el.id.toLowerCase() === id).length > 0;
-  }
-
-  private removeThemesFromBookReader() {
-    Array.from(this.document.querySelector('.book-content')?.children || []).filter(el => el.tagName === 'STYLE' && el.id.toLowerCase().startsWith('booktheme-')).forEach(elem => {
-      elem.remove();
-    });
   }
 
   private fetchThemeContent(themeId: number) {

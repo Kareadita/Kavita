@@ -4,7 +4,6 @@
  * Theme for the the book reader contents
  */
  export interface BookTheme {
-    id: number;
     name: string;
     provider: ThemeProvider;
     /**

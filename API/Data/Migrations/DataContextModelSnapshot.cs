@@ -186,8 +186,8 @@ namespace API.Data.Migrations
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("BookThemeId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("BookThemeName")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("PageSplitOption")
                         .HasColumnType("INTEGER");
@@ -208,8 +208,6 @@ namespace API.Data.Migrations
 
                     b.HasIndex("AppUserId")
                         .IsUnique();
-
-                    b.HasIndex("BookThemeId");
 
                     b.HasIndex("ThemeId");
 
@@ -295,47 +293,6 @@ namespace API.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
-                });
-
-            modelBuilder.Entity("API.Entities.BookTheme", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ColorHash")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDarkTheme")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("LastModified")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NormalizedName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Provider")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SortOrder")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BookTheme");
                 });
 
             modelBuilder.Entity("API.Entities.Chapter", b =>
@@ -1047,17 +1004,11 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Entities.BookTheme", "BookTheme")
-                        .WithMany()
-                        .HasForeignKey("BookThemeId");
-
                     b.HasOne("API.Entities.SiteTheme", "Theme")
                         .WithMany()
                         .HasForeignKey("ThemeId");
 
                     b.Navigation("AppUser");
-
-                    b.Navigation("BookTheme");
 
                     b.Navigation("Theme");
                 });

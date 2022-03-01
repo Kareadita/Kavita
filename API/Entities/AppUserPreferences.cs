@@ -31,10 +31,6 @@ namespace API.Entities
         /// </summary>
         public bool AutoCloseMenu { get; set; } = true;
         /// <summary>
-        /// Book Reader Option: Should the background color be dark
-        /// </summary>
-        public bool BookReaderDarkMode { get; set; } = true;
-        /// <summary>
         /// Book Reader Option: Override extra Margin
         /// </summary>
         public int BookReaderMargin { get; set; } = 15;
@@ -63,11 +59,16 @@ namespace API.Entities
         /// </summary>
         /// <remarks>Should default to Dark</remarks>
         public SiteTheme Theme { get; set; }
+
         /// <summary>
         /// Book Reader Option: The color theme to decorate the book contents
         /// </summary>
         /// <remarks>Should default to Dark</remarks>
-        public BookTheme BookTheme { get; set; }
+        public string BookThemeName { get; set; } = "Dark";
+        /// <summary>
+        /// Book Reader Option: Should the background color be dark (Deprecated, use BookThemeName)
+        /// </summary>
+        public bool BookReaderDarkMode { get; set; } = true;
 
 
         public AppUser AppUser { get; set; }

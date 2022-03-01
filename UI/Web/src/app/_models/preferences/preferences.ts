@@ -15,6 +15,9 @@ export interface Preferences {
     autoCloseMenu: boolean;
     
     // Book Reader
+    /**
+     * Deprecated, use bookReaderThemeName
+     */
     bookReaderDarkMode: boolean;
     bookReaderMargin: number;
     bookReaderLineSpacing: number;
@@ -22,7 +25,7 @@ export interface Preferences {
     bookReaderFontFamily: string;
     bookReaderTapToPaginate: boolean;
     bookReaderReadingDirection: ReadingDirection;
-    bookReaderTheme?: BookTheme;
+    bookReaderThemeName?: string;
 
     // Global
     theme: SiteTheme;

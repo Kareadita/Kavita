@@ -66,12 +66,6 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateDefaultBookTheme(theme: BookTheme) {
-    this.themeService.setDefaultBookTheme(theme.id).subscribe(() => {
-      this.toastr.success('Book theme default has been updated to ' + theme.name);
-    });
-  }
-
   scan() {
     this.themeService.scan().subscribe(() => {
       this.toastr.info('A site theme scan has been queued');

@@ -22,7 +22,6 @@ public interface IUnitOfWork
     IGenreRepository GenreRepository { get; }
     ITagRepository TagRepository { get; }
     ISiteThemeRepository SiteThemeRepository { get; }
-    IBookThemeRepository BookThemeRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -59,7 +58,6 @@ public class UnitOfWork : IUnitOfWork
     public IGenreRepository GenreRepository => new GenreRepository(_context, _mapper);
     public ITagRepository TagRepository => new TagRepository(_context, _mapper);
     public ISiteThemeRepository SiteThemeRepository => new SiteThemeRepository(_context, _mapper);
-    public IBookThemeRepository BookThemeRepository => new BookThemeRepository(_context, _mapper);
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

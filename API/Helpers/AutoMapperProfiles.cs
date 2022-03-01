@@ -122,14 +122,13 @@ namespace API.Helpers
 
             CreateMap<AppUser, UserDto>();
             CreateMap<SiteTheme, SiteThemeDto>();
-            CreateMap<BookTheme, BookThemeDto>();
             CreateMap<AppUserPreferences, UserPreferencesDto>()
                 .ForMember(dest => dest.Theme,
                     opt =>
                         opt.MapFrom(src => src.Theme))
-                .ForMember(dest => dest.BookReaderTheme,
+                .ForMember(dest => dest.BookReaderThemeName,
                     opt =>
-                        opt.MapFrom(src => src.BookTheme));
+                        opt.MapFrom(src => src.BookThemeName));
 
 
             CreateMap<AppUserBookmark, BookmarkDto>();
