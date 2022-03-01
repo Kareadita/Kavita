@@ -64,7 +64,7 @@
             <ng-template ngbPanelContent>
                 <div class="controls">
                     <ng-container *ngFor="let theme of themes">
-                        <button class="btn btn-icon" (click)="setTheme(theme.name)">
+                        <button class="btn btn-icon" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
                             <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
                             {{theme.name}}
                         </button>
@@ -103,7 +103,7 @@
                     </span>
                     <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
                         <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
-                        <span *ngIf="darkMode">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
+                        <span *ngIf="activeTheme?.isDarkTheme">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
                     </button>
                 </div>
             </ng-template>

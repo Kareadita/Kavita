@@ -61,11 +61,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   pageStyles!: PageStyle;
 
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
-  /**
-   * Dark mode for reader. Will be replaced with custom theme.
-   * @deprecated Use themes instead
-   */
-  darkMode: boolean = true;
+
+  activeTheme: BookTheme | undefined;
 
   isFullscreen: boolean = false;
 
@@ -232,6 +229,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
   setTheme(themeName: string) {
     const theme = this.themes.find(t => t.name === themeName);
+    this.activeTheme = theme;
     this.colorThemeUpdate.emit(theme);
   }
 
