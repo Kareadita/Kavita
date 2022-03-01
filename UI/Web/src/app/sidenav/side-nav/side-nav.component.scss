@@ -30,6 +30,7 @@
         position: fixed;
         margin: 0;
         left: 0;
+        top: 56px;
         transition: width var(--side-nav-openclose-transition);
         box-shadow: var(--side-nav-mobile-box-shadow);
         z-index: 999;
