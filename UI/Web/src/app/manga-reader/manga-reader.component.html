@@ -24,9 +24,13 @@
     </ng-container>
 
     <div (click)="toggleMenu()" class="reading-area">
-        <canvas #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" 
+        
+        <canvas style="display: none;" #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" 
                 ondragstart="return false;" onselectstart="return false;">
         </canvas>
+        <div *ngIf="isCoverImage && shouldRenderAsFitSplit()" class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+            <img [src]="canvasImage.src" style="width: 100%">
+        </div>
         <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading && !inSetup">
             <app-infinite-scroller [pageNum]="pageNum" 
             [bufferPages]="5" 
