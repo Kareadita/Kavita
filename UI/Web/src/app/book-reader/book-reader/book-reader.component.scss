@@ -34,6 +34,7 @@
     --accordion-body-bg-color: black;
     --accordion-header-bg-color: grey;
     --br-actionbar-button-hover-border-color: #6c757d;
+    --br-actionbar-bg-color: white;
 }
 
 
@@ -59,61 +60,14 @@ $primary-color: #0062cc;
 
 
 .reading-bar {
-    background-color: white;
+    background-color: var(--br-actionbar-bg-color); 
     overflow: hidden;
     box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
 }
 
-// TODO: MOve this to css-var
-.dark-mode {
-    .reading-bar, .book-title, .drawer-body, .drawer-container {
-        background-color: $dark-form-background-no-opacity;
-    }
-}
 .dark-mode .overlay {
     opacity: 0;
 }
-
-// .dark-mode {
-//     .reading-bar, .book-title, .drawer-body, .drawer-container {
-//         background-color: $dark-form-background-no-opacity;
-//     }
-//     button {
-//         background-color: $dark-form-background-no-opacity;
-//     }
-
-//     .btn {
-//         &.btn-secondary {
-//             border-color: transparent;
-    
-//             &:hover, &:focus {
-//                 border-color: #545b62;
-//             }
-//         }
-        
-//         &.btn-outline-secondary {
-//             border-color: transparent;
-    
-//             &:hover, &:focus {
-//                 border-color: #545b62;
-//             }
-//         }
-    
-//         span {
-//             background-color: unset;
-//         }
-    
-//         i {
-//             background-color: unset;
-//         }
-//     }
-// }
-
-// ::ng-deep .dark-mode .drawer-container {
-//     .header, body, *:not(.progress-bar) {
-//         background-color: $dark-form-background-no-opacity !important;
-//     }
-// }
 
 @media(max-width: 875px) {
     .book-title {

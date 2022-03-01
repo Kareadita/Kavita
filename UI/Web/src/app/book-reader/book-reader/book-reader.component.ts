@@ -770,13 +770,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   // Color Theme 
-  get drawerBackgroundColor() {
-    return this.darkMode ? '#010409': '#fff';
-  }
+  // get drawerBackgroundColor() {
+  //   return this.darkMode ? '#010409': '#fff';
+  // }
 
-  get drawerTextColor() {
-    return this.darkMode ? 'white': 'black';
-  }
+  // get drawerTextColor() {
+  //   return this.darkMode ? 'white': 'black';
+  // }
 
   getDarkModeBackgroundColor() {
     return this.darkMode ? '#292929' : '#fff';
