@@ -27,7 +27,7 @@ export class DrawerComponent {
 
   close() {
     this.isOpen = false;
-    this.drawerClosed.emit(this.isOpen);
-    this.drawerClosed.emit();
+    this.isOpenChange.emit(false);
+    this.drawerClosed.emit(false);
   }
 }
