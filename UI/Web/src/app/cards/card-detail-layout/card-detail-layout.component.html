@@ -1,4 +1,4 @@
-<div class="container-fluid" style="padding-top: 10px">
+
     <div class="row g-0 pb-2">
         <div class="col me-auto">
             <h2 style="display: inline-block">
@@ -29,7 +29,6 @@
     </div>
 
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
-</div>
 
 <ng-template #paginationTemplate let-id="id">
     <div class="d-flex justify-content-center" *ngIf="pagination && items.length > 0">

@@ -42,16 +42,6 @@
         }
     }
 
-    &.closed {
-        .side-nav-text {
-            opacity: 0;
-        }
-
-        .card-actions {
-           opacity: 0;
-        }
-    }
-
     span {
         &:last-child {
             flex-grow: 1;
@@ -61,8 +51,8 @@
 }
 
 a {
-    color: var(--side-nav-color);
     text-decoration: none;
+    color: var(--side-nav-color);
 }
 
 

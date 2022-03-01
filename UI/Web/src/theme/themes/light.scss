@@ -52,6 +52,8 @@
     --side-nav-border-radius: 5px;
     --side-nav-bg-color-transition: 0.5s ease-in-out;
     --side-nav-closed-bg-color: transparent;
+    --side-nav-item-active-color: var(--primary-color);
+    --side-nav-active-bg-color: rgba(0,0,0,0.5);
     
     /* Checkboxes */
     --checkbox-checked-bg-color: black;
