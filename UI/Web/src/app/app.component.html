@@ -2,7 +2,7 @@
 <div class="content-wrapper">
     <a id="content"></a>
     <app-side-nav></app-side-nav>
-    <div class="container-fluid" style="padding-top: 10px">
+    <div class="container-fluid" style="padding-top: 10px; padding-bottom: 10px;">
         <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService?.sideNavVisible$ | async)}" [ngStyle]="(navService?.sideNavVisible$ | async) ? {} : {}">
             <router-outlet></router-outlet>
         </div>

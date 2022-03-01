@@ -1,10 +1,10 @@
 <app-side-nav-companion-bar>
     <ng-container title>
-        <h1>
+        <h2>
             <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
             {{series?.name}}
-        </h1>
-        <h2 *ngIf="series?.localizedName !== series?.name">{{series?.localizedName}}</h2>
+        </h2>
+        <h5 style="margin-left:40px;" *ngIf="series?.localizedName !== series?.name">{{series?.localizedName}}</h5>
         <!-- TODO: Put LocalizedName and library here-->
         <!-- <h2>{{libraryName}}</h2>  -->
     </ng-container>

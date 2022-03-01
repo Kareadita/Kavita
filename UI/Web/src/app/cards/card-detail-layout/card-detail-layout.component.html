@@ -1,5 +1,5 @@
 
-    <div class="row g-0 pb-2">
+    <div class="row mt-2 g-0 pb-2">
         <div class="col me-auto">
             <h2 style="display: inline-block">
                 <span *ngIf="actions.length > 0" class="">
@@ -18,7 +18,7 @@
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 
-    <div class="row g-0">
+    <div class="row g-0 mt-2 mb-2">
         <div class="col-auto" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
@@ -31,7 +31,7 @@
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
 
 <ng-template #paginationTemplate let-id="id">
-    <div class="d-flex justify-content-center" *ngIf="pagination && items.length > 0">
+    <div class="d-flex justify-content-center mb-0" *ngIf="pagination && items.length > 0">
         <ngb-pagination
             *ngIf="pagination.totalPages > 1"
             [maxSize]="8"

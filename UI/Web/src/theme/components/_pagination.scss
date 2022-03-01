@@ -1,13 +1,27 @@
+.pagination {
+    margin-bottom: 0;
+}
+
 .page-item {
+
     &.active .page-link {
         background-color: var(--pagination-active-link-bg-color);
         color: var(--pagination-active-link-text-color);
         border-color: var(--pagination-active-link-border-color);
+
+        &:hover {
+            color: var(--pagination-link-text-color);;
+        }
     }
 
     > .page-link {
         background-color: var(--pagination-link-bg-color);
         border-color: var(--pagination-link-border-color);
+        color: var(--pagination-link-text-color);
+
+        &:hover {
+            color: var(--pagination-link-hover-color);
+        }
     }
 
     &:focus {
