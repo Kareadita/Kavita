@@ -50,6 +50,7 @@ export class AppComponent implements OnInit {
     this.setCurrentUser();
 
     this.setDocHeight();
+    this.navService.sideNavVisible$.subscribe()
   }
 
   setCurrentUser() {

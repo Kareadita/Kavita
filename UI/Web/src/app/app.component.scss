@@ -5,7 +5,7 @@
 
 .companion-bar {
     transition: all 0.15s linear;
-    margin-left: 50px;
+    margin-left: 40px;
 }
 
 .companion-bar-content {
@@ -14,8 +14,17 @@
 }
 
 @media (max-width: 576px) {
+    .container-fluid {
+        padding: 0;
+    }
+
     .content-wrapper {
         padding: calc(56px) 10px 0;
+        overflow: hidden;
+
+        &.closed {
+            overflow: auto;
+        }
     }
 
     .companion-bar {
