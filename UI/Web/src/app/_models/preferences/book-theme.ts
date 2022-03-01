@@ -19,4 +19,8 @@
      * Used to identify the theme on style tag
      */
     selector: string;
+    /**
+     * Inner HTML
+     */
+    content: string;
   }

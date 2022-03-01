@@ -2,11 +2,10 @@ import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { map, ReplaySubject, Subject, take, takeUntil } from 'rxjs';
+import { map, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from './shared/confirm.service';
 import { NotificationProgressEvent } from './_models/events/notification-progress-event';
-import { BookTheme } from './_models/preferences/book-theme';
 import { SiteTheme, ThemeProvider } from './_models/preferences/site-theme';
 import { EVENTS, MessageHubService } from './_services/message-hub.service';
 
@@ -17,7 +16,7 @@ import { EVENTS, MessageHubService } from './_services/message-hub.service';
 export class ThemeService implements OnDestroy {
 
   public defaultTheme: string = 'dark';
-  public defaultBookTheme: string = 'dark';
+  public defaultBookTheme: string = 'Dark';
 
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
@@ -96,6 +95,19 @@ export class ThemeService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'theme/scan', {});
   }
 
+  /**
+   * Sets the book theme on the body tag so css variable overrides can take place
+   * @param selector brtheme- prefixed string
+   */
+  setBookTheme(selector: string) {
+    this.unsetBookThemes();
+    this.renderer.addClass(this.document.querySelector('body'), selector);
+  }
+
+  clearBookTheme() {
+    this.unsetBookThemes();
+  }
+
 
   /**
    * Sets the theme as active. Will inject a style tag into document to load a custom theme and apply the selector to the body
@@ -148,5 +160,10 @@ export class ThemeService implements OnDestroy {
   private unsetThemes() {
     this.themeCache.forEach(theme => this.document.body.classList.remove(theme.selector));
   }
+
+  private unsetBookThemes() {
+    Array.from(this.document.body.classList).filter(cls => cls.startsWith('brtheme-')).forEach(c => this.document.body.classList.remove(c));
+  }
+  
   
 }

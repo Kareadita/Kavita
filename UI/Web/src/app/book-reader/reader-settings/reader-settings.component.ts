@@ -10,6 +10,98 @@ import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { BookService } from '../book.service';
 
+// Important note about themes. Must have one section with .reader-container that contains color, background-color and rest of the styles must be scoped to .book-content
+const BookDarkTheme = `
+:root() .brtheme-dark {
+  --accordion-body-bg-color: black;
+  --accordion-header-bg-color: grey;
+
+}
+
+.book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
+  color: #dcdcdc !important;
+}
+
+.book-content code {
+  color: #e83e8c !important;
+}
+
+.book-content :link, .book-content a {
+  color: #8db2e5 !important;
+}
+
+.book-content img, .book-content img[src] {
+z-index: 1;
+filter: brightness(0.85) !important;
+background-color: initial !important;
+}
+
+.reader-container {
+  color: #dcdcdc !important;
+  background-image: none !important;
+  background-color: #292929 !important;
+}
+
+.book-content *:not(code), .book-content *:not(a) {
+    background-color: #292929;
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: unset;
+    color: #dcdcdc !important;
+}
+  
+.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
+.book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
+`;
+
+const BookBlackTheme = `
+.reader-container {
+  color: #dcdcdc !important;
+  background-image: none !important;
+  background-color: #010409 !important;
+}
+
+.book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
+  color: #dcdcdc !important;
+}
+
+.book-content code {
+  color: #e83e8c !important;
+}
+
+.book-content :link, .book-content a {
+  color: #8db2e5 !important;
+}
+
+.book-content img, .book-content img[src] {
+z-index: 1;
+filter: brightness(0.85) !important;
+background-color: initial !important;
+}
+
+.book-content *:not(code), .book-content *:not(a) {
+    background-color: #010409;
+    box-shadow: none;
+    text-shadow: none;
+    border-radius: unset;
+    color: #dcdcdc !important;
+}
+
+.book-content *:not(input), .book-content *:not(code), .book-content *:not(:link) {
+    color: #dcdcdc !important;
+}
+
+.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
+.book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
+`;
+
+const BookWhiteTheme = `
+  :root() .brtheme-white {
+    --brtheme-link-text-color: green;
+    --brtheme-bg-color: lightgrey;
+  }
+`;
+
 /**
  * Used for book reader. Do not use for other components
  */
@@ -78,7 +170,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       isDarkTheme: true,
       isDefault: true,
       provider: ThemeProvider.System,
-      selector: 'brtheme-dark'
+      selector: 'brtheme-dark',
+      content: BookDarkTheme
     },
     {
       name: 'Black',
@@ -86,7 +179,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       isDarkTheme: true,
       isDefault: false,
       provider: ThemeProvider.System,
-      selector: 'brtheme-black'
+      selector: 'brtheme-black',
+      content: BookBlackTheme
     },
     {
       name: 'White',
@@ -94,7 +188,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       isDarkTheme: false,
       isDefault: false,
       provider: ThemeProvider.System,
-      selector: 'brtheme-white'
+      selector: 'brtheme-white',
+      content: BookWhiteTheme
     },
   ];
 
@@ -174,9 +269,14 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.pageStyles['margin-right'] = value + '%';
             this.styleUpdate.emit(this.pageStyles);
           });
+
+          this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
+          this.resetSettings();
+        } else {
+          this.resetSettings();
         }
 
-        this.resetSettings();
+        
       });
   }
 
@@ -220,7 +320,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   }
 
   setTheme(themeName: string) {
-    const theme = this.themes.find(t => t.name == themeName);
+    const theme = this.themes.find(t => t.name === themeName);
     this.colorThemeUpdate.emit(theme);
   }
 

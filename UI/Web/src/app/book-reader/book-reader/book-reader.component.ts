@@ -29,91 +29,6 @@ import { PageStyle } from '../reader-settings/reader-settings.component';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 
-// Important note about themes. Must have one section with .reader-container that contains color, background-color and rest of the styles must be scoped to .book-content
-const BookDarkTheme = `
-.book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
-  color: #dcdcdc !important;
-}
-
-.book-content code {
-  color: #e83e8c !important;
-}
-
-.book-content :link, .book-content a {
-  color: #8db2e5 !important;
-}
-
-.book-content img, .book-content img[src] {
-z-index: 1;
-filter: brightness(0.85) !important;
-background-color: initial !important;
-}
-
-.reader-container {
-  color: #dcdcdc !important;
-  background-image: none !important;
-  background-color: #292929 !important;
-}
-
-.book-content *:not(code), .book-content *:not(a) {
-    background-color: #292929;
-    box-shadow: none;
-    text-shadow: none;
-    border-radius: unset;
-    color: #dcdcdc !important;
-}
-  
-.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
-.book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
-`;
-
-const BookBlackTheme = `
-.reader-container {
-  color: #dcdcdc !important;
-  background-image: none !important;
-  background-color: #010409 !important;
-}
-
-.book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
-  color: #dcdcdc !important;
-}
-
-.book-content code {
-  color: #e83e8c !important;
-}
-
-.book-content :link, .book-content a {
-  color: #8db2e5 !important;
-}
-
-.book-content img, .book-content img[src] {
-z-index: 1;
-filter: brightness(0.85) !important;
-background-color: initial !important;
-}
-
-.book-content *:not(code), .book-content *:not(a) {
-    background-color: #010409;
-    box-shadow: none;
-    text-shadow: none;
-    border-radius: unset;
-    color: #dcdcdc !important;
-}
-
-.book-content *:not(input), .book-content *:not(code), .book-content *:not(:link) {
-    color: #dcdcdc !important;
-}
-
-.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
-.book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
-`;
-
-const BookWhiteTheme = `
-  :root() .brtheme-white {
-    --brtheme-link-text-color: green;
-    --brtheme-bg-color: lightgrey;
-  }
-`;
 
 enum TabID {
   Settings = 1,
@@ -409,6 +324,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
 
+    this.themeService.clearBookTheme();
+
     this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
       this.themeService.setTheme(theme.name);
     });
@@ -459,6 +376,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextChapterDisabled = false;
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
+    
+    
 
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
       this.bookTitle = info.bookTitle;
@@ -876,22 +795,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const styleElem = this.renderer.createElement('style');
     styleElem.id = theme.selector;
-    if (theme.provider === ThemeProvider.System) {
-      if (theme.name === 'Dark') {
-        styleElem.innerHTML = BookDarkTheme;
-      } else if (theme.name === 'Black') {
-        styleElem.innerHTML = BookBlackTheme;
-      } else if (theme.name === 'White') {
-        styleElem.innerHTML = BookWhiteTheme;
-      }
-    } else {
-      alert('TODO: Implement Custom theme support');
-
-    }
+    styleElem.innerHTML = theme.content;
     
     
     console.log('Injected dark styles into book-content')
     this.renderer.appendChild(this.document.querySelector('.reading-section'), styleElem);
+    // I need to also apply the selector onto the body so that any css variables will take effect
+    this.themeService.setBookTheme(theme.selector);
   }
 
   toggleDrawer() {
