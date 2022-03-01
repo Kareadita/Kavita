@@ -16,6 +16,7 @@ import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
 import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
+import { NavService } from '../_services/nav.service';
 
 @Component({
   selector: 'app-library-detail',
@@ -76,7 +77,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService) {
+    private utilityService: UtilityService, public navService: NavService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
@@ -103,6 +104,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       if (seriesAdded.libraryId !== this.libraryId) return;
       this.loadPage();
     });
+    
+    this.navService.hideSideNav();
   }
 
   ngOnDestroy() {

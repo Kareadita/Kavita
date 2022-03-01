@@ -30,6 +30,7 @@ import { LibraryService } from '../_services/library.service';
 import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
 import { SeriesService } from '../_services/series.service';
+import { NavService } from '../_services/nav.service';
 
 
 enum TabID {
@@ -171,6 +172,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
+              public navService: NavService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -209,6 +211,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.loadSeries(this.seriesId);
+    this.navService.hideSideNav();
   }
 
   ngOnDestroy() {

@@ -117,6 +117,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       const values = this.passwordChangeForm.value;
       this.passwordsMatch = values.password === values.confirmPassword;
     }));
+
+    this.navService.hideSideNav();
   }
 
   ngOnDestroy() {
