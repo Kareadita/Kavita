@@ -28,6 +28,15 @@
     src: url(../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf) format("truetype");
 }
 
+:root {
+    --br-actionbar-button-text-color: #6c757d;
+
+    --accordion-body-bg-color: black;
+    --accordion-header-bg-color: grey;
+    --br-actionbar-button-hover-border-color: #6c757d;
+}
+
+
 $dark-form-background-no-opacity: rgb(1, 4, 9);
 $primary-color: #0062cc;
 
@@ -60,6 +69,9 @@ $primary-color: #0062cc;
     .reading-bar, .book-title, .drawer-body, .drawer-container {
         background-color: $dark-form-background-no-opacity;
     }
+}
+.dark-mode .overlay {
+    opacity: 0;
 }
 
 // .dark-mode {
@@ -160,9 +172,7 @@ $primary-color: #0062cc;
     color: $primary-color;
 }
 
-.dark-mode .overlay {
-    opacity: 0;
-}
+
 
 
 .right {
@@ -211,14 +221,17 @@ $primary-color: #0062cc;
   animation: fadein .5s both;
 }
 
+
+
+
 .btn {
     &.btn-secondary {
-        color: #6c757d;
+        color: var(--br-actionbar-button-text-color); 
         border-color: transparent;
         background-color: unset;
 
         &:hover, &:focus {
-            border-color: #545b62;
+            border-color: var(--br-actionbar-button-hover-border-color);
         }
     }
     
@@ -227,18 +240,18 @@ $primary-color: #0062cc;
         background-color: unset;
 
         &:hover, &:focus {
-            border-color: #545b62;
+            border-color: var(--br-actionbar-button-hover-border-color); // #545b62;
         }
     }
 
     span {
         background-color: unset;
-        color: #6c757d;
+        color: var(--br-actionbar-button-text-color); // #6c757d;
     }
 
     i {
         background-color: unset;
-        color: #6c757d;
+        color: var(--br-actionbar-button-text-color);
     }
 
     &:active {
