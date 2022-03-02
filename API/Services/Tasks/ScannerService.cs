@@ -328,7 +328,7 @@ public class ScannerService : IScannerService
         if (await _unitOfWork.CommitAsync())
         {
             _logger.LogInformation(
-                "[ScannerService] Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                "[ScannerService] Finished scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                 totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
         }
         else
@@ -351,8 +351,8 @@ public class ScannerService : IScannerService
         var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name);
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
-        _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
-            scanElapsedTime);
+        // _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
+        //     scanElapsedTime);
         return new Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>(totalFiles, scanElapsedTime, parsedSeries);
     }
 
