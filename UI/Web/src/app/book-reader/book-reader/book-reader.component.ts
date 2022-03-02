@@ -25,7 +25,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { ThemeService } from 'src/app/theme.service';
-import { PageStyle } from '../reader-settings/reader-settings.component';
+import { LayoutMode, PageStyle } from '../reader-settings/reader-settings.component';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 
@@ -203,6 +203,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isFullscreen: boolean = false;
 
+  /**
+   * How to render the page content
+   */
+  layoutMode: LayoutMode = LayoutMode.Default;
+
+  get LayoutMode(): typeof LayoutMode {
+    return LayoutMode;
+  }
 
   get TabID(): typeof TabID {
     return TabID;
@@ -239,6 +247,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.pageNum === 0;
   }
 
+  get ColumnWidth() {
+    const windowWidth = window.innerWidth
+      || this.document.documentElement.clientWidth
+      || this.document.body.clientWidth;
+    switch (this.layoutMode) {
+      case LayoutMode.Default:
+        return 'unset';
+      case LayoutMode.Column1:
+        return (windowWidth - 40) + 'px';
+      case LayoutMode.Column2:
+        return ((windowWidth - 40) / 2) + 'px';
+    }
+  }
+
+  get WindowHeight() {
+    return window.innerHeight;
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
@@ -247,16 +273,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
-
-      // this.darkModeStyleElem = this.renderer.createElement('style');
-      // this.darkModeStyleElem.id = 'brtheme-default';
-      // this.renderer.appendChild(this.document.querySelector('.reading-section'), this.darkModeStyleElem)
-
-      // this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      //   if (user) {
-      //     this.user = user;
-      //   }
-      // });
   }
 
   /**
@@ -884,6 +900,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
+  }
+
+  updateLayoutMode(mode: LayoutMode) {
+    console.log('Setting Layout mode: ', mode);
+    this.layoutMode = mode;
   }
 
   // Table of Contents

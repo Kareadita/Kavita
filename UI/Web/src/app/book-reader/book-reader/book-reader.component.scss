@@ -103,6 +103,21 @@ $primary-color: #0062cc;
     background-color: var(--brtheme-bg-color);
 }
 
+.column-layout {
+    //column-width: 100%; // This has to be done programatically
+    column-gap: 20px;
+    max-width: none;
+    max-height: 100vh;
+    min-width: 0px;
+    min-height: 0px;
+    overflow-wrap: break-word;
+    // height must be set so no scrolling
+    //overflow: hidden;
+
+
+
+}
+
 // A bunch of resets so books render correctly
 ::ng-deep .book-content {
     & a, & :link {

@@ -53,26 +53,6 @@
 
         </ngb-panel>
 
-        <ngb-panel id="color-panel" title="Color Theme">
-            <ng-template ngbPanelHeader>
-                <h2 class="accordion-header">
-                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('color-panel')" aria-controls="collapseOne">
-                        Color Theme
-                    </button>
-                </h2>
-            </ng-template>
-            <ng-template ngbPanelContent>
-                <div class="controls">
-                    <ng-container *ngFor="let theme of themes">
-                        <button class="btn btn-icon" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
-                            <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
-                            {{theme.name}}
-                        </button>
-                    </ng-container>
-                </div>
-            </ng-template>
-        </ngb-panel>
-
         <ngb-panel id="reader-panel" title="Reader Settings">
             <ng-template ngbPanelHeader>
                 <h2 class="accordion-header">
@@ -82,8 +62,6 @@
                 </h2>
             </ng-template>
             <ng-template ngbPanelContent>
-
-
                 <div class="controls">
                     <label id="readingdirection" class="form-label">Reading Direction</label>
                     <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}"><i class="fa {{readingDirection === 0 ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</span></button>
@@ -105,6 +83,35 @@
                         <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
                         <span *ngIf="activeTheme?.isDarkTheme">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
                     </button>
+                </div>
+
+                <div class="controls">
+                    <label id="layout-mode" class="form-label">Layout Mode</label>
+                    <button class="btn btn-outline-secondary" (click)="setLayout(LayoutMode.Default)">Default</button>
+                    <button class="btn btn-outline-secondary" (click)="setLayout(LayoutMode.Column1)">1 Column</button>
+                    <button class="btn btn-outline-secondary" (click)="setLayout(LayoutMode.Column2)">2 Column</button>
+                </div>
+
+
+            </ng-template>
+        </ngb-panel>
+
+        <ngb-panel id="color-panel" title="Color Theme">
+            <ng-template ngbPanelHeader>
+                <h2 class="accordion-header">
+                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('color-panel')" aria-controls="collapseOne">
+                        Color Theme
+                    </button>
+                </h2>
+            </ng-template>
+            <ng-template ngbPanelContent>
+                <div class="controls">
+                    <ng-container *ngFor="let theme of themes">
+                        <button class="btn btn-icon" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
+                            <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
+                            {{theme.name}}
+                        </button>
+                    </ng-container>
                 </div>
             </ng-template>
         </ngb-panel>

@@ -24,6 +24,12 @@ export interface PageStyle {
   'margin-right': string;
 }
 
+export enum LayoutMode {
+  Default = 'Default',
+  Column2 = '2 Column',
+  Column1 = 'Column'
+}
+
 const mobileBreakpointMarginOverride = 700;
 
 @Component({
@@ -45,6 +51,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
    * Outputs when a theme/dark mode is updated
    */
   @Output() colorThemeUpdate: EventEmitter<BookTheme> = new EventEmitter();
+  /**
+   * Outputs when a layout mode is updated
+   */
+  @Output() layoutModeUpdate: EventEmitter<LayoutMode> = new EventEmitter();
   /**
    * Outputs when fullscreen is toggled
    */
@@ -104,6 +114,11 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
   private onDestroy: Subject<void> = new Subject();
+
+
+  get LayoutMode(): typeof LayoutMode  {
+    return LayoutMode;
+  }
 
 
 
@@ -212,6 +227,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     const windowWidth = window.innerWidth
       || this.document.documentElement.clientWidth
       || this.document.body.clientWidth;
+      
 
     let defaultMargin = '15%';
     if (windowWidth <= mobileBreakpointMarginOverride) {
@@ -231,6 +247,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     const theme = this.themes.find(t => t.name === themeName);
     this.activeTheme = theme;
     this.colorThemeUpdate.emit(theme);
+  }
+
+  setLayout(layoutMode: LayoutMode) {
+    this.layoutModeUpdate.emit(layoutMode);
   }
 
   toggleReadingDirection() {

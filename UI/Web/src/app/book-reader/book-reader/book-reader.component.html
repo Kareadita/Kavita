@@ -29,6 +29,7 @@
                                     (styleUpdate)="updateReaderStyles($event)" 
                                     (clickToPaginateChanged)="showPaginationOverlay($event)"
                                     (fullscreen)="toggleFullscreen()"
+                                    (layoutModeUpdate)="updateLayoutMode($event)"
                                 ></app-reader-settings>
                             </ng-template>
                           </li>
@@ -49,7 +50,7 @@
     <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" 
         [@isLoading]="isLoading ? true : false">
 
-        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}" 
+        <div #readingHtml class="book-content {{layoutMode !== LayoutMode.Default ? 'column-layout' : ''}}" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px', 'column-width': ColumnWidth, 'height': WindowHeight}" 
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <ng-container  *ngIf="clickToPaginate">
