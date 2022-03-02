@@ -7,82 +7,196 @@
         </button>
     </div>
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-        
+        <form [formGroup]="editSeriesForm">
             <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
-                <li [ngbNavItem]="tabs[0]">
-                  <a ngbNavLink>{{tabs[0]}}</a>
-                  <ng-template ngbNavContent>
-                    <form [formGroup]="editSeriesForm">
-                    <div class="row g-0">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="name" class="form-label">Name</label>
-                            <input id="name" class="form-control" formControlName="name" type="text">
-                        </div>
-                    </div>
-
-                    <div class="row g-0">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="sort-name" class="form-label">Sort Name</label>
-                            <input id="sort-name" class="form-control" formControlName="sortName" type="text">
-                        </div>
-                    </div>
-
-                    <div class="row g-0">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="localized-name" class="form-label">Localized Name</label>
-                            <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
-                        </div>
-                    </div>
-
-                    <div class="row g-0" *ngIf="metadata">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="author" class="form-label">Author</label>
-                                <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                
+                    <li [ngbNavItem]="tabs[0]">
+                    <a ngbNavLink>{{tabs[0]}}</a>
+                    <ng-template ngbNavContent>
+                        <div class="row g-0">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="name" class="form-label">Name</label>
+                                <input id="name" class="form-control" formControlName="name" type="text">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="artist" class="form-label">Artist</label>
-                                <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+
+                        <div class="row g-0">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="sort-name" class="form-label">Sort Name</label>
+                                <input id="sort-name" class="form-control" formControlName="sortName" type="text">
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row g-0" *ngIf="metadata">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="genres" class="form-label">Genres</label>
-                                <input id="genres" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="genres" type="text">
+                        <div class="row g-0">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="localized-name" class="form-label">Localized Name</label>
+                                <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="collections" class="form-label">Collections</label>
-                                <app-typeahead (selectedData)="updateCollections($event)" [settings]="settings">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.title}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.title}}
-                                    </ng-template>
-                                </app-typeahead>
+
+                        <div class="row g-0">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="summary" class="form-label">Summary</label>
+                                <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row g-0">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="summary" class="form-label">Summary</label>
-                            <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
-                        </div>
-                    </div>
-                    </form>
+                    </ng-template>
+                    </li>
+                    <li [ngbNavItem]="tabs[1]" *ngIf="metadata">
+                        <a ngbNavLink>{{tabs[1]}}</a>
+                        <ng-template ngbNavContent>
 
-                  </ng-template>
-                </li>
-                <li [ngbNavItem]="tabs[1]">
-                  <a ngbNavLink>{{tabs[1]}}</a>
+                            <div class="row g-0">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="collections" class="form-label">Collections</label>
+                                        <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.title}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.title}}
+                                            </ng-template>
+                                        </app-typeahead>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-0">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="genres" class="form-label">Genres</label>
+                                        <input id="genres" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="genres" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-0">
+                                <div class="col-md-12">
+                                    <div class="mb-3">
+                                        <label for="tags" class="form-label">Tags</label>
+                                        <app-typeahead (selectedData)="updateTags($event)" [settings]="tagsSettings">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.title}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.title}}
+                                            </ng-template>
+                                        </app-typeahead>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-0">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="age-rating" class="form-label">Age Rating</label>
+                                        <select class="form-select"id="age-rating" formControlName="ageRating">
+                                            <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="publication-status" class="form-label">Publication Status</label>
+                                        <select class="form-select"id="publication-status" formControlName="publicationStatus">
+                                            <option *ngFor="let opt of publicationStatuses" [value]="opt.value">{{opt.title | titlecase}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+ 
+
+
+
+                        </ng-template>
+                    </li>
+                
+                    <li [ngbNavItem]="tabs[2]">
+                        <a ngbNavLink>{{tabs[2]}}</a>
+                        <ng-template ngbNavContent>
+                            <div class="row g-0">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="author" class="form-label">Writer</label>
+                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="artist" class="form-label">Cover Artist</label>
+                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-0">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="author" class="form-label">Publisher</label>
+                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="artist" class="form-label">Penciller</label>
+                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-0">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="author" class="form-label">Letterer</label>
+                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="artist" class="form-label">Inker</label>
+                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-0">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="author" class="form-label">Editor</label>
+                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="artist" class="form-label">Collorist</label>
+                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-0">
+                                <!-- TODO: Validate if this should be in Metadata or People -->
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="author" class="form-label">Character</label>
+                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="artist" class="form-label">Translators</label>
+                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-template>
+                    </li>
+                
+                <li [ngbNavItem]="tabs[3]">
+                  <a ngbNavLink>{{tabs[3]}}</a>
                   <ng-template ngbNavContent>
                     <p class="alert alert-primary" role="alert">
                         Upload and choose a new cover image. Press Save to upload and override the cover.
@@ -90,8 +204,8 @@
                     <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
                   </ng-template>
                 </li>
-                <li [ngbNavItem]="tabs[2]">
-                  <a ngbNavLink>{{tabs[2]}}</a>
+                <li [ngbNavItem]="tabs[4]">
+                  <a ngbNavLink>{{tabs[4]}}</a>
                   <ng-template ngbNavContent>
                     <h4>Information</h4>
                     <div class="row g-0 mb-2">
@@ -152,6 +266,7 @@
                   </ng-template>
                 </li>
             </ul>
+        </form>
         
             <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
