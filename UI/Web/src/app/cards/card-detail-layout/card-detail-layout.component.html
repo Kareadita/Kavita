@@ -19,7 +19,7 @@
 
 
     <div class="row g-0 mt-2 mb-2">
-        <div class="col-auto" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
+        <div class="col-auto ps-1 pe-1 mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
         
