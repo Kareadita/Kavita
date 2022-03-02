@@ -113,6 +113,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
       ageRating: new FormControl('', []),
       publicationStatus: new FormControl('', []),
+      language: new FormControl('', []),
     });
 
 
@@ -132,6 +133,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
         this.editSeriesForm.get('ageRating')?.setValue(this.metadata.ageRating);
         this.editSeriesForm.get('publicationStatus')?.setValue(this.metadata.publicationStatus);
+        this.editSeriesForm.get('language')?.setValue(this.metadata.language);
 
         this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.metadata.ageRating = val;
@@ -141,7 +143,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
           this.metadata.publicationStatus = val;
         });
 
-
+        this.editSeriesForm.get('language')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.language = val;
+        });
       }
     });
 
@@ -253,7 +257,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     });
 
     if (this.metadata.genres) {
-      this.tagsSettings.savedData = this.metadata.genres;
+      this.genreSettings.savedData = this.metadata.genres;
     }
     return of(true);
   }
@@ -365,14 +369,47 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   updateTags(tags: Tag[]) {
     this.tags = tags;
+    this.metadata.tags = tags;
   }
 
   updateGenres(genres: Genre[]) {
     this.genres = genres;
+    this.metadata.genres = genres;
   }
 
   updatePerson(persons: Person[], role: PersonRole) {
-    // TODO
+    switch (role) {
+      case PersonRole.CoverArtist:
+        this.metadata.coverArtists = persons;
+        break;
+      case PersonRole.Character:
+        this.metadata.characters = persons;
+        break;
+      case PersonRole.Colorist:
+        this.metadata.colorists = persons;
+        break;
+      case PersonRole.Editor:
+        this.metadata.editors = persons;
+        break;
+      case PersonRole.Inker:
+        this.metadata.inkers = persons;
+        break;
+      case PersonRole.Letterer:
+        this.metadata.letterers = persons;
+        break;
+      case PersonRole.Penciller:
+        this.metadata.pencillers = persons;
+        break;
+      case PersonRole.Publisher:
+        this.metadata.publishers = persons;
+        break;
+      case PersonRole.Writer:
+        this.metadata.writers = persons;
+        break;
+      case PersonRole.Translator:
+        this.metadata.translators = persons;
+
+    }
   }
 
   updateSelectedIndex(index: number) {

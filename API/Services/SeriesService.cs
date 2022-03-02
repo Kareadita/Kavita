@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,10 +7,13 @@ using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
 using API.DTOs;
+using API.DTOs.CollectionTags;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 namespace API.Services;
 
@@ -45,51 +49,32 @@ public class SeriesService : ISeriesService
             var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
             var allTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
+            var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToList();
+
             if (series.Metadata == null)
             {
-                series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.Tags
+                series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.CollectionTags
                     .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
             }
             else
             {
 
+                series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata.AgeRating;
+                series.Metadata.PublicationStatus = updateSeriesMetadataDto.SeriesMetadata.PublicationStatus;
+
+
                 series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                // TODO: Move this merging logic into a reusable code as it can be used for any Tag
-                var newTags = new List<CollectionTag>();
-
-                // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-                var existingTags = series.Metadata.CollectionTags.ToList();
-                foreach (var existing in existingTags)
-                {
-                    if (updateSeriesMetadataDto.Tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-                    {
-                        // Remove tag
-                        series.Metadata.CollectionTags.Remove(existing);
-                    }
-                }
-
-                // At this point, all tags that aren't in dto have been removed.
-                foreach (var tag in updateSeriesMetadataDto.Tags)
-                {
-                    var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
-                    if (existingTag != null)
-                    {
-                        if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
-                        {
-                            newTags.Add(existingTag);
-                        }
-                    }
-                    else
-                    {
-                        // Add new tag
-                        newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
-                    }
-                }
-
-                foreach (var tag in newTags)
+                UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allTags, (tag) =>
                 {
                     series.Metadata.CollectionTags.Add(tag);
-                }
+                });
+
+                series.Metadata.Genres ??= new List<Genre>();
+                UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata.Genres, series, allGenres, (genre) =>
+                {
+                    series.Metadata.Genres.Add(genre);
+                    //series.Metadata.GenresLocked = true;
+                });
             }
 
             if (!_unitOfWork.HasChanges())
@@ -99,7 +84,7 @@ public class SeriesService : ISeriesService
 
             if (await _unitOfWork.CommitAsync())
             {
-                foreach (var tag in updateSeriesMetadataDto.Tags)
+                foreach (var tag in updateSeriesMetadataDto.CollectionTags)
                 {
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
                         MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
@@ -118,6 +103,83 @@ public class SeriesService : ISeriesService
         }
 
         return false;
+    }
+
+    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, List<CollectionTag> allTags, Action<CollectionTag> handleAdd)
+    {
+
+        // TODO: Move this merging logic into a reusable code as it can be used for any Tag
+        //var newTags = new List<CollectionTag>();
+
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = series.Metadata.CollectionTags.ToList();
+        foreach (var existing in existingTags)
+        {
+            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+            {
+                // Remove tag
+                series.Metadata.CollectionTags.Remove(existing);
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tag in tags)
+        {
+            var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
+            if (existingTag != null)
+            {
+                if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
+                {
+                    //newTags.Add(existingTag);
+                    handleAdd(existingTag);
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
+                //newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
+            }
+        }
+
+        // foreach (var tag in newTags)
+        // {
+        //     series.Metadata.CollectionTags.Add(tag);
+        // }
+    }
+
+    private static void UpdateGenreList(ICollection<GenreTagDto> tags, Series series, IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd)
+    {
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = series.Metadata.Genres.ToList();
+        foreach (var existing in existingTags)
+        {
+            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+            {
+                // Remove tag
+                series.Metadata.Genres.Remove(existing);
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tag in tags)
+        {
+            var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
+            if (existingTag != null)
+            {
+                if (series.Metadata.Genres.All(t => t.Title != tag.Title))
+                {
+                    //newTags.Add(existingTag);
+                    handleAdd(existingTag);
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(DbFactory.Genre(tag.Title, false));
+                //newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
+            }
+        }
     }
 
     /// <summary>
