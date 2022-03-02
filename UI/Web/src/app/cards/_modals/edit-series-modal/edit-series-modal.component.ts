@@ -65,6 +65,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   ageRatings: Array<AgeRatingDto> = [];
   publicationStatuses: Array<PublicationStatusDto> = [];
+  validLanguages: Array<Language> = [];
 
   get Breakpoint(): typeof Breakpoint {
     return Breakpoint;
@@ -119,6 +120,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     
     this.metadataService.getAllPublicationStatus().subscribe(statuses => {
       this.publicationStatuses = statuses;
+    });
+
+    this.metadataService.getAllValidLanguages().subscribe(validLanguages => {
+      this.validLanguages = validLanguages;
     })
 
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
@@ -173,8 +178,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.setupTagSettings(),
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
+      this.setupLanguageTypeahead()
     ]).subscribe(results => {
-      //this.resetTypeaheads.next(true);
       this.collectionTags = this.metadata.collectionTags;
       this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
     });
@@ -275,6 +280,31 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     }
   }
 
+  setupLanguageTypeahead() {
+    this.languageSettings.minCharacters = 0;
+    this.languageSettings.multiple = false;
+    this.languageSettings.id = 'language';
+    this.languageSettings.unique = true;
+    this.languageSettings.addIfNonExisting = false;
+    this.languageSettings.compareFn = (options: Language[], filter: string) => {
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
+      .pipe(map(items => this.languageSettings.compareFn(items, filter)));
+
+    this.languageSettings.singleCompareFn = (a: Language, b: Language) => {
+      return a.isoCode == b.isoCode;
+    }
+
+    if (this.metadata.language) {
+      const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
+      if (l !== undefined) {
+        this.languageSettings.savedData = l;
+      }
+    }
+    return of(true);
+  }
+
   setupPersonTypeahead() {
     this.peopleSettings = {};
 
@@ -371,6 +401,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   updateGenres(genres: Genre[]) {
     this.genres = genres;
     this.metadata.genres = genres;
+  }
+
+  updateLanguage(language: Language) {
+    this.metadata.language = language.isoCode;
   }
 
   updatePerson(persons: Person[], role: PersonRole) {

@@ -79,6 +79,13 @@ export class MetadataService {
     return this.httpClient.get<Array<Language>>(this.baseUrl + method);
   }
 
+  /**
+   * All the potential language tags there can be
+   */
+  getAllValidLanguages() {
+    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages');
+  }
+
   getAllPeople(libraries?: Array<number>) {
     let method = 'metadata/people'
     if (libraries != undefined && libraries.length > 0) {

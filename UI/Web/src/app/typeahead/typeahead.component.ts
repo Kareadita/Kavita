@@ -245,10 +245,17 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       if (this.settings.multiple) {
         this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);  
       }
-      //  else {
-      //   this.optionSelection = new SelectionModel<any>(true, this.settings.savedData[0]);
-      //   this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
-      // }
+       else {
+         const isArray = this.settings.savedData.hasOwnProperty('length');
+         if (isArray) {
+          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+         } else {
+          this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
+         }
+        
+        
+        //this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
+      }
     } else {
       this.optionSelection = new SelectionModel<any>();
     }
@@ -337,6 +344,10 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   handleOptionClick(opt: any) {
+    if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
+      return;
+    }
+
     this.toggleSelection(opt);
 
     this.resetField();
@@ -375,12 +386,17 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       event.preventDefault();
     }
 
+    if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
+      return;
+    }
+
     if (this.inputElem) {
       // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
       document.querySelector('body')?.click();
       this.inputElem.nativeElement.focus();
       this.hasFocus = true;
     }
+
    
     this.openDropdown();
   }

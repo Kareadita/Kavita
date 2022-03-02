@@ -99,10 +99,17 @@
                                 <div class="col-md-4 pe-2">
                                     <div class="mb-3">
                                         <label for="language" class="form-label">Language</label>
-                                        <input type="text" class="form-control" formControlName="language" id="language">
-                                        <!-- <select class="form-select"id="age-rating" formControlName="ageRating">
-                                            <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
+                                        <!-- <select class="form-select" id="language" formControlName="language">
+                                            <option *ngFor="let opt of validLanguages" [value]="opt.isoCode">{{opt.title | titlecase}}</option>
                                         </select> -->
+                                        <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.title}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.title}} ({{item.isoCode}})
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                                 <div class="col-md-4 pe-2">

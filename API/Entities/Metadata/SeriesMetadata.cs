@@ -40,6 +40,7 @@ namespace API.Entities.Metadata
         public int Count { get; set; } = 0;
         public PublicationStatus PublicationStatus { get; set; }
 
+
         // Relationship
         public Series Series { get; set; }
         public int SeriesId { get; set; }
