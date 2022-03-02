@@ -104,10 +104,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       sortName: new FormControl(this.series.sortName, []),
       rating: new FormControl(this.series.userRating, []),
 
-      genres: new FormControl('', []),
-      author: new FormControl('', []),
-      artist: new FormControl('', []),
-
       coverImageIndex: new FormControl(0, []),
       coverImageLocked: new FormControl(this.series.coverImageLocked, []),
 
@@ -136,11 +132,11 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('language')?.setValue(this.metadata.language);
 
         this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          this.metadata.ageRating = val;
+          this.metadata.ageRating = parseInt(val + '', 10);
         });
     
         this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          this.metadata.publicationStatus = val;
+          this.metadata.publicationStatus = parseInt(val + '', 10);
         });
 
         this.editSeriesForm.get('language')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {

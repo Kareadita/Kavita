@@ -6,11 +6,6 @@ import { Person } from "./person";
 import { Tag } from "./tag";
 
 export interface SeriesMetadata {
-    /**
-     * Is this used
-     * @deprecate Is this used?
-     */
-    // publisher: string;
     summary: string;
     genres: Array<Genre>;
     tags: Array<Tag>;

@@ -11,6 +11,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
@@ -48,8 +49,10 @@ public class SeriesService : ISeriesService
         {
             var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-            var allTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
+            var allCollectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
             var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToList();
+            var allPeople = (await _unitOfWork.PersonRepository.GetAllPeople()).ToList();
+            var allTags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToList();
 
             if (series.Metadata == null)
             {
@@ -64,7 +67,7 @@ public class SeriesService : ISeriesService
 
 
                 series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allTags, (tag) =>
+                UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
                 {
                     series.Metadata.CollectionTags.Add(tag);
                 });
@@ -75,6 +78,87 @@ public class SeriesService : ISeriesService
                     series.Metadata.Genres.Add(genre);
                     //series.Metadata.GenresLocked = true;
                 });
+
+                series.Metadata.Tags ??= new List<Tag>();
+                UpdateTagList(updateSeriesMetadataDto.SeriesMetadata.Tags, series, allTags, (tag) =>
+                {
+                    series.Metadata.Tags.Add(tag);
+                    //series.Metadata.TagsLocked = true;
+                });
+
+                series.Metadata.People ??= new List<Person>();
+                UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allPeople,
+                    (person) =>
+                {
+                    series.Metadata.People.Add(person);
+                    allPeople.Add(person);
+                    //series.Metadata.WriterLocked = true;
+                });
+                UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allPeople,
+                    (person) =>
+                {
+                    series.Metadata.People.Add(person);
+                    allPeople.Add(person);
+                    //series.Metadata.WriterLocked = true;
+                });
+
+                UpdatePeopleList(PersonRole.Colorist, updateSeriesMetadataDto.SeriesMetadata.Colorists, series, allPeople,
+                (person) =>
+                {
+                    series.Metadata.People.Add(person);
+                    allPeople.Add(person);
+                    //series.Metadata.ColoristLocked = true;
+                });
+
+                UpdatePeopleList(PersonRole.Editor, updateSeriesMetadataDto.SeriesMetadata.Editors, series, allPeople,
+                    (person) =>
+                    {
+                        series.Metadata.People.Add(person);
+                        allPeople.Add(person);
+                        //series.Metadata.EditorLocked = true;
+                    });
+                UpdatePeopleList(PersonRole.Inker, updateSeriesMetadataDto.SeriesMetadata.Inkers, series, allPeople,
+                    (person) =>
+                    {
+                        series.Metadata.People.Add(person);
+                        allPeople.Add(person);
+                        //series.Metadata.InkerLocked = true;
+                    });
+                UpdatePeopleList(PersonRole.Letterer, updateSeriesMetadataDto.SeriesMetadata.Letterers, series, allPeople,
+                    (person) =>
+                    {
+                        series.Metadata.People.Add(person);
+                        allPeople.Add(person);
+                        //series.Metadata.LettererLocked = true;
+                    });
+                UpdatePeopleList(PersonRole.Penciller, updateSeriesMetadataDto.SeriesMetadata.Pencillers, series, allPeople,
+                    (person) =>
+                    {
+                        series.Metadata.People.Add(person);
+                        allPeople.Add(person);
+                        //series.Metadata.PencillerLocked = true;
+                    });
+                UpdatePeopleList(PersonRole.Publisher, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allPeople,
+                    (person) =>
+                    {
+                        series.Metadata.People.Add(person);
+                        allPeople.Add(person);
+                        //series.Metadata.PublisherLocked = true;
+                    });
+                UpdatePeopleList(PersonRole.Translator, updateSeriesMetadataDto.SeriesMetadata.Translators, series, allPeople,
+                    (person) =>
+                    {
+                        series.Metadata.People.Add(person);
+                        allPeople.Add(person);
+                        //series.Metadata.TranslatorLocked = true;
+                    });
+                UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
+                    (person) =>
+                    {
+                        series.Metadata.People.Add(person);
+                        allPeople.Add(person);
+                        //series.Metadata.CoverArtistLocked = true;
+                    });
             }
 
             if (!_unitOfWork.HasChanges())
@@ -91,6 +175,9 @@ public class SeriesService : ISeriesService
                             updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
                 }
 
+                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
+                    MessageFactory.ScanSeriesEvent(series.Id, series.Name), false);
+
                 await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
 
                 return true;
@@ -105,12 +192,9 @@ public class SeriesService : ISeriesService
         return false;
     }
 
-    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, List<CollectionTag> allTags, Action<CollectionTag> handleAdd)
+    // TODO: Move this to a helper so we can easily test
+    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags, Action<CollectionTag> handleAdd)
     {
-
-        // TODO: Move this merging logic into a reusable code as it can be used for any Tag
-        //var newTags = new List<CollectionTag>();
-
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();
         foreach (var existing in existingTags)
@@ -138,14 +222,8 @@ public class SeriesService : ISeriesService
             {
                 // Add new tag
                 handleAdd(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
-                //newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
             }
         }
-
-        // foreach (var tag in newTags)
-        // {
-        //     series.Metadata.CollectionTags.Add(tag);
-        // }
     }
 
     private static void UpdateGenreList(ICollection<GenreTagDto> tags, Series series, IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd)
@@ -169,7 +247,6 @@ public class SeriesService : ISeriesService
             {
                 if (series.Metadata.Genres.All(t => t.Title != tag.Title))
                 {
-                    //newTags.Add(existingTag);
                     handleAdd(existingTag);
                 }
             }
@@ -177,7 +254,71 @@ public class SeriesService : ISeriesService
             {
                 // Add new tag
                 handleAdd(DbFactory.Genre(tag.Title, false));
-                //newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
+            }
+        }
+    }
+
+    private static void UpdateTagList(ICollection<TagDto> tags, Series series, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd)
+    {
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = series.Metadata.Tags.ToList();
+        foreach (var existing in existingTags)
+        {
+            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+            {
+                // Remove tag
+                series.Metadata.Tags.Remove(existing);
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tag in tags)
+        {
+            var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
+            if (existingTag != null)
+            {
+                if (series.Metadata.Tags.All(t => t.Title != tag.Title))
+                {
+                    handleAdd(existingTag);
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(DbFactory.Tag(tag.Title, false));
+            }
+        }
+    }
+
+    private static void UpdatePeopleList(PersonRole role, ICollection<PersonDto> tags, Series series, IReadOnlyCollection<Person> allTags,
+        Action<Person> handleAdd)
+    {
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = series.Metadata.People.ToList();
+        foreach (var existing in existingTags)
+        {
+            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+            {
+                // Remove tag
+                series.Metadata.People.Remove(existing);
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tag in tags)
+        {
+            var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
+            if (existingTag != null)
+            {
+                if (series.Metadata.People.All(t => t.Name != tag.Name && t.Role == tag.Role))
+                {
+                    handleAdd(existingTag);
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(DbFactory.Person(tag.Name, role));
             }
         }
     }
