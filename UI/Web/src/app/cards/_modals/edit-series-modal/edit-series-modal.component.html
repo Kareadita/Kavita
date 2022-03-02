@@ -96,7 +96,7 @@
                             </div>
 
                             <div class="row g-0">
-                                <div class="col-md-6">
+                                <div class="col-md-6 pe-2">
                                     <div class="mb-3">
                                         <label for="age-rating" class="form-label">Age Rating</label>
                                         <select class="form-select"id="age-rating" formControlName="ageRating">
@@ -125,7 +125,7 @@
                         <a ngbNavLink>{{tabs[2]}}</a>
                         <ng-template ngbNavContent>
                             <div class="row g-0">
-                                <div class="col-md-6">
+                                <div class="col-md-6 pe-2">
                                     <div class="mb-3">
                                         <label for="writer" class="form-label">Writer</label>
                                         <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)">
@@ -140,69 +140,131 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="artist" class="form-label">Cover Artist</label>
-                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                        <label for="cover-artist" class="form-label">Cover Artist</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="row g-0">
-                                <div class="col-md-6">
+                                <div class="col-md-6 pe-2">
                                     <div class="mb-3">
-                                        <label for="author" class="form-label">Publisher</label>
-                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                        <label for="publisher" class="form-label">Publisher</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="artist" class="form-label">Penciller</label>
-                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                        <label for="penciller" class="form-label">Penciller</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="row g-0">
-                                <div class="col-md-6">
+                                <div class="col-md-6 pe-2">
                                     <div class="mb-3">
-                                        <label for="author" class="form-label">Letterer</label>
-                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                        <label for="letterer" class="form-label">Letterer</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="artist" class="form-label">Inker</label>
-                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                        <label for="inker" class="form-label">Inker</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="row g-0">
-                                <div class="col-md-6">
+                                <div class="col-md-6 pe-2">
                                     <div class="mb-3">
-                                        <label for="author" class="form-label">Editor</label>
-                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                        <label for="editor" class="form-label">Editor</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="artist" class="form-label">Colorist</label>
-                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                        <label for="colorist" class="form-label">Colorist</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="row g-0">
-                                <!-- TODO: Validate if this should be in Metadata or People -->
-                                <div class="col-md-6">
+                                <div class="col-md-6 pe-2">
                                     <div class="mb-3">
-                                        <label for="author" class="form-label">Character</label>
-                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                        <label for="character" class="form-label">Character</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="artist" class="form-label">Translators</label>
-                                        <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
+                                        <label for="translator" class="form-label">Translators</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                             </div>

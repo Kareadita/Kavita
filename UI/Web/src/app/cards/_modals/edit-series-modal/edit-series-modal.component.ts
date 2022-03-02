@@ -115,6 +115,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       publicationStatus: new FormControl('', []),
     });
 
+
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
       this.ageRatings = ratings;
     });
@@ -128,12 +129,17 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.metadata = metadata;
         this.setupTypeaheads();
 
-        
-        // this.collectionTagSettings.savedData = metadata.collectionTags;
-        // this.collectionTags = metadata.collectionTags;
         this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
         this.editSeriesForm.get('ageRating')?.setValue(this.metadata.ageRating);
         this.editSeriesForm.get('publicationStatus')?.setValue(this.metadata.publicationStatus);
+
+        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.ageRating = val;
+        });
+    
+        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.publicationStatus = val;
+        });
 
 
       }
@@ -252,14 +258,13 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     return of(true);
   }
 
-  updateFromPreset(id: string, presetField: Array<any> | undefined, role: PersonRole) {
+  updateFromPreset(id: string, presetField: Array<Person> | undefined, role: PersonRole) {
     const personSettings = this.createBlankPersonSettings(id, role)
     if (presetField && presetField.length > 0) {
       const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
       return fetch('').pipe(map(people => {
-        personSettings.savedData = people.filter(item => presetField.includes(item.id));
-        //peopleFilterField = personSettings.savedData.map(item => item.id);
-        //this.resetTypeaheads.next(true);
+        const persetIds = presetField.map(p => p.id);
+        personSettings.savedData = people.filter(person => persetIds.includes(person.id));
         this.peopleSettings[role] = personSettings;
         this.updatePerson(personSettings.savedData as Person[], role);
         return true;
@@ -274,7 +279,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.peopleSettings = {};
 
     return forkJoin([
-      this.updateFromPreset('writers', this.metadata.writers, PersonRole.Writer),
+      this.updateFromPreset('writer', this.metadata.writers, PersonRole.Writer),
       this.updateFromPreset('character', this.metadata.characters, PersonRole.Character),  
       this.updateFromPreset('colorist', this.metadata.colorists, PersonRole.Colorist),
       this.updateFromPreset('cover-artist', this.metadata.coverArtists, PersonRole.CoverArtist),
@@ -283,7 +288,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.updateFromPreset('letterer', this.metadata.letterers, PersonRole.Letterer),
       this.updateFromPreset('penciller', this.metadata.pencillers, PersonRole.Penciller),
       this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
-      this.updateFromPreset('translators', this.metadata.translators, PersonRole.Translator)
+      this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator)
     ]).pipe(map(results => {
       //this.resetTypeaheads.next(true);
       return of(true);
