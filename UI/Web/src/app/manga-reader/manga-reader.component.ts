@@ -12,7 +12,7 @@ import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { BehaviorSubject, forkJoin, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { KEY_CODES, UtilityService, Breakpoint } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
 import { MemberService } from '../_services/member.service';
 import { Stack } from '../shared/data-structures/stack';
@@ -110,7 +110,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('reader') reader!: ElementRef;
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
-  private canvasImage = new Image();
+  canvasImage = new Image(); // private 
 
   /**
    * A circular array of size PREFETCH_PAGES + 2. Maintains prefetched Images around the current page to load from to avoid loading animation.
@@ -920,13 +920,26 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
-      if (windowWidth > newWidth) {
-        this.setCanvasSize();
-        this.ctx.drawImage(this.canvasImage, 0, 0);
-      } else {
-        this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-        this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
-      }
+      // if (windowWidth > newWidth) {
+      //   this.setCanvasSize();
+      //   this.ctx.drawImage(this.canvasImage, 0, 0);
+      // } else {
+      //   this.setCanvasSize();
+      //   //this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
+      //   this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
+      // }
+
+      this.setCanvasSize();
+      // var offScreenCanvas = document.createElement('canvas')
+      // offScreenCanvas.width  = newWidth;
+      // offScreenCanvas.height = newHeight;
+//      const resizedImage = new Image();
+      // pica.resize(this.canvasImage, offScreenCanvas);
+
+      
+
+      //this.document.querySelector('.reading-area')?.appendChild(this.canvasImage);
+
     }
 
     // Reset scroll on non HEIGHT Fits
