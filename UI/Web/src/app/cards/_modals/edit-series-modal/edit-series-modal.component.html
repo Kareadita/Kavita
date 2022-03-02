@@ -67,7 +67,14 @@
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="genres" class="form-label">Genres</label>
-                                        <input id="genres" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="genres" type="text">
+                                        <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.title}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.title}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                             </div>
@@ -120,8 +127,15 @@
                             <div class="row g-0">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="author" class="form-label">Writer</label>
-                                        <input id="author" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="author" type="text">
+                                        <label for="writer" class="form-label">Writer</label>
+                                        <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)">
+                                            <ng-template #badgeItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                            <ng-template #optionItem let-item let-position="idx">
+                                                {{item.name}}
+                                            </ng-template>
+                                        </app-typeahead>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -171,7 +185,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label for="artist" class="form-label">Collorist</label>
+                                        <label for="artist" class="form-label">Colorist</label>
                                         <input id="artist" class="form-control" placeholder="Not Implemented" readonly="true" formControlName="artist" type="text">
                                     </div>
                                 </div>

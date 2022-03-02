@@ -1,16 +1,17 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { forkJoin, of, Subject } from 'rxjs';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
+import { Genre } from 'src/app/_models/genre';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { Language } from 'src/app/_models/metadata/language';
 import { PublicationStatusDto } from 'src/app/_models/metadata/publication-status-dto';
-import { Person } from 'src/app/_models/person';
+import { Person, PersonRole } from 'src/app/_models/person';
 import { Series } from 'src/app/_models/series';
 import { SeriesMetadata } from 'src/app/_models/series-metadata';
 import { Tag } from 'src/app/_models/tag';
@@ -48,11 +49,13 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   collectionTagSettings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
-  tagSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
+  genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
 
   collectionTags: CollectionTag[] = [];
   tags: Tag[] = [];
+  genres: Genre[] = [];
+
   metadata!: SeriesMetadata;
   imageUrls: Array<string> = [];
   /**
@@ -65,6 +68,14 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   get Breakpoint(): typeof Breakpoint {
     return Breakpoint;
+  }
+
+  get PersonRole() {
+    return PersonRole;
+  }
+
+  getPersonsSettings(role: PersonRole) {
+    return this.peopleSettings[role];
   }
 
   constructor(public modal: NgbActiveModal,
@@ -154,12 +165,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     forkJoin([
       this.setupCollectionTagsSettings(),
       this.setupTagSettings(),
-      // this.setupLanguageSettings(),
-      // this.setupGenreTypeahead(),
-      // this.setupPersonTypeahead(),
+      this.setupGenreTypeahead(),
+      this.setupPersonTypeahead(),
     ]).subscribe(results => {
       //this.resetTypeaheads.next(true);
-      //this.collectionTagSettings.savedData = this.metadata.collectionTags;
       this.collectionTags = this.metadata.collectionTags;
       this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
     });
@@ -216,6 +225,102 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     return of(true);
   }
 
+  setupGenreTypeahead() {
+    this.genreSettings.minCharacters = 0;
+    this.genreSettings.multiple = true;
+    this.genreSettings.id = 'genres';
+    this.genreSettings.unique = true;
+    this.genreSettings.addIfNonExisting = true;
+    this.genreSettings.fetchFn = (filter: string) => {
+      return this.metadataService.getAllGenres()
+      .pipe(map(items => this.genreSettings.compareFn(items, filter))); 
+    };
+    this.genreSettings.compareFn = (options: Genre[], filter: string) => {
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.genreSettings.singleCompareFn = (a: Genre, b: Genre) => {
+      return a.title == b.title;
+    }
+
+    this.genreSettings.addTransformFn = ((title: string) => {
+      return {id: 0, title: title };
+    });
+
+    if (this.metadata.genres) {
+      this.tagsSettings.savedData = this.metadata.genres;
+    }
+    return of(true);
+  }
+
+  updateFromPreset(id: string, presetField: Array<any> | undefined, role: PersonRole) {
+    const personSettings = this.createBlankPersonSettings(id, role)
+    if (presetField && presetField.length > 0) {
+      const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
+      return fetch('').pipe(map(people => {
+        personSettings.savedData = people.filter(item => presetField.includes(item.id));
+        //peopleFilterField = personSettings.savedData.map(item => item.id);
+        //this.resetTypeaheads.next(true);
+        this.peopleSettings[role] = personSettings;
+        this.updatePerson(personSettings.savedData as Person[], role);
+        return true;
+      }));
+    } else {
+      this.peopleSettings[role] = personSettings;
+      return of(true);
+    }
+  }
+
+  setupPersonTypeahead() {
+    this.peopleSettings = {};
+
+    return forkJoin([
+      this.updateFromPreset('writers', this.metadata.writers, PersonRole.Writer),
+      this.updateFromPreset('character', this.metadata.characters, PersonRole.Character),  
+      this.updateFromPreset('colorist', this.metadata.colorists, PersonRole.Colorist),
+      this.updateFromPreset('cover-artist', this.metadata.coverArtists, PersonRole.CoverArtist),
+      this.updateFromPreset('editor', this.metadata.editors, PersonRole.Editor),
+      this.updateFromPreset('inker', this.metadata.inkers, PersonRole.Inker),
+      this.updateFromPreset('letterer', this.metadata.letterers, PersonRole.Letterer),
+      this.updateFromPreset('penciller', this.metadata.pencillers, PersonRole.Penciller),
+      this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
+      this.updateFromPreset('translators', this.metadata.translators, PersonRole.Translator)
+    ]).pipe(map(results => {
+      //this.resetTypeaheads.next(true);
+      return of(true);
+    }));
+  }
+
+  fetchPeople(role: PersonRole, filter: string) { 
+    return this.metadataService.getAllPeople().pipe(map(people => {
+      return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter));
+    }));
+  }
+
+  createBlankPersonSettings(id: string, role: PersonRole) {
+    var personSettings = new TypeaheadSettings<Person>();
+    personSettings.minCharacters = 0;
+    personSettings.multiple = true;
+    personSettings.unique = true;
+    personSettings.addIfNonExisting = true;
+    personSettings.id = id;
+    personSettings.compareFn = (options: Person[], filter: string) => {
+      return options.filter(m => this.utilityService.filter(m.name, filter));
+    }
+
+    personSettings.singleCompareFn = (a: Person, b: Person) => {
+      return a.name == b.name && a.role == b.role;
+    }
+    personSettings.fetchFn = (filter: string) => {
+      return this.fetchPeople(role, filter).pipe(map(items => personSettings.compareFn(items, filter)));
+    };
+
+    personSettings.addTransformFn = ((title: string) => {
+      return {id: 0, name: title, role: role };
+    });
+
+    return personSettings;
+  }
+
   close() {
     this.modal.close({success: false, series: undefined});
   }
@@ -255,6 +360,14 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   updateTags(tags: Tag[]) {
     this.tags = tags;
+  }
+
+  updateGenres(genres: Genre[]) {
+    this.genres = genres;
+  }
+
+  updatePerson(persons: Person[], role: PersonRole) {
+    // TODO
   }
 
   updateSelectedIndex(index: number) {
