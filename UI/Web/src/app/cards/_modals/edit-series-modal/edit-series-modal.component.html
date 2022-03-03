@@ -46,7 +46,7 @@
                         <div class="row g-0">
                             <div class="mb-3" style="width: 100%">
                                 <label for="summary" class="form-label">Summary</label>
-                                <div class="input-group {{editSeriesForm.get('summary')?.dirty || metadata.summaryLocked ? 'lock-active' : ''}}">
+                                <div class="input-group {{editSeriesForm.get('summary')?.dirty || metadata?.summaryLocked ? 'lock-active' : ''}}">
                                     <ng-container [ngTemplateOutlet]="lock"></ng-container>
                                     <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                                 </div>
@@ -80,7 +80,9 @@
                                 <div class="col-md-12">
                                     <div class="mb-3">
                                         <label for="genres" class="form-label">Genres</label>
-                                        <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings" [(locked)]="metadata.genresLocked" (onUnlock)="handleUnlock('genres')">
+                                        <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings" 
+                                            [(locked)]="metadata.genresLocked" (onUnlock)="handleUnlock('genres')"
+                                            (newItemAdded)="metadata.genresLocked = true" (selectedData)="metadata.genresLocked = false">
                                             <ng-template #badgeItem let-item let-position="idx">
                                                 {{item.title}}
                                             </ng-template>

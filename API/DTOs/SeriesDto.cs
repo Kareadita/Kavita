@@ -33,6 +33,10 @@ namespace API.DTOs
 
         public DateTime Created { get; set; }
 
+        public bool NameLocked { get; set; }
+        public bool SortNameLocked { get; set; }
+        public bool LocalizedNameLocked { get; set; }
+
         public int LibraryId { get; set; }
         public string LibraryName { get; set; }
     }
