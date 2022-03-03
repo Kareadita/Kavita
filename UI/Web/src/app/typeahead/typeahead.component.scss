@@ -11,8 +11,10 @@ input {
 }
 
 .lock-active {
-    background-color: var(--primary-color);
-    color: white;
+    > .input-group-text {
+        background-color: var(--primary-color);
+        color: white;
+    }
 }
 
 .close-offset {

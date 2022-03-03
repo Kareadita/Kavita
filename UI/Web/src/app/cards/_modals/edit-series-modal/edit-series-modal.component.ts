@@ -403,6 +403,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     console.log('todo: unlock ', field);
   }
 
+  hello(val: boolean) {
+    console.log('hello: ', val);
+  }
+
   updateCollections(tags: CollectionTag[]) {
     this.collectionTags = tags;
   }

@@ -1,7 +1,7 @@
 <form [formGroup]="typeaheadForm">
-  <div class="input-group  {{hasFocus ? 'open': ''}}">
+  <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}">
     <ng-container *ngIf="settings.showLocked">
-      <span class="input-group-text {{locked ? 'lock-active clickable' : ''}}" (click)="unlock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
+      <span class="input-group-text {{locked ? 'clickable' : ''}}" (click)="unlock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
         <span class="visually-hidden">Field is locked</span>
     </span>
     </ng-container>
