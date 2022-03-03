@@ -1344,6 +1344,48 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenNonRead_LooseLeafChaptersAndVolumes()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("230", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("231", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("1", nextChapter.Range);
+    }
+
+    [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllRead()
     {
         _context.Series.Add(new Series()
