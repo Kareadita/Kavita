@@ -40,6 +40,30 @@ namespace API.Entities.Metadata
         public int Count { get; set; } = 0;
         public PublicationStatus PublicationStatus { get; set; }
 
+        // Locks
+        public bool LanguageLocked { get; set; }
+        public bool SummaryLocked { get; set; }
+        /// <summary>
+        /// Locked by user so metadata updates from scan loop will not override AgeRating
+        /// </summary>
+        public bool AgeRatingLocked { get; set; }
+        /// <summary>
+        /// Locked by user so metadata updates from scan loop will not override PublicationStatus
+        /// </summary>
+        public bool PublicationStatusLocked { get; set; }
+        public bool GenresLocked { get; set; }
+        public bool TagsLocked { get; set; }
+        public bool WriterLocked { get; set; }
+        public bool CharacterLocked { get; set; }
+        public bool ColoristLocked { get; set; }
+        public bool EditorLocked { get; set; }
+        public bool InkerLocked { get; set; }
+        public bool LettererLocked { get; set; }
+        public bool PencillerLocked { get; set; }
+        public bool PublisherLocked { get; set; }
+        public bool TranslatorLocked { get; set; }
+        public bool CoverArtistLocked { get; set; }
+
 
         // Relationship
         public Series Series { get; set; }
@@ -48,6 +72,7 @@ namespace API.Entities.Metadata
         /// <inheritdoc />
         [ConcurrencyCheck]
         public uint RowVersion { get; private set; }
+
 
         /// <inheritdoc />
         public void OnSavingChanges()

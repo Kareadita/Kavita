@@ -43,7 +43,10 @@ export class ThemeTestComponent implements OnInit {
     sortName: '', 
     userRating: 0,
     userReview: '', 
-    volumes: []
+    volumes: [],
+    localizedNameLocked: false,
+    nameLocked: false, 
+    sortNameLocked: false
   }
 
   seriesWithProgress: Series = {
@@ -61,7 +64,10 @@ export class ThemeTestComponent implements OnInit {
     sortName: '', 
     userRating: 0,
     userReview: '', 
-    volumes: []
+    volumes: [],
+    localizedNameLocked: false,
+    nameLocked: false, 
+    sortNameLocked: false
   }
 
   get TagBadgeCursor(): typeof TagBadgeCursor {

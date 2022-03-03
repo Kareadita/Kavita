@@ -146,7 +146,7 @@ namespace API.Controllers
             series.Name = updateSeries.Name.Trim();
             series.LocalizedName = updateSeries.LocalizedName.Trim();
             series.SortName = updateSeries.SortName?.Trim();
-            series.Metadata.Summary = updateSeries.Summary?.Trim();
+            //series.Metadata.Summary = updateSeries.Summary?.Trim(); // TODO: MOve this to Metadata
 
             var needsRefreshMetadata = false;
             // This is when you hit Reset

@@ -101,8 +101,9 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating, userReview});
   }
 
-  updateSeries(model: any) {
-    return this.httpClient.post(this.baseUrl + 'series/update', model);
+  updateSeries(model: any, unlockName = false, unlockSortName = false, unlockLocalizedName = false) {
+    const data = {...model, unlockName, unlockSortName, unlockLocalizedName};
+    return this.httpClient.post(this.baseUrl + 'series/update', data);
   }
 
   markRead(seriesId: number) {
@@ -161,10 +162,30 @@ export class SeriesService {
     }));
   }
 
-  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[]) {
+  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[],
+    genresLocked: boolean = false, tagsLocked: boolean = false, writersLocked: boolean = false,
+    coverArtistsLocked: boolean = false, publishersLocked: boolean = false, charactersLocked: boolean = false, 
+    pencillersLocked: boolean = false, inkersLocked: boolean = false, coloristsLocked: boolean = false, letterersLocked: boolean = false, 
+    editorsLocked: boolean = false, translatorsLocked: boolean = false, ageRatingLocked: boolean = false, languageLocked: boolean = false, 
+    publicationStatusLocked: boolean = false) {
     const data = {
       seriesMetadata,
-      collectionTags
+      collectionTags,
+      genresLocked,
+      tagsLocked,
+      writersLocked,
+      coverArtistsLocked,
+      publishersLocked,
+      charactersLocked,
+      pencillersLocked,
+      inkersLocked,
+      coloristsLocked,
+      letterersLocked,
+      editorsLocked,
+      translatorsLocked,
+      ageRatingLocked,
+      languageLocked,
+      publicationStatusLocked,
     };
     return this.httpClient.post(this.baseUrl + 'series/metadata', data, {responseType: 'text' as 'json'});
   }
@@ -173,11 +194,6 @@ export class SeriesService {
     let params = new HttpParams();
 
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
-    
-    // NOTE: I'm not sure the paginated result is doing anything
-    // if (this.paginatedSeriesForTagsResults?.pagination !== undefined && this.paginatedSeriesForTagsResults?.pagination?.currentPage === pageNum) {
-    //   return of(this.paginatedSeriesForTagsResults);
-    // }
 
     return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'series/series-by-collection?collectionId=' + collectionTagId, {observe: 'response', params}).pipe(
       map((response: any) => {

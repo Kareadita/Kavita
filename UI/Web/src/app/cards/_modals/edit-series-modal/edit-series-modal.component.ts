@@ -214,6 +214,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.tagsSettings.multiple = true;
     this.tagsSettings.id = 'tags';
     this.tagsSettings.unique = true;
+    this.tagsSettings.showLocked = true;
     this.tagsSettings.addIfNonExisting = true;
 
 
@@ -241,6 +242,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.genreSettings.multiple = true;
     this.genreSettings.id = 'genres';
     this.genreSettings.unique = true;
+    this.genreSettings.showLocked = true;
     this.genreSettings.addIfNonExisting = true;
     this.genreSettings.fetchFn = (filter: string) => {
       return this.metadataService.getAllGenres()
@@ -285,6 +287,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.languageSettings.multiple = false;
     this.languageSettings.id = 'language';
     this.languageSettings.unique = true;
+    this.languageSettings.showLocked = true;
     this.languageSettings.addIfNonExisting = false;
     this.languageSettings.compareFn = (options: Language[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
@@ -335,6 +338,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     var personSettings = new TypeaheadSettings<Person>();
     personSettings.minCharacters = 0;
     personSettings.multiple = true;
+    personSettings.showLocked = true;
     personSettings.unique = true;
     personSettings.addIfNonExisting = true;
     personSettings.id = id;
@@ -374,11 +378,17 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   save() {
     const model = this.editSeriesForm.value;
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
+
     const apis = [
-      this.seriesService.updateSeries(model),
       this.seriesService.updateMetadata(this.metadata, this.collectionTags)
     ];
 
+    // We only need to call updateSeries if we changed name, sort name, or localized name
+    if (this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty) {
+      apis.push(this.seriesService.updateSeries(model));
+    }
+
+    
 
     if (selectedIndex > 0) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
@@ -387,6 +397,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     forkJoin(apis).subscribe(results => {
       this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0});
     });
+  }
+
+  handleUnlock(field: string) {
+    console.log('todo: unlock ', field);
   }
 
   updateCollections(tags: CollectionTag[]) {

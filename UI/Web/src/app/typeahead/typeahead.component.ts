@@ -151,6 +151,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   @Input() locked: boolean = false;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
+  @Output() onUnlock = new EventEmitter<void>();
+  @Output() lockedChange = new EventEmitter<boolean>();
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
@@ -347,6 +349,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.resetField();
   }
 
+  clearSelections(event: any) {
+    this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+    this.selectedData.emit(this.optionSelection.selected());
+    this.resetField();
+  }
+
   handleOptionClick(opt: any) {
     if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
       return;
@@ -433,6 +441,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           && this.typeaheadControl.dirty
           && (typeof this.settings.compareFn == 'function' && this.settings.compareFn(options, this.typeaheadControl.value.trim()).length === 0);
 
+  }
+
+  unlock(event: any) {
+    this.locked = false;
+    this.onUnlock.emit();
+    this.lockedChange.emit(this.locked);
   }
 
 }

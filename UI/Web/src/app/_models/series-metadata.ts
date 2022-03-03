@@ -6,10 +6,12 @@ import { Person } from "./person";
 import { Tag } from "./tag";
 
 export interface SeriesMetadata {
+    seriesId: number;
     summary: string;
+    collectionTags: Array<CollectionTag>;
+
     genres: Array<Genre>;
     tags: Array<Tag>;
-    collectionTags: Array<CollectionTag>;
     writers: Array<Person>;
     coverArtists: Array<Person>;
     publishers: Array<Person>;
@@ -23,6 +25,23 @@ export interface SeriesMetadata {
     ageRating: AgeRating;
     releaseYear: number;
     language: string;
-    seriesId: number;
     publicationStatus: PublicationStatus;
+
+    summaryLocked: boolean;
+    genresLocked: boolean;
+    tagsLocked: boolean;
+    writersLocked: boolean;
+    coverArtistsLocked: boolean;
+    publishersLocked: boolean;
+    charactersLocked: boolean;
+    pencillersLocked: boolean;
+    inkersLocked: boolean;
+    coloristsLocked: boolean;
+    letterersLocked: boolean;
+    editorsLocked: boolean;
+    translatorsLocked: boolean;
+    ageRatingLocked: boolean;
+    releaseYearLocked: boolean;
+    languageLocked: boolean;
+    publicationStatusLocked: boolean;
 }
