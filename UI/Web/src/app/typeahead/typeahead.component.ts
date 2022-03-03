@@ -137,30 +137,34 @@ export class SelectionModel<T> {
   styleUrls: ['./typeahead.component.scss']
 })
 export class TypeaheadComponent implements OnInit, OnDestroy {
-
-  filteredOptions!: Observable<string[]>;
-  isLoadingOptions: boolean = false;
-  typeaheadControl!: FormControl;
-  typeaheadForm!: FormGroup;
-  
-
+  /**
+   * Settings for the typeahead
+   */
   @Input() settings!: TypeaheadSettings<any>;
   /**
    * When true, component will re-init and set back to false.
    */
   @Input() reset: Subject<boolean> = new ReplaySubject(1);
+  /**
+   * When a field is locked, we render custom css to indicate to the user. Does not affect functionality.
+   */
+  @Input() locked: boolean = false;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
+
+  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
+  @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
+  @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
 
   optionSelection!: SelectionModel<any>;
 
   hasFocus = false; // Whether input has active focus
   focusedIndex: number = 0;
   showAddItem: boolean = false;
-
-  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
-  @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
-  @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
+  filteredOptions!: Observable<string[]>;
+  isLoadingOptions: boolean = false;
+  typeaheadControl!: FormControl;
+  typeaheadForm!: FormGroup;
   
   private readonly onDestroy = new Subject<void>();
 

@@ -50,8 +50,10 @@
                             <div class="row g-0">
                                 <div class="col-md-12">
                                     <div class="mb-3">
-                                        <label for="collections" class="form-label">Collections</label>
-                                        <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings">
+                                        <label for="collections" class="form-label">Collections 
+                                            <span class="visually-hidden"> Locked</span></label>
+                                            &nbsp;<i class="fa fa-lock" aria-hidden="true" title="Locked"></i>
+                                        <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">
                                             <ng-template #badgeItem let-item let-position="idx">
                                                 {{item.title}}
                                             </ng-template>
@@ -99,9 +101,6 @@
                                 <div class="col-md-4 pe-2">
                                     <div class="mb-3">
                                         <label for="language" class="form-label">Language</label>
-                                        <!-- <select class="form-select" id="language" formControlName="language">
-                                            <option *ngFor="let opt of validLanguages" [value]="opt.isoCode">{{opt.title | titlecase}}</option>
-                                        </select> -->
                                         <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings">
                                             <ng-template #badgeItem let-item let-position="idx">
                                                 {{item.title}}
@@ -115,17 +114,23 @@
                                 <div class="col-md-4 pe-2">
                                     <div class="mb-3">
                                         <label for="age-rating" class="form-label">Age Rating</label>
-                                        <select class="form-select"id="age-rating" formControlName="ageRating">
-                                            <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
-                                        </select>
+                                        <div class="input-group {{editSeriesForm.get('ageRating')?.dirty ? 'lock-active' : ''}}">
+                                            <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                            <select class="form-select"id="age-rating" formControlName="ageRating">
+                                                <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="publication-status" class="form-label">Publication Status</label>
-                                        <select class="form-select"id="publication-status" formControlName="publicationStatus">
-                                            <option *ngFor="let opt of publicationStatuses" [value]="opt.value">{{opt.title | titlecase}}</option>
-                                        </select>
+                                        <div class="input-group {{editSeriesForm.get('publicationStatus')?.dirty ? 'lock-active' : ''}}">
+                                            <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                            <select class="form-select"id="publication-status" formControlName="publicationStatus">
+                                                <option *ngFor="let opt of publicationStatuses" [value]="opt.value">{{opt.title | titlecase}}</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -368,4 +373,10 @@
     </div>
 </div>
 
+
+<ng-template #lock>
+    <span class="input-group-text"><i class="fa fa-lock" aria-hidden="true"></i>
+        <span class="visually-hidden">Field is locked</span>
+    </span>
+</ng-template>
 
