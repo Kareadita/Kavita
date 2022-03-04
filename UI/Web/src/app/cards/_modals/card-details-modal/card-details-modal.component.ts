@@ -130,7 +130,7 @@ export class CardDetailsModalComponent implements OnInit {
     });
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this)).filter(item => item.action !== Action.Edit);
-
+    console.log('chapterActions: ', this.chapterActions);
     if (this.isChapter) {
       this.chapters.push(this.data as Chapter);
     } else if (!this.isChapter) {

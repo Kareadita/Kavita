@@ -31,24 +31,26 @@
                             Pages: {{data.pages}}
                         </div>
                     </div>
-                    <div class="row g-0">
-                        <div class="col-auto" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
-                            <h6>Tags</h6>
-                            <app-badge-expander [items]="chapterMetadata.tags">
-                                <ng-template #badgeExpanderItem let-item let-position="idx">
-                                    <app-tag-badge>{{item.title}}</app-tag-badge>
-                                </ng-template>  
-                            </app-badge-expander>
+                    <ng-container *ngIf="chapterMetadata !== undefined">
+                        <div class="row g-0">
+                            <div class="col-auto" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
+                                <h6>Tags</h6>
+                                <app-badge-expander [items]="chapterMetadata.tags">
+                                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                                        <app-tag-badge>{{item.title}}</app-tag-badge>
+                                    </ng-template>  
+                                </app-badge-expander>
+                            </div>
+                            <div class="col-auto" *ngIf="chapterMetadata.genres && chapterMetadata.genres.length > 0">
+                                <h6>Genres</h6>
+                                <app-badge-expander [items]="chapterMetadata.genres">
+                                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                                        <app-tag-badge>{{item.title}}</app-tag-badge>
+                                    </ng-template>  
+                                </app-badge-expander>
+                            </div>
                         </div>
-                        <div class="col-auto" *ngIf="chapterMetadata.genres && chapterMetadata.genres.length > 0">
-                            <h6>Genres</h6>
-                            <app-badge-expander [items]="chapterMetadata.genres">
-                                <ng-template #badgeExpanderItem let-item let-position="idx">
-                                    <app-tag-badge>{{item.title}}</app-tag-badge>
-                                </ng-template>  
-                            </app-badge-expander>
-                        </div>
-                    </div>
+                    </ng-container>
                 </ng-template>
             </li>
 
@@ -91,8 +93,9 @@
                             <div class="flex-grow-1">
                                 <h5 class="mt-0 mb-1">
                                     <span *ngIf="chapter.number !== '0'; else specialHeader">
-                                        <span >
-                                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
+                                        <span>
+                                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" 
+                                            [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
                                             {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
                                         </span>
                                         <span class="badge bg-primary rounded-pill">
