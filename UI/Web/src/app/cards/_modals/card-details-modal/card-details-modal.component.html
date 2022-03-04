@@ -14,7 +14,7 @@
             <li [ngbNavItem]="tabs[0]" *ngIf="!tabs[0].disabled">
                 <a ngbNavLink>{{tabs[0].title}}</a>
                 <ng-template ngbNavContent>
-                    
+
                     <div class="row g-0">
                         <div class="col">
                             Id: {{data.id}}
@@ -121,7 +121,6 @@
         <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
-        <!-- <button type="button" class="btn btn-secondary" [disabled]="!isAdmin" (click)="updateCover()">Update Cover</button> -->
         <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
     </div>
 </div>

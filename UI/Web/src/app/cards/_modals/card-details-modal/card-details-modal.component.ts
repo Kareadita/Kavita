@@ -12,7 +12,6 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { UploadService } from 'src/app/_services/upload.service';
-import { ChangeCoverImageModalComponent } from '../change-cover-image/change-cover-image-modal.component';
 import { LibraryType } from '../../../_models/library';
 import { LibraryService } from '../../../_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -42,9 +41,9 @@ export class CardDetailsModalComponent implements OnInit {
   isChapter = false;
   chapters: Chapter[] = [];
 
-  seriesVolumes: any[] = [];
-  isLoadingVolumes = false;
-  formatKeys = Object.keys(MangaFormat);
+  //seriesVolumes: any[] = [];
+  //isLoadingVolumes = false;
+  //formatKeys = Object.keys(MangaFormat);
   
   /**
    * If a cover image update occured. 
@@ -60,14 +59,15 @@ export class CardDetailsModalComponent implements OnInit {
    * When the API is doing work
    */
   coverImageSaveLoading: boolean = false;
-
-
   imageUrls: Array<string> = [];
-  isAdmin: boolean = false;
+
+
+  //isAdmin: boolean = false;
   actions: ActionItem<any>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
   libraryType: LibraryType = LibraryType.Manga; 
-  series: Series | undefined = undefined;
+
+  series: Series | undefined = undefined; // Used literally only for the Format. Not sure if we really need when on bottom page
 
   tabs = [{title: 'General', disabled: false}, {title: 'Metadata', disabled: false}, {title: 'Cover', disabled: false}, {title: 'Bookmarks', disabled: false}, {title: 'Info', disabled: false}];
   active = this.tabs[0];
@@ -87,7 +87,7 @@ export class CardDetailsModalComponent implements OnInit {
     return LibraryType;
   }
 
-  constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
+  constructor(public modal: NgbActiveModal, public utilityService: UtilityService, 
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, private router: Router, private libraryService: LibraryService,
@@ -107,9 +107,7 @@ export class CardDetailsModalComponent implements OnInit {
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
-        this.isAdmin = this.accountService.hasAdminRole(user);
-
-        if (!this.isAdmin) {
+        if (!this.accountService.hasAdminRole(user)) {
           this.tabs.find(s => s.title === 'Cover')!.disabled = true;
         }
       }
@@ -156,37 +154,6 @@ export class CardDetailsModalComponent implements OnInit {
       action.callback(action.action, chapter);
     }
   }
-
-  // updateCover() {
-  //   // TODO: Move this into it's own tab to make the experience better
-  //   const modalRef = this.modalService.open(ChangeCoverImageModalComponent, {  size: 'lg' }); 
-  //   if (this.utilityService.isChapter(this.data)) {
-  //     const chapter = this.utilityService.asChapter(this.data)
-  //     chapter.coverImage = this.imageService.getChapterCoverImage(chapter.id);
-  //     modalRef.componentInstance.chapter = chapter;
-  //     modalRef.componentInstance.title = 'Select ' + (chapter.isSpecial ? '' : this.utilityService.formatChapterName(this.libraryType, false, true)) + chapter.range + '\'s Cover';
-  //   } else {
-  //     const volume = this.utilityService.asVolume(this.data);
-  //     const chapters = volume.chapters;
-  //     if (chapters && chapters.length > 0) {
-  //       modalRef.componentInstance.chapter = chapters[0];
-  //       modalRef.componentInstance.title = 'Select Volume ' + volume.number + '\'s Cover';
-  //     }
-  //   }
-    
-  //   modalRef.closed.subscribe((closeResult: {success: boolean, chapter: Chapter, coverImageUpdate: boolean}) => {
-  //     if (closeResult.success) {
-  //       this.coverImageUpdate = closeResult.coverImageUpdate;
-  //       if (!this.coverImageUpdate) {
-  //         this.uploadService.resetChapterCoverLock(closeResult.chapter.id).subscribe(() => {
-  //           this.toastr.info('Please refresh in a bit for the cover image to be reflected.');
-  //         });
-  //       } else {
-  //         closeResult.chapter.coverImage = this.imageService.randomize(this.imageService.getChapterCoverImage(closeResult.chapter.id));
-  //       }
-  //     }
-  //   });
-  // }
 
   updateSelectedIndex(index: number) {
     this.coverImageIndex = index;
