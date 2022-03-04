@@ -61,39 +61,5 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>Metadata field</remarks>
         public string TitleName { get; set; }
-
-
-        // /// <summary>
-        // /// Summary for the Chapter/Issue
-        // /// </summary>
-        // public string Summary { get; set; }
-        // /// <summary>
-        // /// Language for the Chapter/Issue
-        // /// </summary>
-        // public string Language { get; set; }
-        // /// <summary>
-        // /// Number in the TotalCount of issues
-        // /// </summary>
-        // public int Count { get; set; }
-        // /// <summary>
-        // /// Total number of issues for the series
-        // /// </summary>
-        // public int TotalCount { get; set; }
-        // public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> CoverArtists { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Characters { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Pencillers { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Inkers { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Colorists { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Letterers { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
-        // public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
-        // public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
-        // public ICollection<GenreTagDto> Genres { get; set; } = new List<GenreTagDto>();
-        // public AgeRatingDto AgeRating { get; set; }
-        // public string ReleaseYear { get; set; }
-        // public PublicationStatusDto PublicationStatus { get; set; }
-
     }
 }

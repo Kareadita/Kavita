@@ -11,7 +11,7 @@ export interface ChapterMetadata {
     year: string;
 
     ageRating: AgeRating;
-    releaseYear: number;
+    releaseDate: string;
     language: string;
     publicationStatus: PublicationStatus;
     summary: string;

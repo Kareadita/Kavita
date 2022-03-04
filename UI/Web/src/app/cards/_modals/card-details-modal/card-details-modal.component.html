@@ -14,26 +14,36 @@
             <li [ngbNavItem]="tabs[0]" *ngIf="!tabs[0].disabled">
                 <a ngbNavLink>{{tabs[0].title}}</a>
                 <ng-template ngbNavContent>
-
-                    <div class="row g-0">
-                        <div class="col">
-                            Id: {{data.id}}
+                    <div class="container-fluid row g-0">
+                        <div class="col-md-2 col-xs-4 col-sm-6">            
+                            <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                            ID: {{data.id}}
                         </div>
-                        <div class="col" *ngIf="series !== undefined">
-                            Format: <span class="badge bg-secondary">{{utilityService.mangaFormat(series.format) | sentenceCase}}</span>
+                        <div class="col-md-10 col-xs-8 col-sm-6">
+                            <div class="row g-0">
+                                <h2>
+                                    {{chapter?.titleName}}
+                                </h2>
+                                <span>
+                                    <span *ngIf="chapterMetadata.releaseDate !== null">Release Date: {{chapterMetadata.releaseDate | date: 'shortDate' || '-'}}</span>
+                                </span>
+                                <span class="text-accent">{{chapter.pages}} pages</span>
+                            </div>
+                            <div class="row g-0">
+                                <div class="col-auto">
+                                    Added: {{(chapter.created | date: 'short') || '-'}}
+                                </div>
+                            </div>
+                            <div class="row g-0">
+                                <div class="col-auto">
+                                    Age Rating: {{ageRating}}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row g-0">
-                        <div class="col" *ngIf="data.hasOwnProperty('created')">
-                            Added: {{(data.created | date: 'short') || '-'}}
-                        </div>
-                        <div class="col">
-                            Pages: {{data.pages}}
-                        </div>
-                    </div>
-                    <ng-container *ngIf="chapterMetadata !== undefined">
-                        <div class="row g-0">
-                            <div class="col-auto" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
+                        <ng-container *ngIf="chapterMetadata !== undefined">
+                            <div class="row g-0" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
                                 <h6>Tags</h6>
                                 <app-badge-expander [items]="chapterMetadata.tags">
                                     <ng-template #badgeExpanderItem let-item let-position="idx">
@@ -41,7 +51,7 @@
                                     </ng-template>  
                                 </app-badge-expander>
                             </div>
-                            <div class="col-auto" *ngIf="chapterMetadata.genres && chapterMetadata.genres.length > 0">
+                            <div class="row g-0" *ngIf="chapterMetadata.genres && chapterMetadata.genres.length > 0">
                                 <h6>Genres</h6>
                                 <app-badge-expander [items]="chapterMetadata.genres">
                                     <ng-template #badgeExpanderItem let-item let-position="idx">
@@ -49,8 +59,8 @@
                                     </ng-template>  
                                 </app-badge-expander>
                             </div>
-                        </div>
-                    </ng-container>
+                        </ng-container>
+                    </div>
                 </ng-template>
             </li>
 

@@ -19,6 +19,8 @@ export interface Chapter {
     isSpecial: boolean;
     title: string;
     created: string;
-
+    /**
+     * Actual name of the Chapter if populated in underlying metadata
+     */
     titleName: string;
 }

@@ -21,6 +21,7 @@ import { Volume } from 'src/app/_models/volume';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { ReaderService } from 'src/app/_services/reader.service';
+import { MetadataService } from 'src/app/_services/metadata.service';
 
 
 
@@ -61,12 +62,9 @@ export class CardDetailsModalComponent implements OnInit {
   imageUrls: Array<string> = [];
 
 
-  //isAdmin: boolean = false;
   actions: ActionItem<any>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
   libraryType: LibraryType = LibraryType.Manga; 
-
-  series: Series | undefined = undefined; // Used literally only for the Format. Not sure if we really need when on bottom page
 
   bookmarks: PageBookmark[] = [];
 
@@ -74,6 +72,7 @@ export class CardDetailsModalComponent implements OnInit {
   active = this.tabs[0];
 
   chapterMetadata!: ChapterMetadata;
+  ageRating!: string;
   
 
   get Breakpoint(): typeof Breakpoint {
@@ -92,7 +91,7 @@ export class CardDetailsModalComponent implements OnInit {
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, private router: Router, private libraryService: LibraryService,
-    private seriesService: SeriesService, private readerService: ReaderService) { }
+    private seriesService: SeriesService, private readerService: ReaderService, public metadataService: MetadataService) { }
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
@@ -115,7 +114,10 @@ export class CardDetailsModalComponent implements OnInit {
 
     this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
       this.chapterMetadata = metadata;
-    })
+
+      this.metadataService.getAgeRating(this.chapterMetadata.ageRating).subscribe(ageRating => this.ageRating = ageRating);
+    });
+    
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -130,7 +132,7 @@ export class CardDetailsModalComponent implements OnInit {
     });
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this)).filter(item => item.action !== Action.Edit);
-    console.log('chapterActions: ', this.chapterActions);
+
     if (this.isChapter) {
       this.chapters.push(this.data as Chapter);
     } else if (!this.isChapter) {
@@ -144,10 +146,6 @@ export class CardDetailsModalComponent implements OnInit {
     this.chapters.forEach((c: Chapter) => {
       c.files.sort((a: MangaFile, b: MangaFile) => collator.compare(a.filePath, b.filePath));
     });
-
-    this.seriesService.getSeries(this.seriesId).subscribe(series => {
-      this.series = series;
-    })
   }
 
   close() {

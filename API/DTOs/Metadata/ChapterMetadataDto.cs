@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.Entities.Enums;
 
 namespace API.DTOs.Metadata
 {
@@ -21,14 +22,15 @@ namespace API.DTOs.Metadata
         public ICollection<PersonDto> Editors { get; set; } = new List<PersonDto>();
         public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
 
-        public ICollection<GenreTagDto> Genres { get; set; }
+        public ICollection<GenreTagDto> Genres { get; set; } = new List<GenreTagDto>();
+
         /// <summary>
         /// Collection of all Tags from underlying chapters for a Series
         /// </summary>
-        public ICollection<TagDto> Tags { get; set; }
-        public AgeRatingDto AgeRating { get; set; }
-        public string ReleaseYear { get; set; }
-        public PublicationStatusDto PublicationStatus { get; set; }
+        public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
+        public AgeRating AgeRating { get; set; }
+        public string ReleaseDate { get; set; }
+        public PublicationStatus PublicationStatus { get; set; }
         /// <summary>
         /// Summary for the Chapter/Issue
         /// </summary>
