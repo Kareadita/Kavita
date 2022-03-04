@@ -101,9 +101,8 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating, userReview});
   }
 
-  updateSeries(model: any, unlockName = false, unlockSortName = false, unlockLocalizedName = false) {
-    const data = {...model, unlockName, unlockSortName, unlockLocalizedName};
-    return this.httpClient.post(this.baseUrl + 'series/update', data);
+  updateSeries(model: any) {
+    return this.httpClient.post(this.baseUrl + 'series/update', model);
   }
 
   markRead(seriesId: number) {
@@ -162,30 +161,10 @@ export class SeriesService {
     }));
   }
 
-  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[],
-    genresLocked: boolean = false, tagsLocked: boolean = false, writersLocked: boolean = false,
-    coverArtistsLocked: boolean = false, publishersLocked: boolean = false, charactersLocked: boolean = false, 
-    pencillersLocked: boolean = false, inkersLocked: boolean = false, coloristsLocked: boolean = false, letterersLocked: boolean = false, 
-    editorsLocked: boolean = false, translatorsLocked: boolean = false, ageRatingLocked: boolean = false, languageLocked: boolean = false, 
-    publicationStatusLocked: boolean = false) {
+  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[]) {
     const data = {
       seriesMetadata,
       collectionTags,
-      genresLocked,
-      tagsLocked,
-      writersLocked,
-      coverArtistsLocked,
-      publishersLocked,
-      charactersLocked,
-      pencillersLocked,
-      inkersLocked,
-      coloristsLocked,
-      letterersLocked,
-      editorsLocked,
-      translatorsLocked,
-      ageRatingLocked,
-      languageLocked,
-      publicationStatusLocked,
     };
     return this.httpClient.post(this.baseUrl + 'series/metadata', data, {responseType: 'text' as 'json'});
   }
