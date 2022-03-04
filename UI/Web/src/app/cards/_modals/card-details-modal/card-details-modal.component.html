@@ -14,6 +14,7 @@
             <li [ngbNavItem]="tabs[0]" *ngIf="!tabs[0].disabled">
                 <a ngbNavLink>{{tabs[0].title}}</a>
                 <ng-template ngbNavContent>
+                    
                     <div class="row g-0">
                         <div class="col">
                             Id: {{data.id}}
@@ -30,19 +31,6 @@
                             Pages: {{data.pages}}
                         </div>
                     </div>
-                </ng-template>
-            </li>
-
-            <li [ngbNavItem]="tabs[1]" *ngIf="!tabs[1].disabled">
-                <a ngbNavLink>{{tabs[1].title}}</a>
-                <ng-template ngbNavContent>
-                    <app-chapter-metadata-detail [chapter]="chapterMetadata"></app-chapter-metadata-detail>
-                </ng-template>
-            </li>
-
-            <li [ngbNavItem]="tabs[2]" *ngIf="!tabs[2].disabled">
-                <a ngbNavLink>{{tabs[2].title}}</a>
-                <ng-template ngbNavContent>
                     <div class="row g-0">
                         <div class="col-auto" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
                             <h6>Tags</h6>
@@ -64,10 +52,26 @@
                 </ng-template>
             </li>
 
+            <li [ngbNavItem]="tabs[1]" *ngIf="!tabs[1].disabled">
+                <a ngbNavLink>{{tabs[1].title}}</a>
+                <ng-template ngbNavContent>
+                    <app-chapter-metadata-detail [chapter]="chapterMetadata"></app-chapter-metadata-detail>
+                </ng-template>
+            </li>
+
+            <li [ngbNavItem]="tabs[2]" *ngIf="!tabs[2].disabled">
+                <a ngbNavLink>{{tabs[2].title}}</a>
+                <ng-template ngbNavContent>
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="chapter.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                    <!-- TODO: Make this a loading button -->
+                    <button class="btn btn-primary" [disabled]="coverImageSaveLoading" (click)="saveCoverImage()">Save</button>
+                </ng-template>
+            </li>
+
             <li [ngbNavItem]="tabs[3]" *ngIf="!tabs[3].disabled">
                 <a ngbNavLink>{{tabs[3].title}}</a>
                 <ng-template ngbNavContent>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="chapter.coverImageLocked" (resetClicked)="handleResetCoverImage()"></app-cover-image-chooser>
+                    Bookmarks
                 </ng-template>
             </li>
 
@@ -117,7 +121,7 @@
         <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" [disabled]="!isAdmin" (click)="updateCover()">Update Cover</button>
+        <!-- <button type="button" class="btn btn-secondary" [disabled]="!isAdmin" (click)="updateCover()">Update Cover</button> -->
         <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
     </div>
 </div>

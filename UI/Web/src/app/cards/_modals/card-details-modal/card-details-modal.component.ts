@@ -38,17 +38,30 @@ export class CardDetailsModalComponent implements OnInit {
   /**
    * If this is a volume, this will be first chapter for said volume.
    */
-   chapter!: Chapter;
+  chapter!: Chapter;
   isChapter = false;
   chapters: Chapter[] = [];
 
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
   formatKeys = Object.keys(MangaFormat);
+  
   /**
    * If a cover image update occured. 
    */
   coverImageUpdate: boolean = false; 
+  coverImageIndex: number = 0;
+  /**
+   * Url of the selected cover
+   */
+  selectedCover: string = '';
+  coverImageLocked: boolean = false;
+  /**
+   * When the API is doing work
+   */
+  coverImageSaveLoading: boolean = false;
+
+
   imageUrls: Array<string> = [];
   isAdmin: boolean = false;
   actions: ActionItem<any>[] = [];
@@ -144,46 +157,67 @@ export class CardDetailsModalComponent implements OnInit {
     }
   }
 
-  updateCover() {
-    // TODO: Move this into it's own tab to make the experience better
-    const modalRef = this.modalService.open(ChangeCoverImageModalComponent, {  size: 'lg' }); 
-    if (this.utilityService.isChapter(this.data)) {
-      const chapter = this.utilityService.asChapter(this.data)
-      chapter.coverImage = this.imageService.getChapterCoverImage(chapter.id);
-      modalRef.componentInstance.chapter = chapter;
-      modalRef.componentInstance.title = 'Select ' + (chapter.isSpecial ? '' : this.utilityService.formatChapterName(this.libraryType, false, true)) + chapter.range + '\'s Cover';
-    } else {
-      const volume = this.utilityService.asVolume(this.data);
-      const chapters = volume.chapters;
-      if (chapters && chapters.length > 0) {
-        modalRef.componentInstance.chapter = chapters[0];
-        modalRef.componentInstance.title = 'Select Volume ' + volume.number + '\'s Cover';
-      }
-    }
+  // updateCover() {
+  //   // TODO: Move this into it's own tab to make the experience better
+  //   const modalRef = this.modalService.open(ChangeCoverImageModalComponent, {  size: 'lg' }); 
+  //   if (this.utilityService.isChapter(this.data)) {
+  //     const chapter = this.utilityService.asChapter(this.data)
+  //     chapter.coverImage = this.imageService.getChapterCoverImage(chapter.id);
+  //     modalRef.componentInstance.chapter = chapter;
+  //     modalRef.componentInstance.title = 'Select ' + (chapter.isSpecial ? '' : this.utilityService.formatChapterName(this.libraryType, false, true)) + chapter.range + '\'s Cover';
+  //   } else {
+  //     const volume = this.utilityService.asVolume(this.data);
+  //     const chapters = volume.chapters;
+  //     if (chapters && chapters.length > 0) {
+  //       modalRef.componentInstance.chapter = chapters[0];
+  //       modalRef.componentInstance.title = 'Select Volume ' + volume.number + '\'s Cover';
+  //     }
+  //   }
     
-    modalRef.closed.subscribe((closeResult: {success: boolean, chapter: Chapter, coverImageUpdate: boolean}) => {
-      if (closeResult.success) {
-        this.coverImageUpdate = closeResult.coverImageUpdate;
-        if (!this.coverImageUpdate) {
-          this.uploadService.resetChapterCoverLock(closeResult.chapter.id).subscribe(() => {
-            this.toastr.info('Please refresh in a bit for the cover image to be reflected.');
-          });
-        } else {
-          closeResult.chapter.coverImage = this.imageService.randomize(this.imageService.getChapterCoverImage(closeResult.chapter.id));
+  //   modalRef.closed.subscribe((closeResult: {success: boolean, chapter: Chapter, coverImageUpdate: boolean}) => {
+  //     if (closeResult.success) {
+  //       this.coverImageUpdate = closeResult.coverImageUpdate;
+  //       if (!this.coverImageUpdate) {
+  //         this.uploadService.resetChapterCoverLock(closeResult.chapter.id).subscribe(() => {
+  //           this.toastr.info('Please refresh in a bit for the cover image to be reflected.');
+  //         });
+  //       } else {
+  //         closeResult.chapter.coverImage = this.imageService.randomize(this.imageService.getChapterCoverImage(closeResult.chapter.id));
+  //       }
+  //     }
+  //   });
+  // }
+
+  updateSelectedIndex(index: number) {
+    this.coverImageIndex = index;
+  }
+
+  updateSelectedImage(url: string) {
+    this.selectedCover = url;
+  }
+
+  handleReset() {
+    this.coverImageLocked = false;
+  }
+
+  saveCoverImage() {
+    this.coverImageSaveLoading = true;
+    const selectedIndex = this.coverImageIndex || 0;
+    if (selectedIndex > 0) {
+      this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover).subscribe(() => {
+        if (this.coverImageIndex > 0) {
+          this.chapter.coverImageLocked = true;
+          this.coverImageUpdate = true;
         }
-      }
-    });
-  }
-
-  handleResetCoverImage() {
-
-  }
-
-  updateSelectedIndex(s: number) {
-
-  }
-  updateSelectedImage(s: any) {
-
+        this.coverImageSaveLoading = false;
+      }, err => this.coverImageSaveLoading = false);
+    } else if (this.coverImageLocked === false) {
+      this.uploadService.resetChapterCoverLock(this.chapter.id).subscribe(() => {
+        this.toastr.info('Cover image reset');
+        this.coverImageSaveLoading = false;
+        this.coverImageUpdate = true;
+      });
+    }
   }
 
   markChapterAsRead(chapter: Chapter) {
