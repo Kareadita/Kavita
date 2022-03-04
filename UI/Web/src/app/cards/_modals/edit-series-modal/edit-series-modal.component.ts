@@ -500,7 +500,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   unlock(b: any, field: string) {
     if (b) {
-      b[field] = false;
+      b[field] = !b[field];
     }
   }
 

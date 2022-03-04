@@ -128,6 +128,7 @@ public class SeriesService : ISeriesService
 
                 if (!updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked) series.Metadata.AgeRatingLocked = false;
                 if (!updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked) series.Metadata.PublicationStatusLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.LanguageLocked) series.Metadata.LanguageLocked = false;
                 if (!updateSeriesMetadataDto.SeriesMetadata.GenresLocked) series.Metadata.GenresLocked = false;
                 if (!updateSeriesMetadataDto.SeriesMetadata.TagsLocked) series.Metadata.TagsLocked = false;
                 if (!updateSeriesMetadataDto.SeriesMetadata.CharacterLocked) series.Metadata.CharacterLocked = false;

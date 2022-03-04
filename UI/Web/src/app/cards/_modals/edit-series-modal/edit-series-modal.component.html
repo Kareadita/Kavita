@@ -403,7 +403,7 @@
 
 
 <ng-template #lock let-item="item" let-field="field">
-    <span class="input-group-text" (click)="unlock(item, field)">
+    <span class="input-group-text clickable" (click)="unlock(item, field)">
         <i class="fa fa-lock" aria-hidden="true"></i>
         <span class="visually-hidden">Field is locked</span>
     </span>
