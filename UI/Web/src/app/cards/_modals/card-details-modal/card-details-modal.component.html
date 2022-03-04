@@ -25,7 +25,7 @@
                                     {{chapter?.titleName}}
                                 </h4>
                                 <span>
-                                    <span *ngIf="chapterMetadata.releaseDate !== null">Release Date: {{chapterMetadata.releaseDate | date: 'shortDate' || '-'}}</span>
+                                    <span *ngIf="chapterMetadata && chapterMetadata.releaseDate !== null">Release Date: {{chapterMetadata.releaseDate | date: 'shortDate' || '-'}}</span>
                                 </span>
                                 <span class="text-accent">{{chapter.pages}} pages</span>
                             </div>

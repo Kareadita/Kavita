@@ -129,46 +129,44 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.seriesService.getMetadata(this.series.id).subscribe(metadata => {
       if (metadata) {
         this.metadata = metadata;
-        this.setupTypeaheads();
 
+        this.setupTypeaheads();
         this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
         this.editSeriesForm.get('ageRating')?.setValue(this.metadata.ageRating);
         this.editSeriesForm.get('publicationStatus')?.setValue(this.metadata.publicationStatus);
         this.editSeriesForm.get('language')?.setValue(this.metadata.language);
 
-        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          this.metadata.ageRating = parseInt(val + '', 10);
-        });
-    
-        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          this.metadata.publicationStatus = parseInt(val + '', 10);
-        });
-
-        this.editSeriesForm.get('language')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          this.metadata.language = val;
-        });
-
         this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          if (!this.editSeriesForm.get('name')?.touched) return;
           this.series.nameLocked = true;
         });
 
         this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          if (!this.editSeriesForm.get('sortName')?.touched) return;
           this.series.sortNameLocked = true;
         });
 
         this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          if (!this.editSeriesForm.get('localizedName')?.touched) return;
           this.series.localizedNameLocked = true;
         });
 
         this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          if (!this.editSeriesForm.get('summary')?.touched) return;
           this.metadata.summaryLocked = true;
+          this.metadata.summary = val;
         });
+
 
         this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.ageRating = parseInt(val + '', 10);
+          if (!this.editSeriesForm.get('ageRating')?.touched) return;
           this.metadata.ageRatingLocked = true;
         });
-
+    
         this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.publicationStatus = parseInt(val + '', 10);
+          if (!this.editSeriesForm.get('publicationStatus')?.touched) return;
           this.metadata.publicationStatusLocked = true;
         });
       }

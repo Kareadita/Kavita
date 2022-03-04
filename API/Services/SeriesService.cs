@@ -73,7 +73,7 @@ public class SeriesService : ISeriesService
                     series.Metadata.PublicationStatusLocked = true;
                 }
 
-                if (series.Metadata.Summary != updateSeriesMetadataDto.SeriesMetadata.Summary)
+                if (series.Metadata.Summary != updateSeriesMetadataDto.SeriesMetadata.Summary.Trim())
                 {
                     series.Metadata.Summary = updateSeriesMetadataDto.SeriesMetadata?.Summary.Trim();
                     series.Metadata.SummaryLocked = true;
@@ -141,6 +141,7 @@ public class SeriesService : ISeriesService
                 if (!updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked) series.Metadata.CoverArtistLocked = false;
                 if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
                 if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
+
             }
 
             if (!_unitOfWork.HasChanges())
