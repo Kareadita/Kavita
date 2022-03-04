@@ -351,8 +351,7 @@ public class ScannerService : IScannerService
         var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name);
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
-        // _logger.LogInformation("Scanned {TotalFiles} files in {ElapsedScanTime} milliseconds", totalFiles,
-        //     scanElapsedTime);
+
         return new Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>(totalFiles, scanElapsedTime, parsedSeries);
     }
 
@@ -435,12 +434,6 @@ public class ScannerService : IScannerService
             try
             {
                 await _unitOfWork.CommitAsync();
-
-                // Update the people, genres, and tags after committing as we might have inserted new ones.
-                // TODO: Instead of requerying, we can just add new people to the list
-                // allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-                // allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-                // allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
             }
             catch (Exception ex)
             {
@@ -643,12 +636,6 @@ public class ScannerService : IScannerService
         // Handle People
         foreach (var chapter in chapters)
         {
-            // foreach (var personRole in Enum.GetValues<PersonRole>())
-            // {
-            //     PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == personRole).Select(p => p.Name), personRole,
-            //         HandleAddPerson);
-            // }
-
             if (!series.Metadata.WriterLocked)
             {
                 PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,

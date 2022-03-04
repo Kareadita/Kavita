@@ -199,7 +199,6 @@ public class SeriesService : ISeriesService
             {
                 if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
                 {
-                    //newTags.Add(existingTag);
                     handleAdd(existingTag);
                 }
             }
@@ -227,12 +226,12 @@ public class SeriesService : ISeriesService
         }
 
         // At this point, all tags that aren't in dto have been removed.
-        foreach (var tag in tags)
+        foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
+            var existingTag = allTags.SingleOrDefault(t => t.Title == tagTitle);
             if (existingTag != null)
             {
-                if (series.Metadata.Genres.All(t => t.Title != tag.Title))
+                if (series.Metadata.Genres.All(t => t.Title != tagTitle))
                 {
                     handleAdd(existingTag);
                     isModified = true;
@@ -241,7 +240,7 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Genre(tag.Title, false));
+                handleAdd(DbFactory.Genre(tagTitle, false));
                 isModified = true;
             }
         }
@@ -268,12 +267,12 @@ public class SeriesService : ISeriesService
         }
 
         // At this point, all tags that aren't in dto have been removed.
-        foreach (var tag in tags)
+        foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
+            var existingTag = allTags.SingleOrDefault(t => t.Title == tagTitle);
             if (existingTag != null)
             {
-                if (series.Metadata.Tags.All(t => t.Title != tag.Title))
+                if (series.Metadata.Tags.All(t => t.Title != tagTitle))
                 {
 
                     handleAdd(existingTag);
@@ -283,7 +282,7 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Tag(tag.Title, false));
+                handleAdd(DbFactory.Tag(tagTitle, false));
                 isModified = true;
             }
         }
