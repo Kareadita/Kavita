@@ -2,6 +2,10 @@ form {
     position: relative;
 }
 
+.input-group {
+    flex-wrap: inherit;
+}
+
 input {
     width: 15px;
     opacity: 1px;
