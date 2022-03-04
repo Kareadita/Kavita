@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Chapter } from '../_models/chapter';
+import { ChapterMetadata } from '../_models/chapter-metadata';
 import { CollectionTag } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
@@ -85,6 +86,10 @@ export class SeriesService {
     return this.httpClient.get<Chapter>(this.baseUrl + 'series/chapter?chapterId=' + chapterId);
   }
 
+  getChapterMetadata(chapterId: number) {
+    return this.httpClient.get<ChapterMetadata>(this.baseUrl + 'series/chapter-metadata?chapterId=' + chapterId);
+  }
+
   getData(id: number) {
     return of(id);
   }
@@ -161,10 +166,10 @@ export class SeriesService {
     }));
   }
 
-  updateMetadata(seriesMetadata: SeriesMetadata, tags: CollectionTag[]) {
+  updateMetadata(seriesMetadata: SeriesMetadata, collectionTags: CollectionTag[]) {
     const data = {
       seriesMetadata,
-      tags
+      collectionTags,
     };
     return this.httpClient.post(this.baseUrl + 'series/metadata', data, {responseType: 'text' as 'json'});
   }
@@ -173,11 +178,6 @@ export class SeriesService {
     let params = new HttpParams();
 
     params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
-    
-    // NOTE: I'm not sure the paginated result is doing anything
-    // if (this.paginatedSeriesForTagsResults?.pagination !== undefined && this.paginatedSeriesForTagsResults?.pagination?.currentPage === pageNum) {
-    //   return of(this.paginatedSeriesForTagsResults);
-    // }
 
     return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'series/series-by-collection?collectionId=' + collectionTagId, {observe: 'response', params}).pipe(
       map((response: any) => {

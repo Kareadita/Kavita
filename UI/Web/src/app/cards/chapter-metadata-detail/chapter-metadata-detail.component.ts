@@ -5,6 +5,7 @@ import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { LibraryType } from 'src/app/_models/library';
 import { ActionItem } from 'src/app/_services/action-factory.service';
+import { PersonRole } from 'src/app/_models/person';
 
 @Component({
   selector: 'app-chapter-metadata-detail',
@@ -13,9 +14,10 @@ import { ActionItem } from 'src/app/_services/action-factory.service';
 })
 export class ChapterMetadataDetailComponent implements OnInit {
 
-  @Input() chapter!: Chapter;
+  @Input() chapter!: ChapterMetadata;
   @Input() libraryType: LibraryType = LibraryType.Manga;
-  //metadata!: ChapterMetadata;
+
+  roles: string[] = [];
 
   get LibraryType(): typeof LibraryType {
     return LibraryType;
@@ -24,10 +26,14 @@ export class ChapterMetadataDetailComponent implements OnInit {
   constructor(private metadataService: MetadataService, public utilityService: UtilityService) { }
 
   ngOnInit(): void {
-    // this.metadataService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
-    //   console.log('Chapter ', this.chapter.number, ' metadata: ', metadata);
-    //   this.metadata = metadata;
-    // })
+    this.roles = Object.keys(PersonRole).filter(role => /[0-9]/.test(role) === false);
+  }
+
+  getPeople(role: string) {
+    if (this.chapter) {
+      return (this.chapter as any)[role.toLowerCase()];
+    }
+    return [];
   }
 
   performAction(action: ActionItem<Chapter>, chapter: Chapter) {

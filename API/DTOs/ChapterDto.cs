@@ -61,31 +61,5 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>Metadata field</remarks>
         public string TitleName { get; set; }
-        /// <summary>
-        /// Summary for the Chapter/Issue
-        /// </summary>
-        public string Summary { get; set; }
-        /// <summary>
-        /// Language for the Chapter/Issue
-        /// </summary>
-        public string Language { get; set; }
-        /// <summary>
-        /// Number in the TotalCount of issues
-        /// </summary>
-        public int Count { get; set; }
-        /// <summary>
-        /// Total number of issues for the series
-        /// </summary>
-        public int TotalCount { get; set; }
-        public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Penciller { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Inker { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Colorist { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Letterer { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> CoverArtist { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Editor { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Publisher { get; set; } = new List<PersonDto>();
-        public ICollection<PersonDto> Translators { get; set; } = new List<PersonDto>();
-        public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
     }
 }

@@ -29,13 +29,12 @@ import { CollectionsModule } from './collections/collections.module';
 import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
-import { PersonRolePipe } from './_pipes/person-role.pipe';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
-import { PublicationStatusPipe } from './_pipes/publication-status.pipe';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
+import { PipeModule } from './pipe/pipe.module';
 
 
 @NgModule({
@@ -51,8 +50,6 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
     OnDeckComponent,
     DashboardComponent,
     NavEventsToggleComponent,
-    PersonRolePipe,
-    PublicationStatusPipe,
     SeriesMetadataDetailComponent,
     AllSeriesComponent,
     GroupedTypeaheadComponent,
@@ -83,6 +80,7 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
     RegistrationModule,
 
     NgbAccordionModule, // ThemeTest Component only
+    PipeModule,
 
 
     ToastrModule.forRoot({

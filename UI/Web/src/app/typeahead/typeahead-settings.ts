@@ -17,6 +17,10 @@ export class TypeaheadSettings<T> {
      */
     id: string = '';
     /**
+     * Show a locked icon next to input and provide functionality around locking/unlocking a field
+     */
+    showLocked: boolean = false;
+    /**
      * Data to preload the typeahead with on first load
      */
     /**

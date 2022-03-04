@@ -137,30 +137,36 @@ export class SelectionModel<T> {
   styleUrls: ['./typeahead.component.scss']
 })
 export class TypeaheadComponent implements OnInit, OnDestroy {
-
-  filteredOptions!: Observable<string[]>;
-  isLoadingOptions: boolean = false;
-  typeaheadControl!: FormControl;
-  typeaheadForm!: FormGroup;
-  
-
+  /**
+   * Settings for the typeahead
+   */
   @Input() settings!: TypeaheadSettings<any>;
   /**
    * When true, component will re-init and set back to false.
    */
   @Input() reset: Subject<boolean> = new ReplaySubject(1);
+  /**
+   * When a field is locked, we render custom css to indicate to the user. Does not affect functionality.
+   */
+  @Input() locked: boolean = false;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
+  @Output() onUnlock = new EventEmitter<void>();
+  @Output() lockedChange = new EventEmitter<boolean>();
+
+  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
+  @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
+  @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
 
   optionSelection!: SelectionModel<any>;
 
   hasFocus = false; // Whether input has active focus
   focusedIndex: number = 0;
   showAddItem: boolean = false;
-
-  @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
-  @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
-  @ContentChild('badgeItem') badgeTemplate!: TemplateRef<any>;
+  filteredOptions!: Observable<string[]>;
+  isLoadingOptions: boolean = false;
+  typeaheadControl!: FormControl;
+  typeaheadForm!: FormGroup;
   
   private readonly onDestroy = new Subject<void>();
 
@@ -245,10 +251,17 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       if (this.settings.multiple) {
         this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);  
       }
-      //  else {
-      //   this.optionSelection = new SelectionModel<any>(true, this.settings.savedData[0]);
-      //   this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
-      // }
+       else {
+         const isArray = this.settings.savedData.hasOwnProperty('length');
+         if (isArray) {
+          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+         } else {
+          this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
+         }
+        
+        
+        //this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
+      }
     } else {
       this.optionSelection = new SelectionModel<any>();
     }
@@ -336,7 +349,17 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.resetField();
   }
 
+  clearSelections(event: any) {
+    this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+    this.selectedData.emit(this.optionSelection.selected());
+    this.resetField();
+  }
+
   handleOptionClick(opt: any) {
+    if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
+      return;
+    }
+
     this.toggleSelection(opt);
 
     this.resetField();
@@ -375,12 +398,17 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       event.preventDefault();
     }
 
+    if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
+      return;
+    }
+
     if (this.inputElem) {
       // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
       document.querySelector('body')?.click();
       this.inputElem.nativeElement.focus();
       this.hasFocus = true;
     }
+
    
     this.openDropdown();
   }
@@ -413,6 +441,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           && this.typeaheadControl.dirty
           && (typeof this.settings.compareFn == 'function' && this.settings.compareFn(options, this.typeaheadControl.value.trim()).length === 0);
 
+  }
+
+  unlock(event: any) {
+    this.locked = !this.locked;
+    this.onUnlock.emit();
+    this.lockedChange.emit(this.locked);
   }
 
 }

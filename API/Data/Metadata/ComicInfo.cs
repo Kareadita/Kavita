@@ -25,7 +25,7 @@ namespace API.Data.Metadata
         public int PageCount { get; set; }
         // ReSharper disable once InconsistentNaming
         /// <summary>
-        /// ISO 639-1 Code to represent the language of the content
+        /// IETF BCP 47 Code to represent the language of the content
         /// </summary>
         public string LanguageISO { get; set; } = string.Empty;
         /// <summary>
