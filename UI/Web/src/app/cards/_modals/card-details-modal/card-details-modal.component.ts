@@ -49,13 +49,14 @@ export class CardDetailsModalComponent implements OnInit {
    * If a cover image update occured. 
    */
   coverImageUpdate: boolean = false; 
+  imageUrls: Array<string> = [];
   isAdmin: boolean = false;
   actions: ActionItem<any>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
   libraryType: LibraryType = LibraryType.Manga; 
   series: Series | undefined = undefined;
 
-  tabs = ['General', 'Metadata', 'Cover', 'Info'];
+  tabs = [{title: 'General', disabled: false}, {title: 'Metadata', disabled: false}, {title: 'Cover', disabled: false}, {title: 'Bookmarks', disabled: false}, {title: 'Info', disabled: false}];
   active = this.tabs[0];
 
   chapterMetadata!: ChapterMetadata;
@@ -73,10 +74,6 @@ export class CardDetailsModalComponent implements OnInit {
     return LibraryType;
   }
 
-  // get Chapter() {
-  //   return this.utilityService.isChapter(this.data) ? this.data : this.data.chapters[0];
-  // }
-
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
@@ -89,6 +86,8 @@ export class CardDetailsModalComponent implements OnInit {
 
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
 
+    this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
+
     this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
       this.chapterMetadata = metadata;
     })
@@ -96,6 +95,10 @@ export class CardDetailsModalComponent implements OnInit {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
+
+        if (!this.isAdmin) {
+          this.tabs.find(s => s.title === 'Cover')!.disabled = true;
+        }
       }
     });
 
@@ -170,6 +173,17 @@ export class CardDetailsModalComponent implements OnInit {
         }
       }
     });
+  }
+
+  handleResetCoverImage() {
+
+  }
+
+  updateSelectedIndex(s: number) {
+
+  }
+  updateSelectedImage(s: any) {
+
   }
 
   markChapterAsRead(chapter: Chapter) {

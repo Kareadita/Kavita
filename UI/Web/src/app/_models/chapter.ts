@@ -1,10 +1,8 @@
-import { Genre } from './genre';
 import { MangaFile } from './manga-file';
-import { AgeRating } from './metadata/age-rating';
-import { PublicationStatus } from './metadata/publication-status';
-import { Person } from './person';
-import { Tag } from './tag';
 
+/**
+ * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
+ */
 export interface Chapter {
     id: number;
     range: string;
@@ -23,25 +21,4 @@ export interface Chapter {
     created: string;
 
     titleName: string;
-    /**
-     * This is only Year and Month, Day is not supported from underlying sources
-     */
-    // releaseDate: string;
-    // writers: Array<Person>;
-    // pencillers: Array<Person>;
-    // inkers: Array<Person>;
-    // colorists: Array<Person>;
-    // letterers: Array<Person>;
-    // coverArtists: Array<Person>;
-    // editors: Array<Person>;
-    // publishers: Array<Person>;
-    // translators: Array<Person>;
-    // characters: Array<Person>;
-    // tags: Array<Tag>;
-    // genres: Array<Genre>;
-    
-    // ageRating: AgeRating;
-    // releaseYear: number;
-    // language: string;
-    // publicationStatus: PublicationStatus;
 }
