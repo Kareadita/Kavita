@@ -19,6 +19,8 @@ import { Series } from 'src/app/_models/series';
 import { PersonRole } from 'src/app/_models/person';
 import { Volume } from 'src/app/_models/volume';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
+import { PageBookmark } from 'src/app/_models/page-bookmark';
+import { ReaderService } from 'src/app/_services/reader.service';
 
 
 
@@ -41,9 +43,6 @@ export class CardDetailsModalComponent implements OnInit {
   isChapter = false;
   chapters: Chapter[] = [];
 
-  //seriesVolumes: any[] = [];
-  //isLoadingVolumes = false;
-  //formatKeys = Object.keys(MangaFormat);
   
   /**
    * If a cover image update occured. 
@@ -69,6 +68,8 @@ export class CardDetailsModalComponent implements OnInit {
 
   series: Series | undefined = undefined; // Used literally only for the Format. Not sure if we really need when on bottom page
 
+  bookmarks: PageBookmark[] = [];
+
   tabs = [{title: 'General', disabled: false}, {title: 'Metadata', disabled: false}, {title: 'Cover', disabled: false}, {title: 'Bookmarks', disabled: false}, {title: 'Info', disabled: false}];
   active = this.tabs[0];
 
@@ -91,7 +92,7 @@ export class CardDetailsModalComponent implements OnInit {
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, private router: Router, private libraryService: LibraryService,
-    private seriesService: SeriesService) { }
+    private seriesService: SeriesService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
@@ -100,6 +101,17 @@ export class CardDetailsModalComponent implements OnInit {
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
 
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
+
+    let bookmarkApi;
+    if (this.isChapter) {
+      bookmarkApi = this.readerService.getBookmarks(this.chapter.id);
+    } else {
+      bookmarkApi = this.readerService.getBookmarksForVolume(this.data.id);
+    }
+
+    bookmarkApi.pipe(take(1)).subscribe(bookmarks => {
+      this.bookmarks = bookmarks;
+    });
 
     this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
       this.chapterMetadata = metadata;
@@ -230,5 +242,11 @@ export class CardDetailsModalComponent implements OnInit {
     } else {
       this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
     }
+  }
+
+  removeBookmark(bookmark: PageBookmark, index: number) {
+    this.readerService.unbookmark(bookmark.seriesId, bookmark.volumeId, bookmark.chapterId, bookmark.page).subscribe(() => {
+      this.bookmarks.splice(index, 1);
+    });
   }
 }
