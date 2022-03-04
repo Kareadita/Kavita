@@ -10,6 +10,6 @@
 
         public bool UnlockName { get; set; }
         public bool UnlockSortName { get; set; }
-        public bool UnlockSummary { get; set; }
+        public bool UnlockLocalizedName { get; set; }
     }
 }

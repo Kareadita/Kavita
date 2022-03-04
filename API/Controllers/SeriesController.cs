@@ -143,10 +143,27 @@ namespace API.Controllers
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
-            series.Name = updateSeries.Name.Trim();
-            series.LocalizedName = updateSeries.LocalizedName.Trim();
-            series.SortName = updateSeries.SortName?.Trim();
-            //series.Metadata.Summary = updateSeries.Summary?.Trim(); // TODO: MOve this to Metadata
+
+            if (!series.Name.Equals(updateSeries.Name.Trim()))
+            {
+                series.Name = updateSeries.Name.Trim();
+                series.NameLocked = true;
+            }
+            if (!series.SortName.Equals(updateSeries.SortName.Trim()))
+            {
+                series.SortName = updateSeries.SortName.Trim();
+                series.SortNameLocked = true;
+            }
+            if (!series.LocalizedName.Equals(updateSeries.LocalizedName.Trim()))
+            {
+                series.LocalizedName = updateSeries.LocalizedName.Trim();
+                series.LocalizedNameLocked = true;
+            }
+
+
+            if (!series.NameLocked) series.NameLocked = false;
+            if (!series.SortNameLocked) series.SortNameLocked = false;
+            if (!series.LocalizedNameLocked) series.LocalizedNameLocked = false;
 
             var needsRefreshMetadata = false;
             // This is when you hit Reset

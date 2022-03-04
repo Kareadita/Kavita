@@ -147,6 +147,30 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('language')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.metadata.language = val;
         });
+
+        this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.series.nameLocked = true;
+        });
+
+        this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.series.sortNameLocked = true;
+        });
+
+        this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.series.localizedNameLocked = true;
+        });
+
+        this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.summaryLocked = true;
+        });
+
+        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.ageRatingLocked = true;
+        });
+
+        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.publicationStatusLocked = true;
+        });
       }
     });
 
@@ -474,6 +498,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.editSeriesForm.patchValue({
       coverImageLocked: false
     });
+  }
+
+  unlock(b: any, field: string) {
+    if (b) {
+      b[field] = false;
+    }
   }
 
 }

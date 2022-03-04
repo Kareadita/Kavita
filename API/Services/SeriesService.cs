@@ -90,15 +90,13 @@ public class SeriesService : ISeriesService
                 UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata.Genres, series, allGenres, (genre) =>
                 {
                     series.Metadata.Genres.Add(genre);
-                    series.Metadata.GenresLocked = true;
-                });
+                }, () => series.Metadata.GenresLocked = true);
 
                 series.Metadata.Tags ??= new List<Tag>();
                 UpdateTagList(updateSeriesMetadataDto.SeriesMetadata.Tags, series, allTags, (tag) =>
                 {
                     series.Metadata.Tags.Add(tag);
-                    series.Metadata.TagsLocked = true;
-                });
+                }, () => series.Metadata.TagsLocked = true);
 
                 void HandleAddPerson(Person person)
                 {
@@ -128,20 +126,21 @@ public class SeriesService : ISeriesService
                 UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
                     HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
 
-                if (updateSeriesMetadataDto.UnlockAgeRating) series.Metadata.AgeRatingLocked = false;
-                if (updateSeriesMetadataDto.UnlockPublicationStatus) series.Metadata.PublicationStatusLocked = false;
-                if (updateSeriesMetadataDto.UnlockGenres) series.Metadata.GenresLocked = false;
-                if (updateSeriesMetadataDto.UnlockTags) series.Metadata.TagsLocked = false;
-                if (updateSeriesMetadataDto.UnlockCharacter) series.Metadata.CharacterLocked = false;
-                if (updateSeriesMetadataDto.UnlockColorist) series.Metadata.ColoristLocked = false;
-                if (updateSeriesMetadataDto.UnlockEditor) series.Metadata.EditorLocked = false;
-                if (updateSeriesMetadataDto.UnlockInker) series.Metadata.InkerLocked = false;
-                if (updateSeriesMetadataDto.UnlockLetterer) series.Metadata.LettererLocked = false;
-                if (updateSeriesMetadataDto.UnlockPenciller) series.Metadata.PencillerLocked = false;
-                if (updateSeriesMetadataDto.UnlockPublisher) series.Metadata.PublisherLocked = false;
-                if (updateSeriesMetadataDto.UnlockTranslator) series.Metadata.TranslatorLocked = false;
-                if (updateSeriesMetadataDto.UnlockCoverArtist) series.Metadata.CoverArtistLocked = false;
-                if (updateSeriesMetadataDto.UnlockWriter) series.Metadata.WriterLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked) series.Metadata.AgeRatingLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked) series.Metadata.PublicationStatusLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.GenresLocked) series.Metadata.GenresLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.TagsLocked) series.Metadata.TagsLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.CharacterLocked) series.Metadata.CharacterLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.ColoristLocked) series.Metadata.ColoristLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.EditorLocked) series.Metadata.EditorLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.InkerLocked) series.Metadata.InkerLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.LettererLocked) series.Metadata.LettererLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.PencillerLocked) series.Metadata.PencillerLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.PublisherLocked) series.Metadata.PublisherLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked) series.Metadata.TranslatorLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked) series.Metadata.CoverArtistLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
+                if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
             }
 
             if (!_unitOfWork.HasChanges())
@@ -176,7 +175,8 @@ public class SeriesService : ISeriesService
     }
 
     // TODO: Move this to a helper so we can easily test
-    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags, Action<CollectionTag> handleAdd)
+    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
+        Action<CollectionTag> handleAdd)
     {
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();
@@ -209,8 +209,9 @@ public class SeriesService : ISeriesService
         }
     }
 
-    private static void UpdateGenreList(ICollection<GenreTagDto> tags, Series series, IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd)
+    private static void UpdateGenreList(ICollection<GenreTagDto> tags, Series series, IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
     {
+        var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.Genres.ToList();
         foreach (var existing in existingTags)
@@ -219,6 +220,7 @@ public class SeriesService : ISeriesService
             {
                 // Remove tag
                 series.Metadata.Genres.Remove(existing);
+                isModified = true;
             }
         }
 
@@ -231,18 +233,26 @@ public class SeriesService : ISeriesService
                 if (series.Metadata.Genres.All(t => t.Title != tag.Title))
                 {
                     handleAdd(existingTag);
+                    isModified = true;
                 }
             }
             else
             {
                 // Add new tag
                 handleAdd(DbFactory.Genre(tag.Title, false));
+                isModified = true;
             }
+        }
+
+        if (isModified)
+        {
+            onModified();
         }
     }
 
-    private static void UpdateTagList(ICollection<TagDto> tags, Series series, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd)
+    private static void UpdateTagList(ICollection<TagDto> tags, Series series, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd, Action onModified)
     {
+        var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.Tags.ToList();
         foreach (var existing in existingTags)
@@ -251,6 +261,7 @@ public class SeriesService : ISeriesService
             {
                 // Remove tag
                 series.Metadata.Tags.Remove(existing);
+                isModified = true;
             }
         }
 
@@ -262,14 +273,22 @@ public class SeriesService : ISeriesService
             {
                 if (series.Metadata.Tags.All(t => t.Title != tag.Title))
                 {
+
                     handleAdd(existingTag);
+                    isModified = true;
                 }
             }
             else
             {
                 // Add new tag
                 handleAdd(DbFactory.Tag(tag.Title, false));
+                isModified = true;
             }
+        }
+
+        if (isModified)
+        {
+            onModified();
         }
     }
 

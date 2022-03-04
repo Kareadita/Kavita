@@ -16,8 +16,8 @@
                         <div class="row g-0">
                             <div class="mb-3" style="width: 100%">
                                 <label for="name" class="form-label">Name</label>
-                                <div class="input-group {{editSeriesForm.get('name')?.dirty || series.nameLocked ? 'lock-active' : ''}}">
-                                    <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
+                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }"></ng-container>
                                     <input id="name" class="form-control" formControlName="name" type="text">
                                 </div>
                             </div>
@@ -26,8 +26,8 @@
                         <div class="row g-0">
                             <div class="mb-3" style="width: 100%">
                                 <label for="sort-name" class="form-label">Sort Name</label>
-                                <div class="input-group {{editSeriesForm.get('sortName')?.dirty || series.sortNameLocked ? 'lock-active' : ''}}">
-                                    <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
+                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
                                     <input id="sort-name" class="form-control" formControlName="sortName" type="text">
                                 </div>
                             </div>
@@ -36,8 +36,8 @@
                         <div class="row g-0">
                             <div class="mb-3" style="width: 100%">
                                 <label for="localized-name" class="form-label">Localized Name</label>
-                                <div class="input-group {{editSeriesForm.get('localizedName')?.dirty || series.localizedNameLocked ? 'lock-active' : ''}}">
-                                    <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
+                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }"></ng-container>
                                     <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
                                 </div>
                             </div>
@@ -46,8 +46,8 @@
                         <div class="row g-0">
                             <div class="mb-3" style="width: 100%">
                                 <label for="summary" class="form-label">Summary</label>
-                                <div class="input-group {{editSeriesForm.get('summary')?.dirty || metadata?.summaryLocked ? 'lock-active' : ''}}">
-                                    <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                <div class="input-group {{metadata?.summaryLocked ? 'lock-active' : ''}}">
+                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
                                     <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                                 </div>
                                 
@@ -131,8 +131,8 @@
                                 <div class="col-md-4 pe-2">
                                     <div class="mb-3">
                                         <label for="age-rating" class="form-label">Age Rating</label>
-                                        <div class="input-group {{editSeriesForm.get('ageRating')?.dirty || metadata.ageRatingLocked ? 'lock-active' : ''}}">
-                                            <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                        <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
+                                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'ageRatingLocked' }"></ng-container>
                                             <select class="form-select"id="age-rating" formControlName="ageRating">
                                                 <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
                                             </select>
@@ -142,8 +142,8 @@
                                 <div class="col-md-4">
                                     <div class="mb-3">
                                         <label for="publication-status" class="form-label">Publication Status</label>
-                                        <div class="input-group {{editSeriesForm.get('publicationStatus')?.dirty ? 'lock-active' : ''}}">
-                                            <ng-container [ngTemplateOutlet]="lock"></ng-container>
+                                        <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">
+                                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }"></ng-container>
                                             <select class="form-select"id="publication-status" formControlName="publicationStatus">
                                                 <option *ngFor="let opt of publicationStatuses" [value]="opt.value">{{opt.title | titlecase}}</option>
                                             </select>
@@ -406,8 +406,9 @@
 </div>
 
 
-<ng-template #lock>
-    <span class="input-group-text"><i class="fa fa-lock" aria-hidden="true"></i>
+<ng-template #lock let-item="item" let-field="field">
+    <span class="input-group-text" (click)="unlock(item, field)">
+        <i class="fa fa-lock" aria-hidden="true"></i>
         <span class="visually-hidden">Field is locked</span>
     </span>
 </ng-template>
