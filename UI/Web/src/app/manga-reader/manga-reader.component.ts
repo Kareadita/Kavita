@@ -111,6 +111,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
   canvasImage = new Image(); // private 
+  renderWithCanvas: boolean = false; // Dictates if we use render with canvas or with image
 
   /**
    * A circular array of size PREFETCH_PAGES + 2. Maintains prefetched Images around the current page to load from to avoid loading animation.
@@ -232,6 +233,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
+
+  // Debug:
+  get readingModeTitle() {
+    switch (this.readerMode) {
+      case READER_MODE.MANGA_LR:
+        return 'Left to Right';
+      case READER_MODE.MANGA_UD:
+        return 'Up and Down';
+      case READER_MODE.WEBTOON:
+        return 'Webtoon';
+    }
+  }
 
 
   get pageBookmarked() {
@@ -877,13 +890,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const needsSplitting = this.isCoverImage();
     this.updateSplitPage();
 
+    console.log('DEBUG: ')
+    console.log('isCoverImage: ', this.isCoverImage());
+    console.log('readerMode: ', this.readerMode);
+
+
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
+      this.renderWithCanvas = true;
+      console.log('[Render] Canvas')
     } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
+      this.renderWithCanvas = true;
+      console.log('[Render] Canvas')
     } else {
+      this.renderWithCanvas = false;
       if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
         this.updateScalingForFirstPageRender();
       }
@@ -902,44 +925,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       
-      const windowWidth = window.innerWidth
-              || document.documentElement.clientWidth
-              || document.body.clientWidth;
-      const windowHeight = window.innerHeight
-              || document.documentElement.clientHeight
-              || document.body.clientHeight;
-      // If the user's screen is wider than the image, just pretend this is no split, as it will render nicer
-      this.canvas.nativeElement.width = windowWidth;
-      this.canvas.nativeElement.height = windowHeight;
-      const ratio = this.canvasImage.width / this.canvasImage.height;
-      let newWidth = windowWidth;
-      let newHeight = newWidth / ratio;
-      if (newHeight > windowHeight) {
-        newHeight = windowHeight;
-        newWidth = newHeight * ratio;
-      }
-
-      // Optimization: When the screen is larger than newWidth, allow no split rendering to occur for a better fit
-      // if (windowWidth > newWidth) {
-      //   this.setCanvasSize();
-      //   this.ctx.drawImage(this.canvasImage, 0, 0);
-      // } else {
-      //   this.setCanvasSize();
-      //   //this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      //   this.ctx.drawImage(this.canvasImage, 0, 0, newWidth, newHeight);
-      // }
-
       this.setCanvasSize();
-      // var offScreenCanvas = document.createElement('canvas')
-      // offScreenCanvas.width  = newWidth;
-      // offScreenCanvas.height = newHeight;
-//      const resizedImage = new Image();
-      // pica.resize(this.canvasImage, offScreenCanvas);
-
-      
-
-      //this.document.querySelector('.reading-area')?.appendChild(this.canvasImage);
-
     }
 
     // Reset scroll on non HEIGHT Fits
@@ -1192,6 +1178,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showBookmarkEffectEvent.next(pageNum);
     if (this.readerMode != READER_MODE.WEBTOON) {
       if (this.canvas) {
+        // TODO: Apply this on the image
+        this.renderer.addClass(this.canvas?.nativeElement, 'bookmark-effect');
         this.renderer.addClass(this.canvas?.nativeElement, 'bookmark-effect');
         setTimeout(() => {
           this.renderer.removeClass(this.canvas?.nativeElement, 'bookmark-effect');
