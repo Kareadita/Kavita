@@ -1,4 +1,7 @@
+import { Genre } from './genre';
 import { MangaFile } from './manga-file';
+import { AgeRating } from './metadata/age-rating';
+import { PublicationStatus } from './metadata/publication-status';
 import { Person } from './person';
 import { Tag } from './tag';
 
@@ -23,14 +26,22 @@ export interface Chapter {
     /**
      * This is only Year and Month, Day is not supported from underlying sources
      */
-    releaseDate: string;
-    writers: Array<Person>;
-    penciller: Array<Person>;
-    inker: Array<Person>;
-    colorist: Array<Person>;
-    letterer: Array<Person>;
-    coverArtist: Array<Person>;
-    editor: Array<Person>;
-    publisher: Array<Person>;
-    tags: Array<Tag>;
+    // releaseDate: string;
+    // writers: Array<Person>;
+    // pencillers: Array<Person>;
+    // inkers: Array<Person>;
+    // colorists: Array<Person>;
+    // letterers: Array<Person>;
+    // coverArtists: Array<Person>;
+    // editors: Array<Person>;
+    // publishers: Array<Person>;
+    // translators: Array<Person>;
+    // characters: Array<Person>;
+    // tags: Array<Tag>;
+    // genres: Array<Genre>;
+    
+    // ageRating: AgeRating;
+    // releaseYear: number;
+    // language: string;
+    // publicationStatus: PublicationStatus;
 }

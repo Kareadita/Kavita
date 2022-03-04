@@ -121,6 +121,12 @@ namespace API.Controllers
             return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
 
+        [HttpGet("chapter-metadata")]
+        public async Task<ActionResult<ChapterDto>> GetChapterMetadata(int chapterId)
+        {
+            return Ok(await _unitOfWork.ChapterRepository.GetChapterMetadataDtoAsync(chapterId));
+        }
+
 
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)

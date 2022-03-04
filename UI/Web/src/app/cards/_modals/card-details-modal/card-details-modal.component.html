@@ -9,76 +9,109 @@
         
         </button>
     </div>
-    <div class="modal-body scrollable-modal" *ngIf="utilityService.isChapter(data)">
-        <ng-container *ngIf="utilityService.isChapter(data)">
-            <app-chapter-metadata-detail [chapter]="data"></app-chapter-metadata-detail>
-        </ng-container>
-    </div>
-    <div class="modal-body scrollable-modal" *ngIf="utilityService.isVolume(data)">
-        <h4 *ngIf="utilityService.isVolume(data)">Information</h4>
+    <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">     
+            <li [ngbNavItem]="tabs[0]">
+                <a ngbNavLink>{{tabs[0]}}</a>
+                <ng-template ngbNavContent>
+                    <div class="row g-0">
+                        <div class="col">
+                            Id: {{data.id}}
+                        </div>
+                        <div class="col" *ngIf="series !== undefined">
+                            Format: <span class="badge bg-secondary">{{utilityService.mangaFormat(series.format) | sentenceCase}}</span>
+                        </div>
+                    </div>
+                    <div class="row g-0">
+                        <div class="col" *ngIf="data.hasOwnProperty('created')">
+                            Added: {{(data.created | date: 'short') || '-'}}
+                        </div>
+                        <div class="col">
+                            Pages: {{data.pages}}
+                        </div>
+                    </div>
+                </ng-template>
+            </li>
 
-        <ng-container *ngIf="utilityService.isVolume(data) || utilityService.isChapter(data)">
-            <div class="row g-0">
-                <div class="col">
-                    Id: {{data.id}}
-                </div>
-                <div class="col" *ngIf="series !== undefined">
-                    Format: <span class="badge bg-secondary">{{utilityService.mangaFormat(series.format) | sentenceCase}}</span>
-                </div>
-            </div>
-            <div class="row g-0">
-                <div class="col" *ngIf="data.hasOwnProperty('created')">
-                    Added: {{(data.created | date: 'short') || '-'}}
-                </div>
-                <div class="col">
-                    Pages: {{data.pages}}
-                </div>
-            </div>
-        </ng-container>
+            <li [ngbNavItem]="tabs[1]">
+                <a ngbNavLink>{{tabs[1]}}</a>
+                <ng-template ngbNavContent>
+                    <app-chapter-metadata-detail [chapter]="chapterMetadata"></app-chapter-metadata-detail>
+                </ng-template>
+            </li>
 
-        <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
-        <ul class="list-unstyled">
-            <li class="d-flex my-4" *ngFor="let chapter of chapters">
-                <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
-                    <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
-                </a>
-                <div class="flex-grow-1">
-                    <h5 class="mt-0 mb-1">
-                        <span *ngIf="chapter.number !== '0'; else specialHeader">
-                            <span >
-                                <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
-                                {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
-                            </span>
-                            <span class="badge bg-primary rounded-pill">
-                                <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
-                                <span *ngIf="chapter.pagesRead === 0">UNREAD</span>
-                                <span *ngIf="chapter.pagesRead === chapter.pages">READ</span>
-                            </span>
-                        </span>
-                        <ng-template #specialHeader>File(s)</ng-template>
-                    </h5>
-                    <ul class="list-group">
-                        <li *ngFor="let file of chapter.files" class="list-group-item no-hover">
-                            <span>{{file.filePath}}</span>
-                            <div class="row g-0">
-                                <div class="col">
-                                    Pages: {{file.pages}}
-                                </div>
-                                <div class="col" *ngIf="data.hasOwnProperty('created')">
-                                    Added: {{(data.created | date: 'short') || '-'}}
-                                </div>
+            <li [ngbNavItem]="tabs[2]">
+                <a ngbNavLink>{{tabs[2]}}</a>
+                <ng-template ngbNavContent>
+                    <div class="row g-0">
+                        <div class="col-auto" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
+                            <h6>Tags</h6>
+                            <app-badge-expander [items]="chapterMetadata.tags">
+                                <ng-template #badgeExpanderItem let-item let-position="idx">
+                                    <app-tag-badge>{{item.title}}</app-tag-badge>
+                                </ng-template>  
+                            </app-badge-expander>
+                        </div>
+                        <div class="col-auto" *ngIf="chapterMetadata.genres && chapterMetadata.genres.length > 0">
+                            <h6>Genres</h6>
+                            <app-badge-expander [items]="chapterMetadata.genres">
+                                <ng-template #badgeExpanderItem let-item let-position="idx">
+                                    <app-tag-badge>{{item.title}}</app-tag-badge>
+                                </ng-template>  
+                            </app-badge-expander>
+                        </div>
+                    </div>
+                </ng-template>
+            </li>
+
+            <li [ngbNavItem]="tabs[3]">
+                <a ngbNavLink>{{tabs[3]}}</a>
+                <ng-template ngbNavContent>
+                    <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
+                    <ul class="list-unstyled">
+                        <li class="d-flex my-4" *ngFor="let chapter of chapters">
+                            <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
+                                <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                            </a>
+                            <div class="flex-grow-1">
+                                <h5 class="mt-0 mb-1">
+                                    <span *ngIf="chapter.number !== '0'; else specialHeader">
+                                        <span >
+                                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
+                                            {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
+                                        </span>
+                                        <span class="badge bg-primary rounded-pill">
+                                            <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
+                                            <span *ngIf="chapter.pagesRead === 0">UNREAD</span>
+                                            <span *ngIf="chapter.pagesRead === chapter.pages">READ</span>
+                                        </span>
+                                    </span>
+                                    <ng-template #specialHeader>File(s)</ng-template>
+                                </h5>
+                                <ul class="list-group">
+                                    <li *ngFor="let file of chapter.files" class="list-group-item no-hover">
+                                        <span>{{file.filePath}}</span>
+                                        <div class="row g-0">
+                                            <div class="col">
+                                                Pages: {{file.pages}}
+                                            </div>
+                                            <div class="col" *ngIf="data.hasOwnProperty('created')">
+                                                Added: {{(data.created | date: 'short') || '-'}}
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
                         </li>
                     </ul>
-                </div>
+                </ng-template>
             </li>
         </ul>
-        
+        <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" [disabled]="!isAdmin" (click)="updateCover()">Update Cover</button>
         <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
     </div>
 </div>
-
 

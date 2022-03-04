@@ -4,6 +4,7 @@ import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Chapter } from '../_models/chapter';
+import { ChapterMetadata } from '../_models/chapter-metadata';
 import { CollectionTag } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
@@ -83,6 +84,10 @@ export class SeriesService {
 
   getChapter(chapterId: number) {
     return this.httpClient.get<Chapter>(this.baseUrl + 'series/chapter?chapterId=' + chapterId);
+  }
+
+  getChapterMetadata(chapterId: number) {
+    return this.httpClient.get<ChapterMetadata>(this.baseUrl + 'series/chapter-metadata?chapterId=' + chapterId);
   }
 
   getData(id: number) {

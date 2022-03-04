@@ -1,16 +1,37 @@
+import { Genre } from "./genre";
+import { AgeRating } from "./metadata/age-rating";
+import { PublicationStatus } from "./metadata/publication-status";
 import { Person } from "./person";
+import { Tag } from "./tag";
 
 export interface ChapterMetadata {
     id: number;
     chapterId: number;
     title: string;
     year: string;
+
+    ageRating: AgeRating;
+    releaseYear: number;
+    language: string;
+    publicationStatus: PublicationStatus;
+    summary: string;
+    count: number;
+    totalCount: number;
+    
+
+    genres: Array<Genre>;
+    tags: Array<Tag>;
     writers: Array<Person>;
-    penciller: Array<Person>;
-    inker: Array<Person>;
-    colorist: Array<Person>;
-    letterer: Array<Person>;
-    coverArtist: Array<Person>;
-    editor: Array<Person>;
+    coverArtists: Array<Person>;
     publishers: Array<Person>;
+    characters: Array<Person>;
+    pencillers: Array<Person>;
+    inkers: Array<Person>;
+    colorists: Array<Person>;
+    letterers: Array<Person>;
+    editors: Array<Person>;
+    translators: Array<Person>;
+    
+
+    
 }

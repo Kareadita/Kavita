@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -17,6 +17,9 @@ import { LibraryType } from '../../../_models/library';
 import { LibraryService } from '../../../_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { Series } from 'src/app/_models/series';
+import { PersonRole } from 'src/app/_models/person';
+import { Volume } from 'src/app/_models/volume';
+import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
 
 
 
@@ -30,9 +33,15 @@ export class CardDetailsModalComponent implements OnInit {
   @Input() parentName = '';
   @Input() seriesId: number = 0;
   @Input() libraryId: number = 0;
-  @Input() data!: any; // Volume | Chapter
+  @Input() data!: Volume | Chapter; // Volume | Chapter
+  
+  /**
+   * If this is a volume, this will be first chapter for said volume.
+   */
+   chapter!: Chapter;
   isChapter = false;
   chapters: Chapter[] = [];
+
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
   formatKeys = Object.keys(MangaFormat);
@@ -46,9 +55,27 @@ export class CardDetailsModalComponent implements OnInit {
   libraryType: LibraryType = LibraryType.Manga; 
   series: Series | undefined = undefined;
 
+  tabs = ['General', 'Metadata', 'Cover', 'Info'];
+  active = this.tabs[0];
+
+  chapterMetadata!: ChapterMetadata;
+  
+
+  get Breakpoint(): typeof Breakpoint {
+    return Breakpoint;
+  }
+
+  get PersonRole() {
+    return PersonRole;
+  }
+
   get LibraryType(): typeof LibraryType {
     return LibraryType;
   }
+
+  // get Chapter() {
+  //   return this.utilityService.isChapter(this.data) ? this.data : this.data.chapters[0];
+  // }
 
   constructor(private modalService: NgbModal, public modal: NgbActiveModal, public utilityService: UtilityService, 
     public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
@@ -58,6 +85,13 @@ export class CardDetailsModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
+    console.log('isChapter: ', this.isChapter);
+
+    this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
+
+    this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
+      this.chapterMetadata = metadata;
+    })
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -72,10 +106,11 @@ export class CardDetailsModalComponent implements OnInit {
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this)).filter(item => item.action !== Action.Edit);
 
     if (this.isChapter) {
-      this.chapters.push(this.data);
+      this.chapters.push(this.data as Chapter);
     } else if (!this.isChapter) {
-      this.chapters.push(...this.data?.chapters);
+      this.chapters.push(...(this.data as Volume).chapters);
     }
+    // TODO: Move this into the backend
     this.chapters.sort(this.utilityService.sortChapters);
     this.chapters.forEach(c => c.coverImage = this.imageService.getChapterCoverImage(c.id));
     // Try to show an approximation of the reading order for files
@@ -107,7 +142,8 @@ export class CardDetailsModalComponent implements OnInit {
   }
 
   updateCover() {
-    const modalRef = this.modalService.open(ChangeCoverImageModalComponent, {  size: 'lg' }); // scrollable: true, size: 'lg', windowClass: 'scrollable-modal' (these don't work well on mobile)
+    // TODO: Move this into it's own tab to make the experience better
+    const modalRef = this.modalService.open(ChangeCoverImageModalComponent, {  size: 'lg' }); 
     if (this.utilityService.isChapter(this.data)) {
       const chapter = this.utilityService.asChapter(this.data)
       chapter.coverImage = this.imageService.getChapterCoverImage(chapter.id);
