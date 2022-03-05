@@ -25,8 +25,8 @@ import { ReaderMode } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
 import { LibraryService } from '../_services/library.service';
 import { LibraryType } from '../_models/library';
-import Swiper from 'swiper';
-import { SwiperEvents } from 'swiper/types';
+import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 const PREFETCH_PAGES = 5;
 
@@ -285,7 +285,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
               private libraryService: LibraryService, private utilityService: UtilityService,
-              private renderer: Renderer2, @Inject(DOCUMENT) private document: Document) {
+              private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
                 this.navService.hideNavBar();
   }
 
@@ -1174,7 +1174,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.renderWithCanvas && this.canvas) {
         element = this.canvas?.nativeElement;
       } else {
-        element = document.querySelector('#image-1');
+        element = this.document.querySelector('#image-1');
       }
 
 
@@ -1209,8 +1209,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return [windowWidth, windowHeight];
   }
 
-  toggleImageViewer(collapse: any) {
-    collapse.toggle();
-    this.resetMenuCloseTimer();
+  openShortcutModal() {
+    let ref = this.modalService.open(ShorcutsModalComponent, { scrollable: true, size: 'md' });
+    ref.componentInstance.shortcuts = [
+      {key: '⇽', description: 'Move to previous page'},
+      {key: '⇾', description: 'Move to next page'},
+      {key: '↑', description: 'Move to previous page'},
+      {key: '↓', description: 'Move to previous page'},
+      {key: 'G', description: 'Open Go to Page dialog'},
+      {key: 'B', description: 'Bookmark current page'},
+      {key: 'ESC', description: 'Close reader'},
+      {key: 'SPACE', description: 'Toggle Menu'},
+    ];
   }
 }
