@@ -24,19 +24,19 @@
     </ng-container>
 
     <div (click)="toggleMenu()" class="reading-area">
-        <ng-container *ngIf="readerMode !== READER_MODE.WEBTOON">
+        <ng-container *ngIf="readerMode !== ReaderMode.Webtoon">
             <div [ngClass]="{'d-none': !renderWithCanvas }">
-                <canvas #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}}" 
+                <canvas #content class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}}" 
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
             </div>
             <div [ngClass]="{'d-none': renderWithCanvas }">
-                <img [src]="canvasImage.src" id="image-1" class="active {{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                <img [src]="canvasImage.src" id="image-1" class="active {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
             </div>
         </ng-container>
 
-        <ng-container *ngIf="readerMode === READER_MODE.WEBTOON">
-            <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading && !inSetup">
+        <ng-container *ngIf="readerMode === ReaderMode.Webtoon">
+            <div class="webtoon-images" *ngIf="readerMode === ReaderMode.Webtoon && !isLoading && !inSetup">
                 <app-infinite-scroller [pageNum]="pageNum" 
                 [bufferPages]="5" 
                 [goToPage]="goToPageEvent" 
@@ -51,16 +51,16 @@
         </ng-container>
         
 
-        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
+        <ng-container *ngIf="readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown">
+            <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
                 <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'down'}}"
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
                      title="Next Page" aria-hidden="true"></i>
                 </div>
             </div>
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
+            <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
                 <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'up'}}"
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                      title="Previous Page" aria-hidden="true"></i>
                 </div>
             </div>
@@ -89,7 +89,7 @@
         </div>
         <div class="row pt-4 ms-2 me-2">
             <div class="col">
-                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>

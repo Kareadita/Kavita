@@ -21,7 +21,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 import { ChapterInfo } from './_models/chapter-info';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/reader-enums';
 import { pageSplitOptions, scalingOptions } from '../_models/preferences/preferences';
-import { READER_MODE } from '../_models/preferences/reader-mode';
+import { ReaderMode } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
 import { LibraryService } from '../_services/library.service';
 import { LibraryType } from '../_models/library';
@@ -101,7 +101,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
   isFullscreen: boolean = false;
   autoCloseMenu: boolean = true;
-  readerMode: READER_MODE = READER_MODE.MANGA_LR;
+  readerMode: ReaderMode = ReaderMode.LeftRight;
 
   pageSplitOptions = pageSplitOptions;
 
@@ -234,19 +234,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
 
-  // Debug:
-  get readingModeTitle() {
-    switch (this.readerMode) {
-      case READER_MODE.MANGA_LR:
-        return 'Left to Right';
-      case READER_MODE.MANGA_UD:
-        return 'Up and Down';
-      case READER_MODE.WEBTOON:
-        return 'Webtoon';
-    }
-  }
-
-
   get pageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
   }
@@ -263,17 +250,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get readerModeIcon() {
     switch(this.readerMode) {
-      case READER_MODE.MANGA_LR:
+      case ReaderMode.LeftRight:
         return 'fa-exchange-alt';
-      case READER_MODE.MANGA_UD:
+      case ReaderMode.UpDown:
         return 'fa-exchange-alt fa-rotate-90';
-      case READER_MODE.WEBTOON:
+      case ReaderMode.Webtoon:
         return 'fa-arrows-alt-v';
     }
+    return '';
   }
 
-  get READER_MODE(): typeof READER_MODE {
-    return READER_MODE;
+  get ReaderMode() {
+    return ReaderMode;
   }
 
   get ReadingDirection(): typeof ReadingDirection {
@@ -385,15 +373,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   handleKeyPress(event: KeyboardEvent) {
 
     switch (this.readerMode) {
-      case READER_MODE.MANGA_LR:
+      case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
           this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
         } else if (event.key === KEY_CODES.LEFT_ARROW) {
           this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
         }
         break;
-      case READER_MODE.MANGA_UD:
-      case READER_MODE.WEBTOON:
+      case ReaderMode.UpDown:
+      case ReaderMode.Webtoon:
         if (event.key === KEY_CODES.DOWN_ARROW) {
           this.nextPage()
         } else if (event.key === KEY_CODES.UP_ARROW) {
@@ -527,7 +515,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   render() {
-    if (this.readerMode === READER_MODE.WEBTOON) {
+    if (this.readerMode === ReaderMode.Webtoon) {
       this.isLoading = false;
     } else {
       this.loadPage();
@@ -716,7 +704,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handlePageChange(event: any, direction: string) {
-    if (this.readerMode === READER_MODE.WEBTOON) {
+    if (this.readerMode === ReaderMode.Webtoon) {
       if (direction === 'right') {
         this.nextPage(event);
       } else {
@@ -751,12 +739,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum + 1);
-      if (this.readerMode !== READER_MODE.WEBTOON) {
+      if (this.readerMode !== ReaderMode.Webtoon) {
         this.canvasImage = this.cachedImages.next();
       }
     }
 
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if (this.readerMode !== ReaderMode.Webtoon) {
       this.loadPage();
     }
   }
@@ -784,7 +772,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.canvasImage = this.cachedImages.prev();
     }
 
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if (this.readerMode !== ReaderMode.Webtoon) {
       this.loadPage();
     }
   }
@@ -1025,7 +1013,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   sliderDragUpdate(context: ChangeContext) {
     // This will update the value for value except when in webtoon due to how the webtoon reader
     // responds to page changes
-    if (this.readerMode !== READER_MODE.WEBTOON) {
+    if (this.readerMode !== ReaderMode.Webtoon) {
       this.setPageNum(context.value);
     }
   }
@@ -1128,15 +1116,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleReaderMode() {
     switch(this.readerMode) {
-      case READER_MODE.MANGA_LR:
-        this.readerMode = READER_MODE.MANGA_UD;
+      case ReaderMode.LeftRight:
+        this.readerMode = ReaderMode.UpDown;
         this.pagingDirection = PAGING_DIRECTION.FORWARD;
         break;
-      case READER_MODE.MANGA_UD:
-        this.readerMode = READER_MODE.WEBTOON;
+      case ReaderMode.UpDown:
+        this.readerMode = ReaderMode.Webtoon;
         break;
-      case READER_MODE.WEBTOON:
-        this.readerMode = READER_MODE.MANGA_LR;
+      case ReaderMode.Webtoon:
+        this.readerMode = ReaderMode.LeftRight;
         break;
     }
 
@@ -1146,7 +1134,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateForm() {
-    if ( this.readerMode === READER_MODE.WEBTOON) {
+    if ( this.readerMode === ReaderMode.Webtoon) {
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('pageSplitOption')?.disable();
     } else {
@@ -1176,7 +1164,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Show an effect on the image to show that it was bookmarked
     this.showBookmarkEffectEvent.next(pageNum);
-    if (this.readerMode != READER_MODE.WEBTOON) {
+    if (this.readerMode != ReaderMode.Webtoon) {
       if (this.canvas) {
         // TODO: Apply this on the image
         this.renderer.addClass(this.canvas?.nativeElement, 'bookmark-effect');
