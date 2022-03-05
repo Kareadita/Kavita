@@ -27,6 +27,7 @@ import { LibraryService } from '../_services/library.service';
 import { LibraryType } from '../_models/library';
 import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { LayoutMode } from './_models/layout-mode';
 
 const PREFETCH_PAGES = 5;
 
@@ -233,6 +234,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Used for webtoon reader. When loading pages or data, this will disable the reader
    */
   inSetup: boolean = true;
+  /**
+   * If we render 2 pages at once or 1
+   */
+  layoutMode: LayoutMode = LayoutMode.Single;
 
 
   private readonly onDestroy = new Subject<void>();
@@ -323,6 +328,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.pageSplitOption = this.user.preferences.pageSplitOption;
         this.autoCloseMenu = this.user.preferences.autoCloseMenu;
         this.readerMode = this.user.preferences.readerMode;
+        this.layoutMode = this.user.preferences.layoutMode;
 
 
         this.generalSettingsForm = this.formBuilder.group({
@@ -1156,12 +1162,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   bookmarkPage() {
     const pageNum = this.pageNum;
+
+    // TODO: Handle LayoutMode.Double
+
     if (this.pageBookmarked) {
-      this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
+      let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
+      if (this.layoutMode === LayoutMode.Double) apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
+      forkJoin(apis).pipe(take(1)).subscribe(() => {
         delete this.bookmarks[pageNum];
       });
     } else {
-      this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum).pipe(take(1)).subscribe(() => {
+      let apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
+      if (this.layoutMode === LayoutMode.Double) apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
+      forkJoin(apis).pipe(take(1)).subscribe(() => {
         this.bookmarks[pageNum] = 1;
       });
     }
@@ -1170,19 +1183,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showBookmarkEffectEvent.next(pageNum);
     if (this.readerMode != ReaderMode.Webtoon) {
 
-      let element:Element | ElementRef | null = null;
+      let elements:Array<Element | ElementRef> = [];
       if (this.renderWithCanvas && this.canvas) {
-        element = this.canvas?.nativeElement;
+        elements.push(this.canvas?.nativeElement);
       } else {
-        element = this.document.querySelector('#image-1');
+        const image1 = this.document.querySelector('#image-1');
+        if (image1 != null) elements.push(image1);
+
+        if (this.layoutMode === LayoutMode.Double) {
+          const image2 = this.document.querySelector('#image-2');
+          if (image2 != null) elements.push(image2);
+        }
       }
 
 
-      if (element !== null) {
-        this.renderer.addClass(element, 'bookmark-effect');
-        this.renderer.addClass(element, 'bookmark-effect');
+      if (elements.length > 0) {
+        elements.forEach(elem => this.renderer.addClass(elem, 'bookmark-effect'));
         setTimeout(() => {
-          this.renderer.removeClass(element, 'bookmark-effect');
+          elements.forEach(elem => this.renderer.removeClass(elem, 'bookmark-effect'));
         }, 1000);
       }
     }

@@ -5,7 +5,7 @@ import { take } from 'rxjs/operators';
 import { Options } from '@angular-slider/ngx-slider';
 import { Title } from '@angular/platform-browser';
 import { BookService } from 'src/app/book-reader/book.service';
-import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences } from 'src/app/_models/preferences/preferences';
+import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, layoutModes } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -23,6 +23,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   scalingOptions = scalingOptions;
   pageSplitOptions = pageSplitOptions;
   readingModes = readingModes;
+  layoutModes = layoutModes;
 
   settingsForm: FormGroup = new FormGroup({});
   passwordChangeForm: FormGroup = new FormGroup({});
@@ -98,6 +99,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('pageSplitOption', new FormControl(user.preferences.pageSplitOption, []));
         this.settingsForm.addControl('autoCloseMenu', new FormControl(user.preferences.autoCloseMenu, []));
         this.settingsForm.addControl('readerMode', new FormControl(user.preferences.readerMode, []));
+        this.settingsForm.addControl('layoutMode', new FormControl(user.preferences.layoutMode, []));
         this.settingsForm.addControl('bookReaderDarkMode', new FormControl(user.preferences.bookReaderDarkMode, []));
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
         this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
@@ -132,6 +134,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('scalingOption')?.setValue(this.user.preferences.scalingOption);
     this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu);
     this.settingsForm.get('readerMode')?.setValue(this.user.preferences.readerMode);
+    this.settingsForm.get('layoutMode')?.setValue(this.user.preferences.layoutMode);
     this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
     this.settingsForm.get('bookReaderDarkMode')?.setValue(this.user.preferences.bookReaderDarkMode);
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
@@ -157,7 +160,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       scalingOption: parseInt(modelSettings.scalingOption, 10), 
       pageSplitOption: parseInt(modelSettings.pageSplitOption, 10), 
       autoCloseMenu: modelSettings.autoCloseMenu, 
-      readerMode: parseInt(modelSettings.readerMode), 
+      readerMode: parseInt(modelSettings.readerMode, 10), 
+      layoutMode: parseInt(modelSettings.layoutMode, 10),
       bookReaderDarkMode: modelSettings.bookReaderDarkMode,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
