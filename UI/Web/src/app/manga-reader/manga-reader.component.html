@@ -37,7 +37,10 @@
                 </canvas>
             </div>
             <div [ngClass]="{'d-none': renderWithCanvas }">
-                <img [src]="canvasImage.src" id="image-1" class="active {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                <img [src]="canvasImage.src" id="image-1" class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                <ng-container *ngIf="layoutMode === LayoutMode.Double && !isCoverImage()">
+                    <img [src]="canvasImage2.src" id="image-2"  class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                </ng-container>
             </div>
         </ng-container>
 
@@ -156,8 +159,21 @@
                     </div>
                     <div class="col-6">
                         <div class="form-check">
+                            <!-- TODO: Make this switch -->
                             <input id="autoCloseMenu" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="autoCloseMenu">
                         </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2 mb-2">
+                    <div class="col-6">
+                        <label for="layout-mode" class="form-label">Layout Mode</label>
+                    </div>
+                    <div class="col-6">
+                        <select class="form-control" id="page-fitting" formControlName="layoutMode">
+                            <option value="1">Single</option>
+                            <option value="2">Double</option>
+                        </select>
                     </div>
                 </div>
             </form>

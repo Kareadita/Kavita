@@ -113,7 +113,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('reader') reader!: ElementRef;
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
-  canvasImage = new Image(); // private 
+  /**
+   * Used to render a page on the canvas or in the image tag. This Image element is prefetched by the cachedImages buffer
+   */
+  canvasImage = new Image();
+  /**
+   * Used soley for LayoutMode.Double rendering. Will always hold the next image in buffer. 
+   */
+  canvasImage2 = new Image();
   renderWithCanvas: boolean = false; // Dictates if we use render with canvas or with image
 
   /**
@@ -276,12 +283,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ReaderMode() {
     return ReaderMode;
   }
+  get LayoutMode() {
+    return LayoutMode;
+  }
 
-  get ReadingDirection(): typeof ReadingDirection {
+  get ReadingDirection() {
     return ReadingDirection;
   }
 
-  get PageSplitOption(): typeof PageSplitOption {
+  get PageSplitOption() {
     return PageSplitOption;
   }
 
@@ -328,16 +338,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.pageSplitOption = this.user.preferences.pageSplitOption;
         this.autoCloseMenu = this.user.preferences.autoCloseMenu;
         this.readerMode = this.user.preferences.readerMode;
-        this.layoutMode = this.user.preferences.layoutMode;
+        this.layoutMode = this.user.preferences.layoutMode || LayoutMode.Single;
 
 
         this.generalSettingsForm = this.formBuilder.group({
           autoCloseMenu: this.autoCloseMenu,
           pageSplitOption: this.pageSplitOption,
-          fittingOption: this.translateScalingOption(this.scalingOption)
+          fittingOption: this.translateScalingOption(this.scalingOption),
+          layoutMode: this.layoutMode
         });
 
         this.updateForm();
+
+        this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.layoutMode = parseInt(val, 10);
+          if (this.layoutMode === LayoutMode.Double) {
+            // Update canvasImage2
+            this.canvasImage2 = this.cachedImages.next();
+          }
+        });
 
 
         this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
@@ -756,6 +775,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum + 1);
       if (this.readerMode !== ReaderMode.Webtoon) {
         this.canvasImage = this.cachedImages.next();
+        this.canvasImage2 = this.cachedImages.peek(2);
       }
     }
 
@@ -785,6 +805,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum - 1);
       this.canvasImage = this.cachedImages.prev();
+      this.canvasImage2 = this.cachedImages.peek(-2);
     }
 
     if (this.readerMode !== ReaderMode.Webtoon) {
@@ -995,6 +1016,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
+    //this.canvasImage2 = this.cachedImages.peek(1); // TODO: Do I need this here?
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
       this.canvasImage.onload = () => this.renderPage();
