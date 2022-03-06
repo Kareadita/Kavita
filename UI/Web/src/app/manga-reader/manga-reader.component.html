@@ -29,7 +29,7 @@
         </div>
     </ng-container>
 
-    <div (click)="toggleMenu()" class="reading-area">
+    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}">
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon">
             <div [ngClass]="{'d-none': !renderWithCanvas }">
                 <canvas #content class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}}" 

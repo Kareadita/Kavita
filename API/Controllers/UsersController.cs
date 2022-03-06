@@ -5,6 +5,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +15,12 @@ namespace API.Controllers
     public class UsersController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUnitOfWork unitOfWork)
+        public UsersController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -73,7 +76,7 @@ namespace API.Controllers
             existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
             existingPreferences.ReaderMode = preferencesDto.ReaderMode;
             existingPreferences.LayoutMode = preferencesDto.LayoutMode;
-            existingPreferences.BackgroundColor = string.IsNullOrEmpty(preferencesDto.BackgroundColor) ? "#FFFFFF" : preferencesDto.BackgroundColor;
+            existingPreferences.BackgroundColor = string.IsNullOrEmpty(preferencesDto.BackgroundColor) ? "#000000" : preferencesDto.BackgroundColor;
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
@@ -91,6 +94,14 @@ namespace API.Controllers
             }
 
             return BadRequest("There was an issue saving preferences.");
+        }
+
+        [HttpGet("get-preferences")]
+        public async Task<ActionResult<UserPreferencesDto>> GetPreferences()
+        {
+            return _mapper.Map<UserPreferencesDto>(
+                await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername()));
+
         }
     }
 }

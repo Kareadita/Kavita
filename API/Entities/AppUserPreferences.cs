@@ -36,7 +36,7 @@ namespace API.Entities
         /// <summary>
         /// Manga Reader Option: Background color of the reader
         /// </summary>
-        public string BackgroundColor { get; set; } = "#FFFFFF";
+        public string BackgroundColor { get; set; } = "#000000";
         /// <summary>
         /// Book Reader Option: Should the background color be dark
         /// </summary>

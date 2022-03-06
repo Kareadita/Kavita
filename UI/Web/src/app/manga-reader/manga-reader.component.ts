@@ -245,6 +245,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If we render 2 pages at once or 1
    */
   layoutMode: LayoutMode = LayoutMode.Single;
+  /**
+   * Background color for canvas/reader. User configured.
+   */
+  backgroundColor: string = '#FFFFFF';
 
 
   private readonly onDestroy = new Subject<void>();
@@ -328,8 +332,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.continuousChaptersStack.push(this.chapterId);
 
-    this.readerService.setOverrideStyles();
-
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
@@ -339,6 +341,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.autoCloseMenu = this.user.preferences.autoCloseMenu;
         this.readerMode = this.user.preferences.readerMode;
         this.layoutMode = this.user.preferences.layoutMode || LayoutMode.Single;
+        this.backgroundColor = this.user.preferences.backgroundColor || '#000000';
+        this.readerService.setOverrideStyles(this.backgroundColor);
 
 
         this.generalSettingsForm = this.formBuilder.group({

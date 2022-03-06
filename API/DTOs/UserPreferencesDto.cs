@@ -32,7 +32,7 @@ namespace API.DTOs
         /// <summary>
         /// Manga Reader Option: Background color of the reader
         /// </summary>
-        public string BackgroundColor { get; set; } = "#FFFFFF";
+        public string BackgroundColor { get; set; } = "#000000";
         /// <summary>
         /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
         /// </summary>

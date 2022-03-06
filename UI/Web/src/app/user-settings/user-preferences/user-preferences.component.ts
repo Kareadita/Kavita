@@ -9,8 +9,9 @@ import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Pref
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-user-preferences',
@@ -67,7 +68,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   backgroundColor: any; // TODO: Hook into user pref
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, 
-    private navService: NavService, private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService) {
+    private navService: NavService, private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
+    private router: Router) {
     this.fontFamilies = this.bookService.getFontFamilies();
 
     this.route.fragment.subscribe(frag => {
@@ -86,32 +88,40 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - User Preferences');
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
-      if (user) {
-        this.user = user;
-        this.isAdmin = this.accountService.hasAdminRole(user);
-        this.hasChangePasswordRole = this.accountService.hasChangePasswordRole(user);
 
-        if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
-          this.user.preferences.bookReaderFontFamily = 'default';
-        }
-        
-        this.settingsForm.addControl('readingDirection', new FormControl(user.preferences.readingDirection, []));
-        this.settingsForm.addControl('scalingOption', new FormControl(user.preferences.scalingOption, []));
-        this.settingsForm.addControl('pageSplitOption', new FormControl(user.preferences.pageSplitOption, []));
-        this.settingsForm.addControl('autoCloseMenu', new FormControl(user.preferences.autoCloseMenu, []));
-        this.settingsForm.addControl('readerMode', new FormControl(user.preferences.readerMode, []));
-        this.settingsForm.addControl('layoutMode', new FormControl(user.preferences.layoutMode, []));
-        this.settingsForm.addControl('bookReaderDarkMode', new FormControl(user.preferences.bookReaderDarkMode, []));
-        this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
-        this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
-        this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []));
-        this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
-        this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
-        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.bookReaderTapToPaginate, []));
-
-        this.settingsForm.addControl('theme', new FormControl(user.preferences.theme, []));
+    forkJoin({
+      user: this.accountService.currentUser$.pipe(take(1)),
+      pref: this.accountService.getPreferences()
+    }).subscribe(results => {
+      if (results.user === undefined) {
+        this.router.navigateByUrl('/login');
+        return;
       }
+
+      this.user = results.user;
+      this.user.preferences = results.pref;
+      this.isAdmin = this.accountService.hasAdminRole(results.user);
+      this.hasChangePasswordRole = this.accountService.hasChangePasswordRole(results.user);
+
+      if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
+        this.user.preferences.bookReaderFontFamily = 'default';
+      }
+      
+      this.settingsForm.addControl('readingDirection', new FormControl(this.user.preferences.readingDirection, []));
+      this.settingsForm.addControl('scalingOption', new FormControl(this.user.preferences.scalingOption, []));
+      this.settingsForm.addControl('pageSplitOption', new FormControl(this.user.preferences.pageSplitOption, []));
+      this.settingsForm.addControl('autoCloseMenu', new FormControl(this.user.preferences.autoCloseMenu, []));
+      this.settingsForm.addControl('readerMode', new FormControl(this.user.preferences.readerMode, []));
+      this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
+      this.settingsForm.addControl('bookReaderDarkMode', new FormControl(this.user.preferences.bookReaderDarkMode, []));
+      this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
+      this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
+      this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
+      this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
+      this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
+      this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
+
+      this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
     });
 
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
