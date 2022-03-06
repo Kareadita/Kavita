@@ -5,7 +5,7 @@
         <span class="visually-hidden">Field is locked</span>
     </span>
     </ng-container>
-    <div class="typeahead-input" [ngStyle]="{'width': (settings.showLocked ? '93%' : '100%')}" (click)="onInputFocus($event)">
+    <div class="typeahead-input" (click)="onInputFocus($event)">
         <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index">
           <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i }"></ng-container>
           <i class="fa fa-times" (click)="toggleSelection(option)" tabindex="0" aria-label="close"></i>
