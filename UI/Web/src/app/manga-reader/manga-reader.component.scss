@@ -55,14 +55,21 @@ canvas {
 }
 
 // Fitting Options
+// .full-height {
+//     position: absolute;
+//     margin: auto;
+//     top: 0px;
+//     left: 0;
+//     right: 0;
+//     bottom: 0px;
+//     height: 100%;
+// }
+
 .full-height {
-    position: absolute;
-    margin: auto;
-    top: 0px;
-    left: 0;
-    right: 0;
-    bottom: 0px;
-    height: 100%;
+  width: auto;
+  margin: 0 auto;
+  height: 100vh;
+  vertical-align: top;
 }
 
 .original {
@@ -77,7 +84,18 @@ canvas {
 
 .full-width {
     width: 100%;
+
+    &.double {
+      width: 50%
+    }
+
+    .image-2 {
+      margin-left: 50%;
+    }
 }
+
+
+
 
 
 .right {

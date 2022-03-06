@@ -620,10 +620,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFittingOptionClass() {
     const formControl = this.generalSettingsForm.get('fittingOption');
+    let val = FITTING_OPTION.HEIGHT;
     if (formControl === undefined) {
-      return FITTING_OPTION.HEIGHT;
+      val =  FITTING_OPTION.HEIGHT;
     }
-    return formControl?.value;
+    val =  formControl?.value;
+
+    if (this.isCoverImage() && this.shouldRenderAsFitSplit()) {
+      // Rewriting to fit to width for this cover image
+      val = FITTING_OPTION.WIDTH;
+    }
+
+    if (!this.isCoverImage() && this.layoutMode === LayoutMode.Double) {
+      return val + ' double';
+    }
+    return val;
   }
 
   getFittingIcon() {
@@ -780,6 +791,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.readerMode !== ReaderMode.Webtoon) {
         this.canvasImage = this.cachedImages.next();
         this.canvasImage2 = this.cachedImages.peek(2);
+        console.log('[nextPage] canvasImage: ', this.canvasImage);
+        console.log('[nextPage] canvasImage2: ', this.canvasImage2);
       }
     }
 
@@ -810,6 +823,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum - 1);
       this.canvasImage = this.cachedImages.prev();
       this.canvasImage2 = this.cachedImages.peek(-2);
+      console.log('[prevPage] canvasImage: ', this.canvasImage);
+      console.log('[prevPage] canvasImage2: ', this.canvasImage2);
     }
 
     if (this.readerMode !== ReaderMode.Webtoon) {
@@ -1020,10 +1035,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading = true;
     this.canvasImage = this.cachedImages.current();
-    //this.canvasImage2 = this.cachedImages.peek(1); // TODO: Do I need this here?
+    this.canvasImage2 = this.cachedImages.next(); // TODO: Do I need this here?
+    console.log('[loadPage] canvasImage: ', this.canvasImage);
+    console.log('[loadPage] canvasImage2: ', this.canvasImage2);
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+      this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
       this.canvasImage.onload = () => this.renderPage();
+
+      console.log('[loadPage] (after setting) canvasImage: ', this.canvasImage);
+      console.log('[loadPage] (after setting) canvasImage2: ', this.canvasImage2);
     } else {
       this.renderPage();
     }
