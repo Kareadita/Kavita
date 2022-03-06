@@ -112,7 +112,7 @@
                             </div>
 
                             <div class="row g-0">
-                                <div class="col-md-4 pe-2">
+                                <div class="col-md-4 col-sm-12 pe-2">
                                     <div class="mb-3">
                                         <label for="language" class="form-label">Language</label>
                                         <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings"
@@ -127,7 +127,7 @@
                                         </app-typeahead>
                                     </div>
                                 </div>
-                                <div class="col-md-4 pe-2">
+                                <div class="col-md-4  col-sm-12 pe-2">
                                     <div class="mb-3">
                                         <label for="age-rating" class="form-label">Age Rating</label>
                                         <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
@@ -138,7 +138,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-4 col-sm-12">
                                     <div class="mb-3">
                                         <label for="publication-status" class="form-label">Publication Status</label>
                                         <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">
