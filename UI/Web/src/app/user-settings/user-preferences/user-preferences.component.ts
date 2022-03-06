@@ -64,6 +64,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsEnabled: boolean = false;
   makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
 
+  backgroundColor: any; // TODO: Hook into user pref
+
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService, 
     private navService: NavService, private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService) {
     this.fontFamilies = this.bookService.getFontFamilies();
@@ -162,6 +164,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       autoCloseMenu: modelSettings.autoCloseMenu, 
       readerMode: parseInt(modelSettings.readerMode, 10), 
       layoutMode: parseInt(modelSettings.layoutMode, 10),
+      backgroundColor: this.user.preferences.backgroundColor,
       bookReaderDarkMode: modelSettings.bookReaderDarkMode,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,

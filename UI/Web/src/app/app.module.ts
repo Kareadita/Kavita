@@ -35,6 +35,7 @@ import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { PipeModule } from './pipe/pipe.module';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 
 @NgModule({
@@ -78,6 +79,8 @@ import { PipeModule } from './pipe/pipe.module';
     CollectionsModule,
     ReadingListModule,
     RegistrationModule,
+
+    ColorPickerModule, // User preferences 
 
     NgbAccordionModule, // ThemeTest Component only
     PipeModule,

@@ -1,8 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FilterPipe } from './filter.pipe';
-import { PersonRolePipe } from './person-role.pipe';
 import { PublicationStatusPipe } from './publication-status.pipe';
+import { SentenceCasePipe } from './sentence-case.pipe';
+import { PersonRolePipe } from './person-role.pipe';
 
 
 
@@ -10,7 +11,8 @@ import { PublicationStatusPipe } from './publication-status.pipe';
   declarations: [
     FilterPipe,
     PersonRolePipe,
-    PublicationStatusPipe
+    PublicationStatusPipe,
+    SentenceCasePipe
   ],
   imports: [
     CommonModule,
@@ -18,7 +20,8 @@ import { PublicationStatusPipe } from './publication-status.pipe';
   exports: [
     FilterPipe,
     PersonRolePipe,
-    PublicationStatusPipe
+    PublicationStatusPipe,
+    SentenceCasePipe
   ]
 })
 export class PipeModule { }

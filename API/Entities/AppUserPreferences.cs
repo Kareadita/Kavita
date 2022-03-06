@@ -34,6 +34,10 @@ namespace API.Entities
         /// </summary>
         public LayoutMode LayoutMode { get; set; } = LayoutMode.Single;
         /// <summary>
+        /// Manga Reader Option: Background color of the reader
+        /// </summary>
+        public string BackgroundColor { get; set; } = "#FFFFFF";
+        /// <summary>
         /// Book Reader Option: Should the background color be dark
         /// </summary>
         public bool BookReaderDarkMode { get; set; } = true;

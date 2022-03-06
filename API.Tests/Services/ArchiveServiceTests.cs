@@ -310,7 +310,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"001.txt", "002.txt", "a.jpg"}, "Test.zip", "a.jpg")]
         public void FindCoverImageFilename(string[] filenames, string archiveName, string expected)
         {
-            Assert.Equal(expected, _archiveService.FindCoverImageFilename(archiveName, filenames));
+            Assert.Equal(expected, ArchiveService.FindCoverImageFilename(archiveName, filenames));
         }
 
 

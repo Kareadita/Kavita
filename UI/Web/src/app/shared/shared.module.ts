@@ -14,7 +14,6 @@ import { SeriesFormatComponent } from './series-format/series-format.component';
 import { UpdateNotificationModalComponent } from './update-notification/update-notification-modal.component';
 import { CircularLoaderComponent } from './circular-loader/circular-loader.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
-import { SentenceCasePipe } from './sentence-case.pipe';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { BadgeExpanderComponent } from './badge-expander/badge-expander.component';
 import { ImageComponent } from './image/image.component';
@@ -31,7 +30,6 @@ import { ImageComponent } from './image/image.component';
     SeriesFormatComponent,
     UpdateNotificationModalComponent,
     CircularLoaderComponent,
-    SentenceCasePipe,
     PersonBadgeComponent,
     BadgeExpanderComponent,
     ImageComponent
@@ -46,7 +44,6 @@ import { ImageComponent } from './image/image.component';
   ],
   exports: [
     SafeHtmlPipe, // Used globally
-    SentenceCasePipe, // Used globablly
     ReadMoreComponent, // Used globably
     DrawerComponent, // Can be replaced with boostrap offscreen canvas (v5)
     ShowIfScrollbarDirective, // Used book reader only?

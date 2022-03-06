@@ -14,6 +14,7 @@ export interface Preferences {
     readerMode: ReaderMode;
     autoCloseMenu: boolean;
     layoutMode: LayoutMode;
+    backgroundColor: string;
     
     // Book Reader
     bookReaderDarkMode: boolean;

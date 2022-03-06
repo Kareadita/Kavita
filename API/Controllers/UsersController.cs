@@ -73,6 +73,7 @@ namespace API.Controllers
             existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
             existingPreferences.ReaderMode = preferencesDto.ReaderMode;
             existingPreferences.LayoutMode = preferencesDto.LayoutMode;
+            existingPreferences.BackgroundColor = string.IsNullOrEmpty(preferencesDto.BackgroundColor) ? "#FFFFFF" : preferencesDto.BackgroundColor;
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
