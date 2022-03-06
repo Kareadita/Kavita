@@ -72,6 +72,7 @@ namespace API.Controllers
             existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
             existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
             existingPreferences.ReaderMode = preferencesDto.ReaderMode;
+            existingPreferences.LayoutMode = preferencesDto.LayoutMode;
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;

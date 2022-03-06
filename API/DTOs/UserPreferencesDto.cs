@@ -9,6 +9,7 @@ namespace API.DTOs
         public ScalingOption ScalingOption { get; set; }
         public PageSplitOption PageSplitOption { get; set; }
         public ReaderMode ReaderMode { get; set; }
+        public LayoutMode LayoutMode { get; set; }
         public bool AutoCloseMenu { get; set; }
         public bool BookReaderDarkMode { get; set; } = false;
         public int BookReaderMargin { get; set; }
