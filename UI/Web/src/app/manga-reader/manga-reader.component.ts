@@ -29,7 +29,7 @@ import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
 
-const PREFETCH_PAGES = 5;
+const PREFETCH_PAGES = 8;
 
 const CHAPTER_ID_NOT_FETCHED = -2;
 const CHAPTER_ID_DOESNT_EXIST = -1;
