@@ -36,9 +36,9 @@
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
             </div>
-            <div [ngClass]="{'d-none': renderWithCanvas }">
+            <div [ngClass]="{'d-none': renderWithCanvas, 'center-double': layoutMode === LayoutMode.Double && !isCoverImage(), 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && layoutMode === LayoutMode.Double && !isCoverImage() && utilityService.getActiveBreakpoint() >= Breakpoint.Tablet}">
                 <img [src]="canvasImage.src" id="image-1" 
-                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{layoutMode === LayoutMode.Double && !isCoverImage() ? 'double-first-image-offset' : ''}}">
+                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
                 
                 <ng-container *ngIf="layoutMode === LayoutMode.Double && !isCoverImage()">
                     <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
@@ -160,9 +160,14 @@
                         <label for="autoCloseMenu" class="form-check-label">Auto Close Menu</label>
                     </div>
                     <div class="col-6">
-                        <div class="form-check">
-                            <!-- TODO: Make this switch -->
-                            <input id="autoCloseMenu" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="autoCloseMenu">
+                        <div class="mb-3">
+                            <label id="auto-close-label" class="form-label"></label>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                    <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

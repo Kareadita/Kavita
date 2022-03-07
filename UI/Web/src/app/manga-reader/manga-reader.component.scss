@@ -94,8 +94,14 @@ canvas {
     }
 }
 
-.double-first-image-offset {
-  margin-left: 15%;
+.center-double {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.fit-to-height-double-offset {
+  width: 50%;
 }
 
 

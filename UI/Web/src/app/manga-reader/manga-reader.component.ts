@@ -12,7 +12,7 @@ import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { BehaviorSubject, forkJoin, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
-import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
+import { Breakpoint, KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
 import { MemberService } from '../_services/member.service';
 import { Stack } from '../shared/data-structures/stack';
@@ -299,11 +299,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return PageSplitOption;
   }
 
+  get Breakpoint() {
+    return Breakpoint;
+  }
+
+  get FITTING_OPTION() {
+    return FITTING_OPTION;
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
-              private libraryService: LibraryService, private utilityService: UtilityService,
+              private libraryService: LibraryService, public utilityService: UtilityService,
               private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
                 this.navService.hideNavBar();
   }
