@@ -79,6 +79,12 @@ public class SeriesService : ISeriesService
                     series.Metadata.SummaryLocked = true;
                 }
 
+                if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata.Language)
+                {
+                    series.Metadata.Language = updateSeriesMetadataDto.SeriesMetadata?.Language;
+                    series.Metadata.LanguageLocked = true;
+                }
+
 
                 series.Metadata.CollectionTags ??= new List<CollectionTag>();
                 UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>

@@ -14,10 +14,6 @@ $pointer-offset: 5px;
     }
 } 
 
-// .btn-icon {
-//     color: white;
-// }
-
 canvas {
     position: absolute;
 }
@@ -30,9 +26,6 @@ canvas {
         align-items: center;
     }
 }
-
-
-
 
 
 .loading {
@@ -62,14 +55,21 @@ canvas {
 }
 
 // Fitting Options
+// .full-height {
+//     position: absolute;
+//     margin: auto;
+//     top: 0px;
+//     left: 0;
+//     right: 0;
+//     bottom: 0px;
+//     height: 100%;
+// }
+
 .full-height {
-    position: absolute;
-    margin: auto;
-    top: 0px;
-    left: 0;
-    right: 0;
-    bottom: 0px;
-    height: 100%;
+  width: auto;
+  margin: 0 auto;
+  height: 100vh;
+  vertical-align: top;
 }
 
 .original {
@@ -84,7 +84,28 @@ canvas {
 
 .full-width {
     width: 100%;
+
+    &.double {
+      width: 50%
+    }
+
+    .image-2 {
+      margin-left: 50%;
+    }
 }
+
+.center-double {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.fit-to-height-double-offset {
+  width: 50%;
+}
+
+
+
 
 
 .right {

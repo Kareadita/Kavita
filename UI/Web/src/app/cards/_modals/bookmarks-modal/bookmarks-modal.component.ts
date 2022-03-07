@@ -7,7 +7,6 @@ import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { Series } from 'src/app/_models/series';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReaderService } from 'src/app/_services/reader.service';
-import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
   selector: 'app-bookmarks-modal',
@@ -28,7 +27,7 @@ export class BookmarksModalComponent implements OnInit {
 
   constructor(public imageService: ImageService, private readerService: ReaderService, 
     public modal: NgbActiveModal, private downloadService: DownloadService, 
-    private toastr: ToastrService, private seriesService: SeriesService) { }
+    private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.init();

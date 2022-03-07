@@ -1,14 +1,17 @@
-export enum READER_MODE {
+/**
+ * The pagination method used by the reader
+ */
+export enum ReaderMode {
     /**
      * Manga default left/right to page
      */
-    MANGA_LR = 0,
+    LeftRight = 0,
     /**
      * Manga up and down to page
      */
-    MANGA_UD = 1,
+    UpDown = 1,
     /**
      * Webtoon reading (scroll) with optional areas to tap
      */
-    WEBTOON = 2
+    Webtoon = 2
 }

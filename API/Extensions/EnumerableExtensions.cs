@@ -19,12 +19,13 @@ namespace API.Extensions
         /// <returns>Sorted Enumerable</returns>
         public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> items, Func<T, string> selector, StringComparer stringComparer = null)
         {
-            var maxDigits = items
+            var list = items.ToList();
+            var maxDigits = list
                 .SelectMany(i => Regex.Matches(selector(i))
                     .Select(digitChunk => (int?)digitChunk.Value.Length))
                 .Max() ?? 0;
 
-            return items.OrderBy(i => Regex.Replace(selector(i), match => match.Value.PadLeft(maxDigits, '0')), stringComparer ?? StringComparer.CurrentCulture);
+            return list.OrderBy(i => Regex.Replace(selector(i), match => match.Value.PadLeft(maxDigits, '0')), stringComparer ?? StringComparer.CurrentCulture);
         }
     }
 }

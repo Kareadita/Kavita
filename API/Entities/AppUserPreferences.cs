@@ -25,11 +25,22 @@ namespace API.Entities
         /// </example>
         /// </summary>
         public ReaderMode ReaderMode { get; set; }
-
         /// <summary>
         /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
         /// </summary>
         public bool AutoCloseMenu { get; set; } = true;
+        /// <summary>
+        /// Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change
+        /// </summary>
+        public bool ShowScreenHints { get; set; } = true;
+        /// <summary>
+        /// Manga Reader Option: How many pages to display in the reader at once
+        /// </summary>
+        public LayoutMode LayoutMode { get; set; } = LayoutMode.Single;
+        /// <summary>
+        /// Manga Reader Option: Background color of the reader
+        /// </summary>
+        public string BackgroundColor { get; set; } = "#000000";
         /// <summary>
         /// Book Reader Option: Should the background color be dark
         /// </summary>

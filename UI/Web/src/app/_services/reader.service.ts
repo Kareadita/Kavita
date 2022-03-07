@@ -114,11 +114,11 @@ export class ReaderService {
   /**
    * Captures current body color and forces background color to be black. Call @see resetOverrideStyles() on destroy of component to revert changes
    */
-  setOverrideStyles() {
+  setOverrideStyles(backgroundColor: string = 'black') {
     const bodyNode = document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
       this.originalBodyColor = bodyNode.style.background;
-      bodyNode.setAttribute('style', 'background-color: black !important');
+      bodyNode.setAttribute('style', 'background-color: ' + backgroundColor + ' !important');
     }
   }
 

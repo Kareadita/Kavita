@@ -12,7 +12,13 @@
                     {{subtitle}}
                 </div>
             </div>
+
             <div style="margin-left: auto; padding-right: 3%;">
+                <button class="btn btn-icon btn-small" title="Shortcuts" (click)="openShortcutModal()">
+                    <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
+                    <span class="visually-hidden">Keyboard Shortcuts Modal</span>
+                </button>
+
                 <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="pageBookmarked" title="{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{pageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
             </div>
         </div>
@@ -23,37 +29,49 @@
         </div>
     </ng-container>
 
-    <div (click)="toggleMenu()" class="reading-area">
-        <!-- TODO: Change this logic to only render for split pages and use image for all else-->
-        <canvas style="display: none;" #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" 
-                ondragstart="return false;" onselectstart="return false;">
-        </canvas>
+    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}">
+        <ng-container *ngIf="readerMode !== ReaderMode.Webtoon">
+            <div [ngClass]="{'d-none': !renderWithCanvas }">
+                <canvas #content class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}}" 
+                    ondragstart="return false;" onselectstart="return false;">
+                </canvas>
+            </div>
+            <div [ngClass]="{'d-none': renderWithCanvas, 'center-double': layoutMode === LayoutMode.Double && !isCoverImage(), 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && layoutMode === LayoutMode.Double && !isCoverImage() && utilityService.getActiveBreakpoint() >= Breakpoint.Tablet}">
+                <img [src]="canvasImage.src" id="image-1" 
+                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                
+                <ng-container *ngIf="layoutMode === LayoutMode.Double && !isCoverImage()">
+                    <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                </ng-container>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="readerMode === ReaderMode.Webtoon">
+            <div class="webtoon-images" *ngIf="readerMode === ReaderMode.Webtoon && !isLoading && !inSetup">
+                <app-infinite-scroller [pageNum]="pageNum" 
+                [bufferPages]="5" 
+                [goToPage]="goToPageEvent" 
+                (pageNumberChange)="handleWebtoonPageChange($event)" 
+                [totalPages]="maxPages" 
+                [urlProvider]="getPageUrl" 
+                (loadNextChapter)="loadNextChapter()" 
+                (loadPrevChapter)="loadPrevChapter()"
+                [bookmarkPage]="showBookmarkEffectEvent"
+                [fullscreenToggled]="fullscreenEvent"></app-infinite-scroller>
+            </div>
+        </ng-container>
         
-        <div *ngIf="isCoverImage && shouldRenderAsFitSplit()">
-            <img [src]="canvasImage.src" class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
-        </div>
-        <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading && !inSetup">
-            <app-infinite-scroller [pageNum]="pageNum" 
-            [bufferPages]="5" 
-            [goToPage]="goToPageEvent" 
-            (pageNumberChange)="handleWebtoonPageChange($event)" 
-            [totalPages]="maxPages" 
-            [urlProvider]="getPageUrl" 
-            (loadNextChapter)="loadNextChapter()" 
-            (loadPrevChapter)="loadPrevChapter()"
-            [bookmarkPage]="showBookmarkEffectEvent"
-            [fullscreenToggled]="fullscreenEvent"></app-infinite-scroller>
-        </div>
-        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
+
+        <ng-container *ngIf="readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown">
+            <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
                 <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'down'}}"
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
                      title="Next Page" aria-hidden="true"></i>
                 </div>
             </div>
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
+            <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
                 <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'up'}}"
+                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                      title="Previous Page" aria-hidden="true"></i>
                 </div>
             </div>
@@ -82,7 +100,7 @@
         </div>
         <div class="row pt-4 ms-2 me-2">
             <div class="col">
-                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>
@@ -142,9 +160,27 @@
                         <label for="autoCloseMenu" class="form-check-label">Auto Close Menu</label>
                     </div>
                     <div class="col-6">
-                        <div class="form-check">
-                            <input id="autoCloseMenu" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="autoCloseMenu">
+                        <div class="mb-3">
+                            <label id="auto-close-label" class="form-label"></label>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                    <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2 mb-2">
+                    <div class="col-6">
+                        <label for="layout-mode" class="form-label">Layout Mode</label>
+                    </div>
+                    <div class="col-6">
+                        <select class="form-control" id="page-fitting" formControlName="layoutMode">
+                            <option value="1">Single</option>
+                            <option value="2">Double</option>
+                        </select>
                     </div>
                 </div>
             </form>

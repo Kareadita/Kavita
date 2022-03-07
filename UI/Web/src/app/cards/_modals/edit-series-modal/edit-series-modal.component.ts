@@ -160,13 +160,11 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
         this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.metadata.ageRating = parseInt(val + '', 10);
-          if (!this.editSeriesForm.get('ageRating')?.touched) return;
           this.metadata.ageRatingLocked = true;
         });
     
         this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.metadata.publicationStatus = parseInt(val + '', 10);
-          if (!this.editSeriesForm.get('publicationStatus')?.touched) return;
           this.metadata.publicationStatusLocked = true;
         });
       }

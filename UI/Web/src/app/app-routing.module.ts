@@ -15,6 +15,7 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
 const routes: Routes = [
+  {path: '', component: UserLoginComponent},
   {
     path: 'admin',
     canActivate: [AdminGuard],
@@ -69,8 +70,7 @@ const routes: Routes = [
     ]
   },
   {path: 'theme', component: ThemeTestComponent},
-  
-  {path: '', component: UserLoginComponent},
+
   {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
   {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];
