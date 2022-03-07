@@ -38,6 +38,10 @@ namespace API.DTOs
         /// </summary>
         public bool AutoCloseMenu { get; set; }
         /// <summary>
+        /// Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change
+        /// </summary>
+        public bool ShowScreenHints { get; set; } = true;
+        /// <summary>
         /// Book Reader Option: Should the background color be dark
         /// </summary>
         public bool BookReaderDarkMode { get; set; } = false;

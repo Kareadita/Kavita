@@ -37,7 +37,8 @@
                 </canvas>
             </div>
             <div [ngClass]="{'d-none': renderWithCanvas }">
-                <img [src]="canvasImage.src" id="image-1" class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                <img [src]="canvasImage.src" id="image-1" 
+                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{layoutMode === LayoutMode.Double && !isCoverImage() ? 'double-first-image-offset' : ''}}">
                 
                 <ng-container *ngIf="layoutMode === LayoutMode.Double && !isCoverImage()">
                     <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">

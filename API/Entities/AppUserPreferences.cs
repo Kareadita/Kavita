@@ -30,6 +30,10 @@ namespace API.Entities
         /// </summary>
         public bool AutoCloseMenu { get; set; } = true;
         /// <summary>
+        /// Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change
+        /// </summary>
+        public bool ShowScreenHints { get; set; } = true;
+        /// <summary>
         /// Manga Reader Option: How many pages to display in the reader at once
         /// </summary>
         public LayoutMode LayoutMode { get; set; } = LayoutMode.Single;

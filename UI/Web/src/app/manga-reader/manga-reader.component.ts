@@ -408,7 +408,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:keyup', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
-
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
@@ -946,25 +945,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log('[Render] Canvas')
     } else {
       this.renderWithCanvas = false;
-      // if (!this.firstPageRendered && this.scalingOption === ScalingOption.Automatic) {
-      //   this.updateScalingForFirstPageRender();
-      // }
-
-      // this.setCanvasSize();
-
-      // // Fit Split on a page that needs splitting
-      // if (!this.shouldRenderAsFitSplit()) {
-        
-      //   this.ctx.drawImage(this.canvasImage, 0, 0);
-
-      //   // Reset scroll on non HEIGHT Fits
-      //   if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-      //     window.scrollTo(0, 0);
-      //   }
-
-      //   this.isLoading = false;
-      //   return;
-      // }
     }
 
     // Reset scroll on non HEIGHT Fits
@@ -1058,7 +1038,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingDirection = ReadingDirection.LeftToRight;
     }
 
-    if (this.menuOpen) {
+    if (this.menuOpen && this.user.preferences.showScreenHints) {
       this.showClickOverlay = true;
       setTimeout(() => {
         this.showClickOverlay = false;

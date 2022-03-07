@@ -111,6 +111,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('scalingOption', new FormControl(this.user.preferences.scalingOption, []));
       this.settingsForm.addControl('pageSplitOption', new FormControl(this.user.preferences.pageSplitOption, []));
       this.settingsForm.addControl('autoCloseMenu', new FormControl(this.user.preferences.autoCloseMenu, []));
+      this.settingsForm.addControl('showScreenHints', new FormControl(this.user.preferences.showScreenHints, []));
       this.settingsForm.addControl('readerMode', new FormControl(this.user.preferences.readerMode, []));
       this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
       this.settingsForm.addControl('bookReaderDarkMode', new FormControl(this.user.preferences.bookReaderDarkMode, []));
@@ -145,6 +146,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('readingDirection')?.setValue(this.user.preferences.readingDirection);
     this.settingsForm.get('scalingOption')?.setValue(this.user.preferences.scalingOption);
     this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu);
+    this.settingsForm.get('showScreenHints')?.setValue(this.user.preferences.showScreenHints);
     this.settingsForm.get('readerMode')?.setValue(this.user.preferences.readerMode);
     this.settingsForm.get('layoutMode')?.setValue(this.user.preferences.layoutMode);
     this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
@@ -174,6 +176,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       autoCloseMenu: modelSettings.autoCloseMenu, 
       readerMode: parseInt(modelSettings.readerMode, 10), 
       layoutMode: parseInt(modelSettings.layoutMode, 10),
+      showScreenHints: modelSettings.showScreenHints,
       backgroundColor: this.user.preferences.backgroundColor,
       bookReaderDarkMode: modelSettings.bookReaderDarkMode,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
