@@ -19,7 +19,7 @@
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
 
-                <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="pageBookmarked" title="{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{pageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
+                <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="isCurrentPageBookmarked" title="{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{isCurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
             </div>
         </div>
     </div>
@@ -30,23 +30,40 @@
     </ng-container>
 
     <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}">
-        <ng-container *ngIf="readerMode !== ReaderMode.Webtoon">
+        <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div [ngClass]="{'d-none': !renderWithCanvas }">
-                <canvas #content class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}}" 
+                <canvas #content class="{{getFittingOptionClass()}}">  <!--  {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} -->
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
             </div>
-            <div [ngClass]="{'d-none': renderWithCanvas, 'center-double': layoutMode === LayoutMode.Double && !isCoverImage(), 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && layoutMode === LayoutMode.Double && !isCoverImage() && utilityService.getActiveBreakpoint() >= Breakpoint.Tablet}">
+            <div [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage, 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && layoutMode === LayoutMode.Double && !isCoverImage() && utilityService.getActiveBreakpoint() >= Breakpoint.Tablet}">
                 <img [src]="canvasImage.src" id="image-1" 
                 class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
                 
-                <ng-container *ngIf="layoutMode === LayoutMode.Double && !isCoverImage()">
+                <ng-container *ngIf="ShouldRenderDoublePage">
                     <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
                 </ng-container>
             </div>
+
+            <ng-container>
+                <!-- Pagination controls and screen hints-->
+                <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
+                    <div *ngIf="showClickOverlay">
+                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
+                         title="Next Page" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
+                    <div *ngIf="showClickOverlay">
+                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
+                         title="Previous Page" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </ng-container>
+
         </ng-container>
 
-        <ng-container *ngIf="readerMode === ReaderMode.Webtoon">
+        <ng-template #webtoon>
             <div class="webtoon-images" *ngIf="readerMode === ReaderMode.Webtoon && !isLoading && !inSetup">
                 <app-infinite-scroller [pageNum]="pageNum" 
                 [bufferPages]="5" 
@@ -59,23 +76,9 @@
                 [bookmarkPage]="showBookmarkEffectEvent"
                 [fullscreenToggled]="fullscreenEvent"></app-infinite-scroller>
             </div>
-        </ng-container>
-        
+        </ng-template>
 
-        <ng-container *ngIf="readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown">
-            <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
-                <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
-                     title="Next Page" aria-hidden="true"></i>
-                </div>
-            </div>
-            <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
-                <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
-                     title="Previous Page" aria-hidden="true"></i>
-                </div>
-            </div>
-        </ng-container>
+        
     </div>
     
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
@@ -95,8 +98,6 @@
                 <button class="btn btn-small btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
                 <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
             </div>
-            
-            
         </div>
         <div class="row pt-4 ms-2 me-2">
             <div class="col">
@@ -186,5 +187,4 @@
             </form>
         </div>
     </div>
-    
 </div>
