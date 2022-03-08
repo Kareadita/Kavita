@@ -20,7 +20,7 @@ import { ChangeContext, LabelType, Options } from '@angular-slider/ngx-slider';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ChapterInfo } from './_models/chapter-info';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/reader-enums';
-import { pageSplitOptions, scalingOptions } from '../_models/preferences/preferences';
+import { layoutModes, pageSplitOptions, scalingOptions } from '../_models/preferences/preferences';
 import { ReaderMode } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
 import { LibraryService } from '../_services/library.service';
@@ -107,6 +107,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readerMode: ReaderMode = ReaderMode.LeftRight;
 
   pageSplitOptions = pageSplitOptions;
+  layoutModes = layoutModes;
 
   isLoading = true;
 

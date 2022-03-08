@@ -41,7 +41,7 @@
                 class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
                 
                 <ng-container *ngIf="ShouldRenderDoublePage">
-                    <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                    <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
                 </ng-container>
             </div>
 
@@ -179,8 +179,7 @@
                     </div>
                     <div class="col-6">
                         <select class="form-control" id="page-fitting" formControlName="layoutMode">
-                            <option value="1">Single</option>
-                            <option value="2">Double</option>
+                            <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
                         </select>
                     </div>
                 </div>
