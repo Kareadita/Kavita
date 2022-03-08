@@ -149,8 +149,9 @@ public class EmailService : IEmailService
         return true;
     }
 
-    private static bool IsLocalIpAddress(string host)
+    private static bool IsLocalIpAddress(string url)
     {
+        var host = url.Split(':')[0];
         try
         {
             // get host IP addresses
