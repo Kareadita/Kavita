@@ -801,7 +801,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
-    const pageAmount = (this.layoutMode === LayoutMode.Single && !this.isCoverImage()) ? 1 : 2;
+    let pageAmount = (this.layoutMode === LayoutMode.Single && !this.isCoverImage()) ? 1 : 2;
+    if (this.pageNum <= 1) {
+      pageAmount = 1;
+    }
+
     if ((this.pageNum + pageAmount >= this.maxPages && notInSplit) || this.isLoading) {
 
       if (this.isLoading) { return; }

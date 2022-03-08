@@ -4,6 +4,9 @@ $side-width: 25%;
 $dash-width: 3px;
 $pointer-offset: 5px;
 
+img {
+  user-select: none;
+}
 
 @media(min-width: 600px) {
     .overlay .left .i {
@@ -80,15 +83,6 @@ canvas {
 }
 
 // Fitting Options
-// .full-height {
-//     position: absolute;
-//     margin: auto;
-//     top: 0px;
-//     left: 0;
-//     right: 0;
-//     bottom: 0px;
-//     height: 100%;
-// }
 
 .full-height {
   width: auto;
@@ -118,8 +112,6 @@ canvas {
 .center-double {
   display: flex;
   overflow: unset;
-  //margin-left: auto;
-  //margin-right: auto;
 }
 
 .fit-to-width-double-offset {
