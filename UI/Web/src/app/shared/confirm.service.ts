@@ -41,7 +41,7 @@ export class ConfirmService {
         return resolve(result);
       });
       modalRef.dismissed.pipe(take(1)).subscribe(() => {
-        return reject(false);
+        return resolve(false);
       });
     });
 
@@ -65,7 +65,7 @@ export class ConfirmService {
         return resolve(result);
       });
       modalRef.dismissed.pipe(take(1)).subscribe(() => {
-        return reject(false);
+        return resolve(false);
       });
     })
   }
