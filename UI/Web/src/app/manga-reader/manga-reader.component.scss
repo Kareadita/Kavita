@@ -14,6 +14,29 @@ $pointer-offset: 5px;
     }
 } 
 
+.reading-area {
+  display: flex;
+  justify-content: center;
+}
+
+.image-container {
+  text-align: center;
+  display: block;
+  overflow: auto;
+
+  #image-1 {
+    &.double {
+      margin: 0 0 0 auto;
+    }
+  }
+  
+  #image-2 {
+    &.double {
+      margin: 0 auto 0 0;
+    }
+  }
+}
+
 canvas {
     position: absolute;
 }
@@ -86,25 +109,23 @@ canvas {
     width: 100%;
 
     &.double {
-      width: 50%
-    }
+      width: 50%;
 
-    .image-2 {
-      margin-left: 50%;
+      &.cover {
+        width: 100%;
+      }
     }
 }
 
 .center-double {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+  //display: block;
+  //margin-left: auto;
+  //margin-right: auto;
 }
 
 .fit-to-height-double-offset {
-  width: 50%;
+  display: flex;
 }
-
-
 
 
 
@@ -113,7 +134,7 @@ canvas {
     right: 0px;
     top: 0px;
     width: $side-width;
-    height: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;
@@ -135,7 +156,7 @@ canvas {
     left: 0px;
     top: 0px;
     width: $side-width;
-    height: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;

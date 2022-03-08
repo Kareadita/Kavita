@@ -32,11 +32,11 @@
     <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}">
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div [ngClass]="{'d-none': !renderWithCanvas }">
-                <canvas #content class="{{getFittingOptionClass()}}">  <!--  {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} -->
+                <canvas #content class="{{getFittingOptionClass()}}"
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
             </div>
-            <div [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage, 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && layoutMode === LayoutMode.Double && !isCoverImage() && utilityService.getActiveBreakpoint() >= Breakpoint.Tablet}">
+            <div class="image-container" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage, 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage}">
                 <img [src]="canvasImage.src" id="image-1" 
                 class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
                 
