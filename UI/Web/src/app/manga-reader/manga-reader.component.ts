@@ -815,7 +815,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum + 1);
-      if (this.layoutMode != LayoutMode.Single) {
+      if (this.layoutMode != LayoutMode.Single && !this.isCoverImage()) {
         this.setPageNum(this.pageNum + 1);
       }
 
@@ -860,7 +860,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum - 1);
-      if (this.layoutMode != LayoutMode.Single) {
+      if (this.layoutMode != LayoutMode.Single && !this.isCoverImage()) {
         this.setPageNum(this.pageNum - 1);
       }
       this.canvasImage = this.cachedImages.prev();
@@ -1060,6 +1060,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.isLoading = true;
     
+    this.canvasImage = this.cachedImages.current();
+    this.canvasImage2 = this.cachedImages.next(); 
     
     
 
