@@ -28,6 +28,9 @@ $pointer-offset: 5px;
     &.double {
       margin: 0 0 0 auto;
     }
+    &.reverse {
+      float: left;
+    }
   }
   
   #image-2 {
@@ -125,6 +128,10 @@ canvas {
 
 .fit-to-height-double-offset {
   display: flex;
+
+  &.reverse {
+    flex-direction: row-reverse;
+  }
 }
 
 
