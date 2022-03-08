@@ -257,6 +257,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
+  get PageNumber() {
+    return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
+  }
 
   get ShouldRenderDoublePage() {
     return (this.layoutMode === LayoutMode.Double || this.layoutMode === LayoutMode.DoubleReversed) && !this.isCoverImage();
@@ -803,7 +806,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
-    if ((this.pageNum + 1 >= this.maxPages && notInSplit) || this.isLoading) {
+    const pageIncrease = (this.layoutMode === LayoutMode.Single) ? 1 : 2;
+    if ((this.pageNum + pageIncrease >= this.maxPages && notInSplit) || this.isLoading) {
 
       if (this.isLoading) { return; }
 
