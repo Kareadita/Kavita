@@ -822,7 +822,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (this.readerMode !== ReaderMode.Webtoon) {
         this.canvasImage = this.cachedImages.next();
-       // this.canvasImage2 = this.cachedImages.peek();
       }
     }
 
@@ -839,7 +838,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
-    if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
+    const pageAmount = (this.layoutMode === LayoutMode.Single) ? 1 : 2;
+    if ((this.pageNum - pageAmount < 0 && notInSplit) || this.isLoading) {
 
       if (this.isLoading) { return; }
 
@@ -855,10 +855,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.setPageNum(this.pageNum - 1);
       }
       this.canvasImage = this.cachedImages.prev();
-      // this.canvasImage2 = this.cachedImages.peek(-2);
-      console.log('[Prev] Current page: ', this.pageNum);
-      console.log('[Prev] Current page index: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)).indexOf(this.pageNum));
-      console.log('[Prev] cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
     }
 
     if (this.readerMode !== ReaderMode.Webtoon) {
@@ -972,12 +968,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
       this.renderWithCanvas = true;
-      console.log('[Render] Canvas')
     } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       this.renderWithCanvas = true;
-      console.log('[Render] Canvas')
     } else {
       this.renderWithCanvas = false;
     }
@@ -1045,7 +1039,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }, this.cachedImages.size() - 3);
 
-    console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
+    //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
   loadPage() {
@@ -1054,9 +1048,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     
     this.canvasImage = this.cachedImages.current();
-    //this.canvasImage2 = this.cachedImages.peek(); 
-    
-    
+
 
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       if (this.layoutMode === LayoutMode.Single) {
