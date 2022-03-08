@@ -802,7 +802,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
     let pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage()) ? 2 : 1;
-    if (this.pageNum <= 1) {
+    if (this.pageNum < 1) {
       pageAmount = 1;
     }
 
@@ -837,8 +837,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
-    const pageAmount = (this.layoutMode === LayoutMode.Single && !this.isCoverImage()) ? 1 : 2;
-
+    const pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage()) ? 2: 1;
+    console.log('pageAmt: ', pageAmount);
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
 
       if (this.isLoading) { return; }
@@ -1102,7 +1102,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
-    this.pageNum = pageNum;
+    this.pageNum = Math.max(pageNum, 0);
 
     if (this.pageNum >= this.maxPages - 10) {
       // Tell server to cache the next chapter
