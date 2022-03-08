@@ -40,7 +40,7 @@
                 <img [src]="readerService.getPageUrl(this.chapterId, this.pageNum)" id="image-1"
                 class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
-                <ng-container *ngIf="ShouldRenderDoublePage && this.pageNum + 1 <= maxPages - 1">
+                <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 1)">
                     <img [src]="readerService.getPageUrl(this.chapterId, PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
                 </ng-container>
             </div>

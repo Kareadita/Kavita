@@ -801,8 +801,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
-    const pageIncrease = (this.layoutMode === LayoutMode.Single) ? 1 : 2;
-    if ((this.pageNum + pageIncrease >= this.maxPages && notInSplit) || this.isLoading) {
+    const pageAmount = (this.layoutMode === LayoutMode.Single && !this.isCoverImage()) ? 1 : 2;
+    if ((this.pageNum + pageAmount >= this.maxPages && notInSplit) || this.isLoading) {
 
       if (this.isLoading) { return; }
 
@@ -813,12 +813,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
-      this.setPageNum(this.pageNum + 1);
-
-      if (this.readerMode !== ReaderMode.Webtoon && this.layoutMode != LayoutMode.Single && !this.isCoverImage()) {
-        this.setPageNum(this.pageNum + 1);
-        this.cachedImages.next();
-      }
+      this.setPageNum(this.pageNum + pageAmount);
 
       if (this.readerMode !== ReaderMode.Webtoon) {
         this.canvasImage = this.cachedImages.next();
@@ -838,8 +833,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
-    const pageAmount = (this.layoutMode === LayoutMode.Single) ? 1 : 2;
-    if ((this.pageNum - pageAmount < 0 && notInSplit) || this.isLoading) {
+    const pageAmount = (this.layoutMode === LayoutMode.Single && !this.isCoverImage()) ? 1 : 2;
+
+    if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
 
       if (this.isLoading) { return; }
 
@@ -850,10 +846,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     if (this.isNoSplit() || notInSplit) {
-      this.setPageNum(this.pageNum - 1);
-      if (this.layoutMode != LayoutMode.Single && !this.isCoverImage()) {
-        this.setPageNum(this.pageNum - 1);
-      }
+      this.setPageNum(this.pageNum - pageAmount);
       this.canvasImage = this.cachedImages.prev();
     }
 
@@ -1209,7 +1202,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if ( this.readerMode === ReaderMode.Webtoon) {
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('pageSplitOption')?.disable();
-      this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
       this.generalSettingsForm.get('layoutMode')?.disable();
     } else {
       this.generalSettingsForm.get('fittingOption')?.enable()
