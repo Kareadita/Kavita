@@ -381,7 +381,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.FitSplit);
             this.generalSettingsForm.get('pageSplitOption')?.disable();
 
-            this.canvasImage2 = this.cachedImages.next();
+            this.canvasImage2 = this.cachedImages.peek();
           }
         });
 
@@ -815,23 +815,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum + 1);
-      if (this.layoutMode != LayoutMode.Single && !this.isCoverImage()) {
+
+      if (this.readerMode !== ReaderMode.Webtoon && this.layoutMode != LayoutMode.Single && !this.isCoverImage()) {
         this.setPageNum(this.pageNum + 1);
+        this.cachedImages.next();
       }
 
       if (this.readerMode !== ReaderMode.Webtoon) {
-        console.log('[Next] Current page: ', this.pageNum);
-        console.log('[Next] Current page index: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)).indexOf(this.pageNum));
-
-        console.log('[Next] cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
-        if (this.layoutMode != LayoutMode.Single) {
-          
-          this.cachedImages.next(); // Move cache one element to account for canvasImage2
-        }
         this.canvasImage = this.cachedImages.next();
-        this.canvasImage2 = this.cachedImages.next();
-        console.log('[nextPage] canvasImage: ', this.canvasImage);
-        console.log('[nextPage] canvasImage2: ', this.canvasImage2);
+       // this.canvasImage2 = this.cachedImages.peek();
       }
     }
 
@@ -864,9 +856,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.setPageNum(this.pageNum - 1);
       }
       this.canvasImage = this.cachedImages.prev();
-      this.canvasImage2 = this.cachedImages.peek(-2);
-      console.log('[prevPage] canvasImage: ', this.canvasImage);
-      console.log('[prevPage] canvasImage2: ', this.canvasImage2);
+      // this.canvasImage2 = this.cachedImages.peek(-2);
+      console.log('[Prev] Current page: ', this.pageNum);
+      console.log('[Prev] Current page index: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)).indexOf(this.pageNum));
+      console.log('[Prev] cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
     }
 
     if (this.readerMode !== ReaderMode.Webtoon) {
@@ -1042,6 +1035,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cachedImages.applyFor((item, internalIndex) => {
       const offsetIndex = this.pageNum + index;
       const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
+      
       if (urlPageNum === offsetIndex) {
         index += 1;
         return;
@@ -1061,33 +1055,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     
     this.canvasImage = this.cachedImages.current();
-    this.canvasImage2 = this.cachedImages.next(); 
+    //this.canvasImage2 = this.cachedImages.peek(); 
     
     
 
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
-      // this.canvasImage = this.cachedImages.next();
-      // this.canvasImage2 = this.cachedImages.next(); 
       if (this.layoutMode === LayoutMode.Single) {
         this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
       } else {
-        console.log('[Next] Current page: ', this.pageNum);
-        console.log('[Next] Current page index: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)).indexOf(this.pageNum));
-        console.log('[Next] cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
-
-
-        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1);
-        this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 2); // TODO: I need to handle last page correctly
+        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+        this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
       }
-
-      console.log('[loadPage] canvasImage: ', this.canvasImage);
-      console.log('[loadPage] canvasImage2: ', this.canvasImage2);
-      
-      // Do I need this still?
       this.canvasImage.onload = () => this.renderPage();
 
-      //console.log('[loadPage] (after setting) canvasImage: ', this.canvasImage);
-      //console.log('[loadPage] (after setting) canvasImage2: ', this.canvasImage2);
     } else {
       this.renderPage();
     }
