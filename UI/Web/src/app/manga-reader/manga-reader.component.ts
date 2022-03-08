@@ -258,7 +258,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   get ShouldRenderDoublePage() {
-    return this.layoutMode === LayoutMode.Double && !this.isCoverImage();
+    return (this.layoutMode === LayoutMode.Double || this.layoutMode === LayoutMode.DoubleReversed) && !this.isCoverImage();
+  }
+
+  get ShouldRenderReverseDouble() {
+    return (this.layoutMode === LayoutMode.DoubleReversed) && !this.isCoverImage();
   }
 
   get isCurrentPageBookmarked() {
@@ -368,8 +372,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.layoutMode = parseInt(val, 10);
-          if (this.layoutMode === LayoutMode.Double) {
-            // Update canvasImage2
+          
+          if (this.layoutMode === LayoutMode.Single) {
+            this.generalSettingsForm.get('pageSplitOption')?.enable();
+
+          } else {
+            this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.FitSplit);
+            this.generalSettingsForm.get('pageSplitOption')?.disable();
+
             this.canvasImage2 = this.cachedImages.next();
           }
         });
@@ -1188,12 +1198,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateForm() {
+
     if ( this.readerMode === ReaderMode.Webtoon) {
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('pageSplitOption')?.disable();
+      this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
+      this.generalSettingsForm.get('layoutMode')?.disable();
     } else {
       this.generalSettingsForm.get('fittingOption')?.enable()
       this.generalSettingsForm.get('pageSplitOption')?.enable();
+      this.generalSettingsForm.get('layoutMode')?.enable();
+
+      if (this.layoutMode !== LayoutMode.Single) {
+        this.generalSettingsForm.get('pageSplitOption')?.disable();
+      }
     }
   }
 
