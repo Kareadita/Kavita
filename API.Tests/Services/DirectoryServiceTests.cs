@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
@@ -753,6 +753,22 @@ namespace API.Tests.Services
             Assert.Equal(2, ds.GetFiles(testDirectory).Count());
             Assert.False(fileSystem.FileExists($"{testDirectory}subdir/data-3.webp"));
             Assert.True(fileSystem.Directory.Exists($"{testDirectory}subdir/"));
+        }
+
+        [Fact]
+        public void Flatten_ShouldFlatten_WithoutMacosx()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(testDirectory);
+            fileSystem.AddFile($"{testDirectory}data-1.jpg", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}subdir/data-3.webp", new MockFileData("abc"));
+            fileSystem.AddFile($"{testDirectory}__MACOSX/data-4.webp", new MockFileData("abc"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.Flatten($"{testDirectory}");
+            Assert.Equal(2, ds.GetFiles(testDirectory).Count());
+            Assert.False(fileSystem.FileExists($"{testDirectory}data-4.webp"));
         }
 
         #endregion
