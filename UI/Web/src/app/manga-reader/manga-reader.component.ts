@@ -119,7 +119,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   canvasImage = new Image();
   /**
-   * Used soley for LayoutMode.Double rendering. Will always hold the next image in buffer. 
+   * Used soley for LayoutMode.Double rendering. Will always hold the next image in buffer.
    */
   canvasImage2 = new Image();
   renderWithCanvas: boolean = false; // Dictates if we use render with canvas or with image
@@ -376,7 +376,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.layoutMode = parseInt(val, 10);
-          
+
           if (this.layoutMode === LayoutMode.Single) {
             this.generalSettingsForm.get('pageSplitOption')?.enable();
 
@@ -837,7 +837,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
-    let pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage()) ? 2 : 1;
+    const pageAmount = (this.layoutMode === LayoutMode.Single && !this.isCoverImage()) ? 1 : 2;
 
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
 
@@ -1025,7 +1025,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cachedImages.applyFor((item, internalIndex) => {
       const offsetIndex = this.pageNum + index;
       const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
-      
+
       if (urlPageNum === offsetIndex) {
         index += 1;
         return;
@@ -1043,8 +1043,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.canvas || !this.ctx) { return; }
 
     this.isLoading = true;
-    
+
     this.canvasImage = this.cachedImages.current();
+
 
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       if (this.layoutMode === LayoutMode.Single) {
@@ -1096,7 +1097,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.setPageNum(page);
     this.refreshSlider.emit();
-    this.goToPageEvent.next(page); 
+    this.goToPageEvent.next(page);
     this.render();
   }
 
