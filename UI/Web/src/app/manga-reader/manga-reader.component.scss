@@ -22,7 +22,6 @@ $pointer-offset: 5px;
 .image-container {
   text-align: center;
   display: block;
-  overflow: auto;
 
   #image-1 {
     &.double {
@@ -96,20 +95,16 @@ canvas {
   margin: 0 auto;
   height: 100vh;
   vertical-align: top;
+  overflow: auto;
 }
 
 .original {
-    position: absolute;
-    margin-left: auto;
-    margin-right: auto;
-    top: 0px;
-    bottom: 0px;
-    left: 0;
-    right: 0;    
+  align-self: center;  
 }
 
 .full-width {
     width: 100%;
+    align-self: center;  
 
     &.double {
       width: 50%;
@@ -121,9 +116,18 @@ canvas {
 }
 
 .center-double {
-  //display: block;
+  display: flex;
+  overflow: unset;
   //margin-left: auto;
   //margin-right: auto;
+}
+
+.fit-to-width-double-offset {
+  width: 100%;
+}
+
+.original-double-offset {
+  width: 100%;
 }
 
 .fit-to-height-double-offset {
