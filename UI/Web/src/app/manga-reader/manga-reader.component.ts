@@ -257,7 +257,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
 
-  get pageBookmarked() {
+  get ShouldRenderDoublePage() {
+    return this.layoutMode === LayoutMode.Double && !this.isCoverImage();
+  }
+
+  get isCurrentPageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
   }
 
@@ -1198,9 +1202,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   bookmarkPage() {
     const pageNum = this.pageNum;
 
-    // TODO: Handle LayoutMode.Double
-
-    if (this.pageBookmarked) {
+    if (this.isCurrentPageBookmarked) {
       let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
       if (this.layoutMode === LayoutMode.Double) apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       forkJoin(apis).pipe(take(1)).subscribe(() => {
