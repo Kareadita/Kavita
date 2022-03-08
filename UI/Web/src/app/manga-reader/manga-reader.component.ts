@@ -262,7 +262,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ShouldRenderDoublePage() {
-    return (this.layoutMode === LayoutMode.Double || this.layoutMode === LayoutMode.DoubleReversed) && !this.isCoverImage();
+    return this.layoutMode !== LayoutMode.Single && !this.isCoverImage();
   }
 
   get ShouldRenderReverseDouble() {
@@ -650,18 +650,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       val =  FITTING_OPTION.HEIGHT;
     }
     val =  formControl?.value;
-/*
-    if (this.isCoverImage() && this.shouldRenderAsFitSplit()) {
-      // Rewriting to fit to width for this cover image
-      val = FITTING_OPTION.WIDTH;
-    }
-  */
 
-    if (this.isCoverImage() && this.layoutMode === LayoutMode.Double) {
+
+    if (this.isCoverImage() && this.layoutMode !== LayoutMode.Double) {
       return val + ' cover double';
     }
 
-    if (!this.isCoverImage() && this.layoutMode === LayoutMode.Double) {
+    if (!this.isCoverImage() && this.layoutMode !== LayoutMode.Double) {
       return val + ' double';
     }
     return val;
