@@ -995,8 +995,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isCoverImage() {
-    var test = this.canvasImage.width > this.canvasImage.height
-    console.log('canvas cover?', test);
     return this.canvasImage.width > this.canvasImage.height;
   }
 
