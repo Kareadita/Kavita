@@ -815,9 +815,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum + 1);
+      if (this.layoutMode != LayoutMode.Single) {
+        this.setPageNum(this.pageNum + 1);
+      }
+
       if (this.readerMode !== ReaderMode.Webtoon) {
+        console.log('[Next] Current page: ', this.pageNum);
+        console.log('[Next] Current page index: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)).indexOf(this.pageNum));
+
+        console.log('[Next] cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
+        if (this.layoutMode != LayoutMode.Single) {
+          
+          this.cachedImages.next(); // Move cache one element to account for canvasImage2
+        }
         this.canvasImage = this.cachedImages.next();
-        this.canvasImage2 = this.cachedImages.peek(2);
+        this.canvasImage2 = this.cachedImages.next();
         console.log('[nextPage] canvasImage: ', this.canvasImage);
         console.log('[nextPage] canvasImage2: ', this.canvasImage2);
       }
@@ -848,6 +860,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum - 1);
+      if (this.layoutMode != LayoutMode.Single) {
+        this.setPageNum(this.pageNum - 1);
+      }
       this.canvasImage = this.cachedImages.prev();
       this.canvasImage2 = this.cachedImages.peek(-2);
       console.log('[prevPage] canvasImage: ', this.canvasImage);
@@ -1036,23 +1051,41 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
+
+    console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }
 
     this.isLoading = true;
-    this.canvasImage = this.cachedImages.current();
-    this.canvasImage2 = this.cachedImages.next(); // TODO: Do I need this here?
-    console.log('[loadPage] canvasImage: ', this.canvasImage);
-    console.log('[loadPage] canvasImage2: ', this.canvasImage2);
+    
+    
+    
+
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
-      this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-      this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
+      // this.canvasImage = this.cachedImages.next();
+      // this.canvasImage2 = this.cachedImages.next(); 
+      if (this.layoutMode === LayoutMode.Single) {
+        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+      } else {
+        console.log('[Next] Current page: ', this.pageNum);
+        console.log('[Next] Current page index: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)).indexOf(this.pageNum));
+        console.log('[Next] cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
+
+
+        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1);
+        this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 2); // TODO: I need to handle last page correctly
+      }
+
+      console.log('[loadPage] canvasImage: ', this.canvasImage);
+      console.log('[loadPage] canvasImage2: ', this.canvasImage2);
+      
+      // Do I need this still?
       this.canvasImage.onload = () => this.renderPage();
 
-      console.log('[loadPage] (after setting) canvasImage: ', this.canvasImage);
-      console.log('[loadPage] (after setting) canvasImage2: ', this.canvasImage2);
+      //console.log('[loadPage] (after setting) canvasImage: ', this.canvasImage);
+      //console.log('[loadPage] (after setting) canvasImage2: ', this.canvasImage2);
     } else {
       this.renderPage();
     }
