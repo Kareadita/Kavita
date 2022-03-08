@@ -632,10 +632,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       val =  FITTING_OPTION.HEIGHT;
     }
     val =  formControl?.value;
-
+/*
     if (this.isCoverImage() && this.shouldRenderAsFitSplit()) {
       // Rewriting to fit to width for this cover image
       val = FITTING_OPTION.WIDTH;
+    }
+  */
+
+    if (this.isCoverImage() && this.layoutMode === LayoutMode.Double) {
+      return val + ' cover double';
     }
 
     if (!this.isCoverImage() && this.layoutMode === LayoutMode.Double) {
@@ -990,6 +995,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   isCoverImage() {
+    var test = this.canvasImage.width > this.canvasImage.height
+    console.log('canvas cover?', test);
     return this.canvasImage.width > this.canvasImage.height;
   }
 
