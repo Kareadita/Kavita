@@ -652,11 +652,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     val =  formControl?.value;
 
 
-    if (this.isCoverImage() && this.layoutMode !== LayoutMode.Double) {
+    if (this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
       return val + ' cover double';
     }
 
-    if (!this.isCoverImage() && this.layoutMode !== LayoutMode.Double) {
+    if (!this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
       return val + ' double';
     }
     return val;
