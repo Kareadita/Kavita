@@ -80,7 +80,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     this.accountService.logout();
     this.navService.hideNavBar();
     this.navService.hideSideNav();
-    this.navService.deleteSideNav();
+    this.navService.toggleSideNavVisibility(false);
     this.router.navigateByUrl('/login');
   }
 

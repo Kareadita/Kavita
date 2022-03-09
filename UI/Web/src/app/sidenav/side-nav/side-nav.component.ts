@@ -44,7 +44,6 @@ export class SideNavComponent implements OnInit {
     });
 
     this.navService.sideNavVisible$.subscribe();
-    this.navService.addSideNav();
   }
 
   handleAction(action: Action, library: Library) {

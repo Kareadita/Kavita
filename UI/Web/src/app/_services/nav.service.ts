@@ -11,11 +11,11 @@ export class NavService {
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
   navbarVisible$ = this.navbarVisibleSource.asObservable();
 
-  private sidenavVisibleSource = new ReplaySubject<boolean>(1);
-  private sidenavRemoveSource = new ReplaySubject<boolean>(1);
-  sideNavVisible$ = this.sidenavVisibleSource.asObservable();
-  private removeSideNav: boolean = false;
-  removeSideNav$ = this.sidenavRemoveSource.asObservable();
+  private sideNavCollapseSource = new ReplaySubject<boolean>(1);
+  sideNavVisible$ = this.sideNavCollapseSource.asObservable();
+  private sideNavVisibility: boolean = false;
+  private sideNavVisibilitySource = new ReplaySubject<boolean>(1);
+  sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
 
   private darkMode: boolean = true;
   private darkModeSource = new ReplaySubject<boolean>(1);
@@ -24,7 +24,7 @@ export class NavService {
   constructor() {
     this.showNavBar();
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
-    this.sidenavVisibleSource.next(sideNavState);
+    this.sideNavCollapseSource.next(sideNavState);
   }
  
   showNavBar() {
@@ -35,36 +35,26 @@ export class NavService {
     this.navbarVisibleSource.next(false);
   }
 
+  showSideNav() {
+    this.sideNavCollapseSource.next(true);
+  }
+
+  hideSideNav() {
+    this.sideNavCollapseSource.next(false);
+  }
+
   toggleSideNav() {
-    this.sidenavVisibleSource.pipe(take(1)).subscribe(val => {
+    this.sideNavCollapseSource.pipe(take(1)).subscribe(val => {
       if (val === undefined) val = false;
       const newVal = !(val || false);
-      this.sidenavVisibleSource.next(newVal);
+      this.sideNavCollapseSource.next(newVal);
       localStorage.setItem(this.localStorageSideNavKey, newVal + '');
     });
   }
-
-  showSideNav(supressSaveState: boolean = true) {
-    this.sidenavVisibleSource.next(true);
-    if (supressSaveState) return;
-    localStorage.setItem(this.localStorageSideNavKey, true + '');
-  }
-
-  hideSideNav(supressSaveState: boolean = true) {
-    this.sidenavVisibleSource.next(false);
-    if (supressSaveState) return;
-    localStorage.setItem(this.localStorageSideNavKey, false + '');
-  }
-
-
-  addSideNav() {
-    this.removeSideNav = false;
-    this.sidenavRemoveSource.next(this.removeSideNav);
-  }
-
-  deleteSideNav() {
-    this.removeSideNav = !this.removeSideNav;
-    this.sidenavRemoveSource.next(this.removeSideNav);
+  
+  toggleSideNavVisibility(forcedState: boolean) {
+    this.sideNavVisibility = forcedState;
+    this.sideNavVisibilitySource.next(this.sideNavVisibility);
   }
 
 
