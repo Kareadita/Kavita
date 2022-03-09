@@ -152,16 +152,14 @@ namespace API.Tests.Services
         }
 
 
-
-        // TODO: This is broken on GA due to DirectoryService.CoverImageDirectory
-        //[Theory]
-        [InlineData("v10.cbz", "v10.expected.jpg")]
-        [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
-        [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
-        [InlineData("macos_native.zip", "macos_native.jpg")]
-        [InlineData("v10 - duplicate covers.cbz", "v10 - duplicate covers.expected.jpg")]
-        [InlineData("sorting.zip", "sorting.expected.jpg")]
-        [InlineData("test.zip", "test.expected.jpg")] // https://github.com/kleisauke/net-vips/issues/155
+        [Theory]
+        [InlineData("v10.cbz", "v10.expected.png")]
+        [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.png")]
+        [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.png")]
+        [InlineData("macos_native.zip", "macos_native.png")]
+        [InlineData("v10 - duplicate covers.cbz", "v10 - duplicate covers.expected.png")]
+        [InlineData("sorting.zip", "sorting.expected.png")]
+        [InlineData("test.zip", "test.expected.jpg")]
         public void GetCoverImage_Default_Test(string inputFile, string expectedOutputFile)
         {
             var ds = Substitute.For<DirectoryService>(_directoryServiceLogger, new FileSystem());
@@ -183,33 +181,33 @@ namespace API.Tests.Services
 
 
             Assert.Equal(expectedBytes, actual);
-            //_directoryService.ClearAndDeleteDirectory(outputDir);
+            _directoryService.ClearAndDeleteDirectory(outputDir);
         }
 
 
-        // TODO: This is broken on GA due to DirectoryService.CoverImageDirectory
-        //[Theory]
-        [InlineData("v10.cbz", "v10.expected.jpg")]
-        [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.jpg")]
-        [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.jpg")]
-        [InlineData("macos_native.zip", "macos_native.jpg")]
-        [InlineData("v10 - duplicate covers.cbz", "v10 - duplicate covers.expected.jpg")]
-        [InlineData("sorting.zip", "sorting.expected.jpg")]
+        [Theory]
+        [InlineData("v10.cbz", "v10.expected.png")]
+        [InlineData("v10 - with folder.cbz", "v10 - with folder.expected.png")]
+        [InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.png")]
+        [InlineData("macos_native.zip", "macos_native.png")]
+        [InlineData("v10 - duplicate covers.cbz", "v10 - duplicate covers.expected.png")]
+        [InlineData("sorting.zip", "sorting.expected.png")]
         public void GetCoverImage_SharpCompress_Test(string inputFile, string expectedOutputFile)
         {
             var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService);
             var archiveService =  Substitute.For<ArchiveService>(_logger,
                 new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService);
-            var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages");
-            var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
+            var testDirectory = API.Parser.Parser.NormalizePath(Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages")));
 
             var outputDir = Path.Join(testDirectory, "output");
             _directoryService.ClearDirectory(outputDir);
             _directoryService.ExistOrCreate(outputDir);
 
             archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.SharpCompress);
-            var actualBytes = File.ReadAllBytes(archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),
-                Path.GetFileNameWithoutExtension(inputFile) + "_output", outputDir));
+            var coverOutputFile = archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),
+                Path.GetFileNameWithoutExtension(inputFile), outputDir);
+            var actualBytes = File.ReadAllBytes(Path.Join(outputDir, coverOutputFile));
+            var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
             Assert.Equal(expectedBytes, actualBytes);
 
             _directoryService.ClearAndDeleteDirectory(outputDir);

@@ -142,7 +142,7 @@ namespace API.Services
         {
             foreach (var chapter in chapterIds)
             {
-                _directoryService.ClearDirectory(GetCachePath(chapter));
+                _directoryService.ClearAndDeleteDirectory(GetCachePath(chapter));
             }
         }
 

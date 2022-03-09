@@ -3,7 +3,10 @@ export enum FITTING_OPTION {
     WIDTH = 'full-width',
     ORIGINAL = 'original'
 }
-  
+
+/**
+ * How to split a page into virutal pages. Only works with LayoutMode.Single
+ */
 export enum SPLIT_PAGE_PART {
     NO_SPLIT = 'none',
     LEFT_PART = 'left',
