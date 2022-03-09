@@ -278,6 +278,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               private libraryService: LibraryService, private utilityService: UtilityService,
               private renderer: Renderer2, @Inject(DOCUMENT) private document: Document) {
                 this.navService.hideNavBar();
+                this.navService.deleteSideNav();
   }
 
   ngOnInit(): void {
@@ -528,6 +529,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.location.back();
     }
+
+    this.navService.addSideNav();
   }
 
   updateTitle(chapterInfo: ChapterInfo, type: LibraryType) {

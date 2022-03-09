@@ -12,7 +12,10 @@ export class NavService {
   navbarVisible$ = this.navbarVisibleSource.asObservable();
 
   private sidenavVisibleSource = new ReplaySubject<boolean>(1);
+  private sidenavRemoveSource = new ReplaySubject<boolean>(1);
   sideNavVisible$ = this.sidenavVisibleSource.asObservable();
+  private removeSideNav: boolean = false;
+  removeSideNav$ = this.sidenavRemoveSource.asObservable();
 
   private darkMode: boolean = true;
   private darkModeSource = new ReplaySubject<boolean>(1);
@@ -52,6 +55,18 @@ export class NavService {
     if (supressSaveState) return;
     localStorage.setItem(this.localStorageSideNavKey, false + '');
   }
+
+
+  addSideNav() {
+    this.removeSideNav = false;
+    this.sidenavRemoveSource.next(this.removeSideNav);
+  }
+
+  deleteSideNav() {
+    this.removeSideNav = !this.removeSideNav;
+    this.sidenavRemoveSource.next(this.removeSideNav);
+  }
+
 
   toggleDarkMode() {
     this.darkMode = !this.darkMode;

@@ -13,6 +13,11 @@
     overflow: auto;
     border: var(--side-nav-border);
 
+    &.hidden {
+        display: none;
+        opacity: 0;
+    }
+    
     &.closed {
         width: 50px;
         overflow-x: hidden;

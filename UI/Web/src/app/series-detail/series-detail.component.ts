@@ -211,6 +211,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.loadSeries(this.seriesId);
+    this.navService.addSideNav();
     this.navService.hideSideNav();
   }
 

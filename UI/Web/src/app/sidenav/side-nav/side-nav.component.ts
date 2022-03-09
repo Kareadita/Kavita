@@ -43,7 +43,8 @@ export class SideNavComponent implements OnInit {
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     });
 
-    this.navService.sideNavVisible$.subscribe()
+    this.navService.sideNavVisible$.subscribe();
+    this.navService.addSideNav();
   }
 
   handleAction(action: Action, library: Library) {
