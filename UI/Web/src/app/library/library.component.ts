@@ -138,7 +138,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'collections') {
       this.router.navigate(['collections']);
-    } else if (sectionTitle.toLowerCase() === 'recently added') {
+    } else if (sectionTitle.toLowerCase() === 'recently updated series') {
       this.router.navigate(['recently-added']);
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       this.router.navigate(['on-deck']);
