@@ -20,19 +20,24 @@ img {
 .reading-area {
   display: flex;
   justify-content: center;
+  position: relative;
 }
 
 .image-container {
   text-align: center;
   display: block;
+  height: 100vh;
 
   #image-1 {
     &.double {
       margin: 0 0 0 auto;
     }
-    &.reverse {
-      float: left;
-    }
+  }
+
+  &.reverse {
+    flex-direction: row-reverse;
+    overflow: unset;
+    justify-content: flex-end;
   }
   
   #image-2 {
@@ -87,9 +92,8 @@ canvas {
 .full-height {
   width: auto;
   margin: 0 auto;
-  height: 100vh;
+  height: 100%;
   vertical-align: top;
-  overflow: auto;
 }
 
 .original {
@@ -123,11 +127,13 @@ canvas {
 }
 
 .fit-to-height-double-offset {
-  display: flex;
-
-  &.reverse {
-    flex-direction: row-reverse;
-  }
+  position: absolute;
+  height: 100vh;
+  object-fit: scale-down;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  max-width: 100%;
 }
 
 
