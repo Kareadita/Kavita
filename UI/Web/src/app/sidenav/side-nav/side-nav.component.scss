@@ -49,7 +49,7 @@
     }
 
     .side-nav-overlay {
-        background-color: var(--side-nav-box-shadow);
+        background-color: var(--side-nav-overlay-color);
         width: 100vw;
         height: calc(100vh - 56px);
         position: absolute;
