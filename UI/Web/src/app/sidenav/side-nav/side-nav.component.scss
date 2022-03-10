@@ -9,7 +9,6 @@
     top: 66px;
     border-radius: var(--side-nav-border-radius);
     transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition);
-    box-shadow: var(--side-nav-box-shadow);
     overflow: auto;
     border: var(--side-nav-border);
 
@@ -17,7 +16,7 @@
         display: none;
         opacity: 0;
     }
-    
+
     &.closed {
         width: 50px;
         overflow-x: hidden;
@@ -37,7 +36,6 @@
         left: 0;
         top: 56px;
         transition: width var(--side-nav-openclose-transition);
-        box-shadow: var(--side-nav-mobile-box-shadow);
         z-index: 999;
         overflow: auto;
         border: var(--side-nav-mobile-border);
@@ -46,6 +44,19 @@
             width: 0;
             overflow: hidden;
             box-shadow: none;
+        }
+    }
+
+    .side-nav-overlay {
+        background-color: var(--side-nav-box-shadow);
+        width: 100vw;
+        height: calc(100vh - 56px);
+        position: absolute;
+        left: 0;
+        z-index: 998;
+
+        &.closed {
+            display: none;
         }
     }
 }

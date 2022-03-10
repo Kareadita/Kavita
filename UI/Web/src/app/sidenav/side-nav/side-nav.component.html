@@ -1,5 +1,4 @@
 <ng-container>
-
 <div class="side-nav" [ngClass]="{'closed' : !(navService?.sideNavVisible$ | async), 'hidden' :!(navService?.sideNavVisibility$ | async)}"  *ngIf="accountService.currentUser$ | async as user">
     <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
         <ng-container actions>
@@ -29,4 +28,5 @@
         </app-side-nav-item>
     </div>
 </div>
+<div class="side-nav-overlay" [ngClass]="{'closed' : !(navService?.sideNavVisible$ | async)}"></div>
 </ng-container>
