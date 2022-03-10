@@ -10,12 +10,16 @@
             <ng-template ngbNavContent>
               <ng-container *ngIf="tab.fragment === ''">
                 <p>
-                    These are global settings that are bound to your account. 
+                    These are global settings that are bound to your account.
                 </p>
-                 
+
                 <ngb-accordion [closeOthers]="true" activeIds="reading-panel" #acc="ngbAccordion">
                         <ngb-panel id="reading-panel" title="Reading">
                             <ng-template ngbPanelHeader>
+                                <!-- <div class="d-flex align-items-center justify-content-between">
+                                  <button ngbPanelToggle class="btn container-fluid text-start ps-0 accordion-header">Reading</button>
+                                  <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('reading-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>
+                                </div> -->
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
                                         Reading
@@ -25,9 +29,9 @@
                             <ng-template ngbPanelContent>
                                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
                                     <h3 id="manga-header">Image Reader</h3>
-                                    
+
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-2">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-reading-direction" class="form-label">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #readingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
                                             <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
@@ -35,8 +39,8 @@
                                                 <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
-                                
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-2">
+
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-scaling-option" class="form-label">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
                                             <ng-template #taskBackupTooltip>How to scale the image to your screen.</ng-template>
                                             <span class="visually-hidden" id="settings-scaling-option-help">How to scale the image to your screen.</span>
@@ -45,9 +49,9 @@
                                             </select>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-2">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-pagesplit-option" class="form-label">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #pageSplitOptionTooltip>How to split a full width image (ie both left and right images are combined)</ng-template>
                                             <span class="visually-hidden" id="settings-pagesplit-option-help">How to split a full width image (ie both left and right images are combined)</span>
@@ -55,29 +59,63 @@
                                                 <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-2">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-readingmode-option" class="form-label">Reading Mode</label>
                                             <select class="form-select" aria-describedby="manga-header" formControlName="readerMode" id="settings-readingmode-option">
                                                 <option *ngFor="let opt of readingModes" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
                                     </div>
-                            
-                                    
-                                    <div class="mb-3">
-                                        <!-- TODO: Turn this into a checkbox -->
-                                        <label id="auto-close-label" class="form-label"></label>
-                                        <div class="mb-3">
-                                            <div class="form-check form-switch">
-                                                <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
-                                                <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+
+                                    <div class="row g-0">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <label for="settings-layoutmode-option" class="form-label">Layout Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
+                                            <ng-template #layoutModeTooltip>Render a single image to the screen to two side-by-side images</ng-template>
+                                            <span class="visually-hidden" id="settings-layoutmode-option-help"><ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container></span>
+                                            <select class="form-select" aria-describedby="manga-header" formControlName="layoutMode" id="settings-layoutmode-option">
+                                                <option *ngFor="let opt of layoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <label for="settings-backgroundcolor-option" class="form-label">Background Color</label>
+                                            <input [value]="user.preferences.backgroundColor"
+                                                class="form-control"
+                                                (colorPickerChange)="settingsForm.markAsTouched()"
+                                                [style.background]="user.preferences.backgroundColor"
+                                                [cpAlphaChannel]="'disabled'"
+                                                [(colorPicker)]="user.preferences.backgroundColor"/>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row g-0">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <div class="mb-3">
+                                                <label id="auto-close-label" class="form-label"></label>
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                                        <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <div class="mb-3">
+                                                <label id="show-screen-hints-label" class="form-label"></label>
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" id="show-screen-hints" formControlName="showScreenHints" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                                        <label class="form-check-label" for="show-screen-hints">Show Screen Hints</label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     <hr>
                                     <h3>Book Reader</h3>
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-3">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label id="dark-mode-label" class="form-label"></label>
                                             <div class="mb-3">
                                                 <div class="form-check form-switch">
@@ -86,8 +124,8 @@
                                                 </div>
                                             </div>
                                         </div>
-    
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-3">
+
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label id="taptopaginate-label" class="form-label"></label>
                                             <div class="mb-3">
                                                 <div class="form-check form-switch">
@@ -101,7 +139,7 @@
                                     </div>
 
                                     <div class="row g-0">
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-3">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label for="settings-book-reading-direction" class="form-label">Book Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
                                             <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
@@ -109,9 +147,9 @@
                                                 <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
-                                        
-                                        
-                                        <div class="form-group col-md-6 col-sm-12 pe-2 mb-3">
+
+
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label for="settings-fontfamily-option" class="form-label">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #fontFamilyOptionTooltip>Font familty to load up. Default will load the book's default font</ng-template>
                                             <span class="visually-hidden" id="settings-fontfamily-option-help">Font familty to load up. Default will load the book's default font</span>
@@ -121,21 +159,21 @@
                                         </div>
                                     </div>
 
-                                    
+
 
                                     <div class="row g-0">
-                                        <div class="form-group col-md-4 col-sm-12 pe-2 mb-3">
+                                        <div class="col-md-4 col-sm-12 pe-2 mb-3">
                                             <label id="font-size" class="form-label">Font Size</label>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderFontSizeOptions" formControlName="bookReaderFontSize" aria-labelledby="font-size"></ngx-slider></div>
                                         </div>
-                                        <div class="form-group col-md-4 col-sm-12 pe-2 mb-3">
+                                        <div class="col-md-4 col-sm-12 pe-2 mb-3">
                                             <label class="form-label">Line Height</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLineHeightOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookLineHeightOptionTooltip>How much spacing between the lines of the book</ng-template>
                                             <span class="visually-hidden" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderLineSpacingOptions" formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help"></ngx-slider></div>
                                         </div>
-        
-                                        <div class="form-group col-md-4 col-sm-12 pe-2 mb-3">
+
+                                        <div class="col-md-4 col-sm-12 pe-2 mb-3">
                                             <label class="form-label">Margin</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReaderMarginOptionTooltip>How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</ng-template>
                                             <span class="visually-hidden" id="settings-bookmargin-option-help">How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</span>
@@ -143,8 +181,8 @@
                                         </div>
                                     </div>
 
-                                    
-    
+
+
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                                         <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
                                         <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>

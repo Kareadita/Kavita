@@ -11,6 +11,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
+using API.SignalR;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -333,5 +334,66 @@ public class BookmarkServiceTests
         Assert.Equal(2, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
         Assert.False(ds.FileSystem.FileInfo.FromFileName(Path.Join(BookmarkDirectory, "1/1/1/0001.jpg")).Exists);
     }
+    #endregion
+
+    #region GetBookmarkFilesById
+
+    [Fact]
+    public async Task GetBookmarkFilesById_ShouldMatchActualFiles()
+    {
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{CacheDirectory}1/0001.jpg", new MockFileData("123"));
+
+        // Delete all Series to reset state
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+
+                        }
+                    }
+                }
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "Joe"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
+
+        await bookmarkService.BookmarkPage(user, new BookmarkDto()
+        {
+            ChapterId = 1,
+            Page = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, $"{CacheDirectory}1/0001.jpg");
+
+        var files = await bookmarkService.GetBookmarkFilesById(1, new[] {1});
+        var actualFiles = ds.GetFiles(BookmarkDirectory, searchOption: SearchOption.AllDirectories);
+        Assert.Equal(files.Select(API.Parser.Parser.NormalizePath).ToList(), actualFiles.Select(API.Parser.Parser.NormalizePath).ToList());
+    }
+
+
     #endregion
 }

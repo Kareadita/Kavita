@@ -123,18 +123,30 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
-        if (ids != null && ids.Count > 0)
+        if (ids is {Count: > 0})
         {
             return Ok(await _unitOfWork.SeriesRepository.GetAllLanguagesForLibrariesAsync(ids));
         }
 
+        var englishTag = CultureInfo.GetCultureInfo("en");
         return Ok(new List<LanguageDto>()
         {
             new ()
             {
-                Title = CultureInfo.GetCultureInfo("en").DisplayName,
-                IsoCode = "en"
+                Title = englishTag.DisplayName,
+                IsoCode = englishTag.IetfLanguageTag
             }
         });
+    }
+
+    [HttpGet("all-languages")]
+    public IEnumerable<LanguageDto> GetAllValidLanguages()
+    {
+        return CultureInfo.GetCultures(CultureTypes.AllCultures).Select(c =>
+            new LanguageDto()
+            {
+                Title = c.DisplayName,
+                IsoCode = c.IetfLanguageTag
+            }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
     }
 }

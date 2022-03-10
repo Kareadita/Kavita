@@ -106,6 +106,8 @@ namespace API.Controllers
                 (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
             var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
             var format = Path.GetExtension(file.FullName).Replace(".", "");
+
+            Response.AddCacheHeader(file.FullName);
             return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
         }
     }

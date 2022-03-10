@@ -121,7 +121,7 @@ export class ActionFactoryService {
     
         this.chapterActions.push({
           action: Action.Edit,
-          title: 'Info',
+          title: 'Details',
           callback: this.dummyCallback,
           requiresAdmin: false
         });
@@ -247,7 +247,7 @@ export class ActionFactoryService {
       },
       {
         action: Action.Edit,
-        title: 'Info',
+        title: 'Details',
         callback: this.dummyCallback,
         requiresAdmin: false
       }

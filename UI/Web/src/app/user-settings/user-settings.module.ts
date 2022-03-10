@@ -11,7 +11,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { SidenavModule } from '../sidenav/sidenav.module';
-
+import { ColorPickerModule } from 'ngx-color-picker';
 
 
 
@@ -32,8 +32,9 @@ import { SidenavModule } from '../sidenav/sidenav.module';
     NgxSliderModule,
     UserSettingsRoutingModule,
     PipeModule,
-    SidenavModule
-  ], 
+    SidenavModule,
+    ColorPickerModule, // User prefernces background color
+  ],
   exports: [
     SiteThemeProviderPipe
   ]

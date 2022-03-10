@@ -14,7 +14,7 @@ namespace API.SignalR
         /// </summary>
         public const string UpdateAvailable = "UpdateAvailable";
         /// <summary>
-        /// Used to tell when a scan series completes
+        /// Used to tell when a scan series completes. This also informs UI to update series metadata
         /// </summary>
         public const string ScanSeries = "ScanSeries";
         /// <summary>

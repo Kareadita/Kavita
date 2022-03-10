@@ -115,6 +115,12 @@ namespace API.Services.Tasks.Scanner
                 {
                     info.Chapters = info.ComicInfo.Number;
                 }
+
+                // Patch is SeriesSort from ComicInfo
+                if (info.ComicInfo != null && !string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+                {
+                    info.SeriesSort = info.ComicInfo.TitleSort;
+                }
             }
 
             TrackSeries(info);

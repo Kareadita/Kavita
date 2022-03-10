@@ -158,6 +158,20 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
   }
 
+  /**
+   * This will get latest preferences for a user and cache them into user store
+   * @returns 
+   */
+  getPreferences() {
+    return this.httpClient.get<Preferences>(this.baseUrl + 'users/get-preferences').pipe(map(pref => {
+      if (this.currentUser !== undefined || this.currentUser != null) {
+        this.currentUser.preferences = pref;
+        this.setCurrentUser(this.currentUser);
+      }
+      return pref;
+    }), takeUntil(this.onDestroy));
+  }
+
   updatePreferences(userPreferences: Preferences) {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
       if (this.currentUser !== undefined || this.currentUser != null) {

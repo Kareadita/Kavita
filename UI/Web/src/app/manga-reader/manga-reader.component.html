@@ -5,15 +5,22 @@
                 <i class="fa fa-arrow-left" aria-hidden="true"></i>
                 <span class="visually-hidden">Back</span>
             </button>
-            
+
             <div>
                 <div style="font-weight: bold;">{{title}} <span class="clickable" *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode:</span>)</span></div>
                 <div class="subtitle">
                     {{subtitle}}
                 </div>
             </div>
+
             <div style="margin-left: auto; padding-right: 3%;">
-                <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="pageBookmarked" title="{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{pageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{pageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
+                <button class="btn btn-icon btn-small" title="Shortcuts" (click)="openShortcutModal()">
+                    <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
+                    <span class="visually-hidden">Keyboard Shortcuts Modal</span>
+                </button>
+                <!-- {{this.pageNum}} -->
+
+                <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="isCurrentPageBookmarked" title="{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{isCurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
             </div>
         </div>
     </div>
@@ -23,38 +30,58 @@
         </div>
     </ng-container>
 
-    <div (click)="toggleMenu()" class="reading-area">
-        <canvas #content class="{{getFittingOptionClass()}} {{readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" 
-                ondragstart="return false;" onselectstart="return false;">
-        </canvas>
-        <div class="webtoon-images" *ngIf="readerMode === READER_MODE.WEBTOON && !isLoading && !inSetup">
-            <app-infinite-scroller [pageNum]="pageNum" 
-            [bufferPages]="5" 
-            [goToPage]="goToPageEvent" 
-            (pageNumberChange)="handleWebtoonPageChange($event)" 
-            [totalPages]="maxPages" 
-            [urlProvider]="getPageUrl" 
-            (loadNextChapter)="loadNextChapter()" 
-            (loadPrevChapter)="loadPrevChapter()"
-            [bookmarkPage]="showBookmarkEffectEvent"
-            [fullscreenToggled]="fullscreenEvent"></app-infinite-scroller>
-        </div>
-        <ng-container *ngIf="readerMode === READER_MODE.MANGA_LR || readerMode === READER_MODE.MANGA_UD">
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
-                <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'right' : 'down'}}"
-                     title="Next Page" aria-hidden="true"></i>
-                </div>
+    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}">
+        <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
+            <div [ngClass]="{'d-none': !renderWithCanvas }">
+                <canvas #content class="{{getFittingOptionClass()}}"
+                    ondragstart="return false;" onselectstart="return false;">
+                </canvas>
             </div>
-            <div class="pagination-area {{readerMode === READER_MODE.MANGA_LR ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
-                <div *ngIf="showClickOverlay">
-                    <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === READER_MODE.MANGA_LR ? 'left' : 'up'}}"
-                     title="Previous Page" aria-hidden="true"></i>
-                </div>
+            <div class="image-container" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage, 'fit-to-width-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH && ShouldRenderDoublePage, 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage, 'original-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage, 'reverse': ShouldRenderReverseDouble}">
+                <img [src]="readerService.getPageUrl(this.chapterId, this.pageNum)" id="image-1"
+                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+
+                <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
+                    <img [src]="readerService.getPageUrl(this.chapterId, PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
+                </ng-container>
             </div>
+
+            <ng-container>
+                <!-- Pagination controls and screen hints-->
+                <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
+                    <div *ngIf="showClickOverlay">
+                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
+                         title="Next Page" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
+                    <div *ngIf="showClickOverlay">
+                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
+                         title="Previous Page" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </ng-container>
+
         </ng-container>
+
+        <ng-template #webtoon>
+            <div class="webtoon-images" *ngIf="readerMode === ReaderMode.Webtoon && !isLoading && !inSetup">
+                <app-infinite-scroller [pageNum]="pageNum"
+                [bufferPages]="5"
+                [goToPage]="goToPageEvent"
+                (pageNumberChange)="handleWebtoonPageChange($event)"
+                [totalPages]="maxPages"
+                [urlProvider]="getPageUrl"
+                (loadNextChapter)="loadNextChapter()"
+                (loadPrevChapter)="loadPrevChapter()"
+                [bookmarkPage]="showBookmarkEffectEvent"
+                [fullscreenToggled]="fullscreenEvent"></app-infinite-scroller>
+            </div>
+        </ng-template>
+
+
     </div>
-    
+
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
         <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
             <span class="visually-hidden" id="slider-info"></span>
@@ -72,12 +99,10 @@
                 <button class="btn btn-small btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
                 <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
             </div>
-            
-            
         </div>
         <div class="row pt-4 ms-2 me-2">
             <div class="col">
-                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === READER_MODE.WEBTOON || readerMode === READER_MODE.MANGA_UD" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>
@@ -107,7 +132,7 @@
                     <div class="col-6">
                         <label for="page-splitting" class="form-label">Image Splitting</label>&nbsp;
                         <div class="split fa fa-image">
-                            <div class="{{splitIconClass}}"></div> 
+                            <div class="{{splitIconClass}}"></div>
                         </div>
                     </div>
                     <div class="col-6">
@@ -137,13 +162,29 @@
                         <label for="autoCloseMenu" class="form-check-label">Auto Close Menu</label>
                     </div>
                     <div class="col-6">
-                        <div class="form-check">
-                            <input id="autoCloseMenu" type="checkbox" aria-label="Admin" class="form-check-input" formControlName="autoCloseMenu">
+                        <div class="mb-3">
+                            <label id="auto-close-label" class="form-label"></label>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                    <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2 mb-2">
+                    <div class="col-6">
+                        <label for="layout-mode" class="form-label">Layout Mode</label>
+                    </div>
+                    <div class="col-6">
+                        <select class="form-control" id="page-fitting" formControlName="layoutMode">
+                            <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
+                        </select>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    
 </div>

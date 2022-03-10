@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.1");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -165,6 +165,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("AutoCloseMenu")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BackgroundColor")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("BookReaderDarkMode")
                         .HasColumnType("INTEGER");
 
@@ -186,6 +189,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("LayoutMode")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PageSplitOption")
                         .HasColumnType("INTEGER");
 
@@ -196,6 +202,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ScalingOption")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ThemeId")
@@ -502,13 +511,49 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("AgeRatingLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("CharacterLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ColoristLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Count")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("CoverArtistLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("EditorLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("GenresLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("InkerLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Language")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("LanguageLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LettererLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PencillerLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PublicationStatus")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PublicationStatusLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PublisherLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ReleaseYear")
@@ -523,6 +568,18 @@ namespace API.Data.Migrations
 
                     b.Property<string>("Summary")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("SummaryLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TagsLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TranslatorLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("WriterLocked")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -647,8 +704,14 @@ namespace API.Data.Migrations
                     b.Property<string>("LocalizedName")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("LocalizedNameLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("NameLocked")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("NormalizedName")
                         .HasColumnType("TEXT");
@@ -661,6 +724,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("SortName")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("SortNameLocked")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

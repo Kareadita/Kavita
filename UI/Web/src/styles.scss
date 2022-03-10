@@ -37,6 +37,7 @@
 @import './theme/components/progress';
 @import './theme/components/sidenav';
 @import './theme/components/carousel';
+@import './theme/components/progress';
 
 
 @import './theme/utilities/utilities';
@@ -59,9 +60,13 @@ label, select, .clickable {
   cursor: pointer;
 }
 
+.form-check-input[disabled] ~ .form-check-label, .form-check-input:disabled ~ .form-check-label {
+  cursor: default;
+}
+
 html, body { height: 100%; color-scheme: var(--color-scheme); }
 body {
-  margin: 0; 
+  margin: 0;
   font-family: var(--body-font-family);
   color: var(--body-text-color);
 }

@@ -57,7 +57,7 @@ export class AppComponent implements OnInit {
     if (user) {
       this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
       this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
-    }
+    } 
   }
 
   setDocHeight() {

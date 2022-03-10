@@ -18,6 +18,10 @@ namespace API.DTOs
         /// </summary>
         public int PagesRead { get; set; }
         /// <summary>
+        /// DateTime representing last time the series was Read. Calculated at API-time.
+        /// </summary>
+        public DateTime LatestReadDate { get; set; }
+        /// <summary>
         /// Rating from logged in user. Calculated at API-time.
         /// </summary>
         public int UserRating { get; set; }
@@ -28,6 +32,10 @@ namespace API.DTOs
         public MangaFormat Format { get; set; }
 
         public DateTime Created { get; set; }
+
+        public bool NameLocked { get; set; }
+        public bool SortNameLocked { get; set; }
+        public bool LocalizedNameLocked { get; set; }
 
         public int LibraryId { get; set; }
         public string LibraryName { get; set; }

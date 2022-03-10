@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
-import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
@@ -76,10 +75,9 @@ const routes: Routes = [
 
     ]
   },
-  
-  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
-  {path: 'no-connection', component: NotConnectedComponent},
   {path: 'theme', component: ThemeTestComponent},
+
+  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
   {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];
 

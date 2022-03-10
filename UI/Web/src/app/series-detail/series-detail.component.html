@@ -8,24 +8,19 @@
         <!-- TODO: Put LocalizedName and library here-->
         <!-- <h2>{{libraryName}}</h2>  -->
     </ng-container>
-    
-
-    <div main>
-        <!-- TODO: Implement Tabs here for Recommended and Library view -->
-    </div>
 </app-side-nav-companion-bar>
 <div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
     <div class="row mb-3">
-        <div class="col-md-2 col-xs-4 col-sm-6">            
+        <div class="col-md-2 col-xs-4 col-sm-6">
             <app-image class="poster" maxWidth="300px" [imageUrl]="seriesImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6">
-            <!-- <div class="row g-0">
-                
+            <div class="row g-0">
+
                 <h2>
                     {{series?.name}}
                 </h2>
-            </div> -->
+            </div>
             <div class="row g-0">
                 <div class="col-auto">
                     <button class="btn btn-primary" (click)="read()">
@@ -68,7 +63,7 @@
                 <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
             <div *ngIf="seriesMetadata" class="mt-2">
-                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [series]="series"></app-series-metadata-detail>
+                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"></app-series-metadata-detail>
             </div>
 
 
@@ -79,7 +74,7 @@
         <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
-              <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Specials'}}</a>
+              <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
                 <div class="row g-0">
                     <ng-container *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
@@ -90,7 +85,7 @@
                 </div>
               </ng-template>
             </li>
-            <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (hasNonSpecialVolumeChapters || hasNonSpecialNonVolumeChapters)">
+            <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
                     <div class="row g-0">
@@ -107,19 +102,19 @@
                     </div>
                 </ng-template>
             </li>
-            <li [ngbNavItem]="TabID.Volumes" *ngIf="hasNonSpecialVolumeChapters">
+            <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
                 <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Volumes'}}</a>
                 <ng-template ngbNavContent>
                     <div class="row g-0">
                           <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
-                                  <app-card-item class="col-auto" *ngIf="volume.number != 0" [entity]="volume" [title]="formatVolumeTitle(volume)" (click)="openVolume(volume)"
+                                  <app-card-item class="col-auto" [entity]="volume" [title]="formatVolumeTitle(volume)" (click)="openVolume(volume)"
                                   [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
                                   [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
                           </ng-container>
                     </div>
                 </ng-template>
               </li>
-            <li [ngbNavItem]="TabID.Chapters" *ngIf="hasNonSpecialNonVolumeChapters">
+            <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
                 <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
                 <ng-template ngbNavContent>
                     <div class="row g-0">

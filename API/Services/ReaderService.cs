@@ -337,29 +337,67 @@ public class ReaderService : IReaderService
         return -1;
     }
 
+    /// <summary>
+    /// Finds the chapter to continue reading from. If a chapter has progress and not complete, return that. If not, progress in the
+    /// ordering (Volumes -> Loose Chapters -> Special) to find next chapter. If all are read, return first in order for series.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
-        // Loop through all chapters that are not in volume 0
+        var progress = (await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId)).ToList();
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
 
-        var nonSpecialChapters = volumes
+         if (progress.Count == 0)
+         {
+             // I think i need a way to sort volumes last
+             return volumes.OrderBy(v => double.Parse(v.Number + ""), _chapterSortComparer).First().Chapters
+                 .OrderBy(c => float.Parse(c.Number)).First();
+         }
+
+        // Loop through all chapters that are not in volume 0
+        var volumeChapters = volumes
             .Where(v => v.Number != 0)
             .SelectMany(v => v.Chapters)
             .OrderBy(c => float.Parse(c.Number))
             .ToList();
 
-        var currentlyReadingChapter = nonSpecialChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
-
-
+        // If there are any volumes that have progress, return those. If not, move on.
+        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
-        // Check if there are any specials
+        // Check loose leaf chapters (and specials). First check if there are any
         var volume = volumes.SingleOrDefault(v => v.Number == 0);
-        if (volume == null) return nonSpecialChapters.First();
+        return FindNextReadingChapter(volume == null ? volumeChapters : volume.Chapters.OrderBy(c => float.Parse(c.Number)).ToList());
+    }
 
-        var chapters = volume.Chapters.OrderBy(c => float.Parse(c.Number)).ToList();
+    private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
+    {
+        var chaptersWithProgress = volumeChapters.Where(c => c.PagesRead > 0).ToList();
+        if (chaptersWithProgress.Count > 0)
+        {
+            var last = chaptersWithProgress.FindLastIndex(c => c.PagesRead > 0);
+            if (last + 1 < chaptersWithProgress.Count)
+            {
+                return chaptersWithProgress.ElementAt(last + 1);
+            }
 
-        return chapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages) ?? chapters.First();
+            var lastChapter = chaptersWithProgress.ElementAt(last);
+            if (lastChapter.PagesRead < lastChapter.Pages)
+            {
+                return chaptersWithProgress.ElementAt(last);
+            }
+
+            // chaptersWithProgress are all read, then we need to get the next chapter that doesn't have progress
+            var lastIndexWithProgress = volumeChapters.IndexOf(lastChapter);
+            if (lastIndexWithProgress + 1 < volumeChapters.Count)
+            {
+                return volumeChapters.ElementAt(lastIndexWithProgress + 1);
+            }
+        }
+
+        return volumeChapters.First();
     }
 
 
@@ -394,7 +432,7 @@ public class ReaderService : IReaderService
         {
             var chapters = volume.Chapters
                 .OrderBy(c => float.Parse(c.Number))
-                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber && Parser.Parser.MaximumNumberFromRange(c.Range) > 0.0);
+                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber);
             MarkChaptersAsRead(user, volume.SeriesId, chapters);
         }
     }

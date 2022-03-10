@@ -2,12 +2,28 @@ form {
     position: relative;
 }
 
+.input-group {
+    flex-wrap: inherit;
+}
+
 input {
     width: 15px;
     opacity: 1px;
     position: relative;
     left: 4px;
     border: none;
+}
+
+.lock-active {
+    > .input-group-text {
+        background-color: var(--primary-color);
+        color: white;
+    }
+}
+
+.close-offset {
+    right: 29px !important;
+    top: 29% !important;
 }
 
 .typeahead-input {
@@ -44,20 +60,33 @@ input {
     }
 }
 
+.open .input-group-text {
+    border-bottom-left-radius: 0px;
+}
+
+.open .typeahead-input {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
 .dropdown {
     width: 100%;
     min-width: 10rem;
     background: var(--input-bg-color);
-    z-index:1000;
-    margin: 2px 0 0;
+    z-index: 1000;
     border-radius: 4px;
-    margin-top: -7px;
+    margin-top: -1px;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     position: absolute;
     max-height: 400px;
     overflow-y: auto;
     overflow-x: hidden;
+
+    .list-group {
+        border-top-left-radius: 0px;
+        border-top-right-radius: 0px;
+    }
 
     .list-group-item {
         padding: 5px 10px;

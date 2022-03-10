@@ -39,7 +39,7 @@
 <div class="mb-3">
     <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
     <div class="form-check">
-        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection">
+        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input">
         <label for="stat-collection" class="form-check-label">Normal Checkbox</label>
     </div>
 </div>
@@ -47,7 +47,7 @@
 <div class="mb-3">
     <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
     <div class="form-check">
-        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" [disabled]="true">
+        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" [disabled]="true">
         <label for="stat-collection" class="form-check-label">Disabled Checkbox</label>
     </div>
 </div>
@@ -56,20 +56,20 @@
 <p>Labels should have form-check-label on them and inputs form-check-input</p>
 <div class="mb-3">
     <div class="form-check">
-        <input class="form-check-input" type="radio" id="site-dark-mode" formControlName="siteDarkMode" [value]="true" aria-labelledby="site-dark-mode-label">
+        <input class="form-check-input" type="radio" id="site-dark-mode" [value]="true" aria-labelledby="site-dark-mode-label">
         <label class="form-check-label" for="site-dark-mode">True</label>
     </div>
     <div class="form-check">
-        <input class="form-check-input" type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" [value]="false" aria-labelledby="site-dark-mode-label">
-        <label class="form-check-label" for="site-not-dark-mode">False</label>
+        <input class="form-check-input" type="radio" id="site-not-dark-mode2" [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode2">False</label>
     </div>
     <div class="form-check">
-        <input class="form-check-input" type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" [disabled]="true" [value]="false" aria-labelledby="site-dark-mode-label">
-        <label class="form-check-label" for="site-not-dark-mode">Disabled</label>
+        <input class="form-check-input" type="radio" id="site-not-dark-mode3"  [disabled]="true" [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode3">Disabled</label>
     </div>
     <div class="form-check">
-        <input class="form-check-input" type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" readonly [value]="false" aria-labelledby="site-dark-mode-label">
-        <label class="form-check-label" for="site-not-dark-mode">Readonly</label>
+        <input class="form-check-input" type="radio" id="site-not-dark-mode4"  readonly [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode4">Readonly</label>
     </div>
 </div>
 
@@ -116,11 +116,28 @@
     <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">Non Allowed</app-tag-badge>
 </div>
 
-<h2>Badge</h2>
-TODO
+<h2>Person Badge with Expander</h2>
+<div class="g-2">
+    <app-person-badge></app-person-badge>
+    <app-badge-expander [items]="people" [itemsTillExpander]="1">
+        <ng-template #badgeExpanderItem let-item let-position="idx">
+            <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+        </ng-template>  
+    </app-badge-expander>
+</div>
 
 <h2>Switch</h2>
-TODO: New component, will be used in place of 2 way radios
+<form>
+    <div class="mb-3">
+        <label id="auto-close-label" class="form-label"></label>
+        <div class="mb-3">
+            <div class="form-check form-switch">
+                <input type="checkbox" id="auto-close" class="form-check-input" aria-labelledby="auto-close-label">
+                <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+            </div>
+        </div>
+    </div>
+</form>
 
 <h2>Dropdown/List Group</h2>
 <div class="dropdown" >
@@ -130,5 +147,42 @@ TODO: New component, will be used in place of 2 way radios
     </ul>
 </div>
 
-<h2></h2>
+<h2>Accordion</h2>
+<ngb-accordion [closeOthers]="true" activeIds="reading-panel" #acc="ngbAccordion">
+    <ngb-panel id="reading-panel" title="Reading">
+        <ng-template ngbPanelHeader>
+            <h2 class="accordion-header">
+                <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
+                    Reading
+                  </button>
+            </h2>
+          </ng-template>
+        <ng-template ngbPanelContent>
+            <p>This is the body of the accordion...........This is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf as</p>
+        </ng-template>
+    </ngb-panel>
 
+    <ngb-panel id="reading-panel2">
+        <ng-template ngbPanelHeader>
+            <h2 class="accordion-header">
+                <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
+                    Header 2
+                  </button>
+            </h2>
+          </ng-template>
+        <ng-template ngbPanelContent>
+            <p>This is the body of the accordion asdfasdf as
+                dfas 
+                f asdfasdfasdf asdfasdfaaff asdf
+                as fd
+                asfasf asdfasdfafd 
+            </p>
+        </ng-template>
+    </ngb-panel>
+</ngb-accordion>
+
+
+<h2>Cards</h2>
+<app-card-item [entity]="seriesNotRead"></app-card-item>
+<app-card-item [entity]="seriesNotRead" [count]="10"></app-card-item>
+<app-card-item [entity]="seriesWithProgress"></app-card-item>

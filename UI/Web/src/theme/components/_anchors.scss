@@ -9,7 +9,7 @@ a:not(.dark-exempt) {
   a.btn {
     color: inherit;
     text-decoration: none;
-  
+
     &:hover {
       text-decoration: none;
     }
@@ -18,9 +18,8 @@ a:not(.dark-exempt) {
 a.read-more-link {
     font-weight: bold;
     text-decoration: none;
-    color: var(--body-text-color);
     cursor: pointer;
-    color: var(--body-text-color);
+    color: var(--body-text-color) !important;
 
     &:hover {
       text-decoration: none;

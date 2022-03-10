@@ -19,6 +19,7 @@ import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { LibraryType } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
+import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { SeriesMetadata } from '../_models/series-metadata';
 import { Volume } from '../_models/volume';
@@ -29,6 +30,7 @@ import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
 import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
+import { ReadingListService } from '../_services/reading-list.service';
 import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
 
@@ -79,6 +81,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
+  readingLists: Array<ReadingList> = [];
   /**
    * Poster image for the Series
    */
@@ -172,7 +175,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
-              public navService: NavService
+              private readingListService: ReadingListService, public navService: NavService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -334,6 +337,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.coverImageOffset = 0;
 
     this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
+    this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
+      this.readingLists = lists;
+    });
     this.setContinuePoint();
 
     forkJoin([
@@ -354,7 +360,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
       this.seriesService.getSeriesDetail(this.seriesId).subscribe(detail => {
-        this.hasSpecials = detail.specials.length > 0
+        this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
 
         this.chapters = detail.chapters;
@@ -375,29 +381,21 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
-    // This shows Chapters/Issues tab
 
-    // If this has chapters that are not specials
-    if (this.chapters.filter(c => !c.isSpecial).length > 0) {
-      this.hasNonSpecialNonVolumeChapters = true;
+    // Book libraries only have Volumes or Specials enabled
+    if (this.libraryType === LibraryType.Book) {
+      if (this.volumes.length === 0) {
+        this.activeTabId = TabID.Specials;
+      } else {
+        this.activeTabId = TabID.Volumes;
+      }
+      return;
     }
 
-    // This shows Volumes tab
-    if (this.volumes.filter(v => v.number !== 0).length !== 0) {
-      this.hasNonSpecialVolumeChapters = true;
-    }
-
-    // If an update occured and we were on specials, re-activate Volumes/Chapters
-    if (!this.hasSpecials && !this.hasNonSpecialVolumeChapters && this.activeTabId != TabID.Storyline) {
-      this.activeTabId = TabID.Storyline;
-    }
-
-    if (this.libraryType == LibraryType.Book && !this.hasSpecials){
-      this.activeTabId = TabID.Volumes;
-    } else if (this.hasNonSpecialVolumeChapters || this.hasNonSpecialNonVolumeChapters) {
-      this.activeTabId = TabID.Storyline;
-    } else {
+    if (this.volumes.length === 0 && this.chapters.length === 0 && this.specials.length > 0) {
       this.activeTabId = TabID.Specials;
+    } else {
+      this.activeTabId = TabID.Storyline;
     }
   }
 
@@ -455,7 +453,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   read() {
-    if (this.currentlyReadingChapter !== undefined) { 
+    if (this.currentlyReadingChapter !== undefined) {
       this.openChapter(this.currentlyReadingChapter);
       return;
     }
@@ -526,7 +524,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   openEditSeriesModal() {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' }); // scrollable: true, size: 'lg', windowClass: 'scrollable-modal' (these don't work well on mobile)
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'xl' });
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
