@@ -21,9 +21,6 @@ export class AccountService implements OnDestroy {
 
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User | undefined>(1);
-  /**
-   * 
-   */
   currentUser$ = this.currentUserSource.asObservable();
 
   /**
@@ -62,7 +59,6 @@ export class AccountService implements OnDestroy {
       map((response: User) => {
         const user = response;
         if (user) {
-          console.log('Login: ', user);
           this.setCurrentUser(user);
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }

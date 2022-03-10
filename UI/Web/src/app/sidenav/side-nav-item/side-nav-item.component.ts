@@ -23,10 +23,10 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() link: string | undefined;
 
+  @Input() isActive: () => boolean = () => false;
+
   constructor(public navService: NavService) { }
 
-  ngOnInit(): void {
-    this.navService.sideNavVisible$.subscribe()
-  }
+  ngOnInit(): void {}
 
 }

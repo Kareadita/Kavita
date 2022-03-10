@@ -1,9 +1,9 @@
 <app-nav-header></app-nav-header>
-<div class="content-wrapper" [ngClass]="{'closed' : !(navService?.sideNavVisible$ | async)}">
+<div class="content-wrapper" [ngClass]="{'closed' : !(navService?.sideNavCollapsed$ | async)}">
     <a id="content"></a>
-    <app-side-nav></app-side-nav>
+    <app-side-nav *ngIf="navService.sideNavVisibility$ | async"></app-side-nav>
     <div class="container-fluid" style="padding-top: 10px; padding-bottom: 10px;">
-        <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService?.sideNavVisible$ | async)}" [ngStyle]="(navService?.sideNavVisible$ | async) ? {} : {}">
+        <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService?.sideNavCollapsed$ | async)}">
             <router-outlet></router-outlet>
         </div>
     </div>

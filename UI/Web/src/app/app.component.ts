@@ -8,7 +8,6 @@ import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT } from '@angular/common';
-import { ThemeService } from './theme.service';
 
 @Component({
   selector: 'app-root',
@@ -48,11 +47,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.setCurrentUser();
-
     this.setDocHeight();
-    this.navService.sideNavVisible$.subscribe();
-    this.navService.toggleSideNavVisibility(true);
-    this.navService.hideSideNav();
   }
 
   setCurrentUser() {

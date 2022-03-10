@@ -5,42 +5,59 @@ import { ReplaySubject, take } from 'rxjs';
   providedIn: 'root'
 })
 export class NavService {
-
   public localStorageSideNavKey = 'kavita--sidenav--collapsed';
 
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
+  /**
+   * If the top Nav bar is rendered or not
+   */
   navbarVisible$ = this.navbarVisibleSource.asObservable();
 
   private sideNavCollapseSource = new ReplaySubject<boolean>(1);
-  sideNavVisible$ = this.sideNavCollapseSource.asObservable();
-  private sideNavVisibility: boolean = false;
-  private sideNavVisibilitySource = new ReplaySubject<boolean>(1);
-  sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
+  /**
+   * If the Side Nav is in a collapsed state or not.
+   */
+  sideNavCollapsed$ = this.sideNavCollapseSource.asObservable();
 
-  private darkMode: boolean = true;
-  private darkModeSource = new ReplaySubject<boolean>(1);
-  darkMode$ = this.darkModeSource.asObservable();
+  private sideNavVisibilitySource = new ReplaySubject<boolean>(1);
+  /**
+   * If the side nav is rendered or not into the DOM.
+   */
+  sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
 
   constructor() {
     this.showNavBar();
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapseSource.next(sideNavState);
+    this.showSideNav();
   }
  
+  /**
+   * Shows the top nav bar. This should be visible on all pages except the reader.
+   */
   showNavBar() {
     this.navbarVisibleSource.next(true);
   }
 
+  /**
+   * Hides the top nav bar. 
+   */
   hideNavBar() {
     this.navbarVisibleSource.next(false);
   }
 
+  /**
+   * Shows the side nav. When being visible, the side nav will automatically return to previous collapsed state.
+   */
   showSideNav() {
-    this.sideNavCollapseSource.next(true);
+    this.sideNavVisibilitySource.next(true);
   }
 
+  /**
+   * Hides the side nav. This is useful for the readers and login page.
+   */
   hideSideNav() {
-    this.sideNavCollapseSource.next(false);
+    this.sideNavVisibilitySource.next(false);
   }
 
   toggleSideNav() {
@@ -52,20 +69,11 @@ export class NavService {
     });
   }
   
+  /**
+   * Completely show/hide the side nav. Useful in situations like when reading.
+   * @param forcedState 
+   */
   toggleSideNavVisibility(forcedState: boolean) {
-    this.sideNavVisibility = forcedState;
-    this.sideNavVisibilitySource.next(this.sideNavVisibility);
+    this.sideNavVisibilitySource.next(forcedState);
   }
-
-
-  toggleDarkMode() {
-    this.darkMode = !this.darkMode;
-    this.darkModeSource.next(this.darkMode);
-  }
-
-  setDarkMode(mode: boolean) {
-    this.darkMode = mode;
-    this.darkModeSource.next(this.darkMode);
-  }
-
 }
