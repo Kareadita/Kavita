@@ -98,6 +98,10 @@
     --side-nav-hover-bg-color: black;
     --side-nav-color: white;
     --side-nav-border-radius: 5px;
+    --side-nav-border: none;
+    --side-nav-border-closed: none;
+    --side-nav-border-transition: 0.5s ease-in-out;
+    --side-nav-companion-bar-transistion: 0.15s linear;
     --side-nav-bg-color-transition: 0.5s ease-in-out;
     --side-nav-closed-bg-color: transparent;
     --side-nav-item-active-color: var(--primary-color);

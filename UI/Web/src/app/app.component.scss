@@ -4,7 +4,7 @@
 }
 
 .companion-bar {
-    transition: all 0.15s linear;
+    transition: all var(--side-nav-companion-bar-transistion);
     margin-left: 40px;
 }
 

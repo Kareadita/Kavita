@@ -8,7 +8,7 @@
     left: 10px;
     top: 66px;
     border-radius: var(--side-nav-border-radius);
-    transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition);
+    transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
     overflow: auto;
     border: var(--side-nav-border);
 
@@ -22,6 +22,7 @@
         overflow-x: hidden;
         overflow-y: auto;
         background-color: var(--side-nav-closed-bg-color);
+        border: var(--side-nav-border-closed);
     }
 }
 
