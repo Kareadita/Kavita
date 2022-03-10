@@ -20,7 +20,7 @@
                     <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="filterQuery = '';">Clear</button>
                 </div>
             </div>
-            <app-side-nav-item *ngFor="let library of libraries | filter: filterLibrary" [link]="'library/' + library.id"
+            <app-side-nav-item *ngFor="let library of libraries | filter: filterLibrary" [link]="'/library/' + library.id"
             [icon]="utilityService.getLibraryTypeIcon(library.type)" [title]="library.name">
                 <ng-container actions>
                     <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>

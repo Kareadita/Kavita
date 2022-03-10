@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { filter, map, Subject, takeUntil } from 'rxjs';
 import { NavService } from '../../_services/nav.service';
 
@@ -23,22 +23,19 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
    */
   @Input() link: string | undefined;
 
-  //@Input() isActive: (route: string) => boolean = (route: string) => false;
 
   highlighted = false;
   private onDestroy: Subject<void> = new Subject();
    
   constructor(public navService: NavService, private router: Router) {
     router.events
-      .pipe(filter(event => event instanceof NavigationStart), 
+      .pipe(filter(event => event instanceof NavigationEnd), 
             takeUntil(this.onDestroy),
-            map(evt => evt as NavigationStart))
-      .subscribe((evt: NavigationStart) => {
-        console.log(evt)
-        if (this.link !== undefined && evt.url.startsWith(this.link)) {
+            map(evt => evt as NavigationEnd))
+      .subscribe((evt: NavigationEnd) => {
+        if (this.link !== undefined && evt.url.split('?')[0] === this.link) {
           this.highlighted = true;
         }
-        //this.highlighted = this.isActive('');
       });
   }
 
