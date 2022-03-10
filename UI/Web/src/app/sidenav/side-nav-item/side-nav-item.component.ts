@@ -1,4 +1,6 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { NavigationStart, Router } from '@angular/router';
+import { filter, map, Subject, takeUntil } from 'rxjs';
 import { NavService } from '../../_services/nav.service';
 
 @Component({
@@ -6,9 +8,7 @@ import { NavService } from '../../_services/nav.service';
   templateUrl: './side-nav-item.component.html',
   styleUrls: ['./side-nav-item.component.scss']
 })
-export class SideNavItemComponent implements OnInit {
-  
-
+export class SideNavItemComponent implements OnInit, OnDestroy {
   /**
    * Icon to display next to item. ie) 'fa-home'
    */
@@ -23,10 +23,30 @@ export class SideNavItemComponent implements OnInit {
    */
   @Input() link: string | undefined;
 
-  @Input() isActive: () => boolean = () => false;
+  //@Input() isActive: (route: string) => boolean = (route: string) => false;
 
-  constructor(public navService: NavService) { }
+  highlighted = false;
+  private onDestroy: Subject<void> = new Subject();
+   
+  constructor(public navService: NavService, private router: Router) {
+    router.events
+      .pipe(filter(event => event instanceof NavigationStart), 
+            takeUntil(this.onDestroy),
+            map(evt => evt as NavigationStart))
+      .subscribe((evt: NavigationStart) => {
+        console.log(evt)
+        if (this.link !== undefined && evt.url.startsWith(this.link)) {
+          this.highlighted = true;
+        }
+        //this.highlighted = this.isActive('');
+      });
+  }
 
   ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+      this.onDestroy.next();
+      this.onDestroy.complete();
+  }
 
 }

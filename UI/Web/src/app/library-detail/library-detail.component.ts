@@ -104,8 +104,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       if (seriesAdded.libraryId !== this.libraryId) return;
       this.loadPage();
     });
-    
-    this.navService.hideSideNav();
   }
 
   ngOnDestroy() {

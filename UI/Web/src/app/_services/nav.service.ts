@@ -68,12 +68,4 @@ export class NavService {
       localStorage.setItem(this.localStorageSideNavKey, newVal + '');
     });
   }
-  
-  /**
-   * Completely show/hide the side nav. Useful in situations like when reading.
-   * @param forcedState 
-   */
-  toggleSideNavVisibility(forcedState: boolean) {
-    this.sideNavVisibilitySource.next(forcedState);
-  }
 }

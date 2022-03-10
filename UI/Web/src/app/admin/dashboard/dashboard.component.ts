@@ -38,7 +38,6 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.titleService.setTitle('Kavita - Admin Dashboard');
-    this.navService.hideSideNav();
   }
 
   restartServer() {

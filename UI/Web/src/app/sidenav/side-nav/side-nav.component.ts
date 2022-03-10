@@ -27,6 +27,7 @@ export class SideNavComponent implements OnInit {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
+
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private router: Router,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService) { }

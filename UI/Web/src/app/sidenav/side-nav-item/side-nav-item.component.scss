@@ -10,6 +10,10 @@
 
     cursor: pointer; // This needs to be based a flag
 
+    .active {
+        color: var(--primary-color);
+    }
+
     .side-nav-text {
         padding-left: 10px;
         opacity: 1;
@@ -23,9 +27,6 @@
 
     .card-actions {
         opacity: 1;
-
-        div {
-        }
     }
 
     div {
