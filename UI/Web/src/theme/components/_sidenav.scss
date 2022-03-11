@@ -4,6 +4,7 @@
 }
 
 .side-nav-item {
+    position: relative;
 
     &.closed {
         .side-nav-text {
@@ -28,6 +29,18 @@
     &.active {
         color: var(--side-nav-item-active-color);
         background-color: var(--side-nav-active-bg-color);
+
+        .active-highlight {
+            background-color: var(--side-nav-item-active-color);
+            width: 5px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+        }
+
+        &:hover {
+            background-color: var(--side-nav-hover-bg-color);
+        }
     }
 }
 

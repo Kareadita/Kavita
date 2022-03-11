@@ -10,10 +10,6 @@
 
     cursor: pointer; // This needs to be based a flag
 
-    .active {
-        color: var(--primary-color);
-    }
-
     .side-nav-text {
         padding-left: 10px;
         opacity: 1;
@@ -29,24 +25,28 @@
         opacity: 1;
     }
 
-    div {
-        align-items: center;
-        display: flex;
-        height: 100%;
-        justify-content: inherit;
-        min-width: 30px;
-        width: 100%;
-        padding-left: 5px;
-
-        i {
-            font-size: 18px;
-        }
+    .active {
+        color: var(--primary-color);
     }
 
     span {
         &:last-child {
             flex-grow: 1;
             justify-content: end;
+        }
+
+        div {
+            align-items: center;
+            display: flex;
+            height: 100%;
+            justify-content: inherit;
+            min-width: 30px;
+            width: 100%;
+            padding-left: 5px;
+    
+            i {
+                font-size: 18px;
+            }
         }
     }
 }

@@ -33,6 +33,8 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
             takeUntil(this.onDestroy),
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
+        console.log(evt.url.split('?')[0]);
+        console.log(this.link);
         if (this.link !== undefined && evt.url.split('?')[0] === this.link) {
           this.highlighted = true;
         }

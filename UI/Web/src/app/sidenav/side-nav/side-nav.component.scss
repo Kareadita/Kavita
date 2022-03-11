@@ -2,11 +2,11 @@
     padding: 10px 0;
     width: 190px;
     background-color: var(--side-nav-bg-color);
-    height: calc(100vh - 76px);
+    height: calc(100vh - 85px);
     position: fixed;
     margin: 0;
     left: 10px;
-    top: 66px;
+    top: 73px;
     border-radius: var(--side-nav-border-radius);
     transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
     overflow: auto;
