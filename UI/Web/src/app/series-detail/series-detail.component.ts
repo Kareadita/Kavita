@@ -514,7 +514,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' }); // , scrollable: true (these don't work well on mobile)
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
     modalRef.componentInstance.seriesId = this.series?.id;
