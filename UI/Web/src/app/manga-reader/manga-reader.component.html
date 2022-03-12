@@ -38,7 +38,7 @@
                 </canvas>
             </div>
             <div class="image-container" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage, 'fit-to-width-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH && ShouldRenderDoublePage, 'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage, 'original-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage, 'reverse': ShouldRenderReverseDouble}">
-                <img [src]="readerService.getPageUrl(this.chapterId, this.pageNum)" id="image-1"
+                <img [src]="canvasImage.src" id="image-1"
                 class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
                 <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
@@ -128,27 +128,19 @@
         </div>
         <div class="bottom-menu" *ngIf="settingsOpen && generalSettingsForm">
             <form [formGroup]="generalSettingsForm">
-                <div class="row">
-                    <div class="col-6">
+                <div class="row mb-2">
+                    <div class="col-md-6 col-sm-12">
                         <label for="page-splitting" class="form-label">Image Splitting</label>&nbsp;
                         <div class="split fa fa-image">
                             <div class="{{splitIconClass}}"></div>
                         </div>
+                        <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
+                            <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
+                        </select>
                     </div>
-                    <div class="col-6">
-                        <div class="mb-3">
-                            <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
-                                <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-6">
+                    <div class="col-md-6 col-sm-12">
                         <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
-                    </div>
-                    <div class="col-6">
                         <select class="form-control" id="page-fitting" formControlName="fittingOption">
                             <option value="full-height">Height</option>
                             <option value="full-width">Width</option>
@@ -157,11 +149,14 @@
                     </div>
                 </div>
 
-                <div class="row mt-2 mb-2">
-                    <div class="col-6">
-                        <label for="autoCloseMenu" class="form-check-label">Auto Close Menu</label>
+                <div class="row mb-2">
+                    <div class="col-md-6 col-sm-12">
+                        <label for="layout-mode" class="form-label">Layout Mode</label>
+                        <select class="form-control" id="page-fitting" formControlName="layoutMode">
+                            <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
+                        </select>
                     </div>
-                    <div class="col-6">
+                    <div class="col-md-6 col-sm-12">
                         <div class="mb-3">
                             <label id="auto-close-label" class="form-label"></label>
                             <div class="mb-3">
@@ -171,17 +166,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="row mt-2 mb-2">
-                    <div class="col-6">
-                        <label for="layout-mode" class="form-label">Layout Mode</label>
-                    </div>
-                    <div class="col-6">
-                        <select class="form-control" id="page-fitting" formControlName="layoutMode">
-                            <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
-                        </select>
                     </div>
                 </div>
             </form>

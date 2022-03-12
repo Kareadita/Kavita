@@ -27,7 +27,7 @@
                                 <span>
                                     <span *ngIf="chapterMetadata && chapterMetadata.releaseDate !== null">Release Date: {{chapterMetadata.releaseDate | date: 'shortDate' || '-'}}</span>
                                 </span>
-                                <span class="text-accent">{{chapter.pages}} pages</span>
+                                <span class="text-accent">{{data.pages}} pages</span>
                             </div>
                             <div class="row g-0">
                                 <div class="col-auto">
@@ -106,24 +106,26 @@
                     <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
                     <ul class="list-unstyled">
                         <li class="d-flex my-4" *ngFor="let chapter of chapters">
-                            <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
+                            <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{utilityService.formatChapterName(libraryType, true, false)}} {{formatChapterNumber(chapter)}}">
                                 <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
                             </a>
                             <div class="flex-grow-1">
                                 <h5 class="mt-0 mb-1">
-                                    <span *ngIf="chapter.number !== '0'; else specialHeader">
+                                    <span >
                                         <span>
                                             <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" 
                                             [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
-                                            {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
+                                            <ng-container *ngIf="chapter.number !== '0'; else specialHeader">
+                                                {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
+                                            </ng-container>
                                         </span>
-                                        <span class="badge bg-primary rounded-pill">
+                                        <span class="badge bg-primary rounded-pill ms-1">
                                             <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
                                             <span *ngIf="chapter.pagesRead === 0">UNREAD</span>
                                             <span *ngIf="chapter.pagesRead === chapter.pages">READ</span>
                                         </span>
                                     </span>
-                                    <ng-template #specialHeader>File(s)</ng-template>
+                                    <ng-template #specialHeader>Files</ng-template>
                                 </h5>
                                 <ul class="list-group">
                                     <li *ngFor="let file of chapter.files" class="list-group-item no-hover">
