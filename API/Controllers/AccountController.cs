@@ -338,6 +338,12 @@ namespace API.Controllers
 
 
 
+        /// <summary>
+        /// Invites a user to the server. Will generate a setup link for continuing setup. If the server is not accessible, no
+        /// email will be sent.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("invite")]
         public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
@@ -417,7 +423,9 @@ namespace API.Controllers
 
                 var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
                 _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-                if (dto.SendEmail)
+                var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+                var accessible = await _emailService.CheckIfAccessible(host);
+                if (accessible)
                 {
                     await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                     {
@@ -426,7 +434,11 @@ namespace API.Controllers
                         ServerConfirmationLink = emailLink
                     });
                 }
-                return Ok(emailLink);
+                return Ok(new InviteUserResponse
+                {
+                    EmailLink = emailLink,
+                    EmailSent = accessible
+                });
             }
             catch (Exception)
             {
