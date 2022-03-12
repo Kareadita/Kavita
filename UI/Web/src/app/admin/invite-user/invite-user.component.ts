@@ -24,6 +24,8 @@ export class InviteUserComponent implements OnInit {
   selectedLibraries: Array<number> = [];
   emailLink: string = '';
 
+  makeLink: (val: string) => string = (val: string) => {return this.emailLink};
+
   public get email() { return this.inviteForm.get('email'); }
 
   constructor(public modal: NgbActiveModal, private accountService: AccountService, private serverService: ServerService, 

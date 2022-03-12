@@ -9,7 +9,7 @@
         Invite a user to your server. Enter their email in and we will send them an email to create an account.
     </p>
 
-    <form [formGroup]="inviteForm">
+    <form [formGroup]="inviteForm" *ngIf="emailLink === ''">
         <div class="row g-0">
             <div class="mb-3" style="width:100%">
                 <label for="email" class="form-label">Email</label>
@@ -22,12 +22,6 @@
             </div>
         </div>
 
-        <ng-container *ngIf="emailLink !== ''">
-            <p>Use this link to finish setting up the user account. You may need to log out before using this to register a new user. 
-                If your server is accessible externally, an email will have been sent.</p>
-            <a class="email-link" href="{{emailLink}}" target="_blank">{{emailLink}}</a>
-        </ng-container>
-    
         <div class="row g-0">
             <div class="col-md-6">
                 <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
@@ -38,6 +32,15 @@
             </div>
         </div>
     </form>
+
+    <ng-container *ngIf="emailLink !== ''">
+        <h4>User invited</h4>
+        <p>You can use the following link below to setup the account for your user or use the copy button. You may need to log out before using the link to register a new user.
+            If your server is externallyaccessible, an email will have been sent to the user and the links can be used by them to finish setting up their account.
+        </p>
+        <a class="email-link" href="{{emailLink}}" target="_blank">Setup user's account</a>
+        <app-api-key title="Invite Url" tooltipText="Copy this and paste in a new tab. You may need to log out." [showRefresh]="false" [transform]="makeLink"></app-api-key>
+    </ng-container>
 
 </div>
 <div class="modal-footer">

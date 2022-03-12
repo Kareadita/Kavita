@@ -31,12 +31,12 @@ import { ColorPickerModule } from 'ngx-color-picker';
     NgbTooltipModule,
     NgxSliderModule,
     UserSettingsRoutingModule,
-    //SharedModule, // SentenceCase pipe
     PipeModule,
     ColorPickerModule, // User prefernces background color
   ], 
   exports: [
-    SiteThemeProviderPipe
+    SiteThemeProviderPipe,
+    ApiKeyComponent
   ]
 })
 export class UserSettingsModule { }
