@@ -645,20 +645,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFittingOptionClass() {
     const formControl = this.generalSettingsForm.get('fittingOption');
-    let val = FITTING_OPTION.HEIGHT;
+    let val = FITTING_OPTION.HEIGHT as string;
     if (formControl === undefined) {
-      val =  FITTING_OPTION.HEIGHT;
+      val =  FITTING_OPTION.HEIGHT as string;
     }
     val =  formControl?.value;
 
-
-    if (this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
-      return val + ' cover double';
+    if (this.layoutMode !== LayoutMode.Single) {
+      val =  val + (this.isCoverImage() ? 'cover' : '') + 'double';
+    } else if (this.isCoverImage() && this.shouldRenderAsFitSplit()) {
+      // JOE: If we are Fit to Screen, we should use fitting as width just for cover images
+      // Rewriting to fit to width for this cover image
+      val = FITTING_OPTION.WIDTH;
     }
 
-    if (!this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
-      return val + ' double';
-    }
     return val;
   }
 
@@ -971,6 +971,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.renderWithCanvas = true;
     } else {
       this.renderWithCanvas = false;
+
+      // if (this.isCoverImage() && this.layoutMode === LayoutMode.Single && this.getFit() !== FITTING_OPTION.WIDTH) {
+
+      // }
     }
 
     // Reset scroll on non HEIGHT Fits
