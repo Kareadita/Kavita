@@ -64,7 +64,10 @@
             <ng-template ngbPanelContent>
                 <div class="controls">
                     <label id="readingdirection" class="form-label">Reading Direction</label>
-                    <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}"><i class="fa {{readingDirection === 0 ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{readingDirection === 0 ? 'Left to Right' : 'Right to Left'}}</span></button>
+                    <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirectionModel === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
+                        <i class="fa {{readingDirectionModel === ReadingDirection.LeftToRight ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i>
+                        <span class="phone-hidden">&nbsp;{{readingDirectionModel === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
+                    </button>
                 </div>
                 <div class="controls">
                     <label for="tap-pagination" class="form-label">Tap Pagination</label>

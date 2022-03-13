@@ -59,6 +59,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
    * Outputs when fullscreen is toggled
    */
   @Output() fullscreen: EventEmitter<void> = new EventEmitter();
+  /**
+   * Outputs when reading direction is changed
+   */
+  @Output() readingDirection: EventEmitter<ReadingDirection> = new EventEmitter();
   
   user!: User;
   /**
@@ -70,7 +74,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
    */
   pageStyles!: PageStyle;
 
-  readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
+  readingDirectionModel: ReadingDirection = ReadingDirection.LeftToRight;
 
   activeTheme: BookTheme | undefined;
 
@@ -120,6 +124,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     return LayoutMode;
   }
 
+  get ReadingDirection() {
+    return ReadingDirection;
+  }
+
 
 
   constructor(private bookService: BookService, private accountService: AccountService, @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
@@ -149,13 +157,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
           }
 
 
-          this.readingDirection = this.user.preferences.bookReaderReadingDirection;
-          this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
-          this.settingsForm.get('bookReaderReadingDirection')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            // TODO: Figure out what to do
-            this.readingDirection = value;
-          });
-
+          this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
           
           this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
           this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(familyName => {
@@ -255,11 +257,13 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   }
 
   toggleReadingDirection() {
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      this.readingDirection = ReadingDirection.RightToLeft;
+    if (this.readingDirectionModel === ReadingDirection.LeftToRight) {
+      this.readingDirectionModel = ReadingDirection.RightToLeft;
     } else {
-      this.readingDirection = ReadingDirection.LeftToRight;
+      this.readingDirectionModel = ReadingDirection.LeftToRight;
     }
+
+    this.readingDirection.emit(this.readingDirectionModel);
   }
 
   toggleFullscreen() {
