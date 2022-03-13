@@ -208,6 +208,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   layoutMode: LayoutMode = LayoutMode.Default;
 
+
+  windowWidth: number = 0;
+  windowHeight: number = 0;
+
+
+
   get LayoutMode(): typeof LayoutMode {
     return LayoutMode;
   }
@@ -248,22 +254,35 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ColumnWidth() {
-    const windowWidth = window.innerWidth
-      || this.document.documentElement.clientWidth
-      || this.document.body.clientWidth;
     switch (this.layoutMode) {
       case LayoutMode.Default:
         return 'unset';
       case LayoutMode.Column1:
-        return (windowWidth - 40) + 'px';
+        return (this.windowWidth - 40) + 'px';
       case LayoutMode.Column2:
-        return ((windowWidth - 40) / 2) + 'px';
+        return ((this.windowWidth / 2) - 40) + 'px';
     }
   }
 
-  get WindowHeight() {
-    return window.innerHeight;
+  get ColumnHeight() {
+    if (this.layoutMode !== LayoutMode.Default) {
+      // Take the height after page loads, subtract the top/bottom bar and the extra 20 pixels we add on
+      return this.windowHeight - (this.topOffset *2) - 20 + 'px';
+    }
+    return '';
   }
+
+  get ColumnLayout() {
+    switch (this.layoutMode) {
+      case LayoutMode.Default:
+        return '';
+      case LayoutMode.Column1:
+        return 'column-layout-1';
+      case LayoutMode.Column2:
+        return 'column-layout-2';
+    }
+  }
+
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, private readerService: ReaderService, private location: Location,
@@ -662,6 +681,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
     this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
+
+    this.windowWidth = window.innerWidth
+    || this.document.documentElement.clientWidth
+    || this.document.body.clientWidth;
+    this.windowHeight = this.readingSectionElemRef.nativeElement.clientHeight;
 
     // Find all the part ids and their top offset
     this.setupPageAnchors();

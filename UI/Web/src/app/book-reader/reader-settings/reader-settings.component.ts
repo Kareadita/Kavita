@@ -197,6 +197,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
           this.settingsForm.addControl('layoutMode', new FormControl(LayoutMode.Default, []));//this.user.preferences.layoutMode || 
           this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: LayoutMode) => {
+            console.log(layoutMode);
             this.layoutModeUpdate.emit(layoutMode);
           });
 

@@ -113,8 +113,21 @@ $primary-color: #0062cc;
     overflow-wrap: break-word;
     // height must be set so no scrolling
     //overflow: hidden;
+}
 
+// This is essentially fitting the text to height and when you press next you are scrolling over by page width
+.column-layout-1 {
+    .book-content {
+        column-count: 1;
+        overflow: auto;
+    }
+}
 
+.column-layout-2 {
+    .book-content {
+        column-count: 2;
+        overflow: auto;
+    }
 
 }
 
