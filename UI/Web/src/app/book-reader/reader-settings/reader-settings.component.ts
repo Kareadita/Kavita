@@ -193,6 +193,11 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.styleUpdate.emit(this.pageStyles);
           });
 
+          this.settingsForm.addControl('layoutMode', new FormControl(LayoutMode.Default, []));//this.user.preferences.layoutMode || 
+          this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: LayoutMode) => {
+            this.layoutModeUpdate.emit(layoutMode);
+          });
+
           this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
           this.resetSettings();
         } else {
@@ -247,10 +252,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     const theme = this.themes.find(t => t.name === themeName);
     this.activeTheme = theme;
     this.colorThemeUpdate.emit(theme);
-  }
-
-  setLayout(layoutMode: LayoutMode) {
-    this.layoutModeUpdate.emit(layoutMode);
   }
 
   toggleReadingDirection() {

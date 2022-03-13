@@ -1,5 +1,5 @@
 <div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container" tabindex="0" #reader>
-    <div class="fixed-top" #stickyTop>
+    <div class="fixed-top" #stickyTop >
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         <app-drawer #commentDrawer="drawer" [(isOpen)]="drawerOpen" [options]="{topOffset: topOffset}">

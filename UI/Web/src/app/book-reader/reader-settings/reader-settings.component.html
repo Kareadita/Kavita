@@ -19,8 +19,8 @@
                         </div>
                     </div>
                     <div class="row g-0 controls">
-                        <label for="fontsize" class="form-label col-auto">Font Size</label>
-                        <span class="col-auto float-end" style="display: inline-flex;">
+                        <label for="fontsize" class="form-label col-6">Font Size</label>
+                        <span class="col-6 float-end" style="display: inline-flex;">
                             <i class="fa-solid fa-font"  style="font-size: 12px;"></i>
                             <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="settingsForm.get('bookReaderFontSize')?.value + '%'">
                             <i class="fa-solid fa-font" style="font-size: 24px;"></i>
@@ -28,8 +28,8 @@
                     </div>
 
                     <div class="row g-0 controls">
-                        <label for="linespacing" class="form-label col-auto">Line Spacing</label>
-                        <span class="col-auto float-end" style="display: inline-flex;">
+                        <label for="linespacing" class="form-label col-6">Line Spacing</label>
+                        <span class="col-6 float-end" style="display: inline-flex;">
                             1x
                             <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
                             2.5x
@@ -37,8 +37,8 @@
                     </div>
 
                     <div class="row g-0 controls">
-                        <label for="margin" class="form-label col-auto">Margin</label>
-                        <span class="col-auto float-end" style="display: inline-flex;">
+                        <label for="margin" class="form-label col-6">Margin</label>
+                        <span class="col-6 float-end" style="display: inline-flex;">
                             <i class="fa-solid fa-outdent"></i>
                             <input type="range" class="form-range ms-2 me-2" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" [ngbTooltip]="settingsForm.get('bookReaderMargin')?.value + '%'">
                             <i class="fa-solid fa-indent"></i>
@@ -87,9 +87,17 @@
 
                 <div class="controls">
                     <label id="layout-mode" class="form-label">Layout Mode</label>
-                    <button class="btn btn-outline-secondary" (click)="setLayout(LayoutMode.Default)">Default</button>
-                    <button class="btn btn-outline-secondary" (click)="setLayout(LayoutMode.Column1)">1 Column</button>
-                    <button class="btn btn-outline-secondary" (click)="setLayout(LayoutMode.Column2)">2 Column</button>
+                    <br>
+                    <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
+                        <input type="radio" formControlName="layoutMode" [value]="LayoutMode.Default" class="btn-check" id="btnradio1" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btnradio1">Default</label>
+                      
+                        <input type="radio" formControlName="layoutMode" [value]="LayoutMode.Column1" class="btn-check" id="btnradio2" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btnradio2">1 Column</label>
+                        
+                        <input type="radio" formControlName="layoutMode" [value]="LayoutMode.Column2" class="btn-check" id="btnradio2" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btnradio2">2 Column</label>
+                      </div>
                 </div>
 
 
