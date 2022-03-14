@@ -1,18 +1,15 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
-import { FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, Subject } from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
-import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-
 import { BookService } from '../book.service';
 import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
 import { BookChapterItem } from '../_models/book-chapter-item';
@@ -25,9 +22,9 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { ThemeService } from 'src/app/theme.service';
-import { LayoutMode, PageStyle } from '../reader-settings/reader-settings.component';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
-import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
+import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
+import { PageStyle } from '../reader-settings/reader-settings.component';
 
 
 enum TabID {
@@ -206,7 +203,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * How to render the page content
    */
-  layoutMode: LayoutMode = LayoutMode.Default;
+  layoutMode: BookPageLayoutMode = BookPageLayoutMode.Default;
 
 
   windowWidth: number = 0;
@@ -214,8 +211,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-  get LayoutMode(): typeof LayoutMode {
-    return LayoutMode;
+  get BookPageLayoutMode() {
+    return BookPageLayoutMode;
   }
 
   get TabID(): typeof TabID {
@@ -255,17 +252,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ColumnWidth() {
     switch (this.layoutMode) {
-      case LayoutMode.Default:
+      case BookPageLayoutMode.Default:
         return 'unset';
-      case LayoutMode.Column1:
+      case BookPageLayoutMode.Column1:
         return (this.windowWidth - 40) + 'px';
-      case LayoutMode.Column2:
+      case BookPageLayoutMode.Column2:
         return ((this.windowWidth / 2) - 40) + 'px';
     }
   }
 
   get ColumnHeight() {
-    if (this.layoutMode !== LayoutMode.Default) {
+    if (this.layoutMode !== BookPageLayoutMode.Default) {
       // Take the height after page loads, subtract the top/bottom bar and the extra 20 pixels we add on
       return this.windowHeight - (this.topOffset *2) - 20 + 'px';
     }
@@ -274,11 +271,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ColumnLayout() {
     switch (this.layoutMode) {
-      case LayoutMode.Default:
+      case BookPageLayoutMode.Default:
         return '';
-      case LayoutMode.Column1:
+      case BookPageLayoutMode.Column1:
         return 'column-layout-1';
-      case LayoutMode.Column2:
+      case BookPageLayoutMode.Column2:
         return 'column-layout-2';
     }
   }
@@ -687,6 +684,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     || this.document.body.clientWidth;
     this.windowHeight = this.readingSectionElemRef.nativeElement.clientHeight;
 
+
     // Find all the part ids and their top offset
     this.setupPageAnchors();
     
@@ -726,6 +724,26 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   prevPage() {
     const oldPageNum = this.pageNum;
+
+    // We need to handle virtual paging before we increment the actual page
+    if (this.layoutMode !== BookPageLayoutMode.Default) {
+      
+      const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
+      console.log('Scroll Left: ', scrollOffset);
+      //27880
+      const totalScroll = this.readingHtml.nativeElement.scrollWidth;
+      console.log('Total Scroll: ', totalScroll);
+
+      const pageWidth = this.windowWidth + 20; // 20px for the column gap
+      console.log('Page width: ', pageWidth);
+
+
+
+      if (scrollOffset - pageWidth >= 0) {
+        this.scrollService.scrollToX(scrollOffset - pageWidth, this.readingHtml.nativeElement);
+        return;
+      }
+    }
     
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       this.setPageNum(this.pageNum - 1);
@@ -749,6 +767,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
+
+    // We need to handle virtual paging before we increment the actual page
+    if (this.layoutMode !== BookPageLayoutMode.Default) {
+      
+      const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
+      console.log('Scroll Left: ', scrollOffset);
+      //27880
+      const totalScroll = this.readingHtml.nativeElement.scrollWidth;
+      console.log('Total Scroll: ', totalScroll);
+
+      const pageWidth = this.windowWidth + 20; // 20px for the column gap
+      console.log('Page width: ', pageWidth);
+
+      if (scrollOffset + pageWidth < totalScroll) {
+        this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);
+        return;
+      }
+    }
+
     const oldPageNum = this.pageNum;
     if (oldPageNum + 1 === this.maxPages) {
       // Move to next volume/chapter automatically
@@ -926,8 +963,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  updateLayoutMode(mode: LayoutMode) {
-    console.log('Setting Layout mode: ', mode);
+  updateLayoutMode(mode: BookPageLayoutMode) {
     this.layoutMode = mode;
   }
 

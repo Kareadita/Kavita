@@ -1,5 +1,5 @@
 
-import { BookTheme } from './book-theme';
+import { BookPageLayoutMode } from '../book-page-layout-mode';
 import { PageSplitOption } from './page-split-option';
 import { READER_MODE } from './reader-mode';
 import { ReadingDirection } from './reading-direction';
@@ -26,6 +26,7 @@ export interface Preferences {
     bookReaderTapToPaginate: boolean;
     bookReaderReadingDirection: ReadingDirection;
     bookReaderThemeName?: string;
+    bookReaderLayoutMode: BookPageLayoutMode;
 
     // Global
     theme: SiteTheme;
@@ -35,3 +36,5 @@ export const readingDirections = [{text: 'Left to Right', value: ReadingDirectio
 export const scalingOptions = [{text: 'Automatic', value: ScalingOption.Automatic}, {text: 'Fit to Height', value: ScalingOption.FitToHeight}, {text: 'Fit to Width', value: ScalingOption.FitToWidth}, {text: 'Original', value: ScalingOption.Original}];
 export const pageSplitOptions = [{text: 'Fit to Screen', value: PageSplitOption.FitSplit}, {text: 'Right to Left', value: PageSplitOption.SplitRightToLeft}, {text: 'Left to Right', value: PageSplitOption.SplitLeftToRight}, {text: 'No Split', value: PageSplitOption.NoSplit}];
 export const readingModes = [{text: 'Left to Right', value: READER_MODE.MANGA_LR}, {text: 'Up to Down', value: READER_MODE.MANGA_UD}, {text: 'Webtoon', value: READER_MODE.WEBTOON}];
+export const bookLayoutModes = [{text: 'Default', value: BookPageLayoutMode.Default}, {text: '1 Column', value: BookPageLayoutMode.Column1}, {text: '2 Column', value: BookPageLayoutMode.Column2}];
+export const bookColorThemes = [{text: 'Default', value: BookPageLayoutMode.Default}, {text: '1 Column', value: BookPageLayoutMode.Column1}, {text: '2 Column', value: BookPageLayoutMode.Column2}];

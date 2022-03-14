@@ -138,6 +138,27 @@
                                         </div>
                                     </div>
 
+                                    <div class="row g-0">
+                                        
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                            <label for="settings-bookcolortheme-option" class="form-label">Color Theme</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookColorThemeTooltip" role="button" tabindex="0"></i>
+                                            <ng-template #bookColorThemeTooltip>Color Theme to use for the book</ng-template>
+                                            <span class="visually-hidden" id="settings-bookcolortheme-option-help">Color Theme to use for the book</span>
+                                            <select class="form-select" aria-describedby="settings-bookcolortheme-option-help" formControlName="bookReaderThemeName">
+                                                <option *ngFor="let opt of bookColorThemes" [value]="opt.name">{{opt.name | titlecase}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                            <label for="settings-booklayoutmode-option" class="form-label">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="booklayoutmodeTooltip" role="button" tabindex="0"></i>
+                                            <ng-template #booklayoutmodeTooltip>How to render the page. Default is as book dictates, 1 column will fit the height to device, 2 column will also split into 2 columns</ng-template>
+                                            <span class="visually-hidden" id="settings-booklayoutmode-option-help"><ng-container [ngTemplateOutlet]="booklayoutmodeTooltip"></ng-container></span>
+                                            <select class="form-select" aria-describedby="settings-booklayoutmode-option-help" formControlName="bookReaderLayoutMode">
+                                                <option *ngFor="let opt of bookLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     
     
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">

@@ -103,30 +103,24 @@ $primary-color: #0062cc;
     background-color: var(--brtheme-bg-color);
 }
 
-.column-layout {
-    //column-width: 100%; // This has to be done programatically
-    column-gap: 20px;
-    max-width: none;
-    max-height: 100vh;
-    min-width: 0px;
-    min-height: 0px;
-    overflow-wrap: break-word;
-    // height must be set so no scrolling
-    //overflow: hidden;
-}
+
 
 // This is essentially fitting the text to height and when you press next you are scrolling over by page width
 .column-layout-1 {
     .book-content {
         column-count: 1;
+        column-gap: 20px;
         overflow: auto;
+        word-break: break-word;
     }
 }
 
 .column-layout-2 {
     .book-content {
         column-count: 2;
+        column-gap: 20px;
         overflow: auto;
+        word-break: break-word;
     }
 
 }

@@ -5,12 +5,13 @@ import { take } from 'rxjs/operators';
 import { Options } from '@angular-slider/ngx-slider';
 import { Title } from '@angular/platform-browser';
 import { BookService } from 'src/app/book-reader/book.service';
-import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences } from 'src/app/_models/preferences/preferences';
+import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
+import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
 
 @Component({
   selector: 'app-user-preferences',
@@ -23,6 +24,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   scalingOptions = scalingOptions;
   pageSplitOptions = pageSplitOptions;
   readingModes = readingModes;
+  bookLayoutModes = bookLayoutModes;
+  bookColorThemes = bookColorThemes;
 
   settingsForm: FormGroup = new FormGroup({});
   passwordChangeForm: FormGroup = new FormGroup({});
@@ -105,6 +108,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
         this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
         this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.bookReaderTapToPaginate, []));
+        this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(user.preferences.bookReaderLayoutMode, []));
 
         this.settingsForm.addControl('theme', new FormControl(user.preferences.theme, []));
       }
@@ -140,6 +144,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
+    this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
   }
 
@@ -165,6 +170,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
+      bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutmode, 10),
       theme: modelSettings.theme
     };
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

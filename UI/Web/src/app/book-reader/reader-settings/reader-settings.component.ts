@@ -3,6 +3,7 @@ import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output } from '@ang
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
 import { ThemeService } from 'src/app/theme.service';
+import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
@@ -24,11 +25,35 @@ export interface PageStyle {
   'margin-right': string;
 }
 
-export enum LayoutMode {
-  Default = 'Default',
-  Column2 = '2 Column',
-  Column1 = 'Column'
-}
+export const bookColorThemes = [
+  {
+    name: 'Dark',
+    colorHash: '#292929',
+    isDarkTheme: true,
+    isDefault: true,
+    provider: ThemeProvider.System,
+    selector: 'brtheme-dark',
+    content: BookDarkTheme
+  },
+  {
+    name: 'Black',
+    colorHash: '#000000',
+    isDarkTheme: true,
+    isDefault: false,
+    provider: ThemeProvider.System,
+    selector: 'brtheme-black',
+    content: BookBlackTheme
+  },
+  {
+    name: 'White',
+    colorHash: '#FFFFFF',
+    isDarkTheme: false,
+    isDefault: false,
+    provider: ThemeProvider.System,
+    selector: 'brtheme-white',
+    content: BookWhiteTheme
+  },
+];
 
 const mobileBreakpointMarginOverride = 700;
 
@@ -54,7 +79,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * Outputs when a layout mode is updated
    */
-  @Output() layoutModeUpdate: EventEmitter<LayoutMode> = new EventEmitter();
+  @Output() layoutModeUpdate: EventEmitter<BookPageLayoutMode> = new EventEmitter();
   /**
    * Outputs when fullscreen is toggled
    */
@@ -85,43 +110,14 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * System provided themes
    */
-  themes: Array<BookTheme> = [
-    {
-      name: 'Dark',
-      colorHash: '#292929',
-      isDarkTheme: true,
-      isDefault: true,
-      provider: ThemeProvider.System,
-      selector: 'brtheme-dark',
-      content: BookDarkTheme
-    },
-    {
-      name: 'Black',
-      colorHash: '#000000',
-      isDarkTheme: true,
-      isDefault: false,
-      provider: ThemeProvider.System,
-      selector: 'brtheme-black',
-      content: BookBlackTheme
-    },
-    {
-      name: 'White',
-      colorHash: '#FFFFFF',
-      isDarkTheme: false,
-      isDefault: false,
-      provider: ThemeProvider.System,
-      selector: 'brtheme-white',
-      content: BookWhiteTheme
-    },
-  ];
-
+  themes: Array<BookTheme> = bookColorThemes;
 
 
   private onDestroy: Subject<void> = new Subject();
 
 
-  get LayoutMode(): typeof LayoutMode  {
-    return LayoutMode;
+  get BookPageLayoutMode(): typeof BookPageLayoutMode  {
+    return BookPageLayoutMode;
   }
 
   get ReadingDirection() {
@@ -195,8 +191,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.styleUpdate.emit(this.pageStyles);
           });
 
-          this.settingsForm.addControl('layoutMode', new FormControl(LayoutMode.Default, []));//this.user.preferences.layoutMode || 
-          this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: LayoutMode) => {
+          this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
+          this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
             console.log(layoutMode);
             this.layoutModeUpdate.emit(layoutMode);
           });

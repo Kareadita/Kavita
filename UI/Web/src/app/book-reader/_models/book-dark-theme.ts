@@ -66,12 +66,18 @@ export const BookDarkTheme = `
     --nav-link-active-text-color: white;
     --nav-link-text-color: white;
 
+    /* Checkboxes/Switch */
+    --checkbox-checked-bg-color: var(--primary-color);
+    --checkbox-border-color: var(--input-focused-border-color);
+    --checkbox-focus-border-color: var(--primary-color);
+    --checkbox-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
 
-  /* Reading Bar */
-  --br-actionbar-button-text-color: white;
-  --br-actionbar-button-hover-border-color: #6c757d;
-  --br-actionbar-bg-color: black;
+
+    /* Reading Bar */
+    --br-actionbar-button-text-color: white;
+    --br-actionbar-button-hover-border-color: #6c757d;
+    --br-actionbar-bg-color: black;
 }
 
 
