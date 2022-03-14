@@ -25,6 +25,7 @@ import { ThemeService } from 'src/app/theme.service';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
 import { PageStyle } from '../reader-settings/reader-settings.component';
+import { User } from 'src/app/_models/user';
 
 
 enum TabID {
@@ -206,8 +207,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   layoutMode: BookPageLayoutMode = BookPageLayoutMode.Default;
 
 
+  /**
+   * Width of the document (in non-column layout), used for column layout virtual paging
+   */
   windowWidth: number = 0;
   windowHeight: number = 0;
+
+  user!: User;
 
 
 
@@ -399,7 +405,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    this.init();
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.user = user;
+        this.init();
+      }
+    });
   }
 
   init() {
@@ -680,9 +691,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
     this.windowWidth = window.innerWidth
-    || this.document.documentElement.clientWidth
-    || this.document.body.clientWidth;
+        || this.document.documentElement.clientWidth
+        || this.document.body.clientWidth;
     this.windowHeight = this.readingSectionElemRef.nativeElement.clientHeight;
+    this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
 
 
     // Find all the part ids and their top offset
@@ -773,7 +785,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       
       const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
       console.log('Scroll Left: ', scrollOffset);
-      //27880
       const totalScroll = this.readingHtml.nativeElement.scrollWidth;
       console.log('Total Scroll: ', totalScroll);
 
@@ -810,9 +821,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   updateReaderStyles(pageStyles: PageStyle) {
     this.pageStyles = pageStyles;
-    if (this.readingHtml === undefined || !this.readingHtml.nativeElement)  return;
-
-    console.log('[Style Update] page styles: ', this.pageStyles);
+    if (this.readingHtml === undefined || !this.readingHtml.nativeElement) return;
 
     // Line Height must be placed on each element in the page
     
@@ -846,22 +855,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  // Color Theme 
-  // get drawerBackgroundColor() {
-  //   return this.darkMode ? '#010409': '#fff';
+  // getDarkModeBackgroundColor() {
+  //   return this.darkMode ? '#292929' : '#fff';
   // }
-
-  // get drawerTextColor() {
-  //   return this.darkMode ? 'white': 'black';
-  // }
-
-  getDarkModeBackgroundColor() {
-    return this.darkMode ? '#292929' : '#fff';
-  }
 
   setOverrideStyles(theme: BookTheme) {
-    
-
     // TODO: Put optimization in to avoid any work if the theme is the same as selected (or have reading settings control handle that)
 
     // Remove all themes 
