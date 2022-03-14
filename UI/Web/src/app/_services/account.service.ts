@@ -8,7 +8,6 @@ import { User } from '../_models/user';
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
 import { ThemeService } from '../theme.service';
-import { InviteUserResponse } from '../_models/invite-user-response';
 
 @Injectable({
   providedIn: 'root'
@@ -131,8 +130,8 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, {responseType: 'text' as 'json'});
   }
 
-  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>}) {
-    return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/invite', model);
+  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, sendEmail: boolean}) {
+    return this.httpClient.post<string>(this.baseUrl + 'account/invite', model, {responseType: 'text' as 'json'});
   }
 
   confirmEmail(model: {email: string, username: string, password: string, token: string}) {

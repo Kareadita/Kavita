@@ -109,7 +109,14 @@ namespace API.Controllers
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-            await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumes(markReadDto.SeriesId);
+            user.Progresses ??= new List<AppUserProgress>();
+            foreach (var volume in volumes)
+            {
+                _readerService.MarkChaptersAsRead(user, markReadDto.SeriesId, volume.Chapters);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
 
             if (await _unitOfWork.CommitAsync())
             {
@@ -130,7 +137,14 @@ namespace API.Controllers
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-            await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
+            var volumes = await _unitOfWork.VolumeRepository.GetVolumes(markReadDto.SeriesId);
+            user.Progresses ??= new List<AppUserProgress>();
+            foreach (var volume in volumes)
+            {
+                _readerService.MarkChaptersAsUnread(user, markReadDto.SeriesId, volume.Chapters);
+            }
+
+            _unitOfWork.UserRepository.Update(user);
 
             if (await _unitOfWork.CommitAsync())
             {

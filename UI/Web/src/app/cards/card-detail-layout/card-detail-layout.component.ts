@@ -54,47 +54,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   constructor(private seriesService: SeriesService) {
     this.filter = this.seriesService.createSeriesFilter();
-
-    this.readProgressGroup = new FormGroup({
-      read: new FormControl(this.filter.readStatus.read, []),
-      notRead: new FormControl(this.filter.readStatus.notRead, []),
-      inProgress: new FormControl(this.filter.readStatus.inProgress, []),
-    });
-
-    this.sortGroup = new FormGroup({
-      sortField: new FormControl(this.filter.sortOptions?.sortField || SortField.SortName, []),
-    });
-
-    this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
-      this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
-      this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
-      this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
-
-      let sum = 0;
-      sum += (this.filter.readStatus.read ? 1 : 0);
-      sum += (this.filter.readStatus.inProgress ? 1 : 0);
-      sum += (this.filter.readStatus.notRead ? 1 : 0);
-
-      if (sum === 1) {
-        if (this.filter.readStatus.read) this.readProgressGroup.get('read')?.disable({ emitEvent: false });
-        if (this.filter.readStatus.notRead) this.readProgressGroup.get('notRead')?.disable({ emitEvent: false });
-        if (this.filter.readStatus.inProgress) this.readProgressGroup.get('inProgress')?.disable({ emitEvent: false });
-      } else {
-        this.readProgressGroup.get('read')?.enable({ emitEvent: false });
-        this.readProgressGroup.get('notRead')?.enable({ emitEvent: false });
-        this.readProgressGroup.get('inProgress')?.enable({ emitEvent: false });
-      }
-    });
-
-    this.sortGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
-      if (this.filter.sortOptions == null) {
-        this.filter.sortOptions = {
-          isAscending: this.isAscendingSort,
-          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
-        };
-      }
-      this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
-    });
   }
 
   ngOnInit(): void {
@@ -104,14 +63,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
     }
-
-    if (this.filterSettings.presets) {
-      this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets?.readStatus.read);
-      this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets?.readStatus.notRead);
-      this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets?.readStatus.inProgress);
-    }
-
-    this.setupTypeaheads();
   }
 
   ngOnDestroy() {

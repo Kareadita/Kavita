@@ -36,8 +36,7 @@ import { ColorPickerModule } from 'ngx-color-picker';
     ColorPickerModule, // User prefernces background color
   ],
   exports: [
-    SiteThemeProviderPipe,
-    ApiKeyComponent
+    SiteThemeProviderPipe
   ]
 })
 export class UserSettingsModule { }

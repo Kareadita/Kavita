@@ -79,8 +79,8 @@ public interface ISeriesRepository
     /// <returns></returns>
     Task AddSeriesModifiers(int userId, List<SeriesDto> series);
     Task<string> GetSeriesCoverImageAsync(int seriesId);
-    Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter, bool cutoffOnDate = true);
-    Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
+    Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter);
+    Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter); // NOTE: Probably put this in LibraryRepo
     Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
     Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
@@ -593,11 +593,11 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userParams">Pagination information</param>
     /// <param name="filter">Optional (default null) filter on query</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter, bool cutoffOnDate = true)
+    public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
     {
         //var allSeriesWithProgress = await _context.AppUserProgresses.Select(p => p.SeriesId).ToListAsync();
         //var allChapters = await GetChapterIdsForSeriesAsync(allSeriesWithProgress);
-        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
+        var cuttoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
         var query = (await CreateFilteredSearchQueryable(userId, libraryId, filter))
             .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
                 new
@@ -612,12 +612,8 @@ public class SeriesRepository : ISeriesRepository
                     // This is only taking into account chapters that have progress on them, not all chapters in said series
                     LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created)
                     //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
-                });
-        if (cutoffOnDate)
-        {
-            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint);
-        }
-
+                })
+            .Where(d => d.LastReadingProgress >= cuttoffProgressPoint);
         // I think I need another Join statement. The problem is the chapters are still limited to progress
 
 

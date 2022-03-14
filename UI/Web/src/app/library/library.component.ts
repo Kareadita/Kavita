@@ -141,11 +141,7 @@ export class LibraryComponent implements OnInit, OnDestroy {
     } else if (sectionTitle.toLowerCase() === 'recently updated series') {
       this.router.navigate(['recently-added']);
     } else if (sectionTitle.toLowerCase() === 'on deck') {
-      const params: any = {};
-      params['readStatus'] = 'true,false,false';
-      params['page'] = 1;
-      this.router.navigate(['all-series'], {queryParams: params});
-      //this.router.navigate(['on-deck']);
+      this.router.navigate(['on-deck']);
     } else if (sectionTitle.toLowerCase() === 'libraries') {
       this.router.navigate(['all-series']);
     } 

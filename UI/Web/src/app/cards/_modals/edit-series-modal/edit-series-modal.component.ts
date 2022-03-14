@@ -67,8 +67,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   publicationStatuses: Array<PublicationStatusDto> = [];
   validLanguages: Array<Language> = [];
 
-  coverImageReset = false;
-
   get Breakpoint(): typeof Breakpoint {
     return Breakpoint;
   }
@@ -405,20 +403,28 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.seriesService.updateMetadata(this.metadata, this.collectionTags)
     ];
 
-    // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
-    if (this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty || this.coverImageReset) {
+    // We only need to call updateSeries if we changed name, sort name, or localized name
+    if (this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty) {
       apis.push(this.seriesService.updateSeries(model));
     }
 
     
-    if (selectedIndex > 0 && this.selectedCover !== '') {
+
+    if (selectedIndex > 0) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
     }
-
 
     forkJoin(apis).subscribe(results => {
       this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0});
     });
+  }
+
+  handleUnlock(field: string) {
+    console.log('todo: unlock ', field);
+  }
+
+  hello(val: boolean) {
+    console.log('hello: ', val);
   }
 
   updateCollections(tags: CollectionTag[]) {
@@ -485,7 +491,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   handleReset() {
-    this.coverImageReset = true;
     this.editSeriesForm.patchValue({
       coverImageLocked: false
     });
