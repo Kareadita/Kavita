@@ -20,6 +20,7 @@ import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
 import { SidenavModule } from '../sidenav/sidenav.module';
+import { UserSettingsModule } from '../user-settings/user-settings.module';
 
 
 
@@ -51,6 +52,7 @@ import { SidenavModule } from '../sidenav/sidenav.module';
     SharedModule,
     PipeModule,
     SidenavModule
+    UserSettingsModule // API-key componet
   ],
   providers: []
 })

@@ -23,7 +23,6 @@ import { CarouselModule } from './carousel/carousel.module';
 
 import { TypeaheadModule } from './typeahead/typeahead.module';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
-import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
@@ -50,7 +49,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     SeriesDetailComponent,
     ReviewSeriesModalComponent,
     RecentlyAddedComponent,
-    OnDeckComponent,
     DashboardComponent,
     NavEventsToggleComponent,
     SeriesMetadataDetailComponent,
@@ -104,7 +102,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
     Title,
     {provide: SAVER, useFactory: getSaver},
-    // { provide: APP_BASE_HREF, useFactory: (config: ConfigData) => config.baseUrl, deps: [ConfigData] },
   ],
   entryComponents: [],
   bootstrap: [AppComponent]

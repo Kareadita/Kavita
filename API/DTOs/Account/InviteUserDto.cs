@@ -16,6 +16,4 @@ public class InviteUserDto
     /// A list of libraries to grant access to
     /// </summary>
     public IList<int> Libraries { get; init; }
-
-    public bool SendEmail { get; init; } = true;
 }

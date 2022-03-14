@@ -122,7 +122,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Used soley for LayoutMode.Double rendering. Will always hold the next image in buffer.
    */
   canvasImage2 = new Image();
-  renderWithCanvas: boolean = false; // Dictates if we use render with canvas or with image
+  /**
+   * Dictates if we use render with canvas or with image. This is only for Splitting.
+   */
+  renderWithCanvas: boolean = false; 
 
   /**
    * A circular array of size PREFETCH_PAGES + 2. Maintains prefetched Images around the current page to load from to avoid loading animation.
@@ -534,11 +537,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
       this.pageOptions = newOptions;
 
-      // TODO: Move this into ChapterInfo
-      this.libraryService.getLibraryType(results.chapterInfo.libraryId).pipe(take(1)).subscribe(type => {
-        this.libraryType = type;
-        this.updateTitle(results.chapterInfo, type);
-      });
+      this.libraryType = results.chapterInfo.libraryType;
+      this.updateTitle(results.chapterInfo, this.libraryType);
 
       this.inSetup = false;
 
@@ -649,20 +649,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFittingOptionClass() {
     const formControl = this.generalSettingsForm.get('fittingOption');
-    let val = FITTING_OPTION.HEIGHT;
+    let val = FITTING_OPTION.HEIGHT as string;
     if (formControl === undefined) {
-      val =  FITTING_OPTION.HEIGHT;
+      val =  FITTING_OPTION.HEIGHT as string;
     }
     val =  formControl?.value;
 
-
-    if (this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
-      return val + ' cover double';
+    if (this.layoutMode !== LayoutMode.Single) {
+      val =  val + (this.isCoverImage() ? 'cover' : '') + 'double';
+    } else if (this.isCoverImage() && this.shouldRenderAsFitSplit()) {
+      // JOE: If we are Fit to Screen, we should use fitting as width just for cover images
+      // Rewriting to fit to width for this cover image
+      val = FITTING_OPTION.WIDTH;
     }
 
-    if (!this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
-      return val + ' double';
-    }
     return val;
   }
 
@@ -975,6 +975,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.renderWithCanvas = true;
     } else {
       this.renderWithCanvas = false;
+
+      // if (this.isCoverImage() && this.layoutMode === LayoutMode.Single && this.getFit() !== FITTING_OPTION.WIDTH) {
+
+      // }
     }
 
     // Reset scroll on non HEIGHT Fits

@@ -6,7 +6,6 @@ import { take, debounceTime, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';

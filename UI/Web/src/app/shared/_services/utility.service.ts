@@ -207,6 +207,18 @@ export class UtilityService {
       filter.translators = [...filter.translators, ...translators.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
+
+    /// Read status is encoded as true,true,true
+    const readStatus = snapshot.queryParamMap.get('readStatus');
+    if (readStatus !== undefined && readStatus !== null) {
+      const values = readStatus.split(',').map(i => i === "true");
+      if (values.length === 3) {
+        filter.readStatus.inProgress = values[0];
+        filter.readStatus.notRead = values[1];
+        filter.readStatus.read = values[2];
+        anyChanged = true;
+      }
+    }
     
 
     return [filter, anyChanged];
