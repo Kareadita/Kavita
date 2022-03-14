@@ -75,10 +75,11 @@ namespace API.Controllers
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
-            existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
             existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
+            existingPreferences.BookThemeName = preferencesDto.BookReaderThemeName;
+            existingPreferences.PageLayoutMode = preferencesDto.BookReaderLayoutMode;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
 
             _unitOfWork.UserRepository.Update(existingPreferences);

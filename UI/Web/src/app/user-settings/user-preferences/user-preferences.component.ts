@@ -12,6 +12,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
+import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
 
 @Component({
   selector: 'app-user-preferences',
@@ -101,14 +102,14 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('pageSplitOption', new FormControl(user.preferences.pageSplitOption, []));
         this.settingsForm.addControl('autoCloseMenu', new FormControl(user.preferences.autoCloseMenu, []));
         this.settingsForm.addControl('readerMode', new FormControl(user.preferences.readerMode, []));
-        this.settingsForm.addControl('bookReaderDarkMode', new FormControl(user.preferences.bookReaderDarkMode, []));
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(user.preferences.bookReaderFontFamily, []));
         this.settingsForm.addControl('bookReaderFontSize', new FormControl(user.preferences.bookReaderFontSize, []));
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(user.preferences.bookReaderLineSpacing, []));
         this.settingsForm.addControl('bookReaderMargin', new FormControl(user.preferences.bookReaderMargin, []));
         this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(user.preferences.bookReaderReadingDirection, []));
         this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!user.preferences.bookReaderTapToPaginate, []));
-        this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(user.preferences.bookReaderLayoutMode, []));
+        this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
+        this.settingsForm.addControl('bookReaderThemeName', new FormControl(user.preferences.bookReaderThemeName || 'Dark', []));
 
         this.settingsForm.addControl('theme', new FormControl(user.preferences.theme, []));
       }
@@ -137,7 +138,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('autoCloseMenu')?.setValue(this.user.preferences.autoCloseMenu);
     this.settingsForm.get('readerMode')?.setValue(this.user.preferences.readerMode);
     this.settingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
-    this.settingsForm.get('bookReaderDarkMode')?.setValue(this.user.preferences.bookReaderDarkMode);
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
     this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize);
     this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
@@ -145,6 +145,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
     this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
+    this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
   }
 
@@ -163,16 +164,17 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       pageSplitOption: parseInt(modelSettings.pageSplitOption, 10), 
       autoCloseMenu: modelSettings.autoCloseMenu, 
       readerMode: parseInt(modelSettings.readerMode), 
-      bookReaderDarkMode: modelSettings.bookReaderDarkMode,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
-      bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutmode, 10),
+      bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),
+      bookReaderThemeName: modelSettings.bookReaderThemeName,
       theme: modelSettings.theme
     };
+
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
       if (this.user) {

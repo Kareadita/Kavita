@@ -1,5 +1,5 @@
 export enum BookPageLayoutMode {
     Default = 0,
-    Column2 = 1,
-    Column1 = 2
+    Column1 = 1,
+    Column2 = 2,
 }

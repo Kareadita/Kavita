@@ -10,11 +10,6 @@ namespace API.DTOs
         public PageSplitOption PageSplitOption { get; set; }
         public ReaderMode ReaderMode { get; set; }
         public bool AutoCloseMenu { get; set; }
-        /// <summary>
-        /// Deprecated in place of BookReaderTheme
-        /// TODO: Remove Field
-        /// </summary>
-        public bool BookReaderDarkMode { get; set; } = false;
         public int BookReaderMargin { get; set; }
         public int BookReaderLineSpacing { get; set; }
         public int BookReaderFontSize { get; set; }
@@ -23,5 +18,6 @@ namespace API.DTOs
         public ReadingDirection BookReaderReadingDirection { get; set; }
         public SiteThemeDto Theme { get; set; }
         public string BookReaderThemeName { get; set; }
+        public BookPageLayoutMode BookReaderLayoutMode { get; set; }
     }
 }

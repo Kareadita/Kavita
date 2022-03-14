@@ -128,7 +128,10 @@ namespace API.Helpers
                         opt.MapFrom(src => src.Theme))
                 .ForMember(dest => dest.BookReaderThemeName,
                     opt =>
-                        opt.MapFrom(src => src.BookThemeName));
+                        opt.MapFrom(src => src.BookThemeName))
+                .ForMember(dest => dest.BookReaderLayoutMode,
+                    opt =>
+                        opt.MapFrom(src => src.PageLayoutMode));
 
 
             CreateMap<AppUserBookmark, BookmarkDto>();

@@ -15,17 +15,13 @@ export interface Preferences {
     autoCloseMenu: boolean;
     
     // Book Reader
-    /**
-     * Deprecated, use bookReaderThemeName
-     */
-    bookReaderDarkMode: boolean;
     bookReaderMargin: number;
     bookReaderLineSpacing: number;
     bookReaderFontSize: number;
     bookReaderFontFamily: string;
     bookReaderTapToPaginate: boolean;
     bookReaderReadingDirection: ReadingDirection;
-    bookReaderThemeName?: string;
+    bookReaderThemeName: string;
     bookReaderLayoutMode: BookPageLayoutMode;
 
     // Global
@@ -37,4 +33,3 @@ export const scalingOptions = [{text: 'Automatic', value: ScalingOption.Automati
 export const pageSplitOptions = [{text: 'Fit to Screen', value: PageSplitOption.FitSplit}, {text: 'Right to Left', value: PageSplitOption.SplitRightToLeft}, {text: 'Left to Right', value: PageSplitOption.SplitLeftToRight}, {text: 'No Split', value: PageSplitOption.NoSplit}];
 export const readingModes = [{text: 'Left to Right', value: READER_MODE.MANGA_LR}, {text: 'Up to Down', value: READER_MODE.MANGA_UD}, {text: 'Webtoon', value: READER_MODE.WEBTOON}];
 export const bookLayoutModes = [{text: 'Default', value: BookPageLayoutMode.Default}, {text: '1 Column', value: BookPageLayoutMode.Column1}, {text: '2 Column', value: BookPageLayoutMode.Column2}];
-export const bookColorThemes = [{text: 'Default', value: BookPageLayoutMode.Default}, {text: '1 Column', value: BookPageLayoutMode.Column1}, {text: '2 Column', value: BookPageLayoutMode.Column2}];

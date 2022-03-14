@@ -66,9 +66,11 @@ namespace API.Entities
         /// <remarks>Should default to Dark</remarks>
         public string BookThemeName { get; set; } = "Dark";
         /// <summary>
-        /// Book Reader Option: Should the background color be dark (Deprecated, use BookThemeName)
+        /// Book Reader Option: The way a page from a book is rendered. Default is as book dictates, 1 column is fit to height,
+        /// 2 column is fit to height, 2 columns
         /// </summary>
-        public bool BookReaderDarkMode { get; set; } = true;
+        /// <remarks>Defaults to Default</remarks>
+        public BookPageLayoutMode PageLayoutMode { get; set; } = BookPageLayoutMode.Default;
 
 
         public AppUser AppUser { get; set; }

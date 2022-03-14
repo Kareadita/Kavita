@@ -72,7 +72,7 @@
                                     <hr>
                                     <h3>Book Reader</h3>
                                     <div class="row g-0">
-                                        <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                        <!-- <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label id="dark-mode-label" class="form-label"></label>
                                             <div class="mb-3">
                                                 <div class="form-check form-switch">
@@ -80,7 +80,7 @@
                                                     <label class="form-check-label" for="dark-mode">Dark Mode</label>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> -->
     
                                         <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label id="taptopaginate-label" class="form-label"></label>
@@ -150,7 +150,7 @@
                                         </div>
 
                                         <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                            <label for="settings-booklayoutmode-option" class="form-label">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="booklayoutmodeTooltip" role="button" tabindex="0"></i>
+                                            <label for="settings-booklayoutmode-option" class="form-label">Page Layout Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="booklayoutmodeTooltip" role="button" tabindex="0"></i>
                                             <ng-template #booklayoutmodeTooltip>How to render the page. Default is as book dictates, 1 column will fit the height to device, 2 column will also split into 2 columns</ng-template>
                                             <span class="visually-hidden" id="settings-booklayoutmode-option-help"><ng-container [ngTemplateOutlet]="booklayoutmodeTooltip"></ng-container></span>
                                             <select class="form-select" aria-describedby="settings-booklayoutmode-option-help" formControlName="bookReaderLayoutMode">
