@@ -787,18 +787,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       
       const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
-      console.log('Scroll Left: ', scrollOffset);
-
-      const totalScroll = this.readingHtml.nativeElement.scrollWidth;
-      console.log('Total Scroll: ', totalScroll);
-
       const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
-      console.log('Page width: ', pageWidth);
-
-
 
       if (scrollOffset - pageWidth >= 0) {
         this.scrollService.scrollToX(scrollOffset - pageWidth, this.readingHtml.nativeElement);
+        // TODO: I need a way to trigger a "scroll" or get the first element on this screen that's visible
+        // let path = this.getXPathTo(intersectingEntries[0]);
+        //     if (path === '') { return; }
+        //     if (!path.startsWith('id')) {
+        //       path = '//html[1]/' + path;
+        //     }
+        //     this.lastSeenScrollPartPath = path;
+        this.saveProgress();
         return;
       }
     }
@@ -830,17 +830,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       
       const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
-      console.log('Scroll Left: ', scrollOffset);
       const totalScroll = this.readingHtml.nativeElement.scrollWidth;
-      console.log('Total Scroll: ', totalScroll);
-
-
       const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
-      console.log('Page width: ', pageWidth);
 
 
       if (scrollOffset + pageWidth < totalScroll) {
         this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);
+        this.saveProgress();
         return;
       }
     }
@@ -942,7 +938,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
-    this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET, this.reader.nativeElement);
+    if (this.layoutMode === BookPageLayoutMode.Default) {
+      this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET, this.reader.nativeElement);
+    } else {
+      this.scrollService.scrollToX(element.getBoundingClientRect().left + window.pageXOffset, this.reader.nativeElement);
+    }
+
+    
   }
 
 
