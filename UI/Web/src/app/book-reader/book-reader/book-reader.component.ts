@@ -26,6 +26,7 @@ import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
 import { PageStyle } from '../reader-settings/reader-settings.component';
 import { User } from 'src/app/_models/user';
+import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 
 
 enum TabID {
@@ -173,7 +174,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pageStyles!: PageStyle;
 
   
-  darkMode = false;
+  darkMode = true;
   backgroundColor: string = 'white';
   topOffset: number = 0; // Offset for drawer and rendering canvas
   /**
@@ -272,7 +273,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Take the height after page loads, subtract the top/bottom bar and the extra 20 pixels we add on
       return this.windowHeight - (this.topOffset *2) - (20*2) + 'px';
     }
-    return '';
+    return 'unset';
   }
 
   get ColumnLayout() {
@@ -449,6 +450,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.libraryService.getLibraryType(this.libraryId).pipe(take(1)).subscribe(type => {
           this.libraryType = type;
         });
+
+        this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
   
   
   
@@ -676,8 +679,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         // Apply scaling class to all images to ensure they scale down to max width to not blow out the reader
         Array.from(imgs).forEach(img => {
           this.renderer.addClass(img, 'scale-width');
-          const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
-          this.renderer.setStyle(img, 'max-width', pageWidth + 'px');
+          //const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
+          //this.renderer.setStyle(img, 'max-width', pageWidth + 'px');
           //this.renderer.setStyle(img, 'max-height', this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2));
           //this.renderer.setStyle(img, 'max-height', (this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2) - 40) + 'px');
         });
@@ -688,20 +691,40 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         .then(() => {
           console.log('all Images loaded');
           this.setupPage(part, scrollTop);
-
-          const images = this.readingSectionElemRef.nativeElement.querySelectorAll('img') || [];
-          Array.from(images).forEach(img => {
-            const height = this.readingHtml.nativeElement.clientHeight - (this.topOffset *2) - (20*2) - 10 - 60 + 'px';
-
-            // reading area height - offset from reading bars - 20 padding on top and bottom - 10 padding top
-            // Then we need wiggle room
-            // TODO: Check if we need to gate this for column layout only
-            this.renderer.setStyle(img, 'max-height', height);
-          });
+          this.updateImagesWithHeight();
           
         });
       }, 10);
     });
+  }
+
+  updateImagesWithHeight() {
+    const images = this.readingSectionElemRef.nativeElement.querySelectorAll('img') || [];
+
+    // if (this.readingHtml === undefined) {
+    //   console.error('Trying to update scaling on images without the images being injected');
+    //   return;
+    // }
+    
+    if (this.layoutMode !== BookPageLayoutMode.Default) {
+      
+      console.log('window height: ', window.innerHeight);
+      console.log('readingHtml height: ', this.readingHtml?.nativeElement?.clientHeight || 0);
+
+      const height = window.innerHeight - (this.topOffset *2) - (20*2)  + 'px'; // - 10 - 60
+      Array.from(images).forEach(img => {
+        // reading area height - offset from reading bars - 20 padding on top and bottom - 10 padding top
+        // Then we need wiggle room
+        this.renderer.setStyle(img, 'max-height', height);
+        console.log('setting max height: ', height);
+      });
+    } else {
+      Array.from(images).forEach(img => {
+        this.renderer.removeStyle(img, 'max-height');
+      });
+    }
+
+    
   }
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
@@ -712,8 +735,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.windowWidth = window.innerWidth
         || this.document.documentElement.clientWidth
         || this.document.body.clientWidth;
-    this.windowHeight = this.readingSectionElemRef.nativeElement.clientHeight;
-    this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
+    
+    this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, this.windowHeight);
+    
+    console.log('height: ', this.windowHeight);
+    this.updateLayoutMode(this.layoutMode || BookPageLayoutMode.Default);
     
 
 
@@ -876,11 +902,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
-
-  // getDarkModeBackgroundColor() {
-  //   return this.darkMode ? '#292929' : '#fff';
-  // }
-
   setOverrideStyles(theme: BookTheme) {
     // TODO: Put optimization in to avoid any work if the theme is the same as selected (or have reading settings control handle that)
 
@@ -985,6 +1006,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateLayoutMode(mode: BookPageLayoutMode) {
     this.layoutMode = mode;
+
+    // Remove any max-heights from column layout
+    this.updateImagesWithHeight();
   }
 
   // Table of Contents

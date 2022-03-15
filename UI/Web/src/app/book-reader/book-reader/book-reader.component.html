@@ -59,7 +59,7 @@
             <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" tabindex="-1"></div>
         </ng-container>
         
-        <div *ngIf="page !== undefined && scrollbarNeeded">
+        <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         </div>
     </div>
