@@ -2,3 +2,10 @@
     max-height: 90vh; // 600px
     overflow: auto;
 }
+
+.lock-active {
+    > .input-group-text {
+        background-color: var(--primary-color);
+        color: white;
+    }
+}

@@ -8,6 +8,7 @@ import { User } from '../_models/user';
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
 import { ThemeService } from '../theme.service';
+import { InviteUserResponse } from '../_models/invite-user-response';
 
 @Injectable({
   providedIn: 'root'
@@ -134,8 +135,8 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, {responseType: 'text' as 'json'});
   }
 
-  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, sendEmail: boolean}) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/invite', model, {responseType: 'text' as 'json'});
+  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>}) {
+    return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/invite', model);
   }
 
   confirmEmail(model: {email: string, username: string, password: string, token: string}) {
@@ -160,6 +161,20 @@ export class AccountService implements OnDestroy {
 
   update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
+  }
+
+  /**
+   * This will get latest preferences for a user and cache them into user store
+   * @returns 
+   */
+  getPreferences() {
+    return this.httpClient.get<Preferences>(this.baseUrl + 'users/get-preferences').pipe(map(pref => {
+      if (this.currentUser !== undefined || this.currentUser != null) {
+        this.currentUser.preferences = pref;
+        this.setCurrentUser(this.currentUser);
+      }
+      return pref;
+    }), takeUntil(this.onDestroy));
   }
 
   updatePreferences(userPreferences: Preferences) {

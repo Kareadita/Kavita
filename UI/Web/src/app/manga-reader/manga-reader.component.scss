@@ -4,6 +4,9 @@ $side-width: 25%;
 $dash-width: 3px;
 $pointer-offset: 5px;
 
+img {
+  user-select: none;
+}
 
 @media(min-width: 600px) {
     .overlay .left .i {
@@ -14,13 +17,39 @@ $pointer-offset: 5px;
     }
 } 
 
-// .btn-icon {
-//     color: white;
-// }
-
-canvas {
-    position: absolute;
+.reading-area {
+  display: flex;
+  justify-content: center;
+  position: relative;
 }
+
+.image-container {
+  text-align: center;
+  display: block;
+  height: 100vh;
+
+  #image-1 {
+    &.double {
+      margin: 0 0 0 auto;
+    }
+  }
+
+  &.reverse {
+    flex-direction: row-reverse;
+    overflow: unset;
+    justify-content: flex-end;
+  }
+  
+  #image-2 {
+    &.double {
+      margin: 0 auto 0 0;
+    }
+  }
+}
+
+// canvas {
+//     //position: absolute; // JOE: Not sure why we have this, but it breaks the renderer
+// }
 
 .reader {
     background-color: var(--manga-reader-bg-color);
@@ -30,9 +59,6 @@ canvas {
         align-items: center;
     }
 }
-
-
-
 
 
 .loading {
@@ -62,29 +88,54 @@ canvas {
 }
 
 // Fitting Options
+
 .full-height {
-    position: absolute;
-    margin: auto;
-    top: 0px;
-    left: 0;
-    right: 0;
-    bottom: 0px;
-    height: 100%;
+  width: auto;
+  margin: 0 auto;
+  height: 100%;
+  vertical-align: top;
 }
 
 .original {
-    position: absolute;
-    margin-left: auto;
-    margin-right: auto;
-    top: 0px;
-    bottom: 0px;
-    left: 0;
-    right: 0;    
+  align-self: center;  
 }
 
 .full-width {
     width: 100%;
+    align-self: center;  
+
+    &.double {
+      width: 50%;
+
+      &.cover {
+        width: 100%;
+      }
+    }
 }
+
+.center-double {
+  display: flex;
+  overflow: unset;
+}
+
+.fit-to-width-double-offset {
+  width: 100%;
+}
+
+.original-double-offset {
+  width: 100%;
+}
+
+.fit-to-height-double-offset {
+  position: absolute;
+  height: 100vh;
+  object-fit: scale-down;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  max-width: 100%;
+}
+
 
 
 .right {
@@ -92,7 +143,7 @@ canvas {
     right: 0px;
     top: 0px;
     width: $side-width;
-    height: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;
@@ -114,7 +165,7 @@ canvas {
     left: 0px;
     top: 0px;
     width: $side-width;
-    height: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;

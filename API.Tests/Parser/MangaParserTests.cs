@@ -168,6 +168,7 @@ namespace API.Tests.Parser
         [InlineData("Seraph of the End - Vampire Reign 093  (2020) (Digital) (LuCaZ).cbz", "Seraph of the End - Vampire Reign")]
         [InlineData("Love Hina - Volume 01 [Scans].pdf", "Love Hina")]
         [InlineData("It's Witching Time! 001 (Digital) (Anonymous1234)", "It's Witching Time!")]
+        [InlineData("Zettai Karen Children v02 c003 - The Invisible Guardian (2) [JS Scans]", "Zettai Karen Children")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));

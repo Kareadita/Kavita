@@ -705,7 +705,7 @@ namespace API.Services
         }
 
 
-        private void FlattenDirectory(IDirectoryInfo root, IDirectoryInfo directory, ref int directoryIndex)
+        private static void FlattenDirectory(IFileSystemInfo root, IDirectoryInfo directory, ref int directoryIndex)
         {
             if (!root.FullName.Equals(directory.FullName))
             {
@@ -727,6 +727,9 @@ namespace API.Services
 
             foreach (var subDirectory in directory.EnumerateDirectories().OrderByNatural(d => d.FullName))
             {
+                // We need to check if the directory is not a blacklisted (ie __MACOSX)
+                if (Parser.Parser.HasBlacklistedFolderInPath(subDirectory.FullName)) continue;
+
                 FlattenDirectory(root, subDirectory, ref directoryIndex);
             }
         }

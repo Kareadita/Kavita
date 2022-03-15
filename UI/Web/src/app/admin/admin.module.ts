@@ -19,6 +19,7 @@ import { InviteUserComponent } from './invite-user/invite-user.component';
 import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
+import { UserSettingsModule } from '../user-settings/user-settings.module';
 
 
 
@@ -49,7 +50,8 @@ import { EditUserComponent } from './edit-user/edit-user.component';
     NgbTooltipModule,
     NgbDropdownModule,
     SharedModule,
-    PipeModule
+    PipeModule,
+    UserSettingsModule // API-key componet
   ],
   providers: []
 })

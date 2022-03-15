@@ -12,6 +12,7 @@ namespace API.Data.Migrations
                 name: "BookThemeName",
                 table: "AppUserPreferences",
                 type: "TEXT",
+                defaultValue: "Dark",
                 nullable: true);
         }
 

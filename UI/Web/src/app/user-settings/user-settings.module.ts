@@ -10,7 +10,8 @@ import { ApiKeyComponent } from './api-key/api-key.component';
 import { SharedModule } from '../shared/shared.module';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
-
+import { PipeModule } from '../pipe/pipe.module';
+import { ColorPickerModule } from 'ngx-color-picker';
 
 
 
@@ -30,10 +31,12 @@ import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
     NgbTooltipModule,
     NgxSliderModule,
     UserSettingsRoutingModule,
-    SharedModule // SentenceCase pipe
+    PipeModule,
+    ColorPickerModule, // User prefernces background color
   ], 
   exports: [
-    SiteThemeProviderPipe
+    SiteThemeProviderPipe,
+    ApiKeyComponent
   ]
 })
 export class UserSettingsModule { }

@@ -496,7 +496,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
       // Find the continue point chapter and load it
-      this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => this.openChapter(chapter));
+      const unreadChapters = volume.chapters.filter(item => item.pagesRead < item.pages);
+      if (unreadChapters.length > 0) {
+        this.openChapter(unreadChapters[0]);
+        return;
+      }
+      this.openChapter(volume.chapters[0]);
       return;
     }
 
@@ -509,7 +514,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' }); // , scrollable: true (these don't work well on mobile)
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
     modalRef.componentInstance.seriesId = this.series?.id;
@@ -522,7 +527,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   openEditSeriesModal() {
-    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'lg' }); // scrollable: true, size: 'lg', windowClass: 'scrollable-modal' (these don't work well on mobile)
+    const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'xl' });
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);

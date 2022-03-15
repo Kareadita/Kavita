@@ -27,7 +27,6 @@ namespace API.Services
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
         Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
-        string FindCoverImageFilename(string archivePath, IList<string> entryNames);
     }
 
     /// <summary>
@@ -127,8 +126,8 @@ namespace API.Services
         public static string FindFolderEntry(IEnumerable<string> entryFullNames)
         {
             var result = entryFullNames
-                .OrderByNatural(Path.GetFileNameWithoutExtension)
                 .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
                 .FirstOrDefault(Parser.Parser.IsCoverImage);
 
             return string.IsNullOrEmpty(result) ? null : result;
@@ -144,8 +143,8 @@ namespace API.Services
             // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
             // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
             var fullNames = entryFullNames
-                .OrderByNatural(c => c.GetFullPathWithoutExtension())
                 .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)) && Parser.Parser.IsImage(path))
+                .OrderByNatural(c => c.GetFullPathWithoutExtension())
                 .ToList();
             if (fullNames.Count == 0) return null;
 
@@ -201,9 +200,8 @@ namespace API.Services
                     case ArchiveLibrary.Default:
                     {
                         using var archive = ZipFile.OpenRead(archivePath);
-                        var entryNames = archive.Entries.Select(e => e.FullName).ToList();
 
-                        var entryName = FindCoverImageFilename(archivePath, entryNames);
+                        var entryName = FindCoverImageFilename(archivePath, archive.Entries.Select(e => e.FullName));
                         var entry = archive.Entries.Single(e => e.FullName == entryName);
 
                         using var stream = entry.Open();
@@ -242,7 +240,7 @@ namespace API.Services
         /// <param name="archivePath"></param>
         /// <param name="entryNames"></param>
         /// <returns></returns>
-        public string FindCoverImageFilename(string archivePath, IList<string> entryNames)
+        public static string FindCoverImageFilename(string archivePath, IEnumerable<string> entryNames)
         {
             var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
             return entryName;

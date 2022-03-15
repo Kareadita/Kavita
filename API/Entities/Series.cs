@@ -58,6 +58,10 @@ namespace API.Entities
         /// </summary>
         public MangaFormat Format { get; set; } = MangaFormat.Unknown;
 
+        public bool NameLocked { get; set; }
+        public bool SortNameLocked { get; set; }
+        public bool LocalizedNameLocked { get; set; }
+
         public SeriesMetadata Metadata { get; set; }
         public ICollection<AppUserRating> Ratings { get; set; } = new List<AppUserRating>();
         public ICollection<AppUserProgress> Progress { get; set; } = new List<AppUserProgress>();

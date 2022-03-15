@@ -165,6 +165,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("AutoCloseMenu")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("BookReaderDarkMode")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("BookReaderFontFamily")
                         .HasColumnType("TEXT");
 
@@ -181,14 +184,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("BookReaderTapToPaginate")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("BookThemeName")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("Dark");
-
-                    b.Property<int>("PageLayoutMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")

@@ -27,9 +27,7 @@
         <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
-                    <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()">
-                        
-                    </button>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()"></button>
                 </h2>
                 
             </div>
@@ -324,7 +322,7 @@
                 </div>
                 <div class="col-md-2 me-3"></div>
             </div>
-            <div class="row justify-content-center g-0">
+            <div class="row justify-content-center g-0 mt-2">
                 <div class="col-md-2 me-3" *ngIf="!filterSettings.sortDisabled">
                     <form [formGroup]="sortGroup">
                         <div class="mb-3">

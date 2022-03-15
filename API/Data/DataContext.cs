@@ -63,6 +63,9 @@ namespace API.Data
             builder.Entity<AppUserPreferences>()
                 .Property(b => b.BookThemeName)
                 .HasDefaultValue("Dark");
+            builder.Entity<AppUserPreferences>()
+                .Property(b => b.BackgroundColor)
+                .HasDefaultValue("#000000");
         }
 
 

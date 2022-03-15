@@ -6,7 +6,6 @@ import { RecentlyAddedComponent } from './recently-added/recently-added.componen
 import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
-import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
@@ -15,6 +14,7 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
 const routes: Routes = [
+  {path: '', component: UserLoginComponent},
   {
     path: 'admin',
     canActivate: [AdminGuard],
@@ -63,14 +63,12 @@ const routes: Routes = [
     children: [
       {path: 'library', component: DashboardComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
-      {path: 'on-deck', component: OnDeckComponent},
       {path: 'all-series', component: AllSeriesComponent},
 
     ]
   },
   {path: 'theme', component: ThemeTestComponent},
-  
-  {path: '', component: UserLoginComponent},
+
   {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
   {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];

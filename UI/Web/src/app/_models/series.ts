@@ -11,6 +11,9 @@ export interface Series {
     localizedName: string;
     sortName: string;
     coverImageLocked: boolean;
+    sortNameLocked: boolean;
+    localizedNameLocked: boolean;
+    nameLocked: boolean;
     volumes: Volume[];
     /**
      * Total pages in series

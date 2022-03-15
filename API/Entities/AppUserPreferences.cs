@@ -31,6 +31,18 @@ namespace API.Entities
         /// </summary>
         public bool AutoCloseMenu { get; set; } = true;
         /// <summary>
+        /// Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change
+        /// </summary>
+        public bool ShowScreenHints { get; set; } = true;
+        /// <summary>
+        /// Manga Reader Option: How many pages to display in the reader at once
+        /// </summary>
+        public LayoutMode LayoutMode { get; set; } = LayoutMode.Single;
+        /// <summary>
+        /// Manga Reader Option: Background color of the reader
+        /// </summary>
+        public string BackgroundColor { get; set; } = "#000000";
+        /// <summary>
         /// Book Reader Option: Override extra Margin
         /// </summary>
         public int BookReaderMargin { get; set; } = 15;
@@ -59,7 +71,6 @@ namespace API.Entities
         /// </summary>
         /// <remarks>Should default to Dark</remarks>
         public SiteTheme Theme { get; set; }
-
         /// <summary>
         /// Book Reader Option: The color theme to decorate the book contents
         /// </summary>
