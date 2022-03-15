@@ -261,9 +261,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case BookPageLayoutMode.Default:
         return 'unset';
       case BookPageLayoutMode.Column1:
-        return (this.windowWidth - 40) + 'px';
+        return (this.windowWidth /2) + 'px';
       case BookPageLayoutMode.Column2:
-        return ((this.windowWidth / 2) - 40) + 'px';
+        return ((this.windowWidth / 4)) + 'px';
     }
   }
 
@@ -674,7 +674,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         // Apply scaling class to all images to ensure they scale down to max width to not blow out the reader
-        Array.from(imgs).forEach(img => this.renderer.addClass(img, 'scale-width'));
+        Array.from(imgs).forEach(img => {
+          this.renderer.addClass(img, 'scale-width');
+          const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
+          this.renderer.setStyle(img, 'max-width', pageWidth + 'px');
+          this.renderer.setStyle(img, 'max-height', '100vh');
+        });
 
         Promise.all(Array.from(imgs)
         .filter(img => !img.complete)
@@ -690,11 +695,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = false;
     this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
+    // Virtual Paging stuff
     this.windowWidth = window.innerWidth
         || this.document.documentElement.clientWidth
         || this.document.body.clientWidth;
     this.windowHeight = this.readingSectionElemRef.nativeElement.clientHeight;
     this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
+    
 
 
     // Find all the part ids and their top offset
@@ -742,11 +749,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       
       const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
       console.log('Scroll Left: ', scrollOffset);
-      //27880
+
       const totalScroll = this.readingHtml.nativeElement.scrollWidth;
       console.log('Total Scroll: ', totalScroll);
 
-      const pageWidth = this.windowWidth + 20; // 20px for the column gap
+      const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
       console.log('Page width: ', pageWidth);
 
 
@@ -788,8 +795,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const totalScroll = this.readingHtml.nativeElement.scrollWidth;
       console.log('Total Scroll: ', totalScroll);
 
-      const pageWidth = this.windowWidth + 20; // 20px for the column gap
+
+      const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
       console.log('Page width: ', pageWidth);
+
 
       if (scrollOffset + pageWidth < totalScroll) {
         this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);

@@ -110,8 +110,9 @@ $primary-color: #0062cc;
     .book-content {
         column-count: 1;
         column-gap: 20px;
-        overflow: auto;
+        overflow: hidden;
         word-break: break-word;
+        overflow-wrap: break-word;
     }
 }
 
@@ -119,8 +120,9 @@ $primary-color: #0062cc;
     .book-content {
         column-count: 2;
         column-gap: 20px;
-        overflow: auto;
+        overflow: hidden;
         word-break: break-word;
+        overflow-wrap: break-word;
     }
 
 }
@@ -140,6 +142,10 @@ $primary-color: #0062cc;
     max-width: 100%;
     object-fit: contain;
     object-position: top center;
+    break-inside: avoid;
+    break-before: column;
+    max-height: 100vh;
+    
 }
 
 
@@ -147,6 +153,11 @@ $primary-color: #0062cc;
 .icon-primary-color {
     color: $primary-color;
 }
+
+img {
+    break-inside: avoid;
+}
+
 
 
 

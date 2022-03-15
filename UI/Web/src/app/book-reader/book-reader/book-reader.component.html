@@ -51,7 +51,7 @@
     <div #readingSection class="reading-section {{ColumnLayout}}" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" 
         [@isLoading]="isLoading ? true : false">
 
-        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px', 'height': ColumnHeight}" 
+        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px', 'height': ColumnHeight, 'column-width': ColumnWidth}" 
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <ng-container  *ngIf="clickToPaginate">
