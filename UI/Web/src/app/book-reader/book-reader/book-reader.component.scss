@@ -95,6 +95,7 @@ $primary-color: #0062cc;
 
 .book-content {
     position: relative;
+    padding-top: 20px;
 
     a, :link {
         color: var(--brtheme-link-text-color);
@@ -145,17 +146,13 @@ $primary-color: #0062cc;
     break-inside: avoid;
     break-before: column;
     max-height: 100vh;
-    
+
 }
 
 
 // Click to Paginate styles
 .icon-primary-color {
     color: $primary-color;
-}
-
-img {
-    break-inside: avoid;
 }
 
 

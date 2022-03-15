@@ -270,7 +270,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ColumnHeight() {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       // Take the height after page loads, subtract the top/bottom bar and the extra 20 pixels we add on
-      return this.windowHeight - (this.topOffset *2) - 20 + 'px';
+      return this.windowHeight - (this.topOffset *2) - (20*2) + 'px';
     }
     return '';
   }
@@ -678,14 +678,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.renderer.addClass(img, 'scale-width');
           const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
           this.renderer.setStyle(img, 'max-width', pageWidth + 'px');
-          this.renderer.setStyle(img, 'max-height', '100vh');
+          //this.renderer.setStyle(img, 'max-height', this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2));
+          //this.renderer.setStyle(img, 'max-height', (this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2) - 40) + 'px');
         });
 
         Promise.all(Array.from(imgs)
         .filter(img => !img.complete)
         .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
         .then(() => {
+          console.log('all Images loaded');
           this.setupPage(part, scrollTop);
+
+          const images = this.readingSectionElemRef.nativeElement.querySelectorAll('img') || [];
+          Array.from(images).forEach(img => {
+            const height = this.readingHtml.nativeElement.clientHeight - (this.topOffset *2) - (20*2) - 10 - 60 + 'px';
+
+            // reading area height - offset from reading bars - 20 padding on top and bottom - 10 padding top
+            // Then we need wiggle room
+            // TODO: Check if we need to gate this for column layout only
+            this.renderer.setStyle(img, 'max-height', height);
+          });
+          
         });
       }, 10);
     });
