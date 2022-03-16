@@ -7,6 +7,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { CardsModule } from '../cards/cards.module';
 import { FormsModule } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { RouterModule } from '@angular/router';
 
 
 
@@ -18,6 +19,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
   ],
   imports: [
     CommonModule,
+    RouterModule,
     PipeModule,
     CardsModule,
     FormsModule,

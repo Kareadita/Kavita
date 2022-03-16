@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import {  ActivatedRoute, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { filter, map, Subject, takeUntil } from 'rxjs';
 import { NavService } from '../../_services/nav.service';
 
@@ -29,37 +29,44 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
   highlighted = false;
   private onDestroy: Subject<void> = new Subject();
    
-  constructor(public navService: NavService, private router: Router) {
+  constructor(public navService: NavService, private router: Router, private route: ActivatedRoute) {
     router.events
       .pipe(filter(event => event instanceof NavigationEnd), 
             takeUntil(this.onDestroy),
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
-        const page = evt.url.split('?')[0];
-
-        if (this.link === undefined) {
-          this.highlighted = false;
-          return;
-        }
-
-        if (this.comparisonMethod === 'equals' && page === this.link) {
-          this.highlighted = true;
-          return;
-        }
-        if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
-          this.highlighted = true;
-          return;
-        }
-
-        this.highlighted = false;
+        this.updateHightlight(evt.url.split('?')[0]);
       });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    setTimeout(() => {
+      this.updateHightlight(this.router.url.split('?')[0]);
+    }, 100);
+    
+  }
 
   ngOnDestroy(): void {
       this.onDestroy.next();
       this.onDestroy.complete();
+  }
+
+  updateHightlight(page: string) {
+    if (this.link === undefined) {
+      this.highlighted = false;
+      return;
+    }
+
+    if (this.comparisonMethod === 'equals' && page === this.link) {
+      this.highlighted = true;
+      return;
+    }
+    if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
+      this.highlighted = true;
+      return;
+    }
+
+    this.highlighted = false;
   }
 
 }
