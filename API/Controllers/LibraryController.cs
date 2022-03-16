@@ -150,15 +150,9 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
-        public async Task<ActionResult> Scan(int libraryId)
+        public ActionResult Scan(int libraryId)
         {
-            // TODO: Remove this debug code
-            await _eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent("Some of the root folders for the library are empty.",
-                    "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                "Scan will be aborted. " +
-                "Check that your mount is connected or change the library's root folder and rescan"));
-            //_taskScheduler.ScanLibrary(libraryId);
+            _taskScheduler.ScanLibrary(libraryId);
             return Ok();
         }
 
