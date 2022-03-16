@@ -10,7 +10,6 @@
 
             <ng-container *ngIf="debugMode">
                 <li class="list-group-item dark-menu-item">
-                    <!-- <div class="spinner-grow text-primary small-spinner" role="status"></div> -->
                     <div class="h6 mb-1">Title goes here</div>
                     <div class="accent-text mb-1">Subtitle goes here</div> 
                     <div class="progress-container row g-0 align-items-center">
@@ -85,7 +84,7 @@
                         
                         <span><i class="fa-solid fa-triangle-exclamation me-2"></i>{{error.title}}</span>
                         <div class="accent-text" *ngIf="error.subTitle !== ''">Click for more information</div>
-                        <button type="button" class="btn-close float-end" aria-label="close"></button>
+                        <button type="button" class="btn-close float-end" aria-label="close" (click)="removeError(error, $event)"></button>
                     </li>
                 </ng-container>
             </ng-container>

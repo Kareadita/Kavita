@@ -62,16 +62,13 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Debounce for testing. Kavita's too fast
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
-      if (event.event.endsWith('error')) {
-        // TODO: Show an error handle
-      } else if (event.event === EVENTS.NotificationProgress) {
+      if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
-      } else if (event.event === EVENTS.ScanLibraryError || event.event === EVENTS.Error) {
+      } else if (event.event === EVENTS.Error) {
         const values = this.errorSource.getValue();
         values.push(event.payload as ErrorEvent);
         this.errorSource.next(values);
         this.activeEvents += 1;
-        // We will use a timeout to remove the message or a click handler? 
       }
     });
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
@@ -135,7 +132,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
-  seeMoreError(error: ErrorEvent) {
+  async seeMoreError(error: ErrorEvent) {
     const config = new ConfirmConfig();
     config.buttons = [
       {text: 'Dismiss', type: 'primary'},
@@ -143,7 +140,21 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     ];
     config.header = error.title;
     config.content = error.subTitle;
-    this.confirmService.alert(error.subTitle || error.title, config);
+    var result = await this.confirmService.alert(error.subTitle || error.title, config);
+    if (result) {
+      this.removeError(error);
+    }
+  }
+
+  removeError(error: ErrorEvent, event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    let data = this.errorSource.getValue();
+    data = data.filter(m => m !== error); 
+    this.errorSource.next(data);
+    this.activeEvents = Math.max(this.activeEvents - 1, 0);
   }
 
   prettyPrintProgress(progress: number) {
