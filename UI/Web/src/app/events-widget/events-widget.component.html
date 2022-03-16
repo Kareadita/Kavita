@@ -1,7 +1,7 @@
 <ng-container *ngIf="isAdmin">
     
     <button type="button" class="btn btn-icon {{activeEvents > 0 ? 'colored' : ''}}" 
-        [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'">
+        [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
         <i aria-hidden="true" class="fa fa-wave-square nav"></i>
     </button>
 
@@ -33,8 +33,14 @@
                             </div>
                         </div>
 
-                  </div>
-                        
+                  </div>   
+                </li>
+                <li class="list-group-item dark-menu-item error">
+                    <div>
+                        <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2"></i>There was some library scan error</div>
+                        <div class="accent-text mb-1">Click for more information</div>
+                    </div>
+                    <button type="button" class="btn-close float-end" aria-label="close" ></button>
                 </li>
             </ng-container>
             <!-- Progress Events-->
@@ -81,9 +87,10 @@
             <ng-container *ngIf="errors$ | async as errors">
                 <ng-container *ngFor="let error of errors">
                     <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMoreError(error)">
-                        
-                        <span><i class="fa-solid fa-triangle-exclamation me-2"></i>{{error.title}}</span>
-                        <div class="accent-text" *ngIf="error.subTitle !== ''">Click for more information</div>
+                        <div>
+                            <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2"></i>{{error.title}}</div>
+                            <div class="accent-text mb-1">Click for more information</div>
+                        </div>
                         <button type="button" class="btn-close float-end" aria-label="close" (click)="removeError(error, $event)"></button>
                     </li>
                 </ng-container>
@@ -95,7 +102,7 @@
                     <div>{{onlineUsers.length}} Users online</div>
                 </li>
                 <li class="list-group-item dark-menu-item" *ngIf="activeEvents < 1 && onlineUsers.length <= 1">Not much going on here</li>
-                <!-- <li class="list-group-item dark-menu-item">Active Events: {{activeEvents}}</li> -->
+                <li class="list-group-item dark-menu-item" *ngIf="debugMode">Active Events: {{activeEvents}}</li>
             </ng-container>
         </ul>
     </ng-template>

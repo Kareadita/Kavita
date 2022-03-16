@@ -77,8 +77,19 @@
 
 .error {
     cursor: pointer;
-    color: var(--error-color);
+    position: relative;
+    .h6 {
+        color: var(--error-color);
+    }
+
     i.fa {
         color: var(--primary-color) !important;
+    }
+
+    .btn-close {
+        top: 5px;
+        right: 10px;
+        font-size: 11px;
+        position: absolute;
     }
 }
