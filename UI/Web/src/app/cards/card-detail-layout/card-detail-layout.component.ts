@@ -90,7 +90,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   }
 
   applyMetadataFilter(event: FilterEvent) {
-    console.log('apply called in card detail: ', event);
     this.applyFilter.emit(event);
     this.updateApplied++;
   }

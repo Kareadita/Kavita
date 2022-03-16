@@ -23,6 +23,8 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
    */
   @Input() link: string | undefined;
 
+  @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
+
 
   highlighted = false;
   private onDestroy: Subject<void> = new Subject();
@@ -33,11 +35,23 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
             takeUntil(this.onDestroy),
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
-        console.log(evt.url.split('?')[0]);
-        console.log(this.link);
-        if (this.link !== undefined && evt.url.split('?')[0] === this.link) {
-          this.highlighted = true;
+        const page = evt.url.split('?')[0];
+
+        if (this.link === undefined) {
+          this.highlighted = false;
+          return;
         }
+
+        if (this.comparisonMethod === 'equals' && page === this.link) {
+          this.highlighted = true;
+          return;
+        }
+        if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
+          this.highlighted = true;
+          return;
+        }
+
+        this.highlighted = false;
       });
   }
 
