@@ -12,6 +12,10 @@ export class UploadService {
   constructor(private httpClient: HttpClient) { }
 
 
+  uploadByUrl(url: string) {
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-url', {url}, {responseType: 'text' as 'json'});
+  }
+
   /**
    * 
    * @param seriesId Series to overwrite cover image for

@@ -74,7 +74,7 @@ public class ScannerService : IScannerService
 
         if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
         {
-            _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
         }
 
