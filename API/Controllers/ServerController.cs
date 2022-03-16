@@ -124,17 +124,6 @@ namespace API.Controllers
             return Ok(await _versionUpdaterService.GetAllReleases());
         }
 
-        // [HttpGet("active-jobs")]
-        // public ActionResult<string> GetActiveJobs()
-        // {
-        //     // This doesn't work it seems..I don't think an API is the way to handle this. Hooking into SignalR would be much better.
-        //     var jobs = JobStorage.Current.GetMonitoringApi();
-        //     var processingJobs = jobs.EnqueuedJobs("", 0, int.MaxValue);
-        //     var inprogressJobs = jobs.ProcessingJobs(0, int.MaxValue);
-        //     return Ok("");
-        //
-        // }
-
         /// <summary>
         /// Is this server accessible to the outside net
         /// </summary>

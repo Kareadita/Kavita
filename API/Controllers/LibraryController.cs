@@ -11,7 +11,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
-using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,18 +26,16 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IEventHub _eventHub;
 
         public LibraryController(IDirectoryService directoryService,
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
-            IUnitOfWork unitOfWork, IEventHub eventHub)
+            IUnitOfWork unitOfWork)
         {
             _directoryService = directoryService;
             _logger = logger;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
-            _eventHub = eventHub;
         }
 
         /// <summary>
