@@ -133,28 +133,24 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.metadata = metadata;
 
         this.setupTypeaheads();
-        this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
-        this.editSeriesForm.get('ageRating')?.setValue(this.metadata.ageRating);
-        this.editSeriesForm.get('publicationStatus')?.setValue(this.metadata.publicationStatus);
-        this.editSeriesForm.get('language')?.setValue(this.metadata.language);
+        this.editSeriesForm.get('summary')?.patchValue(this.metadata.summary);
+        this.editSeriesForm.get('ageRating')?.patchValue(this.metadata.ageRating);
+        this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
+        this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
 
         this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('name')?.touched) return;
           this.series.nameLocked = true;
         });
 
         this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('sortName')?.touched) return;
           this.series.sortNameLocked = true;
         });
 
         this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('localizedName')?.touched) return;
           this.series.localizedNameLocked = true;
         });
 
         this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('summary')?.touched) return;
           this.metadata.summaryLocked = true;
           this.metadata.summary = val;
         });
@@ -203,7 +199,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.setupLanguageTypeahead()
     ]).subscribe(results => {
       this.collectionTags = this.metadata.collectionTags;
-      this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
     });
   }
 
