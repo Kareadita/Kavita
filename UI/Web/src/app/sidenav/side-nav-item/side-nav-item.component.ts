@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import {  ActivatedRoute, NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, Subject, takeUntil } from 'rxjs';
 import { NavService } from '../../_services/nav.service';
 
@@ -29,7 +29,7 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
   highlighted = false;
   private onDestroy: Subject<void> = new Subject();
    
-  constructor(public navService: NavService, private router: Router, private route: ActivatedRoute) {
+  constructor(public navService: NavService, private router: Router) {
     router.events
       .pipe(filter(event => event instanceof NavigationEnd), 
             takeUntil(this.onDestroy),
