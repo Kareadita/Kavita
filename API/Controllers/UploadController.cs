@@ -39,8 +39,7 @@ namespace API.Controllers
         /// This stores a file (image) in temp directory for use in a cover image replacement flow.
         /// This is automatically cleaned up.
         /// </summary>
-        /// <param name="fileUrl">Escaped url to download from</param>
-        /// <param name="filename">Filename to use. Should be entity id</param>
+        /// <param name="dto">Escaped url to download from</param>
         /// <returns>filename</returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("upload-by-url")]
@@ -53,10 +52,7 @@ namespace API.Controllers
 
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"Could not download file");
 
-            //format =  _directoryService.FileSystem.Path.GetExtension(path).Replace(".", ""));
             return $"coverupload_{dateString}.{format}";
-            //Response.AddCacheHeader(path);
-            //return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
         /// <summary>
