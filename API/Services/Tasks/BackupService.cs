@@ -91,6 +91,8 @@ public class BackupService : IBackupService
         if (!_directoryService.ExistOrCreate(backupDirectory))
         {
             _logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent("Backup Service Error",$"Could not write to {backupDirectory}; aborting backup"));
             return;
         }
 
@@ -101,7 +103,9 @@ public class BackupService : IBackupService
 
         if (File.Exists(zipPath))
         {
-            _logger.LogInformation("{ZipFile} already exists, aborting", zipPath);
+            _logger.LogCritical("{ZipFile} already exists, aborting", zipPath);
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent("Backup Service Error",$"{zipPath} already exists, aborting"));
             return;
         }
 

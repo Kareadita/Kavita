@@ -4,6 +4,7 @@ using API.Data;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -109,6 +110,23 @@ namespace API.Controllers
 
             Response.AddCacheHeader(file.FullName);
             return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
+        }
+
+        /// <summary>
+        /// Returns a temp coverupload image
+        /// </summary>
+        /// <param name="filename">Filename of file. This is used with upload/upload-by-url</param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("cover-upload")]
+        public ActionResult GetCoverUploadImage(string filename)
+        {
+            var path = Path.Join(_directoryService.TempDirectory, filename);
+            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"File does not exist");
+            var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+
+            Response.AddCacheHeader(path);
+            return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
     }
 }

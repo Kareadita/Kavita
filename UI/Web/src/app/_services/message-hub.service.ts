@@ -16,7 +16,10 @@ export enum EVENTS {
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
   SeriesAddedToCollection = 'SeriesAddedToCollection',
-  ScanLibraryError = 'ScanLibraryError',
+  /**
+   * A generic error that occurs during operations on the server
+   */
+  Error = 'Error',
   BackupDatabaseProgress = 'BackupDatabaseProgress',
   /**
    * A subtype of NotificationProgress that represents maintenance cleanup on server-owned resources
@@ -149,15 +152,11 @@ export class MessageHubService {
       });
     });
 
-    this.hubConnection.on(EVENTS.ScanLibraryError, resp => {
+    this.hubConnection.on(EVENTS.Error, resp => {
       this.messagesSource.next({
-        event: EVENTS.ScanLibraryError,
+        event: EVENTS.Error,
         payload: resp.body
       });
-      if (this.isAdmin) {
-        // TODO: Just show the error, RBS is done in eventhub
-        this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
-      }
     });
 
     this.hubConnection.on(EVENTS.SeriesAdded, resp => {

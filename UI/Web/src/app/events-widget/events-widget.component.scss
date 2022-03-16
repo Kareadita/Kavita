@@ -74,3 +74,22 @@
     }
     color: var(--primary-color);
 }
+
+.error {
+    cursor: pointer;
+    position: relative;
+    .h6 {
+        color: var(--error-color);
+    }
+
+    i.fa {
+        color: var(--primary-color) !important;
+    }
+
+    .btn-close {
+        top: 5px;
+        right: 10px;
+        font-size: 11px;
+        position: absolute;
+    }
+}

@@ -7,6 +7,7 @@ using API.DTOs.Update;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
+using Hangfire;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

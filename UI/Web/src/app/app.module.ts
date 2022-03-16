@@ -27,7 +27,7 @@ import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
 import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
-import { NavEventsToggleComponent } from './nav-events-toggle/nav-events-toggle.component';
+import { EventsWidgetComponent } from './events-widget/events-widget.component';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { RegistrationModule } from './registration/registration.module';
@@ -48,7 +48,7 @@ import { ColorPickerModule } from 'ngx-color-picker';
     ReviewSeriesModalComponent,
     RecentlyAddedComponent,
     DashboardComponent,
-    NavEventsToggleComponent,
+    EventsWidgetComponent,
     SeriesMetadataDetailComponent,
     AllSeriesComponent,
     GroupedTypeaheadComponent,

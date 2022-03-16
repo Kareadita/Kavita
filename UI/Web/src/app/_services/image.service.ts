@@ -83,6 +83,10 @@ export class ImageService implements OnDestroy {
     return this.baseUrl + 'image/bookmark?chapterId=' + chapterId + '&pageNum=' + pageNum + '&apiKey=' + encodeURIComponent(this.apiKey);
   }
 
+  getCoverUploadImage(filename: string) {
+    return this.baseUrl + 'image/cover-upload?filename=' + encodeURIComponent(filename);
+  }
+
   updateErroredImage(event: any) {
     event.target.src = this.placeholderImage;
   }

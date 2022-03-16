@@ -38,10 +38,6 @@ namespace API.SignalR
         /// </summary>
         public const string SeriesAddedToCollection = "SeriesAddedToCollection";
         /// <summary>
-        /// When an error occurs during a scan library task
-        /// </summary>
-        public const string ScanLibraryError = "ScanLibraryError";
-        /// <summary>
         /// Event sent out during backing up the database
         /// </summary>
         private const string BackupDatabaseProgress = "BackupDatabaseProgress";
@@ -209,18 +205,22 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage ScanLibraryErrorEvent(int libraryId, string libraryName)
+        /**
+         * A generic error that will show on events widget in the UI
+         */
+        public static SignalRMessage ErrorEvent(string title, string subtitle)
         {
             return new SignalRMessage
             {
-                Name = ScanLibraryError,
-                Title = "Error",
-                SubTitle = $"Error Scanning {libraryName}",
+                Name = Error,
+                Title = title,
+                SubTitle = subtitle,
                 Progress = ProgressType.None,
                 EventType = ProgressEventType.Single,
                 Body = new
                 {
-                    LibraryId = libraryId,
+                    Title = title,
+                    SubTitle = subtitle,
                 }
             };
         }
