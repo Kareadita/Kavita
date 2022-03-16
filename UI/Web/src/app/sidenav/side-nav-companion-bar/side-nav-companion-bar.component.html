@@ -1,17 +1,8 @@
 <div class="mt-0">
     <div class="row g-0">
-        <!--
-        <div class="col-auto mr-auto">
-            <ng-container *ngIf="showGoBack">
-                <button class="btn btn-icon" (click)="goBack()">
-                    <i class="fa-solid fa-left-long" aria-hidden="true"></i>
-                    <span class="phone-hidden">Go Back</span>
-                </button>
-            </ng-container>
-        </div>
-        -->
         <div class="col mr-auto">
             <ng-content select="[title]"></ng-content>
+            <ng-content select="[subtitle]"></ng-content>
         </div>
         <div class="col mr-auto">
             <ng-content select="[main]"></ng-content>
