@@ -32,6 +32,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   @Input() series!: Series;
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
+  /**
+   * A copy of the series from init. This is used to compare values for name fields to see if lock was modified
+   */
+  initSeries!: Series;
 
   isCollapsed = true;
   volumeCollapsed: any = {};
@@ -93,6 +97,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
+
+    this.initSeries = Object.assign({}, this.series);
 
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
@@ -340,7 +346,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
       this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator)
     ]).pipe(map(results => {
-      //this.resetTypeaheads.next(true);
       return of(true);
     }));
   }
@@ -401,7 +406,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     ];
 
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
-    if (this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty || this.coverImageReset) {
+    const nameFieldsDirty = this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty;
+    const nameFieldLockChanged = this.series.nameLocked !== this.initSeries.nameLocked || this.series.sortNameLocked !== this.initSeries.sortNameLocked || this.series.localizedNameLocked !== this.initSeries.localizedNameLocked;
+    if (nameFieldsDirty || nameFieldLockChanged || this.coverImageReset) {
+      model.nameLocked = this.series.nameLocked;
+      model.sortNameLocked = this.series.sortNameLocked;
+      model.localizedNameLocked = this.series.localizedNameLocked;
       apis.push(this.seriesService.updateSeries(model));
     }
 

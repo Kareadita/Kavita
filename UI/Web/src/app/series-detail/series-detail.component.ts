@@ -532,6 +532,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
+        this.seriesService.getSeries(this.seriesId).subscribe(s => {
+          this.series = s;
+        });
+        
         this.loadSeries(this.seriesId);
         if (closeResult.coverImageUpdate) {
           // Random triggers a load change without any problems with API

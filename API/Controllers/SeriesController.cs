@@ -150,26 +150,14 @@ namespace API.Controllers
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
 
-            if (!series.Name.Equals(updateSeries.Name.Trim()))
-            {
-                series.Name = updateSeries.Name.Trim();
-                series.NameLocked = true;
-            }
-            if (!series.SortName.Equals(updateSeries.SortName.Trim()))
-            {
-                series.SortName = updateSeries.SortName.Trim();
-                series.SortNameLocked = true;
-            }
-            if (!series.LocalizedName.Equals(updateSeries.LocalizedName.Trim()))
-            {
-                series.LocalizedName = updateSeries.LocalizedName.Trim();
-                series.LocalizedNameLocked = true;
-            }
+            series.Name = updateSeries.Name.Trim();
+            series.SortName = updateSeries.SortName.Trim();
+            series.LocalizedName = updateSeries.LocalizedName.Trim();
 
+            series.NameLocked = updateSeries.NameLocked;
+            series.SortNameLocked = updateSeries.SortNameLocked;
+            series.LocalizedNameLocked = updateSeries.LocalizedNameLocked;
 
-            if (!series.NameLocked) series.NameLocked = false;
-            if (!series.SortNameLocked) series.SortNameLocked = false;
-            if (!series.LocalizedNameLocked) series.LocalizedNameLocked = false;
 
             var needsRefreshMetadata = false;
             // This is when you hit Reset
