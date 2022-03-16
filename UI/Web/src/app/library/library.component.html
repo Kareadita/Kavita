@@ -14,7 +14,7 @@
 <!-- TODO: Refactor this so we can use series actions here -->
 <app-carousel-reel [items]="recentlyUpdatedSeries" title="Recently Updated Series"  (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
-        <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" 
+        <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
         [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
     </ng-template>
 </app-carousel-reel>
@@ -27,13 +27,7 @@
 
 <!-- <app-carousel-reel [items]="recentlyAddedChapters" title="Recently Added" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
-        <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)" 
+        <app-card-item [entity]="item" [title]="item.title" [subtitle]="item.seriesName" [imageUrl]="imageService.getRecentlyAddedItem(item)"
         [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)"></app-card-item>
     </ng-template>
 </app-carousel-reel> -->
-
-<app-carousel-reel [items]="libraries" title="Libraries" (sectionClick)="handleSectionClick($event)">
-    <ng-template #carouselItem let-item let-position="idx">
-        <app-library-card [data]="item"></app-library-card>
-    </ng-template>
-</app-carousel-reel>

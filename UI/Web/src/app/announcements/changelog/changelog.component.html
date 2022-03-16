@@ -10,7 +10,7 @@
 
 
           <pre class="card-text update-body">
-            <app-read-more class="float-end" [text]="update.updateBody" [maxLength]="500"></app-read-more>
+            <app-read-more [text]="update.updateBody" [maxLength]="500"></app-read-more>
           </pre>
           <a *ngIf="!update.isDocker && update.updateVersion === installedVersion" href="{{update.updateUrl}}" class="btn disabled btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank">Installed</a>
           <a *ngIf="!update.isDocker && update.updateVersion !== installedVersion" href="{{update.updateUrl}}" class="btn btn-{{indx === 0 ? 'primary' : 'secondary'}} float-end" target="_blank">Download</a>

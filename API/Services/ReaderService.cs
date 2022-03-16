@@ -16,8 +16,6 @@ namespace API.Services;
 
 public interface IReaderService
 {
-    Task MarkSeriesAsRead(AppUser user, int seriesId);
-    Task MarkSeriesAsUnread(AppUser user, int seriesId);
     void MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
     void MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
     Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
@@ -45,40 +43,6 @@ public class ReaderService : IReaderService
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
     {
         return Parser.Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
-    }
-
-    /// <summary>
-    /// Does not commit. Marks all entities under the series as read.
-    /// </summary>
-    /// <param name="user"></param>
-    /// <param name="seriesId"></param>
-    public async Task MarkSeriesAsRead(AppUser user, int seriesId)
-    {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumes(seriesId);
-        user.Progresses ??= new List<AppUserProgress>();
-        foreach (var volume in volumes)
-        {
-            MarkChaptersAsRead(user, seriesId, volume.Chapters);
-        }
-
-        _unitOfWork.UserRepository.Update(user);
-    }
-
-    /// <summary>
-    /// Does not commit. Marks all entities under the series as unread.
-    /// </summary>
-    /// <param name="user"></param>
-    /// <param name="seriesId"></param>
-    public async Task MarkSeriesAsUnread(AppUser user, int seriesId)
-    {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumes(seriesId);
-        user.Progresses ??= new List<AppUserProgress>();
-        foreach (var volume in volumes)
-        {
-            MarkChaptersAsUnread(user, seriesId, volume.Chapters);
-        }
-
-        _unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
@@ -403,7 +367,7 @@ public class ReaderService : IReaderService
             .ToList();
 
         // If there are any volumes that have progress, return those. If not, move on.
-        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages); // (removed for GetContinuePoint_ShouldReturnFirstVolumeChapter_WhenPreExistingProgress), not sure if needed && chapter.PagesRead > 0
+        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Check loose leaf chapters (and specials). First check if there are any

@@ -1,52 +1,24 @@
-<div class="container">
-    <h2>User Dashboard</h2>
+<app-side-nav-companion-bar>
+    <h1 title>
+        User Dashboard
+    </h1>
+</app-side-nav-companion-bar>
+<div class="container-fluid">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
         <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
             <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
             <ng-template ngbNavContent>
               <ng-container *ngIf="tab.fragment === ''">
                 <p>
-                    These are global settings that are bound to your account. 
+                    These are global settings that are bound to your account.
                 </p>
-                 
+
                 <ngb-accordion [closeOthers]="true" activeIds="reading-panel" #acc="ngbAccordion">
-                        <!-- <ngb-panel id="site-panel" title="Site">
-                            <ng-template ngbPanelHeader>
-                                <h2 class="accordion-header">
-                                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('site-panel')" aria-controls="collapseOne">
-                                        Site
-                                      </button>
-                                </h2>
-                              </ng-template>
-                            <ng-template ngbPanelContent>
-                                <form [formGroup]="settingsForm" *ngIf="user !== undefined">
-                                    <div class="mb-3">
-                                        <label id="site-dark-mode-label" aria-describedby="site-heading" class="form-label">Dark Mode</label>
-                                        <div class="mb-3">
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input type="radio" id="site-dark-mode" formControlName="siteDarkMode" class=" form-check-input" [value]="true" aria-labelledby="site-dark-mode-label">
-                                                <label class="form-check-label" for="site-dark-mode">True</label>
-                                            </div>
-                                            <div class="custom-control custom-radio custom-control-inline">
-                                                <input type="radio" id="site-not-dark-mode" formControlName="siteDarkMode" class="form-check-input" [value]="false" aria-labelledby="site-dark-mode-label">
-                                                <label class="form-check-label" for="site-not-dark-mode">False</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="">
-                                        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                                            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="site-dark-mode-label">Reset</button>
-                                            <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="site-dark-mode-label" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </ng-template>
-                        </ngb-panel> -->
                         <ngb-panel id="reading-panel" title="Reading">
                             <ng-template ngbPanelHeader>
                                 <!-- <div class="d-flex align-items-center justify-content-between">
                                   <button ngbPanelToggle class="btn container-fluid text-start ps-0 accordion-header">Reading</button>
-                                  <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('reading-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>  
+                                  <span class="pull-right"><i class="fa fa-angle-{{acc.isExpanded('reading-panel') ? 'down' : 'up'}}" aria-hidden="true"></i></span>
                                 </div> -->
                                 <h2 class="accordion-header">
                                     <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
@@ -57,7 +29,7 @@
                             <ng-template ngbPanelContent>
                                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
                                     <h3 id="manga-header">Image Reader</h3>
-                                    
+
                                     <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-reading-direction" class="form-label">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="readingDirectionTooltip" role="button" tabindex="0"></i>
@@ -67,7 +39,7 @@
                                                 <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
-                                
+
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-scaling-option" class="form-label">Scaling Options</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
                                             <ng-template #taskBackupTooltip>How to scale the image to your screen.</ng-template>
@@ -77,7 +49,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-pagesplit-option" class="form-label">Page Splitting</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="pageSplitOptionTooltip" role="button" tabindex="0"></i>
@@ -114,8 +86,8 @@
                                                 [(colorPicker)]="user.preferences.backgroundColor"/>
                                         </div>
                                     </div>
-                            
-                                    
+
+
                                     <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="mb-3">
@@ -152,7 +124,7 @@
                                                 </div>
                                             </div>
                                         </div>
-    
+
                                         <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label id="taptopaginate-label" class="form-label"></label>
                                             <div class="mb-3">
@@ -175,8 +147,8 @@
                                                 <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
-                                        
-                                        
+
+
                                         <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                             <label for="settings-fontfamily-option" class="form-label">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #fontFamilyOptionTooltip>Font familty to load up. Default will load the book's default font</ng-template>
@@ -187,7 +159,7 @@
                                         </div>
                                     </div>
 
-                                    
+
 
                                     <div class="row g-0">
                                         <div class="col-md-4 col-sm-12 pe-2 mb-3">
@@ -200,7 +172,7 @@
                                             <span class="visually-hidden" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
                                             <div class="custom-slider"><ngx-slider [options]="bookReaderLineSpacingOptions" formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help"></ngx-slider></div>
                                         </div>
-        
+
                                         <div class="col-md-4 col-sm-12 pe-2 mb-3">
                                             <label class="form-label">Margin</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReaderMarginOptionTooltip" role="button" tabindex="0"></i>
                                             <ng-template #bookReaderMarginOptionTooltip>How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.</ng-template>
@@ -209,8 +181,8 @@
                                         </div>
                                     </div>
 
-                                    
-    
+
+
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                                         <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
                                         <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
@@ -273,6 +245,5 @@
             </ng-template>
         </li>
     </ul>
-
     <div [ngbNavOutlet]="nav" class="mt-3"></div>
 </div>

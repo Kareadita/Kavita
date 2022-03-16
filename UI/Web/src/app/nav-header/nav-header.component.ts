@@ -79,6 +79,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   logout() {
     this.accountService.logout();
     this.navService.hideNavBar();
+    this.navService.hideSideNav();
     this.router.navigateByUrl('/login');
   }
 
@@ -193,5 +194,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     return searchFocused;
   }
 
-  
+  hideSideNav() {
+    this.navService.toggleSideNav();
+  }
 }

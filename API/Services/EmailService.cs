@@ -98,7 +98,7 @@ public class EmailService : IEmailService
         return await SendEmailWithPost(emailLink + "/api/email/email-password-reset", data);
     }
 
-    private static async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)
+    private static async Task<bool> SendEmailWithGet(string url)
     {
         try
         {
@@ -108,7 +108,7 @@ public class EmailService : IEmailService
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
+                .WithTimeout(TimeSpan.FromSeconds(30))
                 .GetStringAsync();
 
             if (!string.IsNullOrEmpty(response) && bool.Parse(response))
@@ -124,7 +124,7 @@ public class EmailService : IEmailService
     }
 
 
-    private static async Task<bool> SendEmailWithPost(string url, object data, int timeoutSecs = 30)
+    private static async Task<bool> SendEmailWithPost(string url, object data)
     {
         try
         {
@@ -134,7 +134,7 @@ public class EmailService : IEmailService
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
+                .WithTimeout(TimeSpan.FromSeconds(30))
                 .PostJsonAsync(data);
 
             if (response.StatusCode != StatusCodes.Status200OK)

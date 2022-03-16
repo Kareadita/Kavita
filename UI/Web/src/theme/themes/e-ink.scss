@@ -59,6 +59,27 @@
   /* Tagbadge */
   --tagbadge-bg-color: #c9c9c9;
 
+  /* Side Nav */
+  --side-nav-bg-color: rgba(255,255,255,0.6);
+  --side-nav-mobile-bg-color: rgb(255,255,255);
+  --side-nav-openclose-transition: 1ms;
+  --side-nav-box-shadow: none;
+  --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
+  --side-nav-hover-color: white;
+  --side-nav-hover-bg-color: black;
+  --side-nav-color: black;
+  --side-nav-border-radius: 5px;
+  --side-nav-border: none;
+  --side-nav-border-closed: none;
+  --side-nav-border-transition: 0s;
+  --side-nav-bg-color-transition: 0s;
+  --side-nav-companion-bar-transistion: 0s;
+  --side-nav-closed-bg-color: transparent;
+  --side-nav-item-active-color: var(--primary-color);
+  --side-nav-active-bg-color: rgba(0,0,0,0.5);
+  --side-nav-overlay-color: rgba(0,0,0,1);
+  --side-nav-item-active-text-color: black;
+
   /* Toasts */
   --toast-success-bg-color: rgba(74, 198, 148, 0.9);
   --toast-error-bg-color: #BD362F;
@@ -103,6 +124,7 @@
   --dropdown-item-hover-text-color: white;
   --dropdown-item-hover-bg-color: var(--primary-color);
   --dropdown-overlay-color: rgba(0,0,0,0.5);
+  --dropdown-item-bg-color: white;
   
   /* Manga Reader */
   --manga-reader-overlay-filter: none;
@@ -119,7 +141,7 @@
   /* Carousel */
   --carousel-header-text-color: black;
   --carousel-header-text-decoration: none;
-  --carousel-hover-header-text-decoration: underline;
+  --carousel-hover-header-text-decoration: none;
 
 
 }

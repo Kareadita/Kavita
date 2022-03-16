@@ -39,6 +39,28 @@
     --nav-link-text-color: black;
     --nav-link-hover-text-color: var(--primary-color);
     --nav-tab-border-hover-color: transparent;
+
+    /* Side Nav */
+    --side-nav-bg-color: rgba(255,255,255,0.6);
+    --side-nav-mobile-bg-color: rgb(255,255,255);
+    --side-nav-openclose-transition: 0.15s ease-in-out;
+    --side-nav-box-shadow: none;
+    --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
+    --side-nav-hover-color: white;
+    --side-nav-hover-bg-color: black;
+    --side-nav-color: black;
+    --side-nav-border-radius: 5px;
+    --side-nav-border: 1px solid rgba(0,0,0,0.2);
+    --side-nav-border-closed: 1px solid transparent;
+    --side-nav-companion-bar-transistion: 0.5s linear;
+    --side-nav-border-transition: 0.5s ease-in-out;
+    --side-nav-bg-color-transition: 0.5s ease-in-out;
+    --side-nav-closed-bg-color: transparent;
+    --side-nav-item-active-color: var(--primary-color);
+    --side-nav-active-bg-color: rgba(0,0,0,0.5);
+    --side-nav-item-active-text-color: black;
+    --side-nav-overlay-color: rgba(0,0,0,0.5);
+  
     
     /* Checkboxes */
     --checkbox-checked-bg-color: black;
@@ -95,6 +117,7 @@
     --dropdown-item-hover-text-color: white;
     --dropdown-item-hover-bg-color: var(--primary-color);
     --dropdown-overlay-color: rgba(0,0,0,0.5);
+    --dropdown-item-bg-color: white;
     
     /* Manga Reader */
     --manga-reader-overlay-filter: blur(10px);

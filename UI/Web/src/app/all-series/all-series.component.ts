@@ -1,11 +1,12 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { take, debounceTime, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
+import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
+import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -29,6 +30,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   filter: SeriesFilter | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');

@@ -3,7 +3,6 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { InviteUserResponse } from 'src/app/_models/invite-user-response';
 import { Library } from 'src/app/_models/library';
 import { AccountService } from 'src/app/_services/account.service';
 import { ServerService } from 'src/app/_services/server.service';
@@ -20,11 +19,14 @@ export class InviteUserComponent implements OnInit {
    */
   isSending: boolean = false;
   inviteForm: FormGroup = new FormGroup({});
+  /**
+   * If a user would be able to load this server up externally
+   */
+  accessible: boolean = true;
+  checkedAccessibility: boolean = false;
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
   emailLink: string = '';
-
-  makeLink: (val: string) => string = (val: string) => {return this.emailLink};
 
   public get email() { return this.inviteForm.get('email'); }
 
@@ -33,6 +35,14 @@ export class InviteUserComponent implements OnInit {
 
   ngOnInit(): void {
     this.inviteForm.addControl('email', new FormControl('', [Validators.required]));
+
+    this.serverService.isServerAccessible().subscribe(async (accessibile) => {
+      if (!accessibile) {
+        await this.confirmService.alert('This server is not accessible outside the network. You cannot invite via Email. You wil be given a link to finish registration with instead.');
+        this.accessible = accessibile;
+      }
+      this.checkedAccessibility = true;
+    });
   }
 
   close() {
@@ -47,10 +57,11 @@ export class InviteUserComponent implements OnInit {
       email,
       libraries: this.selectedLibraries,
       roles: this.selectedRoles,
-    }).subscribe((data: InviteUserResponse) => {
-      this.emailLink = data.emailLink;
+      sendEmail: this.accessible
+    }).subscribe(emailLink => {
+      this.emailLink = emailLink;
       this.isSending = false;
-      if (data.emailSent) {
+      if (this.accessible) {
         this.toastr.info('Email sent to ' + email);
         this.modal.close(true);
       }

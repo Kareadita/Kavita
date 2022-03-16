@@ -7,10 +7,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
-import { SharedModule } from '../shared/shared.module';
-import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
-import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { PipeModule } from '../pipe/pipe.module';
+import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
+import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
+import { SidenavModule } from '../sidenav/sidenav.module';
 import { ColorPickerModule } from 'ngx-color-picker';
 
 
@@ -32,11 +32,11 @@ import { ColorPickerModule } from 'ngx-color-picker';
     NgxSliderModule,
     UserSettingsRoutingModule,
     PipeModule,
+    SidenavModule,
     ColorPickerModule, // User prefernces background color
-  ], 
+  ],
   exports: [
-    SiteThemeProviderPipe,
-    ApiKeyComponent
+    SiteThemeProviderPipe
   ]
 })
 export class UserSettingsModule { }

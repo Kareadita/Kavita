@@ -35,6 +35,9 @@
 @import './theme/components/radios';
 @import './theme/components/selects';
 @import './theme/components/progress';
+@import './theme/components/sidenav';
+@import './theme/components/carousel';
+@import './theme/components/progress';
 
 
 @import './theme/utilities/utilities';
@@ -63,7 +66,7 @@ label, select, .clickable {
 
 html, body { height: 100%; color-scheme: var(--color-scheme); }
 body {
-  margin: 0; 
+  margin: 0;
   font-family: var(--body-font-family);
   color: var(--body-text-color);
 }

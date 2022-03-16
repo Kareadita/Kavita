@@ -6,10 +6,13 @@ import { RecentlyAddedComponent } from './recently-added/recently-added.componen
 import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
+import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
+import { ReadingListsComponent } from './reading-list/reading-lists/reading-lists.component';
+import { AllCollectionsComponent } from './collections/all-collections/all-collections.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -40,6 +43,10 @@ const routes: Routes = [
     loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
   },
   {
+    path: 'announcements',
+    loadChildren: () => import('../app/announcements/announcements.module').then(m => m.AnnouncementsModule)
+  },
+  {
     path: '',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],
@@ -63,6 +70,7 @@ const routes: Routes = [
     children: [
       {path: 'library', component: DashboardComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
+      {path: 'on-deck', component: OnDeckComponent},
       {path: 'all-series', component: AllSeriesComponent},
 
     ]

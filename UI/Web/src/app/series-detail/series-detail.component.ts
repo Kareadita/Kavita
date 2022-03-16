@@ -32,6 +32,7 @@ import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { ReaderService } from '../_services/reader.service';
 import { ReadingListService } from '../_services/reading-list.service';
 import { SeriesService } from '../_services/series.service';
+import { NavService } from '../_services/nav.service';
 
 
 enum TabID {
@@ -74,6 +75,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   hasSpecials = false;
   specials: Array<Chapter> = [];
   activeTabId = TabID.Storyline;
+  hasNonSpecialVolumeChapters = false;
+  hasNonSpecialNonVolumeChapters = false;
 
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
@@ -172,7 +175,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
-              private readingListService: ReadingListService
+              private readingListService: ReadingListService, public navService: NavService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -378,7 +381,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
-    
+
     // Book libraries only have Volumes or Specials enabled
     if (this.libraryType === LibraryType.Book) {
       if (this.volumes.length === 0) {
@@ -394,7 +397,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     } else {
       this.activeTabId = TabID.Storyline;
     }
-
   }
 
   createHTML() {
@@ -451,7 +453,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   read() {
-    if (this.currentlyReadingChapter !== undefined) { 
+    if (this.currentlyReadingChapter !== undefined) {
       this.openChapter(this.currentlyReadingChapter);
       return;
     }
@@ -496,12 +498,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
       // Find the continue point chapter and load it
-      const unreadChapters = volume.chapters.filter(item => item.pagesRead < item.pages);
-      if (unreadChapters.length > 0) {
-        this.openChapter(unreadChapters[0]);
-        return;
-      }
-      this.openChapter(volume.chapters[0]);
+      this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => this.openChapter(chapter));
       return;
     }
 
@@ -514,7 +511,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
+    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' }); // , scrollable: true (these don't work well on mobile)
     modalRef.componentInstance.data = data;
     modalRef.componentInstance.parentName = this.series?.name;
     modalRef.componentInstance.seriesId = this.series?.id;

@@ -263,6 +263,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
     @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
       this.navService.hideNavBar();
+      this.navService.hideSideNav();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
@@ -388,6 +389,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
     }
     this.navService.showNavBar();
+    this.navService.showSideNav();
 
     const head = this.document.querySelector('head');
     this.renderer.removeChild(head, this.darkModeStyleElem);

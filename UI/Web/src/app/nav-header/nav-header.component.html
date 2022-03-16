@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
     <div class="container-fluid">
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+      <a class="side-nav-toggle" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
       <a class="navbar-brand dark-exempt" routerLink="/library" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="d-none d-md-inline"> Kavita</span></a>
       <ul class="navbar-nav col me-auto">
         
@@ -117,7 +118,7 @@
           <div class="nav-item">
             <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
           </div>
-          <div class="nav-item pe-2 not-xs-only">
+          <div class="nav-item not-xs-only">
             <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon" title="Server Settings">
               <i class="fa fa-cogs nav" aria-hidden="true"></i>
               <span class="visually-hidden">Server Settings</span>
@@ -127,11 +128,13 @@
 
           <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
             <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-              {{user.username | sentenceCase}}
+              <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i><span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
             </button>
             <div ngbDropdownMenu>
               <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
               <a ngbDropdownItem routerLink="/preferences/">Settings</a>
+              <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noreferrer" target="_blank">Help</a>
+              <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">Annoucements</a>
               <a ngbDropdownItem (click)="logout()">Logout</a>
             </div>
           </div>

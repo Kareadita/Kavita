@@ -5,6 +5,14 @@
 
 .navbar {
     background-color: var(--navbar-bg-color);
+
+    .side-nav-toggle {
+        cursor: pointer;
+        font-size: 1.2rem;
+        i {
+            color: var(--navbar-fa-icon-color);
+        }
+    }
 }
 
 /* small devices (phones, 650px and down) */
@@ -38,6 +46,7 @@
 .navbar-brand {
     font-family: var(--brand-font-family);
     font-weight: bold;
+    margin: 0 1rem;
 
     &:hover {
         text-decoration: none;
