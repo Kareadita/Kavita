@@ -242,7 +242,7 @@ public class ReaderService : IReaderService
             {
                 // Handle Chapters within current Volume
                 // In this case, i need 0 first because 0 represents a full volume file.
-                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting),
+                var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
 
@@ -255,6 +255,9 @@ public class ReaderService : IReaderService
             var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
             if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
             {
+                // We need to handle an extra check if the current chapter is the last special, as we should return -1
+                if (currentChapter.IsSpecial) return -1;
+
                 return chapters.Last().Id;
             }
 

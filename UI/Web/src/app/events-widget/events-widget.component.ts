@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -8,17 +8,17 @@ import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
+import { ErrorEvent } from '../_models/events/error-event';
+import { ConfirmService } from '../shared/confirm.service';
+import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
+import { ServerService } from '../_services/server.service';
 
-
-
-
-// TODO: Rename this to events widget
 @Component({
   selector: 'app-nav-events-toggle',
-  templateUrl: './nav-events-toggle.component.html',
-  styleUrls: ['./nav-events-toggle.component.scss']
+  templateUrl: './events-widget.component.html',
+  styleUrls: ['./events-widget.component.scss']
 })
-export class NavEventsToggleComponent implements OnInit, OnDestroy {
+export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input() user!: User;
 
   isAdmin: boolean = false;
@@ -34,6 +34,9 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
   singleUpdateSource = new BehaviorSubject<NotificationProgressEvent[]>([]);
   singleUpdates$ = this.singleUpdateSource.asObservable();
 
+  errorSource = new BehaviorSubject<ErrorEvent[]>([]);
+  errors$ = this.errorSource.asObservable();
+
   private updateNotificationModalRef: NgbModalRef | null = null;
 
   activeEvents: number = 0;
@@ -45,22 +48,27 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     return EVENTS;
   }
 
-  constructor(public messageHub: MessageHubService, private modalService: NgbModal, private accountService: AccountService) { }
+  constructor(public messageHub: MessageHubService, private modalService: NgbModal, 
+    private accountService: AccountService, private confirmService: ConfirmService) { }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
     this.progressEventsSource.complete();
     this.singleUpdateSource.complete();
+    this.errorSource.complete();
   }
 
   ngOnInit(): void {
     // Debounce for testing. Kavita's too fast
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
-      if (event.event.endsWith('error')) {
-        // TODO: Show an error handle
-      } else if (event.event === EVENTS.NotificationProgress) {
+      if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
+      } else if (event.event === EVENTS.Error) {
+        const values = this.errorSource.getValue();
+        values.push(event.payload as ErrorEvent);
+        this.errorSource.next(values);
+        this.activeEvents += 1;
       }
     });
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
@@ -94,6 +102,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         const index = data.findIndex(m => m.name === message.name);
         if (index < 0) {
           data.push(message);
+          this.activeEvents += 1;
         } else {
           data[index] = message;
         }
@@ -103,7 +112,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         data = this.progressEventsSource.getValue();
         data = data.filter(m => m.name !== message.name); // This does not work //  && m.title !== message.title
         this.progressEventsSource.next(data);
-        this.activeEvents =  Math.max(this.activeEvents - 1, 0);
+        this.activeEvents = Math.max(this.activeEvents - 1, 0);
         break;
       default:
         break;
@@ -121,6 +130,31 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
     this.updateNotificationModalRef.dismissed.subscribe(() => {
       this.updateNotificationModalRef = null;
     });
+  }
+
+  async seeMoreError(error: ErrorEvent) {
+    const config = new ConfirmConfig();
+    config.buttons = [
+      {text: 'Dismiss', type: 'primary'},
+      {text: 'Ok', type: 'secondary'},
+    ];
+    config.header = error.title;
+    config.content = error.subTitle;
+    var result = await this.confirmService.alert(error.subTitle || error.title, config);
+    if (result) {
+      this.removeError(error);
+    }
+  }
+
+  removeError(error: ErrorEvent, event?: MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
+    let data = this.errorSource.getValue();
+    data = data.filter(m => m !== error); 
+    this.errorSource.next(data);
+    this.activeEvents = Math.max(this.activeEvents - 1, 0);
   }
 
   prettyPrintProgress(progress: number) {

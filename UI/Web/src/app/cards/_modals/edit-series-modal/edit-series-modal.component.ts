@@ -32,6 +32,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   @Input() series!: Series;
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
+  /**
+   * A copy of the series from init. This is used to compare values for name fields to see if lock was modified
+   */
+  initSeries!: Series;
 
   isCollapsed = true;
   volumeCollapsed: any = {};
@@ -67,6 +71,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   publicationStatuses: Array<PublicationStatusDto> = [];
   validLanguages: Array<Language> = [];
 
+  coverImageReset = false;
+
   get Breakpoint(): typeof Breakpoint {
     return Breakpoint;
   }
@@ -91,6 +97,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
+
+    this.initSeries = Object.assign({}, this.series);
 
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
@@ -131,28 +139,24 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.metadata = metadata;
 
         this.setupTypeaheads();
-        this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
-        this.editSeriesForm.get('ageRating')?.setValue(this.metadata.ageRating);
-        this.editSeriesForm.get('publicationStatus')?.setValue(this.metadata.publicationStatus);
-        this.editSeriesForm.get('language')?.setValue(this.metadata.language);
+        this.editSeriesForm.get('summary')?.patchValue(this.metadata.summary);
+        this.editSeriesForm.get('ageRating')?.patchValue(this.metadata.ageRating);
+        this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
+        this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
 
         this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('name')?.touched) return;
           this.series.nameLocked = true;
         });
 
         this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('sortName')?.touched) return;
           this.series.sortNameLocked = true;
         });
 
         this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('localizedName')?.touched) return;
           this.series.localizedNameLocked = true;
         });
 
         this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          if (!this.editSeriesForm.get('summary')?.touched) return;
           this.metadata.summaryLocked = true;
           this.metadata.summary = val;
         });
@@ -201,7 +205,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.setupLanguageTypeahead()
     ]).subscribe(results => {
       this.collectionTags = this.metadata.collectionTags;
-      this.editSeriesForm.get('summary')?.setValue(this.metadata.summary);
     });
   }
 
@@ -343,7 +346,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
       this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator)
     ]).pipe(map(results => {
-      //this.resetTypeaheads.next(true);
       return of(true);
     }));
   }
@@ -403,28 +405,25 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.seriesService.updateMetadata(this.metadata, this.collectionTags)
     ];
 
-    // We only need to call updateSeries if we changed name, sort name, or localized name
-    if (this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty) {
+    // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
+    const nameFieldsDirty = this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty;
+    const nameFieldLockChanged = this.series.nameLocked !== this.initSeries.nameLocked || this.series.sortNameLocked !== this.initSeries.sortNameLocked || this.series.localizedNameLocked !== this.initSeries.localizedNameLocked;
+    if (nameFieldsDirty || nameFieldLockChanged || this.coverImageReset) {
+      model.nameLocked = this.series.nameLocked;
+      model.sortNameLocked = this.series.sortNameLocked;
+      model.localizedNameLocked = this.series.localizedNameLocked;
       apis.push(this.seriesService.updateSeries(model));
     }
 
     
-
-    if (selectedIndex > 0) {
+    if (selectedIndex > 0 && this.selectedCover !== '') {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
     }
+
 
     forkJoin(apis).subscribe(results => {
       this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0});
     });
-  }
-
-  handleUnlock(field: string) {
-    console.log('todo: unlock ', field);
-  }
-
-  hello(val: boolean) {
-    console.log('hello: ', val);
   }
 
   updateCollections(tags: CollectionTag[]) {
@@ -491,6 +490,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   handleReset() {
+    this.coverImageReset = true;
     this.editSeriesForm.patchValue({
       coverImageLocked: false
     });
