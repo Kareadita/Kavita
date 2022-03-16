@@ -11,6 +11,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,16 +27,18 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEventHub _eventHub;
 
         public LibraryController(IDirectoryService directoryService,
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, IEventHub eventHub)
         {
             _directoryService = directoryService;
             _logger = logger;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -147,9 +150,15 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
-        public ActionResult Scan(int libraryId)
+        public async Task<ActionResult> Scan(int libraryId)
         {
-            _taskScheduler.ScanLibrary(libraryId);
+            // TODO: Remove this debug code
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent("Some of the root folders for the library are empty.",
+                    "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                "Scan will be aborted. " +
+                "Check that your mount is connected or change the library's root folder and rescan"));
+            //_taskScheduler.ScanLibrary(libraryId);
             return Ok();
         }
 

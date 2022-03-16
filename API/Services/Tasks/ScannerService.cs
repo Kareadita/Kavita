@@ -72,7 +72,7 @@ public class ScannerService : IScannerService
         var folderPaths = library.Folders.Select(f => f.Path).ToList();
 
 
-        if (!await CheckMounts(library.Folders.Select(f => f.Path).ToList()))
+        if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
         {
             _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
@@ -190,33 +190,25 @@ public class ScannerService : IScannerService
         }
     }
 
-    private async Task<bool> CheckMounts(IList<string> folders)
+    private async Task<bool> CheckMounts(string libraryName, IList<string> folders)
     {
-        // TODO: IF false, inform UI
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
         if (folders.Any(f => !_directoryService.IsDriveMounted(f)))
         {
-            _logger.LogError("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            await _eventHub.SendMessageAsync("library.scan.error", new SignalRMessage()
-            {
-                Name = "library.scan.error",
-                Body =
-                new {
-                    Message =
-                    "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
-                    Details = ""
-                },
-                Title = "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
-                SubTitle = string.Join(", ", folders.Where(f => !_directoryService.IsDriveMounted(f)))
-            });
+            _logger.LogError("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
+
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
+                    string.Join(", ", folders.Where(f => !_directoryService.IsDriveMounted(f)))));
 
             return false;
         }
 
+
         // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
         if (folders.Any(f => _directoryService.IsDirectoryEmpty(f)))
         {
-            // TODO: Food for thought, move this to throw an exception and let a middleware inform the UI to keep the code clean. (We can throw a custom exception which
+            // NOTE: Food for thought, move this to throw an exception and let a middleware inform the UI to keep the code clean. (We can throw a custom exception which
             // will always propagate to the UI)
             // That way logging and UI informing is all in one place with full context
             _logger.LogError("Some of the root folders for the library are empty. " +
@@ -224,23 +216,10 @@ public class ScannerService : IScannerService
                              "Scan will be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
 
-            // TODO: Use a factory method
-            await _eventHub.SendMessageAsync(MessageFactory.Error, new SignalRMessage()
-            {
-                Name = MessageFactory.Error,
-                Title = "Some of the root folders for the library are empty.",
-                SubTitle = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                           "Scan will be aborted. " +
-                           "Check that your mount is connected or change the library's root folder and rescan",
-                Body =
-                    new {
-                        Title =
-                            "Some of the root folders for the library are empty.",
-                        SubTitle = "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                                  "Scan will be aborted. " +
-                                  "Check that your mount is connected or change the library's root folder and rescan"
-                    }
-            }, true);
+            await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent( $"Some of the root folders for the library, {libraryName}, are empty.",
+                "Either your mount has been disconnected or you are trying to delete all series in the library. " +
+                "Scan will be aborted. " +
+                "Check that your mount is connected or change the library's root folder and rescan"));
 
             return false;
         }
@@ -285,25 +264,12 @@ public class ScannerService : IScannerService
             return;
         }
 
-        if (!await CheckMounts(library.Folders.Select(f => f.Path).ToList()))
+        if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-            //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
             return;
         }
 
-        // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
-        if (library.Folders.Any(f => _directoryService.IsDirectoryEmpty(f.Path)))
-        {
-            _logger.LogCritical("Some of the root folders for the library are empty. " +
-                             "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                             "Scan will be aborted. " +
-                             "Check that your mount is connected or change the library's root folder and rescan");
-            // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-            //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
-            return;
-        }
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
         // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
@@ -437,13 +403,16 @@ public class ScannerService : IScannerService
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the DB. Chunk {ChunkNumber} did not save to DB. If debug mode, series to check will be printed", chunk);
+                _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the DB. Chunk {ChunkNumber} did not save to DB", chunk);
                 foreach (var series in nonLibrarySeries)
                 {
                     _logger.LogCritical("[ScannerService] There may be a constraint issue with {SeriesName}", series.OriginalName);
                 }
-                await _eventHub.SendMessageAsync(MessageFactory.ScanLibraryError,
-                    MessageFactory.ScanLibraryErrorEvent(library.Id, library.Name));
+
+                await _eventHub.SendMessageAsync(MessageFactory.Error,
+                    MessageFactory.ErrorEvent("There was an issue writing to the DB. Chunk {ChunkNumber} did not save to DB",
+                        "The following series had constraint issues: " + string.Join(",", nonLibrarySeries.Select(s => s.OriginalName))));
+
                 continue;
             }
             _logger.LogInformation(

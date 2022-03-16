@@ -74,3 +74,11 @@
     }
     color: var(--primary-color);
 }
+
+.error {
+    cursor: pointer;
+    color: var(--error-color);
+    i.fa {
+        color: var(--primary-color) !important;
+    }
+}

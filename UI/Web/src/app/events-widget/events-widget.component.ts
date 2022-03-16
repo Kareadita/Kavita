@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -8,6 +8,10 @@ import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
+import { ErrorEvent } from '../_models/events/error-event';
+import { ConfirmService } from '../shared/confirm.service';
+import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
+import { ServerService } from '../_services/server.service';
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -30,6 +34,9 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   singleUpdateSource = new BehaviorSubject<NotificationProgressEvent[]>([]);
   singleUpdates$ = this.singleUpdateSource.asObservable();
 
+  errorSource = new BehaviorSubject<ErrorEvent[]>([]);
+  errors$ = this.errorSource.asObservable();
+
   private updateNotificationModalRef: NgbModalRef | null = null;
 
   activeEvents: number = 0;
@@ -41,13 +48,15 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     return EVENTS;
   }
 
-  constructor(public messageHub: MessageHubService, private modalService: NgbModal, private accountService: AccountService) { }
+  constructor(public messageHub: MessageHubService, private modalService: NgbModal, 
+    private accountService: AccountService, private confirmService: ConfirmService) { }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
     this.progressEventsSource.complete();
     this.singleUpdateSource.complete();
+    this.errorSource.complete();
   }
 
   ngOnInit(): void {
@@ -57,6 +66,12 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         // TODO: Show an error handle
       } else if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
+      } else if (event.event === EVENTS.ScanLibraryError || event.event === EVENTS.Error) {
+        const values = this.errorSource.getValue();
+        values.push(event.payload as ErrorEvent);
+        this.errorSource.next(values);
+        this.activeEvents += 1;
+        // We will use a timeout to remove the message or a click handler? 
       }
     });
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
@@ -118,6 +133,17 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     this.updateNotificationModalRef.dismissed.subscribe(() => {
       this.updateNotificationModalRef = null;
     });
+  }
+
+  seeMoreError(error: ErrorEvent) {
+    const config = new ConfirmConfig();
+    config.buttons = [
+      {text: 'Dismiss', type: 'primary'},
+      {text: 'Ok', type: 'secondary'},
+    ];
+    config.header = error.title;
+    config.content = error.subTitle;
+    this.confirmService.alert(error.subTitle || error.title, config);
   }
 
   prettyPrintProgress(progress: number) {

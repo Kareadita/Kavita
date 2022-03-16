@@ -78,6 +78,18 @@
                 </ng-container>
             </ng-container>
 
+            <!-- Errors -->
+            <ng-container *ngIf="errors$ | async as errors">
+                <ng-container *ngFor="let error of errors">
+                    <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMoreError(error)">
+                        
+                        <span><i class="fa-solid fa-triangle-exclamation me-2"></i>{{error.title}}</span>
+                        <div class="accent-text" *ngIf="error.subTitle !== ''">Click for more information</div>
+                        <button type="button" class="btn-close float-end" aria-label="close"></button>
+                    </li>
+                </ng-container>
+            </ng-container>
+
             <!-- Online Users -->
             <ng-container *ngIf="messageHub.onlineUsers$ | async as onlineUsers">
                 <li class="list-group-item dark-menu-item" *ngIf="onlineUsers.length > 1">
