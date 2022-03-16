@@ -9,16 +9,12 @@ import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 
-
-
-
-// TODO: Rename this to events widget
 @Component({
   selector: 'app-nav-events-toggle',
-  templateUrl: './nav-events-toggle.component.html',
-  styleUrls: ['./nav-events-toggle.component.scss']
+  templateUrl: './events-widget.component.html',
+  styleUrls: ['./events-widget.component.scss']
 })
-export class NavEventsToggleComponent implements OnInit, OnDestroy {
+export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input() user!: User;
 
   isAdmin: boolean = false;
@@ -94,6 +90,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         const index = data.findIndex(m => m.name === message.name);
         if (index < 0) {
           data.push(message);
+          this.activeEvents += 1;
         } else {
           data[index] = message;
         }
@@ -103,7 +100,7 @@ export class NavEventsToggleComponent implements OnInit, OnDestroy {
         data = this.progressEventsSource.getValue();
         data = data.filter(m => m.name !== message.name); // This does not work //  && m.title !== message.title
         this.progressEventsSource.next(data);
-        this.activeEvents =  Math.max(this.activeEvents - 1, 0);
+        this.activeEvents = Math.max(this.activeEvents - 1, 0);
         break;
       default:
         break;
