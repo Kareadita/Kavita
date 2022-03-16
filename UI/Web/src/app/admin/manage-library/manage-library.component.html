@@ -7,7 +7,7 @@
         <li *ngFor="let library of libraries; let idx = index; trackby: trackbyLibrary" class="list-group-item no-hover">
             <div>
                 <h4>
-                    <span id="library-name--{{idx}}">{{library.name}}</span>&nbsp;
+                    <span id="library-name--{{idx}}"><a [routerLink]="'/library/' + library.id">{{library.name}}</a></span>&nbsp;
                     <div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;" role="status" *ngIf="scanInProgress.hasOwnProperty(library.id) && scanInProgress[library.id].progress" title="Scan in progress. Started at {{scanInProgress[library.id].timestamp | date: 'short'}}">
                         <span class="visually-hidden">Scan for {{library.name}} in progress</span>
                     </div>
