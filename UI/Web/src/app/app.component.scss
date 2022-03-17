@@ -1,5 +1,5 @@
 .content-wrapper {
-    padding: calc(56px) 10px 0;
+    padding: 0 10px 0;
     height: 100%;
 }
 
@@ -19,7 +19,7 @@
     }
 
     .content-wrapper {
-        padding: calc(56px) 10px 0;
+        padding: 0 10px 0;
         overflow: hidden;
 
         &.closed {
