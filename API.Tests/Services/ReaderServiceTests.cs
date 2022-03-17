@@ -1780,6 +1780,85 @@ public class ReaderServiceTests
         Assert.True(await _unitOfWork.AppUserProgressRepository.UserHasProgress(LibraryType.Manga, 1));
     }
 
+    [Fact]
+    public async Task MarkChaptersUntilAsRead_ShouldMarkAsReadAnythingUntil()
+    {
+        await ResetDB();
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("45", false, new List<MangaFile>(), 5),
+
+                    EntityFactory.CreateChapter("46", false, new List<MangaFile>(), 46),
+                    EntityFactory.CreateChapter("47", false, new List<MangaFile>(), 47),
+                    EntityFactory.CreateChapter("48", false, new List<MangaFile>(), 48),
+                    EntityFactory.CreateChapter("49", false, new List<MangaFile>(), 49),
+                    EntityFactory.CreateChapter("50", false, new List<MangaFile>(), 50),
+                    EntityFactory.CreateChapter("Some Special Title", true, new List<MangaFile>(), 10),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 6),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 7),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("12", false, new List<MangaFile>(), 5),
+                    EntityFactory.CreateChapter("13", false, new List<MangaFile>(), 5),
+                    EntityFactory.CreateChapter("14", false, new List<MangaFile>(), 5),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        var markReadUntilNumber = 47;
+
+        await readerService.MarkChaptersUntilAsRead(user, 1, markReadUntilNumber);
+        await _context.SaveChangesAsync();
+
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(1, 1);
+        var notReadChapterRanges = new[] {"Some Special Title"};
+        Assert.True(volumes.SelectMany(v => v.Chapters).All(c =>
+        {
+            // Specials are ignored.
+            // If chapter is higher than MarkReadUntilNumber it must be not read
+            if (notReadChapterRanges.Contains(c.Range) || float.Parse(c.Number)>markReadUntilNumber)
+            {
+                return c.PagesRead == 0;
+            }
+            else
+            {
+                // Pages read and total pages must match -> chapter fully read
+                return c.Pages == c.PagesRead;
+            }
+        }));
+
+        //Assert.True(volumes.SelectMany(v => v.Chapters).All(c => (c.Pages == c.PagesRead || notReadChapterRanges.All(c.Range.Contains))));
+
+    }
+
+
     #endregion
 
 
