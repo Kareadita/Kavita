@@ -57,6 +57,10 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (!page.endsWith('/')) {
+      page = page + '/';
+    }
+
     if (this.comparisonMethod === 'equals' && page === this.link) {
       this.highlighted = true;
       return;
