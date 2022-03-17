@@ -5,7 +5,7 @@ import { ReplaySubject, take } from 'rxjs';
   providedIn: 'root'
 })
 export class NavService {
-  public localStorageSideNavKey = 'kavita--sidenav--collapsed';
+  public localStorageSideNavKey = 'kavita--sidenav--expanded';
 
   private navbarVisibleSource = new ReplaySubject<boolean>(1);
   /**

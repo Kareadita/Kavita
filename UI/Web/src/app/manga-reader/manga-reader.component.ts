@@ -431,9 +431,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.navService.showSideNav();
     this.onDestroy.next();
     this.onDestroy.complete();
-    this.goToPageEvent.complete();
     this.showBookmarkEffectEvent.complete();
     this.readerService.exitFullscreen();
+    if (this.goToPageEvent !== undefined) this.goToPageEvent.complete();
   }
 
   @HostListener('window:keyup', ['$event'])

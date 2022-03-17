@@ -3,8 +3,14 @@
     <a id="content"></a>
     <app-side-nav *ngIf="navService.sideNavVisibility$ | async"></app-side-nav>
     <div class="container-fluid" style="padding-top: 10px; padding-bottom: 10px;">
-        <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService?.sideNavCollapsed$ | async)}">
+        <ng-container *ngIf="navService.sideNavVisibility$ | async else noSideNav">
+            <div class="companion-bar" [ngClass]="{'companion-bar-content': (navService?.sideNavCollapsed$ | async)}">
+                <router-outlet></router-outlet>
+            </div>
+        </ng-container>
+        <ng-template #noSideNav>
             <router-outlet></router-outlet>
-        </div>
+        </ng-template>
+        
     </div>
 </div>
