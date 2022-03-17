@@ -1,11 +1,11 @@
 <app-side-nav-companion-bar [showGoBack]="true">
-  <h1 title>
+  <h2 title>
     <span *ngIf="actions.length > 0">
       <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>
     </span>
     {{readingList.title}}&nbsp;<span *ngIf="readingList?.promoted">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>&nbsp;
     <span class="badge bg-primary rounded-pill" attr.aria-label="{{items.length}} total items">{{items.length}}</span>
-  </h1>
+  </h2>
 </app-side-nav-companion-bar>
 <div class="container-fluid mt-2" *ngIf="readingList">
   <div class="mb-3">
