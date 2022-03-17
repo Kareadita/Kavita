@@ -394,6 +394,8 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             user.Progresses ??= new List<AppUserProgress>();
 
+            if (chapterNumber == 0.0f) return true;
+
             if (chapterNumber < 1.0f)
             {
                 // This is a hack to track volume number. We need to map it back by x100
