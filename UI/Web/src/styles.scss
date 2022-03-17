@@ -64,12 +64,7 @@ label, select, .clickable {
   cursor: default;
 }
 
-html, body { height: 100%; color-scheme: var(--color-scheme); }
-body {
-  margin: 0;
-  font-family: var(--body-font-family);
-  color: var(--body-text-color);
-}
+
 
 // Needed for fullscreen
 app-root {
