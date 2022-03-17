@@ -202,7 +202,7 @@ public class SeriesServiceTests
 
         Assert.NotEmpty(detail.Volumes);
         Assert.Equal(2, detail.Volumes.Count()); // Volume 0 shouldn't be sent in Volumes
-        Assert.All(detail.Volumes, dto => Assert.Contains(dto.Name, new[] {"2", "3"}));
+        Assert.All(detail.Volumes, dto => Assert.Contains(dto.Name, new[] {"Volume 2", "Volume 3"})); // Volumes get names mapped
     }
 
     [Fact]
