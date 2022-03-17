@@ -655,6 +655,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     val =  formControl?.value;
 
+    if (this.isCoverImage() && this.layoutMode == LayoutMode.Single && val !== FITTING_OPTION.WIDTH && this.shouldRenderAsFitSplit()) {
+      // Rewriting to fit to width for this cover image
+      return FITTING_OPTION.WIDTH;
+    }
+
 
     if (this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
       return val + ' cover double';
