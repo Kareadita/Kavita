@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,6 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 
 namespace API.Services;
 
@@ -515,7 +513,7 @@ public class SeriesService : ISeriesService
             Volumes = processedVolumes,
             StorylineChapters = volumes
                 .Where(v => v.Number == 0)
-                .SelectMany(v => v.Chapters)
+                .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
                 .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
 
         };
