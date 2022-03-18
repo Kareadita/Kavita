@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { ReplaySubject, take } from 'rxjs';
 
 @Injectable({
@@ -25,7 +26,10 @@ export class NavService {
    */
   sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
 
-  constructor() {
+  private renderer: Renderer2;
+
+  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2) {
+    this.renderer = rendererFactory.createRenderer(null, null);
     this.showNavBar();
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapseSource.next(sideNavState);
@@ -36,6 +40,7 @@ export class NavService {
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */
   showNavBar() {
+    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '56px');
     this.navbarVisibleSource.next(true);
   }
 
@@ -43,6 +48,7 @@ export class NavService {
    * Hides the top nav bar. 
    */
   hideNavBar() {
+    this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '0px');
     this.navbarVisibleSource.next(false);
   }
 

@@ -67,7 +67,7 @@
               <ng-template ngbNavContent>
                 <div class="row g-0">
                     <ng-container *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
-                        <app-card-item class="col-auto p-2" *ngIf="chapter.isSpecial" [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
+                        <app-card-item class="col-auto p-2" [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
                         [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
                         [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('special', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('special', idx)" [allowSelection]="true"></app-card-item>
                     </ng-container>
@@ -79,12 +79,12 @@
                 <ng-template ngbNavContent>
                     <div class="row g-0">
                         <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
-                            <app-card-item class="col-auto p-2" *ngIf="volume.number != 0" [entity]="volume" [title]="formatVolumeTitle(volume)" (click)="openVolume(volume)"
+                            <app-card-item class="col-auto p-2" *ngIf="volume.number != 0" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
                             [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
                             [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
                         </ng-container>
                           <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
-                              <app-card-item class="col-auto p-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="formatChapterTitle(chapter)" (click)="openChapter(chapter)"
+                              <app-card-item class="col-auto p-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
                               [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
                               [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, storyChapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
                           </ng-container>
@@ -96,7 +96,7 @@
                 <ng-template ngbNavContent>
                     <div class="row g-0">
                           <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
-                                  <app-card-item class="col-auto p-2" [entity]="volume" [title]="formatVolumeTitle(volume)" (click)="openVolume(volume)"
+                                  <app-card-item class="col-auto p-2" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
                                   [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
                                   [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
                           </ng-container>
@@ -108,7 +108,7 @@
                 <ng-template ngbNavContent>
                     <div class="row g-0">
                         <ng-container *ngFor="let chapter of chapters; let idx = index; trackBy: trackByChapterIdentity">
-                            <app-card-item class="col-auto p-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="formatChapterTitle(chapter)" (click)="openChapter(chapter)"
+                            <app-card-item class="col-auto p-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
                             [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
                             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
                         </ng-container>
