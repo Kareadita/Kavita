@@ -1832,32 +1832,25 @@ public class ReaderServiceTests
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        var markReadUntilNumber = 47;
+        const int markReadUntilNumber = 47;
 
         await readerService.MarkChaptersUntilAsRead(user, 1, markReadUntilNumber);
         await _context.SaveChangesAsync();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(1, 1);
-        var notReadChapterRanges = new[] {"Some Special Title"};
         Assert.True(volumes.SelectMany(v => v.Chapters).All(c =>
         {
             // Specials are ignored.
-            // If chapter is higher than MarkReadUntilNumber it must be not read
-            if (notReadChapterRanges.Contains(c.Range) || float.Parse(c.Number)>markReadUntilNumber)
+            var notReadChapterRanges = new[] {"Some Special Title", "48", "49", "50"};
+            if (notReadChapterRanges.Contains(c.Range))
             {
                 return c.PagesRead == 0;
             }
-            else
-            {
-                // Pages read and total pages must match -> chapter fully read
-                return c.Pages == c.PagesRead;
-            }
+            // Pages read and total pages must match -> chapter fully read
+            return c.Pages == c.PagesRead;
+
         }));
-
-        //Assert.True(volumes.SelectMany(v => v.Chapters).All(c => (c.Pages == c.PagesRead || notReadChapterRanges.All(c.Range.Contains))));
-
     }
-
 
     #endregion
 
