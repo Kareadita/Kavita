@@ -1,4 +1,5 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, fromEvent, merge, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { ReaderService } from '../../_services/reader.service';
@@ -92,7 +93,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * The minimum width of images in webtoon. On image loading, this is checked and updated. All images will get this assigned to them for rendering.
    */
-  webtoonImageWidth: number = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+  webtoonImageWidth: number = window.innerWidth || this.document.documentElement.clientWidth || this.document.body.clientWidth;
   /**
    * Used to tell if a scrollTo() operation is in progress
    */
@@ -152,7 +153,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2) {
+  constructor(private readerService: ReaderService, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document) {
     // This will always exist at this point in time since this is used within manga reader
     const reader = document.querySelector('.reader');
     if (reader !== null) {
@@ -174,11 +175,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * Responsible for binding the scroll handler to the correct event. On non-fullscreen, window is correct. However, on fullscreen, we must use the reader as that is what 
+   * Responsible for binding the scroll handler to the correct event. On non-fullscreen, body is correct. However, on fullscreen, we must use the reader as that is what 
    * gets promoted to fullscreen.
    */
   initScrollHandler() {
-    fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : window, 'scroll')
+    fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
     .pipe(debounceTime(20), takeUntil(this.onDestroy))
     .subscribe((event) => this.handleScrollEvent(event));
   }
@@ -233,7 +234,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   getVerticalOffset() {
-    const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : window;
+    const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
 
     let offset = 0;
     if (reader instanceof Window) {
