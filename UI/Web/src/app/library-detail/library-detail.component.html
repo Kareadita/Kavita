@@ -1,8 +1,8 @@
 <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)">
-    <h1 title>
+    <h2 title>
         <app-card-actionables [actions]="actions"></app-card-actionables>
         {{libraryName}}
-    </h1>
+    </h2>
     <h6 subtitle style="margin-left:40px;">{{pagination?.totalItems}} Series</h6>
     <div main>
         <!-- TODO: Implement Tabs here for Recommended and Library view -->

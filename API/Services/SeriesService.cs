@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,6 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 
 namespace API.Services;
 
@@ -460,21 +458,39 @@ public class SeriesService : ISeriesService
                 {
                     volume.Name += $" - {firstChapter.TitleName}";
                 }
+
                 processedVolumes.Add(volume);
             }
         }
         else
         {
             processedVolumes = volumes.Where(v => v.Number > 0).ToList();
+            processedVolumes.ForEach(v => v.Name = $"Volume {v.Name}");
         }
 
 
         var specials = new List<ChapterDto>();
-        foreach (var chapter in chapters.Where(c => c.IsSpecial))
+        foreach (var chapter in chapters)
         {
-            chapter.Title = Parser.Parser.CleanSpecialTitle(chapter.Title);
-            specials.Add(chapter);
+            if (chapter.IsSpecial)
+            {
+                chapter.Title = Parser.Parser.CleanSpecialTitle(chapter.Title);
+                specials.Add(chapter);
+            }
+            else
+            {
+                var title = libraryType switch
+                {
+                    LibraryType.Book => $"Book {chapter.Title}",
+                    LibraryType.Comic => $"Issue #{chapter.Title}",
+                    LibraryType.Manga => $"Chapter {chapter.Title}",
+                    _ => "Chapter "
+                };
+                chapter.Title = title;
+            }
+
         }
+
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
         IEnumerable<ChapterDto> retChapters;
@@ -497,7 +513,7 @@ public class SeriesService : ISeriesService
             Volumes = processedVolumes,
             StorylineChapters = volumes
                 .Where(v => v.Number == 0)
-                .SelectMany(v => v.Chapters)
+                .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
                 .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
 
         };

@@ -28,6 +28,7 @@ public class OpdsController : BaseApiController
     private readonly IDirectoryService _directoryService;
     private readonly ICacheService _cacheService;
     private readonly IReaderService _readerService;
+    private readonly ISeriesService _seriesService;
 
 
     private readonly XmlSerializer _xmlSerializer;
@@ -61,13 +62,14 @@ public class OpdsController : BaseApiController
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
-        IReaderService readerService)
+        IReaderService readerService, ISeriesService seriesService)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
         _directoryService = directoryService;
         _cacheService = cacheService;
         _readerService = readerService;
+        _seriesService = seriesService;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -314,16 +316,17 @@ public class OpdsController : BaseApiController
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
         foreach (var item in items)
         {
-            feed.Entries.Add(new FeedEntry()
-            {
-                Id = item.ChapterId.ToString(),
-                Title = $"{item.SeriesName} Chapter {item.ChapterNumber}",
-                Links = new List<FeedLink>()
-                {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{item.SeriesId}/volume/{item.VolumeId}/chapter/{item.ChapterId}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={item.ChapterId}")
-                }
-            });
+            feed.Entries.Add(CreateChapter(apiKey, $"{item.SeriesName} Chapter {item.ChapterNumber}", item.ChapterId, item.VolumeId, item.SeriesId));
+            // new FeedEntry()
+            // {
+            //     Id = item.ChapterId.ToString(),
+            //     Title = $"{item.SeriesName} Chapter {item.ChapterNumber}",
+            //     Links = new List<FeedLink>()
+            //     {
+            //         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{item.SeriesId}/volume/{item.VolumeId}/chapter/{item.ChapterId}"),
+            //         CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={item.ChapterId}")
+            //     }
+            // }
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -521,14 +524,29 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId);
-        var feed = CreateFeed(series.Name + " - Volumes", $"{apiKey}/series/{series.Id}", apiKey);
+
+        var feed = CreateFeed(series.Name + " - Storyline", $"{apiKey}/series/{series.Id}", apiKey);
         SetFeedId(feed, $"series-{series.Id}");
         feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesId}"));
-        foreach (var volumeDto in volumes)
+
+        // NOTE: I want to try and use ReaderService to get SeriesDetails.
+        var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
+        foreach (var volume in seriesDetail.Volumes)
         {
-            feed.Entries.Add(CreateVolume(volumeDto, seriesId, apiKey));
+            feed.Entries.Add(CreateVolume(volume, seriesId, apiKey)); // We might want to emulate a volume but make this a chapter
         }
+
+        foreach (var storylineChapter in seriesDetail.StorylineChapters.Where(c => !c.IsSpecial))
+        {
+            feed.Entries.Add(CreateChapter(apiKey, storylineChapter.Title, storylineChapter.Id, storylineChapter.VolumeId, seriesId));
+        }
+
+        foreach (var special in seriesDetail.Specials)
+        {
+            feed.Entries.Add(CreateChapter(apiKey, special.Title, special.Id, special.VolumeId, seriesId));
+        }
+
+
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -694,6 +712,23 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}")
+            }
+        };
+    }
+
+    private static FeedEntry CreateChapter(string apiKey, string title, int chapterId, int volumeId, int seriesId)
+    {
+
+        return new FeedEntry()
+        {
+            Id = chapterId.ToString(),
+            Title = title,
+            Links = new List<FeedLink>()
+            {
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"/api/image/chapter-cover?chapterId={chapterId}")
             }
         };
     }
