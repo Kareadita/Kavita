@@ -491,7 +491,7 @@ public class OpdsController : BaseApiController
         var feed = new OpenSearchDescription()
         {
             ShortName = "Search",
-            Description = "Search for Series",
+            Description = "Search for Series, Collections, or Reading Lists",
             Url = new SearchLink()
             {
                 Type = FeedLinkType.AtomAcquisition,
