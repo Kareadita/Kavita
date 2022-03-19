@@ -521,7 +521,19 @@ public class OpdsController : BaseApiController
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            feed.Entries.Add(CreateVolume(volume, seriesId, apiKey)); // We might want to emulate a volume but make this a chapter
+            // If there is only one chapter to the Volume, we will emulate a volume to flatten the amount of hops a user must go through
+            if (volume.Chapters.Count == 1)
+            {
+                var firstChapter = volume.Chapters.First();
+                var chapter = CreateChapter(apiKey, volume.Name, firstChapter.Id, volume.Id, seriesId);
+                chapter.Id = firstChapter.Id.ToString();
+                feed.Entries.Add(chapter);
+            }
+            else
+            {
+                feed.Entries.Add(CreateVolume(volume, seriesId, apiKey));
+            }
+
         }
 
         foreach (var storylineChapter in seriesDetail.StorylineChapters.Where(c => !c.IsSpecial))
@@ -697,9 +709,12 @@ public class OpdsController : BaseApiController
             Title = volumeDto.Name,
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}")
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"/api/image/volume-cover?volumeId={volumeDto.Id}")
             }
         };
     }
@@ -715,6 +730,8 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
                     Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}"),
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"/api/image/chapter-cover?chapterId={chapterId}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
                     $"/api/image/chapter-cover?chapterId={chapterId}")
             }
         };
