@@ -443,7 +443,7 @@ public class ReaderService : IReaderService
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
-        foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber))
+        foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber && v.Number > 0))
         {
             MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }

@@ -394,6 +394,10 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             user.Progresses ??= new List<AppUserProgress>();
 
+            // Tachiyomi sends chapter 0.0f when there's no chapters read.
+            // Due to the encoding for volumes this marks all chapters in volume 0 (loose chapters) as read so we ignore it
+            if (chapterNumber == 0.0f) return true;
+
             if (chapterNumber < 1.0f)
             {
                 // This is a hack to track volume number. We need to map it back by x100
