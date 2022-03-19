@@ -1,7 +1,7 @@
 <ng-container *ngIf="libraries.length === 0 && !isLoading">
     <div class="mt-3">
         <div *ngIf="isAdmin" class="d-flex justify-content-center">
-            <p>There are no libraries setup yet. Configure some in <a routerLink="/admin/dashboard#libraries">Server settings</a>.</p>
+            <p>There are no libraries setup yet. Configure some in <a routerLink="/admin/dashboard" fragment="libraries">Server settings</a>.</p>
         </div>
         <div *ngIf="!isAdmin" class="d-flex justify-content-center">
             <p>You haven't been granted access to any libraries.</p>
