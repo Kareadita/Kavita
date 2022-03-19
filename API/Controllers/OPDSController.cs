@@ -730,15 +730,7 @@ public class OpdsController : BaseApiController
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
 
 
-        var title = $"{series.Name} - ";
-        if (volume.Number == 0 && !chapter.IsSpecial)
-        {
-            title += $"Chapter {chapter.Number}";
-        } else
-        {
-            //title += $"Volume {volume.Name} - Chapter {chapter.Number}";
-            title += SeriesService.FormatChapterTitle(chapter, libraryType);
-        }
+        var title = $"{series.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
 
         // Chunky requires a file at the end. Our API ignores this
         var accLink =
