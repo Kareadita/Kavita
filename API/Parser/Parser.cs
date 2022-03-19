@@ -57,7 +57,7 @@ namespace API.Parser
         private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)((?<!back)cover|folder)(?![\w\d])",
             MatchOptions, RegexTimeout);
 
-        private static readonly Regex NormalizeRegex = new Regex(@"[^a-zA-Z0-9\+]",
+        private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+]",
             MatchOptions, RegexTimeout);
 
 
@@ -966,8 +966,7 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
-            return string.IsNullOrEmpty(normalized) ? name : normalized;
+            return NormalizeRegex.Replace(name, string.Empty).ToLower();
         }
 
         /// <summary>

@@ -163,6 +163,7 @@ namespace API.Tests.Parser
         [InlineData("Citrus+", "citrus+")]
         [InlineData("Again!!!!", "again")]
         [InlineData("카비타", "카비타")]
+        [InlineData("06", "06")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
