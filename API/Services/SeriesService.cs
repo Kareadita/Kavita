@@ -472,24 +472,11 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         foreach (var chapter in chapters)
         {
+            chapter.Title = FormatChapterTitle(chapter, libraryType);
             if (chapter.IsSpecial)
             {
-                //chapter.Title = Parser.Parser.CleanSpecialTitle(chapter.Title);
-                chapter.Title = FormatChapterTitle(chapter, libraryType);
                 specials.Add(chapter);
             }
-            else
-            {
-                // var title = libraryType switch
-                // {
-                //     LibraryType.Book => $"Book {chapter.Title}",
-                //     LibraryType.Comic => $"Issue #{chapter.Title}",
-                //     LibraryType.Manga => $"Chapter {chapter.Title}",
-                //     _ => "Chapter "
-                // };
-                chapter.Title = FormatChapterTitle(chapter, libraryType);
-            }
-
         }
 
 

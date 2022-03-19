@@ -596,10 +596,10 @@ public class OpdsController : BaseApiController
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
         var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(libraryType)}-{chapter.Id}-files");
+        SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
-            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, volume, chapter, apiKey));
+            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -737,7 +737,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private async Task<FeedEntry> CreateChapterWithFile(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, Volume volume, ChapterDto chapter, string apiKey)
+    private async Task<FeedEntry> CreateChapterWithFile(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, ChapterDto chapter, string apiKey)
     {
         var fileSize =
             DirectoryService.GetHumanReadableBytes(_directoryService.GetTotalSize(new List<string>()
