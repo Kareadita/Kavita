@@ -1009,12 +1009,12 @@ namespace API.Parser
 
         public static bool IsEpub(string filePath)
         {
-            return Path.GetExtension(filePath).ToLower() == ".epub";
+            return Path.GetExtension(filePath).Equals(".epub", StringComparison.InvariantCultureIgnoreCase);
         }
 
         public static bool IsPdf(string filePath)
         {
-           return Path.GetExtension(filePath).ToLower() == ".pdf";
+           return Path.GetExtension(filePath).Equals(".pdf", StringComparison.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
@@ -1025,8 +1025,7 @@ namespace API.Parser
         /// <returns></returns>
         public static string CleanAuthor(string author)
         {
-            if (string.IsNullOrEmpty(author)) return string.Empty;
-            return author.Trim();
+            return string.IsNullOrEmpty(author) ? string.Empty : author.Trim();
         }
 
         /// <summary>

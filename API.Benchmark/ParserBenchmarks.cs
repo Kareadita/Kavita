@@ -54,7 +54,7 @@ namespace API.Benchmark
         {
             foreach (var name in _names)
             {
-                if ((name + ".epub").ToLower() == ".epub")
+                if ((name).ToLower() == ".epub")
                 {
                     /* No Operation */
                 }
@@ -67,7 +67,7 @@ namespace API.Benchmark
             foreach (var name in _names)
             {
 
-                if (IsEpub.IsMatch((name + ".epub")))
+                if (Path.GetExtension(name).Equals(".epub", StringComparison.InvariantCultureIgnoreCase))
                 {
                     /* No Operation */
                 }
