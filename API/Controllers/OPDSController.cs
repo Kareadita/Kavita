@@ -317,18 +317,7 @@ public class OpdsController : BaseApiController
         foreach (var item in items)
         {
             feed.Entries.Add(CreateChapter(apiKey, $"{item.SeriesName} Chapter {item.ChapterNumber}", item.ChapterId, item.VolumeId, item.SeriesId));
-            // new FeedEntry()
-            // {
-            //     Id = item.ChapterId.ToString(),
-            //     Title = $"{item.SeriesName} Chapter {item.ChapterNumber}",
-            //     Links = new List<FeedLink>()
-            //     {
-            //         CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{item.SeriesId}/volume/{item.VolumeId}/chapter/{item.ChapterId}"),
-            //         CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={item.ChapterId}")
-            //     }
-            // }
         }
-
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -502,7 +491,7 @@ public class OpdsController : BaseApiController
         var feed = new OpenSearchDescription()
         {
             ShortName = "Search",
-            Description = "Search for Series",
+            Description = "Search for Series, Collections, or Reading Lists",
             Url = new SearchLink()
             {
                 Type = FeedLinkType.AtomAcquisition,
@@ -529,11 +518,22 @@ public class OpdsController : BaseApiController
         SetFeedId(feed, $"series-{series.Id}");
         feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesId}"));
 
-        // NOTE: I want to try and use ReaderService to get SeriesDetails.
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            feed.Entries.Add(CreateVolume(volume, seriesId, apiKey)); // We might want to emulate a volume but make this a chapter
+            // If there is only one chapter to the Volume, we will emulate a volume to flatten the amount of hops a user must go through
+            if (volume.Chapters.Count == 1)
+            {
+                var firstChapter = volume.Chapters.First();
+                var chapter = CreateChapter(apiKey, volume.Name, firstChapter.Id, volume.Id, seriesId);
+                chapter.Id = firstChapter.Id.ToString();
+                feed.Entries.Add(chapter);
+            }
+            else
+            {
+                feed.Entries.Add(CreateVolume(volume, seriesId, apiKey));
+            }
+
         }
 
         foreach (var storylineChapter in seriesDetail.StorylineChapters.Where(c => !c.IsSpecial))
@@ -546,8 +546,6 @@ public class OpdsController : BaseApiController
             feed.Entries.Add(CreateChapter(apiKey, special.Title, special.Id, special.VolumeId, seriesId));
         }
 
-
-
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -559,19 +557,20 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapters =
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                 _chapterSortComparer);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-chapters");
+        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
+        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(libraryType)}s");
         foreach (var chapter in chapters)
         {
             feed.Entries.Add(new FeedEntry()
             {
                 Id = chapter.Id.ToString(),
-                Title = "Chapter " + chapter.Number,
+                Title = SeriesService.FormatChapterTitle(chapter, libraryType),
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapter.Id}"),
@@ -591,15 +590,16 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + " - Chapters ", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-chapter-{chapter.Id}-files");
+        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
+        SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
-            feed.Entries.Add(CreateChapter(seriesId, volumeId, chapterId, mangaFile, series, volume, chapter, apiKey));
+            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -706,19 +706,21 @@ public class OpdsController : BaseApiController
         return new FeedEntry()
         {
             Id = volumeDto.Id.ToString(),
-            Title = "Volume " + volumeDto.Name,
+            Title = volumeDto.Name,
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/volume-cover?volumeId={volumeDto.Id}")
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"/api/image/volume-cover?volumeId={volumeDto.Id}")
             }
         };
     }
 
     private static FeedEntry CreateChapter(string apiKey, string title, int chapterId, int volumeId, int seriesId)
     {
-
         return new FeedEntry()
         {
             Id = chapterId.ToString(),
@@ -728,22 +730,36 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
                     Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}"),
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"/api/image/chapter-cover?chapterId={chapterId}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
                     $"/api/image/chapter-cover?chapterId={chapterId}")
             }
         };
     }
 
-    private FeedEntry CreateChapter(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, Volume volume, ChapterDto chapter, string apiKey)
+    private async Task<FeedEntry> CreateChapterWithFile(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, ChapterDto chapter, string apiKey)
     {
         var fileSize =
             DirectoryService.GetHumanReadableBytes(_directoryService.GetTotalSize(new List<string>()
                 {mangaFile.FilePath}));
         var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
         var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
+        var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
+
+
+        var title = $"{series.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+
+        // Chunky requires a file at the end. Our API ignores this
+        var accLink =
+                CreateLink(FeedLinkRelation.Acquisition, fileType,
+                    $"{Prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}",
+                    filename);
+        accLink.TotalPages = chapter.Pages;
+
         return new FeedEntry()
         {
             Id = mangaFile.Id.ToString(),
-            Title = $"{series.Name} - Volume {volume.Name} - Chapter {chapter.Number}",
+            Title = title,
             Extent = fileSize,
             Summary = $"{fileType.Split("/")[1]} - {fileSize}",
             Format = mangaFile.Format.ToString(),
@@ -751,8 +767,7 @@ public class OpdsController : BaseApiController
             {
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
-                // Chunky requires a file at the end. Our API ignores this
-                CreateLink(FeedLinkRelation.Acquisition, fileType, $"{Prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}"),
+                accLink,
                 CreatePageStreamLink(seriesId, volumeId, chapterId, mangaFile, apiKey)
             },
             Content = new FeedEntryContent()
@@ -839,13 +854,14 @@ public class OpdsController : BaseApiController
         return link;
     }
 
-    private static FeedLink CreateLink(string rel, string type, string href)
+    private static FeedLink CreateLink(string rel, string type, string href, string title = null)
     {
         return new FeedLink()
         {
             Rel = rel,
             Href = href,
-            Type = type
+            Type = type,
+            Title = string.IsNullOrEmpty(title) ? string.Empty : title
         };
     }
 

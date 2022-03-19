@@ -1213,6 +1213,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateForm() {
 
     if ( this.readerMode === ReaderMode.Webtoon) {
+      this.generalSettingsForm.get('pageSplitOption')?.disable()
       this.generalSettingsForm.get('fittingOption')?.disable()
       this.generalSettingsForm.get('pageSplitOption')?.disable();
       this.generalSettingsForm.get('layoutMode')?.disable();
@@ -1220,6 +1221,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('fittingOption')?.enable()
       this.generalSettingsForm.get('pageSplitOption')?.enable();
       this.generalSettingsForm.get('layoutMode')?.enable();
+      this.generalSettingsForm.get('pageSplitOption')?.enable()
 
       if (this.layoutMode !== LayoutMode.Single) {
         this.generalSettingsForm.get('pageSplitOption')?.disable();
