@@ -284,7 +284,7 @@ public class SeriesRepository : ISeriesRepository
 
         result.Libraries = await _context.Library
             .Where(l => libraryIds.Contains(l.Id))
-            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%"))
+            .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .OrderBy(l => l.Name)
             .AsSplitQuery()
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
@@ -515,7 +515,7 @@ public class SeriesRepository : ISeriesRepository
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
         out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter,
-        out bool hasLanguageFilter, out bool hasPublicationFilter)
+        out bool hasLanguageFilter, out bool hasPublicationFilter, out bool hasSeriesNameFilter)
     {
         var formats = filter.GetSqlFilter();
 
@@ -588,6 +588,8 @@ public class SeriesRepository : ISeriesRepository
                 .ToList();
         }
 
+        hasSeriesNameFilter = !string.IsNullOrEmpty(filter.SeriesNameQuery);
+
         return formats;
     }
 
@@ -645,7 +647,7 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter, out var hasSeriesNameFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -659,8 +661,11 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
-                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
-            )
+                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
+            .Where(s => !hasSeriesNameFilter ||
+                        EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
+                                             || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
+                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
             .AsNoTracking();
 
         // If no sort options, default to using SortName

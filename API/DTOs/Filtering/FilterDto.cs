@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using API.Entities;
 using API.Entities.Enums;
 
@@ -93,6 +94,11 @@ namespace API.DTOs.Filtering
         /// Publication statuses to filter by. Empty list will return everything back
         /// </summary>
         public IList<PublicationStatus> PublicationStatus { get; init; } = new List<PublicationStatus>();
+
+        /// <summary>
+        /// An optional name string to filter by. Empty string will ignore.
+        /// </summary>
+        public string SeriesNameQuery { get; init; } = string.Empty;
 
     }
 }

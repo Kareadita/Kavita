@@ -29,6 +29,7 @@ export interface SeriesFilter {
     tags: Array<number>;
     languages: Array<string>;
     publicationStatus: Array<number>;
+    seriesNameQuery: string;
 }
 
 export interface SortOptions {
