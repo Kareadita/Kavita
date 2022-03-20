@@ -2,7 +2,7 @@ import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
-import { UtilityService } from '../shared/_services/utility.service';
+import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from '../typeahead/typeahead-settings';
 import { CollectionTag } from '../_models/collection-tag';
 import { Genre } from '../_models/genre';
