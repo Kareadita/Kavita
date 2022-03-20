@@ -5,8 +5,6 @@ import { debounceTime, filter, map, shareReplay, switchMap, take, takeUntil, tap
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
-//export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
-
 /**
    * SelectionModel<T> is used for keeping track of multiple selections. Simple interface with ability to toggle. 
    * @param selectedState Optional state to set selectedOptions to. If not passed, defaults to false.
