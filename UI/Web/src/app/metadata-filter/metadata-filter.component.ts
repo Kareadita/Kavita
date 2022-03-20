@@ -443,8 +443,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     return personSettings;
   }
 
-  updateFormatFilters(formats: MangaFormat[]) {
-    this.filter.formats = formats.map(item => item) || [];
+  updateFormatFilters(formats: FilterItem<MangaFormat>[]) {
+    this.filter.formats = formats.map(item => item.value) || [];
   }
 
   updateLibraryFilters(libraries: Library[]) {
