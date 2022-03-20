@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data.Scanner;
 using API.DTOs;
@@ -289,17 +290,23 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
+        var justYear = Regex.Match(searchQuery, @"\d{4}").Value;
+        var hasYearInQuery = !string.IsNullOrEmpty(justYear);
+        var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
+
         result.Series = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
                         || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
+                        || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%")
+                        || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
             .Include(s => s.Library)
             .OrderBy(s => s.SortName)
             .AsNoTracking()
             .AsSplitQuery()
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+
 
         result.ReadingLists = await _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)
