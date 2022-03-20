@@ -74,6 +74,10 @@ namespace API.SignalR
         /// When DB updates are occuring during a library/series scan
         /// </summary>
         private const string ScanProgress = "ScanProgress";
+        /// <summary>
+        /// When a library is created/deleted in the Server
+        /// </summary>
+        public const string LibraryModified = "LibraryModified";
 
 
         public static SignalRMessage ScanSeriesEvent(int seriesId, string seriesName)
@@ -225,6 +229,22 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage LibraryModifiedEvent(int libraryId, string action)
+        {
+            return new SignalRMessage
+            {
+                Name = LibraryModified,
+                Title = "Library modified",
+                Progress = ProgressType.None,
+                EventType = ProgressEventType.Single,
+                Body = new
+                {
+                    LibrayId = libraryId,
+                    Action = action,
+                }
+            };
+        }
+
         public static SignalRMessage DownloadProgressEvent(string username, string downloadName, float progress, string eventType = "updated")
         {
             return new SignalRMessage()
@@ -270,27 +290,8 @@ namespace API.SignalR
             };
         }
 
-        public static SignalRMessage DbUpdateProgressEvent(Series series, string eventType)
-        {
-            // TODO: I want this as a detail of a Scanning Series and we can put more information like Volume or Chapter here
-            return new SignalRMessage()
-            {
-                Name = ScanProgress,
-                Title = $"Scanning {series.Library.Name}",
-                SubTitle = series.Name,
-                EventType = eventType,
-                Progress = ProgressType.Indeterminate,
-                Body = new
-                {
-                    Title = "Updating Series",
-                    SubTitle = series.Name
-                }
-            };
-        }
-
         public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "")
         {
-            // TODO: I want this as a detail of a Scanning Series and we can put more information like Volume or Chapter here
             return new SignalRMessage()
             {
                 Name = ScanProgress,
