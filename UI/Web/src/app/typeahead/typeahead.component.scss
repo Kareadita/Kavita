@@ -107,3 +107,15 @@ input {
     cursor: pointer;
     top: 30%;
 }
+
+.results {
+    .list-group-item {
+        cursor: pointer;
+        border-left-color: var(--list-group-hover-text-color);
+        border-right-color: var(--list-group-hover-text-color);
+    }
+
+    .list-group-item:last-child {
+        border-bottom-color: var(--list-group-hover-text-color);
+    }
+}
