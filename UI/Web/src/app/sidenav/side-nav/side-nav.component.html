@@ -1,14 +1,13 @@
 <ng-container>
     <div class="side-nav" [ngClass]="{'closed' : !(navService?.sideNavCollapsed$ | async), 'hidden' :!(navService?.sideNavVisibility$ | async)}"  *ngIf="accountService.currentUser$ | async as user">
-        <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
+        <!-- <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
             <ng-container actions>
-                <!-- Todo: This will be customize dashboard/side nav controls-->
+                Todo: This will be customize dashboard/side nav controls
                 <a href="/preferences/" title="User Settings"><span class="visually-hidden">User Settings</span></a>
             </ng-container>
-        </app-side-nav-item>
+        </app-side-nav-item> -->
 
-        <div class="mt-3">
-            <app-side-nav-item icon="fa-home" title="Home" link="/library/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-home" title="Home" link="/library/"></app-side-nav-item>
             <app-side-nav-item icon="fa-list" title="Collections" link="/collections/"></app-side-nav-item>
             <app-side-nav-item icon="fa-list-ol" title="Reading Lists" link="/lists/"></app-side-nav-item>
             <app-side-nav-item icon="fa-regular fa-rectangle-list" title="All Series" link="/all-series/"></app-side-nav-item>
@@ -24,8 +23,7 @@
                 <ng-container actions>
                     <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>
                 </ng-container>
-            </app-side-nav-item>
-        </div>
+        </app-side-nav-item>
     </div>
     <div class="side-nav-overlay" (click)="navService?.toggleSideNav()" [ngClass]="{'closed' : !(navService?.sideNavCollapsed$ | async)}"></div>
 </ng-container>

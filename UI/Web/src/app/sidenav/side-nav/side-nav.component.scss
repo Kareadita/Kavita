@@ -1,5 +1,5 @@
 .side-nav {
-    padding: 10px 0;
+    padding-bottom: 10px;
     width: 190px;
     background-color: var(--side-nav-bg-color);
     height: calc(100vh - 85px);
@@ -24,6 +24,11 @@
         background-color: var(--side-nav-closed-bg-color);
         border: var(--side-nav-border-closed);
     }
+
+    .side-nav-item:first() {
+        border-top-left-radius: var(--side-nav-border-radius);
+        border-top-right-radius: var(--side-nav-border-radius);
+    }
 }
 
 @media (max-width: 576px) {
@@ -45,6 +50,11 @@
             width: 0;
             overflow: hidden;
             box-shadow: none;
+        }
+
+        .side-nav-item:first() {
+            border-top-left-radius: var(--side-nav-border-radius);
+            border-top-right-radius: var(--side-nav-border-radius);
         }
     }
 
