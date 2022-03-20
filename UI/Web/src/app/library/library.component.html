@@ -16,14 +16,14 @@
 </app-carousel-reel>
 
 <!-- TODO: Refactor this so we can use series actions here -->
-<app-carousel-reel [items]="recentlyUpdatedSeries" title="Recently Updated Series"  (sectionClick)="handleSectionClick($event)">
+<app-carousel-reel [items]="recentlyUpdatedSeries" title="Recently Updated Series" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
         <app-card-item [entity]="item" [title]="item.seriesName" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
         [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
     </ng-template>
 </app-carousel-reel>
 
-<app-carousel-reel [items]="recentlyAddedSeries" title="Newly Added Series">
+<app-carousel-reel [items]="recentlyAddedSeries" title="Newly Added Series" [clickableTitle]="false">
     <ng-template #carouselItem let-item let-position="idx">
         <app-series-card [data]="item" [libraryId]="item.libraryId" (dataChanged)="loadRecentlyAddedSeries()"></app-series-card>
     </ng-template>

@@ -12,6 +12,7 @@ export class CarouselReelComponent implements OnInit {
   @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
   @Input() items: any[] = [];
   @Input() title = '';
+  @Input() clickableTitle: boolean = true;
   @Output() sectionClick = new EventEmitter<string>();
 
   swiper: Swiper | undefined;
