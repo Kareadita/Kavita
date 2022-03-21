@@ -47,9 +47,9 @@ img {
   }
 }
 
-canvas {
-    position: absolute;
-}
+// canvas {
+//     //position: absolute; // JOE: Not sure why we have this, but it breaks the renderer
+// }
 
 .reader {
     background-color: var(--manga-reader-bg-color);

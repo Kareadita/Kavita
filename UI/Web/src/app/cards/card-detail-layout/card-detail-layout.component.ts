@@ -20,7 +20,7 @@ const ANIMATION_SPEED = 300;
 export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   @Input() header: string = '';
-  @Input() isLoading: boolean = false; 
+  @Input() isLoading: boolean = false;
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
   /**
@@ -36,7 +36,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
-  
+
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
 
 

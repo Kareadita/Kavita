@@ -14,7 +14,7 @@
     </div>
 
     <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
-    
+
     <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 
@@ -22,7 +22,7 @@
         <div class="col-auto ps-1 pe-1 mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
-        
+
         <p *ngIf="items.length === 0 && !isLoading">
             There is no data
         </p>
@@ -68,7 +68,7 @@
                     </div>
                 </li>
             </ng-template>
-            
+
         </ngb-pagination>
     </div>
 </ng-template>

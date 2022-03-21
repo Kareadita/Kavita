@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar [showGoBack]="true">
+<app-side-nav-companion-bar>
   <h2 title>
     <span *ngIf="actions.length > 0">
       <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>

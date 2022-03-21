@@ -84,7 +84,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
-      this.filter = this.seriesService.createSeriesFilter();
+    
+    this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl(this.filter.readStatus.read, []),
       notRead: new FormControl(this.filter.readStatus.notRead, []),
@@ -147,6 +148,12 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
         this.filteringCollapsed = !openState;
       });
+    }
+
+    if (this.filterSettings.presets) {
+      this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets?.readStatus.read);
+      this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets?.readStatus.notRead);
+      this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets?.readStatus.inProgress);
     }
 
     this.setupTypeaheads();

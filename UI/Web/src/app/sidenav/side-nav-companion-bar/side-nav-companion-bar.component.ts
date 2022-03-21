@@ -10,11 +10,6 @@ import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateR
   styleUrls: ['./side-nav-companion-bar.component.scss']
 })
 export class SideNavCompanionBarComponent implements OnInit {
-
-  /**
-   * Show a dedicated button to go back one history event.
-   */
-  @Input() showGoBack: boolean = false;
   /**
    * If the page should show a filter
    */

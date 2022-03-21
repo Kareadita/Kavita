@@ -81,7 +81,8 @@ public class ChapterRepository : IChapterRepository
                 data.TitleName,
                 SeriesFormat = series.Format,
                 SeriesName = series.Name,
-                series.LibraryId
+                series.LibraryId,
+                LibraryType = series.Library.Type
             })
             .Select(data => new ChapterInfoDto()
             {
@@ -89,12 +90,13 @@ public class ChapterRepository : IChapterRepository
                 VolumeNumber = data.VolumeNumber + string.Empty,
                 VolumeId = data.VolumeId,
                 IsSpecial = data.IsSpecial,
-                SeriesId =data.SeriesId,
+                SeriesId = data.SeriesId,
                 SeriesFormat = data.SeriesFormat,
                 SeriesName = data.SeriesName,
                 LibraryId = data.LibraryId,
                 Pages = data.Pages,
-                ChapterTitle = data.TitleName
+                ChapterTitle = data.TitleName,
+                LibraryType = data.LibraryType
             })
             .AsNoTracking()
             .AsSplitQuery()
