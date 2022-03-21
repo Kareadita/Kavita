@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { take, takeUntil, takeWhile } from 'rxjs/operators';
+import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { UtilityService } from '../../shared/_services/utility.service';
 import { Library } from '../../_models/library';
 import { User } from '../../_models/user';
@@ -15,7 +17,7 @@ import { NavService } from '../../_services/nav.service';
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss']
 })
-export class SideNavComponent implements OnInit {
+export class SideNavComponent implements OnInit, OnDestroy {
 
   user: User | undefined;
   libraries: Library[] = [];
@@ -27,9 +29,11 @@ export class SideNavComponent implements OnInit {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
+  private onDestory: Subject<void> = new Subject();
+
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
-    public utilityService: UtilityService, private router: Router,
+    public utilityService: UtilityService, private messageHub: MessageHubService,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService) { }
 
   ngOnInit(): void {
@@ -44,7 +48,18 @@ export class SideNavComponent implements OnInit {
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     });
 
+    this.messageHub.messages$.pipe(takeUntil(this.onDestory), takeWhile(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
+      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
+        this.libraries = libraries;
+      });
+    });
+
     
+  }
+
+  ngOnDestroy(): void {
+    this.onDestory.next();
+    this.onDestory.complete();
   }
 
   handleAction(action: Action, library: Library) {

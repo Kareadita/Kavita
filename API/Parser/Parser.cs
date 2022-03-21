@@ -57,7 +57,7 @@ namespace API.Parser
         private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)((?<!back)cover|folder)(?![\w\d])",
             MatchOptions, RegexTimeout);
 
-        private static readonly Regex NormalizeRegex = new Regex(@"[^a-zA-Z0-9\+]",
+        private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+]",
             MatchOptions, RegexTimeout);
 
 
@@ -966,8 +966,7 @@ namespace API.Parser
 
         public static string Normalize(string name)
         {
-            var normalized = NormalizeRegex.Replace(name, string.Empty).ToLower();
-            return string.IsNullOrEmpty(normalized) ? name : normalized;
+            return NormalizeRegex.Replace(name, string.Empty).ToLower();
         }
 
         /// <summary>
@@ -1009,12 +1008,12 @@ namespace API.Parser
 
         public static bool IsEpub(string filePath)
         {
-            return Path.GetExtension(filePath).ToLower() == ".epub";
+            return Path.GetExtension(filePath).Equals(".epub", StringComparison.InvariantCultureIgnoreCase);
         }
 
         public static bool IsPdf(string filePath)
         {
-           return Path.GetExtension(filePath).ToLower() == ".pdf";
+           return Path.GetExtension(filePath).Equals(".pdf", StringComparison.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
@@ -1025,8 +1024,7 @@ namespace API.Parser
         /// <returns></returns>
         public static string CleanAuthor(string author)
         {
-            if (string.IsNullOrEmpty(author)) return string.Empty;
-            return author.Trim();
+            return string.IsNullOrEmpty(author) ? string.Empty : author.Trim();
         }
 
         /// <summary>

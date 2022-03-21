@@ -17,6 +17,10 @@
             text-decoration: var(--carousel-hover-header-text-decoration);
         }
     }
+
+    .non-selectable {
+        cursor: default;
+    }
 }
 
 

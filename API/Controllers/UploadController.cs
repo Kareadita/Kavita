@@ -46,7 +46,7 @@ namespace API.Controllers
         public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
         {
             var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
-            var format = _directoryService.FileSystem.Path.GetExtension(dto.Url).Replace(".", "");
+            var format = _directoryService.FileSystem.Path.GetExtension(dto.Url.Split('?')[0]).Replace(".", "");
             var path = await dto.Url
                 .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
 

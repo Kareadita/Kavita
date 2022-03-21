@@ -445,20 +445,7 @@ public class SeriesService : ISeriesService
                 var firstChapter = volume.Chapters.First();
                 // On Books, skip volumes that are specials, since these will be shown
                 if (firstChapter.IsSpecial) continue;
-                if (string.IsNullOrEmpty(firstChapter.TitleName))
-                {
-                    if (!firstChapter.Range.Equals(Parser.Parser.DefaultVolume))
-                    {
-                        var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
-                        if (string.IsNullOrEmpty(title)) continue;
-                        volume.Name += $" - {title}";
-                    }
-                }
-                else
-                {
-                    volume.Name += $" - {firstChapter.TitleName}";
-                }
-
+                RenameVolumeName(firstChapter, volume, libraryType);
                 processedVolumes.Add(volume);
             }
         }
@@ -517,48 +504,64 @@ public class SeriesService : ISeriesService
         return !c.IsSpecial && !c.Number.Equals(Parser.Parser.DefaultChapter);
     }
 
-    public static string FormatChapterTitle(ChapterDto chapter, LibraryType libraryType)
+    public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType)
     {
-        if (chapter.IsSpecial)
+        if (libraryType == LibraryType.Book)
         {
-            return Parser.Parser.CleanSpecialTitle(chapter.Title);
+            if (string.IsNullOrEmpty(firstChapter.TitleName))
+            {
+                if (firstChapter.Range.Equals(Parser.Parser.DefaultVolume)) return;
+                var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
+                if (string.IsNullOrEmpty(title)) return;
+                volume.Name += $" - {title}";
+            }
+            else
+            {
+                volume.Name += $" - {firstChapter.TitleName}";
+            }
+
+            return;
         }
+
+        volume.Name = $"Volume {volume.Name}";
+    }
+
+
+    private static string FormatChapterTitle(bool isSpecial, LibraryType libraryType, string chapterTitle, bool withHash)
+    {
+        if (isSpecial)
+        {
+            return Parser.Parser.CleanSpecialTitle(chapterTitle);
+        }
+
+        var hashSpot = withHash ? "#" : string.Empty;
         return libraryType switch
         {
-            LibraryType.Book => $"Book {chapter.Title}",
-            LibraryType.Comic => $"Issue #{chapter.Title}",
-            LibraryType.Manga => $"Chapter {chapter.Title}",
+            LibraryType.Book => $"Book {chapterTitle}",
+            LibraryType.Comic => $"Issue {hashSpot}{chapterTitle}",
+            LibraryType.Manga => $"Chapter {chapterTitle}",
             _ => "Chapter "
         };
     }
 
-    public static string FormatChapterTitle(Chapter chapter, LibraryType libraryType)
+    public static string FormatChapterTitle(ChapterDto chapter, LibraryType libraryType, bool withHash = true)
     {
-        if (chapter.IsSpecial)
-        {
-            return Parser.Parser.CleanSpecialTitle(chapter.Title);
-        }
-        return libraryType switch
-        {
-            LibraryType.Book => $"Book {chapter.Title}",
-            LibraryType.Comic => $"Issue #{chapter.Title}",
-            LibraryType.Manga => $"Chapter {chapter.Title}",
-            _ => "Chapter "
-        };
+        return FormatChapterTitle(chapter.IsSpecial, libraryType, chapter.Title, withHash);
+    }
+
+    public static string FormatChapterTitle(Chapter chapter, LibraryType libraryType, bool withHash = true)
+    {
+        return FormatChapterTitle(chapter.IsSpecial, libraryType, chapter.Title, withHash);
     }
 
     public static string FormatChapterName(LibraryType libraryType, bool withHash = false)
     {
-        switch (libraryType)
+        return libraryType switch
         {
-            case LibraryType.Manga:
-                return "Chapter";
-            case LibraryType.Comic:
-                return withHash ? "Issue #" : "Issue";
-            case LibraryType.Book:
-                return "Book";
-            default:
-                throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);
-        }
+            LibraryType.Manga => "Chapter",
+            LibraryType.Comic => withHash ? "Issue #" : "Issue",
+            LibraryType.Book => "Book",
+            _ => "Chapter"
+        };
     }
 }

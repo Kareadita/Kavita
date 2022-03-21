@@ -1,8 +1,8 @@
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import { forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
-import { UtilityService } from '../shared/_services/utility.service';
+import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
+import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from '../typeahead/typeahead-settings';
 import { CollectionTag } from '../_models/collection-tag';
 import { Genre } from '../_models/genre';
@@ -66,6 +66,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   readProgressGroup!: FormGroup;
   sortGroup!: FormGroup;
+  seriesNameGroup!: FormGroup;
   isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
@@ -83,7 +84,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
-      this.filter = this.seriesService.createSeriesFilter();
+    
+    this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl(this.filter.readStatus.read, []),
       notRead: new FormControl(this.filter.readStatus.notRead, []),
@@ -92,6 +94,10 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
     this.sortGroup = new FormGroup({
       sortField: new FormControl(this.filter.sortOptions?.sortField || SortField.SortName, []),
+    });
+
+    this.seriesNameGroup = new FormGroup({
+      seriesNameQuery: new FormControl(this.filter.seriesNameQuery || '', [])
     });
 
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
@@ -124,6 +130,13 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       }
       this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
     });
+
+    this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
+      map(val => (val || '').trim()),
+      distinctUntilChanged(), 
+      takeUntil(this.onDestory)).subscribe(changes => {
+      this.filter.seriesNameQuery = changes;
+    });
   }
 
   ngOnInit(): void {
@@ -135,6 +148,12 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
         this.filteringCollapsed = !openState;
       });
+    }
+
+    if (this.filterSettings.presets) {
+      this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets?.readStatus.read);
+      this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets?.readStatus.notRead);
+      this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets?.readStatus.inProgress);
     }
 
     this.setupTypeaheads();
@@ -443,8 +462,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     return personSettings;
   }
 
-  updateFormatFilters(formats: MangaFormat[]) {
-    this.filter.formats = formats.map(item => item) || [];
+  updateFormatFilters(formats: FilterItem<MangaFormat>[]) {
+    this.filter.formats = formats.map(item => item.value) || [];
   }
 
   updateLibraryFilters(libraries: Library[]) {

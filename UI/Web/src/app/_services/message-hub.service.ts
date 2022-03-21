@@ -4,6 +4,7 @@ import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { LibraryModifiedEvent } from '../_models/events/library-modified-event';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
 import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
 import { User } from '../_models/user';
@@ -49,6 +50,10 @@ export enum EVENTS {
    * A subtype of NotificationProgress that represents a file being processed for cover image extraction
    */
    CoverUpdateProgress = 'CoverUpdateProgress',
+   /**
+    * A library is created or removed from the instance
+    */
+   LibraryModified = 'LibraryModified'
 }
 
 export interface Message<T> {
@@ -127,6 +132,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.ScanLibraryProgress,
         payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.LibraryModified, resp => {
+      this.messagesSource.next({
+        event: EVENTS.LibraryModified,
+        payload: resp.body as LibraryModifiedEvent
       });
     });
 

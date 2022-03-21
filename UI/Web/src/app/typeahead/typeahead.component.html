@@ -15,8 +15,8 @@
         <div class="spinner-border spinner-border-sm {{settings.multiple ? 'close-offset' : ''}}" role="status" *ngIf="isLoadingOptions">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <ng-container *ngIf="settings.multiple">
-          <button class="btn btn-close float-end mt-2" style="font-size: 0.8rem;" (click)="clearSelections($event)"></button>
+        <ng-container *ngIf="settings.multiple && (selectedData | async) as selected">
+          <button class="btn btn-close float-end mt-2" *ngIf="selected.length > 0" style="font-size: 0.8rem;" (click)="clearSelections($event)"></button>
         </ng-container>
     </div>
   </div>

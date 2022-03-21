@@ -226,6 +226,7 @@ export class SeriesService {
       tags: [],
       languages: [],
       publicationStatus: [],
+      seriesNameQuery: '',
     };
 
     if (filter === undefined) return data;

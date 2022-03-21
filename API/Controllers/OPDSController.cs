@@ -745,9 +745,18 @@ public class OpdsController : BaseApiController
         var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
         var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
+        var volume = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, await GetUser(apiKey));
 
-
-        var title = $"{series.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+        var title = $"{series.Name} - ";
+        if (volume.Chapters.Count == 1)
+        {
+            SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType);
+            title += $"{volume.Name}";
+        }
+        else
+        {
+            title = $"{series.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+        }
 
         // Chunky requires a file at the end. Our API ignores this
         var accLink =

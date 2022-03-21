@@ -5,14 +5,11 @@
 </div>
 
 <div class="not-phone-hidden">
-    <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
+    <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" [options]="{topOffset: 56}" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
         <div header>
             <h2 style="margin-top: 0.5rem">Book Settings
-                <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()">
-                    
-                </button>
+                <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()"></button>
             </h2>
-            
         </div>
         <div body class="drawer-body">
             <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
@@ -306,6 +303,16 @@
             <div class="col-md-2 me-3"></div>
         </div>
         <div class="row justify-content-center g-0">
+            <div class="col-md-2 me-3">
+                <form [formGroup]="seriesNameGroup">
+                    <div class="mb-3">
+                        <label for="series-name" class="form-label">Series Name</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="seriesNameFilterTooltip" role="button" tabindex="0"></i>
+                        <span class="visually-hidden" id="filter-series-name-help"><ng-container [ngTemplateOutlet]="seriesNameFilterTooltip"></ng-container></span>
+                        <ng-template #seriesNameFilterTooltip>Series name will filter against Name, Sort Name, or Localized Name</ng-template>
+                        <input type="text" id="series-name" formControlName="seriesNameQuery" class="form-control" aria-describedby="filter-series-name-help">
+                    </div>
+                </form>
+            </div>
             <div class="col-md-2 me-3" *ngIf="!filterSettings.sortDisabled">
                 <form [formGroup]="sortGroup">
                     <div class="mb-3">
@@ -326,11 +333,10 @@
             </div>  
             <div class="col-md-2 me-3" *ngIf="filterSettings.sortDisabled"></div>
             <div class="col-md-2 me-3"></div>
-            <div class="col-md-2 me-3"></div>
-            <div class="col-md-2 me-3">
+            <div class="col-md-2 me-3 mt-4">
                 <button class="btn btn-secondary col-12" (click)="clear()">Clear</button>
             </div>
-            <div class="col-md-2 me-3">
+            <div class="col-md-2 me-3 mt-4">
                 <button class="btn btn-primary col-12" (click)="apply()">Apply</button>
             </div>
         </div>

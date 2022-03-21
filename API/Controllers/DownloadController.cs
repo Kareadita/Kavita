@@ -65,6 +65,8 @@ namespace API.Controllers
             return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
+
+
         [Authorize(Policy="RequireDownloadRole")]
         [HttpGet("volume")]
         public async Task<ActionResult> DownloadVolume(int volumeId)

@@ -89,7 +89,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
               private seriesService: SeriesService,
               public utilityService: UtilityService,
               private fb: FormBuilder,
-              public imageService: ImageService, 
+              public imageService: ImageService,
               private libraryService: LibraryService,
               private collectionService: CollectionTagService,
               private uploadService: UploadService,
@@ -98,8 +98,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
-    this.initSeries = Object.assign({}, this.series);
-
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
@@ -107,7 +105,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
-      summary: new FormControl('', []), 
+      summary: new FormControl('', []),
       name: new FormControl(this.series.name, []),
       localizedName: new FormControl(this.series.localizedName, []),
       sortName: new FormControl(this.series.sortName, []),
@@ -125,7 +123,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
       this.ageRatings = ratings;
     });
-    
+
     this.metadataService.getAllPublicationStatus().subscribe(statuses => {
       this.publicationStatuses = statuses;
     });
@@ -166,7 +164,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
           this.metadata.ageRating = parseInt(val + '', 10);
           this.metadata.ageRatingLocked = true;
         });
-    
+
         this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.metadata.publicationStatus = parseInt(val + '', 10);
           this.metadata.publicationStatusLocked = true;
@@ -245,8 +243,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
     this.tagsSettings.fetchFn = (filter: string) => this.metadataService.getAllTags()
-      .pipe(map(items => this.tagsSettings.compareFn(items, filter))); 
-    
+      .pipe(map(items => this.tagsSettings.compareFn(items, filter)));
+
     this.tagsSettings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };
     });
@@ -269,7 +267,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.genreSettings.addIfNonExisting = true;
     this.genreSettings.fetchFn = (filter: string) => {
       return this.metadataService.getAllGenres()
-      .pipe(map(items => this.genreSettings.compareFn(items, filter))); 
+      .pipe(map(items => this.genreSettings.compareFn(items, filter)));
     };
     this.genreSettings.compareFn = (options: Genre[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
@@ -336,7 +334,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
     return forkJoin([
       this.updateFromPreset('writer', this.metadata.writers, PersonRole.Writer),
-      this.updateFromPreset('character', this.metadata.characters, PersonRole.Character),  
+      this.updateFromPreset('character', this.metadata.characters, PersonRole.Character),
       this.updateFromPreset('colorist', this.metadata.colorists, PersonRole.Colorist),
       this.updateFromPreset('cover-artist', this.metadata.coverArtists, PersonRole.CoverArtist),
       this.updateFromPreset('editor', this.metadata.editors, PersonRole.Editor),
@@ -350,7 +348,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     }));
   }
 
-  fetchPeople(role: PersonRole, filter: string) { 
+  fetchPeople(role: PersonRole, filter: string) {
     return this.metadataService.getAllPeople().pipe(map(people => {
       return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter));
     }));
@@ -415,7 +413,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       apis.push(this.seriesService.updateSeries(model));
     }
 
-    
+
     if (selectedIndex > 0 && this.selectedCover !== '') {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
     }
