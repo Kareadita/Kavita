@@ -473,10 +473,16 @@ public class SeriesRepository : ISeriesRepository
         {
             s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
             var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
-            if (rating == null) continue;
-            s.UserRating = rating.Rating;
-            s.UserReview = rating.Review;
-            s.LatestReadDate = userProgress.Max(p => p.LastModified);
+            if (rating != null)
+            {
+                s.UserRating = rating.Rating;
+                s.UserReview = rating.Review;
+            }
+
+            if (userProgress.Count > 0)
+            {
+                s.LatestReadDate = userProgress.Max(p => p.LastModified);
+            }
         }
     }
 

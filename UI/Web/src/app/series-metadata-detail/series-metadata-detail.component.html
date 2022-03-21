@@ -6,8 +6,6 @@
 <div class="row g-0 mb-2">
     <app-tag-badge title="Age Rating" *ngIf="seriesMetadata.ageRating" a11y-click="13,32" class="clickable col-auto" (click)="goTo('ageRating', seriesMetadata.ageRating)" [selectionMode]="TagBadgeCursor.Clickable">{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
     <ng-container *ngIf="series">
-        <!-- Maybe we can put the library this resides in to make it easier to get back -->
-        <!-- tooltip here explaining how this is year of first issue -->
         <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date" class="col-auto">{{seriesMetadata.releaseYear}}</app-tag-badge>
         <app-tag-badge *ngIf="seriesMetadata.language !== null && seriesMetadata.language !== ''" title="Language" a11y-click="13,32" class="col-auto" (click)="goTo('languages', seriesMetadata.language)" [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.language}}</app-tag-badge>
         <app-tag-badge title="Publication Status" a11y-click="13,32" class="col-auto" (click)="goTo('publicationStatus', seriesMetadata.publicationStatus)" [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.publicationStatus | publicationStatus}}</app-tag-badge>
