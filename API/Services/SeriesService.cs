@@ -446,20 +446,6 @@ public class SeriesService : ISeriesService
                 // On Books, skip volumes that are specials, since these will be shown
                 if (firstChapter.IsSpecial) continue;
                 RenameVolumeName(firstChapter, volume, libraryType);
-                // if (string.IsNullOrEmpty(firstChapter.TitleName))
-                // {
-                //     if (!firstChapter.Range.Equals(Parser.Parser.DefaultVolume))
-                //     {
-                //         var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
-                //         if (string.IsNullOrEmpty(title)) continue;
-                //         volume.Name += $" - {title}";
-                //     }
-                // }
-                // else
-                // {
-                //     volume.Name += $" - {firstChapter.TitleName}";
-                // }
-
                 processedVolumes.Add(volume);
             }
         }
