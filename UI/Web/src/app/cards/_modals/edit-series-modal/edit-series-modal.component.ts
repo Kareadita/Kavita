@@ -101,6 +101,8 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
+    
+    this.initSeries = Object.assign({}, this.series);
 
 
     this.editSeriesForm = this.fb.group({
