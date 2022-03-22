@@ -2,7 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace API.Services;
@@ -11,15 +13,18 @@ public interface IDownloadService
 {
     Task<(byte[], string, string)> GetFirstFileDownload(IEnumerable<MangaFile> files);
     string GetContentTypeFromFile(string filepath);
+    Task<bool> HasDownloadPermission(AppUser user);
 }
 public class DownloadService : IDownloadService
 {
     private readonly IDirectoryService _directoryService;
+    private readonly UserManager<AppUser> _userManager;
     private readonly FileExtensionContentTypeProvider _fileTypeProvider = new FileExtensionContentTypeProvider();
 
-    public DownloadService(IDirectoryService directoryService)
+    public DownloadService(IDirectoryService directoryService, UserManager<AppUser> userManager)
     {
         _directoryService = directoryService;
+        _userManager = userManager;
     }
 
     /// <summary>
@@ -52,5 +57,11 @@ public class DownloadService : IDownloadService
         }
 
         return contentType;
+    }
+
+    public async Task<bool> HasDownloadPermission(AppUser user)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
     }
 }
