@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, fromEvent, merge, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { ScrollService } from 'src/app/scroll.service';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
@@ -129,7 +130,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Outline | DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
@@ -153,7 +154,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document) {
+  constructor(private readerService: ReaderService, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService) {
     // This will always exist at this point in time since this is used within manga reader
     const reader = document.querySelector('.reader');
     if (reader !== null) {
@@ -338,7 +339,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.atTop = true; 
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.body.scrollHeight - document.body.scrollTop;
-        requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX)); // TODO: does this need to be fullscreen protected?
+        
+        const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
+        requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
         // If already at top, then we moving on
         this.loadPrevChapter.emit();
