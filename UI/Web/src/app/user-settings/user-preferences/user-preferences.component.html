@@ -68,7 +68,7 @@
                                     </div>
 
                                     <div class="row g-0">
-                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2" *ngIf="false">
                                             <label for="settings-layoutmode-option" class="form-label">Layout Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
                                             <ng-template #layoutModeTooltip>Render a single image to the screen to two side-by-side images</ng-template>
                                             <span class="visually-hidden" id="settings-layoutmode-option-help"><ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container></span>

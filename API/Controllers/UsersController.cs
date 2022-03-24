@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.Entities.Enums;
 using API.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -86,6 +87,9 @@ namespace API.Controllers
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
             existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
+
+            // TODO: Remove this code - this overrides layout mode to be single until the mode is released
+            existingPreferences.LayoutMode = LayoutMode.Single;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 
