@@ -36,7 +36,6 @@ namespace API
 
 
             var directoryService = new DirectoryService(null, new FileSystem());
-            //MigrateConfigFiles.Migrate(isDocker, directoryService);
 
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet() &&

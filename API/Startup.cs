@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
@@ -148,13 +149,19 @@ namespace API
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
-
+                    var context = serviceProvider.GetRequiredService<DataContext>();
 
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
+
+                    //  Update the version in the DB after all migrations are run
+                    var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
+                    installVersion.Value = BuildInfo.Version.ToString();
+                    unitOfWork.SettingsRepository.Update(installVersion);
+                    await unitOfWork.CommitAsync();
                 }).GetAwaiter()
                     .GetResult();
             }
@@ -205,21 +212,6 @@ namespace API
             app.UseAuthorization();
 
             app.UseDefaultFiles();
-
-            // This is not implemented completely. Commenting out until implemented
-            // var service = serviceProvider.GetRequiredService<IUnitOfWork>();
-            // var settings = service.SettingsRepository.GetSettingsDto();
-            // if (!string.IsNullOrEmpty(settings.BaseUrl) && !settings.BaseUrl.Equals("/"))
-            // {
-            //     var path = !settings.BaseUrl.StartsWith("/")
-            //         ? $"/{settings.BaseUrl}"
-            //         : settings.BaseUrl;
-            //     path = !path.EndsWith("/")
-            //         ? $"{path}/"
-            //         : path;
-            //     app.UsePathBase(path);
-            //     Console.WriteLine("Starting with base url as " + path);
-            // }
 
             app.UseStaticFiles(new StaticFileOptions
             {
