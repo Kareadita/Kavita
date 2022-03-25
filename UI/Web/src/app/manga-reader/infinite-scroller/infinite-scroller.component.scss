@@ -42,10 +42,10 @@ img, .full-width {
 }
 
 .bookmark-effect {
-    animation: bookmark 1s cubic-bezier(0.165, 0.84, 0.44, 1);
+    animation: infinite-scroll-bookmark 1s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-@keyframes bookmark {
+@keyframes infinite-scroll-bookmark {
     0%, 100% {
         filter: opacity(1);
     }

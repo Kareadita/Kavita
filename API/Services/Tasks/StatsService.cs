@@ -99,11 +99,12 @@ public class StatsService : IStatsService
     public async Task<ServerInfoDto> GetServerInfo()
     {
         var installId = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId);
+        var installVersion = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
         var serverInfo = new ServerInfoDto
         {
             InstallId = installId.Value,
             Os = RuntimeInformation.OSDescription,
-            KavitaVersion = BuildInfo.Version.ToString(),
+            KavitaVersion = installVersion.Value,
             DotnetVersion = Environment.Version.ToString(),
             IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),

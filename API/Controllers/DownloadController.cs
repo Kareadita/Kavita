@@ -89,8 +89,7 @@ namespace API.Controllers
         private async Task<bool> HasDownloadPermission()
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            var roles = await _userManager.GetRolesAsync(user);
-            return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
+            return await _downloadService.HasDownloadPermission(user);
         }
 
         private async Task<ActionResult> GetFirstFileDownload(IEnumerable<MangaFile> files)

@@ -851,10 +851,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
-    const pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage()) ? 2: 1;
+    // If the prev page before we change current page is a cover image, we actually are skipping a page
+    console.log('Page ', this.PageNumber, ' is cover image: ', this.isCoverImage(this.cachedImages.prev()))
+    console.log('Page ', this.pageNum, ' is cover image: ', this.isCoverImage())
+    const pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage(this.cachedImages.prev())) ? 2: 1; 
+    // BUG: isCoverImage works on canvasImage, where we need to know if the previous image is a cover image or not. 
     console.log('pageAmt: ', pageAmount);
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
-
       if (this.isLoading) { return; }
 
       // Move to next volume/chapter automatically
@@ -1021,8 +1024,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
   }
 
-  isCoverImage() {
-    return this.canvasImage.width > this.canvasImage.height;
+  isCoverImage(elem?: HTMLImageElement) {
+    if (elem) return elem.width > elem.height;
+    const element = elem || this.canvasImage;
+    return element.width > element.height;
   }
 
 

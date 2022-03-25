@@ -10,7 +10,7 @@
         border-color: var(--pagination-active-link-border-color);
 
         &:hover {
-            color: var(--pagination-link-text-color);;
+            color: var(--pagination-link-text-color);
         }
     }
 
@@ -21,6 +21,7 @@
 
         &:hover {
             color: var(--pagination-link-hover-color);
+            text-decoration: none;
         }
     }
 

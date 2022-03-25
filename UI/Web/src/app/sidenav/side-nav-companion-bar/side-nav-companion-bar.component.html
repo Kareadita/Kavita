@@ -4,7 +4,7 @@
             <ng-content select="[title]"></ng-content>
             <ng-content select="[subtitle]"></ng-content>
         </div>
-        <div class="col mr-auto">
+        <div class="col mr-auto hide-if-empty">
             <ng-content select="[main]"></ng-content>
         </div>
         <div class="col" *ngIf="hasFilter">

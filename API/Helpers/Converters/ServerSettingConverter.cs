@@ -45,6 +45,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.EmailServiceUrl:
                         destination.EmailServiceUrl = row.Value;
                         break;
+                    case ServerSettingKey.InstallVersion:
+                        destination.InstallVersion = row.Value;
+                        break;
                 }
             }
 

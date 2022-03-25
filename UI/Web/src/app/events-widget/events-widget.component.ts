@@ -110,7 +110,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         break;
       case 'ended':
         data = this.progressEventsSource.getValue();
-        data = data.filter(m => m.name !== message.name); // This does not work //  && m.title !== message.title
+        data = data.filter(m => m.name !== message.name);
         this.progressEventsSource.next(data);
         this.activeEvents = Math.max(this.activeEvents - 1, 0);
         break;

@@ -150,7 +150,7 @@ namespace API.Services
         {
             // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be
             // Scoped
-            var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), "") : string.Empty;
+            var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
             var importBuilder = new StringBuilder();
             foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
             {
@@ -343,7 +343,7 @@ namespace API.Services
             {
                 foreach (var styleLinks in styleNodes)
                 {
-                    var key = BookService.CleanContentKeys(styleLinks.Attributes["href"].Value);
+                    var key = CleanContentKeys(styleLinks.Attributes["href"].Value);
                     // Some epubs are malformed the key in content.opf might be: content/resources/filelist_0_0.xml but the actual html links to resources/filelist_0_0.xml
                     // In this case, we will do a search for the key that ends with
                     if (!book.Content.Css.ContainsKey(key))
@@ -358,11 +358,20 @@ namespace API.Services
                         key = correctedKey;
                     }
 
-                    var styleContent = await ScopeStyles(await book.Content.Css[key].ReadContentAsync(), apiBase,
-                        book.Content.Css[key].FileName, book);
-                    if (styleContent != null)
+                    try
                     {
-                        body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                        var cssFile = book.Content.Css[key];
+
+                        var styleContent = await ScopeStyles(await cssFile.ReadContentAsync(), apiBase,
+                            cssFile.FileName, book);
+                        if (styleContent != null)
+                        {
+                            body.PrependChild(HtmlNode.CreateNode($"<style>{styleContent}</style>"));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "There was an error reading css file for inlining likely due to a key mismatch in metadata");
                     }
                 }
             }
@@ -460,7 +469,7 @@ namespace API.Services
         }
 
         /// <summary>
-        /// Removes the leading ../
+        /// Removes all leading ../
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>

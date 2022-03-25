@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, fromEvent, merge, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { ScrollService } from 'src/app/scroll.service';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';
@@ -93,7 +94,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * The minimum width of images in webtoon. On image loading, this is checked and updated. All images will get this assigned to them for rendering.
    */
-  webtoonImageWidth: number = window.innerWidth || this.document.documentElement.clientWidth || this.document.body.clientWidth;
+  webtoonImageWidth: number = window.innerWidth || this.document.body.clientWidth || this.document.documentElement.clientWidth;
   /**
    * Used to tell if a scrollTo() operation is in progress
    */
@@ -145,7 +146,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   get areImagesWiderThanWindow() {
     let [_, innerWidth] = this.getInnerDimensions();
-    return this.webtoonImageWidth > (innerWidth || document.documentElement.clientWidth);
+    return this.webtoonImageWidth > (innerWidth || document.body.clientWidth);
   }
 
 
@@ -153,7 +154,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document) {
+  constructor(private readerService: ReaderService, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService) {
     // This will always exist at this point in time since this is used within manga reader
     const reader = document.querySelector('.reader');
     if (reader !== null) {
@@ -230,7 +231,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   recalculateImageWidth() {
     const [_, innerWidth] = this.getInnerDimensions();
-    this.webtoonImageWidth = innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+    this.webtoonImageWidth = innerWidth || document.body.clientWidth || document.documentElement.clientWidth;
   }
 
   getVerticalOffset() {
@@ -244,8 +245,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     return (offset
+      || document.body.scrollTop 
       || document.documentElement.scrollTop 
-      || document.body.scrollTop || 0);
+      || 0);
   }
 
   /**
@@ -290,19 +292,20 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   getTotalHeight() {
     let totalHeight = 0;
     document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
-    return totalHeight;
+    return Math.round(totalHeight);
   }
   getTotalScroll() {
     if (this.isFullscreenMode) {
       return this.readerElemRef.nativeElement.offsetHeight + this.readerElemRef.nativeElement.scrollTop;
     }
-    return document.documentElement.offsetHeight + document.documentElement.scrollTop;
+    return document.body.offsetHeight + document.body.scrollTop;
   }
   getScrollTop() {
     if (this.isFullscreenMode) {
       return this.readerElemRef.nativeElement.scrollTop;
     }
-    return document.documentElement.scrollTop;
+
+    return document.body.scrollTop;
   }
 
   checkIfShouldTriggerContinuousReader() {
@@ -316,14 +319,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       if (this.atTop && this.pageNum > 0) {
         this.atTop = false;
       }
-      
+
       if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
         this.setPageNum(this.totalPages);
 
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = this.getScrollTop();
-        requestAnimationFrame(() => document.documentElement.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
+        requestAnimationFrame(() => document.body.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
         this.loadNextChapter.emit();
@@ -335,8 +338,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
         this.atTop = true; 
         // Scroll user back to original location
-        this.previousScrollHeightMinusTop = document.documentElement.scrollHeight - document.documentElement.scrollTop;
-        requestAnimationFrame(() => window.scrollTo(0, SPACER_SCROLL_INTO_PX)); // TODO: does this need to be fullscreen protected?
+        this.previousScrollHeightMinusTop = document.body.scrollHeight - document.body.scrollTop;
+        
+        const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
+        requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
         // If already at top, then we moving on
         this.loadPrevChapter.emit();
@@ -377,8 +382,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     return (rect.bottom >= 0 && 
             rect.right >= 0 && 
-            rect.top <= (innerHeight || document.documentElement.clientHeight) &&
-            rect.left <= (innerWidth || document.documentElement.clientWidth)
+            rect.top <= (innerHeight || document.body.clientHeight) &&
+            rect.left <= (innerWidth || document.body.clientWidth)
           );
   }
 
@@ -398,10 +403,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (rect.bottom >= 0 && 
             rect.right >= 0 && 
-            rect.top <= (innerHeight || document.documentElement.clientHeight) &&
-            rect.left <= (innerWidth || document.documentElement.clientWidth)
+            rect.top <= (innerHeight || document.body.clientHeight) &&
+            rect.left <= (innerWidth || document.body.clientWidth)
           ) {
-            const topX = (innerHeight || document.documentElement.clientHeight);
+            const topX = (innerHeight || document.body.clientHeight);
             return Math.abs(rect.top / topX) <= 0.25;
           }
     return false;

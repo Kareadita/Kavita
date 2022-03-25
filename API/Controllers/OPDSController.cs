@@ -765,7 +765,7 @@ public class OpdsController : BaseApiController
                     filename);
         accLink.TotalPages = chapter.Pages;
 
-        return new FeedEntry()
+        var entry = new FeedEntry()
         {
             Id = mangaFile.Id.ToString(),
             Title = title,
@@ -776,7 +776,6 @@ public class OpdsController : BaseApiController
             {
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
-                accLink,
                 CreatePageStreamLink(seriesId, volumeId, chapterId, mangaFile, apiKey)
             },
             Content = new FeedEntryContent()
@@ -785,6 +784,15 @@ public class OpdsController : BaseApiController
                 Type = "text"
             }
         };
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
+        if (await _downloadService.HasDownloadPermission(user))
+        {
+            entry.Links.Add(accLink);
+        }
+
+
+        return entry;
     }
 
     [HttpGet("{apiKey}/image")]

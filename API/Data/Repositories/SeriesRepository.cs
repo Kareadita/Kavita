@@ -610,8 +610,6 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter, bool cutoffOnDate = true)
     {
-        //var allSeriesWithProgress = await _context.AppUserProgresses.Select(p => p.SeriesId).ToListAsync();
-        //var allChapters = await GetChapterIdsForSeriesAsync(allSeriesWithProgress);
         var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
         var query = (await CreateFilteredSearchQueryable(userId, libraryId, filter))
             .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
@@ -625,7 +623,7 @@ public class SeriesRepository : ISeriesRepository
                         .Where(p => p.Id == progress.Id && p.AppUserId == userId)
                         .Max(p => p.LastModified),
                     // This is only taking into account chapters that have progress on them, not all chapters in said series
-                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created)
+                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
                     //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
                 });
         if (cutoffOnDate)
