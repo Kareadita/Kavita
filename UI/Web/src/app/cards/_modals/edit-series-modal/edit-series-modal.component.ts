@@ -219,10 +219,14 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
     });
     this.collectionTagSettings.compareFn = (options: CollectionTag[], filter: string) => {
+      console.log('compareFN:')
+      console.log('options: ', options);
+      console.log('filter: ', filter);
+      console.log('results: ', options.filter(m => this.utilityService.filter(m.title, filter)));
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
-    this.collectionTagSettings.singleCompareFn = (a: CollectionTag, b: CollectionTag) => {
-      return a.id == b.id;
+    this.collectionTagSettings.selectionCompareFn = (a: CollectionTag, b: CollectionTag) => {
+      return a.title === b.title;
     }
 
     if (this.metadata.collectionTags) {
@@ -250,7 +254,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.tagsSettings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };
     });
-    this.tagsSettings.singleCompareFn = (a: Tag, b: Tag) => {
+    this.tagsSettings.selectionCompareFn = (a: Tag, b: Tag) => {
       return a.id == b.id;
     }
 
@@ -274,7 +278,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.genreSettings.compareFn = (options: Genre[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
-    this.genreSettings.singleCompareFn = (a: Genre, b: Genre) => {
+    this.genreSettings.selectionCompareFn = (a: Genre, b: Genre) => {
       return a.title == b.title;
     }
 
@@ -318,7 +322,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
       .pipe(map(items => this.languageSettings.compareFn(items, filter)));
 
-    this.languageSettings.singleCompareFn = (a: Language, b: Language) => {
+    this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
       return a.isoCode == b.isoCode;
     }
 
@@ -368,7 +372,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.name, filter));
     }
 
-    personSettings.singleCompareFn = (a: Person, b: Person) => {
+    personSettings.selectionCompareFn = (a: Person, b: Person) => {
       return a.name == b.name && a.role == b.role;
     }
     personSettings.fetchFn = (filter: string) => {

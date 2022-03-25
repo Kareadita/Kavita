@@ -201,7 +201,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
 
-    this.formatSettings.singleCompareFn = (a: FilterItem<MangaFormat>, b: FilterItem<MangaFormat>) => {
+    this.formatSettings.selectionCompareFn = (a: FilterItem<MangaFormat>, b: FilterItem<MangaFormat>) => {
       return a.title == b.title;
     }
 
@@ -225,7 +225,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.librarySettings.compareFn = (options: Library[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.name, filter));
     }
-    this.librarySettings.singleCompareFn = (a: Library, b: Library) => {
+    this.librarySettings.selectionCompareFn = (a: Library, b: Library) => {
       return a.name == b.name;
     }
 
@@ -252,7 +252,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.genreSettings.compareFn = (options: Genre[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
-    this.genreSettings.singleCompareFn = (a: Genre, b: Genre) => {
+    this.genreSettings.selectionCompareFn = (a: Genre, b: Genre) => {
       return a.title == b.title;
     }
 
@@ -279,7 +279,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
 
-    this.ageRatingSettings.singleCompareFn = (a: AgeRatingDto, b: AgeRatingDto) => {
+    this.ageRatingSettings.selectionCompareFn = (a: AgeRatingDto, b: AgeRatingDto) => {
       return a.title == b.title;
     }
 
@@ -306,7 +306,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
 
-    this.publicationStatusSettings.singleCompareFn = (a: PublicationStatusDto, b: PublicationStatusDto) => {
+    this.publicationStatusSettings.selectionCompareFn = (a: PublicationStatusDto, b: PublicationStatusDto) => {
       return a.title == b.title;
     }
 
@@ -332,7 +332,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.tagsSettings.fetchFn = (filter: string) => this.metadataService.getAllTags(this.filter.libraries)
       .pipe(map(items => this.tagsSettings.compareFn(items, filter))); 
     
-    this.tagsSettings.singleCompareFn = (a: Tag, b: Tag) => {
+    this.tagsSettings.selectionCompareFn = (a: Tag, b: Tag) => {
       return a.id == b.id;
     }
 
@@ -358,7 +358,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.languageSettings.fetchFn = (filter: string) => this.metadataService.getAllLanguages(this.filter.libraries)
           .pipe(map(items => this.languageSettings.compareFn(items, filter))); 
 
-    this.languageSettings.singleCompareFn = (a: Language, b: Language) => {
+    this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
       return a.isoCode == b.isoCode;
     }
 
@@ -384,7 +384,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.collectionSettings.fetchFn = (filter: string) => this.collectionTagService.allTags()
       .pipe(map(items => this.collectionSettings.compareFn(items, filter)));
 
-    this.collectionSettings.singleCompareFn = (a: CollectionTag, b: CollectionTag) => {
+    this.collectionSettings.selectionCompareFn = (a: CollectionTag, b: CollectionTag) => {
       return a.id == b.id;
     }
 
@@ -453,7 +453,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.name, filter));
     }
 
-    personSettings.singleCompareFn = (a: Person, b: Person) => {
+    personSettings.selectionCompareFn = (a: Person, b: Person) => {
       return a.name == b.name && a.role == b.role;
     }
     personSettings.fetchFn = (filter: string) => {
