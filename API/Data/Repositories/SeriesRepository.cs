@@ -276,6 +276,7 @@ public class SeriesRepository : ISeriesRepository
     {
 
         var result = new SearchResultGroupDto();
+        var searchQueryNormalized = Parser.Parser.Normalize(searchQuery);
 
         var seriesIds = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
@@ -299,6 +300,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
                         || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
                         || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%")
+                        || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")
                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
             .Include(s => s.Library)
             .OrderBy(s => s.SortName)
@@ -317,7 +319,7 @@ public class SeriesRepository : ISeriesRepository
 
         result.Collections =  await _context.CollectionTag
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
+                        || EF.Functions.Like(s.NormalizedTitle, $"%{searchQueryNormalized}%"))
             .Where(s => s.Promoted || isAdmin)
             .OrderBy(s => s.Title)
             .AsNoTracking()

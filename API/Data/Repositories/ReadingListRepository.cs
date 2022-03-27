@@ -25,6 +25,7 @@ public interface IReadingListRepository
     void Remove(ReadingListItem item);
     void BulkRemove(IEnumerable<ReadingListItem> items);
     void Update(ReadingList list);
+    Task<int> Count();
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -41,6 +42,11 @@ public class ReadingListRepository : IReadingListRepository
     public void Update(ReadingList list)
     {
         _context.Entry(list).State = EntityState.Modified;
+    }
+
+    public async Task<int> Count()
+    {
+        return await _context.ReadingList.CountAsync();
     }
 
     public void Remove(ReadingListItem item)
