@@ -233,14 +233,14 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
           return results;
         }),
-        tap((val) => {
+        tap((filteredOptions) => {
           this.isLoadingOptions = false; 
           this.focusedIndex = 0; 
-          this.updateShowAddItem(val);
-          // setTimeout(() => {
-          //   this.updateShowAddItem(val);
-          //   this.updateHighlight();
-          // }, 10);
+          //this.updateShowAddItem(filteredOptions);
+          setTimeout(() => {
+            this.updateShowAddItem(filteredOptions);
+            this.updateHighlight();
+          }, 10);
           setTimeout(() => this.updateHighlight(), 20);
         }),
         shareReplay(),
@@ -297,7 +297,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       {
         this.document.querySelectorAll('.list-group-item').forEach((item, index) => {
           if (item.classList.contains('active')) {
-            this.filteredOptions.pipe(take(1)).subscribe((res: any[]) => {  
+            this.filteredOptions.pipe(take(1)).subscribe((opts: any[]) => {  
               // This isn't giving back the filtered array, but everything
               
               if (this.settings.addIfNonExisting && item.classList.contains('add-item')) {
@@ -309,15 +309,15 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
                 return;
               }
 
-              this.filteredOptions.pipe(take(1)).subscribe(opts => {
 
-                if (!this.optionSelection.isSelected(opts[this.focusedIndex], this.settings.selectionCompareFn)) {
-                  this.toggleSelection(opts[this.focusedIndex]);
-                }
+              const filteredResults = opts.filter(item => this.filterSelected(item));
                 
-                this.resetField();
-                this.focusedIndex = 0;
-              });
+              if (filteredResults.length < this.focusedIndex) return;
+              const option = filteredResults[this.focusedIndex];
+
+              this.toggleSelection(option);
+              this.resetField();
+              this.focusedIndex = 0;
               event.preventDefault();
               event.stopPropagation();
             });
