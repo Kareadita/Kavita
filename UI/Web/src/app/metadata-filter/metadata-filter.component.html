@@ -5,7 +5,7 @@
 </div>
 
 <div class="not-phone-hidden">
-    <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [style.--drawer-background-color]="'#010409'" [options]="{topOffset: 56}" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
+    <app-drawer #commentDrawer="drawer" [isOpen]="!filteringCollapsed" [style.--drawer-width]="'300px'" [options]="{topOffset: 56}" (drawerClosed)="filteringCollapsed = !filteringCollapsed">
         <div header>
             <h2 style="margin-top: 0.5rem">Book Settings
                 <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()"></button>

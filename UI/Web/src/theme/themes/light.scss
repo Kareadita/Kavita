@@ -135,4 +135,17 @@
     --carousel-header-text-color: black;
     --carousel-header-text-decoration: none;
     --carousel-hover-header-text-decoration: underline;
-  }
+
+    /** Drawer */
+    --drawer-background-color: white;
+
+    /* Pagination */
+    --pagination-active-link-border-color: var(--primary-color);
+    --pagination-active-link-bg-color: var(--primary-color);
+    --pagination-active-link-text-color: white;
+    --pagination-link-border-color: rgba(239, 239, 239, 1);
+    --pagination-link-text-color: black;
+    --pagination-link-bg-color: white;
+    --pagination-focus-border-color: var(--primary-color);
+    --pagination-link-hover-color: var(--primary-color);
+}
