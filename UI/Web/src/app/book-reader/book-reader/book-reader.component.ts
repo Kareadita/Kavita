@@ -782,13 +782,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
-    if (pageNum < 0) {
-      this.pageNum = 0;
-    } else if (pageNum >= this.maxPages - 1) { // This case handles when we are using the pager to move to the next volume/chapter, the pageNum will get incremented past maxPages // NOTE: I made a change where I removed - 1 in comparison, it's breaking page progress
-      this.pageNum = this.maxPages; // 
-    } else {
-      this.pageNum = pageNum;
-    }
+    this.pageNum = Math.max(Math.min(pageNum, this.maxPages), 0);
   }
 
   goBack() {
