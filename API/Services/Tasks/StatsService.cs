@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Stats;
+using API.DTOs.Theme;
 using API.Entities.Enums;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
@@ -100,6 +101,12 @@ public class StatsService : IStatsService
     {
         var installId = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId);
         var installVersion = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
+
+        var firstAdminUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First();
+        var firstAdminUserPref = (await _unitOfWork.UserRepository.GetPreferencesAsync(firstAdminUser.UserName));
+
+        var activeTheme = firstAdminUserPref.Theme ?? Seed.DefaultThemes.First(t => t.IsDefault);
+
         var serverInfo = new ServerInfoDto
         {
             InstallId = installId.Value,
@@ -109,7 +116,14 @@ public class StatsService : IStatsService
             IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
-            NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count()
+            NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
+            ActiveSiteTheme = activeTheme.Name,
+            NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
+            NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count(),
+            OPDSEnabled = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds,
+            NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsers()).Count(),
+            TotalFiles = await _unitOfWork.LibraryRepository.GetTotalFiles(),
+            MangaReaderMode = firstAdminUserPref.ReaderMode
         };
 
         return serverInfo;

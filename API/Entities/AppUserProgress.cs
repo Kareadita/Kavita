@@ -35,6 +35,14 @@ namespace API.Entities
         /// on next load
         /// </summary>
         public string BookScrollId { get; set; }
+        /// <summary>
+        /// When this was first created
+        /// </summary>
+        public DateTime Created { get; set; }
+        /// <summary>
+        /// Last date this was updated
+        /// </summary>
+        public DateTime LastModified { get; set; }
 
         // Relationships
         /// <summary>
@@ -45,14 +53,5 @@ namespace API.Entities
         /// User this progress belongs to
         /// </summary>
         public int AppUserId { get; set; }
-
-        /// <summary>
-        /// When this was first created
-        /// </summary>
-        public DateTime Created { get; set; }
-        /// <summary>
-        /// Last date this was updated
-        /// </summary>
-        public DateTime LastModified { get; set; }
     }
 }
