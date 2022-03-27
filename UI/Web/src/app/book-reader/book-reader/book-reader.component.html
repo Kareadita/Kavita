@@ -5,11 +5,8 @@
         <app-drawer #commentDrawer="drawer" [isOpen]="drawerOpen" [style.--drawer-width]="'300px'" [options]="{topOffset: topOffset}" [style.--drawer-background-color]="drawerBackgroundColor" (drawerClosed)="closeDrawer()">
             <div header>
                 <h2 style="margin-top: 0.5rem">Book Settings
-                    <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()">
-                        
-                    </button>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="commentDrawer.close()"></button>
                 </h2>
-                
             </div>
             <div body class="drawer-body">
                 <div class="control-container">

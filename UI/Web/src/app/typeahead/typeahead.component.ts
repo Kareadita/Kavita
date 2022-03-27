@@ -223,6 +223,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         switchMap(val => {
           this.isLoadingOptions = true;
           let results: Observable<any[]>;
+          console.log('val: ', val);
           if (Array.isArray(this.settings.fetchFn)) {
             const filteredArray = this.settings.compareFn(this.settings.fetchFn, val.trim());
             results = of(filteredArray).pipe(takeUntil(this.onDestroy), map((items: any[]) => items.filter(item => this.filterSelected(item))));
@@ -232,14 +233,14 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
           return results;
         }),
-        tap((val) => {
+        tap((filteredOptions) => {
           this.isLoadingOptions = false; 
           this.focusedIndex = 0; 
-          this.updateShowAddItem(val);
-          // setTimeout(() => {
-          //   this.updateShowAddItem(val);
-          //   this.updateHighlight();
-          // }, 10);
+          //this.updateShowAddItem(filteredOptions);
+          setTimeout(() => {
+            this.updateShowAddItem(filteredOptions);
+            this.updateHighlight();
+          }, 10);
           setTimeout(() => this.updateHighlight(), 20);
         }),
         shareReplay(),
@@ -296,22 +297,29 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       {
         this.document.querySelectorAll('.list-group-item').forEach((item, index) => {
           if (item.classList.contains('active')) {
-            this.filteredOptions.pipe(take(1)).subscribe((res: any[]) => {  
+            this.filteredOptions.pipe(take(1)).subscribe((opts: any[]) => {  
               // This isn't giving back the filtered array, but everything
               
-              console.log(item.classList.contains('add-item'));
               if (this.settings.addIfNonExisting && item.classList.contains('add-item')) {
                 this.addNewItem(this.typeaheadControl.value);
+                this.resetField();
                 this.focusedIndex = 0;
+                event.preventDefault();
+                event.stopPropagation();
                 return;
               }
 
-              const result = this.settings.compareFn(res, (this.typeaheadControl.value || '').trim());
-              if (result.length === 1) {
-                this.toggleSelection(result[0]);
-                this.resetField();
-                this.focusedIndex = 0;
-              }
+
+              const filteredResults = opts.filter(item => this.filterSelected(item));
+                
+              if (filteredResults.length < this.focusedIndex) return;
+              const option = filteredResults[this.focusedIndex];
+
+              this.toggleSelection(option);
+              this.resetField();
+              this.focusedIndex = 0;
+              event.preventDefault();
+              event.stopPropagation();
             });
           }
         });
@@ -445,6 +453,10 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           && this.typeaheadControl.value.trim().length >= Math.max(this.settings.minCharacters, 1) 
           && this.typeaheadControl.dirty
           && (typeof this.settings.compareFn == 'function' && this.settings.compareFn(options, this.typeaheadControl.value.trim()).length === 0);
+    
+    if (this.showAddItem) {
+      this.hasFocus = true;
+    }
     console.log('show Add item: ', this.showAddItem);
     console.log('compare func: ', this.settings.compareFn(options, this.typeaheadControl.value.trim()));
 

@@ -1356,6 +1356,84 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstNonSpecial2()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                // Loose chapters
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("45", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("46", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("47", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("48", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("Some Special Title", true, new List<MangaFile>(), 1),
+                }),
+
+                // One file volume
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1), // Read
+                }),
+                // Chapter-based volume
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1), // Read
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>(), 1),
+                }),
+                // Chapter-based volume
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
+
+        // Save progress on first volume and 1st chapter of second volume
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 6, // Chapter 0 volume 1 id
+            SeriesId = 1,
+            VolumeId = 2 // Volume 1 id
+        }, 1);
+
+
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 7, // Chapter 21 volume 2 id
+            SeriesId = 1,
+            VolumeId = 3 // Volume 2 id
+        }, 1);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("22", nextChapter.Range);
+
+
+    }
+
+    [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial()
     {
         _context.Series.Add(new Series()
