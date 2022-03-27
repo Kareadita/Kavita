@@ -42,6 +42,9 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   filterSettings: FilterSettings = new FilterSettings();
   summary: string = '';
 
+  actionInProgress: boolean = false;
+  
+
   private onDestory: Subject<void> = new Subject<void>();
 
   bulkActionCallback = (action: Action, data: any) => {
@@ -194,6 +197,12 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         break;
       default:
         break;
+    }
+  }
+
+  performAction(action: ActionItem<any>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action.action, this.collectionTag);
     }
   }
 
