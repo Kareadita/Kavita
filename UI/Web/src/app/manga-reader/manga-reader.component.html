@@ -19,7 +19,7 @@
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
                 <!-- {{this.pageNum}} -->
-                {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)"> - {{PageNumber + 1}}</ng-container>
+                <!-- {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)"> - {{PageNumber + 1}}</ng-container> -->
 
                 <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="isCurrentPageBookmarked" title="{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{isCurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
             </div>
