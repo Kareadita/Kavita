@@ -44,6 +44,7 @@ export class UserLoginComponent implements OnInit {
     this.navService.hideSideNav();
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
+        this.navService.showSideNav();
         this.router.navigateByUrl('/library');
       }
     });

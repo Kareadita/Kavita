@@ -1,3 +1,9 @@
 .hide-if-empty:empty {
     display: none;
 }
+
+::ng-deep .companion-bar {
+    h1, h2, h3, h4, h5, h6 {
+        margin-bottom: 0px;
+    }
+}
