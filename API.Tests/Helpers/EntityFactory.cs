@@ -27,11 +27,12 @@ namespace API.Tests.Helpers
         public static Volume CreateVolume(string volumeNumber, List<Chapter> chapters = null)
         {
             var chaps = chapters ?? new List<Chapter>();
+            var pages = chaps.Count > 0 ? chaps.Max(c => c.Pages) : 0;
             return new Volume()
             {
                 Name = volumeNumber,
                 Number = (int) API.Parser.Parser.MinimumNumberFromRange(volumeNumber),
-                Pages = chaps.Max(c => c.Pages),
+                Pages = pages,
                 Chapters = chaps
             };
         }
