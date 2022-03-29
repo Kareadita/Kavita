@@ -740,7 +740,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.addLinkClickHandlers();
         this.updateReaderStyles();
-        this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
+        // We need to get the offset after we ensure the title has rendered
+        requestAnimationFrame(() => this.topOffset = this.stickyTopElemRef.nativeElement?.getBoundingClientRect().height);
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
         if (imgs === null || imgs.length === 0) {
