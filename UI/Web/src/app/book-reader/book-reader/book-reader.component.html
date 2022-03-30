@@ -52,7 +52,7 @@
                         <label id="tap-pagination" class="form-label">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tap-pagination-help"></i></label>
                         <ng-template #tapPaginationTooltip>The ability to click the sides of the page to page left and right</ng-template>
                         <span class="visually-hidden" id="tap-pagination-help">The ability to click the sides of the page to page left and right</span>
-                        <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i><span *ngIf="darkMode">&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</span></button>
+                        <button (click)="toggleClickToPaginate()" class="btn btn-icon" aria-labelledby="tap-pagination"><i class="fa fa-arrows-alt-h {{clickToPaginate ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>&nbsp;{{clickToPaginate ? 'On' : 'Off'}}</button>
                     </div>
                     <div class="controls">
                         <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
@@ -70,13 +70,13 @@
                     </div>
                 </div>
                 <div class="row g-0">
-                    <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-                    <div class="col-1 page-stub">{{pageNum}}</div>
-                    <div class="col-8" style="margin-top: 15px;padding-right:10px">
+                    <button class="btn btn-small btn-icon col-1" style="padding-left: 0px" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+                    <div class="col-1 page-stub ps-1">{{pageNum}}</div>
+                    <div class="col-8 pe-1" style="margin-top: 15px">
                         <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
                     </div>
-                    <div class="col-1 btn-icon page-stub" (click)="goToPage(maxPages - 1)" title="Go to last page">{{maxPages - 1}}</div>
-                    <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter()" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+                    <div class="col-1 btn-icon page-stub pe-1" (click)="goToPage(maxPages - 1)" title="Go to last page">{{maxPages - 1}}</div>
+                    <button class="btn btn-small btn-icon col-1" style="padding-right: 0px; padding-left: 0px" [disabled]="nextChapterDisabled" (click)="loadNextChapter()" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
                 </div>
                 <div class="table-of-contents">
                     <h3>Table of Contents</h3>
