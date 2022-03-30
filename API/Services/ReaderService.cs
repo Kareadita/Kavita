@@ -403,37 +403,36 @@ public class ReaderService : IReaderService
             .ToList();
 
         // If there are any volumes that have progress, return those. If not, move on.
-        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages); // (removed for GetContinuePoint_ShouldReturnFirstVolumeChapter_WhenPreExistingProgress), not sure if needed && chapter.PagesRead > 0
+        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
-        // Check loose leaf chapters (and specials). First check if there are any
-        var volume = volumes.SingleOrDefault(v => v.Number == 0);
-        return FindNextReadingChapter(volume == null ? volumeChapters : volume.Chapters.OrderBy(c => float.Parse(c.Number)).ToList());
+        // Order with volume 0 last so we prefer the natural order
+        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, new SortComparerZeroLast()).SelectMany(v => v.Chapters).ToList());
     }
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
     {
         var chaptersWithProgress = volumeChapters.Where(c => c.PagesRead > 0).ToList();
-        if (chaptersWithProgress.Count > 0)
+        if (chaptersWithProgress.Count <= 0) return volumeChapters.First();
+
+
+        var last = chaptersWithProgress.FindLastIndex(c => c.PagesRead > 0);
+        if (last + 1 < chaptersWithProgress.Count)
         {
-            var last = chaptersWithProgress.FindLastIndex(c => c.PagesRead > 0);
-            if (last + 1 < chaptersWithProgress.Count)
-            {
-                return chaptersWithProgress.ElementAt(last + 1);
-            }
+            return chaptersWithProgress.ElementAt(last + 1);
+        }
 
-            var lastChapter = chaptersWithProgress.ElementAt(last);
-            if (lastChapter.PagesRead < lastChapter.Pages)
-            {
-                return chaptersWithProgress.ElementAt(last);
-            }
+        var lastChapter = chaptersWithProgress.ElementAt(last);
+        if (lastChapter.PagesRead < lastChapter.Pages)
+        {
+            return chaptersWithProgress.ElementAt(last);
+        }
 
-            // chaptersWithProgress are all read, then we need to get the next chapter that doesn't have progress
-            var lastIndexWithProgress = volumeChapters.IndexOf(lastChapter);
-            if (lastIndexWithProgress + 1 < volumeChapters.Count)
-            {
-                return volumeChapters.ElementAt(lastIndexWithProgress + 1);
-            }
+        // chaptersWithProgress are all read, then we need to get the next chapter that doesn't have progress
+        var lastIndexWithProgress = volumeChapters.IndexOf(lastChapter);
+        if (lastIndexWithProgress + 1 < volumeChapters.Count)
+        {
+            return volumeChapters.ElementAt(lastIndexWithProgress + 1);
         }
 
         return volumeChapters.First();
