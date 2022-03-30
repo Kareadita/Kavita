@@ -1625,6 +1625,11 @@ public class ReaderServiceTests
                     EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
                     EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
                 }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("11", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("22", false, new List<MangaFile>(), 1),
+                }),
             }
         });
 
@@ -1638,33 +1643,13 @@ public class ReaderServiceTests
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>());
 
         // Save progress on first volume chapters and 1st of second volume
-        await readerService.SaveReadingProgress(new ProgressDto()
-        {
-            PageNum = 1,
-            ChapterId = 1,
-            SeriesId = 1,
-            VolumeId = 1
-        }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
-        {
-            PageNum = 1,
-            ChapterId = 2,
-            SeriesId = 1,
-            VolumeId = 1
-        }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
-        {
-            PageNum = 1,
-            ChapterId = 3,
-            SeriesId = 1,
-            VolumeId = 1
-        }, 1);
-
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        await readerService.MarkSeriesAsRead(user, 1);
         await _context.SaveChangesAsync();
 
         var nextChapter = await readerService.GetContinuePoint(1, 1);
 
-        Assert.Equal("1", nextChapter.Range);
+        Assert.Equal("11", nextChapter.Range);
     }
 
     [Fact]
