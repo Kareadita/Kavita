@@ -525,6 +525,12 @@ namespace API.Controllers
                 return Ok("An email will be sent to the email if it exists in our database");
             }
 
+            var roles = await _userManager.GetRolesAsync(user);
+
+
+            if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
+                return Unauthorized("You are not permitted to this operation.");
+
             var emailLink = GenerateEmailLink(await _userManager.GeneratePasswordResetTokenAsync(user), "confirm-reset-password", user.Email);
             _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
             var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
