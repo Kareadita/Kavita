@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar *ngIf="series !== undefined">
+<app-side-nav-companion-bar *ngIf="series !== undefined" [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
     <ng-container title>
         <h2 style="margin-bottom: 0px" *ngIf="collectionTag !== undefined">
             <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
@@ -24,6 +24,7 @@
     [items]="series"
     [pagination]="seriesPagination"
     [filterSettings]="filterSettings"
+    [filterOpen]="filterOpen"
     (pageChange)="onPageChange($event)"
     (applyFilter)="updateFilter($event)"
     >
