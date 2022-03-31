@@ -117,9 +117,14 @@ namespace API.Services.Tasks.Scanner
                 }
 
                 // Patch is SeriesSort from ComicInfo
-                if (info.ComicInfo != null && !string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
                 {
                     info.SeriesSort = info.ComicInfo.TitleSort;
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
+                {
+                    info.SeriesSort = info.ComicInfo.SeriesSort;
                 }
             }
 
