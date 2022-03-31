@@ -164,7 +164,7 @@ public class SeriesService : ISeriesService
                 }
 
                 await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-                    MessageFactory.ScanSeriesEvent(series.Id, series.Name), false);
+                    MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false);
 
                 await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
 

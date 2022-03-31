@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-import { take, takeUntil, takeWhile } from 'rxjs/operators';
+import { filter, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { UtilityService } from '../../shared/_services/utility.service';
 import { Library } from '../../_models/library';
@@ -48,7 +48,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     });
 
-    this.messageHub.messages$.pipe(takeUntil(this.onDestory), takeWhile(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntil(this.onDestory), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
       this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
       });

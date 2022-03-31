@@ -80,13 +80,15 @@ namespace API.SignalR
         public const string LibraryModified = "LibraryModified";
 
 
-        public static SignalRMessage ScanSeriesEvent(int seriesId, string seriesName)
+        public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
         {
             return new SignalRMessage()
             {
                 Name = ScanSeries,
+                EventType = ProgressEventType.Single,
                 Body = new
                 {
+                    LibraryId = libraryId,
                     SeriesId = seriesId,
                     SeriesName = seriesName
                 }
