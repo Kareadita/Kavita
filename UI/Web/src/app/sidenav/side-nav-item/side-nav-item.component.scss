@@ -59,7 +59,7 @@
     }
 
     &:hover {
-        color: var(--side-nav-hover-color);
+        color: var(--side-nav-hover-text-color);
         background-color: var(--side-nav-hover-bg-color);
     }
 
@@ -80,7 +80,7 @@
         }
 
         &:hover {
-            color: var(--side-nav-hover-color);
+            color: var(--side-nav-hover-text-color);
             background-color: var(--side-nav-hover-bg-color);
         }
     }
