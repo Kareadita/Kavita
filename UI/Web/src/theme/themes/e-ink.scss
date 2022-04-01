@@ -156,5 +156,19 @@
   --pagination-focus-border-color: var(--primary-color);
   --pagination-link-hover-color: var(--primary-color);
 
+  /** Event Widget */
+  --event-widget-bg-color: white;
+  --event-widget-item-bg-color: lightgrey;
+  --event-widget-text-color: black;
+  --event-widget-item-border-color: lightgrey;
+  --event-widget-border-color: lightgrey;
+  
+  /* Popover */
+  --popover-body-bg-color: var(--navbar-bg-color);
+  --popover-body-text-color: var(--navbar-text-color);
+  --popover-outerarrow-color: lightgrey;
+  --popover-arrow-color: lightgrey;
+  --popover-bg-color: lightgrey;
+  --popover-border-color: lightgrey;
 
 }

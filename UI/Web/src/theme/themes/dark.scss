@@ -210,5 +210,12 @@
     --carousel-hover-header-text-decoration: none;
 
     /** Drawer */
-  --drawer-background-color: black;
+    --drawer-background-color: black;
+
+    /** Event Widget */
+    --event-widget-bg-color: rgb(1, 4, 9);
+    --event-widget-item-bg-color: rgb(1, 4, 9);
+    --event-widget-text-color: var(--body-text-color);
+    --event-widget-item-border-color: rgba(53, 53, 53, 0.5);
+    --event-widget-border-color: rgba(1, 4, 9, 0.5);
   }
