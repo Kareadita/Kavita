@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ThemeService } from 'src/app/theme.service';
 import { AccountService } from 'src/app/_services/account.service';
+import { NavService } from 'src/app/_services/nav.service';
 
 @Component({
   selector: 'app-confirm-email',
@@ -29,8 +30,9 @@ export class ConfirmEmailComponent implements OnInit {
 
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService, 
-    private toastr: ToastrService, private themeService: ThemeService) {
-    this.themeService.setTheme(this.themeService.defaultTheme);
+    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService) {
+    this.navService.hideSideNav();
+      this.themeService.setTheme(this.themeService.defaultTheme);
     const token = this.route.snapshot.queryParamMap.get('token');
     const email = this.route.snapshot.queryParamMap.get('email');
     if (token == undefined || token === '' || token === null) {

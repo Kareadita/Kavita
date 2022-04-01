@@ -100,6 +100,21 @@ public class SiteThemeService : ISiteThemeService
             await _unitOfWork.CommitAsync();
         }
 
+        // if there are no default themes, reselect Dark as default
+        var postSaveThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
+        if (!postSaveThemes.Any(t => t.IsDefault))
+        {
+            var defaultThemeName = Seed.DefaultThemes.Single(t => t.IsDefault).NormalizedName;
+            var theme = postSaveThemes.SingleOrDefault(t => t.NormalizedName == defaultThemeName);
+            if (theme != null)
+            {
+                theme.IsDefault = true;
+                _unitOfWork.SiteThemeRepository.Update(theme);
+                await _unitOfWork.CommitAsync();
+            }
+
+        }
+
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.SiteThemeProgressEvent("",  "", ProgressEventType.Ended));
 
