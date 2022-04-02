@@ -624,7 +624,7 @@ public class SeriesRepository : ISeriesRepository
                     LastReadingProgress = _context.AppUserProgresses
                         .Where(p => p.Id == progress.Id && p.AppUserId == userId)
                         .Max(p => p.LastModified),
-                    // This is only taking into account chapters that have progress on them, not all chapters in said series
+                    // BUG: This is only taking into account chapters that have progress on them, not all chapters in said series
                     LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
                     //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
                 });
