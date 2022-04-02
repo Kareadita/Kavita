@@ -23,11 +23,20 @@
   
     /* Buttons */
     --btn-primary-text-color: black;
+    --btn-primary-bg-color: white;
+    --btn-primary-border-color: black;
+    --btn-primary-hover-text-color: white;
+    --btn-primary-hover-bg-color: black;
+    --btn-primary-hover-border-color: black;
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;
     --btn-alt-focus-bg-color: #343c59;
     --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
+    --btn-fa-icon-color: black;
+    --btn-disabled-bg-color: #020202;
+    --btn-disabled-text-color: white;
+    --btn-disabled-border-color: #6c757d;
 
     /* Nav */
     --nav-link-active-text-color: white;
