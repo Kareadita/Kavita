@@ -72,7 +72,7 @@
   
     
     /* Checkboxes */
-    --checkbox-checked-bg-color: black;
+    --checkbox-checked-bg-color: var(--primary-color);
     --checkbox-bg-color: white;
     --checkbox-border-color: var(--primary-color);
     --checkbox-focus-border-color: var(--input-border-color);
