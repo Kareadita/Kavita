@@ -37,6 +37,7 @@ public interface ILibraryRepository
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds);
+    Task<int> GetTotalFiles();
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -88,6 +89,7 @@ public class LibraryRepository : ILibraryRepository
     {
         var library = await GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.Series);
         _context.Library.Remove(library);
+
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -114,6 +116,11 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Library
             .Where(x => libraryIds.Contains(x.Id))
             .ToListAsync();
+    }
+
+    public async Task<int> GetTotalFiles()
+    {
+        return await _context.MangaFile.CountAsync();
     }
 
     public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()

@@ -36,7 +36,6 @@ namespace API
 
 
             var directoryService = new DirectoryService(null, new FileSystem());
-            //MigrateConfigFiles.Migrate(isDocker, directoryService);
 
             // Before anything, check if JWT has been generated properly or if user still has default
             if (!Configuration.CheckIfJwtTokenSet() &&
@@ -73,10 +72,10 @@ namespace API
                 }
 
                 await context.Database.MigrateAsync();
-                var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
-                await Seed.SeedRoles(roleManager);
+                await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
                 await Seed.SeedSettings(context, directoryService);
+                await Seed.SeedThemes(context);
                 await Seed.SeedUserApiKeys(context);
 
 
@@ -110,7 +109,7 @@ namespace API
                     (await context.ServerSetting.SingleOrDefaultAsync(s =>
                         s.Key == ServerSettingKey.InstallVersion))?.Value;
             }
-            catch
+            catch (Exception)
             {
                 // ignored
             }

@@ -1,0 +1,25 @@
+.form-select {
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+    border-color: var(--input-border-color);
+
+    &:focus {
+        border-color: var(--input-focused-border-color);
+        background-color: var(--input-bg-color);
+        color: var(--input-text-color);
+        box-shadow: 0 0 0 0.25rem var(--input-focus-boxshadow-color);
+    }
+
+    &:read-only {
+        background-color: var(--input-bg-readonly-color);
+        cursor: initial;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    &::placeholder {
+        color: var(--input-placeholder-color);
+    }
+}

@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot } from '@angular/router';
-import { FilterSettings } from 'src/app/cards/card-detail-layout/card-detail-layout.component';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Series } from 'src/app/_models/series';
 import { SeriesFilter } from 'src/app/_models/series-filter';
 import { Volume } from 'src/app/_models/volume';
@@ -209,6 +207,18 @@ export class UtilityService {
       filter.translators = [...filter.translators, ...translators.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
+
+    /// Read status is encoded as true,true,true
+    const readStatus = snapshot.queryParamMap.get('readStatus');
+    if (readStatus !== undefined && readStatus !== null) {
+      const values = readStatus.split(',').map(i => i === "true");
+      if (values.length === 3) {
+        filter.readStatus.inProgress = values[0];
+        filter.readStatus.notRead = values[1];
+        filter.readStatus.read = values[2];
+        anyChanged = true;
+      }
+    }
     
 
     return [filter, anyChanged];
@@ -241,6 +251,16 @@ export class UtilityService {
         return 'fa-file-pdf';
       case MangaFormat.UNKNOWN:
         return 'fa-question';
+    }
+  }
+
+  getLibraryTypeIcon(format: LibraryType) {
+    switch (format) {
+      case LibraryType.Book:
+        return 'fa-book';
+      case LibraryType.Comic:
+      case LibraryType.Manga:
+        return 'fa-book-open';
     }
   }
 

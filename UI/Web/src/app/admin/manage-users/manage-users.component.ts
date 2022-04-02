@@ -35,8 +35,10 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService,
               public messageHub: MessageHubService,
               private serverService: ServerService) {
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user: User) => {
-      this.loggedInUsername = user.username;
+    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+      if (user) {
+        this.loggedInUsername = user.username;
+      }
     });
 
   }
@@ -72,6 +74,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   }
 
   loadPendingInvites() {
+    this.pendingInvites = [];
     this.memberService.getPendingInvites().subscribe(members => {
       this.pendingInvites = members;
       // Show logged in user at the top of the list
@@ -114,9 +117,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   inviteUser() {
     const modalRef = this.modalService.open(InviteUserComponent, {size: 'lg'});
     modalRef.closed.subscribe((successful: boolean) => {
-      if (successful) {
-        this.loadPendingInvites();
-      }
+      this.loadPendingInvites();
     });
   }
 

@@ -1,19 +1,19 @@
 <div class="container-fluid">
     <div class="row mb-2">
         <div class="col-8"><h3>Libraries</h3></div>
-        <div class="col-4"><button class="btn btn-primary float-right" (click)="addLibrary()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add Library</span></button></div>
+        <div class="col-4"><button class="btn btn-primary float-end" (click)="addLibrary()" title="Add Library"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add Library</span></button></div>
     </div>
     <ul class="list-group" *ngIf="!createLibraryToggle; else createLibrary">
-        <li *ngFor="let library of libraries; let idx = index; trackby: trackbyLibrary" class="list-group-item">
+        <li *ngFor="let library of libraries; let idx = index; trackby: trackbyLibrary" class="list-group-item no-hover">
             <div>
                 <h4>
-                    <span id="library-name--{{idx}}">{{library.name}}</span>&nbsp;
-                    <div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;" role="status" *ngIf="scanInProgress.hasOwnProperty(library.id) && scanInProgress[library.id].progress" title="Scan in progress. Started at {{scanInProgress[library.id].timestamp | date: 'short'}}">
-                        <span class="sr-only">Scan for {{library.name}} in progress</span>
-                    </div>
-                    <div class="float-right">
-                        <button class="btn btn-secondary mr-2 btn-sm" (click)="scanLibrary(library)" placement="top" ngbTooltip="Scan Library" attr.aria-label="Scan Library"><i class="fa fa-sync-alt" title="Scan"></i></button>
-                        <button class="btn btn-danger mr-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" ngbTooltip="Delete Library" attr.aria-label="Delete {{library.name | sentenceCase}}"></i></button>
+                    <span id="library-name--{{idx}}"><a [routerLink]="'/library/' + library.id">{{library.name}}</a></span>&nbsp;
+                    <!-- <div class="spinner-border text-primary" style="width: 1.5rem; height: 1.5rem;" role="status" *ngIf="scanInProgress.hasOwnProperty(library.id) && scanInProgress[library.id].progress" title="Scan in progress. Started at {{scanInProgress[library.id].timestamp | date: 'short'}}">
+                        <span class="visually-hidden">Scan for {{library.name}} in progress</span>
+                    </div> -->
+                    <div class="float-end">
+                        <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" ngbTooltip="Scan Library" attr.aria-label="Scan Library"><i class="fa fa-sync-alt" title="Scan"></i></button>
+                        <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" ngbTooltip="Delete Library" attr.aria-label="Delete {{library.name | sentenceCase}}"></i></button>
                         <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pen" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{library.name | sentenceCase}}"></i></button>
                     </div>
                 </h4>

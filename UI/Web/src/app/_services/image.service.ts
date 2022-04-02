@@ -1,7 +1,9 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Inject, Injectable, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { ThemeService } from '../theme.service';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { AccountService } from './account.service';
 import { NavService } from './nav.service';
@@ -19,9 +21,9 @@ export class ImageService implements OnDestroy {
 
   private onDestroy: Subject<void> = new Subject();
 
-  constructor(private navSerivce: NavService, private accountService: AccountService) {
-    this.navSerivce.darkMode$.subscribe(res => {
-      if (res) {
+  constructor(private accountService: AccountService, private themeService: ThemeService) {
+    this.themeService.currentTheme$.pipe(takeUntil(this.onDestroy)).subscribe(theme => {
+      if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
       } else {
@@ -79,6 +81,10 @@ export class ImageService implements OnDestroy {
 
   getBookmarkedImage(chapterId: number, pageNum: number) {
     return this.baseUrl + 'image/bookmark?chapterId=' + chapterId + '&pageNum=' + pageNum + '&apiKey=' + encodeURIComponent(this.apiKey);
+  }
+
+  getCoverUploadImage(filename: string) {
+    return this.baseUrl + 'image/cover-upload?filename=' + encodeURIComponent(filename);
   }
 
   updateErroredImage(event: any) {

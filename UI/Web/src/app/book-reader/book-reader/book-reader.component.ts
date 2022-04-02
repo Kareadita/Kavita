@@ -24,6 +24,7 @@ import { ScrollService } from 'src/app/scroll.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
+import { ThemeService } from 'src/app/theme.service';
 
 
 interface PageStyle {
@@ -260,8 +261,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService, 
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
     private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
-    @Inject(DOCUMENT) private document: Document) {
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
       this.navService.hideNavBar();
+      this.navService.hideSideNav();
 
       this.darkModeStyleElem = this.renderer.createElement('style');
       this.darkModeStyleElem.innerHTML = this.darkModeStyles;
@@ -382,11 +384,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null && this.originalBodyColor !== undefined) {
       bodyNode.style.background = this.originalBodyColor;
-      if (this.user.preferences.siteDarkMode) {
-        bodyNode.classList.add('bg-dark');
-      }
+      this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
+        this.themeService.setTheme(theme.name);
+      });
     }
     this.navService.showNavBar();
+    this.navService.showSideNav();
 
     const head = this.document.querySelector('head');
     this.renderer.removeChild(head, this.darkModeStyleElem);
@@ -737,7 +740,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.addLinkClickHandlers();
         this.updateReaderStyles();
-        this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
+        // We need to get the offset after we ensure the title has rendered
+        requestAnimationFrame(() => this.topOffset = this.stickyTopElemRef.nativeElement?.getBoundingClientRect().height);
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
         if (imgs === null || imgs.length === 0) {
@@ -779,13 +783,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
-    if (pageNum < 0) {
-      this.pageNum = 0;
-    } else if (pageNum >= this.maxPages - 1) { // This case handles when we are using the pager to move to the next volume/chapter, the pageNum will get incremented past maxPages // NOTE: I made a change where I removed - 1 in comparison, it's breaking page progress
-      this.pageNum = this.maxPages; // 
-    } else {
-      this.pageNum = pageNum;
-    }
+    this.pageNum = Math.max(Math.min(pageNum, this.maxPages), 0);
   }
 
   goBack() {
@@ -968,7 +966,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setOverrideStyles() {
     const bodyNode = this.document.querySelector('body');
     if (bodyNode !== undefined && bodyNode !== null) {
-      if (this.user.preferences.siteDarkMode) {
+      if (this.themeService.isDarkTheme()) {
         bodyNode.classList.remove('bg-dark');
       }
       
@@ -1015,8 +1013,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (element === null) return;
-
-    this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET, this.reader.nativeElement);
+    const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
+    // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
+    setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
   }
 
   toggleClickToPaginate() {

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
@@ -13,6 +14,7 @@ public interface IAppUserProgressRepository
     Task<bool> UserHasProgress(LibraryType libraryType, int userId);
     Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId);
     Task<bool> HasAnyProgressOnSeriesAsync(int seriesId, int userId);
+    Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
 }
 
 public class AppUserProgressRepository : IAppUserProgressRepository
@@ -81,6 +83,19 @@ public class AppUserProgressRepository : IAppUserProgressRepository
     {
         return await _context.AppUserProgresses
             .AnyAsync(aup => aup.PagesRead > 0 && aup.AppUserId == userId && aup.SeriesId == seriesId);
+    }
+
+    /// <summary>
+    /// This will return any user progress. This filters out progress rows that have no pages read.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId)
+    {
+        return await _context.AppUserProgresses
+            .Where(p => p.SeriesId == seriesId && p.AppUserId == userId && p.PagesRead > 0)
+            .ToListAsync();
     }
 
     public async Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId)

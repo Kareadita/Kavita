@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.0");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -165,6 +165,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("AutoCloseMenu")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BackgroundColor")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("BookReaderDarkMode")
                         .HasColumnType("INTEGER");
 
@@ -186,6 +189,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("LayoutMode")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PageSplitOption")
                         .HasColumnType("INTEGER");
 
@@ -198,13 +204,18 @@ namespace API.Data.Migrations
                     b.Property<int>("ScalingOption")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("SiteDarkMode")
+                    b.Property<bool>("ShowScreenHints")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ThemeId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId")
                         .IsUnique();
+
+                    b.HasIndex("ThemeId");
 
                     b.ToTable("AppUserPreferences");
                 });
@@ -500,13 +511,49 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("AgeRatingLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("CharacterLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ColoristLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Count")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("CoverArtistLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("EditorLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("GenresLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("InkerLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Language")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("LanguageLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("LettererLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PencillerLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("PublicationStatus")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PublicationStatusLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PublisherLocked")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ReleaseYear")
@@ -521,6 +568,18 @@ namespace API.Data.Migrations
 
                     b.Property<string>("Summary")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("SummaryLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TagsLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("TranslatorLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("WriterLocked")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -645,8 +704,14 @@ namespace API.Data.Migrations
                     b.Property<string>("LocalizedName")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("LocalizedNameLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("NameLocked")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("NormalizedName")
                         .HasColumnType("TEXT");
@@ -659,6 +724,9 @@ namespace API.Data.Migrations
 
                     b.Property<string>("SortName")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("SortNameLocked")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -685,6 +753,38 @@ namespace API.Data.Migrations
                     b.HasKey("Key");
 
                     b.ToTable("ServerSetting");
+                });
+
+            modelBuilder.Entity("API.Entities.SiteTheme", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SiteTheme");
                 });
 
             modelBuilder.Entity("API.Entities.Tag", b =>
@@ -967,7 +1067,13 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("API.Entities.SiteTheme", "Theme")
+                        .WithMany()
+                        .HasForeignKey("ThemeId");
+
                     b.Navigation("AppUser");
+
+                    b.Navigation("Theme");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserProgress", b =>

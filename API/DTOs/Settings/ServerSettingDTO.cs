@@ -37,5 +37,6 @@ namespace API.DTOs.Settings
         /// </summary>
         /// <remarks>If null or empty string, will default back to default install setting aka <see cref="EmailService.DefaultApiUrl"/></remarks>
         public string EmailServiceUrl { get; set; }
+        public string InstallVersion { get; set; }
     }
 }

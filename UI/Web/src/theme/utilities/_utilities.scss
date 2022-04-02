@@ -1,0 +1,16 @@
+@media(max-width: $grid-breakpoints-sm) {
+    .phone-hidden {
+      display: none;
+    }
+}
+  
+@media(min-width: $grid-breakpoints-sm) {
+    .not-phone-hidden {
+      display: none;
+    }
+}
+
+.redlines * {
+    outline: 1px solid red;
+    outline-offset: -1px;
+}

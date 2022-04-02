@@ -13,12 +13,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
 import { ManageSystemComponent } from './manage-system/manage-system.component';
-import { ChangelogComponent } from './changelog/changelog.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { InviteUserComponent } from './invite-user/invite-user.component';
 import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
+import { UserSettingsModule } from '../user-settings/user-settings.module';
+import { SidenavModule } from '../sidenav/sidenav.module';
 
 
 
@@ -34,7 +35,6 @@ import { EditUserComponent } from './edit-user/edit-user.component';
     ResetPasswordModalComponent,
     ManageSettingsComponent,
     ManageSystemComponent,
-    ChangelogComponent,
     InviteUserComponent,
     RoleSelectorComponent,
     LibrarySelectorComponent,
@@ -49,7 +49,9 @@ import { EditUserComponent } from './edit-user/edit-user.component';
     NgbTooltipModule,
     NgbDropdownModule,
     SharedModule,
-    PipeModule
+    PipeModule,
+    SidenavModule,
+    UserSettingsModule // API-key componet
   ],
   providers: []
 })

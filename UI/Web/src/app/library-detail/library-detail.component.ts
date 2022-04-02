@@ -1,10 +1,10 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
+import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
@@ -14,8 +14,9 @@ import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
+import { NavService } from '../_services/nav.service';
 
 @Component({
   selector: 'app-library-detail',
@@ -33,6 +34,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filter: SeriesFilter | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
+
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -74,7 +77,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService) {
+    private utilityService: UtilityService, public navService: NavService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
@@ -92,12 +95,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
     this.filterSettings.presets.libraries = [this.libraryId];
-    
-    //this.loadPage();
   }
 
   ngOnInit(): void {
-    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
+      if (event.event !== EVENTS.SeriesAdded) return;
+      const seriesAdded = event.payload as SeriesAddedEvent;
+      if (seriesAdded.libraryId !== this.libraryId) return;
       this.loadPage();
     });
   }

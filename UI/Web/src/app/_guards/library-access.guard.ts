@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MemberService } from '../_services/member.service';
 
 @Injectable({
@@ -12,6 +12,7 @@ export class LibraryAccessGuard implements CanActivate {
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     const libraryId = parseInt(state.url.split('library/')[1], 10);
+    if (isNaN(libraryId)) return of(false);
     return this.memberService.hasLibraryAccess(libraryId);
   }
 }

@@ -3,7 +3,6 @@ import { CanActivate } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 
 @Injectable({
@@ -15,8 +14,8 @@ export class AdminGuard implements CanActivate {
   canActivate(): Observable<boolean> {
     // this automaticallys subs due to being router guard
     return this.accountService.currentUser$.pipe(take(1),
-      map((user: User) => {
-        if (this.accountService.hasAdminRole(user)) {
+      map((user) => {
+        if (user && this.accountService.hasAdminRole(user)) {
           return true;
         }
         

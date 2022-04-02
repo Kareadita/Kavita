@@ -1,118 +1,102 @@
 <ng-container *ngIf="chapter !== undefined">
-    <div class="container-fluid">
-        <!-- <h4>{{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}} <span title="Id">({{chapter.id}})</span></h4> -->
-        
-        
-        <!-- Arc Information -->
-        <div class="row no-gutters">
-            <div class="col">
-                Id: {{chapter.id}} 
+    <ng-container>
+        <span *ngIf="chapter.writers.length === 0 && chapter.coverArtists.length === 0 
+        && chapter.pencillers.length === 0 && chapter.inkers.length === 0
+        && chapter.colorists.length === 0 && chapter.letterers.length === 0
+        && chapter.editors.length === 0 && chapter.publishers.length === 0
+        && chapter.characters.length === 0 && chapter.translators.length === 0">
+            No metadata available
+        </span>
+        <div class="row g-0">
+            <div class="col-auto mt-2" *ngIf="chapter.writers && chapter.writers.length > 0">
+                <h6>Writers</h6>
+                <app-badge-expander [items]="chapter.writers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
             </div>
-        </div>
-    
-        <div class="row no-gutters">
-            <div class="col">
-                Title: {{chapter.titleName || '-'}} 
-            </div>
-            <div class="col">
-                Pages: {{chapter.pages}}
-            </div>
-        </div>
-    
-        <div class="row no-gutters">
-            <div class="col" *ngIf="chapter.hasOwnProperty('created')">
-                Added: {{(chapter.created | date: 'short') || '-'}}
-            </div>
-            <div class="col">
-                Release Date: {{(chapter.releaseDate | date: 'shortDate') || '-'}}
-            </div>
-        </div>
-    </div>
 
-    <ul class="list-unstyled" >
-        <li class="media my-4">
-            <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{libraryType !== LibraryType.Comic ? 'Chapter ' : 'Issue #'}} {{chapter.number}}">
-                <app-image class="mr-3" width="74px" [imageUrl]="chapter.coverImage"></app-image>
-            </a>
-            <div class="media-body">
-                <h5 class="mt-0 mb-1">
-                    <span *ngIf="chapter.number !== '0'; else specialHeader">
-                        <!-- TODO: Add back in 
-                        <span>
-                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>&nbsp;
-                            {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
-                        </span> -->
-                        <span class="badge badge-primary badge-pill">
-                            <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
-                            <span *ngIf="chapter.pagesRead === 0">UNREAD</span>
-                            <span *ngIf="chapter.pagesRead === chapter.pages">READ</span>
-                        </span>
-                    </span>
-                    <ng-template #specialHeader>Files</ng-template>
-                </h5>
-                <ul class="list-group file-list">
-                    <app-file-info *ngFor="let file of chapter.files" [file]="file" [created]="chapter.created"></app-file-info>
-                </ul>
-    
-    
-                <ng-container>
-                    <div class="row no-gutters mt-1"  *ngIf="chapter.writers && chapter.writers.length > 0">
-                        <div class="col-md-4">
-                            <h5>Writers</h5>
-                        </div>
-                        <div class="col-md-8">
-                            <app-person-badge *ngFor="let person of chapter.writers" [person]="person"></app-person-badge>
-                        </div>
-                    </div>
-                
-                    <div class="row no-gutters mt-1"  *ngIf="chapter.coverArtist && chapter.coverArtist.length > 0">
-                        <div class="col-md-4">
-                            <h5>Artists</h5>
-                        </div>
-                        <div class="col-md-8">
-                            <app-person-badge *ngFor="let person of chapter.coverArtist" [person]="person"></app-person-badge>
-                        </div>
-                    </div>
-                
-                    <div class="row no-gutters mt-1"  *ngIf="chapter.publisher && chapter.publisher.length > 0">
-                        <div class="col-md-4">
-                            <h5>Publishers</h5>
-                        </div>
-                        <div class="col-md-8">
-                            <app-person-badge *ngFor="let person of chapter.publisher" [person]="person"></app-person-badge>
-                        </div>
-                    </div>
-                </ng-container>
+            <div class="col-auto mt-2" *ngIf="chapter.coverArtists && chapter.coverArtists.length > 0">
+                <h6>Cover Artists</h6>
+                <app-badge-expander [items]="chapter.coverArtists">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
             </div>
-        </li>
-    </ul>
+
+            <div class="col-auto mt-2" *ngIf="chapter.pencillers && chapter.pencillers.length > 0">
+                <h6>Pencillers</h6>
+                <app-badge-expander [items]="chapter.pencillers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+
+            <div class="col-auto mt-2" *ngIf="chapter.inkers && chapter.inkers.length > 0">
+                <h6>Inkers</h6>
+                <app-badge-expander [items]="chapter.inkers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+
+            <div class="col-auto mt-2" *ngIf="chapter.colorists && chapter.colorists.length > 0">
+                <h6>Colorists</h6>
+                <app-badge-expander [items]="chapter.colorists">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+
+
+            <div class="col-auto mt-2" *ngIf="chapter.letterers && chapter.letterers.length > 0">
+                <h6>Letterers</h6>
+                <app-badge-expander [items]="chapter.letterers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+
+            <div class="col-auto mt-2" *ngIf="chapter.editors && chapter.editors.length > 0">
+                <h6>Editors</h6>
+                <app-badge-expander [items]="chapter.editors">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+
+            <div class="col-auto mt-2" *ngIf="chapter.publishers && chapter.publishers.length > 0">
+                <h6>Publishers</h6>
+                <app-badge-expander [items]="chapter.publishers">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+
+            <div class="col-auto mt-2" *ngIf="chapter.characters && chapter.characters.length > 0">
+                <h6>Characters</h6>
+                <app-badge-expander [items]="chapter.characters">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+            <div class="col-auto mt-2" *ngIf="chapter.translators && chapter.translators.length > 0">
+                <h6>Translators</h6>
+                <app-badge-expander [items]="chapter.translators">
+                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                        <app-person-badge [person]="item"></app-person-badge>
+                    </ng-template>  
+                </app-badge-expander>
+            </div>
+        </div>
+    </ng-container>
 </ng-container>
-
-
-<!-- 
-
-<div class="container-fluid" *ngIf="metadata !== undefined">
-    Chapter {{chapter.range}} {{metadata.title.length > 0 ? ' - ' + metadata.title : ''}}
-    Title: {{metadata.title || '-'}}
-    Year: {{metadata.year || '-'}}
-    Arc Information
-    
-
-    <div class="row no-gutters">
-        <div class="col">
-            Id: {{chapter.id}}
-        </div>
-        <div class="col">
-            Pages: {{chapter.pages}}
-        </div>
-    </div>
-
-    <div class="row no-gutters">
-        <div class="col" *ngIf="chapter.hasOwnProperty('created')">
-            Added: {{(chapter.created | date: 'short') || '-'}}
-        </div>
-        <div class="col">
-            Pages: {{chapter.pages}}
-        </div>
-    </div>
-</div> -->

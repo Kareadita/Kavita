@@ -1,10 +1,10 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
+import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Pagination } from '../_models/pagination';
@@ -12,7 +12,7 @@ import { Series } from '../_models/series';
 import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 /**
@@ -33,6 +33,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
 
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   onDestroy: Subject<void> = new Subject();
 
@@ -63,7 +64,10 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.hubService.seriesAdded.pipe(takeWhile(event => event.libraryId === this.libraryId), debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
+      if (event.event !== EVENTS.SeriesAdded) return;
+      const seriesAdded = event.payload as SeriesAddedEvent;
+      if (seriesAdded.libraryId !== this.libraryId) return;
       this.loadPage();
     });
   }

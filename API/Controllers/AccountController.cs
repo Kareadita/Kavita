@@ -106,7 +106,10 @@ namespace API.Controllers
                 {
                     UserName = registerDto.Username,
                     Email = registerDto.Email,
-                    UserPreferences = new AppUserPreferences(),
+                    UserPreferences = new AppUserPreferences
+                    {
+                        Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+                    },
                     ApiKey = HashUtil.ApiKey()
                 };
 
@@ -179,22 +182,23 @@ namespace API.Controllers
 
             // Update LastActive on account
             user.LastActive = DateTime.Now;
-            user.UserPreferences ??= new AppUserPreferences();
+            user.UserPreferences ??= new AppUserPreferences
+            {
+                Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+            };
 
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
-            return new UserDto
-            {
-                Username = user.UserName,
-                Email = user.Email,
-                Token = await _tokenService.CreateToken(user),
-                RefreshToken = await _tokenService.CreateRefreshToken(user),
-                ApiKey = user.ApiKey,
-                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
-            };
+            var dto = _mapper.Map<UserDto>(user);
+            dto.Token = await _tokenService.CreateToken(user);
+            dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+            var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName);
+            pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+            dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
+            return dto;
         }
 
         [HttpPost("refresh-token")]
@@ -334,6 +338,12 @@ namespace API.Controllers
 
 
 
+        /// <summary>
+        /// Invites a user to the server. Will generate a setup link for continuing setup. If the server is not accessible, no
+        /// email will be sent.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("invite")]
         public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
@@ -358,7 +368,10 @@ namespace API.Controllers
                 UserName = dto.Email,
                 Email = dto.Email,
                 ApiKey = HashUtil.ApiKey(),
-                UserPreferences = new AppUserPreferences()
+                UserPreferences = new AppUserPreferences
+                {
+                    Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
+                }
             };
 
             try
@@ -410,7 +423,10 @@ namespace API.Controllers
 
                 var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
                 _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-                if (dto.SendEmail)
+
+                var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+                var accessible = await _emailService.CheckIfAccessible(host);
+                if (accessible)
                 {
                     await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                     {
@@ -419,7 +435,11 @@ namespace API.Controllers
                         ServerConfirmationLink = emailLink
                     });
                 }
-                return Ok(emailLink);
+                return Ok(new InviteUserResponse
+                {
+                    EmailLink = emailLink,
+                    EmailSent = accessible
+                });
             }
             catch (Exception)
             {
@@ -505,6 +525,12 @@ namespace API.Controllers
                 _logger.LogError("There are no users with email: {Email} but user is requesting password reset", email);
                 return Ok("An email will be sent to the email if it exists in our database");
             }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+
+            if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
+                return Unauthorized("You are not permitted to this operation.");
 
             var emailLink = GenerateEmailLink(await _userManager.GeneratePasswordResetTokenAsync(user), "confirm-reset-password", user.Email);
             _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);

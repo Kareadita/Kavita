@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Middleware;
 using API.Services;
@@ -18,6 +19,7 @@ using Hangfire;
 using Hangfire.MemoryStorage;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -118,6 +120,7 @@ namespace API
                     ForwardedHeaders.All;
             });
 
+
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
@@ -129,6 +132,8 @@ namespace API
             // Add IHostedService for startup tasks
             // Any services that should be bootstrapped go here
             services.AddHostedService<StartupTasksHostedService>();
+
+            services.AddMediatR(typeof(Startup));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -146,12 +151,18 @@ namespace API
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
 
-
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
+
+                    //  Update the version in the DB after all migrations are run
+                    var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
+                    installVersion.Value = BuildInfo.Version.ToString();
+                    unitOfWork.SettingsRepository.Update(installVersion);
+
+                    await unitOfWork.CommitAsync();
                 }).GetAwaiter()
                     .GetResult();
             }
@@ -202,21 +213,6 @@ namespace API
             app.UseAuthorization();
 
             app.UseDefaultFiles();
-
-            // This is not implemented completely. Commenting out until implemented
-            // var service = serviceProvider.GetRequiredService<IUnitOfWork>();
-            // var settings = service.SettingsRepository.GetSettingsDto();
-            // if (!string.IsNullOrEmpty(settings.BaseUrl) && !settings.BaseUrl.Equals("/"))
-            // {
-            //     var path = !settings.BaseUrl.StartsWith("/")
-            //         ? $"/{settings.BaseUrl}"
-            //         : settings.BaseUrl;
-            //     path = !path.EndsWith("/")
-            //         ? $"{path}/"
-            //         : path;
-            //     app.UsePathBase(path);
-            //     Console.WriteLine("Starting with base url as " + path);
-            // }
 
             app.UseStaticFiles(new StaticFileOptions
             {

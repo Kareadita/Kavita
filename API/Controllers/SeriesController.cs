@@ -11,12 +11,10 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
-using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
@@ -26,14 +24,15 @@ namespace API.Controllers
         private readonly ILogger<SeriesController> _logger;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubContext<MessageHub> _messageHub;
+        private readonly ISeriesService _seriesService;
 
-        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IHubContext<MessageHub> messageHub)
+
+        public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, ISeriesService seriesService)
         {
             _logger = logger;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
-            _messageHub = messageHub;
+            _seriesService = seriesService;
         }
 
         [HttpPost]
@@ -59,7 +58,7 @@ namespace API.Controllers
         /// <param name="seriesId">Series Id to fetch details for</param>
         /// <returns></returns>
         /// <exception cref="KavitaException">Throws an exception if the series Id does exist</exception>
-        [HttpGet("{seriesId}")]
+        [HttpGet("{seriesId:int}")]
         public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
@@ -82,21 +81,7 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", seriesId, username);
 
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-
-            var chapterIds = (await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new []{seriesId}));
-            var result = await _unitOfWork.SeriesRepository.DeleteSeriesAsync(seriesId);
-
-            if (result)
-            {
-                await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
-                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
-                await _unitOfWork.CommitAsync();
-                _taskScheduler.CleanupChapters(chapterIds);
-                await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(seriesId, series.Name, series.LibraryId));
-            }
-            return Ok(result);
+            return Ok(await _seriesService.DeleteMultipleSeries(new[] {seriesId}));
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -106,25 +91,9 @@ namespace API.Controllers
             var username = User.GetUsername();
             _logger.LogInformation("Series {SeriesId} is being deleted by {UserName}", dto.SeriesIds, username);
 
-            var chapterMappings =
-                await _unitOfWork.SeriesRepository.GetChapterIdWithSeriesIdForSeriesAsync(dto.SeriesIds.ToArray());
+            if (await _seriesService.DeleteMultipleSeries(dto.SeriesIds)) return Ok();
 
-            var allChapterIds = new List<int>();
-            foreach (var mapping in chapterMappings)
-            {
-                allChapterIds.AddRange(mapping.Value);
-            }
-
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds);
-            _unitOfWork.SeriesRepository.Remove(series);
-
-            if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
-            {
-                await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
-                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
-                _taskScheduler.CleanupChapters(allChapterIds.ToArray());
-            }
-            return Ok();
+            return BadRequest("There was an issue deleting the series requested");
         }
 
         /// <summary>
@@ -152,28 +121,18 @@ namespace API.Controllers
             return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
         }
 
+        [HttpGet("chapter-metadata")]
+        public async Task<ActionResult<ChapterDto>> GetChapterMetadata(int chapterId)
+        {
+            return Ok(await _unitOfWork.ChapterRepository.GetChapterMetadataDtoAsync(chapterId));
+        }
+
 
         [HttpPost("update-rating")]
         public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-            var userRating = await _unitOfWork.UserRepository.GetUserRatingAsync(updateSeriesRatingDto.SeriesId, user.Id) ??
-                             new AppUserRating();
-
-            userRating.Rating = updateSeriesRatingDto.UserRating;
-            userRating.Review = updateSeriesRatingDto.UserReview;
-            userRating.SeriesId = updateSeriesRatingDto.SeriesId;
-
-            if (userRating.Id == 0)
-            {
-                user.Ratings ??= new List<AppUserRating>();
-                user.Ratings.Add(userRating);
-            }
-
-            _unitOfWork.UserRepository.Update(user);
-
-            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical error.");
-
+            if (!await _seriesService.UpdateRating(user, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
             return Ok();
         }
 
@@ -190,10 +149,15 @@ namespace API.Controllers
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
+
             series.Name = updateSeries.Name.Trim();
+            series.SortName = updateSeries.SortName.Trim();
             series.LocalizedName = updateSeries.LocalizedName.Trim();
-            series.SortName = updateSeries.SortName?.Trim();
-            series.Metadata.Summary = updateSeries.Summary?.Trim();
+
+            series.NameLocked = updateSeries.NameLocked;
+            series.SortNameLocked = updateSeries.SortNameLocked;
+            series.LocalizedNameLocked = updateSeries.LocalizedNameLocked;
+
 
             var needsRefreshMetadata = false;
             // This is when you hit Reset
@@ -281,8 +245,7 @@ namespace API.Controllers
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var results = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
 
-            var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
-                .Take(userParams.PageSize).ToList();
+            var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize).Take(userParams.PageSize).ToList();
             var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
 
             await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
@@ -318,77 +281,9 @@ namespace API.Controllers
         [HttpPost("metadata")]
         public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
         {
-            try
+            if (await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
             {
-                var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
-                var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-                var allTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
-                if (series.Metadata == null)
-                {
-                    series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.Tags
-                        .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
-                }
-                else
-                {
-                    series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                    // TODO: Move this merging logic into a reusable code as it can be used for any Tag
-                    var newTags = new List<CollectionTag>();
-
-                    // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-                    var existingTags = series.Metadata.CollectionTags.ToList();
-                    foreach (var existing in existingTags)
-                    {
-                        if (updateSeriesMetadataDto.Tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-                        {
-                            // Remove tag
-                            series.Metadata.CollectionTags.Remove(existing);
-                        }
-                    }
-
-                    // At this point, all tags that aren't in dto have been removed.
-                    foreach (var tag in updateSeriesMetadataDto.Tags)
-                    {
-                        var existingTag = allTags.SingleOrDefault(t => t.Title == tag.Title);
-                        if (existingTag != null)
-                        {
-                            if (series.Metadata.CollectionTags.All(t => t.Title != tag.Title))
-                            {
-                                newTags.Add(existingTag);
-                            }
-                        }
-                        else
-                        {
-                            // Add new tag
-                            newTags.Add(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
-                        }
-                    }
-
-                    foreach (var tag in newTags)
-                    {
-                        series.Metadata.CollectionTags.Add(tag);
-                    }
-                }
-
-                if (!_unitOfWork.HasChanges())
-                {
-                    return Ok("No changes to save");
-                }
-
-                if (await _unitOfWork.CommitAsync())
-                {
-                    foreach (var tag in updateSeriesMetadataDto.Tags)
-                    {
-                        await _messageHub.Clients.All.SendAsync(SignalREvents.SeriesAddedToCollection,
-                            MessageFactory.SeriesAddedToCollection(tag.Id,
-                                updateSeriesMetadataDto.SeriesMetadata.SeriesId));
-                    }
-                    return Ok("Successfully updated");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception when updating metadata");
-                await _unitOfWork.RollbackAsync();
+                return Ok("Successfully updated");
             }
 
             return BadRequest("Could not update metadata");
@@ -436,6 +331,13 @@ namespace API.Controllers
             var val = (AgeRating) ageRating;
 
             return Ok(val.ToDescription());
+        }
+
+        [HttpGet("series-detail")]
+        public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return await _seriesService.GetSeriesDetail(seriesId, userId);
         }
     }
 }

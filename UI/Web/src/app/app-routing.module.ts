@@ -1,16 +1,17 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
-import { NotConnectedComponent } from './not-connected/not-connected.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
-import { OnDeckComponent } from './on-deck/on-deck.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
+import { ThemeTestComponent } from './theme-test/theme-test.component';
+import { ReadingListsComponent } from './reading-list/reading-lists/reading-lists.component';
+import { AllCollectionsComponent } from './collections/all-collections/all-collections.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -37,6 +38,14 @@ const routes: Routes = [
     loadChildren: () => import('./reading-list/reading-list.module').then(m => m.ReadingListModule)
   },
   {
+    path: 'registration',
+    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
+  },
+  {
+    path: 'announcements',
+    loadChildren: () => import('../app/announcements/announcements.module').then(m => m.AnnouncementsModule)
+  },
+  {
     path: '',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],
@@ -60,17 +69,13 @@ const routes: Routes = [
     children: [
       {path: 'library', component: DashboardComponent},
       {path: 'recently-added', component: RecentlyAddedComponent},
-      {path: 'on-deck', component: OnDeckComponent},
       {path: 'all-series', component: AllSeriesComponent},
 
     ]
   },
-  {
-    path: 'registration',
-    loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)
-  },
+  {path: 'theme', component: ThemeTestComponent},
+
   {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
-  {path: 'no-connection', component: NotConnectedComponent},
   {path: '**', component: UserLoginComponent, pathMatch: 'full'}
 ];
 

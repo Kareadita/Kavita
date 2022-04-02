@@ -1,49 +1,37 @@
 .carousel-container {
     overflow: hidden;
-    padding-top: 15px;
     width: 100%;
     position: relative;
     display: flex;
-    float: left;
     flex-direction: column;
 }
 
-.section-title {
-    font-size: 1.6rem;
-    font-weight: 400;
-    margin-left: 10px;
-    color: black;
-
-    :hover {
-        text-decoration: underline;
-    }
-
-    :active {
-        text-decoration: underline;
-    }
-
-    :focus {
-        text-decoration: underline;
-    }
-}
-
-::ng-deep .bg-light {
+.carousel-container {
     .section-title {
-        color: black !important;
+        font-weight: 400;
+        margin-left: 10px;
+        color: var(--carousel-header-text-color);
+        text-decoration: var(--carousel-header-text-decoration);
+
+        &:hover, &:focus, &:active {
+            text-decoration: var(--carousel-hover-header-text-decoration);
+        }
     }
-    
-}
-// These are needed due to nested css within another component
-::ng-deep .bg-dark {
-    .section-title {
-        color: #efefef !important;
+
+    .non-selectable {
+        cursor: default;
     }
 }
+
 
 ::ng-deep .swiper-slide {
     width: auto !important;
 }
 
-::ng-deep .swiper-slide {
-    width: auto !important;
+::ng-deep .swiper-wrapper {
+    margin-bottom: 10px;
+}
+
+::ng-deep .last-carousel {
+    margin-bottom: 0;
 }

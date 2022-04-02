@@ -21,7 +21,7 @@ export class DirectoryPickerComponent implements OnInit {
   /**
    * Url to give more information about selecting directories. Passing nothing will suppress. 
    */
-  @Input() helpUrl: string = 'https://wiki.kavitareader.com/en/guides/adding-a-library';
+  @Input() helpUrl: string = 'https://wiki.kavitareader.com/en/guides/first-time-setup#adding-a-library-to-kavita';
 
   currentRoot = '';
   folders: string[] = [];

@@ -1,40 +1,66 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
-import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
-import { ProgressEvent } from '../_models/events/scan-library-progress-event';
-import { ScanSeriesEvent } from '../_models/events/scan-series-event';
-import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { LibraryModifiedEvent } from '../_models/events/library-modified-event';
+import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
+import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
   ScanSeries = 'ScanSeries',
-  RefreshMetadataProgress = 'RefreshMetadataProgress',
   SeriesAdded = 'SeriesAdded',
   SeriesRemoved = 'SeriesRemoved',
   ScanLibraryProgress = 'ScanLibraryProgress',
   OnlineUsers = 'OnlineUsers',
   SeriesAddedToCollection = 'SeriesAddedToCollection',
-  ScanLibraryError = 'ScanLibraryError',
+  /**
+   * A generic error that occurs during operations on the server
+   */
+  Error = 'Error',
   BackupDatabaseProgress = 'BackupDatabaseProgress',
+  /**
+   * A subtype of NotificationProgress that represents maintenance cleanup on server-owned resources
+   */
   CleanupProgress = 'CleanupProgress',
+  /**
+   * A subtype of NotificationProgress that represnts a user downloading a file or group of files
+   */
   DownloadProgress = 'DownloadProgress',
+  /**
+   * A generic progress event 
+   */
+  NotificationProgress = 'NotificationProgress',
+  /**
+   * A subtype of NotificationProgress that represents the underlying file being processed during a scan
+   */
+  FileScanProgress = 'FileScanProgress',
+  /**
+   * A custom user site theme is added or removed during a scan
+   */
+  SiteThemeProgress = 'SiteThemeProgress',
   /**
    * A cover is updated
    */
-  CoverUpdate = 'CoverUpdate'
+  CoverUpdate = 'CoverUpdate',
+  /**
+   * A subtype of NotificationProgress that represents a file being processed for cover image extraction
+   */
+   CoverUpdateProgress = 'CoverUpdateProgress',
+   /**
+    * A library is created or removed from the instance
+    */
+   LibraryModified = 'LibraryModified'
 }
 
 export interface Message<T> {
   event: EVENTS;
   payload: T;
 }
+
 
 @Injectable({
   providedIn: 'root'
@@ -44,19 +70,36 @@ export class MessageHubService {
   private hubConnection!: HubConnection;
 
   private messagesSource = new ReplaySubject<Message<any>>(1);
-  public messages$ = this.messagesSource.asObservable();
-
   private onlineUsersSource = new BehaviorSubject<string[]>([]);
-  onlineUsers$ = this.onlineUsersSource.asObservable();
 
-  public scanSeries: EventEmitter<ScanSeriesEvent> = new EventEmitter<ScanSeriesEvent>();
-  public scanLibrary: EventEmitter<ProgressEvent> = new EventEmitter<ProgressEvent>(); // TODO: Refactor this name to be generic
-  public seriesAdded: EventEmitter<SeriesAddedEvent> = new EventEmitter<SeriesAddedEvent>();
+  /**
+   * Any events that come from the backend
+   */
+  public messages$ = this.messagesSource.asObservable();
+  /**
+   * Users that are online
+   */
+  public onlineUsers$ = this.onlineUsersSource.asObservable();
+
 
   isAdmin: boolean = false;
 
   constructor(private toastr: ToastrService, private router: Router) {
-    
+
+  }
+
+  /**
+   * Tests that an event is of the type passed
+   * @param event 
+   * @param eventType 
+   * @returns 
+   */
+  public isEventType(event: Message<any>, eventType: EVENTS) {
+    if (event.event == EVENTS.NotificationProgress) {
+      const notification = event.payload as NotificationProgressEvent;
+      return notification.eventType.toLowerCase() == eventType.toLowerCase();
+    } 
+    return event.event === eventType;
   }
 
   createHubConnection(user: User, isAdmin: boolean) {
@@ -83,7 +126,6 @@ export class MessageHubService {
         event: EVENTS.ScanSeries,
         payload: resp.body
       });
-      this.scanSeries.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
@@ -91,34 +133,27 @@ export class MessageHubService {
         event: EVENTS.ScanLibraryProgress,
         payload: resp.body
       });
-      this.scanLibrary.emit(resp.body);
     });
 
-    this.hubConnection.on(EVENTS.BackupDatabaseProgress, resp => {
+    this.hubConnection.on(EVENTS.LibraryModified, resp => {
       this.messagesSource.next({
-        event: EVENTS.BackupDatabaseProgress,
-        payload: resp.body
+        event: EVENTS.LibraryModified,
+        payload: resp.body as LibraryModifiedEvent
       });
     });
 
-    this.hubConnection.on(EVENTS.CleanupProgress, resp => {
+
+    this.hubConnection.on(EVENTS.NotificationProgress, (resp: NotificationProgressEvent) => {
       this.messagesSource.next({
-        event: EVENTS.CleanupProgress,
-        payload: resp.body
+        event: EVENTS.NotificationProgress,
+        payload: resp
       });
     });
 
-    this.hubConnection.on(EVENTS.DownloadProgress, resp => {
+    this.hubConnection.on(EVENTS.SiteThemeProgress, resp => {
       this.messagesSource.next({
-        event: EVENTS.DownloadProgress,
-        payload: resp.body
-      });
-    });
-
-    this.hubConnection.on(EVENTS.RefreshMetadataProgress, resp => {
-      this.messagesSource.next({
-        event: EVENTS.RefreshMetadataProgress,
-        payload: resp.body
+        event: EVENTS.SiteThemeProgress,
+        payload: resp.body as SiteThemeProgressEvent
       });
     });
 
@@ -129,14 +164,11 @@ export class MessageHubService {
       });
     });
 
-    this.hubConnection.on(EVENTS.ScanLibraryError, resp => {
+    this.hubConnection.on(EVENTS.Error, resp => {
       this.messagesSource.next({
-        event: EVENTS.ScanLibraryError,
+        event: EVENTS.Error,
         payload: resp.body
       });
-      if (this.isAdmin) {
-        this.toastr.error('Library Scan had a critical error. Some series were not saved. Check logs');
-      }
     });
 
     this.hubConnection.on(EVENTS.SeriesAdded, resp => {
@@ -144,7 +176,6 @@ export class MessageHubService {
         event: EVENTS.SeriesAdded,
         payload: resp.body
       });
-      this.seriesAdded.emit(resp.body);
     });
 
     this.hubConnection.on(EVENTS.SeriesRemoved, resp => {
@@ -153,14 +184,6 @@ export class MessageHubService {
         payload: resp.body
       });
     });
-
-    // this.hubConnection.on(EVENTS.RefreshMetadata, resp => {
-    //   this.messagesSource.next({
-    //     event: EVENTS.RefreshMetadata,
-    //     payload: resp.body
-    //   });
-    //   this.refreshMetadata.emit(resp.body); // TODO: Remove this
-    // });
 
     this.hubConnection.on(EVENTS.CoverUpdate, resp => {
       this.messagesSource.next({
@@ -186,5 +209,5 @@ export class MessageHubService {
   sendMessage(methodName: string, body?: any) {
     return this.hubConnection.invoke(methodName, body);
   }
-  
+
 }

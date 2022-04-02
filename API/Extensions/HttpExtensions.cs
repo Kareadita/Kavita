@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -41,12 +42,17 @@ namespace API.Extensions
         /// </summary>
         /// <param name="response"></param>
         /// <param name="filename"></param>
-        public static void AddCacheHeader(this HttpResponse response, string filename)
+        /// <param name="maxAge">Maximum amount of seconds to set for Cache-Control</param>
+        public static void AddCacheHeader(this HttpResponse response, string filename, int maxAge = 10)
         {
-            if (filename == null || filename.Length <= 0) return;
+            if (filename is not {Length: > 0}) return;
             var hashContent = filename + File.GetLastWriteTimeUtc(filename);
             using var sha1 = SHA256.Create();
             response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(Encoding.UTF8.GetBytes(hashContent)).Select(x => x.ToString("X2"))));
+            if (maxAge != 10)
+            {
+                response.Headers.CacheControl =  $"max-age={maxAge}";
+            }
         }
 
     }

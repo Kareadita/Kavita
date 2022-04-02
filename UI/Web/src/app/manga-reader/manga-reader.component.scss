@@ -1,11 +1,12 @@
-@use '../../theme/colors';
-
 $center-width: 50%;
 $side-width: 25%;
 
 $dash-width: 3px;
 $pointer-offset: 5px;
 
+img {
+  user-select: none;
+}
 
 @media(min-width: 600px) {
     .overlay .left .i {
@@ -16,25 +17,48 @@ $pointer-offset: 5px;
     }
 } 
 
-.btn-icon {
-    color: white;
+.reading-area {
+  display: flex;
+  justify-content: center;
+  position: relative;
 }
 
-canvas {
-    position: absolute;
+.image-container {
+  text-align: center;
+  display: block;
+  height: 100vh;
+
+  #image-1 {
+    &.double {
+      margin: 0 0 0 auto;
+    }
+  }
+
+  &.reverse {
+    flex-direction: row-reverse;
+    overflow: unset;
+    justify-content: flex-end;
+  }
+  
+  #image-2 {
+    &.double {
+      margin: 0 auto 0 0;
+    }
+  }
 }
+
+// canvas {
+//     //position: absolute; // JOE: Not sure why we have this, but it breaks the renderer
+// }
 
 .reader {
-    background-color: black;
+    background-color: var(--manga-reader-bg-color);
     overflow: auto;
 
     img {
         align-items: center;
     }
 }
-
-
-
 
 
 .loading {
@@ -58,35 +82,60 @@ canvas {
 
 
 .overlay {
-  background-color: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px); // BUG: This doesn't work on Firefox
-  color: white;
+  background-color: var(--manga-reader-overlay-bg-color);
+  backdrop-filter: var(--manga-reader-overlay-filter); // BUG: This doesn't work on Firefox
+  color: var(--manga-reader-overlay-text-color);
 }
 
 // Fitting Options
+
 .full-height {
-    position: absolute;
-    margin: auto;
-    top: 0px;
-    left: 0;
-    right: 0;
-    bottom: 0px;
-    height: 100%;
+  width: auto;
+  margin: 0 auto;
+  height: 100%;
+  vertical-align: top;
 }
 
 .original {
-    position: absolute;
-    margin-left: auto;
-    margin-right: auto;
-    top: 0px;
-    bottom: 0px;
-    left: 0;
-    right: 0;    
+  align-self: center;  
 }
 
 .full-width {
     width: 100%;
+    align-self: center;  
+
+    &.double {
+      width: 50%;
+
+      &.cover {
+        width: 100%;
+      }
+    }
 }
+
+.center-double {
+  display: flex;
+  overflow: unset;
+}
+
+.fit-to-width-double-offset {
+  width: 100%;
+}
+
+.original-double-offset {
+  width: 100%;
+}
+
+.fit-to-height-double-offset {
+  position: absolute;
+  height: 100vh;
+  object-fit: scale-down;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  max-width: 100%;
+}
+
 
 
 .right {
@@ -94,7 +143,7 @@ canvas {
     right: 0px;
     top: 0px;
     width: $side-width;
-    height: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;
@@ -116,7 +165,7 @@ canvas {
     left: 0px;
     top: 0px;
     width: $side-width;
-    height: 100%;
+    height: 100vh;
     background: rgba(0, 0, 0, 0);
     z-index: 2;
     cursor: pointer;
@@ -175,7 +224,7 @@ canvas {
       height: 2px;
     }
     .custom-slider .ngx-slider .ngx-slider-selection {
-      background: colors.$primary-color;
+      background: var(--primary-color);
     }
   
     .custom-slider .ngx-slider .ngx-slider-pointer {
@@ -183,7 +232,7 @@ canvas {
       height: 16px;
       top: auto; /* to remove the default positioning */
       bottom: 0;
-      background-color: colors.$primary-color; // #333;
+      background-color: var(--primary-color); // #333;
       border-top-left-radius: 3px;
       border-top-right-radius: 3px;
     }
@@ -214,7 +263,7 @@ canvas {
     }
   
     .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
-      background: colors.$primary-color;
+      background: var(--primary-color);
     }
   }
 
@@ -235,12 +284,12 @@ canvas {
   }
 
 .highlight {
-  background-color: rgba(65, 225, 100, 0.5) !important;
+  background-color: var(--manga-reader-next-highlight-bg-color) !important;
   animation: fadein .5s both;
   backdrop-filter: blur(10px);
 }
 .highlight-2 {
-  background-color: rgba(65, 105, 225, 0.5) !important;
+  background-color: var(--manga-reader-prev-highlight-bg-color) !important;
   animation: fadein .5s both;
   backdrop-filter: blur(10px);
 }
@@ -255,6 +304,6 @@ canvas {
         border: 0px;
     }
     50% {
-        border: 5px solid colors.$primary-color;
+        border: 5px solid var(--primary-color);
     }
 }

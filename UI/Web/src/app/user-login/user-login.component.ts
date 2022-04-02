@@ -41,8 +41,10 @@ export class UserLoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.navService.showNavBar();
+    this.navService.hideSideNav();
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
+        this.navService.showSideNav();
         this.router.navigateByUrl('/library');
       }
     });
@@ -83,10 +85,11 @@ export class UserLoginComponent implements OnInit {
     this.accountService.login(this.model).subscribe(() => {
       this.loginForm.reset();
       this.navService.showNavBar();
+      this.navService.showSideNav();
 
       // Check if user came here from another url, else send to library route
       const pageResume = localStorage.getItem('kavita--auth-intersection-url');
-      if (pageResume && pageResume !== '/no-connection' && pageResume !== '/login') {
+      if (pageResume && pageResume !== '/login') {
         localStorage.setItem('kavita--auth-intersection-url', '');
         this.router.navigateByUrl(pageResume);
       } else {

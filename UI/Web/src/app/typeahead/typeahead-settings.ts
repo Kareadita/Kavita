@@ -17,6 +17,10 @@ export class TypeaheadSettings<T> {
      */
     id: string = '';
     /**
+     * Show a locked icon next to input and provide functionality around locking/unlocking a field
+     */
+    showLocked: boolean = false;
+    /**
      * Data to preload the typeahead with on first load
      */
     /**
@@ -24,13 +28,15 @@ export class TypeaheadSettings<T> {
      */
     savedData!: T[] | T;
     /**
-     * Function to compare the elements. Should return all elements that fit the matching criteria. This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead (TODO)
+     * Function to compare the elements. Should return all elements that fit the matching criteria. 
+     * This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead (TODO)
      */
     compareFn!:  ((optionList: T[], filter: string)  => T[]);
     /**
-     * Function which is used for comparing objects when keeping track of state. Useful over shallow equal when you have image urls that have random numbers on them.
+     * Function which is used for comparing objects when keeping track of state. 
+     * Useful over shallow equal when you have image urls that have random numbers on them.
      */ 
-    singleCompareFn?: SelectionCompareFn<T>;
+    selectionCompareFn?: SelectionCompareFn<T>;
     /**
      * Function to fetch the data from the server. If data is mainatined in memory, wrap in an observable.
      */

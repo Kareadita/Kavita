@@ -3,7 +3,6 @@ import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
-import { RefreshMetadataEvent } from '../_models/events/refresh-metadata-event';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { Library } from '../_models/library';
@@ -73,11 +72,13 @@ export class LibraryComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
-      this.isAdmin = this.accountService.hasAdminRole(this.user);
-      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
-        this.libraries = libraries;
-        this.isLoading = false;
-      });
+      if (this.user) {
+        this.isAdmin = this.accountService.hasAdminRole(this.user);
+        this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
+          this.libraries = libraries;
+          this.isLoading = false;
+        });
+      }
     });
 
     this.reloadSeries();
@@ -137,10 +138,13 @@ export class LibraryComponent implements OnInit, OnDestroy {
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'collections') {
       this.router.navigate(['collections']);
-    } else if (sectionTitle.toLowerCase() === 'recently added') {
+    } else if (sectionTitle.toLowerCase() === 'recently updated series') {
       this.router.navigate(['recently-added']);
     } else if (sectionTitle.toLowerCase() === 'on deck') {
-      this.router.navigate(['on-deck']);
+      const params: any = {};
+      params['readStatus'] = 'true,false,false';
+      params['page'] = 1;
+      this.router.navigate(['all-series'], {queryParams: params});
     } else if (sectionTitle.toLowerCase() === 'libraries') {
       this.router.navigate(['all-series']);
     } 

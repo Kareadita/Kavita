@@ -14,6 +14,7 @@ namespace API.Data.Metadata
         public string Summary { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Series { get; set; } = string.Empty;
+        public string SeriesSort { get; set; } = string.Empty;
         public string Number { get; set; } = string.Empty;
         /// <summary>
         /// The total number of items in the series.
@@ -25,7 +26,7 @@ namespace API.Data.Metadata
         public int PageCount { get; set; }
         // ReSharper disable once InconsistentNaming
         /// <summary>
-        /// ISO 639-1 Code to represent the language of the content
+        /// IETF BCP 47 Code to represent the language of the content
         /// </summary>
         public string LanguageISO { get; set; } = string.Empty;
         /// <summary>

@@ -49,6 +49,15 @@ namespace API.Controllers
             return Ok(items);
         }
 
+        [HttpGet("lists-for-series")]
+        public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForSeries(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForSeriesAndUserAsync(userId, seriesId, true);
+
+            return Ok(items);
+        }
+
         /// <summary>
         /// Fetches all reading list items for a given list including rich metadata around series, volume, chapters, and progress
         /// </summary>

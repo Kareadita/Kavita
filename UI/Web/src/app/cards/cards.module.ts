@@ -5,9 +5,7 @@ import { LibraryCardComponent } from './library-card/library-card.component';
 import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-chooser.component';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
-import { ChangeCoverImageModalComponent } from './_modals/change-cover-image/change-cover-image-modal.component';
 import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-modal.component';
-import { LazyLoadImageModule } from 'ng-lazyload-image';
 import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -24,6 +22,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
 import { FileInfoComponent } from './file-info/file-info.component';
 import { BookmarkComponent } from './bookmark/bookmark.component';
+import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 
 
 
@@ -35,7 +34,6 @@ import { BookmarkComponent } from './bookmark/bookmark.component';
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    ChangeCoverImageModalComponent,
     BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
@@ -52,16 +50,20 @@ import { BookmarkComponent } from './bookmark/bookmark.component';
     ReactiveFormsModule,
     FormsModule, // EditCollectionsModal
     
+    PipeModule,
     SharedModule,
-    TypeaheadModule,
+    TypeaheadModule, // edit series modal
+
+    MetadataFilterModule,
     
     NgbNavModule,
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,
 
+
+
     NgbNavModule, //Series Detail
-    LazyLoadImageModule,
     NgbPaginationModule, // CardDetailLayoutComponent
     NgbDropdownModule,
     NgbProgressbarModule,
@@ -77,7 +79,6 @@ import { BookmarkComponent } from './bookmark/bookmark.component';
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    ChangeCoverImageModalComponent,
     BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,

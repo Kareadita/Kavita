@@ -1,0 +1,20 @@
+.list-group-item {
+  color: var(--list-group-item-text-color);
+  background-color: var(--list-group-item-bg-color);
+  border-color: var(--list-group-item-border-color);
+
+  &:hover {
+    color: var(--list-group-hover-text-color);
+    background-color: var(--list-group-hover-bg-color);
+  }
+
+  &.active {
+    color: var(--list-group-hover-text-color);
+    background-color: var(--list-group-hover-bg-color);
+    border-color: var(--list-group-active-border-color);
+  }
+
+  &.no-hover:hover {
+    background-color: var(--list-group-item-bg-color);
+  }
+}

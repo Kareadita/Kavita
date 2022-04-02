@@ -1,8 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Uploads;
+using API.Extensions;
 using API.Services;
+using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -20,14 +23,49 @@ namespace API.Controllers
         private readonly IImageService _imageService;
         private readonly ILogger<UploadController> _logger;
         private readonly ITaskScheduler _taskScheduler;
+        private readonly IDirectoryService _directoryService;
 
         /// <inheritdoc />
-        public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger, ITaskScheduler taskScheduler)
+        public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
+            ITaskScheduler taskScheduler, IDirectoryService directoryService)
         {
             _unitOfWork = unitOfWork;
             _imageService = imageService;
             _logger = logger;
             _taskScheduler = taskScheduler;
+            _directoryService = directoryService;
+        }
+
+        /// <summary>
+        /// This stores a file (image) in temp directory for use in a cover image replacement flow.
+        /// This is automatically cleaned up.
+        /// </summary>
+        /// <param name="dto">Escaped url to download from</param>
+        /// <returns>filename</returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("upload-by-url")]
+        public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
+        {
+            var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
+            var format = _directoryService.FileSystem.Path.GetExtension(dto.Url.Split('?')[0]).Replace(".", "");
+            try
+            {
+                var path = await dto.Url
+                    .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
+
+                if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+                    return BadRequest($"Could not download file");
+
+                return $"coverupload_{dateString}.{format}";
+            }
+            catch (FlurlHttpException ex)
+            {
+                // Unauthorized
+                if (ex.StatusCode == 401)
+                    return BadRequest("The server requires authentication to load the url externally");
+            }
+
+            return BadRequest("Unable to download image, please use another url or upload by file");
         }
 
         /// <summary>

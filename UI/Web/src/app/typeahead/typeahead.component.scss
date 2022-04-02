@@ -1,4 +1,10 @@
-@use "../../theme/colors";
+form {
+    position: relative;
+}
+
+.input-group {
+    flex-wrap: inherit;
+}
 
 input {
     width: 15px;
@@ -8,8 +14,19 @@ input {
     border: none;
 }
 
+.lock-active {
+    > .input-group-text {
+        background-color: var(--primary-color);
+        color: white;
+    }
+}
+
+.close-offset {
+    right: 29px !important;
+    top: 29% !important;
+}
+
 .typeahead-input {
-    border: 1px solid #ccc;
     padding: 0px 6px;
     display: inline-block;
     width: 100%;
@@ -20,8 +37,11 @@ input {
     box-shadow: none;
     border-radius: 4px;
     cursor: text;
-    background-color: #fff;
     min-height: 38px;
+
+    background-color: var(--input-bg-color);
+    border: 1px solid var(--input-border-color);
+    color: var(--body-text-color);
 
     input {
         outline: 0 !important;
@@ -40,23 +60,22 @@ input {
     }
 }
 
-::ng-deep .bg-dark .typeahead-input {
-    color: #efefef;
-    background-color: colors.$dark-bg-color;
+.open .input-group-text {
+    border-bottom-left-radius: 0px;
 }
 
-// Causes bleedover
-::ng-deep .bg-dark .dropdown .list-group-item.active {
-    background-color: colors.$dark-hover-color;
+.open .typeahead-input {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
 }
 
 .dropdown {
     width: 100%;
-    background: white;
-    z-index:1000;
-    margin: 2px 0 0;
+    min-width: 10rem;
+    background: var(--input-bg-color);
+    z-index: 1000;
     border-radius: 4px;
-    margin-top: -7px;
+    margin-top: -1px;
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     position: absolute;
@@ -64,8 +83,14 @@ input {
     overflow-y: auto;
     overflow-x: hidden;
 
+    .list-group {
+        border-top-left-radius: 0px;
+        border-top-right-radius: 0px;
+    }
+
     .list-group-item {
         padding: 5px 10px;
+        width: 100%;
     }
 
 
@@ -74,9 +99,6 @@ input {
     }
 }
 
-.list-group-item {
-    cursor: pointer;
-}
 
 .spinner-border {
     position: absolute;
@@ -84,4 +106,16 @@ input {
     margin: auto;
     cursor: pointer;
     top: 30%;
+}
+
+.results {
+    .list-group-item {
+        cursor: pointer;
+        border-left-color: var(--list-group-hover-text-color);
+        border-right-color: var(--list-group-hover-text-color);
+    }
+
+    .list-group-item:last-child {
+        border-bottom-color: var(--list-group-hover-text-color);
+    }
 }

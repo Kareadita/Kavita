@@ -11,6 +11,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,16 +27,18 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEventHub _eventHub;
 
         public LibraryController(IDirectoryService directoryService,
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, IEventHub eventHub)
         {
             _directoryService = directoryService;
             _logger = logger;
             _mapper = mapper;
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -73,6 +76,8 @@ namespace API.Controllers
 
             _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
             _taskScheduler.ScanLibrary(library.Id);
+            await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
+                MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
             return Ok();
         }
 
@@ -191,6 +196,15 @@ namespace API.Controllers
                     await _unitOfWork.CommitAsync();
                     _taskScheduler.CleanupChapters(chapterIds);
                 }
+
+                foreach (var seriesId in seriesIds)
+                {
+                    await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                        MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, libraryId), false);
+                }
+
+                await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
+                    MessageFactory.LibraryModifiedEvent(libraryId, "delete"), false);
                 return Ok(true);
             }
             catch (Exception ex)

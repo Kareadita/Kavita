@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.Entities.Enums;
 using API.Extensions;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +16,12 @@ namespace API.Controllers
     public class UsersController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUnitOfWork unitOfWork)
+        public UsersController(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -71,14 +75,21 @@ namespace API.Controllers
             existingPreferences.ScalingOption = preferencesDto.ScalingOption;
             existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
             existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
+            existingPreferences.ShowScreenHints = preferencesDto.ShowScreenHints;
             existingPreferences.ReaderMode = preferencesDto.ReaderMode;
+            existingPreferences.LayoutMode = preferencesDto.LayoutMode;
+            existingPreferences.BackgroundColor = string.IsNullOrEmpty(preferencesDto.BackgroundColor) ? "#000000" : preferencesDto.BackgroundColor;
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
             existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
-            existingPreferences.SiteDarkMode = preferencesDto.SiteDarkMode;
+            existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
+            existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
+
+            // TODO: Remove this code - this overrides layout mode to be single until the mode is released
+            existingPreferences.LayoutMode = LayoutMode.Single;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 
@@ -88,6 +99,14 @@ namespace API.Controllers
             }
 
             return BadRequest("There was an issue saving preferences.");
+        }
+
+        [HttpGet("get-preferences")]
+        public async Task<ActionResult<UserPreferencesDto>> GetPreferences()
+        {
+            return _mapper.Map<UserPreferencesDto>(
+                await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername()));
+
         }
     }
 }

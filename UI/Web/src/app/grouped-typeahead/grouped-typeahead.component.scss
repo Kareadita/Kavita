@@ -1,18 +1,17 @@
-@use "../../theme/colors";
 form {
     max-height: 38px;
 }
 
-input {
-    width: 15px;
-    opacity: 1;
-    position: relative;
-    left: 4px;
-    border: none;
-}
 
 .search-result img {
     width: 100% !important;
+}
+
+.btn-close {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    position: absolute;
+    right: 5px;
 }
 
 
@@ -27,32 +26,22 @@ input {
     box-sizing: border-box;
     box-shadow: none;
     cursor: text;
-    background-color: #fff;
+    background-color: var(--input-bg-color);
+    color: var(--body-text-color);
     min-height: 38px;
     transition-property: all;
     transition-duration: 0.3s;
     display: block;
 
-
-    .close {
-        cursor: pointer;
-        position: absolute;
-        top: 7px;
-        right: 10px;
-    }
-
-    @media only screen and (max-width:650px) {
-        .close {
-            top: 50%;
-            transform: translate(0, -60%);
-        }
+    .search {
+        display: flex;
+        position: relative;
     }
 
 
     input {
         outline: 0 !important;
         border-radius: .28571429rem;
-        display: inline-block !important;
         padding: 0px !important;
         min-height: 0px !important;
         max-width: 100% !important;
@@ -64,28 +53,31 @@ input {
         transition-property: all;
         transition-duration: 0.3s;
         display: block;
+        opacity: 1;
+        position: relative;
+        left: 4px;
+        border: none;
+
+        &:focus-visible {
+            width: calc(100vw - 175px);
+        }
+
+        &:empty {
+            padding-top: 6px !important;
+        }
     }
 
-    input:focus-visible {
-        width: calc(100vw - 400px);
+    &.focused {
+        width: 100%;
+        border-color: var(--input-focused-border-color);
     }
 
-    input:empty {
-        padding-top: 6px !important;
-    }
 }
 
-.typeahead-input.focused {
-    width: 100%;
-    border-color: #ccc;
-}
+
 
 /* small devices (phones, 650px and down) */
 @media only screen and (max-width:650px) {
-    .typeahead-input {
-        width: 120px;
-    }
-
     input {
         width: 100%
     }
@@ -95,28 +87,27 @@ input {
     }
 }
 
-::ng-deep .bg-dark .typeahead-input {
-    color: #efefef;
-    background-color: colors.$dark-bg-color;
-}
 
-// Causes bleedover
-::ng-deep .bg-dark .dropdown .list-group-item.hover {
-    background-color: colors.$dark-hover-color;
-}
+.section-header {
+    color: var(--body-text-color);
 
+    &:hover {
+        background-color: var(--list-group-item-bg-color) !important;
+        cursor: default;
+    }
+}
 
 .dropdown {
     width: 100vw;
     height: calc(100vh - 57px); //header offset
-    background: rgba(0,0,0,0.5);
+    background: var(--dropdown-overlay-color);
     position: fixed;
     justify-content: center;
     left: 0;
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 10px;
+    margin-top: 9px;
 }
 
 .list-group {
@@ -155,39 +146,6 @@ ul ul {
     border-radius: 0px !important;
 }
 
-.list-group-item {
-    cursor: pointer;
-}
-
-::ng-deep .bg-dark {
-    & .section-header {
-    
-        background: colors.$dark-item-accent-bg;
-        cursor: default;
-    }
-    
-    & .section-header:hover {
-        background-color: colors.$dark-item-accent-bg !important;
-    }
-}
-
-::ng-deep .bg-light {
-    & .section-header {
-    
-        background: colors.$white-item-accent-bg;
-        cursor: default;
-    }
-
-    & .section-header:hover, .list-group-item.section-header:hover {
-        background: colors.$white-item-accent-bg !important;
-    }
-    
-    & .list-group-item:hover {
-        background-color: colors.$primary-color !important;
-    }
-
-
-}
 
 .spinner-border {
     position: absolute;

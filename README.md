@@ -82,6 +82,8 @@ services:
 ## Feature Requests
 Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
 
+## Notice
+Kavita is being actively developed and should be considered beta software until the 1.0 release. Kavita may be subject to changes in how the platform functions as it is being built out toward the vision. You may lose data and have to restart. The Kavita team strives to avoid any data loss.
 
 ## Contributors
 

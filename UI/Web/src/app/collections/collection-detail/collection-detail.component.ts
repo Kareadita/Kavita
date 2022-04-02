@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -6,8 +6,8 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { FilterSettings } from 'src/app/cards/card-detail-layout/card-detail-layout.component';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
+import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
@@ -40,6 +40,12 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   isAdmin: boolean = false;
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
+  summary: string = '';
+
+  actionInProgress: boolean = false;
+
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
+  
 
   private onDestory: Subject<void> = new Subject<void>();
 
@@ -98,6 +104,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         return;
       }
       const tagId = parseInt(routeId, 10);
+      this.seriesPagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
 
       [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
       this.filterSettings.presets.collectionTags = [tagId];
@@ -108,7 +115,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
 
-    this.messageHub.messages$.pipe(takeWhile(event => event.event === EVENTS.SeriesAddedToCollection), takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
       if (event.event == EVENTS.SeriesAddedToCollection) {
         const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
         if (collectionEvent.tagId === this.collectionTag.id) {
@@ -149,6 +156,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         return;
       }
       this.collectionTag = matchingTags[0];
+      this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
       this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
     });
@@ -156,16 +164,22 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
 
   onPageChange(pagination: Pagination) {
     this.router.navigate(['collections', this.collectionTag.id], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.seriesPagination.currentPage} });
+    this.loadPage();
   }
 
   loadPage() {
-    const page = this.route.snapshot.queryParamMap.get('page');
+    const page = this.getPage();
     if (page != null) {
-      if (this.seriesPagination === undefined || this.seriesPagination === null) {
-        this.seriesPagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-      }
       this.seriesPagination.currentPage = parseInt(page, 10);
     }
+
+    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
+    if (this.filter == undefined) {
+      this.filter = this.seriesService.createSeriesFilter();
+      this.filter.collectionTags.push(this.collectionTag.id);
+    }
+
+    // TODO: Add ability to filter series for a collection
     // Reload page after a series is updated or first load
     this.seriesService.getSeriesForTag(this.collectionTag.id, this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage).subscribe(tags => {
       this.series = tags.result;
@@ -175,14 +189,20 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
-    if (this.seriesPagination !== undefined && this.seriesPagination !== null && !data.isFirst) {
+  updateFilter(event: FilterEvent) {
+    this.filter = event.filter;
+    const page = this.getPage();
+    if (page === undefined || page === null || !event.isFirst) {
       this.seriesPagination.currentPage = 1;
       this.onPageChange(this.seriesPagination);
     } else {
       this.loadPage();
     }
+  }
+
+  getPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('page');
   }
 
   handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
@@ -192,6 +212,12 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         break;
       default:
         break;
+    }
+  }
+
+  performAction(action: ActionItem<any>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action.action, this.collectionTag);
     }
   }
 

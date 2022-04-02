@@ -30,6 +30,10 @@ export class ReadingListService {
     );
   }
 
+  getReadingListsForSeries(seriesId: number) {
+    return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists-for-series?seriesId=' + seriesId);
+  }
+
   getListItems(readingListId: number) {
     return this.httpClient.get<ReadingListItem[]>(this.baseUrl + 'readinglist/items?readingListId=' + readingListId);
   }
@@ -43,11 +47,11 @@ export class ReadingListService {
   }
 
   updateByMultiple(readingListId: number, seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds});
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds}, { responseType: 'text' as 'json' });
   }
 
   updateByMultipleSeries(readingListId: number, seriesIds: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds});
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds}, { responseType: 'text' as 'json' });
   }
 
   updateBySeries(readingListId: number, seriesId: number) {

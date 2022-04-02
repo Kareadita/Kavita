@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
@@ -40,14 +42,22 @@ public class EmailService : IEmailService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
+    /// <summary>
+    /// Test if this instance is accessible outside the network
+    /// </summary>
+    /// <remarks>This will do some basic filtering to auto return false if the emailUrl is a LAN ip</remarks>
+    /// <param name="emailUrl"></param>
+    /// <returns></returns>
     public async Task<EmailTestResultDto> TestConnectivity(string emailUrl)
     {
-        // FlurlHttp.ConfigureClient(emailUrl, cli =>
-        //     cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
-
         var result = new EmailTestResultDto();
         try
         {
+            if (IsLocalIpAddress(emailUrl))
+            {
+                result.Successful = false;
+                result.ErrorMessage = "This is a local IP address";
+            }
             result.Successful = await SendEmailWithGet(emailUrl + "/api/email/test");
         }
         catch (KavitaException ex)
@@ -72,6 +82,7 @@ public class EmailService : IEmailService
     public async Task<bool> CheckIfAccessible(string host)
     {
         // This is the only exception for using the default because we need an external service to check if the server is accessible for emails
+        if (IsLocalIpAddress(host)) return false;
         return await SendEmailWithGet(DefaultApiUrl + "/api/email/reachable?host=" + host);
     }
 
@@ -87,7 +98,7 @@ public class EmailService : IEmailService
         return await SendEmailWithPost(emailLink + "/api/email/email-password-reset", data);
     }
 
-    private static async Task<bool> SendEmailWithGet(string url)
+    private static async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)
     {
         try
         {
@@ -97,7 +108,7 @@ public class EmailService : IEmailService
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
+                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
                 .GetStringAsync();
 
             if (!string.IsNullOrEmpty(response) && bool.Parse(response))
@@ -113,7 +124,7 @@ public class EmailService : IEmailService
     }
 
 
-    private static async Task<bool> SendEmailWithPost(string url, object data)
+    private static async Task<bool> SendEmailWithPost(string url, object data, int timeoutSecs = 30)
     {
         try
         {
@@ -123,7 +134,7 @@ public class EmailService : IEmailService
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
+                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
                 .PostJsonAsync(data);
 
             if (response.StatusCode != StatusCodes.Status200OK)
@@ -136,6 +147,36 @@ public class EmailService : IEmailService
             return false;
         }
         return true;
+    }
+
+    private static bool IsLocalIpAddress(string url)
+    {
+        var host = url.Split(':')[0];
+        try
+        {
+            // get host IP addresses
+            var hostIPs = Dns.GetHostAddresses(host);
+            // get local IP addresses
+            var localIPs = Dns.GetHostAddresses(Dns.GetHostName());
+
+            // test if any host IP equals to any local IP or to localhost
+            foreach (var hostIp in hostIPs)
+            {
+                // is localhost
+                if (IPAddress.IsLoopback(hostIp)) return true;
+                // is local address
+                if (localIPs.Contains(hostIp))
+                {
+                    return true;
+                }
+            }
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return false;
     }
 
 }

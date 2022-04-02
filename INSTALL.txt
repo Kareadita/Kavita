@@ -4,4 +4,5 @@
 3. Run Kavita executable.
 4. Open localhost:5000 and setup your account and libraries in the UI.
 
-If updating, copy everything but the config/ directory over. Restart Kavita.
+How to Update
+1. Copy everything but the config/ directory over. Restart Kavita.

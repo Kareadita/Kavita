@@ -6,12 +6,12 @@
         <span class="card-title" tabindex="0">
             Page {{bookmark.page + 1}}
         </span>
-        <span class="card-actions float-right" *ngIf="series != undefined">
+        <span class="card-actions float-end" *ngIf="series != undefined">
             <button attr.aria-labelledby="series--{{series.name}}" class="btn btn-danger btn-sm" (click)="removeBookmark()" 
             [disabled]="isClearing" placement="top" ngbTooltip="Remove Bookmark" attr.aria-label="Remove Bookmark">
                 <ng-container *ngIf="isClearing; else notClearing">
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="sr-only">Loading...</span>
+                    <span class="visually-hidden">Loading...</span>
                 </ng-container>
                 <ng-template #notClearing>
                     <i class="fa fa-trash-alt" aria-hidden="true"></i>

@@ -25,6 +25,8 @@ export class ResetPasswordComponent implements OnInit {
     this.accountService.requestResetPasswordEmail(model).subscribe((resp: string) => {
       this.toastr.info(resp);
       this.router.navigateByUrl('login');
+    }, err => {
+      this.toastr.error(err.error);
     });
   }
 

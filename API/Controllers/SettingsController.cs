@@ -105,16 +105,6 @@ namespace API.Controllers
         {
             _logger.LogInformation("{UserName}  is updating Server Settings", User.GetUsername());
 
-            if (updateSettingsDto.CacheDirectory.Equals(string.Empty))
-            {
-                return BadRequest("Cache Directory cannot be empty");
-            }
-
-            if (!Directory.Exists(updateSettingsDto.CacheDirectory))
-            {
-                return BadRequest("Directory does not exist or is not accessible.");
-            }
-
             // We do not allow CacheDirectory changes, so we will ignore.
             var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
             var updateBookmarks = false;

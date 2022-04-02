@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -26,12 +26,14 @@ namespace API.Tests.Helpers
 
         public static Volume CreateVolume(string volumeNumber, List<Chapter> chapters = null)
         {
+            var chaps = chapters ?? new List<Chapter>();
+            var pages = chaps.Count > 0 ? chaps.Max(c => c.Pages) : 0;
             return new Volume()
             {
                 Name = volumeNumber,
-                Number = int.Parse(volumeNumber),
-                Pages = 0,
-                Chapters = chapters ?? new List<Chapter>()
+                Number = (int) API.Parser.Parser.MinimumNumberFromRange(volumeNumber),
+                Pages = pages,
+                Chapters = chaps
             };
         }
 

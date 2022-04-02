@@ -1,0 +1,188 @@
+<h1>Themes</h1>
+<button class="btn btn-primary" (click)="themeService?.setTheme('dark')">Dark</button>
+<button class="btn btn-primary" (click)="themeService?.setTheme('light')">Light</button>
+<button class="btn btn-primary" (click)="themeService?.setTheme('E-Ink')">E-ink</button>
+<button class="btn btn-primary" (click)="themeService?.setTheme('custom')">Custom</button>
+
+
+
+<h2>Buttons</h2>
+<button class="btn btn-primary">Primary</button>
+<button class="btn btn-secondary">secondary</button>
+<button class="btn btn-secondary alt">secondary alt</button>
+<button class="btn btn-outline-primary">outline primary</button>
+<button class="btn btn-outline-secondary">outline secondary</button>
+<button class="btn btn-link">btn link</button>
+<button class="btn btn-icon">
+    <i class="fa fa-angle-left"></i>&nbsp;Icon
+</button>
+
+<h2>Toastr</h2>
+
+<button class="btn btn-primary" (click)="toastr.success('Test')">Success</button>
+<button class="btn btn-danger" (click)="toastr.error('Test')">Error</button>
+<button class="btn btn-secondary" (click)="toastr.warning('Test')">Warning</button>
+<button class="btn btn-link" (click)="toastr.info('Test')">Info</button>
+
+<h2>Inputs</h2>
+<p>Inputs should always have  class="form-control" on them</p>
+<label>Normal</label>
+<input type="text" class="form-control">
+<label>Readonly</label>
+<input type="text" readonly class="form-control">
+<label>Placeholder</label>
+<input type="text" placeholder="Hello, I'm a placeholder" class="form-control">
+<label>Disabled</label>
+<input type="text" placeholder="Hello, I'm a placeholder" [disabled]="true" class="form-control">
+
+<h2>Checkbox</h2>
+<div class="mb-3">
+    <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
+    <div class="form-check">
+        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input">
+        <label for="stat-collection" class="form-check-label">Normal Checkbox</label>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
+    <div class="form-check">
+        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" [disabled]="true">
+        <label for="stat-collection" class="form-check-label">Disabled Checkbox</label>
+    </div>
+</div>
+
+<h2>Radio</h2>
+<p>Labels should have form-check-label on them and inputs form-check-input</p>
+<div class="mb-3">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-dark-mode" [value]="true" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-dark-mode">True</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-not-dark-mode2" [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode2">False</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-not-dark-mode3"  [disabled]="true" [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode3">Disabled</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" id="site-not-dark-mode4"  readonly [value]="false" aria-labelledby="site-dark-mode-label">
+        <label class="form-check-label" for="site-not-dark-mode4">Readonly</label>
+    </div>
+</div>
+
+
+<h2>Nav tabs</h2>
+<h3>Tabs</h3>
+<ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-tabs nav-pills">
+    <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
+      <a ngbNavLink routerLink=".">{{ tab.title | sentenceCase }}</a>
+      <ng-template ngbNavContent>
+        <ng-container>
+          Tab 1
+        </ng-container>
+        <ng-container>
+            Tab 2
+        </ng-container>
+      </ng-template>
+    </li>
+</ul>
+<div [ngbNavOutlet]="nav" class="mt-3"></div>
+
+<h3>Tabs</h3>
+<nav role="navigation">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills justify-content-center mt-3" role="tab">
+        <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class="nav-item">
+        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | titlecase }}</a>
+        <ng-template ngbNavContent>
+            <ng-container>
+                Tab 1
+              </ng-container>
+              <ng-container>
+                  Tab 2
+              </ng-container>
+        </ng-template>
+        </li>
+    </ul>
+</nav>
+<div [ngbNavOutlet]="nav" class="mt-3"></div>
+
+<h2>Tag Badge</h2>
+<div class="g-2">
+    <app-tag-badge [selectionMode]="TagBadgeCursor.Selectable">Selectable</app-tag-badge>
+    <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable">Clickable</app-tag-badge>
+    <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed">Non Allowed</app-tag-badge>
+</div>
+
+<h2>Person Badge with Expander</h2>
+<div class="g-2">
+    <app-person-badge></app-person-badge>
+    <app-badge-expander [items]="people" [itemsTillExpander]="1">
+        <ng-template #badgeExpanderItem let-item let-position="idx">
+            <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+        </ng-template>  
+    </app-badge-expander>
+</div>
+
+<h2>Switch</h2>
+<form>
+    <div class="mb-3">
+        <label id="auto-close-label" class="form-label"></label>
+        <div class="mb-3">
+            <div class="form-check form-switch">
+                <input type="checkbox" id="auto-close" class="form-check-input" aria-labelledby="auto-close-label">
+                <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+            </div>
+        </div>
+    </div>
+</form>
+
+<h2>Dropdown/List Group</h2>
+<div class="dropdown" >
+    <ul class="list-group" role="listbox" id="dropdown">
+        <li class="list-group-item">Item 1</li>
+        <li class="list-group-item">Item 2</li>
+    </ul>
+</div>
+
+<h2>Accordion</h2>
+<ngb-accordion [closeOthers]="true" activeIds="reading-panel" #acc="ngbAccordion">
+    <ngb-panel id="reading-panel" title="Reading">
+        <ng-template ngbPanelHeader>
+            <h2 class="accordion-header">
+                <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
+                    Reading
+                  </button>
+            </h2>
+          </ng-template>
+        <ng-template ngbPanelContent>
+            <p>This is the body of the accordion...........This is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf asThis is the body of the accordion asdfasdf as</p>
+        </ng-template>
+    </ngb-panel>
+
+    <ngb-panel id="reading-panel2">
+        <ng-template ngbPanelHeader>
+            <h2 class="accordion-header">
+                <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reading-panel')" aria-controls="collapseOne">
+                    Header 2
+                  </button>
+            </h2>
+          </ng-template>
+        <ng-template ngbPanelContent>
+            <p>This is the body of the accordion asdfasdf as
+                dfas 
+                f asdfasdfasdf asdfasdfaaff asdf
+                as fd
+                asfasf asdfasdfafd 
+            </p>
+        </ng-template>
+    </ngb-panel>
+</ngb-accordion>
+
+
+<h2>Cards</h2>
+<app-card-item [entity]="seriesNotRead"></app-card-item>
+<app-card-item [entity]="seriesNotRead" [count]="10"></app-card-item>
+<app-card-item [entity]="seriesWithProgress"></app-card-item>

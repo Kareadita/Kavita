@@ -1,10 +1,20 @@
+<app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)">
+    <h2 title>
+        <app-card-actionables [actions]="actions"></app-card-actionables>
+        {{libraryName}}
+    </h2>
+    <h6 subtitle style="margin-left:40px;">{{pagination?.totalItems}} Series</h6>
+    <div main>
+        <!-- TODO: Implement Tabs here for Recommended and Library view -->
+    </div>
+</app-side-nav-companion-bar>
 <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-<app-card-detail-layout [header]="libraryName" 
+<app-card-detail-layout 
     [isLoading]="loadingSeries"
     [items]="series"
-    [actions]="actions"
     [pagination]="pagination"
     [filterSettings]="filterSettings"
+    [filterOpen]="filterOpen"
     (applyFilter)="updateFilter($event)"
     (pageChange)="onPageChange($event)"
     >

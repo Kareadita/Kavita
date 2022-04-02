@@ -9,9 +9,13 @@ namespace API.Entities
     {
         public int Id { get; set; }
         /// <summary>
-        /// A String representation of the volume number. Allows for floats
+        /// A String representation of the volume number. Allows for floats.
         /// </summary>
+        /// <remarks>For Books with Series_index, this will map to the Series Index.</remarks>
         public string Name { get; set; }
+        /// <summary>
+        /// The minimum number in the Name field in Int form
+        /// </summary>
         public int Number { get; set; }
         public IList<Chapter> Chapters { get; set; }
         public DateTime Created { get; set; }

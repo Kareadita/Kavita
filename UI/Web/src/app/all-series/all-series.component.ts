@@ -1,19 +1,18 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { take, debounceTime, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { FilterSettings } from '../cards/card-detail-layout/card-detail-layout.component';
+import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { ActionItem, Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
-import { MessageHubService } from '../_services/message-hub.service';
+import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
 @Component({
@@ -30,6 +29,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   filter: SeriesFilter | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -82,7 +82,8 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.seriesAdded.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: SeriesAddedEvent) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: Message<any>) => {
+      if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();
     });
   }

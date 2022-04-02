@@ -6,6 +6,7 @@ import { takeWhile } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { ImageService } from 'src/app/_services/image.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
+import { UploadService } from 'src/app/_services/upload.service';
 
 @Component({
   selector: 'app-cover-image-chooser',
@@ -41,7 +42,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   mode: 'file' | 'url' | 'all' = 'all';
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService) { }
+  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService, private uploadService: UploadService) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -72,41 +73,31 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     if (this.selectedIndex === index) { return; }
     this.selectedIndex = index;
     this.imageSelected.emit(this.selectedIndex);
-    const selector = `.chooser img[src="${this.imageUrls[this.selectedIndex]}"]`;
-
-    
-    const elem = document.querySelector(selector) || document.querySelectorAll('.chooser img.card-img-top')[this.selectedIndex];
-    if (elem) {
-      const imageElem = <HTMLImageElement>elem;
-      if (imageElem.src.startsWith('data')) {
-        this.selectedBase64Url.emit(imageElem.src);
-        return;
-      }
-      const image = this.getBase64Image(imageElem);
-      if (image != '') {
-        this.selectedBase64Url.emit(image);
-      }
-    }
+    this.selectedBase64Url.emit(this.imageUrls[this.selectedIndex]);
   }
 
   loadImage() {
     const url = this.form.get('coverImageUrl')?.value.trim();
     if (url && url != '') {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.onload = (e) => this.handleUrlImageAdd(e);
-      img.onerror = (e) => {
-        this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
-        this.form.get('coverImageUrl')?.setValue('');  
-      };
-      img.src = this.form.get('coverImageUrl')?.value;
-      this.form.get('coverImageUrl')?.setValue('');
+
+      this.uploadService.uploadByUrl(url).subscribe(filename => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.src = this.imageService.getCoverUploadImage(filename);
+        img.onload = (e) => this.handleUrlImageAdd(e);
+        img.onerror = (e) => {
+          this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
+          this.form.get('coverImageUrl')?.setValue('');  
+        };
+        this.form.get('coverImageUrl')?.setValue('');
+      });
     }
   }
-  
 
-
-  
+  changeMode(mode: 'url') {
+    this.mode = mode; 
+    this.setupEnterHandler();
+  }
 
   public dropped(files: NgxFileDropEntry[]) {
     this.files = files;
@@ -143,7 +134,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
     setTimeout(() => {
       // Auto select newly uploaded image and tell parent of new base64 url
-      this.selectImage(this.selectedIndex + 1)
+      this.selectImage(this.selectedIndex + 1);
     });
   }
 

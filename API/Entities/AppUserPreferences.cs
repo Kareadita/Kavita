@@ -25,11 +25,22 @@ namespace API.Entities
         /// </example>
         /// </summary>
         public ReaderMode ReaderMode { get; set; }
-
         /// <summary>
         /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
         /// </summary>
         public bool AutoCloseMenu { get; set; } = true;
+        /// <summary>
+        /// Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change
+        /// </summary>
+        public bool ShowScreenHints { get; set; } = true;
+        /// <summary>
+        /// Manga Reader Option: How many pages to display in the reader at once
+        /// </summary>
+        public LayoutMode LayoutMode { get; set; } = LayoutMode.Single;
+        /// <summary>
+        /// Manga Reader Option: Background color of the reader
+        /// </summary>
+        public string BackgroundColor { get; set; } = "#000000";
         /// <summary>
         /// Book Reader Option: Should the background color be dark
         /// </summary>
@@ -58,11 +69,11 @@ namespace API.Entities
         /// Book Reader Option: What direction should the next/prev page buttons go
         /// </summary>
         public ReadingDirection BookReaderReadingDirection { get; set; } = ReadingDirection.LeftToRight;
-
         /// <summary>
-        /// UI Site Global Setting: Whether the UI should render in Dark mode or not.
+        /// UI Site Global Setting: The UI theme the user should use.
         /// </summary>
-        public bool SiteDarkMode { get; set; } = true;
+        /// <remarks>Should default to Dark</remarks>
+        public SiteTheme Theme { get; set; }
 
 
 

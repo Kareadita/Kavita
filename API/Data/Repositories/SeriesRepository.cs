@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data.Scanner;
 using API.DTOs;
@@ -79,8 +80,8 @@ public interface ISeriesRepository
     /// <returns></returns>
     Task AddSeriesModifiers(int userId, List<SeriesDto> series);
     Task<string> GetSeriesCoverImageAsync(int seriesId);
-    Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter);
-    Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter); // NOTE: Probably put this in LibraryRepo
+    Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter, bool cutoffOnDate = true);
+    Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
     Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
     Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
@@ -275,6 +276,7 @@ public class SeriesRepository : ISeriesRepository
     {
 
         var result = new SearchResultGroupDto();
+        var searchQueryNormalized = Parser.Parser.Normalize(searchQuery);
 
         var seriesIds = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
@@ -283,23 +285,30 @@ public class SeriesRepository : ISeriesRepository
 
         result.Libraries = await _context.Library
             .Where(l => libraryIds.Contains(l.Id))
-            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%"))
+            .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .OrderBy(l => l.Name)
             .AsSplitQuery()
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
+        var justYear = Regex.Match(searchQuery, @"\d{4}").Value;
+        var hasYearInQuery = !string.IsNullOrEmpty(justYear);
+        var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
+
         result.Series = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
                         || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
+                        || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%")
+                        || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")
+                        || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
             .Include(s => s.Library)
             .OrderBy(s => s.SortName)
             .AsNoTracking()
             .AsSplitQuery()
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+
 
         result.ReadingLists = await _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)
@@ -310,7 +319,7 @@ public class SeriesRepository : ISeriesRepository
 
         result.Collections =  await _context.CollectionTag
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
+                        || EF.Functions.Like(s.NormalizedTitle, $"%{searchQueryNormalized}%"))
             .Where(s => s.Promoted || isAdmin)
             .OrderBy(s => s.Title)
             .AsNoTracking()
@@ -466,9 +475,16 @@ public class SeriesRepository : ISeriesRepository
         {
             s.PagesRead = userProgress.Where(p => p.SeriesId == s.Id).Sum(p => p.PagesRead);
             var rating = userRatings.SingleOrDefault(r => r.SeriesId == s.Id);
-            if (rating == null) continue;
-            s.UserRating = rating.Rating;
-            s.UserReview = rating.Review;
+            if (rating != null)
+            {
+                s.UserRating = rating.Rating;
+                s.UserReview = rating.Review;
+            }
+
+            if (userProgress.Count > 0)
+            {
+                s.LatestReadDate = userProgress.Max(p => p.LastModified);
+            }
         }
     }
 
@@ -507,7 +523,7 @@ public class SeriesRepository : ISeriesRepository
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
         out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter,
-        out bool hasLanguageFilter, out bool hasPublicationFilter)
+        out bool hasLanguageFilter, out bool hasPublicationFilter, out bool hasSeriesNameFilter)
     {
         var formats = filter.GetSqlFilter();
 
@@ -580,6 +596,8 @@ public class SeriesRepository : ISeriesRepository
                 .ToList();
         }
 
+        hasSeriesNameFilter = !string.IsNullOrEmpty(filter.SeriesNameQuery);
+
         return formats;
     }
 
@@ -592,11 +610,9 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userParams">Pagination information</param>
     /// <param name="filter">Optional (default null) filter on query</param>
     /// <returns></returns>
-    public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
+    public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter, bool cutoffOnDate = true)
     {
-        //var allSeriesWithProgress = await _context.AppUserProgresses.Select(p => p.SeriesId).ToListAsync();
-        //var allChapters = await GetChapterIdsForSeriesAsync(allSeriesWithProgress);
-
+        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
         var query = (await CreateFilteredSearchQueryable(userId, libraryId, filter))
             .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
                 new
@@ -605,12 +621,18 @@ public class SeriesRepository : ISeriesRepository
                     PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
                         .Sum(s1 => s1.PagesRead),
                     progress.AppUserId,
-                    LastReadingProgress = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId)
+                    LastReadingProgress = _context.AppUserProgresses
+                        .Where(p => p.Id == progress.Id && p.AppUserId == userId)
                         .Max(p => p.LastModified),
-                    // This is only taking into account chapters that have progress on them, not all chapters in said series
-                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created)
+                    // BUG: This is only taking into account chapters that have progress on them, not all chapters in said series
+                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
                     //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
                 });
+        if (cutoffOnDate)
+        {
+            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint);
+        }
+
         // I think I need another Join statement. The problem is the chapters are still limited to progress
 
 
@@ -635,7 +657,7 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter, out var hasSeriesNameFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -649,8 +671,11 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
-                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
-            )
+                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
+            .Where(s => !hasSeriesNameFilter ||
+                        EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
+                                             || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
+                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
             .AsNoTracking();
 
         // If no sort options, default to using SortName

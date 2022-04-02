@@ -15,13 +15,14 @@ public interface ITaskScheduler
     Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
-    void ScanLibrary(int libraryId, bool forceUpdate = false);
+    void ScanLibrary(int libraryId);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
     void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();
+    void ScanSiteThemes();
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -35,6 +36,7 @@ public class TaskScheduler : ITaskScheduler
 
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
+    private readonly ISiteThemeService _siteThemeService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     private static readonly Random Rnd = new Random();
@@ -42,7 +44,8 @@ public class TaskScheduler : ITaskScheduler
 
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
-        ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService)
+        ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
+        ISiteThemeService siteThemeService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -53,6 +56,7 @@ public class TaskScheduler : ITaskScheduler
         _cleanupService = cleanupService;
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
+        _siteThemeService = siteThemeService;
     }
 
     public async Task ScheduleTasks()
@@ -124,6 +128,12 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _statsService.Send());
     }
 
+    public void ScanSiteThemes()
+    {
+        _logger.LogInformation("Starting Site Theme scan");
+        BackgroundJob.Enqueue(() => _siteThemeService.Scan());
+    }
+
     #endregion
 
     #region UpdateTasks
@@ -136,7 +146,7 @@ public class TaskScheduler : ITaskScheduler
     }
     #endregion
 
-    public void ScanLibrary(int libraryId, bool forceUpdate = false)
+    public void ScanLibrary(int libraryId)
     {
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));

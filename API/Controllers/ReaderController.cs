@@ -63,6 +63,7 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
+                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
                 return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
             }
             catch (Exception)
@@ -108,14 +109,7 @@ namespace API.Controllers
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-            var volumes = await _unitOfWork.VolumeRepository.GetVolumes(markReadDto.SeriesId);
-            user.Progresses ??= new List<AppUserProgress>();
-            foreach (var volume in volumes)
-            {
-                _readerService.MarkChaptersAsRead(user, markReadDto.SeriesId, volume.Chapters);
-            }
-
-            _unitOfWork.UserRepository.Update(user);
+            await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
 
             if (await _unitOfWork.CommitAsync())
             {
@@ -136,14 +130,7 @@ namespace API.Controllers
         public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-            var volumes = await _unitOfWork.VolumeRepository.GetVolumes(markReadDto.SeriesId);
-            user.Progresses ??= new List<AppUserProgress>();
-            foreach (var volume in volumes)
-            {
-                _readerService.MarkChaptersAsUnread(user, markReadDto.SeriesId, volume.Chapters);
-            }
-
-            _unitOfWork.UserRepository.Update(user);
+            await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
 
             if (await _unitOfWork.CommitAsync())
             {
@@ -392,6 +379,10 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             user.Progresses ??= new List<AppUserProgress>();
+
+            // Tachiyomi sends chapter 0.0f when there's no chapters read.
+            // Due to the encoding for volumes this marks all chapters in volume 0 (loose chapters) as read so we ignore it
+            if (chapterNumber == 0.0f) return true;
 
             if (chapterNumber < 1.0f)
             {

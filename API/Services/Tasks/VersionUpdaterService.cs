@@ -53,7 +53,7 @@ public interface IVersionUpdaterService
 public class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
-    private readonly IHubContext<MessageHub> _messageHub;
+    private readonly IEventHub _eventHub;
     private readonly IPresenceTracker _tracker;
     private readonly Markdown _markdown = new MarkdownDeep.Markdown();
 #pragma warning disable S1075
@@ -61,10 +61,10 @@ public class VersionUpdaterService : IVersionUpdaterService
     private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
 #pragma warning restore S1075
 
-    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IHubContext<MessageHub> messageHub, IPresenceTracker tracker)
+    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub, IPresenceTracker tracker)
     {
         _logger = logger;
-        _messageHub = messageHub;
+        _eventHub = eventHub;
         _tracker = tracker;
 
         FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
@@ -117,24 +117,20 @@ public class VersionUpdaterService : IVersionUpdaterService
     {
         if (update == null) return;
 
-        var admins = await _tracker.GetOnlineAdmins();
         var updateVersion = new Version(update.CurrentVersion);
 
         if (BuildInfo.Version < updateVersion)
         {
             _logger.LogInformation("Server is out of date. Current: {CurrentVersion}. Available: {AvailableUpdate}", BuildInfo.Version, updateVersion);
-            await SendEvent(update, admins);
+            await _eventHub.SendMessageAsync(MessageFactory.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
+                true);
         }
         else if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development)
         {
             _logger.LogInformation("Server is up to date. Current: {CurrentVersion}", BuildInfo.Version);
-            await SendEvent(update, admins);
+            await _eventHub.SendMessageAsync(MessageFactory.UpdateAvailable, MessageFactory.UpdateVersionEvent(update),
+                true);
         }
-    }
-
-    private async Task SendEvent(UpdateNotificationDto update, IReadOnlyList<string> admins)
-    {
-        await _messageHub.Clients.Users(admins).SendAsync(SignalREvents.UpdateAvailable, MessageFactory.UpdateVersionEvent(update));
     }
 
 

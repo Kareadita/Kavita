@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -19,6 +19,7 @@ namespace API.Services
         string LogDirectory { get; }
         string TempDirectory { get; }
         string ConfigDirectory { get; }
+        string SiteThemeDirectory { get; }
         /// <summary>
         /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
         /// </summary>
@@ -64,6 +65,7 @@ namespace API.Services
         public string TempDirectory { get; }
         public string ConfigDirectory { get; }
         public string BookmarkDirectory { get; }
+        public string SiteThemeDirectory { get; }
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
@@ -81,6 +83,9 @@ namespace API.Services
            TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
            ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
            BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
+           SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
+
+           ExistOrCreate(SiteThemeDirectory);
        }
 
        /// <summary>
@@ -351,6 +356,7 @@ namespace API.Services
        /// <summary>
        /// Copies files to a destination directory. If the destination directory doesn't exist, this will create it.
        /// </summary>
+       /// <remarks>If a file already exists in dest, this will rename as (2). It does not support multiple iterations of this. Overwriting is not supported.</remarks>
        /// <param name="filePaths"></param>
        /// <param name="directoryPath"></param>
        /// <param name="prepend">An optional string to prepend to the target file's name</param>
@@ -367,7 +373,16 @@ namespace API.Services
                    var fileInfo = FileSystem.FileInfo.FromFileName(file);
                    if (fileInfo.Exists)
                    {
-                       fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, prepend + fileInfo.Name));
+                       // TODO: I need to handle if file already exists and allow either an overwrite or prepend (2) to it
+                       try
+                       {
+                           fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, prepend + fileInfo.Name));
+                       }
+                       catch (IOException ex)
+                       {
+                           _logger.LogError(ex, "File copy, dest already exists. Appending (2)");
+                           fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, prepend + FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name) + " (2)" + FileSystem.Path.GetExtension(fileInfo.Name)));
+                       }
                    }
                    else
                    {
@@ -690,7 +705,7 @@ namespace API.Services
         }
 
 
-        private void FlattenDirectory(IDirectoryInfo root, IDirectoryInfo directory, ref int directoryIndex)
+        private static void FlattenDirectory(IFileSystemInfo root, IDirectoryInfo directory, ref int directoryIndex)
         {
             if (!root.FullName.Equals(directory.FullName))
             {
@@ -712,6 +727,9 @@ namespace API.Services
 
             foreach (var subDirectory in directory.EnumerateDirectories().OrderByNatural(d => d.FullName))
             {
+                // We need to check if the directory is not a blacklisted (ie __MACOSX)
+                if (Parser.Parser.HasBlacklistedFolderInPath(subDirectory.FullName)) continue;
+
                 FlattenDirectory(root, subDirectory, ref directoryIndex);
             }
         }

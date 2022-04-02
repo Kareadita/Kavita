@@ -1,19 +1,17 @@
 
 <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Add to Reading List</h4>
-    <button type="button" class="close" aria-label="Close" (click)="close()">
-    <span aria-hidden="true">&times;</span>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+    
     </button>
 </div>
 <form style="width: 100%" [formGroup]="listForm">
 <div class="modal-body">
-    <div class="form-group" *ngIf="lists.length >= 5">
-        <label for="filter">Filter</label>
+    <div class="mb-3" *ngIf="lists.length >= 5">
+        <label for="filter" class="form-label">Filter</label>
         <div class="input-group">
             <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-            <div class="input-group-append">
-                <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
-            </div>
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
         </div>
     </div>
     <ul class="list-group">
@@ -23,19 +21,19 @@
         <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No lists created yet</li>
         <li class="list-group-item" *ngIf="loading">
             <div class="spinner-border text-secondary" role="status">
-                <span class="sr-only">Loading...</span>
+                <span class="visually-hidden">Loading...</span>
             </div>
         </li>
     </ul>
 </div>
 <div class="modal-footer" style="justify-content: normal">
     <div style="width: 100%;">
-        <div class="form-row">
+        <div class="d-flex">
             <div class="col-9 col-lg-10">
-              <label class="sr-only" for="add-rlist">Reading List</label>
+              <label class="form-label visually-hidden" for="add-rlist">Reading List</label>
               <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
             </div>
-            <div class="col-2">
+            <div class="col-2 ps-2">
               <button type="submit" class="btn btn-primary" (click)="create()">Create</button>
             </div>
           </div>

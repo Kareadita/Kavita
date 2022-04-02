@@ -31,17 +31,17 @@ public class BackupService : IBackupService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<BackupService> _logger;
     private readonly IDirectoryService _directoryService;
-    private readonly IHubContext<MessageHub> _messageHub;
+    private readonly IEventHub _eventHub;
 
     private readonly IList<string> _backupFiles;
 
     public BackupService(ILogger<BackupService> logger, IUnitOfWork unitOfWork,
-        IDirectoryService directoryService, IConfiguration config, IHubContext<MessageHub> messageHub)
+        IDirectoryService directoryService, IConfiguration config, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _directoryService = directoryService;
-        _messageHub = messageHub;
+        _eventHub = eventHub;
 
         var maxRollingFiles = config.GetMaxRollingFiles();
         var loggingSection = config.GetLoggingFileName();
@@ -91,17 +91,21 @@ public class BackupService : IBackupService
         if (!_directoryService.ExistOrCreate(backupDirectory))
         {
             _logger.LogCritical("Could not write to {BackupDirectory}; aborting backup", backupDirectory);
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent("Backup Service Error",$"Could not write to {backupDirectory}; aborting backup"));
             return;
         }
 
-        await SendProgress(0F);
+        await SendProgress(0F, "Started backup");
 
         var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
         var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
 
         if (File.Exists(zipPath))
         {
-            _logger.LogInformation("{ZipFile} already exists, aborting", zipPath);
+            _logger.LogCritical("{ZipFile} already exists, aborting", zipPath);
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent("Backup Service Error",$"{zipPath} already exists, aborting"));
             return;
         }
 
@@ -112,15 +116,15 @@ public class BackupService : IBackupService
         _directoryService.CopyFilesToDirectory(
             _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)).ToList(), tempDirectory);
 
-        await SendProgress(0.25F);
+        await SendProgress(0.25F, "Copying core files");
 
         await CopyCoverImagesToBackupDirectory(tempDirectory);
 
-        await SendProgress(0.5F);
+        await SendProgress(0.5F, "Copying cover images");
 
         await CopyBookmarksToBackupDirectory(tempDirectory);
 
-        await SendProgress(0.75F);
+        await SendProgress(0.75F, "Copying bookmarks");
 
         try
         {
@@ -133,7 +137,7 @@ public class BackupService : IBackupService
 
         _directoryService.ClearAndDeleteDirectory(tempDirectory);
         _logger.LogInformation("Database backup completed");
-        await SendProgress(1F);
+        await SendProgress(1F, "Completed backup");
     }
 
     private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
@@ -189,10 +193,10 @@ public class BackupService : IBackupService
         }
     }
 
-    private async Task SendProgress(float progress)
+    private async Task SendProgress(float progress, string subtitle)
     {
-        await _messageHub.Clients.All.SendAsync(SignalREvents.BackupDatabaseProgress,
-            MessageFactory.BackupDatabaseProgressEvent(progress));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.BackupDatabaseProgressEvent(progress, subtitle));
     }
 
 }

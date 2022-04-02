@@ -16,6 +16,16 @@ namespace API.Tests.Parser
         }
 
         [Theory]
+        [InlineData("", "")]
+        [InlineData("DEAD Tube Prologue", "DEAD Tube Prologue")]
+        [InlineData("DEAD Tube Prologue SP01", "DEAD Tube Prologue")]
+        [InlineData("DEAD_Tube_Prologue SP01", "DEAD Tube Prologue")]
+        public void CleanSpecialTitleTest(string input, string expected)
+        {
+            Assert.Equal(expected, CleanSpecialTitle(input));
+        }
+
+        [Theory]
         [InlineData("Beastars - SP01", true)]
         [InlineData("Beastars SP01", true)]
         [InlineData("Beastars Special 01", false)]
@@ -153,6 +163,7 @@ namespace API.Tests.Parser
         [InlineData("Citrus+", "citrus+")]
         [InlineData("Again!!!!", "again")]
         [InlineData("카비타", "카비타")]
+        [InlineData("06", "06")]
         [InlineData("", "")]
         public void NormalizeTest(string input, string expected)
         {
@@ -198,6 +209,9 @@ namespace API.Tests.Parser
         [InlineData("MACOSX/Love Hina/", false)]
         [InlineData("._Love Hina/Love Hina/", true)]
         [InlineData("@Recently-Snapshot/Love Hina/", true)]
+        [InlineData("@recycle/Love Hina/", true)]
+        [InlineData("@recycle/Love Hina/", true)]
+        [InlineData("E:/Test/__MACOSX/Love Hina/", true)]
         public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, HasBlacklistedFolderInPath(inputPath));
