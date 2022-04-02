@@ -423,6 +423,7 @@ namespace API.Controllers
 
                 var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
                 _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+
                 var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
                 var accessible = await _emailService.CheckIfAccessible(host);
                 if (accessible)
