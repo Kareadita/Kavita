@@ -120,6 +120,7 @@ namespace API
                     ForwardedHeaders.All;
             });
 
+
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
