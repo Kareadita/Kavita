@@ -120,6 +120,7 @@ namespace API
                     ForwardedHeaders.All;
             });
 
+
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
@@ -149,7 +150,6 @@ namespace API
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
-                    var context = serviceProvider.GetRequiredService<DataContext>();
 
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
@@ -161,6 +161,7 @@ namespace API
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
+
                     await unitOfWork.CommitAsync();
                 }).GetAwaiter()
                     .GetResult();

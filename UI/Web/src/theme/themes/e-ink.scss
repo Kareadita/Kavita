@@ -37,6 +37,7 @@
   --btn-disabled-bg-color: #020202;
   --btn-disabled-text-color: white;
   --btn-disabled-border-color: #6c757d;
+  --btn-fa-icon-color: black;
 
 
   /* Nav */
@@ -65,7 +66,7 @@
   --side-nav-openclose-transition: 1ms;
   --side-nav-box-shadow: none;
   --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
-  --side-nav-hover-color: white;
+  --side-nav-hover-text-color: white;
   --side-nav-hover-bg-color: black;
   --side-nav-color: black;
   --side-nav-border-radius: 5px;
@@ -78,7 +79,7 @@
   --side-nav-item-active-color: var(--primary-color);
   --side-nav-active-bg-color: rgba(0,0,0,0.5);
   --side-nav-overlay-color: rgba(0,0,0,1);
-  --side-nav-item-active-text-color: black;
+  --side-nav-item-active-text-color: white;
 
   /* Toasts */
   --toast-success-bg-color: rgba(74, 198, 148, 0.9);
@@ -156,5 +157,19 @@
   --pagination-focus-border-color: var(--primary-color);
   --pagination-link-hover-color: var(--primary-color);
 
+  /** Event Widget */
+  --event-widget-bg-color: white;
+  --event-widget-item-bg-color: lightgrey;
+  --event-widget-text-color: black;
+  --event-widget-item-border-color: lightgrey;
+  --event-widget-border-color: lightgrey;
+  
+  /* Popover */
+  --popover-body-bg-color: var(--navbar-bg-color);
+  --popover-body-text-color: var(--navbar-text-color);
+  --popover-outerarrow-color: lightgrey;
+  --popover-arrow-color: lightgrey;
+  --popover-bg-color: lightgrey;
+  --popover-border-color: lightgrey;
 
 }

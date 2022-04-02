@@ -197,6 +197,12 @@ namespace API.Controllers
                     _taskScheduler.CleanupChapters(chapterIds);
                 }
 
+                foreach (var seriesId in seriesIds)
+                {
+                    await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                        MessageFactory.SeriesRemovedEvent(seriesId, string.Empty, libraryId), false);
+                }
+
                 await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
                     MessageFactory.LibraryModifiedEvent(libraryId, "delete"), false);
                 return Ok(true);

@@ -1,14 +1,12 @@
-// NOTE: I'm leaving this not fully customized because I'm planning to rewrite the whole design in v0.5.2/3
-// These are customizations for events nav
 .dark-menu {
     background-color: var(--navbar-bg-color);
-    border-color: rgba(1, 4, 9, 0.5);
+    border-color: var(--event-widget-border-color); // rgba(1, 4, 9, 0.5);
 }
 
 .dark-menu-item {
-    color: var(--body-text-color);
-    background-color: rgb(1, 4, 9);
-    border-color: rgba(53, 53, 53, 0.5);
+    color: var(--event-widget-text-color);
+    background-color: var(--event-widget-item-bg-color); // rgb(1, 4, 9)
+    border-color: var(--event-widget-item-border-color); // rgba(53, 53, 53, 0.5)
 }
 
 // Popovers need to be their own component

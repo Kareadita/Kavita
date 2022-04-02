@@ -162,7 +162,7 @@ public class ScannerService : IScannerService
         }
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-            MessageFactory.ScanSeriesEvent(seriesId, series.Name));
+            MessageFactory.ScanSeriesEvent(libraryId, seriesId, series.Name));
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
@@ -428,7 +428,7 @@ public class ScannerService : IScannerService
             foreach (var series in librarySeries)
             {
                 // This is something more like, the series has finished updating in the backend. It may or may not have been modified.
-                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.Id, series.Name));
+                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(library.Id, series.Id, series.Name));
             }
         }
 
@@ -523,7 +523,7 @@ public class ScannerService : IScannerService
                 series.Format = parsedInfos[0].Format;
             }
             series.OriginalName ??= parsedInfos[0].Series;
-            if (!series.SortNameLocked) series.SortName ??= parsedInfos[0].SeriesSort;
+            if (!series.SortNameLocked) series.SortName = parsedInfos[0].SeriesSort;
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 

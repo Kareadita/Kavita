@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)">
+<app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)">
     <h2 title>
         <app-card-actionables [actions]="actions"></app-card-actionables>
         All Series

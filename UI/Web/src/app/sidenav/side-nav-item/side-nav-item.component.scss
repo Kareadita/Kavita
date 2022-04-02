@@ -59,8 +59,13 @@
     }
 
     &:hover {
-        color: var(--side-nav-hover-color);
+        color: var(--side-nav-hover-text-color);
         background-color: var(--side-nav-hover-bg-color);
+
+        .card-actions i.fa {
+            // TODO: The override to white does not work, please fix for light themes
+            color: var(--side-nav-hover-text-color) !important;
+        }
     }
 
     &.active {
@@ -76,13 +81,20 @@
         }
 
         .side-nav-text, i {
-            color: var(--side-nav-item-active-text-color);
+
+            color: var(--side-nav-item-active-text-color) !important;
         }
 
         &:hover {
-            color: var(--side-nav-hover-color);
+            color: var(--side-nav-hover-text-color);
             background-color: var(--side-nav-hover-bg-color);
+
+            .card-actions i.fa {
+                // TODO: The override to white does not work, please fix for light themes
+                color: var(--side-nav-hover-text-color) !important;
+            }
         }
+        
     }
 }
 

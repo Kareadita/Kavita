@@ -23,11 +23,20 @@
   
     /* Buttons */
     --btn-primary-text-color: black;
+    --btn-primary-bg-color: white;
+    --btn-primary-border-color: black;
+    --btn-primary-hover-text-color: white;
+    --btn-primary-hover-bg-color: black;
+    --btn-primary-hover-border-color: black;
     --btn-alt-bg-color: #424c72;
     --btn-alt-border-color: #444f75;
     --btn-alt-hover-bg-color: #3b4466;
     --btn-alt-focus-bg-color: #343c59;
     --btn-alt-focus-boxshadow-color: rgb(68 79 117 / 50%);
+    --btn-fa-icon-color: black;
+    --btn-disabled-bg-color: #020202;
+    --btn-disabled-text-color: white;
+    --btn-disabled-border-color: #6c757d;
 
     /* Nav */
     --nav-link-active-text-color: white;
@@ -46,7 +55,7 @@
     --side-nav-openclose-transition: 0.15s ease-in-out;
     --side-nav-box-shadow: none;
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
-    --side-nav-hover-color: white;
+    --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
     --side-nav-color: black;
     --side-nav-border-radius: 5px;
@@ -58,12 +67,12 @@
     --side-nav-closed-bg-color: transparent;
     --side-nav-item-active-color: var(--primary-color);
     --side-nav-active-bg-color: rgba(0,0,0,0.5);
-    --side-nav-item-active-text-color: black;
+    --side-nav-item-active-text-color: white;
     --side-nav-overlay-color: rgba(0,0,0,0.5);
   
     
     /* Checkboxes */
-    --checkbox-checked-bg-color: black;
+    --checkbox-checked-bg-color: var(--primary-color);
     --checkbox-bg-color: white;
     --checkbox-border-color: var(--primary-color);
     --checkbox-focus-border-color: var(--input-border-color);
@@ -148,4 +157,19 @@
     --pagination-link-bg-color: white;
     --pagination-focus-border-color: var(--primary-color);
     --pagination-link-hover-color: var(--primary-color);
+
+    /** Event Widget */
+    --event-widget-bg-color: white;
+    --event-widget-item-bg-color: lightgrey;
+    --event-widget-text-color: black;
+    --event-widget-item-border-color: lightgrey;
+    --event-widget-border-color: lightgrey;
+
+    /* Popover */
+    --popover-body-bg-color: var(--navbar-bg-color);
+    --popover-body-text-color: var(--navbar-text-color);
+    --popover-outerarrow-color: lightgrey;
+    --popover-arrow-color: lightgrey;
+    --popover-bg-color: lightgrey;
+    --popover-border-color: lightgrey;
 }

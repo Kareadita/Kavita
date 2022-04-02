@@ -155,7 +155,6 @@ export class SeriesService {
   }
 
   scan(libraryId: number, seriesId: number) {
-    // TODO: Pipe and put a toaster up: this.toastr.info('Scan queued for ' + series.name);
     return this.httpClient.post(this.baseUrl + 'series/scan', {libraryId: libraryId, seriesId: seriesId});
   }
 

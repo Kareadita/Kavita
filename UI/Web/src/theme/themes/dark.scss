@@ -94,7 +94,7 @@
     --side-nav-openclose-transition: 0.15s ease-in-out;
     --side-nav-box-shadow: rgba(0,0,0,0.5);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
-    --side-nav-hover-color: white;
+    --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
     --side-nav-color: white;
     --side-nav-border-radius: 5px;
@@ -210,5 +210,12 @@
     --carousel-hover-header-text-decoration: none;
 
     /** Drawer */
-  --drawer-background-color: black;
+    --drawer-background-color: black;
+
+    /** Event Widget */
+    --event-widget-bg-color: rgb(1, 4, 9);
+    --event-widget-item-bg-color: rgb(1, 4, 9);
+    --event-widget-text-color: var(--body-text-color);
+    --event-widget-item-border-color: rgba(53, 53, 53, 0.5);
+    --event-widget-border-color: rgba(1, 4, 9, 0.5);
   }

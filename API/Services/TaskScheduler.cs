@@ -15,7 +15,7 @@ public interface ITaskScheduler
     Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
-    void ScanLibrary(int libraryId, bool forceUpdate = false);
+    void ScanLibrary(int libraryId);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
@@ -146,7 +146,7 @@ public class TaskScheduler : ITaskScheduler
     }
     #endregion
 
-    public void ScanLibrary(int libraryId, bool forceUpdate = false)
+    public void ScanLibrary(int libraryId)
     {
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));

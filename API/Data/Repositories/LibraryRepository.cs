@@ -89,6 +89,7 @@ public class LibraryRepository : ILibraryRepository
     {
         var library = await GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.Series);
         _context.Library.Remove(library);
+
         return await _context.SaveChangesAsync() > 0;
     }
 

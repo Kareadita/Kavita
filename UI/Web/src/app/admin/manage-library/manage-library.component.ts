@@ -2,10 +2,10 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { take, takeUntil, takeWhile } from 'rxjs/operators';
+import { distinctUntilChanged, filter, take, takeLast, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
-import { ProgressEvent } from 'src/app/_models/events/progress-event';
+import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
 import { Library, LibraryType } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
@@ -25,7 +25,6 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
    * If a deletion is in progress for a library
    */
   deletionInProgress: boolean = false;
-  scanInProgress: {[key: number]: {progress: boolean, timestamp?: string}} = {};
   libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
 
   private readonly onDestroy = new Subject<void>();
@@ -38,35 +37,46 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
     this.getLibraries();
 
     // when a progress event comes in, show it on the UI next to library
-    this.hubService.messages$.pipe(takeUntil(this.onDestroy), takeWhile(event => event.event === EVENTS.NotificationProgress))
-      .subscribe((event: Message<NotificationProgressEvent>) => {
-      if (event.event !== EVENTS.NotificationProgress && (event.payload as NotificationProgressEvent).name === EVENTS.ScanSeries) return;
+    this.hubService.messages$.pipe(takeUntil(this.onDestroy), 
+      filter(event => event.event === EVENTS.ScanSeries || event.event === EVENTS.NotificationProgress), 
+      distinctUntilChanged((prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) => 
+        this.hasMessageChanged(prev, curr))) 
+      .subscribe((event: Message<ScanSeriesEvent | NotificationProgressEvent>) => {
+        console.log('scan event: ', event);
 
-      console.log('scan event: ', event.payload);
-      // TODO: Refactor this to use EventyType on NotificationProgress interface rather than float comparison
-      
-      const scanEvent = event.payload.body as ProgressEvent;
-      this.scanInProgress[scanEvent.libraryId] = {progress: scanEvent.progress !== 1};
-      if (scanEvent.progress === 0) {
-        this.scanInProgress[scanEvent.libraryId].timestamp = scanEvent.eventTime;
-      }
-      
-      if (this.scanInProgress[scanEvent.libraryId].progress === false && (scanEvent.progress === 1 || event.payload.eventType === 'ended')) {
+        let libId = 0;
+        if (event.event === EVENTS.ScanSeries) {
+          libId = (event.payload as ScanSeriesEvent).libraryId;
+        } else {
+          if ((event.payload as NotificationProgressEvent).body.hasOwnProperty('libraryId')) {
+            libId = (event.payload as NotificationProgressEvent).body.libraryId;
+          }
+        }
+
         this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
-          const newLibrary = libraries.find(lib => lib.id === scanEvent.libraryId);
-          const existingLibrary = this.libraries.find(lib => lib.id === scanEvent.libraryId);
+          const newLibrary = libraries.find(lib => lib.id === libId);
+          const existingLibrary = this.libraries.find(lib => lib.id === libId);
           if (existingLibrary !== undefined) {
             existingLibrary.lastScanned = newLibrary?.lastScanned || existingLibrary.lastScanned;
           }
         });
-      }
-
     });
   }
 
   ngOnDestroy() {
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  hasMessageChanged(prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) {
+    if (curr.event !== prev.event) return true;
+    if (curr.event === EVENTS.ScanSeries) {
+      return (prev.payload as ScanSeriesEvent).libraryId === (curr.payload as ScanSeriesEvent).libraryId;
+    }
+    if (curr.event === EVENTS.NotificationProgress) {
+      return (prev.payload as NotificationProgressEvent).eventType != (curr.payload as NotificationProgressEvent).eventType;
+    }
+    return false;
   }
 
   getLibraries() {

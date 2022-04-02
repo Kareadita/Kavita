@@ -9,10 +9,10 @@
         <h6 style="margin-left:40px;" title="Localized Name">{{series?.localizedName}}</h6>
     </ng-container>
 </app-side-nav-companion-bar>
-<div class="container-fluid" *ngIf="series !== undefined" style="padding-top: 10px">
+<div class="container-fluid pt-2" *ngIf="series !== undefined">
     <div class="row mb-3">
-        <div class="col-md-2 col-xs-4 col-sm-6">
-            <app-image class="poster" maxWidth="300px" [imageUrl]="seriesImage"></app-image>
+        <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
+            <app-image maxWidth="300px" [imageUrl]="seriesImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
             <div class="row g-0">
@@ -21,7 +21,7 @@
                         <span>
                             <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
                         </span>
-                        <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
+                        <span class="d-none d-sm-inline-block">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
                 <div class="col-auto ms-2" *ngIf="isAdmin">
@@ -31,7 +31,7 @@
                         </span>
                     </button>
                 </div>
-                <div class="col-auto ms-2">
+                <div class="col-auto ms-2 d-none d-sm-block">
                     <div class="card-actions">
                         <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
                     </div>

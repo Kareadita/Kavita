@@ -96,6 +96,9 @@
                         <ng-container *ngFor="let bookmark of bookmarks; let idx = index">
                             <app-bookmark [bookmark]="bookmark" class="col-auto" (bookmarkRemoved)="removeBookmark(bookmark, idx)"></app-bookmark>
                         </ng-container>
+                        <ng-container *ngIf="bookmarks.length === 0">
+                            No bookmarks yet
+                        </ng-container>
                     </div>
                 </ng-template>
             </li>

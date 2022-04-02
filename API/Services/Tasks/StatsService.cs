@@ -102,11 +102,6 @@ public class StatsService : IStatsService
         var installId = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId);
         var installVersion = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
 
-        var firstAdminUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First();
-        var firstAdminUserPref = (await _unitOfWork.UserRepository.GetPreferencesAsync(firstAdminUser.UserName));
-
-        var activeTheme = firstAdminUserPref.Theme ?? Seed.DefaultThemes.First(t => t.IsDefault);
-
         var serverInfo = new ServerInfoDto
         {
             InstallId = installId.Value,
@@ -117,14 +112,23 @@ public class StatsService : IStatsService
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
-            ActiveSiteTheme = activeTheme.Name,
             NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
             NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count(),
             OPDSEnabled = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds,
             NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsers()).Count(),
             TotalFiles = await _unitOfWork.LibraryRepository.GetTotalFiles(),
-            MangaReaderMode = firstAdminUserPref.ReaderMode
         };
+
+        var firstAdminUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).FirstOrDefault();
+
+        if (firstAdminUser != null)
+        {
+            var firstAdminUserPref = (await _unitOfWork.UserRepository.GetPreferencesAsync(firstAdminUser.UserName));
+            var activeTheme = firstAdminUserPref.Theme ?? Seed.DefaultThemes.First(t => t.IsDefault);
+
+            serverInfo.ActiveSiteTheme = activeTheme.Name;
+            serverInfo.MangaReaderMode = firstAdminUserPref.ReaderMode;
+        }
 
         return serverInfo;
     }

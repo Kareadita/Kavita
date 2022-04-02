@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -43,6 +43,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   summary: string = '';
 
   actionInProgress: boolean = false;
+
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
   
 
   private onDestory: Subject<void> = new Subject<void>();
@@ -102,6 +104,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         return;
       }
       const tagId = parseInt(routeId, 10);
+      this.seriesPagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
 
       [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
       this.filterSettings.presets.collectionTags = [tagId];
@@ -161,16 +164,22 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
 
   onPageChange(pagination: Pagination) {
     this.router.navigate(['collections', this.collectionTag.id], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.seriesPagination.currentPage} });
+    this.loadPage();
   }
 
   loadPage() {
-    const page = this.route.snapshot.queryParamMap.get('page');
+    const page = this.getPage();
     if (page != null) {
-      if (this.seriesPagination === undefined || this.seriesPagination === null) {
-        this.seriesPagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
-      }
       this.seriesPagination.currentPage = parseInt(page, 10);
     }
+
+    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
+    if (this.filter == undefined) {
+      this.filter = this.seriesService.createSeriesFilter();
+      this.filter.collectionTags.push(this.collectionTag.id);
+    }
+
+    // TODO: Add ability to filter series for a collection
     // Reload page after a series is updated or first load
     this.seriesService.getSeriesForTag(this.collectionTag.id, this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage).subscribe(tags => {
       this.series = tags.result;
@@ -180,14 +189,20 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
-    if (this.seriesPagination !== undefined && this.seriesPagination !== null && !data.isFirst) {
+  updateFilter(event: FilterEvent) {
+    this.filter = event.filter;
+    const page = this.getPage();
+    if (page === undefined || page === null || !event.isFirst) {
       this.seriesPagination.currentPage = 1;
       this.onPageChange(this.seriesPagination);
     } else {
       this.loadPage();
     }
+  }
+
+  getPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('page');
   }
 
   handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {

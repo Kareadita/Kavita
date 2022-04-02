@@ -72,9 +72,8 @@ namespace API
                 }
 
                 await context.Database.MigrateAsync();
-                var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
 
-                await Seed.SeedRoles(roleManager);
+                await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
                 await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedThemes(context);
                 await Seed.SeedUserApiKeys(context);
@@ -110,7 +109,7 @@ namespace API
                     (await context.ServerSetting.SingleOrDefaultAsync(s =>
                         s.Key == ServerSettingKey.InstallVersion))?.Value;
             }
-            catch
+            catch (Exception)
             {
                 // ignored
             }

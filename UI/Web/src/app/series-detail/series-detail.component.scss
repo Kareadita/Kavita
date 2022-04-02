@@ -6,20 +6,3 @@
   margin-top: 2px;
   font-size: 1.5rem;
 }
-
-.poster {
-  width: 100%;
-  max-width: 300px;
-}
-
-@media(max-width: var(--grid-breakpoints-sm)) {
-  .poster {
-    display: none;
-  }
-}
-
-@media(max-width: var(--grid-breakpoints-sm)) {
-  .read-btn--text {
-    display: none;
-  }
-}

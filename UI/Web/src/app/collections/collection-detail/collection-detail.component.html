@@ -1,17 +1,17 @@
-<app-side-nav-companion-bar *ngIf="series !== undefined">
+<app-side-nav-companion-bar *ngIf="series !== undefined" [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
     <ng-container title>
-        <h2 style="margin-bottom: 0px">
+        <h2 style="margin-bottom: 0px" *ngIf="collectionTag !== undefined">
             <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v"></app-card-actionables>
-            {{collectionTag.title}}
+            {{collectionTag.title}}<span *ngIf="collectionTag.promoted">&nbsp;(<i aria-hidden="true" class="fa fa-angle-double-up"></i>)</span>
         </h2>
     </ng-container>
 </app-side-nav-companion-bar>
-<div class="container-fluid" *ngIf="collectionTag !== undefined" style="padding-top: 10px">
+<div class="container-fluid pt-2" *ngIf="collectionTag !== undefined">
     <div class="row mb-3">
-        <div class="col-md-2 col-xs-4 col-sm-6 poster">            
+        <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">            
             <app-image maxWidth="481px" [imageUrl]="tagImage"></app-image>
         </div>
-        <div class="col-md-10 col-xs-8 col-sm-6">
+        <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
             <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
         </div>
     </div>
@@ -24,6 +24,7 @@
     [items]="series"
     [pagination]="seriesPagination"
     [filterSettings]="filterSettings"
+    [filterOpen]="filterOpen"
     (pageChange)="onPageChange($event)"
     (applyFilter)="updateFilter($event)"
     >

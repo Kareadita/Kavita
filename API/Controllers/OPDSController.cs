@@ -618,6 +618,12 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
+        if (!await _downloadService.HasDownloadPermission(user))
+        {
+            return BadRequest("User does not have download permissions");
+        }
+
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
         var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
         return File(bytes, contentType, fileDownloadName);
@@ -776,6 +782,7 @@ public class OpdsController : BaseApiController
             {
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
+                accLink,
                 CreatePageStreamLink(seriesId, volumeId, chapterId, mangaFile, apiKey)
             },
             Content = new FeedEntryContent()
@@ -785,11 +792,12 @@ public class OpdsController : BaseApiController
             }
         };
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
-        if (await _downloadService.HasDownloadPermission(user))
-        {
-            entry.Links.Add(accLink);
-        }
+        // We can't not show acc link in the feed, panels wont work like that. We have to block download directly
+        // var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
+        // if (await _downloadService.HasDownloadPermission(user))
+        // {
+        //     entry.Links.Add(accLink);
+        // }
 
 
         return entry;

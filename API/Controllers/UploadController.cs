@@ -47,12 +47,24 @@ namespace API.Controllers
         {
             var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
             var format = _directoryService.FileSystem.Path.GetExtension(dto.Url.Split('?')[0]).Replace(".", "");
-            var path = await dto.Url
-                .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
+            try
+            {
+                var path = await dto.Url
+                    .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
 
-            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"Could not download file");
+                if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+                    return BadRequest($"Could not download file");
 
-            return $"coverupload_{dateString}.{format}";
+                return $"coverupload_{dateString}.{format}";
+            }
+            catch (FlurlHttpException ex)
+            {
+                // Unauthorized
+                if (ex.StatusCode == 401)
+                    return BadRequest("The server requires authentication to load the url externally");
+            }
+
+            return BadRequest("Unable to download image, please use another url or upload by file");
         }
 
         /// <summary>

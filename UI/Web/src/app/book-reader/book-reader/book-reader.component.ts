@@ -1013,8 +1013,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (element === null) return;
-
-    this.scrollService.scrollTo(element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET, this.reader.nativeElement);
+    const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
+    // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
+    setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
   }
 
   toggleClickToPaginate() {

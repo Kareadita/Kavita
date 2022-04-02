@@ -223,7 +223,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         switchMap(val => {
           this.isLoadingOptions = true;
           let results: Observable<any[]>;
-          console.log('val: ', val);
           if (Array.isArray(this.settings.fetchFn)) {
             const filteredArray = this.settings.compareFn(this.settings.fetchFn, val.trim());
             results = of(filteredArray).pipe(takeUntil(this.onDestroy), map((items: any[]) => items.filter(item => this.filterSelected(item))));
@@ -457,9 +456,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     if (this.showAddItem) {
       this.hasFocus = true;
     }
-    console.log('show Add item: ', this.showAddItem);
-    console.log('compare func: ', this.settings.compareFn(options, this.typeaheadControl.value.trim()));
-
   }
 
   unlock(event: any) {
