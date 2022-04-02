@@ -16,6 +16,11 @@ export class SideNavCompanionBarComponent implements OnInit {
   @Input() hasFilter: boolean = false;
 
   /**
+   * Is the input open by default
+   */
+  @Input() filterOpenByDefault: boolean = false;
+
+  /**
    * Should be passed through from Filter component.
    */
   //@Input() filterDisabled: EventEmitter<boolean> = new EventEmitter();
@@ -27,14 +32,10 @@ export class SideNavCompanionBarComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-  }
-
-  goBack() {
-
+    this.isFilterOpen = this.filterOpenByDefault;
   }
 
   toggleFilter() {
-    //collapse.toggle()
     this.isFilterOpen = !this.isFilterOpen;
     this.filterOpen.emit(this.isFilterOpen);
   }
