@@ -47,7 +47,7 @@ export class ReadingListService {
   }
 
   updateByMultiple(readingListId: number, seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds});
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds}, { responseType: 'text' as 'json' });
   }
 
   updateByMultipleSeries(readingListId: number, seriesIds: Array<number>) {
