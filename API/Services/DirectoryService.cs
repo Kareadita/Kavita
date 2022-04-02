@@ -71,6 +71,8 @@ namespace API.Services
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store|\.qpkg",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
+       private static readonly Regex FileCopyAppend = new Regex(@"SP\d+",
+           RegexOptions.Compiled | RegexOptions.IgnoreCase);
        public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
        public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
@@ -370,24 +372,11 @@ namespace API.Services
                foreach (var file in filePaths)
                {
                    currentFile = file;
+
                    var fileInfo = FileSystem.FileInfo.FromFileName(file);
-                   if (fileInfo.Exists)
-                   {
-                       // TODO: I need to handle if file already exists and allow either an overwrite or prepend (2) to it
-                       try
-                       {
-                           fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, prepend + fileInfo.Name));
-                       }
-                       catch (IOException ex)
-                       {
-                           _logger.LogError(ex, "File copy, dest already exists. Appending (2)");
-                           fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, prepend + FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name) + " (2)" + FileSystem.Path.GetExtension(fileInfo.Name)));
-                       }
-                   }
-                   else
-                   {
-                       _logger.LogWarning("Tried to copy {File} but it doesn't exist", file);
-                   }
+                   var targetFile = FileSystem.FileInfo.FromFileName(RenameFileForCopy(file, directoryPath, prepend));
+
+                   fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, targetFile.Name));
                }
            }
            catch (Exception ex)
@@ -397,6 +386,42 @@ namespace API.Services
            }
 
            return true;
+       }
+
+       /// <summary>
+       /// Generates the combined filepath given a prepend (optional), output directory path, and a full input file path.
+       /// If the output file already exists, will append (1), (2), etc until it can be written out
+       /// </summary>
+       /// <param name="fileToCopy"></param>
+       /// <param name="directoryPath"></param>
+       /// <param name="prepend"></param>
+       /// <returns></returns>
+       private string RenameFileForCopy(string fileToCopy, string directoryPath, string prepend = "")
+       {
+           var fileInfo = FileSystem.FileInfo.FromFileName(fileToCopy);
+           var filename = prepend + fileInfo.Name;
+
+           var targetFile = FileSystem.FileInfo.FromFileName(FileSystem.Path.Join(directoryPath, filename));
+           if (!targetFile.Exists)
+           {
+               return targetFile.FullName;
+           }
+
+           var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
+           if (FileCopyAppend.IsMatch(noExtension))
+           {
+               var match = FileCopyAppend.Match(noExtension).Value;
+               var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
+               noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
+           }
+           else
+           {
+               noExtension += " (1)";
+           }
+
+           var newFilename = prepend + noExtension +
+                             FileSystem.Path.GetExtension(fileInfo.Name);
+           return RenameFileForCopy(FileSystem.Path.Join(directoryPath, newFilename), directoryPath, prepend);
        }
 
        /// <summary>

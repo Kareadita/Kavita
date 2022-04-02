@@ -26,20 +26,18 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly IDownloadService _downloadService;
         private readonly IEventHub _eventHub;
-        private readonly UserManager<AppUser> _userManager;
         private readonly ILogger<DownloadController> _logger;
         private readonly IBookmarkService _bookmarkService;
         private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
-            IDownloadService downloadService, IEventHub eventHub, UserManager<AppUser> userManager, ILogger<DownloadController> logger, IBookmarkService bookmarkService)
+            IDownloadService downloadService, IEventHub eventHub, ILogger<DownloadController> logger, IBookmarkService bookmarkService)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
             _directoryService = directoryService;
             _downloadService = downloadService;
             _eventHub = eventHub;
-            _userManager = userManager;
             _logger = logger;
             _bookmarkService = bookmarkService;
         }

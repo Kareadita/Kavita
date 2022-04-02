@@ -210,7 +210,6 @@ namespace API.Tests.Parser
         [InlineData("._Love Hina/Love Hina/", true)]
         [InlineData("@Recently-Snapshot/Love Hina/", true)]
         [InlineData("@recycle/Love Hina/", true)]
-        [InlineData("@recycle/Love Hina/", true)]
         [InlineData("E:/Test/__MACOSX/Love Hina/", true)]
         public void HasBlacklistedFolderInPathTest(string inputPath, bool expected)
         {
