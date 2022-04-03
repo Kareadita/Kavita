@@ -229,13 +229,14 @@ public class SeriesService : ISeriesService
         }
 
         // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => Parser.Parser.Normalize(t.Title)))
+        foreach (var tagTitle in tags.Select(t => t.Title))
         {
             // This should be normalized name
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == tagTitle);
+            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
             {
-                if (series.Metadata.Genres.All(t => t.NormalizedTitle != tagTitle))
+                if (series.Metadata.Genres.All(t => t.NormalizedTitle != normalizedTitle))
                 {
                     handleAdd(existingTag);
                     isModified = true;
