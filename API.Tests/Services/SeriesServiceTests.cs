@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.CollectionTags;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
@@ -566,6 +569,54 @@ public class SeriesServiceTests
 
         var ratings = user.Ratings;
         Assert.Empty(ratings);
+    }
+
+    #endregion
+
+    #region UpdateSeriesMetadata
+
+    private void SetupUpdateSeriesMetadataDb()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            }
+        });
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldCreateEmptyMetadata_IfDoesntExist()
+    {
+        await ResetDb();
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            }
+        });
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Genres = new List<GenreTagDto>() {new GenreTagDto() {Id = 0, Title = "New Genre"}}
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.Genres.Select(g => g.Title).Contains("New Genre".SentenceCase()));
+
     }
 
     #endregion
