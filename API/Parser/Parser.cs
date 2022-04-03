@@ -60,6 +60,12 @@ namespace API.Parser
         private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+]",
             MatchOptions, RegexTimeout);
 
+        /// <summary>
+        /// Recognizes the Special token only
+        /// </summary>
+        private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
+            MatchOptions, RegexTimeout);
+
 
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -976,9 +982,8 @@ namespace API.Parser
         /// <returns></returns>
         public static string CleanSpecialTitle(string name)
         {
-            // TODO: Optimize this code & Test
             if (string.IsNullOrEmpty(name)) return name;
-            var cleaned = new Regex(@"SP\d+").Replace(name.Replace('_', ' '), string.Empty).Trim();
+            var cleaned = SpecialTokenRegex.Replace(name.Replace('_', ' '), string.Empty).Trim();
             var lastIndex = cleaned.LastIndexOf('.');
             if (lastIndex > 0)
             {

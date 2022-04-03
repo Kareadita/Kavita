@@ -36,8 +36,9 @@ public class EventHub : IEventHub
         if (onlyAdmins)
         {
             var admins = await _presenceTracker.GetOnlineAdmins();
-            _messageHub.Clients.Users(admins);
+            users = _messageHub.Clients.Users(admins);
         }
+
 
         await users.SendAsync(method, message);
     }

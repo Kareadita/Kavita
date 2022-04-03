@@ -52,102 +52,98 @@ public class SeriesService : ISeriesService
             var allPeople = (await _unitOfWork.PersonRepository.GetAllPeople()).ToList();
             var allTags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToList();
 
-            if (series.Metadata == null)
+            series.Metadata ??= DbFactory.SeriesMetadata(updateSeriesMetadataDto.CollectionTags
+                .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
+
+            if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
             {
-                series.Metadata = DbFactory.SeriesMetadata(updateSeriesMetadataDto.CollectionTags
-                    .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
+                series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata.AgeRating;
+                series.Metadata.AgeRatingLocked = true;
             }
-            else
+
+            if (series.Metadata.PublicationStatus != updateSeriesMetadataDto.SeriesMetadata.PublicationStatus)
             {
-                if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
-                {
-                    series.Metadata.AgeRating = updateSeriesMetadataDto.SeriesMetadata.AgeRating;
-                    series.Metadata.AgeRatingLocked = true;
-                }
-
-                if (series.Metadata.PublicationStatus != updateSeriesMetadataDto.SeriesMetadata.PublicationStatus)
-                {
-                    series.Metadata.PublicationStatus = updateSeriesMetadataDto.SeriesMetadata.PublicationStatus;
-                    series.Metadata.PublicationStatusLocked = true;
-                }
-
-                if (series.Metadata.Summary != updateSeriesMetadataDto.SeriesMetadata.Summary.Trim())
-                {
-                    series.Metadata.Summary = updateSeriesMetadataDto.SeriesMetadata?.Summary.Trim();
-                    series.Metadata.SummaryLocked = true;
-                }
-
-                if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata.Language)
-                {
-                    series.Metadata.Language = updateSeriesMetadataDto.SeriesMetadata?.Language;
-                    series.Metadata.LanguageLocked = true;
-                }
-
-
-                series.Metadata.CollectionTags ??= new List<CollectionTag>();
-                UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
-                {
-                    series.Metadata.CollectionTags.Add(tag);
-                });
-
-                series.Metadata.Genres ??= new List<Genre>();
-                UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata.Genres, series, allGenres, (genre) =>
-                {
-                    series.Metadata.Genres.Add(genre);
-                }, () => series.Metadata.GenresLocked = true);
-
-                series.Metadata.Tags ??= new List<Tag>();
-                UpdateTagList(updateSeriesMetadataDto.SeriesMetadata.Tags, series, allTags, (tag) =>
-                {
-                    series.Metadata.Tags.Add(tag);
-                }, () => series.Metadata.TagsLocked = true);
-
-                void HandleAddPerson(Person person)
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                    allPeople.Add(person);
-                }
-
-                series.Metadata.People ??= new List<Person>();
-                UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.WriterLocked = true);
-                UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.CharacterLocked = true);
-                UpdatePeopleList(PersonRole.Colorist, updateSeriesMetadataDto.SeriesMetadata.Colorists, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.ColoristLocked = true);
-                UpdatePeopleList(PersonRole.Editor, updateSeriesMetadataDto.SeriesMetadata.Editors, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.EditorLocked = true);
-                UpdatePeopleList(PersonRole.Inker, updateSeriesMetadataDto.SeriesMetadata.Inkers, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.InkerLocked = true);
-                UpdatePeopleList(PersonRole.Letterer, updateSeriesMetadataDto.SeriesMetadata.Letterers, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.LettererLocked = true);
-                UpdatePeopleList(PersonRole.Penciller, updateSeriesMetadataDto.SeriesMetadata.Pencillers, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.PencillerLocked = true);
-                UpdatePeopleList(PersonRole.Publisher, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.PublisherLocked = true);
-                UpdatePeopleList(PersonRole.Translator, updateSeriesMetadataDto.SeriesMetadata.Translators, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.TranslatorLocked = true);
-                UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
-                    HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
-
-                if (!updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked) series.Metadata.AgeRatingLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked) series.Metadata.PublicationStatusLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.LanguageLocked) series.Metadata.LanguageLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.GenresLocked) series.Metadata.GenresLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.TagsLocked) series.Metadata.TagsLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.CharacterLocked) series.Metadata.CharacterLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.ColoristLocked) series.Metadata.ColoristLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.EditorLocked) series.Metadata.EditorLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.InkerLocked) series.Metadata.InkerLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.LettererLocked) series.Metadata.LettererLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.PencillerLocked) series.Metadata.PencillerLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.PublisherLocked) series.Metadata.PublisherLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked) series.Metadata.TranslatorLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked) series.Metadata.CoverArtistLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
-                if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
-
+                series.Metadata.PublicationStatus = updateSeriesMetadataDto.SeriesMetadata.PublicationStatus;
+                series.Metadata.PublicationStatusLocked = true;
             }
+
+            if (series.Metadata.Summary != updateSeriesMetadataDto.SeriesMetadata.Summary.Trim())
+            {
+                series.Metadata.Summary = updateSeriesMetadataDto.SeriesMetadata?.Summary.Trim();
+                series.Metadata.SummaryLocked = true;
+            }
+
+            if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata.Language)
+            {
+                series.Metadata.Language = updateSeriesMetadataDto.SeriesMetadata?.Language;
+                series.Metadata.LanguageLocked = true;
+            }
+
+
+            series.Metadata.CollectionTags ??= new List<CollectionTag>();
+            UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
+            {
+                series.Metadata.CollectionTags.Add(tag);
+            });
+
+            series.Metadata.Genres ??= new List<Genre>();
+            UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata.Genres, series, allGenres, (genre) =>
+            {
+                series.Metadata.Genres.Add(genre);
+            }, () => series.Metadata.GenresLocked = true);
+
+            series.Metadata.Tags ??= new List<Tag>();
+            UpdateTagList(updateSeriesMetadataDto.SeriesMetadata.Tags, series, allTags, (tag) =>
+            {
+                series.Metadata.Tags.Add(tag);
+            }, () => series.Metadata.TagsLocked = true);
+
+            void HandleAddPerson(Person person)
+            {
+                PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                allPeople.Add(person);
+            }
+
+            series.Metadata.People ??= new List<Person>();
+            UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.WriterLocked = true);
+            UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.CharacterLocked = true);
+            UpdatePeopleList(PersonRole.Colorist, updateSeriesMetadataDto.SeriesMetadata.Colorists, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.ColoristLocked = true);
+            UpdatePeopleList(PersonRole.Editor, updateSeriesMetadataDto.SeriesMetadata.Editors, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.EditorLocked = true);
+            UpdatePeopleList(PersonRole.Inker, updateSeriesMetadataDto.SeriesMetadata.Inkers, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.InkerLocked = true);
+            UpdatePeopleList(PersonRole.Letterer, updateSeriesMetadataDto.SeriesMetadata.Letterers, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.LettererLocked = true);
+            UpdatePeopleList(PersonRole.Penciller, updateSeriesMetadataDto.SeriesMetadata.Pencillers, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.PencillerLocked = true);
+            UpdatePeopleList(PersonRole.Publisher, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.PublisherLocked = true);
+            UpdatePeopleList(PersonRole.Translator, updateSeriesMetadataDto.SeriesMetadata.Translators, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.TranslatorLocked = true);
+            UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
+                HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
+
+            if (!updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked) series.Metadata.AgeRatingLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked) series.Metadata.PublicationStatusLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.LanguageLocked) series.Metadata.LanguageLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.GenresLocked) series.Metadata.GenresLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.TagsLocked) series.Metadata.TagsLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.CharacterLocked) series.Metadata.CharacterLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.ColoristLocked) series.Metadata.ColoristLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.EditorLocked) series.Metadata.EditorLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.InkerLocked) series.Metadata.InkerLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.LettererLocked) series.Metadata.LettererLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.PencillerLocked) series.Metadata.PencillerLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.PublisherLocked) series.Metadata.PublisherLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked) series.Metadata.TranslatorLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked) series.Metadata.CoverArtistLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
+            if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
+
+
 
             if (!_unitOfWork.HasChanges())
             {
@@ -184,6 +180,7 @@ public class SeriesService : ISeriesService
     private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
+        if (tags == null) return;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();
         foreach (var existing in existingTags)
@@ -216,11 +213,13 @@ public class SeriesService : ISeriesService
 
     private static void UpdateGenreList(ICollection<GenreTagDto> tags, Series series, IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
     {
+        if (tags == null) return;
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.Genres.ToList();
         foreach (var existing in existingTags)
         {
+            // NOTE: Why don't I use a NormalizedName here (outside of memory pressure from string creation)?
             if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
             {
                 // Remove tag
@@ -232,10 +231,12 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tagTitle);
+            // This should be normalized name
+            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
             {
-                if (series.Metadata.Genres.All(t => t.Title != tagTitle))
+                if (series.Metadata.Genres.All(t => t.NormalizedTitle != normalizedTitle))
                 {
                     handleAdd(existingTag);
                     isModified = true;
@@ -257,6 +258,8 @@ public class SeriesService : ISeriesService
 
     private static void UpdateTagList(ICollection<TagDto> tags, Series series, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd, Action onModified)
     {
+        if (tags == null) return;
+
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.Tags.ToList();
@@ -300,6 +303,7 @@ public class SeriesService : ISeriesService
     private static void UpdatePeopleList(PersonRole role, ICollection<PersonDto> tags, Series series, IReadOnlyCollection<Person> allTags,
         Action<Person> handleAdd, Action onModified)
     {
+        if (tags == null) return;
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.People.Where(p => p.Role == role).ToList();

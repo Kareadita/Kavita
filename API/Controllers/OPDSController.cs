@@ -782,6 +782,7 @@ public class OpdsController : BaseApiController
             {
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
+                // We can't not include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
                 accLink,
                 CreatePageStreamLink(seriesId, volumeId, chapterId, mangaFile, apiKey)
             },
@@ -791,14 +792,6 @@ public class OpdsController : BaseApiController
                 Type = "text"
             }
         };
-
-        // We can't not show acc link in the feed, panels wont work like that. We have to block download directly
-        // var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
-        // if (await _downloadService.HasDownloadPermission(user))
-        // {
-        //     entry.Links.Add(accLink);
-        // }
-
 
         return entry;
     }

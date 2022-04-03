@@ -378,7 +378,7 @@ public class SeriesRepository : ISeriesRepository
 
 
     /// <summary>
-    /// Returns Volumes, Metadata, and Collection Tags
+    /// Returns Volumes, Metadata (Incl Genres and People), and Collection Tags
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
