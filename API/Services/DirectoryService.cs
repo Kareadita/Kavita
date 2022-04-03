@@ -71,7 +71,7 @@ namespace API.Services
        private static readonly Regex ExcludeDirectories = new Regex(
           @"@eaDir|\.DS_Store|\.qpkg",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
-       private static readonly Regex FileCopyAppend = new Regex(@"SP\d+",
+       private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
            RegexOptions.Compiled | RegexOptions.IgnoreCase);
        public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
