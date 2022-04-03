@@ -219,6 +219,7 @@ public class SeriesService : ISeriesService
         var existingTags = series.Metadata.Genres.ToList();
         foreach (var existing in existingTags)
         {
+            // NOTE: Why don't I use a NormalizedName here (outside of memory pressure from string creation)?
             if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
             {
                 // Remove tag
@@ -228,12 +229,13 @@ public class SeriesService : ISeriesService
         }
 
         // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => t.Title))
+        foreach (var tagTitle in tags.Select(t => Parser.Parser.Normalize(t.Title)))
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tagTitle);
+            // This should be normalized name
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == tagTitle);
             if (existingTag != null)
             {
-                if (series.Metadata.Genres.All(t => t.Title != tagTitle))
+                if (series.Metadata.Genres.All(t => t.NormalizedTitle != tagTitle))
                 {
                     handleAdd(existingTag);
                     isModified = true;
