@@ -151,7 +151,11 @@ namespace API.Controllers
             }
 
             series.Name = updateSeries.Name.Trim();
-            series.SortName = updateSeries.SortName.Trim();
+            if (!string.IsNullOrEmpty(updateSeries.SortName.Trim()))
+            {
+                series.SortName = updateSeries.SortName.Trim();
+            }
+
             series.LocalizedName = updateSeries.LocalizedName.Trim();
 
             series.NameLocked = updateSeries.NameLocked;
