@@ -142,18 +142,21 @@ public class DefaultParser
               }
             }
 
-            var series = Parser.ParseSeries(folder);
-
-            if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
+            if (!folder.Equals(ret.Series))
             {
-                ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
-                break;
-            }
+                var series = Parser.ParseSeries(folder);
 
-            if (!string.IsNullOrEmpty(series))
-            {
-                ret.Series = series;
-                break;
+                if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
+                {
+                    ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
+                    break;
+                }
+
+                if (!string.IsNullOrEmpty(series) && (string.IsNullOrEmpty(ret.Series) || !folder.Contains(ret.Series)))
+                {
+                    ret.Series = series;
+                    break;
+                }
             }
         }
     }
