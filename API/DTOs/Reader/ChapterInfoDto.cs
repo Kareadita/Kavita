@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using System;
+using API.Entities.Enums;
 
 namespace API.DTOs.Reader
 {
