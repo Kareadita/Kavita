@@ -116,6 +116,11 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private handleAuthError(error: any) {
+
+    // Special hack for register url, to not care about auth
+    if (location.href.includes('/registration/confirm-email?token=')) {
+      return;
+    }
     // NOTE: Signin has error.error or error.statusText available. 
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
     this.accountService.logout();

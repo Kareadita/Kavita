@@ -557,6 +557,24 @@ namespace API.Tests.Services
             Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
         }
 
+        [Fact]
+        public void CopyFilesToDirectory_ShouldAppendWhenTargetFileExists()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddFile($"{testDirectory}file.zip", new MockFileData(""));
+            fileSystem.AddFile($"/manga/output/file (1).zip", new MockFileData(""));
+            fileSystem.AddFile($"/manga/output/file (2).zip", new MockFileData(""));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file.zip"}, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file.zip"}, "/manga/output/");
+            var outputFiles = ds.GetFiles("/manga/output/").Select(API.Parser.Parser.NormalizePath).ToList();
+            Assert.Equal(4, outputFiles.Count()); // we have 2 already there and 2 copies
+            // For some reason, this has C:/ on directory even though everything is emulated
+            Assert.True(outputFiles.Contains(API.Parser.Parser.NormalizePath("/manga/output/file (3).zip")) || outputFiles.Contains(API.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
+        }
+
         #endregion
 
         #region ListDirectory

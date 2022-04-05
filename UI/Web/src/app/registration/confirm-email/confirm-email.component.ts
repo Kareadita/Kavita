@@ -31,18 +31,18 @@ export class ConfirmEmailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService, 
     private toastr: ToastrService, private themeService: ThemeService, private navService: NavService) {
-    this.navService.hideSideNav();
+      this.navService.hideSideNav();
       this.themeService.setTheme(this.themeService.defaultTheme);
-    const token = this.route.snapshot.queryParamMap.get('token');
-    const email = this.route.snapshot.queryParamMap.get('email');
-    if (token == undefined || token === '' || token === null) {
-      // This is not a valid url, redirect to login
-      this.toastr.error('Invalid confirmation email');
-      this.router.navigateByUrl('login');
-      return;
-    }
-    this.token = token;
-    this.registerForm.get('email')?.setValue(email || '');
+      const token = this.route.snapshot.queryParamMap.get('token');
+      const email = this.route.snapshot.queryParamMap.get('email');
+      if (token == undefined || token === '' || token === null) {
+        // This is not a valid url, redirect to login
+        this.toastr.error('Invalid confirmation email');
+        this.router.navigateByUrl('login');
+        return;
+      }
+      this.token = token;
+      this.registerForm.get('email')?.setValue(email || '');
   }
 
   ngOnInit(): void {
