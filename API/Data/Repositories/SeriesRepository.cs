@@ -619,13 +619,13 @@ public class SeriesRepository : ISeriesRepository
                     LastReadingProgress = _context.AppUserProgresses
                         .Where(p => p.Id == progress.Id && p.AppUserId == userId)
                         .Max(p => p.LastModified),
-                    // BUG: This is only taking into account chapters that have progress on them, not all chapters in said series
-                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
-                    //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
+                    // This is only taking into account chapters that have progress on them, not all chapters in said series
+                    //LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
+                    LastChapterCreated = s.Volumes.SelectMany(v => v.Chapters).Max(c => c.Created)
                 });
         if (cutoffOnDate)
         {
-            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint);
+            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint || d.LastChapterCreated >= cutoffProgressPoint);
         }
 
         // I think I need another Join statement. The problem is the chapters are still limited to progress
