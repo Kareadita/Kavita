@@ -92,12 +92,7 @@ public class VersionUpdaterService : IVersionUpdaterService
     {
         if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
-        var currentVersion = BuildInfo.Version.ToString();
-
-        if (updateVersion.Revision == -1)
-        {
-            currentVersion = currentVersion.Substring(0, currentVersion.LastIndexOf(".", StringComparison.Ordinal));
-        }
+        var currentVersion = BuildInfo.Version.ToString(4);
 
         return new UpdateNotificationDto()
         {
