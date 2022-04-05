@@ -145,13 +145,20 @@ namespace API.Controllers
 
             if (series == null) return BadRequest("Series does not exist");
 
-            if (series.Name != updateSeries.Name && await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name, series.Format))
+            var seriesExists =
+                await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name.Trim(), series.LibraryId,
+                    series.Format);
+            if (series.Name != updateSeries.Name && seriesExists)
             {
                 return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
             }
 
             series.Name = updateSeries.Name.Trim();
-            series.SortName = updateSeries.SortName.Trim();
+            if (!string.IsNullOrEmpty(updateSeries.SortName.Trim()))
+            {
+                series.SortName = updateSeries.SortName.Trim();
+            }
+
             series.LocalizedName = updateSeries.LocalizedName.Trim();
 
             series.NameLocked = updateSeries.NameLocked;

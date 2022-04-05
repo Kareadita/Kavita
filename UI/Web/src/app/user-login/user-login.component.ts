@@ -37,7 +37,10 @@ export class UserLoginComponent implements OnInit {
   isLoaded: boolean = false;
 
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
-    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService, private modalService: NgbModal) { }
+    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService, private modalService: NgbModal) {
+      this.navService.showNavBar();
+      this.navService.hideSideNav();
+    }
 
   ngOnInit(): void {
     this.navService.showNavBar();

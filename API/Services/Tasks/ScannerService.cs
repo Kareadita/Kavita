@@ -523,13 +523,17 @@ public class ScannerService : IScannerService
                 series.Format = parsedInfos[0].Format;
             }
             series.OriginalName ??= parsedInfos[0].Series;
+            if (string.IsNullOrEmpty(series.SortName))
+            {
+                series.SortName = series.Name;
+            }
             if (!series.SortNameLocked)
             {
+                series.SortName = series.Name;
                 if (!string.IsNullOrEmpty(parsedInfos[0].SeriesSort))
                 {
                     series.SortName = parsedInfos[0].SeriesSort;
                 }
-                series.SortName = series.Name;
             }
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));

@@ -142,18 +142,22 @@ public class DefaultParser
               }
             }
 
-            var series = Parser.ParseSeries(folder);
-
-            if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
+            // Generally users group in series folders. Let's try to parse series from the top folder
+            if (!folder.Equals(ret.Series) && i == fallbackFolders.Count - 1)
             {
-                ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
-                break;
-            }
+                var series = Parser.ParseSeries(folder);
 
-            if (!string.IsNullOrEmpty(series))
-            {
-                ret.Series = series;
-                break;
+                if (string.IsNullOrEmpty(series))
+                {
+                    ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
+                    break;
+                }
+
+                if (!string.IsNullOrEmpty(series) && (string.IsNullOrEmpty(ret.Series) || !folder.Contains(ret.Series)))
+                {
+                    ret.Series = series;
+                    break;
+                }
             }
         }
     }

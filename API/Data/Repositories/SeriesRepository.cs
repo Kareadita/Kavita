@@ -47,7 +47,7 @@ public interface ISeriesRepository
     void Update(Series series);
     void Remove(Series series);
     void Remove(IEnumerable<Series> series);
-    Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format);
+    Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format);
     /// <summary>
     /// Adds user information like progress, ratings, etc
     /// </summary>
@@ -135,17 +135,12 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="name">Name of series</param>
     /// <param name="format">Format of series</param>
     /// <returns></returns>
-    public async Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format)
+    public async Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format)
     {
-        var libraries = _context.Series
-            .AsNoTracking()
-            .Where(x => x.Name.Equals(name) && x.Format == format)
-            .Select(s => s.LibraryId);
-
         return await _context.Series
             .AsNoTracking()
-            .Where(s => libraries.Contains(s.LibraryId) && s.Name.Equals(name) && s.Format == format)
-            .CountAsync() > 1;
+            .Where(s => s.LibraryId == libraryId && s.Name.Equals(name) && s.Format == format)
+            .AnyAsync();
     }
 
 
@@ -624,13 +619,13 @@ public class SeriesRepository : ISeriesRepository
                     LastReadingProgress = _context.AppUserProgresses
                         .Where(p => p.Id == progress.Id && p.AppUserId == userId)
                         .Max(p => p.LastModified),
-                    // BUG: This is only taking into account chapters that have progress on them, not all chapters in said series
-                    LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
-                    //LastChapterCreated = _context.Chapter.Where(c => allChapters.Contains(c.Id)).Max(c => c.Created)
+                    // This is only taking into account chapters that have progress on them, not all chapters in said series
+                    //LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
+                    LastChapterCreated = s.Volumes.SelectMany(v => v.Chapters).Max(c => c.Created)
                 });
         if (cutoffOnDate)
         {
-            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint);
+            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint || d.LastChapterCreated >= cutoffProgressPoint);
         }
 
         // I think I need another Join statement. The problem is the chapters are still limited to progress

@@ -11,7 +11,7 @@ namespace API.Entities.Metadata
     {
         public int Id { get; set; }
 
-        public string Summary { get; set; }
+        public string Summary { get; set; } = string.Empty;
 
         public ICollection<CollectionTag> CollectionTags { get; set; }
 

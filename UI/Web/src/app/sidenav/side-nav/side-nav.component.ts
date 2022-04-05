@@ -39,6 +39,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       this.user = user;
+
       if (this.user) {
         this.isAdmin = this.accountService.hasAdminRole(this.user);
       }
@@ -54,8 +55,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
         this.libraries = libraries;
       });
     });
-
-    
   }
 
   ngOnDestroy(): void {

@@ -67,6 +67,17 @@ public class SeriesService : ISeriesService
                 series.Metadata.PublicationStatusLocked = true;
             }
 
+            // This shouldn't be needed post v0.5.3 release
+            if (string.IsNullOrEmpty(series.Metadata.Summary))
+            {
+                series.Metadata.Summary = string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(updateSeriesMetadataDto.SeriesMetadata.Summary))
+            {
+                updateSeriesMetadataDto.SeriesMetadata.Summary = string.Empty;
+            }
+
             if (series.Metadata.Summary != updateSeriesMetadataDto.SeriesMetadata.Summary.Trim())
             {
                 series.Metadata.Summary = updateSeriesMetadataDto.SeriesMetadata?.Summary.Trim();
