@@ -34,6 +34,6 @@ namespace API.SignalR
         /// <summary>
         /// When event took place
         /// </summary>
-        public DateTime EventTime = DateTime.Now;
+        public readonly DateTime EventTime = DateTime.Now;
     }
 }

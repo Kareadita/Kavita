@@ -44,7 +44,7 @@ public class DefaultParserTests
     [Theory]
     [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!~1~1")]
     [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!~1~2")]
-    [InlineData("/manga/Monster #8/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster #8~0~1")]
+    [InlineData("/manga/Monster/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster~0~1")]
     public void ParseFromFallbackFolders_ShouldParseSeriesVolumeAndChapter(string inputFile, string expectedParseInfo)
     {
         const string rootDirectory = "/manga/";
@@ -54,6 +54,27 @@ public class DefaultParserTests
         Assert.Equal(tokens[0], actual.Series);
         Assert.Equal(tokens[1], actual.Volumes);
         Assert.Equal(tokens[2], actual.Chapters);
+    }
+
+    [Theory]
+    [InlineData("/manga/Btooom!/Vol.1/Chapter 1/1.cbz", "Btooom!")]
+    [InlineData("/manga/Btooom!/Vol.1 Chapter 2/1.cbz", "Btooom!")]
+    [InlineData("/manga/Monster #8 (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster")]
+    [InlineData("/manga/Monster (Digital)/Ch. 001-016 [MangaPlus] [Digital] [amit34521]/Monster Ch. 001 [MangaPlus] [Digital] [amit34521]/13.jpg", "Monster")]
+    [InlineData("/manga/Foo 50/Specials/Foo 50 SP01.cbz", "Foo 50")]
+    [InlineData("/manga/Foo 50 (kiraa)/Specials/Foo 50 SP01.cbz", "Foo 50")]
+    [InlineData("/manga/Btooom!/Specials/Just a special SP01.cbz", "Btooom!")]
+    public void ParseFromFallbackFolders_ShouldUseExistingSeriesName(string inputFile, string expectedParseInfo)
+    {
+        const string rootDirectory = "/manga/";
+        var fs = new MockFileSystem();
+        fs.AddDirectory(rootDirectory);
+        fs.AddFile(inputFile, new MockFileData(""));
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var parser = new DefaultParser(ds);
+        var actual = parser.Parse(inputFile, rootDirectory);
+        _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
+        Assert.Equal(expectedParseInfo, actual.Series);
     }
 
     #endregion
@@ -241,6 +262,80 @@ public class DefaultParserTests
             Assert.Equal(expectedInfo.FullFilePath, actual.FullFilePath);
             _testOutputHelper.WriteLine("FullFilePath ✓");
         }
+    }
+
+    [Fact]
+    public void Parse_ParseInfo_Manga_WithSpecialsFolder()
+    {
+        const string rootPath = @"E:/Manga/";
+        var filesystem = new MockFileSystem();
+        filesystem.AddDirectory("E:/Manga");
+        filesystem.AddDirectory("E:/Foo 50");
+        filesystem.AddDirectory("E:/Foo 50/Specials");
+        filesystem.AddFile(@"E:/Manga/Foo 50/Foo 50 v1.cbz", new MockFileData(""));
+        filesystem.AddFile(@"E:/Manga/Foo 50/Specials/Foo 50 SP01.cbz", new MockFileData(""));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var parser = new DefaultParser(ds);
+
+        var filepath = @"E:/Manga/Foo 50/Foo 50 v1.cbz";
+        // There is a bad parse for series like "Foo 50", so we have parsed chapter as 50
+        var expected = new ParserInfo
+        {
+            Series = "Foo 50", Volumes = "1",
+            Chapters = "50", Filename = "Foo 50 v1.cbz", Format = MangaFormat.Archive,
+            FullFilePath = filepath
+        };
+
+        var actual = parser.Parse(filepath, rootPath);
+
+        Assert.NotNull(actual);
+        _testOutputHelper.WriteLine($"Validating {filepath}");
+        Assert.Equal(expected.Format, actual.Format);
+        _testOutputHelper.WriteLine("Format ✓");
+        Assert.Equal(expected.Series, actual.Series);
+        _testOutputHelper.WriteLine("Series ✓");
+        Assert.Equal(expected.Chapters, actual.Chapters);
+        _testOutputHelper.WriteLine("Chapters ✓");
+        Assert.Equal(expected.Volumes, actual.Volumes);
+        _testOutputHelper.WriteLine("Volumes ✓");
+        Assert.Equal(expected.Edition, actual.Edition);
+        _testOutputHelper.WriteLine("Edition ✓");
+        Assert.Equal(expected.Filename, actual.Filename);
+        _testOutputHelper.WriteLine("Filename ✓");
+        Assert.Equal(expected.FullFilePath, actual.FullFilePath);
+        _testOutputHelper.WriteLine("FullFilePath ✓");
+        Assert.Equal(expected.IsSpecial, actual.IsSpecial);
+        _testOutputHelper.WriteLine("IsSpecial ✓");
+
+        filepath = @"E:/Manga/Foo 50/Specials/Foo 50 SP01.cbz";
+        expected = new ParserInfo
+        {
+            Series = "Foo 50", Volumes = "0", IsSpecial = true,
+            Chapters = "50", Filename = "Foo 50 SP01.cbz", Format = MangaFormat.Archive,
+            FullFilePath = filepath
+        };
+
+        actual = parser.Parse(filepath, rootPath);
+        Assert.NotNull(actual);
+        _testOutputHelper.WriteLine($"Validating {filepath}");
+        Assert.Equal(expected.Format, actual.Format);
+        _testOutputHelper.WriteLine("Format ✓");
+        Assert.Equal(expected.Series, actual.Series);
+        _testOutputHelper.WriteLine("Series ✓");
+        Assert.Equal(expected.Chapters, actual.Chapters);
+        _testOutputHelper.WriteLine("Chapters ✓");
+        Assert.Equal(expected.Volumes, actual.Volumes);
+        _testOutputHelper.WriteLine("Volumes ✓");
+        Assert.Equal(expected.Edition, actual.Edition);
+        _testOutputHelper.WriteLine("Edition ✓");
+        Assert.Equal(expected.Filename, actual.Filename);
+        _testOutputHelper.WriteLine("Filename ✓");
+        Assert.Equal(expected.FullFilePath, actual.FullFilePath);
+        _testOutputHelper.WriteLine("FullFilePath ✓");
+        Assert.Equal(expected.IsSpecial, actual.IsSpecial);
+        _testOutputHelper.WriteLine("IsSpecial ✓");
+
     }
 
     [Fact]

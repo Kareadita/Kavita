@@ -48,11 +48,6 @@ namespace API.Extensions
             services.AddScoped<IFileService, FileService>();
             services.AddScoped<ICacheHelper, CacheHelper>();
 
-
-            services.AddScoped<IFileSystem, FileSystem>();
-            services.AddScoped<IFileService, FileService>();
-            services.AddScoped<ICacheHelper, CacheHelper>();
-
             services.AddScoped<IPresenceTracker, PresenceTracker>();
             services.AddScoped<IEventHub, EventHub>();
 

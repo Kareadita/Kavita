@@ -311,7 +311,6 @@ namespace API.SignalR
             {
                 Name = CoverUpdate,
                 Title = "Updating Cover",
-                //SubTitle = series.Name, // TODO: Refactor this
                 Progress = ProgressType.None,
                 Body = new
                 {

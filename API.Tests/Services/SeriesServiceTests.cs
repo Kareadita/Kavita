@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.CollectionTags;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
@@ -99,6 +102,9 @@ public class SeriesServiceTests
     {
         _context.Series.RemoveRange(_context.Series.ToList());
         _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
+        _context.Genre.RemoveRange(_context.Genre.ToList());
+        _context.CollectionTag.RemoveRange(_context.CollectionTag.ToList());
+        _context.Person.RemoveRange(_context.Person.ToList());
 
         await _context.SaveChangesAsync();
     }
@@ -566,6 +572,176 @@ public class SeriesServiceTests
 
         var ratings = user.Ratings;
         Assert.Empty(ratings);
+    }
+
+    #endregion
+
+    #region UpdateSeriesMetadata
+
+    private void SetupUpdateSeriesMetadataDb()
+    {
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            }
+        });
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldCreateEmptyMetadata_IfDoesntExist()
+    {
+        await ResetDb();
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            }
+        });
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Genres = new List<GenreTagDto>() {new GenreTagDto() {Id = 0, Title = "New Genre"}}
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.Genres.Select(g => g.Title).Contains("New Genre".SentenceCase()));
+
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldCreateNewTags_IfNoneExist()
+    {
+        await ResetDb();
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            }
+        });
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Genres = new List<GenreTagDto>() {new GenreTagDto() {Id = 0, Title = "New Genre"}},
+                Tags = new List<TagDto>() {new TagDto() {Id = 0, Title = "New Tag"}},
+                Characters = new List<PersonDto>() {new PersonDto() {Id = 0, Name = "Joe Shmo", Role = PersonRole.Character}},
+                Colorists = new List<PersonDto>() {new PersonDto() {Id = 0, Name = "Joe Shmo", Role = PersonRole.Colorist}},
+                Pencillers = new List<PersonDto>() {new PersonDto() {Id = 0, Name = "Joe Shmo 2", Role = PersonRole.Penciller}},
+            },
+            CollectionTags = new List<CollectionTagDto>()
+            {
+                new CollectionTagDto() {Id = 0, Promoted = false, Summary = string.Empty, CoverImageLocked = false, Title = "New Collection"}
+            }
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.Genres.Select(g => g.Title).Contains("New Genre".SentenceCase()));
+        Assert.True(series.Metadata.People.All(g => g.Name is "Joe Shmo" or "Joe Shmo 2"));
+        Assert.True(series.Metadata.Tags.Select(g => g.Title).Contains("New Tag".SentenceCase()));
+        Assert.True(series.Metadata.CollectionTags.Select(g => g.Title).Contains("New Collection"));
+
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveExistingTags()
+    {
+        await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
+        };
+        var g = DbFactory.Genre("Existing Genre", false);
+        s.Metadata.Genres = new List<Genre>() {g};
+        _context.Series.Add(s);
+
+        _context.Genre.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Genres = new List<GenreTagDto>() {new () {Id = 0, Title = "New Genre"}},
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "New Genre".SentenceCase()));
+        Assert.False(series.Metadata.GenresLocked); // GenreLocked is false unless the UI Explicitly says it should be locked
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldLockIfTold()
+    {
+        await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
+        };
+        var g = DbFactory.Genre("Existing Genre", false);
+        s.Metadata.Genres = new List<Genre>() {g};
+        s.Metadata.GenresLocked = true;
+        _context.Series.Add(s);
+
+        _context.Genre.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Genres = new List<GenreTagDto>() {new () {Id = 1, Title = "Existing Genre"}},
+                GenresLocked = true
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "Existing Genre".SentenceCase()));
+        Assert.True(series.Metadata.GenresLocked);
     }
 
     #endregion

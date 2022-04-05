@@ -18,7 +18,7 @@ namespace API.Data
     {
         public static Series Series(string name)
         {
-            return new ()
+            return new Series
             {
                 Name = name,
                 OriginalName = name,

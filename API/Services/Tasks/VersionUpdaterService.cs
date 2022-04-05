@@ -54,18 +54,16 @@ public class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly IPresenceTracker _tracker;
     private readonly Markdown _markdown = new MarkdownDeep.Markdown();
 #pragma warning disable S1075
     private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
     private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
 #pragma warning restore S1075
 
-    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub, IPresenceTracker tracker)
+    public VersionUpdaterService(ILogger<VersionUpdaterService> logger, IEventHub eventHub)
     {
         _logger = logger;
         _eventHub = eventHub;
-        _tracker = tracker;
 
         FlurlHttp.ConfigureClient(GithubLatestReleasesUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -94,12 +92,7 @@ public class VersionUpdaterService : IVersionUpdaterService
     {
         if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
-        var currentVersion = BuildInfo.Version.ToString();
-
-        if (updateVersion.Revision == -1)
-        {
-            currentVersion = currentVersion.Substring(0, currentVersion.LastIndexOf(".", StringComparison.Ordinal));
-        }
+        var currentVersion = BuildInfo.Version.ToString(4);
 
         return new UpdateNotificationDto()
         {
