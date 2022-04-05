@@ -142,11 +142,12 @@ public class DefaultParser
               }
             }
 
-            if (!folder.Equals(ret.Series))
+            // Generally users group in series folders. Let's try to parse series from the top folder
+            if (!folder.Equals(ret.Series) && i == fallbackFolders.Count - 1)
             {
                 var series = Parser.ParseSeries(folder);
 
-                if ((string.IsNullOrEmpty(series) && i == fallbackFolders.Count - 1))
+                if (string.IsNullOrEmpty(series))
                 {
                     ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
                     break;
