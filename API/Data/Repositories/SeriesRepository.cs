@@ -47,7 +47,7 @@ public interface ISeriesRepository
     void Update(Series series);
     void Remove(Series series);
     void Remove(IEnumerable<Series> series);
-    Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format);
+    Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format);
     /// <summary>
     /// Adds user information like progress, ratings, etc
     /// </summary>
@@ -135,17 +135,12 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="name">Name of series</param>
     /// <param name="format">Format of series</param>
     /// <returns></returns>
-    public async Task<bool> DoesSeriesNameExistInLibrary(string name, MangaFormat format)
+    public async Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format)
     {
-        var libraries = _context.Series
-            .AsNoTracking()
-            .Where(x => x.Name.Equals(name) && x.Format == format)
-            .Select(s => s.LibraryId);
-
         return await _context.Series
             .AsNoTracking()
-            .Where(s => libraries.Contains(s.LibraryId) && s.Name.Equals(name) && s.Format == format)
-            .CountAsync() > 1;
+            .Where(s => s.LibraryId == libraryId && s.Name.Equals(name) && s.Format == format)
+            .CountAsync() > 0;
     }
 
 
