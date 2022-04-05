@@ -140,7 +140,7 @@ public class SeriesRepository : ISeriesRepository
         return await _context.Series
             .AsNoTracking()
             .Where(s => s.LibraryId == libraryId && s.Name.Equals(name) && s.Format == format)
-            .CountAsync() > 0;
+            .AnyAsync();
     }
 
 
