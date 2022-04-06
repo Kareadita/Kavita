@@ -31,6 +31,7 @@ public class BackupService : IBackupService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<BackupService> _logger;
     private readonly IDirectoryService _directoryService;
+    private readonly IConfiguration _config;
     private readonly IEventHub _eventHub;
 
     private readonly IList<string> _backupFiles;
@@ -41,11 +42,12 @@ public class BackupService : IBackupService
         _unitOfWork = unitOfWork;
         _logger = logger;
         _directoryService = directoryService;
+        _config = config;
         _eventHub = eventHub;
 
-        var maxRollingFiles = config.GetMaxRollingFiles();
-        var loggingSection = config.GetLoggingFileName();
-        var files = GetLogFiles(maxRollingFiles, loggingSection);
+        // var maxRollingFiles = config.GetMaxRollingFiles();
+        // var loggingSection = config.GetLoggingFileName();
+        // var files = GetLogFiles(maxRollingFiles, loggingSection);
 
 
         _backupFiles = new List<string>()
@@ -58,12 +60,10 @@ public class BackupService : IBackupService
             "kavita.db-wal" // This wont always be there
         };
 
-        foreach (var file in files.Select(f => (_directoryService.FileSystem.FileInfo.FromFileName(f)).Name).ToList())
-        {
-            _backupFiles.Add(file);
-        }
-
-
+        // foreach (var file in files.Select(f => (_directoryService.FileSystem.FileInfo.FromFileName(f)).Name))
+        // {
+        //     _backupFiles.Add(file);
+        // }
     }
 
     public IEnumerable<string> GetLogFiles(int maxRollingFiles, string logFileName)
@@ -74,7 +74,7 @@ public class BackupService : IBackupService
         var files = maxRollingFiles > 0
             ? _directoryService.GetFiles(_directoryService.LogDirectory,
                 $@"{_directoryService.FileSystem.Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
-            : new[] {"kavita.log"};
+            : new[] {_directoryService.FileSystem.Path.Join(_directoryService.LogDirectory, "kavita.log")};
         return files;
     }
 
@@ -97,6 +97,7 @@ public class BackupService : IBackupService
         }
 
         await SendProgress(0F, "Started backup");
+        await SendProgress(0.1F, "Copying core files");
 
         var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
         var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
@@ -116,15 +117,19 @@ public class BackupService : IBackupService
         _directoryService.CopyFilesToDirectory(
             _backupFiles.Select(file => _directoryService.FileSystem.Path.Join(_directoryService.ConfigDirectory, file)).ToList(), tempDirectory);
 
-        await SendProgress(0.25F, "Copying core files");
+        CopyLogsToBackupDirectory(tempDirectory);
+
+        await SendProgress(0.25F, "Copying cover images");
 
         await CopyCoverImagesToBackupDirectory(tempDirectory);
 
-        await SendProgress(0.5F, "Copying cover images");
+        await SendProgress(0.5F, "Copying bookmarks");
 
         await CopyBookmarksToBackupDirectory(tempDirectory);
 
-        await SendProgress(0.75F, "Copying bookmarks");
+        await SendProgress(0.75F, "Copying themes");
+
+        CopyThemesToBackupDirectory(tempDirectory);
 
         try
         {
@@ -138,6 +143,14 @@ public class BackupService : IBackupService
         _directoryService.ClearAndDeleteDirectory(tempDirectory);
         _logger.LogInformation("Database backup completed");
         await SendProgress(1F, "Completed backup");
+    }
+
+    private void CopyLogsToBackupDirectory(string tempDirectory)
+    {
+        var maxRollingFiles = _config.GetMaxRollingFiles();
+        var loggingSection = _config.GetLoggingFileName();
+        var files = GetLogFiles(maxRollingFiles, loggingSection);
+        _directoryService.CopyFilesToDirectory(files, _directoryService.FileSystem.Path.Join(tempDirectory, "logs"));
     }
 
     private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
@@ -181,6 +194,26 @@ public class BackupService : IBackupService
         try
         {
             _directoryService.CopyDirectoryToDirectory(bookmarkDirectory, outputTempDir);
+        }
+        catch (IOException)
+        {
+            // Swallow exception.
+        }
+
+        if (!_directoryService.GetFiles(outputTempDir, searchOption: SearchOption.AllDirectories).Any())
+        {
+            _directoryService.ClearAndDeleteDirectory(outputTempDir);
+        }
+    }
+
+    private void CopyThemesToBackupDirectory(string tempDirectory)
+    {
+        var outputTempDir = Path.Join(tempDirectory, "themes");
+        _directoryService.ExistOrCreate(outputTempDir);
+
+        try
+        {
+            _directoryService.CopyDirectoryToDirectory(_directoryService.SiteThemeDirectory, outputTempDir);
         }
         catch (IOException)
         {
