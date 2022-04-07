@@ -373,6 +373,11 @@ namespace API.Services
                {
                    currentFile = file;
 
+                   if (!FileSystem.File.Exists(file))
+                   {
+                       _logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
+                       continue;
+                   }
                    var fileInfo = FileSystem.FileInfo.FromFileName(file);
                    var targetFile = FileSystem.FileInfo.FromFileName(RenameFileForCopy(file, directoryPath, prepend));
 
