@@ -983,7 +983,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleDrawer() {
     this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
-    this.drawerOpen = !this.drawerOpen;
+    const open = this.drawerOpen;
+    this.drawerOpen = !(!!open);
+    console.log('this.drawerOpen', this.drawerOpen)
+    console.log('open', open)
+    console.log('!open', !open)
   }
 
   closeDrawer() {
