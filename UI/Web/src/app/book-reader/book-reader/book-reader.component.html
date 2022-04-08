@@ -116,7 +116,7 @@
         <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
         <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
         
-        <div *ngIf="page !== undefined && scrollbarNeeded">
+        <div *ngIf="page !== undefined && scrollbarNeeded" (click)="$event.stopPropagation();">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         </div>
     </div>
@@ -130,7 +130,7 @@
                 <span class="d-none d-sm-block">&nbsp;{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}}</span>
             </button>
             <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back"><i class="fa fa-reply" aria-hidden="true"></i><span class="d-none d-sm-block">&nbsp;Go Back</span></button>
-            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="d-none d-sm-block">Settings</span></button>
+            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()"><i class="fa fa-bars" aria-hidden="true"></i><span class="d-none d-sm-block">Settings {{drawerOpen}}</span></button>
             <div class="book-title col-2 d-none d-sm-block">
                 <ng-container *ngIf="isLoading; else showTitle">
                     <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
@@ -138,7 +138,7 @@
                     </div>
                 </ng-container>
                 <ng-template #showTitle>
-                    {{bookTitle}}
+                    <span class="book-title-text">{{bookTitle}}</span>
                     <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode</span>)</span>
                 </ng-template>
             </div>
