@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { fromEvent, Subject } from 'rxjs';
@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { ImageService } from 'src/app/_services/image.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { UploadService } from 'src/app/_services/upload.service';
+import { DOCUMENT } from '@angular/common';
 
 @Component({
   selector: 'app-cover-image-chooser',
@@ -42,7 +43,8 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   mode: 'file' | 'url' | 'all' = 'all';
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService, private uploadService: UploadService) { }
+  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService, private uploadService: UploadService,
+    @Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -84,10 +86,10 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
         const img = new Image();
         img.crossOrigin = 'Anonymous';
         img.src = this.imageService.getCoverUploadImage(filename);
-        img.onload = (e) => this.handleUrlImageAdd(e);
+        img.onload = (e) => this.handleUrlImageAdd(img);
         img.onerror = (e) => {
           this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
-          this.form.get('coverImageUrl')?.setValue('');  
+          this.form.get('coverImageUrl')?.setValue('');
         };
         this.form.get('coverImageUrl')?.setValue('');
       });
@@ -95,8 +97,10 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   }
 
   changeMode(mode: 'url') {
-    this.mode = mode; 
+    this.mode = mode;
     this.setupEnterHandler();
+
+    setTimeout(() => (this.document.querySelector('#load-image') as HTMLInputElement)?.focus(), 10);
   }
 
   public dropped(files: NgxFileDropEntry[]) {
@@ -125,10 +129,8 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     this.selectedBase64Url.emit(e.target.result);
   }
 
-  handleUrlImageAdd(e: any) {
-    if (e.path === null || e.path.length === 0) return;
-
-    const url = this.getBase64Image(e.path[0]);
+  handleUrlImageAdd(img: HTMLImageElement) {
+    const url = this.getBase64Image(img);
     this.imageUrls.push(url);
     this.imageUrlsChange.emit(this.imageUrls);
 
@@ -162,7 +164,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
               this.loadImage();
               break;
             }
-      
+
             case KEY_CODES.ESC_KEY:
               this.mode = 'all';
               event.stopPropagation();

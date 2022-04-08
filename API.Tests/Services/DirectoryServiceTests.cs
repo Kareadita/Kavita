@@ -509,6 +509,21 @@ namespace API.Tests.Services
         }
 
         [Fact]
+        public void CopyFilesToDirectory_ShouldMoveAllFilesAndNotFailOnNonExistentFiles()
+        {
+            const string testDirectory = "/manga/";
+            var fileSystem = new MockFileSystem();
+            for (var i = 0; i < 10; i++)
+            {
+                fileSystem.AddFile($"{testDirectory}file_{i}.zip", new MockFileData(""));
+            }
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{200}.zip", $"{testDirectory}file_{1}.zip"}, "/manga/output/");
+            Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
+        }
+
+        [Fact]
         public void CopyFilesToDirectory_ShouldMoveAllFiles_InclFilesInNestedFolders()
         {
             const string testDirectory = "/manga/";
