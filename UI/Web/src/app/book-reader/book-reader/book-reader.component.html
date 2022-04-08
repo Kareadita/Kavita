@@ -107,15 +107,15 @@
         </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}" 
+    <div #readingSection class="reading-section" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}"
         [@isLoading]="isLoading ? true : false" (click)="handleReaderClick($event)">
 
-        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}" 
+        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}"
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
         <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
-        
+
         <div *ngIf="page !== undefined && scrollbarNeeded" (click)="$event.stopPropagation();">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         </div>
@@ -123,8 +123,8 @@
 
     <ng-template #actionBar>
         <div class="reading-bar row g-0 justify-content-between">
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()" 
-                [disabled]="IsPrevDisabled" 
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()"
+                [disabled]="IsPrevDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
                 <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}}" aria-hidden="true"></i>
                 <span class="d-none d-sm-block">&nbsp;{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}}</span>
@@ -143,8 +143,8 @@
                 </ng-template>
             </div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="d-none d-sm-block">&nbsp;Close</span></button>
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" 
-                [disabled]="IsNextDisabled" 
+            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
+                [disabled]="IsNextDisabled"
                 (click)="nextPage()" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
                 <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
                 <span class="d-none d-sm-block">{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}}&nbsp;</span>

@@ -131,6 +131,7 @@ namespace API.Helpers
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();
+
         }
     }
 }

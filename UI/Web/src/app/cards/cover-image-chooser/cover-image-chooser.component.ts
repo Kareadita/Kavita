@@ -43,7 +43,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   mode: 'file' | 'url' | 'all' = 'all';
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService, private uploadService: UploadService, 
+  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService, private uploadService: UploadService,
     @Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {
@@ -89,7 +89,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
         img.onload = (e) => this.handleUrlImageAdd(img);
         img.onerror = (e) => {
           this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
-          this.form.get('coverImageUrl')?.setValue('');  
+          this.form.get('coverImageUrl')?.setValue('');
         };
         this.form.get('coverImageUrl')?.setValue('');
       });
@@ -97,7 +97,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   }
 
   changeMode(mode: 'url') {
-    this.mode = mode; 
+    this.mode = mode;
     this.setupEnterHandler();
 
     setTimeout(() => (this.document.querySelector('#load-image') as HTMLInputElement)?.focus(), 10);
@@ -164,7 +164,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
               this.loadImage();
               break;
             }
-      
+
             case KEY_CODES.ESC_KEY:
               this.mode = 'all';
               event.stopPropagation();

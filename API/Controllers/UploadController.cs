@@ -9,6 +9,7 @@ using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Controllers
 {
