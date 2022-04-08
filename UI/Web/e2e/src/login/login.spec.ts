@@ -23,3 +23,21 @@ test('Should be able to log in', async ({ page }) => {
     await page.waitForLoadState();
     expect(page.url()).toBe('http://localhost:4200/library');
 });
+
+test('Should get a toastr when no username', async ({ page }) => {
+
+    await page.goto('http://localhost:4200/login', { waitUntil: 'networkidle' });
+    const username = page.locator('#username');
+    expect(username).toBeEditable();
+
+    await username.type('');
+
+    const button =  page.locator('button[type="submit"]');
+    await button.click();
+
+    await page.waitForTimeout(100);
+    const toastr = page.locator('#toast-container div[role="alertdialog"]')
+    await expect(toastr).toHaveText('Invalid username');
+    
+    expect(page.url()).toBe('http://localhost:4200/login');
+});
