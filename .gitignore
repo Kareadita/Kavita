@@ -517,10 +517,12 @@ UI/Web/dist/
 /API/config/kavita.db-shm
 /API/config/kavita.db-wal
 /API/config/kavita.db-journal
+/API/config/*.db
+/API/config/*.bak
+/API/config/*.backup
 /API/config/Hangfire.db
 /API/config/Hangfire-log.db
 API/config/covers/
-API/config/*.db
 API/config/stats/*
 API/config/stats/app_stats.json
 API/config/pre-metadata/
