@@ -16,6 +16,11 @@ namespace API.Entities
         /// Reading lists that are promoted are only done by admins
         /// </summary>
         public bool Promoted { get; set; }
+        /// <summary>
+        /// Absolute path to the (managed) image file
+        /// </summary>
+        /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
+        public string CoverImage { get; set; }
 
         public ICollection<ReadingListItem> Items { get; set; }
         public DateTime Created { get; set; }

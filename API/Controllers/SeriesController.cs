@@ -214,13 +214,6 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId));
         }
 
-        [HttpPost("recently-added-chapters")]
-        public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChaptersAlt()
-        {
-            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAddedChapters(userId));
-        }
-
         [HttpPost("all")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
