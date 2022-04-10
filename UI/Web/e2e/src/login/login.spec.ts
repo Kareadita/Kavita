@@ -19,8 +19,8 @@ test('Should be able to log in', async ({ page }) => {
     const button =  page.locator('button[type="submit"]');
     await button.click();
 
-    await page.waitForTimeout(1000);
-    await page.waitForLoadState();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(200)
     expect(page.url()).toBe('http://localhost:4200/library');
 });
 
