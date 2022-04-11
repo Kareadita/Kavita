@@ -20,7 +20,7 @@ your reading collection with your friends and family!
 ## Goals
 - [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
-- [x] Dark and Light themes
+- [x] Dark and Light themes (and customizable themes)
 - [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
 - [x] Metadata should allow for collections, want to read integration from 3rd party services, genres.
 - [x] Ability to manage users, access, and ratings

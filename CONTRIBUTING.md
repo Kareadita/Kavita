@@ -54,4 +54,10 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
     - feature/parser-enhancements (Great)
     - bugfix/book-issues (Great)
 
+### Swagger API ###
+If you just want to play with Swagger, you can just
+- cd Kavita/API
+- dotnet run -c Debug
+- Go to http://localhost:5000/swagger/index.html
+
 If you have any questions about any of this, please let us know.
