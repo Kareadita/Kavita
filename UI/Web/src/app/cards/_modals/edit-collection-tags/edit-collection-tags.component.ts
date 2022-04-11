@@ -4,6 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { ConfirmService } from 'src/app/shared/confirm.service';
+import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { SelectionModel } from 'src/app/typeahead/typeahead.component';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Pagination } from 'src/app/_models/pagination';
@@ -40,11 +41,15 @@ export class EditCollectionTagsComponent implements OnInit {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
+  get Breakpoint() {
+    return Breakpoint;
+  }
 
   constructor(public modal: NgbActiveModal, private seriesService: SeriesService, 
     private collectionService: CollectionTagService, private toastr: ToastrService,
     private confirmSerivce: ConfirmService, private libraryService: LibraryService,
-    private imageService: ImageService, private uploadService: UploadService) { }
+    private imageService: ImageService, private uploadService: UploadService,
+    public utilityService: UtilityService) { }
 
   ngOnInit(): void {
     if (this.pagination == undefined) {
