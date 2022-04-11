@@ -564,8 +564,7 @@ public class ScannerService : IScannerService
     private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, LibraryType libraryType)
     {
         var isBook = libraryType == LibraryType.Book;
-        var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
-        var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
         if (firstFile == null) return;
@@ -695,9 +694,50 @@ public class ScannerService : IScannerService
             }
         }
 
+        // BUG: The issue here is that people is just from chapter, but series metadata might already have some people on it
+        // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();
         PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
-            people, person => series.Metadata.People.Remove(person));
+            people, person =>
+            {
+                switch (person.Role)
+                {
+                    case PersonRole.Writer:
+                        if (!series.Metadata.WriterLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Penciller:
+                        if (!series.Metadata.PencillerLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Inker:
+                        if (!series.Metadata.InkerLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Colorist:
+                        if (!series.Metadata.ColoristLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Letterer:
+                        if (!series.Metadata.LettererLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.CoverArtist:
+                        if (!series.Metadata.CoverArtistLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Editor:
+                        if (!series.Metadata.EditorLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Publisher:
+                        if (!series.Metadata.PublisherLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Character:
+                        if (!series.Metadata.CharacterLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Translator:
+                        if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Other:
+                    default:
+                        series.Metadata.People.Remove(person);
+                        break;
+                }
+            });
     }
 
 
@@ -720,7 +760,7 @@ public class ScannerService : IScannerService
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
-            UpdateChapters(volume, infos);
+            UpdateChapters(series, volume, infos);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
 
             // Update all the metadata on the Chapters
@@ -767,7 +807,7 @@ public class ScannerService : IScannerService
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
-    private void UpdateChapters(Volume volume, IList<ParserInfo> parsedInfos)
+    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -789,30 +829,18 @@ public class ScannerService : IScannerService
             {
                 _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
-                volume.Chapters.Add(DbFactory.Chapter(info));
+                chapter = DbFactory.Chapter(info);
+                volume.Chapters.Add(chapter);
+                series.LastChapterAdded = DateTime.Now;
             }
             else
             {
                 chapter.UpdateFrom(info);
             }
 
-        }
-
-        // Add files
-        foreach (var info in parsedInfos)
-        {
-            var specialTreatment = info.IsSpecialInfo();
-            Chapter chapter;
-            try
-            {
-                chapter = volume.Chapters.GetChapterByRange(info);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception parsing chapter. Skipping {SeriesName} Vol {VolumeNumber} Chapter {ChapterNumber} - Special treatment: {NeedsSpecialTreatment}", info.Series, volume.Name, info.Chapters, specialTreatment);
-                continue;
-            }
             if (chapter == null) continue;
+            // Add files
+            var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info);
             chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty;
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;

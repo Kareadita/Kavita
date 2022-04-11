@@ -64,16 +64,14 @@ public static class PersonHelper
     /// </summary>
     /// <param name="existingPeople"></param>
     /// <param name="removeAllExcept"></param>
-    /// <param name="action">Callback for all entities that was removed</param>
-    public static void KeepOnlySamePeopleBetweenLists(ICollection<Person> existingPeople, ICollection<Person> removeAllExcept, Action<Person> action = null)
+    /// <param name="action">Callback for all entities that should be removed</param>
+    public static void KeepOnlySamePeopleBetweenLists(IEnumerable<Person> existingPeople, ICollection<Person> removeAllExcept, Action<Person> action = null)
     {
-        var existing = existingPeople.ToList();
-        foreach (var person in existing)
+        foreach (var person in existingPeople)
         {
             var existingPerson = removeAllExcept.FirstOrDefault(p => p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
             if (existingPerson == null)
             {
-                existingPeople.Remove(person);
                 action?.Invoke(person);
             }
         }

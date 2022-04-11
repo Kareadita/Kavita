@@ -62,6 +62,11 @@ namespace API.Entities
         public bool SortNameLocked { get; set; }
         public bool LocalizedNameLocked { get; set; }
 
+        /// <summary>
+        /// When a Chapter was last added onto the Series
+        /// </summary>
+        public DateTime LastChapterAdded { get; set; }
+
         public SeriesMetadata Metadata { get; set; }
         public ICollection<AppUserRating> Ratings { get; set; } = new List<AppUserRating>();
         public ICollection<AppUserProgress> Progress { get; set; } = new List<AppUserProgress>();

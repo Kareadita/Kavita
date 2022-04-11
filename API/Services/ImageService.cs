@@ -143,4 +143,16 @@ public class ImageService : IImageService
     {
         return $"tag{tagId}";
     }
+
+    /// <summary>
+    /// Returns the name format for a reading list cover image
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    public static string GetReadingListFormat(int readingListId)
+    {
+        return $"readinglist{readingListId}";
+    }
+
+
 }

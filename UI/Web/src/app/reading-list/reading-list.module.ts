@@ -12,6 +12,7 @@ import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal
 import { PipeModule } from '../pipe/pipe.module';
 import { SharedModule } from '../shared/shared.module';
 import { SidenavModule } from '../sidenav/sidenav.module';
+import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 
@@ -31,7 +32,8 @@ import { SidenavModule } from '../sidenav/sidenav.module';
     CardsModule,
     PipeModule,
     SharedModule,
-    SidenavModule
+    SidenavModule,
+    NgbNavModule
   ],
   exports: [
     AddToListModalComponent,

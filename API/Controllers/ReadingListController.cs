@@ -7,6 +7,7 @@ using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
+using API.SignalR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -14,11 +15,13 @@ namespace API.Controllers
     public class ReadingListController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEventHub _eventHub;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-        public ReadingListController(IUnitOfWork unitOfWork)
+        public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub)
         {
             _unitOfWork = unitOfWork;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -233,9 +236,12 @@ namespace API.Controllers
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
             if (readingList == null) return BadRequest("List does not exist");
 
+
+
             if (!string.IsNullOrEmpty(dto.Title))
             {
                 readingList.Title = dto.Title; // Should I check if this is unique?
+                readingList.NormalizedTitle = Parser.Parser.Normalize(readingList.Title);
             }
             if (!string.IsNullOrEmpty(dto.Title))
             {
@@ -243,6 +249,19 @@ namespace API.Controllers
             }
 
             readingList.Promoted = dto.Promoted;
+
+            readingList.CoverImageLocked = dto.CoverImageLocked;
+
+            if (!dto.CoverImageLocked)
+            {
+                readingList.CoverImageLocked = false;
+                readingList.CoverImage = string.Empty;
+                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(readingList.Id, "readingList"), false);
+                _unitOfWork.ReadingListRepository.Update(readingList);
+            }
+
+
 
             _unitOfWork.ReadingListRepository.Update(readingList);
 

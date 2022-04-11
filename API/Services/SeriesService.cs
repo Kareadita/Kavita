@@ -10,6 +10,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,19 @@ public class SeriesService : ISeriesService
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Returns the first chapter for a series to extract metadata from (ie Summary, etc)
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="isBookLibrary"></param>
+    /// <returns></returns>
+    public static Chapter GetFirstChapterForMetadata(Series series, bool isBookLibrary)
+    {
+        return series.Volumes.OrderBy(v => v.Number, new ChapterSortComparer())
+            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()))
+            .FirstOrDefault();
     }
 
     public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
@@ -153,6 +167,8 @@ public class SeriesService : ISeriesService
             if (!updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked) series.Metadata.CoverArtistLocked = false;
             if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
             if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
+
+            series.Metadata.PublisherLocked = updateSeriesMetadataDto.SeriesMetadata.PublisherLocked;
 
 
 
@@ -334,7 +350,7 @@ public class SeriesService : ISeriesService
             var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
             if (existingTag != null)
             {
-                if (series.Metadata.People.All(t => t.Name != tag.Name && t.Role == tag.Role))
+                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => !t.Name.Equals(tag.Name)))
                 {
                     handleAdd(existingTag);
                     isModified = true;

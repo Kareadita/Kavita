@@ -20,7 +20,9 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+~~Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).~~
+
+Run `npx playwright test --reporter=line` or `npx playwright test` to run e2e tests. 
 
 ## Further help
 

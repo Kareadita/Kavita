@@ -89,6 +89,22 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Returns cover image for a Reading List
+        /// </summary>
+        /// <param name="readingListId"></param>
+        /// <returns></returns>
+        [HttpGet("readinglist-cover")]
+        public async Task<ActionResult> GetReadingListCoverImage(int readingListId)
+        {
+            var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
+            if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+            var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+
+            Response.AddCacheHeader(path);
+            return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
+        }
+
+        /// <summary>
         /// Returns image for a given bookmark page
         /// </summary>
         /// <remarks>This request is served unauthenticated, but user must be passed via api key to validate</remarks>

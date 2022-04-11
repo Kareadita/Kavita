@@ -95,8 +95,7 @@ public interface ISeriesRepository
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
     Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
-    Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId);
-    Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId);
+    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -607,7 +606,6 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<IEnumerable<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter, bool cutoffOnDate = true)
     {
-        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
         var query = (await CreateFilteredSearchQueryable(userId, libraryId, filter))
             .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) =>
                 new
@@ -619,24 +617,19 @@ public class SeriesRepository : ISeriesRepository
                     LastReadingProgress = _context.AppUserProgresses
                         .Where(p => p.Id == progress.Id && p.AppUserId == userId)
                         .Max(p => p.LastModified),
-                    // This is only taking into account chapters that have progress on them, not all chapters in said series
-                    //LastChapterCreated = _context.Chapter.Where(c => progress.ChapterId == c.Id).Max(c => c.Created),
-                    LastChapterCreated = s.Volumes.SelectMany(v => v.Chapters).Max(c => c.Created)
+                    s.LastChapterAdded
                 });
         if (cutoffOnDate)
         {
-            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint || d.LastChapterCreated >= cutoffProgressPoint);
+            var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
+            query = query.Where(d => d.LastReadingProgress >= cutoffProgressPoint || d.LastChapterAdded >= cutoffProgressPoint);
         }
-
-        // I think I need another Join statement. The problem is the chapters are still limited to progress
-
-
 
         var retSeries = query.Where(s => s.AppUserId == userId
                                          && s.PagesRead > 0
                                          && s.PagesRead < s.Series.Pages)
             .OrderByDescending(s => s.LastReadingProgress)
-            .ThenByDescending(s => s.LastChapterCreated)
+            .ThenByDescending(s => s.LastChapterAdded)
             .Select(s => s.Series)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
@@ -903,116 +896,79 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    private static string RecentlyAddedItemTitle(RecentlyAddedSeries item)
-    {
-        switch (item.LibraryType)
-        {
-            case LibraryType.Book:
-                return string.Empty;
-            case LibraryType.Comic:
-                return "Issue";
-            case LibraryType.Manga:
-            default:
-                return "Chapter";
-        }
-    }
-
-    /// <summary>
-    /// Show all recently added chapters. Provide some mapping for chapter 0 -> Volume 1
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    public async Task<IList<RecentlyAddedItemDto>> GetRecentlyAddedChapters(int userId)
-    {
-        var ret = await GetRecentlyAddedChaptersQuery(userId);
-
-        var items = new List<RecentlyAddedItemDto>();
-        foreach (var item in ret)
-        {
-            var dto = new RecentlyAddedItemDto()
-            {
-                LibraryId = item.LibraryId,
-                LibraryType = item.LibraryType,
-                SeriesId = item.SeriesId,
-                SeriesName = item.SeriesName,
-                Created = item.Created,
-                Id = items.Count,
-                Format = item.Format
-            };
-
-            // Add title and Volume/Chapter Id
-            var chapterTitle = RecentlyAddedItemTitle(item);
-            string title;
-            if (item.ChapterNumber.Equals(Parser.Parser.DefaultChapter))
-            {
-                if ((item.VolumeNumber + string.Empty).Equals(Parser.Parser.DefaultChapter))
-                {
-                    title = item.ChapterTitle;
-                }
-                else
-                {
-                    title = "Volume " + item.VolumeNumber;
-                }
-
-                dto.VolumeId = item.VolumeId;
-            }
-            else
-            {
-                title = item.IsSpecial
-                    ? item.ChapterRange
-                    : $"{chapterTitle} {item.ChapterRange}";
-                dto.ChapterId = item.ChapterId;
-            }
-
-            dto.Title = title;
-            items.Add(dto);
-        }
-
-
-        return items;
-
-    }
-
 
     /// <summary>
     /// Return recently updated series, regardless of read progress, and group the number of volume or chapters added.
     /// </summary>
     /// <param name="userId">Used to ensure user has access to libraries</param>
     /// <returns></returns>
-    public async Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId)
+    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId)
     {
-        var ret = await GetRecentlyAddedChaptersQuery(userId, 150);
+         var ret = await GetRecentlyAddedChaptersQuery(userId, 150);
+
+         var seriesMap = new Dictionary<string, GroupedSeriesDto>();
+         var index = 0;
+         foreach (var item in ret)
+         {
+             if (seriesMap.ContainsKey(item.SeriesName))
+             {
+                 seriesMap[item.SeriesName].Count += 1;
+             }
+             else
+             {
+                 seriesMap[item.SeriesName] = new GroupedSeriesDto()
+                 {
+                     LibraryId = item.LibraryId,
+                     LibraryType = item.LibraryType,
+                     SeriesId = item.SeriesId,
+                     SeriesName = item.SeriesName,
+                     Created = item.Created,
+                     Id = index,
+                     Format = item.Format,
+                     Count = 1,
+                 };
+                 index += 1;
+             }
+         }
+
+         return seriesMap.Values.AsEnumerable();
+
+         //return seriesMap.Values.ToList();
+
+         // var libraries = await _context.AppUser
+         //     .Where(u => u.Id == userId)
+         //     .SelectMany(u => u.Libraries.Select(l => new {LibraryId = l.Id, LibraryType = l.Type}))
+         //     .ToListAsync();
+         // var libraryIds = libraries.Select(l => l.LibraryId).ToList();
+         //
+         // var cuttoffDate = DateTime.Now - TimeSpan.FromDays(12);
+         //
+         // var ret2 = _context.Series
+         //     .Where(s => s.LastChapterAdded >= cuttoffDate
+         //                                             && libraryIds.Contains(s.LibraryId))
+         //     .Select((s) => new GroupedSeriesDto
+         //     {
+         //         LibraryId = s.LibraryId,
+         //         LibraryType = s.Library.Type,
+         //         SeriesId = s.Id,
+         //         SeriesName = s.Name,
+         //         //Created = s.LastChapterAdded, // Hmm on first migration this wont work
+         //         Created = s.Volumes.SelectMany(v => v.Chapters).Max(c => c.Created), // Hmm on first migration this wont work
+         //         Count = s.Volumes.SelectMany(v => v.Chapters).Count(c => c.Created >= cuttoffDate),
+         //         //Id = index,
+         //         Format = s.Format
+         //     })
+         //     .Take(50)
+         //     .OrderByDescending(c => c.Created)
+         //     .AsSplitQuery()
+         //     .AsEnumerable();
+         //
+         // return ret2;
 
 
-        var seriesMap = new Dictionary<string, GroupedSeriesDto>();
-        var index = 0;
-        foreach (var item in ret)
-        {
-            if (seriesMap.ContainsKey(item.SeriesName))
-            {
-                seriesMap[item.SeriesName].Count += 1;
-            }
-            else
-            {
-                seriesMap[item.SeriesName] = new GroupedSeriesDto()
-                {
-                    LibraryId = item.LibraryId,
-                    LibraryType = item.LibraryType,
-                    SeriesId = item.SeriesId,
-                    SeriesName = item.SeriesName,
-                    Created = item.Created,
-                    Id = index,
-                    Format = item.Format,
-                    Count = 1
-                };
-                index += 1;
-            }
-        }
-
-        return seriesMap.Values.ToList();
     }
 
-    private async Task<List<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId, int maxRecords = 50)
+    private async Task<IEnumerable<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId, int maxRecords = 50)
     {
         var libraries = await _context.AppUser
             .Where(u => u.Id == userId)
@@ -1021,7 +977,7 @@ public class SeriesRepository : ISeriesRepository
         var libraryIds = libraries.Select(l => l.LibraryId).ToList();
 
         var withinLastWeek = DateTime.Now - TimeSpan.FromDays(12);
-        var ret = await _context.Chapter
+        var ret = _context.Chapter
             .Where(c => c.Created >= withinLastWeek)
             .AsNoTracking()
             .Include(c => c.Volume)
@@ -1045,8 +1001,9 @@ public class SeriesRepository : ISeriesRepository
                 ChapterTitle = c.Title
             })
             .Take(maxRecords)
+            .AsSplitQuery()
             .Where(c => c.Created >= withinLastWeek && libraryIds.Contains(c.LibraryId))
-            .ToListAsync();
+            .AsEnumerable();
         return ret;
     }
 }

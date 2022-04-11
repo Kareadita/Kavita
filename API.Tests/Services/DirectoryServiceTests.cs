@@ -17,6 +17,7 @@ namespace API.Tests.Services
     {
         private readonly ILogger<DirectoryService> _logger = Substitute.For<ILogger<DirectoryService>>();
 
+
         #region TraverseTreeParallelForEach
         [Fact]
         public void TraverseTreeParallelForEach_JustArchives_ShouldBe28()
@@ -575,19 +576,22 @@ namespace API.Tests.Services
         [Fact]
         public void CopyFilesToDirectory_ShouldAppendWhenTargetFileExists()
         {
+
             const string testDirectory = "/manga/";
             var fileSystem = new MockFileSystem();
-            fileSystem.AddFile($"{testDirectory}file.zip", new MockFileData(""));
-            fileSystem.AddFile($"/manga/output/file (1).zip", new MockFileData(""));
-            fileSystem.AddFile($"/manga/output/file (2).zip", new MockFileData(""));
+            fileSystem.AddFile(MockUnixSupport.Path($"{testDirectory}file.zip"), new MockFileData(""));
+            fileSystem.AddFile(MockUnixSupport.Path($"/manga/output/file (1).zip"), new MockFileData(""));
+            fileSystem.AddFile(MockUnixSupport.Path($"/manga/output/file (2).zip"), new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            ds.CopyFilesToDirectory(new []{$"{testDirectory}file.zip"}, "/manga/output/");
-            ds.CopyFilesToDirectory(new []{$"{testDirectory}file.zip"}, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
             var outputFiles = ds.GetFiles("/manga/output/").Select(API.Parser.Parser.NormalizePath).ToList();
             Assert.Equal(4, outputFiles.Count()); // we have 2 already there and 2 copies
-            // For some reason, this has C:/ on directory even though everything is emulated
-            Assert.True(outputFiles.Contains(API.Parser.Parser.NormalizePath("/manga/output/file (3).zip")) || outputFiles.Contains(API.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
+            // For some reason, this has C:/ on directory even though everything is emulated (System.IO.Abstractions issue, not changing)
+            // https://github.com/TestableIO/System.IO.Abstractions/issues/831
+            Assert.True(outputFiles.Contains(API.Parser.Parser.NormalizePath("/manga/output/file (3).zip"))
+                        || outputFiles.Contains(API.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
         }
 
         #endregion

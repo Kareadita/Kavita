@@ -75,6 +75,10 @@ export class ImageService implements OnDestroy {
     return this.baseUrl + 'image/collection-cover?collectionTagId=' + collectionTagId;
   }
 
+  getReadingListCoverImage(readingListId: number) {
+    return this.baseUrl + 'image/readinglist-cover?readingListId=' + readingListId;
+  }
+
   getChapterCoverImage(chapterId: number) {
     return this.baseUrl + 'image/chapter-cover?chapterId=' + chapterId;
   }

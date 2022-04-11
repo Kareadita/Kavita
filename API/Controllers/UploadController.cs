@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs.Uploads;
 using API.Extensions;
 using API.Services;
+using API.SignalR;
 using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,16 +25,18 @@ namespace API.Controllers
         private readonly ILogger<UploadController> _logger;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IDirectoryService _directoryService;
+        private readonly IEventHub _eventHub;
 
         /// <inheritdoc />
         public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
-            ITaskScheduler taskScheduler, IDirectoryService directoryService)
+            ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub)
         {
             _unitOfWork = unitOfWork;
             _imageService = imageService;
             _logger = logger;
             _taskScheduler = taskScheduler;
             _directoryService = directoryService;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -145,6 +148,8 @@ namespace API.Controllers
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
+                    await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(tag.Id, "collection"), false);
                     return Ok();
                 }
 
@@ -156,6 +161,53 @@ namespace API.Controllers
             }
 
             return BadRequest("Unable to save cover image to Collection Tag");
+        }
+
+        /// <summary>
+        /// Replaces reading list cover image and locks it with a base64 encoded image
+        /// </summary>
+        /// <param name="uploadFileDto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [RequestSizeLimit(8_000_000)]
+        [HttpPost("reading-list")]
+        public async Task<ActionResult> UploadReadingListCoverImageFromUrl(UploadFileDto uploadFileDto)
+        {
+            // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+            // See if we can do this all in memory without touching underlying system
+            if (string.IsNullOrEmpty(uploadFileDto.Url))
+            {
+                return BadRequest("You must pass a url to use");
+            }
+
+            try
+            {
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}");
+                var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
+
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    readingList.CoverImage = filePath;
+                    readingList.CoverImageLocked = true;
+                    _unitOfWork.ReadingListRepository.Update(readingList);
+                }
+
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(readingList.Id, "readingList"), false);
+                    return Ok();
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was an issue uploading cover image for Reading List {Id}", uploadFileDto.Id);
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Unable to save cover image to Reading List");
         }
 
         /// <summary>

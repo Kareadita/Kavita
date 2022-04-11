@@ -29,7 +29,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
   isAdmin = false;
 
   recentlyUpdatedSeries: SeriesGroup[] = [];
-  recentlyAddedChapters: RecentlyAddedItem[] = [];
   inProgress: Series[] = [];
   recentlyAddedSeries: Series[] = [];
 
@@ -57,7 +56,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
           this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
-          this.recentlyAddedChapters = this.recentlyAddedChapters.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
         } else if (res.event === EVENTS.ScanSeries) {
           // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
           this.loadRecentlyAdded$.next();
@@ -124,10 +122,6 @@ export class LibraryComponent implements OnInit, OnDestroy {
   loadRecentlyAdded() {
     this.seriesService.getRecentlyUpdatedSeries().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
       this.recentlyUpdatedSeries = updatedSeries;
-    });
-
-    this.seriesService.getRecentlyAddedChapters().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyAddedChapters = updatedSeries;
     });
   }
 

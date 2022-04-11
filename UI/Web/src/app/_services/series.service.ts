@@ -133,9 +133,6 @@ export class SeriesService {
   getRecentlyUpdatedSeries() {
     return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {});
   }
-  getRecentlyAddedChapters() {
-    return this.httpClient.post<RecentlyAddedItem[]>(this.baseUrl + 'series/recently-added-chapters', {});
-  }
 
   getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     const data = this.createSeriesFilter(filter);

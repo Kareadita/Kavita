@@ -192,8 +192,8 @@
                                 <div class="mb-3">
                                     <label for="publisher" class="form-label">Publisher</label>
                                     <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)"
-                                        [(locked)]="metadata.publishersLocked" (onUnlock)="metadata.publishersLocked = false"
-                                        (newItemAdded)="metadata.publishersLocked = true" (selectedData)="metadata.publishersLocked = true">
+                                        [(locked)]="metadata.publisherLocked" (onUnlock)="metadata.publisherLocked = false"
+                                        (newItemAdded)="metadata.publisherLocked = true" (selectedData)="metadata.publisherLocked = true">
                                         <ng-template #badgeItem let-item let-position="idx">
                                             {{item.name}}
                                         </ng-template>

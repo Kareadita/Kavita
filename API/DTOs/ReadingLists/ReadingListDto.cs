@@ -9,5 +9,6 @@
         /// Reading lists that are promoted are only done by admins
         /// </summary>
         public bool Promoted { get; set; }
+        public bool CoverImageLocked { get; set; }
     }
 }

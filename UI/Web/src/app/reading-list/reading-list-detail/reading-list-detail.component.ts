@@ -15,6 +15,7 @@ import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
 import { LibraryService } from '../../_services/library.service';
 import { forkJoin } from 'rxjs';
+import { ReaderService } from 'src/app/_services/reader.service';
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -38,6 +39,8 @@ export class ReadingListDetailComponent implements OnInit {
 
   libraryTypes: {[key: number]: LibraryType} = {};
 
+  readingListImage: string = '';
+
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
   }
@@ -45,7 +48,7 @@ export class ReadingListDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
     public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, 
-    private confirmService: ConfirmService, private libraryService: LibraryService) {}
+    private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -56,6 +59,8 @@ export class ReadingListDetailComponent implements OnInit {
     }
 
     this.listId = parseInt(listId, 10);
+
+    this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     this.libraryService.getLibraries().subscribe(libs => {
       
@@ -105,6 +110,15 @@ export class ReadingListDetailComponent implements OnInit {
     if (typeof action.callback === 'function') {
       action.callback(action.action, this.readingList);
     }
+  }
+
+  readChapter(item: ReadingListItem) {
+    let reader = 'manga';
+    if (item.seriesFormat === MangaFormat.EPUB) {
+      reader = 'book;'
+    }
+    const params = this.readerService.getQueryParamsObject(false, true, this.readingList.id);
+    this.router.navigate(['library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], {queryParams: params});
   }
 
   handleReadingListActionCallback(action: Action, readingList: ReadingList) {
