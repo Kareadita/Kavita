@@ -8,14 +8,6 @@ namespace API.Extensions
 {
     public static class VolumeListExtensions
     {
-        public static Volume FirstWithChapters(this IEnumerable<Volume> volumes, bool inBookSeries)
-        {
-            return inBookSeries
-                ? volumes.FirstOrDefault(v => v.Chapters.Any())
-                : volumes.OrderBy(v => v.Number, new ChapterSortComparer())
-                    .FirstOrDefault(v => v.Chapters.Any());
-        }
-
         /// <summary>
         /// Selects the first Volume to get the cover image from. For a book with only a special, the special will be returned.
         /// If there are both specials and non-specials, then the first non-special will be returned.

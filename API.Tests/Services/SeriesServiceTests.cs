@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Sdk;
 
 namespace API.Tests.Services;
 
@@ -742,6 +743,88 @@ public class SeriesServiceTests
         Assert.NotNull(series.Metadata);
         Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "Existing Genre".SentenceCase()));
         Assert.True(series.Metadata.GenresLocked);
+    }
+
+    #endregion
+
+    #region GetFirstChapterForMetadata
+
+    private static Series CreateSeriesMock()
+    {
+        var files = new List<MangaFile>()
+        {
+            EntityFactory.CreateMangaFile("Test.cbz", MangaFormat.Archive, 1)
+        };
+        return new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("95", false, files, 1),
+                    EntityFactory.CreateChapter("96", false, files, 1),
+                    EntityFactory.CreateChapter("A Special Case", true, files, 1),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, files, 1),
+                    EntityFactory.CreateChapter("2", false, files, 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, files, 1),
+                    EntityFactory.CreateChapter("22", false, files, 1),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, files, 1),
+                    EntityFactory.CreateChapter("32", false, files, 1),
+                }),
+            }
+        };
+    }
+
+    [Fact]
+    public void GetFirstChapterForMetadata_Book_Test()
+    {
+        var series = CreateSeriesMock();
+
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, true);
+        Assert.Same("1", firstChapter.Range);
+    }
+
+    [Fact]
+    public void GetFirstChapterForMetadata_NonBook_ShouldReturnVolume1()
+    {
+        var series = CreateSeriesMock();
+
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, false);
+        Assert.Same("1", firstChapter.Range);
+    }
+
+    [Fact]
+    public void GetFirstChapterForMetadata_NonBook_ShouldReturnVolume1_WhenFirstChapterIsFloat()
+    {
+        var series = CreateSeriesMock();
+        var files = new List<MangaFile>()
+        {
+            EntityFactory.CreateMangaFile("Test.cbz", MangaFormat.Archive, 1)
+        };
+        series.Volumes[1].Chapters = new List<Chapter>()
+        {
+            EntityFactory.CreateChapter("2", false, files, 1),
+            EntityFactory.CreateChapter("1.1", false, files, 1),
+            EntityFactory.CreateChapter("1.2", false, files, 1),
+        };
+
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, false);
+        Assert.Same("1.1", firstChapter.Range);
     }
 
     #endregion

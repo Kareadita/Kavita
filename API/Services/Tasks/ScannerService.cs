@@ -564,8 +564,7 @@ public class ScannerService : IScannerService
     private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, LibraryType libraryType)
     {
         var isBook = libraryType == LibraryType.Book;
-        var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
-        var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
         if (firstFile == null) return;

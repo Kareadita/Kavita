@@ -10,6 +10,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,19 @@ public class SeriesService : ISeriesService
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Returns the first chapter for a series to extract metadata from (ie Summary, etc)
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="isBookLibrary"></param>
+    /// <returns></returns>
+    public static Chapter GetFirstChapterForMetadata(Series series, bool isBookLibrary)
+    {
+        return series.Volumes.OrderBy(v => v.Number, new ChapterSortComparer())
+            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()))
+            .FirstOrDefault();
     }
 
     public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
