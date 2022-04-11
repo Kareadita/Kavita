@@ -148,6 +148,8 @@ namespace API.Controllers
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
+                    await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(tag.Id, "collection"), false);
                     return Ok();
                 }
 
