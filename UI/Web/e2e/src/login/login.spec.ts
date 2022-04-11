@@ -20,7 +20,7 @@ test('Should be able to log in', async ({ page }) => {
     await button.click();
 
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(200)
+    await page.waitForTimeout(200);
     expect(page.url()).toBe('http://localhost:4200/library');
 });
 

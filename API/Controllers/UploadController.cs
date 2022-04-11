@@ -159,6 +159,51 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Replaces reading list cover image and locks it with a base64 encoded image
+        /// </summary>
+        /// <param name="uploadFileDto"></param>
+        /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [RequestSizeLimit(8_000_000)]
+        [HttpPost("reading-list")]
+        public async Task<ActionResult> UploadReadingListCoverImageFromUrl(UploadFileDto uploadFileDto)
+        {
+            // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+            // See if we can do this all in memory without touching underlying system
+            if (string.IsNullOrEmpty(uploadFileDto.Url))
+            {
+                return BadRequest("You must pass a url to use");
+            }
+
+            try
+            {
+                var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}");
+                var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
+
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    readingList.CoverImage = filePath;
+                    readingList.CoverImageLocked = true;
+                    _unitOfWork.ReadingListRepository.Update(readingList);
+                }
+
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                    return Ok();
+                }
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "There was an issue uploading cover image for Reading List {Id}", uploadFileDto.Id);
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Unable to save cover image to Reading List");
+        }
+
+        /// <summary>
         /// Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.
         /// </summary>
         /// <param name="uploadFileDto"></param>

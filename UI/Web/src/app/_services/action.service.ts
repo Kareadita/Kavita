@@ -460,7 +460,7 @@ export class ActionService implements OnDestroy {
   }
 
   editReadingList(readingList: ReadingList, callback?: ReadingListActionCallback) {
-    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'md' });
+    const readingListModalRef = this.modalService.open(EditReadingListModalComponent, { scrollable: true, size: 'lg' });
     readingListModalRef.componentInstance.readingList = readingList; 
     readingListModalRef.closed.pipe(take(1)).subscribe((list) => {
       if (callback && list !== undefined) {

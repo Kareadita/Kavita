@@ -19,5 +19,6 @@ export interface ReadingList {
     title: string;
     summary: string;
     promoted: boolean;
+    coverImageLocked: boolean;
     items: Array<ReadingListItem>;
 }

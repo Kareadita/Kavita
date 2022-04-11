@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220410192816_SeriesLastChapterAddedAndReadingListCoverImage")]
-    partial class SeriesLastChapterAddedAndReadingListCoverImage
+    [Migration("20220410230540_SeriesLastChapterAddedAndReadingListNormalization")]
+    partial class SeriesLastChapterAddedAndReadingListNormalization
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -626,10 +626,16 @@ namespace API.Data.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("CoverImageLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Promoted")

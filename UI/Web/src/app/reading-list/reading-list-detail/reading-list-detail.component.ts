@@ -38,6 +38,8 @@ export class ReadingListDetailComponent implements OnInit {
 
   libraryTypes: {[key: number]: LibraryType} = {};
 
+  readingListImage: string = '';
+
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
   }
@@ -56,6 +58,8 @@ export class ReadingListDetailComponent implements OnInit {
     }
 
     this.listId = parseInt(listId, 10);
+
+    this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     this.libraryService.getLibraries().subscribe(libs => {
       

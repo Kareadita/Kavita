@@ -11,6 +11,10 @@ namespace API.Entities
     {
         public int Id { get; init; }
         public string Title { get; set; }
+        /// <summary>
+        /// A normalized string used to check if the reading list already exists in the DB
+        /// </summary>
+        public string NormalizedTitle { get; set; }
         public string Summary { get; set; }
         /// <summary>
         /// Reading lists that are promoted are only done by admins
@@ -21,6 +25,7 @@ namespace API.Entities
         /// </summary>
         /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
         public string CoverImage { get; set; }
+        public bool CoverImageLocked { get; set; }
 
         public ICollection<ReadingListItem> Items { get; set; }
         public DateTime Created { get; set; }
