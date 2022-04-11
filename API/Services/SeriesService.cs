@@ -168,6 +168,8 @@ public class SeriesService : ISeriesService
             if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
             if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
 
+            series.Metadata.PublisherLocked = updateSeriesMetadataDto.SeriesMetadata.PublisherLocked;
+
 
 
             if (!_unitOfWork.HasChanges())
@@ -348,7 +350,7 @@ public class SeriesService : ISeriesService
             var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
             if (existingTag != null)
             {
-                if (series.Metadata.People.All(t => t.Name != tag.Name && t.Role == tag.Role))
+                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => !t.Name.Equals(tag.Name)))
                 {
                     handleAdd(existingTag);
                     isModified = true;

@@ -32,7 +32,7 @@ export interface SeriesMetadata {
     tagsLocked: boolean;
     writersLocked: boolean;
     coverArtistsLocked: boolean;
-    publishersLocked: boolean;
+    publisherLocked: boolean;
     charactersLocked: boolean;
     pencillersLocked: boolean;
     inkersLocked: boolean;

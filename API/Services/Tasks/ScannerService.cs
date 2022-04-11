@@ -694,9 +694,50 @@ public class ScannerService : IScannerService
             }
         }
 
+        // BUG: The issue here is that people is just from chapter, but series metadata might already have some people on it
+        // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();
         PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
-            people, person => series.Metadata.People.Remove(person));
+            people, person =>
+            {
+                switch (person.Role)
+                {
+                    case PersonRole.Writer:
+                        if (!series.Metadata.WriterLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Penciller:
+                        if (!series.Metadata.PencillerLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Inker:
+                        if (!series.Metadata.InkerLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Colorist:
+                        if (!series.Metadata.ColoristLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Letterer:
+                        if (!series.Metadata.LettererLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.CoverArtist:
+                        if (!series.Metadata.CoverArtistLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Editor:
+                        if (!series.Metadata.EditorLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Publisher:
+                        if (!series.Metadata.PublisherLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Character:
+                        if (!series.Metadata.CharacterLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Translator:
+                        if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Other:
+                    default:
+                        series.Metadata.People.Remove(person);
+                        break;
+                }
+            });
     }
 
 

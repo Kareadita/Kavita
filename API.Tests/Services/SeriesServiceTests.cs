@@ -705,6 +705,85 @@ public class SeriesServiceTests
     }
 
     [Fact]
+    public async Task UpdateSeriesMetadata_ShouldAddNewPerson_NoExistingPeople()
+    {
+        await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
+        };
+        var g = DbFactory.Person("Existing Person", PersonRole.Publisher);
+        _context.Series.Add(s);
+
+        _context.Person.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Publishers = new List<PersonDto>() {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.People.Select(g => g.Name).All(g => g == "Existing Person"));
+        Assert.False(series.Metadata.PublisherLocked); // PublisherLocked is false unless the UI Explicitly says it should be locked
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldAddNewPerson_ExistingPeople()
+    {
+        await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
+        };
+        var g = DbFactory.Person("Existing Person", PersonRole.Publisher);
+        s.Metadata.People = new List<Person>() {DbFactory.Person("Existing Writer", PersonRole.Writer),
+            DbFactory.Person("Existing Translator", PersonRole.Translator), DbFactory.Person("Existing Publisher 2", PersonRole.Publisher)};
+        _context.Series.Add(s);
+
+        _context.Person.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Publishers = new List<PersonDto>() {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
+                PublisherLocked = true
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.True(series.Metadata.People.Select(g => g.Name).All(g => g == "Existing Person"));
+        Assert.True(series.Metadata.PublisherLocked);
+    }
+
+    [Fact]
     public async Task UpdateSeriesMetadata_ShouldLockIfTold()
     {
         await ResetDb();
