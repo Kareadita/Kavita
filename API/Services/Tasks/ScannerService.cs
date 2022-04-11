@@ -719,7 +719,7 @@ public class ScannerService : IScannerService
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
-            UpdateChapters(volume, infos);
+            UpdateChapters(series, volume, infos);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
 
             // Update all the metadata on the Chapters
@@ -766,7 +766,7 @@ public class ScannerService : IScannerService
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
-    private void UpdateChapters(Volume volume, IList<ParserInfo> parsedInfos)
+    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -789,7 +789,7 @@ public class ScannerService : IScannerService
                 _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
                 volume.Chapters.Add(DbFactory.Chapter(info));
-                volume.Series.LastChapterAdded = DateTime.Now;
+                series.LastChapterAdded = DateTime.Now;
             }
             else
             {
