@@ -788,7 +788,8 @@ public class ScannerService : IScannerService
             {
                 _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
-                volume.Chapters.Add(DbFactory.Chapter(info));
+                chapter = DbFactory.Chapter(info);
+                volume.Chapters.Add(chapter);
                 series.LastChapterAdded = DateTime.Now;
             }
             else
@@ -796,23 +797,9 @@ public class ScannerService : IScannerService
                 chapter.UpdateFrom(info);
             }
 
-        }
-
-        // Add files
-        foreach (var info in parsedInfos)
-        {
-            var specialTreatment = info.IsSpecialInfo();
-            Chapter chapter;
-            try
-            {
-                chapter = volume.Chapters.GetChapterByRange(info);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception parsing chapter. Skipping {SeriesName} Vol {VolumeNumber} Chapter {ChapterNumber} - Special treatment: {NeedsSpecialTreatment}", info.Series, volume.Name, info.Chapters, specialTreatment);
-                continue;
-            }
             if (chapter == null) continue;
+            // Add files
+            var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info);
             chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty;
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
