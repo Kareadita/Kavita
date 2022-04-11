@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs.Uploads;
 using API.Extensions;
 using API.Services;
+using API.SignalR;
 using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,16 +25,18 @@ namespace API.Controllers
         private readonly ILogger<UploadController> _logger;
         private readonly ITaskScheduler _taskScheduler;
         private readonly IDirectoryService _directoryService;
+        private readonly IEventHub _eventHub;
 
         /// <inheritdoc />
         public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
-            ITaskScheduler taskScheduler, IDirectoryService directoryService)
+            ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub)
         {
             _unitOfWork = unitOfWork;
             _imageService = imageService;
             _logger = logger;
             _taskScheduler = taskScheduler;
             _directoryService = directoryService;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -190,6 +193,8 @@ namespace API.Controllers
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
+                    await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(readingList.Id, "readingList"), false);
                     return Ok();
                 }
 
