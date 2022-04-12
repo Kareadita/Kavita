@@ -36,6 +36,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
+  tabs: Array<{title: string, fragment: string}> = [
+    {title: 'Recommended', fragment: 'recomended'},
+    {title: 'Library', fragment: ''},
+  ];
+  active = this.tabs[0];
+
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -95,6 +101,15 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
     this.filterSettings.presets.libraries = [this.libraryId];
+
+    this.route.fragment.subscribe(frag => {
+      const tab = this.tabs.filter(item => item.fragment === frag);
+      if (tab.length > 0) {
+        this.active = tab[0];
+      } else {
+        this.active = this.tabs[0]; // Default to first tab
+      }
+    });
   }
 
   ngOnInit(): void {

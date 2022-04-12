@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { debounceTime, filter, take, takeUntil } from 'rxjs/operators';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { Library } from '../_models/library';
@@ -22,6 +22,11 @@ import { SeriesService } from '../_services/series.service';
   styleUrls: ['./library.component.scss']
 })
 export class LibraryComponent implements OnInit, OnDestroy {
+
+  /**
+   * By default, 0, but if non-zero, will limit all API calls to library id
+   */
+  @Input() libraryId: number = 0;
 
   user: User | undefined;
   libraries: Library[] = [];
@@ -107,21 +112,36 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   loadOnDeck() {
-    this.seriesService.getOnDeck().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+    let api = this.seriesService.getOnDeck();
+    if (this.libraryId > 0) {
+      api = this.seriesService.getOnDeck(this.libraryId);
+    }
+    api.pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
     });
   }
 
   loadRecentlyAddedSeries() {
-    this.seriesService.getRecentlyAdded().pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
+    let api = this.seriesService.getRecentlyAdded();
+    if (this.libraryId > 0) {
+      api = this.seriesService.getRecentlyAdded(this.libraryId);
+    }
+    api.pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.recentlyAddedSeries = updatedSeries.result;
     });
   }
 
 
   loadRecentlyAdded() {
-    this.seriesService.getRecentlyUpdatedSeries().pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
-      this.recentlyUpdatedSeries = updatedSeries;
+    let api = this.seriesService.getRecentlyUpdatedSeries();
+    if (this.libraryId > 0) {
+      api = this.seriesService.getRecentlyUpdatedSeries();
+    }
+    api.pipe(takeUntil(this.onDestroy)).subscribe(updatedSeries => {
+      this.recentlyUpdatedSeries = updatedSeries.filter(group => {
+        if (this.libraryId === 0) return true;
+        return group.libraryId === this.libraryId;
+      });
     });
   }
 

@@ -55,7 +55,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * Supress library link
    */
-  @Input() supressLibraryLink = false;
+  @Input() suppressLibraryLink = false;
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
@@ -125,7 +125,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
       this.supressArchiveWarning = true;
     }
 
-    if (this.supressLibraryLink === false) {
+    if (this.suppressLibraryLink === false) {
       if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
         this.libraryId = (this.entity as Series).libraryId;
       }

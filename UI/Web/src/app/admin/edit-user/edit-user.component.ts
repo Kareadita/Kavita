@@ -1,11 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/member';
 import { AccountService } from 'src/app/_services/account.service';
-import { ServerService } from 'src/app/_services/server.service';
 
 // TODO: Rename this to EditUserModal
 @Component({
@@ -27,8 +25,7 @@ export class EditUserComponent implements OnInit {
   public get username() { return this.userForm.get('username'); }
   public get password() { return this.userForm.get('password'); }
 
-  constructor(public modal: NgbActiveModal, private accountService: AccountService, private serverService: ServerService, 
-    private confirmService: ConfirmService) { }
+  constructor(public modal: NgbActiveModal, private accountService: AccountService) { }
 
   ngOnInit(): void {
     this.userForm.addControl('email', new FormControl(this.member.email, [Validators.required, Validators.email]));
