@@ -11,6 +11,7 @@ using API.Entities.Enums;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
+using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
@@ -125,23 +126,23 @@ public class CleanupServiceTests
     public async Task DeleteSeriesCoverImages_ShouldDeleteAll()
     {
         var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CoverImageDirectory}series_01.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}series_03.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}series_1000.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(3)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1000)}.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
         await ResetDB();
 
         var s = DbFactory.Series("Test 1");
-        s.CoverImage = "series_01.jpg";
+        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
         s = DbFactory.Series("Test 2");
-        s.CoverImage = "series_03.jpg";
+        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
         s = DbFactory.Series("Test 3");
-        s.CoverImage = "series_1000.jpg";
+        s.CoverImage = $"{ImageService.GetSeriesFormat(1000)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
 
@@ -158,20 +159,20 @@ public class CleanupServiceTests
     public async Task DeleteSeriesCoverImages_ShouldNotDeleteLinkedFiles()
     {
         var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CoverImageDirectory}series_01.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}series_03.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}series_1000.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(3)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1000)}.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
         await ResetDB();
 
         // Add 2 series with cover images
         var s = DbFactory.Series("Test 1");
-        s.CoverImage = "series_01.jpg";
+        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
         s = DbFactory.Series("Test 2");
-        s.CoverImage = "series_03.jpg";
+        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
 
@@ -242,9 +243,9 @@ public class CleanupServiceTests
     public async Task DeleteTagCoverImages_ShouldNotDeleteLinkedFiles()
     {
         var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CoverImageDirectory}tag_01.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}tag_02.jpg", new MockFileData(""));
-        filesystem.AddFile($"{CoverImageDirectory}tag_1000.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetCollectionTagFormat(1)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetCollectionTagFormat(2)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetCollectionTagFormat(1000)}.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
         await ResetDB();
@@ -255,9 +256,9 @@ public class CleanupServiceTests
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {
             Title = "Something",
-            CoverImage ="tag_01.jpg"
+            CoverImage = $"{ImageService.GetCollectionTagFormat(1)}.jpg"
         });
-        s.CoverImage = "series_01.jpg";
+        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
 
@@ -266,9 +267,9 @@ public class CleanupServiceTests
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {
             Title = "Something 2",
-            CoverImage ="tag_02.jpg"
+            CoverImage = $"{ImageService.GetCollectionTagFormat(2)}.jpg"
         });
-        s.CoverImage = "series_03.jpg";
+        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
 
@@ -283,6 +284,49 @@ public class CleanupServiceTests
         Assert.Equal(2, ds.GetFiles(CoverImageDirectory).Count());
     }
 
+    #endregion
+
+    #region DeleteReadingListCoverImages
+    [Fact]
+    public async Task DeleteReadingListCoverImages_ShouldNotDeleteLinkedFiles()
+    {
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetReadingListFormat(1)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetReadingListFormat(2)}.jpg", new MockFileData(""));
+        filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetReadingListFormat(3)}.jpg", new MockFileData(""));
+
+        // Delete all Series to reset state
+        await ResetDB();
+
+        _context.Users.Add(new AppUser()
+        {
+            UserName = "Joe",
+            ReadingLists = new List<ReadingList>()
+            {
+                new ReadingList()
+                {
+                    Title = "Something",
+                    NormalizedTitle = API.Parser.Parser.Normalize("Something"),
+                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg"
+                },
+                new ReadingList()
+                {
+                    Title = "Something 2",
+                    NormalizedTitle = API.Parser.Parser.Normalize("Something 2"),
+                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg"
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
+            ds);
+
+        await cleanupService.DeleteReadingListCoverImages();
+
+        Assert.Equal(2, ds.GetFiles(CoverImageDirectory).Count());
+    }
     #endregion
 
     #region CleanupCacheDirectory
