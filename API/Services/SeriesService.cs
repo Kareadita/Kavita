@@ -151,26 +151,22 @@ public class SeriesService : ISeriesService
             UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
 
-            if (!updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked) series.Metadata.AgeRatingLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked) series.Metadata.PublicationStatusLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.LanguageLocked) series.Metadata.LanguageLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.GenresLocked) series.Metadata.GenresLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.TagsLocked) series.Metadata.TagsLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.CharacterLocked) series.Metadata.CharacterLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.ColoristLocked) series.Metadata.ColoristLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.EditorLocked) series.Metadata.EditorLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.InkerLocked) series.Metadata.InkerLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.LettererLocked) series.Metadata.LettererLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.PencillerLocked) series.Metadata.PencillerLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.PublisherLocked) series.Metadata.PublisherLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked) series.Metadata.TranslatorLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked) series.Metadata.CoverArtistLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
-
+            series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
+            series.Metadata.PublicationStatusLocked = updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked;
+            series.Metadata.LanguageLocked = updateSeriesMetadataDto.SeriesMetadata.LanguageLocked;
+            series.Metadata.GenresLocked = updateSeriesMetadataDto.SeriesMetadata.GenresLocked;
+            series.Metadata.TagsLocked = updateSeriesMetadataDto.SeriesMetadata.TagsLocked;
+            series.Metadata.CharacterLocked = updateSeriesMetadataDto.SeriesMetadata.CharacterLocked;
+            series.Metadata.ColoristLocked = updateSeriesMetadataDto.SeriesMetadata.ColoristLocked;
+            series.Metadata.EditorLocked = updateSeriesMetadataDto.SeriesMetadata.EditorLocked;
+            series.Metadata.InkerLocked = updateSeriesMetadataDto.SeriesMetadata.InkerLocked;
+            series.Metadata.LettererLocked = updateSeriesMetadataDto.SeriesMetadata.LettererLocked;
+            series.Metadata.PencillerLocked = updateSeriesMetadataDto.SeriesMetadata.PencillerLocked;
             series.Metadata.PublisherLocked = updateSeriesMetadataDto.SeriesMetadata.PublisherLocked;
-
-
+            series.Metadata.TranslatorLocked = updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked;
+            series.Metadata.CoverArtistLocked = updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked;
+            series.Metadata.WriterLocked = updateSeriesMetadataDto.SeriesMetadata.WriterLocked;
+            series.Metadata.SummaryLocked = updateSeriesMetadataDto.SeriesMetadata.SummaryLocked;
 
             if (!_unitOfWork.HasChanges())
             {
