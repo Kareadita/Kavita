@@ -72,7 +72,7 @@ public class MetadataService : IMetadataService
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
         await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-            MessageFactory.CoverUpdateEvent(chapter.Id, "chapter"), false);
+            MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
         return true;
     }
 
@@ -101,7 +101,7 @@ public class MetadataService : IMetadataService
         if (firstChapter == null) return false;
 
         volume.CoverImage = firstChapter.CoverImage;
-        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, "volume"), false);
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume), false);
 
         return true;
     }
@@ -138,7 +138,7 @@ public class MetadataService : IMetadataService
             }
         }
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
-        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
     }
 
 
@@ -300,7 +300,7 @@ public class MetadataService : IMetadataService
 
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, "series"), false);
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
         }
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);

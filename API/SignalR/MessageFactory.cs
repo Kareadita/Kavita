@@ -7,6 +7,14 @@ using API.Entities;
 
 namespace API.SignalR
 {
+    public static class MessageFactoryEntityTypes
+    {
+        public const string Series = "series";
+        public const string Volume = "volume";
+        public const string Chapter = "chapter";
+        public const string CollectionTag = "collection";
+        public const string ReadingList = "readingList";
+    }
     public static class MessageFactory
     {
         /// <summary>
@@ -78,6 +86,11 @@ namespace API.SignalR
         /// When a library is created/deleted in the Server
         /// </summary>
         public const string LibraryModified = "LibraryModified";
+        /// <summary>
+        /// A user's progress was modified
+        /// </summary>
+        public const string UserProgressUpdate = "UserProgressUpdate";
+
 
 
         public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
@@ -316,6 +329,25 @@ namespace API.SignalR
                 {
                     Id = id,
                     EntityType = entityType,
+                }
+            };
+        }
+
+        public static SignalRMessage UserProgressUpdateEvent(int userId, string username, int seriesId, int volumeId, int chapterId, int pagesRead)
+        {
+            return new SignalRMessage()
+            {
+                Name = UserProgressUpdate,
+                Title = "Updating User Progress",
+                Progress = ProgressType.None,
+                Body = new
+                {
+                    UserId = userId,
+                    Username = username,
+                    SeriesId = seriesId,
+                    VolumeId = volumeId,
+                    ChapterId = chapterId,
+                    PagesRead = pagesRead,
                 }
             };
         }

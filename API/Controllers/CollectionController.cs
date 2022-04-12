@@ -157,7 +157,7 @@ namespace API.Controllers
                     tag.CoverImageLocked = false;
                     tag.CoverImage = string.Empty;
                     await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                        MessageFactory.CoverUpdateEvent(tag.Id, "collection"), false);
+                        MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.CollectionTag), false);
                     _unitOfWork.CollectionTagRepository.Update(tag);
                 }
 

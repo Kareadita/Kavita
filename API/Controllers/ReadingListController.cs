@@ -253,7 +253,7 @@ namespace API.Controllers
                 readingList.CoverImageLocked = false;
                 readingList.CoverImage = string.Empty;
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(readingList.Id, "readingList"), false);
+                    MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
 

@@ -11,6 +11,8 @@ using API.Entities;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
+using API.SignalR;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -25,23 +27,21 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
-        private readonly IDirectoryService _directoryService;
-        private readonly ICleanupService _cleanupService;
         private readonly IBookmarkService _bookmarkService;
+        private readonly IEventHub _eventHub;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
             IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
-            IReaderService readerService, IDirectoryService directoryService,
-            ICleanupService cleanupService, IBookmarkService bookmarkService)
+            IReaderService readerService, IBookmarkService bookmarkService,
+            IEventHub eventHub)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
-            _directoryService = directoryService;
-            _cleanupService = cleanupService;
             _bookmarkService = bookmarkService;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -111,13 +111,14 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
 
-            if (await _unitOfWork.CommitAsync())
-            {
-                return Ok();
-            }
+            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
-
-            return BadRequest("There was an issue saving progress");
+            // var series = new List<SeriesDto>()
+            //     {await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(markReadDto.SeriesId, user.Id)};
+            // await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+            // await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+            //     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markReadDto.SeriesId, series[0], series[0].Pages));
+            return Ok();
         }
 
 
@@ -132,13 +133,19 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
 
-            if (await _unitOfWork.CommitAsync())
-            {
-                return Ok();
-            }
+            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
-
-            return BadRequest("There was an issue saving progress");
+            // Should I do this for every chapter? Maybe in a background task?
+            // foreach (var chapterId in await
+            //              _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new List<int>() {markReadDto.SeriesId}))
+            // {
+            //     await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+            //         MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, chapterId, MessageFactoryEntityTypes.Chapter, 0));
+            // }
+            //
+            // await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+            //     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markReadDto.SeriesId, MessageFactoryEntityTypes.Series, 0));
+            return Ok();
         }
 
         /// <summary>
