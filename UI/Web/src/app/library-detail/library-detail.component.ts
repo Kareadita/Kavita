@@ -37,8 +37,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   tabs: Array<{title: string, fragment: string}> = [
-    {title: 'Recommended', fragment: 'recomended'},
     {title: 'Library', fragment: ''},
+    {title: 'Recommended', fragment: 'recomended'},
   ];
   active = this.tabs[0];
 
@@ -90,6 +90,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
+
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
@@ -101,15 +102,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
     this.filterSettings.presets.libraries = [this.libraryId];
-
-    this.route.fragment.subscribe(frag => {
-      const tab = this.tabs.filter(item => item.fragment === frag);
-      if (tab.length > 0) {
-        this.active = tab[0];
-      } else {
-        this.active = this.tabs[0]; // Default to first tab
-      }
-    });
   }
 
   ngOnInit(): void {

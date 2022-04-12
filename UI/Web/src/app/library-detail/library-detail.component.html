@@ -7,12 +7,12 @@
     <div main>
         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills">
             <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
-              <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
+              <a ngbNavLink>{{tab.title | sentenceCase}}</a>
               <ng-template ngbNavContent>
-                <ng-container *ngIf="tab.fragment === 'recomended'">
+                <ng-container *ngIf="tab.title === 'Recommended'">
                   <app-library [libraryId]="libraryId"></app-library>
                 </ng-container>
-                <ng-container *ngIf="tab.fragment === ''">
+                <ng-container *ngIf="tab.title === 'Library'">
                     <app-card-detail-layout 
                         [isLoading]="loadingSeries"
                         [items]="series"
