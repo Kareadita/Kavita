@@ -636,29 +636,6 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .AsNoTracking();
 
-
-        // var series = _context.Series
-        //     .Where(s => formats.Contains(s.Format) && userLibraries.Contains(s.LibraryId))
-        //     .Join(_context.AppUserProgresses, s => s.Id, progress => progress.SeriesId, (s, progress) => new
-        //     {
-        //         Series = s,
-        //         PagesRead = _context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId).Sum(s1 => s1.PagesRead),
-        //         progress.AppUserId,
-        //         LastModified = _context.AppUserProgresses.Where(p => p.Id == progress.Id && p.AppUserId == userId).Max(p => p.LastModified)
-        //     })
-        //     .AsNoTracking();
-        //
-        // var retSeries = series.Where(s => s.AppUserId == userId
-        //                                   && s.PagesRead > 0
-        //                                   && s.PagesRead < s.Series.Pages)
-        //     .OrderByDescending(s => s.LastModified)
-        //     .ThenByDescending(s => s.Series.LastModified)
-        //     .Select(s => s.Series)
-        //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-        //     .AsSplitQuery()
-        //     .AsNoTracking();
-
-
         // Pagination does not work for this query as when we pull the data back, we get multiple rows of the same series. See controller for pagination code
         return await retSeries.ToListAsync();
     }

@@ -25,8 +25,14 @@ img {
 
 .image-container {
   text-align: center;
-  display: block;
   height: 100vh;
+
+  // Original
+  //display: block;
+
+  // New (for centering in both axis)
+  display: flex;
+  align-items: center;
 
   #image-1 {
     &.double {
@@ -119,11 +125,11 @@ img {
 }
 
 .fit-to-width-double-offset {
-  width: 100%;
+  max-width: 100%; // max-width fixes center alignment issue
 }
 
 .original-double-offset {
-  width: 100%;
+  max-width: 100%;
 }
 
 .fit-to-height-double-offset {
