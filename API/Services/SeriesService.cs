@@ -487,10 +487,10 @@ public class SeriesService : ISeriesService
         foreach (var chapter in chapters)
         {
             chapter.Title = FormatChapterTitle(chapter, libraryType);
-            if (chapter.IsSpecial)
-            {
-                specials.Add(chapter);
-            }
+            if (!chapter.IsSpecial) continue;
+
+            if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+            specials.Add(chapter);
         }
 
 
