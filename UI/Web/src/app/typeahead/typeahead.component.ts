@@ -259,9 +259,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
          } else {
           this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
          }
-        
-        
-        //this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
       }
     } else {
       this.optionSelection = new SelectionModel<any>();
@@ -309,14 +306,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
                 return;
               }
 
-
-              const filteredResults = opts.filter(item => this.filterSelected(item));
-                
-              if (filteredResults.length < this.focusedIndex) return;
-              const option = filteredResults[this.focusedIndex];
-
-              this.toggleSelection(option);
-              this.resetField();
+              (item as HTMLElement).click();
               this.focusedIndex = 0;
               event.preventDefault();
               event.stopPropagation();
@@ -358,9 +348,11 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   clearSelections() {
-    this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
-    this.selectedData.emit(this.optionSelection.selected());
-    this.resetField();
+    if (this.optionSelection) {
+      this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+      this.selectedData.emit(this.optionSelection.selected());
+      this.resetField();
+    }
   }
 
   handleOptionClick(opt: any) {

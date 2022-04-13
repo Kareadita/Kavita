@@ -28,7 +28,7 @@
           Add {{typeaheadControl.value}}...
       </li>
       <li *ngFor="let option of filteredOptions | async; let index = index;" (click)="handleOptionClick(option)"  
-          class="list-group-item" role="option"
+          class="list-group-item" role="option" [attr.data-index]="index"
           (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
         <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
       </li>
