@@ -151,7 +151,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
       this.user = user;
     });
 
-    this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate), map(evt => evt.payload as UserProgressUpdateEvent), takeUntil(this.onDestroy)).subscribe(updateEvent => {
+    this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate), 
+    map(evt => evt.payload as UserProgressUpdateEvent), takeUntil(this.onDestroy)).subscribe(updateEvent => {
       if (this.user !== undefined && this.user.username !== updateEvent.username) return;
       if (this.utilityService.isChapter(this.entity) && updateEvent.chapterId !== this.entity.id) return;
       if (this.utilityService.isVolume(this.entity) && updateEvent.volumeId !== this.entity.id) return;
