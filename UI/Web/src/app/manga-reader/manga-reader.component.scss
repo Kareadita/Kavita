@@ -21,6 +21,7 @@ img {
   display: flex;
   justify-content: center;
   position: relative;
+  overflow: auto;
 }
 
 .image-container {
@@ -31,7 +32,7 @@ img {
   //display: block;
 
   // New (for centering in both axis)
-  display: flex;
+  //display: flex; // Leave this off as it can cutoff the image
   align-items: center;
 
   #image-1 {
