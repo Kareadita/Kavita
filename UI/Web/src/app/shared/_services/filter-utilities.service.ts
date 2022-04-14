@@ -271,6 +271,6 @@ export class FilterUtilitiesService {
     }
     
 
-    return [filter, anyChanged];
+    return [filter, false]; // anyChanged. Testing out if having a filter active but keep drawer closed by default works better
   }
 }
