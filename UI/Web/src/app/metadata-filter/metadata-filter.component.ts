@@ -154,7 +154,13 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets?.readStatus.read);
       this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets?.readStatus.notRead);
       this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets?.readStatus.inProgress);
+
+      if (this.filterSettings.presets.sortOptions) {
+        this.sortGroup.get('sortField')?.setValue(this.filterSettings.presets.sortOptions.sortField);
+        this.isAscendingSort = this.filterSettings.presets.sortOptions.isAscending || true;
+      }
     }
+
 
     this.setupTypeaheads();
   }

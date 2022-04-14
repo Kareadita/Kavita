@@ -231,7 +231,7 @@ public class SeriesRepository : ISeriesRepository
     /// <summary>
     /// Gets all series
     /// </summary>
-    /// <param name="libraryId"></param>
+    /// <param name="libraryId">Restricts to just one library</param>
     /// <param name="userId"></param>
     /// <param name="userParams"></param>
     /// <param name="filter"></param>

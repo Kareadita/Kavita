@@ -8,6 +8,7 @@ import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { Library } from '../_models/library';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
+import { SortField } from '../_models/series-filter';
 import { SeriesGroup } from '../_models/series-group';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
@@ -157,10 +158,16 @@ export class LibraryComponent implements OnInit, OnDestroy {
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
       params['readStatus'] = 'true,false,false';
+      params['sortBy'] = SortField.LastChapterAdded + ',false'; // sort by created, desc
       params['page'] = 1;
       this.router.navigate(['all-series'], {queryParams: params});
     } else if (sectionTitle.toLowerCase() === 'libraries') {
       this.router.navigate(['all-series']);
+    } else if (sectionTitle.toLowerCase() === 'newly added series') {
+      const params: any = {};
+      params['sortBy'] = SortField.Created + ',true'; // sort by created, asc
+      params['page'] = 1;
+      this.router.navigate(['all-series'], {queryParams: params});
     } 
   }
 

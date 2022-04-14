@@ -211,11 +211,27 @@ export class UtilityService {
     /// Read status is encoded as true,true,true
     const readStatus = snapshot.queryParamMap.get('readStatus');
     if (readStatus !== undefined && readStatus !== null) {
-      const values = readStatus.split(',').map(i => i === "true");
+      const values = readStatus.split(',').map(i => i === 'true');
       if (values.length === 3) {
         filter.readStatus.inProgress = values[0];
         filter.readStatus.notRead = values[1];
         filter.readStatus.read = values[2];
+        anyChanged = true;
+      }
+    }
+
+    const sortBy = snapshot.queryParamMap.get('sortBy');
+    if (sortBy !== undefined && sortBy !== null) {
+      const values = sortBy.split(',');
+      if (values.length === 1) {
+        values.push('true');
+      }
+      if (values.length === 2) {
+        filter.sortOptions = {
+          isAscending: values[1] === 'true',
+          sortField: Number(values[0])
+        }
+        console.log('ascending: ', filter.sortOptions.isAscending)
         anyChanged = true;
       }
     }

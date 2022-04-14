@@ -123,6 +123,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
       this.filter = this.seriesService.createSeriesFilter();
     }
 
+    console.log('Load page: ', this.filter);
     this.seriesService.getAllSeries(this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
