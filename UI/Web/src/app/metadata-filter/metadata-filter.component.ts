@@ -159,6 +159,14 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
         this.sortGroup.get('sortField')?.setValue(this.filterSettings.presets.sortOptions.sortField);
         this.isAscendingSort = this.filterSettings.presets.sortOptions.isAscending || true;
       }
+
+      if (this.filterSettings.presets.rating > 0) {
+        this.updateRating(this.filterSettings.presets.rating);
+      }
+
+      if (this.filterSettings.presets.seriesNameQuery !== '') {
+        this.seriesNameGroup.get('searchNameQuery')?.patchValue(this.filterSettings.presets.seriesNameQuery);
+      }
     }
 
 

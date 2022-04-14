@@ -45,7 +45,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - Recently Added');
     if (this.pagination === undefined || this.pagination === null) {
-      this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
+      this.pagination = {currentPage: 1, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
     this.filterSettings.sortDisabled = true;
 
