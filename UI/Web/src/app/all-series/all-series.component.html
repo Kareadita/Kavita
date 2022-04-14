@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)">
+<app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
     <h2 title>
         <app-card-actionables [actions]="actions"></app-card-actionables>
         All Series
@@ -16,6 +16,8 @@
     (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()" (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
+        <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()" 
+        (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" 
+        [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
     </ng-template>
 </app-card-detail-layout>

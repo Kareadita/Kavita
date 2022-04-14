@@ -30,6 +30,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filterActive: boolean = false;
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -118,12 +119,12 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-    console.log('load page called');
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
     }
 
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
     this.seriesService.getAllSeries(this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;

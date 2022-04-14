@@ -35,6 +35,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filterActive: boolean = false;
 
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'Library', fragment: ''},
@@ -173,6 +174,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       this.filter.libraries.push(this.libraryId);
     }
 
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;

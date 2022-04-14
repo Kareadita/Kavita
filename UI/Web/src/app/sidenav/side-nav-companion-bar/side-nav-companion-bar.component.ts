@@ -21,6 +21,11 @@ export class SideNavCompanionBarComponent implements OnInit {
   @Input() filterOpenByDefault: boolean = false;
 
   /**
+   * This implies there is a filter in effect on the underlying page. Will show UI styles to imply this to the user.
+   */
+  @Input() filterActive: boolean = false;
+
+  /**
    * Should be passed through from Filter component.
    */
   //@Input() filterDisabled: EventEmitter<boolean> = new EventEmitter();
