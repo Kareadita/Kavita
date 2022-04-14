@@ -91,6 +91,10 @@ export class FilterUtilitiesService {
     if (filter.rating > 0) {
       params += '&rating=' + filter.rating;
     }
+
+    if (filter.seriesNameQuery !== '') {
+      params += '&name=' + encodeURIComponent(filter.seriesNameQuery);
+    }
     
     return currentUrl + params;
   }
@@ -256,9 +260,14 @@ export class FilterUtilitiesService {
           isAscending: values[1] === 'true',
           sortField: Number(values[0])
         }
-        console.log('ascending: ', filter.sortOptions.isAscending)
         anyChanged = true;
       }
+    }
+
+    const searchNameQuery = snapshot.queryParamMap.get('name');
+    if (searchNameQuery !== undefined && searchNameQuery !== null && searchNameQuery !== '') {
+      filter.seriesNameQuery = decodeURIComponent(searchNameQuery);
+      anyChanged = true;
     }
     
 

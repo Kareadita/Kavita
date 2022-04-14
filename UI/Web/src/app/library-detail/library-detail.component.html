@@ -5,7 +5,7 @@
     </h2>
     <h6 subtitle style="margin-left:40px;" *ngIf="active.fragment === ''">{{pagination?.totalItems}} Series</h6>
     <div main>
-        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills" style="flex-wrap: nowrap;">
             <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
               <a ngbNavLink>{{tab.title | sentenceCase}}</a>
               <ng-template ngbNavContent>

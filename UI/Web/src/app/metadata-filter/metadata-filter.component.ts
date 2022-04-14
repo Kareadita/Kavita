@@ -84,7 +84,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
-    
+
     this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl(this.filter.readStatus.read, []),
@@ -134,7 +134,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
       map(val => (val || '').trim()),
       distinctUntilChanged(), 
-      takeUntil(this.onDestory)).subscribe(changes => {
+      takeUntil(this.onDestory))
+      .subscribe(changes => {
       this.filter.seriesNameQuery = changes;
     });
   }
@@ -165,7 +166,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       }
 
       if (this.filterSettings.presets.seriesNameQuery !== '') {
-        this.seriesNameGroup.get('searchNameQuery')?.patchValue(this.filterSettings.presets.seriesNameQuery);
+        this.seriesNameGroup.get('searchNameQuery')?.setValue(this.filterSettings.presets.seriesNameQuery);
       }
     }
 
