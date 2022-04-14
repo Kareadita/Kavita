@@ -17,6 +17,7 @@ import { LibraryService } from '../_services/library.service';
 import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
+import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 
 @Component({
   selector: 'app-library-detail',
@@ -35,6 +36,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filterActive: boolean = false;
+
+  tabs: Array<{title: string, fragment: string}> = [
+    {title: 'Library', fragment: ''},
+    {title: 'Recommended', fragment: 'recomended'},
+  ];
+  active = this.tabs[0];
 
 
   bulkActionCallback = (action: Action, data: any) => {
@@ -77,12 +85,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, public navService: NavService) {
+    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
     const routeId = this.route.snapshot.paramMap.get('id');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
       return;
     }
+
 
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
@@ -91,9 +100,9 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       this.titleService.setTitle('Kavita - ' + this.libraryName);
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-    this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     
-    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
+    this.pagination = this.filterUtilityService.pagination();
+    [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl();
     this.filterSettings.presets.libraries = [this.libraryId];
   }
 
@@ -142,30 +151,21 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFilter(event: FilterEvent) {
-    this.filter = event.filter;
-    const page = this.getPage();
-    if (page === undefined || page === null || !event.isFirst) {
-      this.pagination.currentPage = 1;
-      this.onPageChange(this.pagination);
-    } else {
-      this.loadPage();
-    }
+  updateFilter(data: FilterEvent) {
+    this.filter = data.filter;
+    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    this.loadPage();
   }
 
   loadPage() {
-    const page = this.getPage();
-    if (page != null) {
-      this.pagination.currentPage = parseInt(page, 10);
-    }
-    this.loadingSeries = true;
-
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
       this.filter.libraries.push(this.libraryId);
     }
 
+    this.loadingSeries = true;
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
@@ -175,7 +175,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?' + 'page=' + this.pagination.currentPage);
+    this.filterUtilityService.updateUrlFromPagination(this.pagination);
     this.loadPage();
   }
 
@@ -184,10 +184,4 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
-
-  getPage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('page');
-  }
-
 }

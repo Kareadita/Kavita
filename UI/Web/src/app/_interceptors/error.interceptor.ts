@@ -100,12 +100,12 @@ export class ErrorInterceptor implements HttpInterceptor {
     const err = error.error;
     if (err.hasOwnProperty('message') && err.message.trim() !== '') {
       if (err.message != 'User is not authenticated') {
-        console.log('500 error: ', error);
+        console.error('500 error: ', error);
       }
       this.toastr.error(err.message);
     } else if (error.hasOwnProperty('message') && error.message.trim() !== '') {
       if (error.message != 'User is not authenticated') {
-        console.log('500 error: ', error);
+        console.error('500 error: ', error);
       }
       this.toastr.error(error.message);
     }

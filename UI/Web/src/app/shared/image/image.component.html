@@ -1,7 +1,3 @@
 <img #img class="lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageService.updateErroredImage($event)" 
             aria-hidden="true">
-
-<!-- <img #img [defaultImage]="imageService.placeholderImage" [lazyload]="imageUrl" 
-            (error)="imageService.updateErroredImage($event)" 
-            aria-hidden="true"> -->

@@ -84,7 +84,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
-    
+
     this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl(this.filter.readStatus.read, []),
@@ -134,7 +134,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
       map(val => (val || '').trim()),
       distinctUntilChanged(), 
-      takeUntil(this.onDestory)).subscribe(changes => {
+      takeUntil(this.onDestory))
+      .subscribe(changes => {
       this.filter.seriesNameQuery = changes;
     });
   }
@@ -151,10 +152,28 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     }
 
     if (this.filterSettings.presets) {
-      this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets?.readStatus.read);
-      this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets?.readStatus.notRead);
-      this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets?.readStatus.inProgress);
+      this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets.readStatus.read);
+      this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets.readStatus.notRead);
+      this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets.readStatus.inProgress);
+      
+      if (this.filterSettings.presets.sortOptions) {
+        this.sortGroup.get('sortField')?.setValue(this.filterSettings.presets.sortOptions.sortField);
+        this.isAscendingSort = this.filterSettings.presets.sortOptions.isAscending;
+        if (this.filter.sortOptions) {
+          this.filter.sortOptions.isAscending = this.isAscendingSort;
+          this.filter.sortOptions.sortField = this.filterSettings.presets.sortOptions.sortField;
+        }
+      }
+
+      if (this.filterSettings.presets.rating > 0) {
+        this.updateRating(this.filterSettings.presets.rating);
+      }
+
+      if (this.filterSettings.presets.seriesNameQuery !== '') {
+        this.seriesNameGroup.get('searchNameQuery')?.setValue(this.filterSettings.presets.seriesNameQuery);
+      }
     }
+
 
     this.setupTypeaheads();
   }

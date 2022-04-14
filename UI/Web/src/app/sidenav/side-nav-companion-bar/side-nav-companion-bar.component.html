@@ -4,13 +4,13 @@
             <ng-content select="[title]"></ng-content>
             <ng-content select="[subtitle]"></ng-content>
         </div>
-        <div class="col mr-auto hide-if-empty">
+        <div class="col mr-auto hide-if-empty d-none d-sm-flex">
             <ng-content select="[main]"></ng-content>
         </div>
         <div class="col" *ngIf="hasFilter">
             <div class="row justify-content-end">
                 <div class="col-auto align-self-end">
-                    <button *ngIf="hasFilter" class="btn btn-secondary btn-small" (click)="toggleFilter()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
+                    <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleFilter()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
                         <i class="fa fa-filter" aria-hidden="true"></i>
                         <span class="visually-hidden">Sort / Filter</span>
                     </button>

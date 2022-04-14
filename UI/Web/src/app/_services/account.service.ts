@@ -235,9 +235,7 @@ export class AccountService implements OnDestroy {
     // set a timeout to refresh the token a minute before it expires
     const expires = new Date(jwtToken.exp * 1000);
     const timeout = expires.getTime() - Date.now() - (60 * 1000);
-    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(() => {
-      console.log('Token Refreshed');
-    }), timeout);
+    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(() => {}), timeout);
   }
 
   private stopRefreshTokenTimer() {

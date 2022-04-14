@@ -27,6 +27,7 @@ public interface IReadingListRepository
     void Update(ReadingList list);
     Task<int> Count();
     Task<string> GetCoverImageAsync(int readingListId);
+    Task<IList<string>> GetAllCoverImagesAsync();
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -57,6 +58,15 @@ public class ReadingListRepository : IReadingListRepository
             .Select(c => c.CoverImage)
             .AsNoTracking()
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<IList<string>> GetAllCoverImagesAsync()
+    {
+        return await _context.ReadingList
+            .Select(t => t.CoverImage)
+            .Where(t => !string.IsNullOrEmpty(t))
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public void Remove(ReadingListItem item)

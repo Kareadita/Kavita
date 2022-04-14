@@ -1,20 +1,24 @@
 import { Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
-import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { filter, finalize, map, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { Download } from 'src/app/shared/_models/download';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
+import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { RecentlyAddedItem } from 'src/app/_models/recently-added-item';
 import { Series } from 'src/app/_models/series';
+import { User } from 'src/app/_models/user';
 import { Volume } from 'src/app/_models/volume';
+import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
+import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { BulkSelectionService } from '../bulk-selection.service';
 
 @Component({
@@ -51,7 +55,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * Supress library link
    */
-  @Input() supressLibraryLink = false;
+  @Input() suppressLibraryLink = false;
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
@@ -97,6 +101,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   isShiftDown: boolean = false;
 
+  private user: User | undefined;
+
   get tooltipTitle() {
     if (this.chapterTitle === '' || this.chapterTitle === null) return this.title;
     return this.chapterTitle;
@@ -111,14 +117,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   constructor(public imageService: ImageService, private libraryService: LibraryService, 
     public utilityService: UtilityService, private downloadService: DownloadService,
-    private toastr: ToastrService, public bulkSelectionService: BulkSelectionService) {}
+    private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
+    private messageHub: MessageHubService, private accountService: AccountService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
       this.supressArchiveWarning = true;
     }
 
-    if (this.supressLibraryLink === false) {
+    if (this.suppressLibraryLink === false) {
       if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
         this.libraryId = (this.entity as Series).libraryId;
       }
@@ -139,6 +146,20 @@ export class CardItemComponent implements OnInit, OnDestroy {
         this.chapterTitle = vol.chapters[0].titleName;
       }
     }
+
+    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+      this.user = user;
+    });
+
+    this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate), 
+    map(evt => evt.payload as UserProgressUpdateEvent), takeUntil(this.onDestroy)).subscribe(updateEvent => {
+      if (this.user !== undefined && this.user.username !== updateEvent.username) return;
+      if (this.utilityService.isChapter(this.entity) && updateEvent.chapterId !== this.entity.id) return;
+      if (this.utilityService.isVolume(this.entity) && updateEvent.volumeId !== this.entity.id) return;
+      if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
+
+      this.read = updateEvent.pagesRead;
+    });
   }
 
   ngOnDestroy() {

@@ -1,5 +1,4 @@
-import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { SwiperComponent } from 'swiper/angular';
+import { Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 import { Swiper, SwiperEvents } from 'swiper/types';
 
 @Component({
@@ -7,7 +6,7 @@ import { Swiper, SwiperEvents } from 'swiper/types';
   templateUrl: './carousel-reel.component.html',
   styleUrls: ['./carousel-reel.component.scss']
 })
-export class CarouselReelComponent implements OnInit {
+export class CarouselReelComponent {
 
   @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
   @Input() items: any[] = [];
@@ -19,30 +18,20 @@ export class CarouselReelComponent implements OnInit {
 
   trackByIdentity: (index: number, item: any) => string;
 
-  get isEnd() {
-    return this.swiper?.isEnd;
-  }
-
-  get isBeginning() {
-    return this.swiper?.isBeginning;
-  }
-
   constructor() { 
     this.trackByIdentity = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
   }
 
-  ngOnInit(): void {}
-
   nextPage() {
-    if (this.isEnd) return;
     if (this.swiper) {
+      if (this.swiper.isEnd) return;
       this.swiper.setProgress(this.swiper.progress + 0.25, 600);
     }
   }
 
   prevPage() {
-    if (this.isBeginning) return;
     if (this.swiper) {
+      if (this.swiper.isBeginning) return;
       this.swiper.setProgress(this.swiper.progress - 0.25, 600);
     }
   }

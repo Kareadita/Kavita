@@ -5,6 +5,7 @@ import { Subject } from 'rxjs';
 import { take, debounceTime, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
+import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
@@ -30,6 +31,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filterActive: boolean = false;
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -71,14 +73,14 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   constructor(private router: Router, private seriesService: SeriesService, 
     private titleService: Title, private actionService: ActionService, 
     public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, private route: ActivatedRoute) {
+    private utilityService: UtilityService, private route: ActivatedRoute, 
+    private filterUtilityService: FilterUtilitiesService) {
     
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
     this.titleService.setTitle('Kavita - All Series');
-    this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
 
-    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
+    this.pagination = this.filterUtilityService.pagination();
+    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl();
   }
 
   ngOnInit(): void {
@@ -109,12 +111,9 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
-    if (this.pagination !== undefined && this.pagination !== null && !data.isFirst) {
-      this.pagination.currentPage = 1;
-      this.onPageChange(this.pagination);
-    } else {
-      this.loadPage();
-    }
+    
+    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    this.loadPage();
   }
 
   loadPage() {
@@ -123,6 +122,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
       this.filter = this.seriesService.createSeriesFilter();
     }
 
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
     this.seriesService.getAllSeries(this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
@@ -132,15 +132,9 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
+    this.filterUtilityService.updateUrlFromPagination(this.pagination);
     this.loadPage();
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
-
-  getPage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('page');
-  }
-
 }

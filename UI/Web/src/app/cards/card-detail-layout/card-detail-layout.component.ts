@@ -61,6 +61,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
 
     if (this.filterSettings === undefined) {
+      console.log('filter settings was empty, creating our own');
       this.filterSettings = new FilterSettings();
     }
   }

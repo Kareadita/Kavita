@@ -5,7 +5,7 @@ import { Subject } from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
-import { KEY_CODES } from '../shared/_services/utility.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
@@ -15,6 +15,8 @@ import { ActionService } from '../_services/action.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
+// TODO: Do I still need this or can All Series handle it with a custom sort
+
 /**
  * This component is used as a standard layout for any card detail. ie) series, on-deck, collections, etc.
  */
@@ -23,7 +25,6 @@ import { SeriesService } from '../_services/series.service';
   templateUrl: './recently-added.component.html',
   styleUrls: ['./recently-added.component.scss']
 })
-
 export class RecentlyAddedComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = true;
@@ -34,15 +35,17 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filterActive: boolean = false;
 
   onDestroy: Subject<void> = new Subject();
 
   constructor(private router: Router, private route: ActivatedRoute, private seriesService: SeriesService, private titleService: Title,
-    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService) {
+    private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
+    private utilityService: UtilityService) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - Recently Added');
     if (this.pagination === undefined || this.pagination === null) {
-      this.pagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
+      this.pagination = {currentPage: 1, itemsPerPage: 30, totalItems: 0, totalPages: 1};
     }
     this.filterSettings.sortDisabled = true;
 
@@ -102,6 +105,7 @@ export class RecentlyAddedComponent implements OnInit, OnDestroy {
     if (page != null) {
       this.pagination.currentPage = parseInt(page, 10);
     }
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
     this.isLoading = true;
     this.seriesService.getRecentlyAdded(this.libraryId, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;

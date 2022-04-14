@@ -4,10 +4,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
+import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
@@ -32,17 +33,15 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   collectionTag!: CollectionTag;
   tagImage: string = '';
   isLoading: boolean = true;
-  collections: CollectionTag[] = [];
-  collectionTagName: string = '';
   series: Array<Series> = [];
   seriesPagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
-  isAdmin: boolean = false;
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   summary: string = '';
 
   actionInProgress: boolean = false;
+  filterActive: boolean = false;
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   
@@ -87,16 +86,10 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
 
   constructor(public imageService: ImageService, private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
     private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
-    private modalService: NgbModal, private titleService: Title, private accountService: AccountService,
+    private modalService: NgbModal, private titleService: Title, 
     public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
-    private utilityService: UtilityService) {
+    private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-        if (user) {
-          this.isAdmin = this.accountService.hasAdminRole(user);
-        }
-      });
 
       const routeId = this.route.snapshot.paramMap.get('id');
       if (routeId === null) {
@@ -104,9 +97,9 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         return;
       }
       const tagId = parseInt(routeId, 10);
-      this.seriesPagination = {currentPage: 0, itemsPerPage: 30, totalItems: 0, totalPages: 1};
 
-      [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.utilityService.filterPresetsFromUrl(this.route.snapshot, this.seriesService.createSeriesFilter());
+      this.seriesPagination = this.filterUtilityService.pagination();
+      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl();
       this.filterSettings.presets.collectionTags = [tagId];
       
       this.updateTag(tagId);
@@ -148,13 +141,13 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
 
   updateTag(tagId: number) {
     this.collectionService.allTags().subscribe(tags => {
-      this.collections = tags;
-      const matchingTags = this.collections.filter(t => t.id === tagId);
+      const matchingTags = tags.filter(t => t.id === tagId);
       if (matchingTags.length === 0) {
         this.toastr.error('You don\'t have access to any libraries this tag belongs to or this tag is invalid');
-        
+        this.router.navigateByUrl('/');
         return;
       }
+
       this.collectionTag = matchingTags[0];
       this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
@@ -163,46 +156,25 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    this.router.navigate(['collections', this.collectionTag.id], {replaceUrl: true, queryParamsHandling: 'merge', queryParams: {page: this.seriesPagination.currentPage} });
+    this.filterUtilityService.updateUrlFromPagination(this.seriesPagination);
     this.loadPage();
   }
 
   loadPage() {
-    const page = this.getPage();
-    if (page != null) {
-      this.seriesPagination.currentPage = parseInt(page, 10);
-    }
-
-    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
-    if (this.filter == undefined) {
-      this.filter = this.seriesService.createSeriesFilter();
-      this.filter.collectionTags.push(this.collectionTag.id);
-    }
-
-    // TODO: Add ability to filter series for a collection
-    // Reload page after a series is updated or first load
-    this.seriesService.getSeriesForTag(this.collectionTag.id, this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage).subscribe(tags => {
-      this.series = tags.result;
-      this.seriesPagination = tags.pagination;
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
+    this.seriesService.getAllSeries(this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+      this.series = series.result;
+      this.seriesPagination = series.pagination;
       this.isLoading = false;
       window.scrollTo(0, 0);
     });
   }
 
-  updateFilter(event: FilterEvent) {
-    this.filter = event.filter;
-    const page = this.getPage();
-    if (page === undefined || page === null || !event.isFirst) {
-      this.seriesPagination.currentPage = 1;
-      this.onPageChange(this.seriesPagination);
-    } else {
-      this.loadPage();
-    }
-  }
-
-  getPage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('page');
+  updateFilter(data: FilterEvent) {
+    this.filter = data.filter;
+    
+    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
+    this.loadPage();
   }
 
   handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {

@@ -50,7 +50,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
     });
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestory), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
-      console.log('Received library modfied event');
       this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
       });

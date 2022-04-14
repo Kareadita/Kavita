@@ -149,7 +149,7 @@ namespace API.Controllers
                 {
                     await _unitOfWork.CommitAsync();
                     await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                        MessageFactory.CoverUpdateEvent(tag.Id, "collection"), false);
+                        MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.CollectionTag), false);
                     return Ok();
                 }
 
@@ -196,7 +196,7 @@ namespace API.Controllers
                 {
                     await _unitOfWork.CommitAsync();
                     await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                        MessageFactory.CoverUpdateEvent(readingList.Id, "readingList"), false);
+                        MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
                     return Ok();
                 }
 

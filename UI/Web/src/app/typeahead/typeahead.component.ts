@@ -179,6 +179,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     this.reset.pipe(takeUntil(this.onDestroy)).subscribe((reset: boolean) => {
+      this.clearSelections();
       this.init();
     });
 
@@ -258,9 +259,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
          } else {
           this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
          }
-        
-        
-        //this.typeaheadControl.setValue(this.settings.displayFn(this.settings.savedData))
       }
     } else {
       this.optionSelection = new SelectionModel<any>();
@@ -308,14 +306,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
                 return;
               }
 
-
-              const filteredResults = opts.filter(item => this.filterSelected(item));
-                
-              if (filteredResults.length < this.focusedIndex) return;
-              const option = filteredResults[this.focusedIndex];
-
-              this.toggleSelection(option);
-              this.resetField();
+              (item as HTMLElement).click();
               this.focusedIndex = 0;
               event.preventDefault();
               event.stopPropagation();
@@ -356,10 +347,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.resetField();
   }
 
-  clearSelections(event: any) {
-    this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
-    this.selectedData.emit(this.optionSelection.selected());
-    this.resetField();
+  clearSelections() {
+    if (this.optionSelection) {
+      this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+      this.selectedData.emit(this.optionSelection.selected());
+      this.resetField();
+    }
   }
 
   handleOptionClick(opt: any) {

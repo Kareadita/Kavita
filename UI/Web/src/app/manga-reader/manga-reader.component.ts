@@ -23,7 +23,6 @@ import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/rea
 import { layoutModes, pageSplitOptions, scalingOptions } from '../_models/preferences/preferences';
 import { ReaderMode } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
-import { LibraryService } from '../_services/library.service';
 import { LibraryType } from '../_models/library';
 import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -326,8 +325,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
-              private libraryService: LibraryService, public utilityService: UtilityService,
-              private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
+              public utilityService: UtilityService, private renderer: Renderer2, 
+              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
   }
@@ -852,11 +851,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
     // If the prev page before we change current page is a cover image, we actually are skipping a page
-    console.log('Page ', this.PageNumber, ' is cover image: ', this.isCoverImage(this.cachedImages.prev()))
-    console.log('Page ', this.pageNum, ' is cover image: ', this.isCoverImage())
+    //console.log('Page ', this.PageNumber, ' is cover image: ', this.isCoverImage(this.cachedImages.prev()))
+    //console.log('Page ', this.pageNum, ' is cover image: ', this.isCoverImage())
     const pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage(this.cachedImages.prev())) ? 2: 1; 
     // BUG: isCoverImage works on canvasImage, where we need to know if the previous image is a cover image or not. 
-    console.log('pageAmt: ', pageAmount);
+    //console.log('pageAmt: ', pageAmount);
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
       if (this.isLoading) { return; }
 
@@ -992,7 +991,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Reset scroll on non HEIGHT Fits
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-      window.scrollTo(0, 0);
+      this.document.body.scroll(0, 0)
     }
 
 

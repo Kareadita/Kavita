@@ -1,4 +1,4 @@
-import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -19,6 +19,11 @@ export class SideNavCompanionBarComponent implements OnInit {
    * Is the input open by default
    */
   @Input() filterOpenByDefault: boolean = false;
+
+  /**
+   * This implies there is a filter in effect on the underlying page. Will show UI styles to imply this to the user.
+   */
+  @Input() filterActive: boolean = false;
 
   /**
    * Should be passed through from Filter component.

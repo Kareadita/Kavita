@@ -95,7 +95,6 @@ export class CardDetailsModalComponent implements OnInit {
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
-    console.log('isChapter: ', this.isChapter);
 
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
 

@@ -211,12 +211,8 @@ namespace API.Controllers
             {
                 return BadRequest("A list of this name already exists");
             }
-            user.ReadingLists.Add(new ReadingList()
-            {
-                Promoted = false,
-                Title = dto.Title,
-                Summary = string.Empty
-            });
+
+            user.ReadingLists.Add(DbFactory.ReadingList(dto.Title, string.Empty, false));
 
             if (!_unitOfWork.HasChanges()) return BadRequest("There was a problem creating list");
 
@@ -257,7 +253,7 @@ namespace API.Controllers
                 readingList.CoverImageLocked = false;
                 readingList.CoverImage = string.Empty;
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(readingList.Id, "readingList"), false);
+                    MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
 
@@ -474,14 +470,7 @@ namespace API.Controllers
             foreach (var chapter in chaptersForSeries)
             {
                 if (existingChapterExists.Contains(chapter.Id)) continue;
-
-                readingList.Items.Add(new ReadingListItem()
-                {
-                    Order = index,
-                    ChapterId = chapter.Id,
-                    SeriesId = seriesId,
-                    VolumeId = chapter.VolumeId
-                });
+                readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
                 index += 1;
             }
 

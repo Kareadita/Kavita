@@ -22,6 +22,10 @@ namespace API.DTOs
         /// </summary>
         public DateTime LatestReadDate { get; set; }
         /// <summary>
+        /// DateTime representing last time a chapter was added to the Series
+        /// </summary>
+        public DateTime LastChapterAdded { get; set; }
+        /// <summary>
         /// Rating from logged in user. Calculated at API-time.
         /// </summary>
         public int UserRating { get; set; }

@@ -82,6 +82,29 @@ namespace API.Data
             };
         }
 
+        public static ReadingList ReadingList(string title, string summary, bool promoted)
+        {
+            return new ReadingList()
+            {
+                NormalizedTitle = API.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+                Title = title?.Trim(),
+                Summary = summary?.Trim(),
+                Promoted = promoted,
+                Items = new List<ReadingListItem>()
+            };
+        }
+
+        public static ReadingListItem ReadingListItem(int index, int seriesId, int volumeId, int chapterId)
+        {
+            return new ReadingListItem()
+            {
+                Order = index,
+                ChapterId = chapterId,
+                SeriesId = seriesId,
+                VolumeId = volumeId
+            };
+        }
+
         public static Genre Genre(string name, bool external)
         {
             return new Genre()

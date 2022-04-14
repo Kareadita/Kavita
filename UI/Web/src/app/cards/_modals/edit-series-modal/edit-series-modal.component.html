@@ -337,6 +337,11 @@
                         <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | sentenceCase}}</div>
                         <div class="col-md-6">Format: <app-tag-badge>{{utilityService.mangaFormat(series.format)}}</app-tag-badge></div>
                     </div>
+                    <div class="row g-0 mb-2">
+                        <div class="col-md-6" >Created: {{series.created | date:'shortDate'}}</div>
+                        <div class="col-md-6">Last Read: {{series.latestReadDate | date:'shortDate'}}</div>
+                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | date:'shortDate'}}</div>
+                    </div>
                       <h4>Volumes</h4>
                       <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
                           <span class="invisible">Loading...</span>

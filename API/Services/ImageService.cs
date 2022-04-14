@@ -26,8 +26,9 @@ public class ImageService : IImageService
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
-    public const string SeriesCoverImageRegex = @"series_\d+";
-    public const string CollectionTagCoverImageRegex = @"tag_\d+";
+    public const string SeriesCoverImageRegex = @"series\d+";
+    public const string CollectionTagCoverImageRegex = @"tag\d+";
+    public const string ReadingListCoverImageRegex = @"readinglist\d+";
 
 
     /// <summary>

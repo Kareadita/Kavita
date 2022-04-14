@@ -53,7 +53,11 @@ export enum EVENTS {
    /**
     * A library is created or removed from the instance
     */
-   LibraryModified = 'LibraryModified'
+   LibraryModified = 'LibraryModified',
+   /**
+    * A user updates an entities read progress
+    */
+   UserProgressUpdate = 'UserProgressUpdate',
 }
 
 export interface Message<T> {
@@ -160,6 +164,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
       this.messagesSource.next({
         event: EVENTS.SeriesAddedToCollection,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.UserProgressUpdate, resp => {
+      this.messagesSource.next({
+        event: EVENTS.UserProgressUpdate,
         payload: resp.body
       });
     });
