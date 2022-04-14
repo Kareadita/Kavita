@@ -44,4 +44,8 @@ export interface Series {
      * DateTime that represents last time the logged in user read this series
      */
     latestReadDate: string;
+    /**
+     * DateTime representing last time a chapter was added to the Series
+     */
+    lastChapterAdded: string;
 }
