@@ -100,7 +100,6 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
 
       this.seriesPagination = this.filterUtilityService.pagination();
       [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl();
-      console.log('presets: ', this.filterSettings.presets);
       this.filterSettings.presets.collectionTags = [tagId];
       
       this.updateTag(tagId);
@@ -162,14 +161,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
-    // if (this.filter == undefined) {
-    //   this.filter = this.seriesService.createSeriesFilter();
-    //   this.filter.collectionTags.push(this.collectionTag.id);
-    // }
-
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
-    console.log('fetching with filter: ', this.filter);
     this.seriesService.getAllSeries(this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.seriesPagination = series.pagination;
@@ -180,7 +172,6 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
-    console.log('update filter: ', this.filter);
     
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
     this.loadPage();

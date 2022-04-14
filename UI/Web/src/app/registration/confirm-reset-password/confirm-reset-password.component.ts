@@ -42,7 +42,7 @@ export class ConfirmResetPasswordComponent implements OnInit {
       this.toastr.success("Password reset");
       this.router.navigateByUrl('login');
     }, err => {
-      console.log(err);
+      console.error(err, 'There was an error trying to confirm reset password');
     });
   }
 

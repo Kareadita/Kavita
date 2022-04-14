@@ -219,10 +219,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
     });
     this.collectionTagSettings.compareFn = (options: CollectionTag[], filter: string) => {
-      // console.log('compareFN:')
-      // console.log('options: ', options);
-      // console.log('filter: ', filter);
-      // console.log('results: ', options.filter(m => this.utilityService.filter(m.title, filter)));
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
     this.collectionTagSettings.selectionCompareFn = (a: CollectionTag, b: CollectionTag) => {

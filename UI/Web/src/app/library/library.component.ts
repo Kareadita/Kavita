@@ -151,21 +151,20 @@ export class LibraryComponent implements OnInit, OnDestroy {
   }
 
   handleSectionClick(sectionTitle: string) {
-    if (sectionTitle.toLowerCase() === 'collections') {
-      this.router.navigate(['collections']);
-    } else if (sectionTitle.toLowerCase() === 'recently updated series') {
-      this.router.navigate(['recently-added']);
+    if (sectionTitle.toLowerCase() === 'recently updated series') {
+      const params: any = {};
+      params['sortBy'] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
+      params['page'] = 1;
+      this.router.navigate(['all-series'], {queryParams: params});
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
       params['readStatus'] = 'true,false,false';
-      params['sortBy'] = SortField.LastChapterAdded + ',false'; // sort by created, desc
+      params['sortBy'] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
       params['page'] = 1;
       this.router.navigate(['all-series'], {queryParams: params});
-    } else if (sectionTitle.toLowerCase() === 'libraries') {
-      this.router.navigate(['all-series']);
-    } else if (sectionTitle.toLowerCase() === 'newly added series') {
+    }else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
-      params['sortBy'] = SortField.Created + ',true'; // sort by created, asc
+      params['sortBy'] = SortField.Created + ',false'; // sort by created, desc
       params['page'] = 1;
       this.router.navigate(['all-series'], {queryParams: params});
     } 

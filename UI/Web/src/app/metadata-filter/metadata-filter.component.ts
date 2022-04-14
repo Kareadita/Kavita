@@ -152,13 +152,17 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     }
 
     if (this.filterSettings.presets) {
-      this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets?.readStatus.read);
-      this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets?.readStatus.notRead);
-      this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets?.readStatus.inProgress);
-
+      this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets.readStatus.read);
+      this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets.readStatus.notRead);
+      this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets.readStatus.inProgress);
+      
       if (this.filterSettings.presets.sortOptions) {
         this.sortGroup.get('sortField')?.setValue(this.filterSettings.presets.sortOptions.sortField);
-        this.isAscendingSort = this.filterSettings.presets.sortOptions.isAscending || true;
+        this.isAscendingSort = this.filterSettings.presets.sortOptions.isAscending;
+        if (this.filter.sortOptions) {
+          this.filter.sortOptions.isAscending = this.isAscendingSort;
+          this.filter.sortOptions.sortField = this.filterSettings.presets.sortOptions.sortField;
+        }
       }
 
       if (this.filterSettings.presets.rating > 0) {

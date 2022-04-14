@@ -42,8 +42,6 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
       distinctUntilChanged((prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) => 
         this.hasMessageChanged(prev, curr))) 
       .subscribe((event: Message<ScanSeriesEvent | NotificationProgressEvent>) => {
-        console.log('scan event: ', event);
-
         let libId = 0;
         if (event.event === EVENTS.ScanSeries) {
           libId = (event.payload as ScanSeriesEvent).libraryId;

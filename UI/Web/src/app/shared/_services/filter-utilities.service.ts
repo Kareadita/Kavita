@@ -84,7 +84,7 @@ export class FilterUtilitiesService {
     }
 
     // sortBy (additional check to not save to url if default case)
-    if (filter.sortOptions && filter.sortOptions.sortField !== SortField.SortName && filter.sortOptions.isAscending !== true) {
+    if (filter.sortOptions && !(filter.sortOptions.sortField === SortField.SortName && filter.sortOptions.isAscending === true)) {
       params += '&sortBy=' + filter.sortOptions.sortField + ',' + filter.sortOptions.isAscending;
     }
 
