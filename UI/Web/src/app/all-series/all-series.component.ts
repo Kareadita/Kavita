@@ -118,12 +118,12 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
+    console.log('load page called');
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
     }
 
-    console.log('Load page: ', this.filter);
     this.seriesService.getAllSeries(this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;

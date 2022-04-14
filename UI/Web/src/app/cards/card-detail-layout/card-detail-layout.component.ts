@@ -71,6 +71,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(page: number) {
+    if (page === this.pagination.currentPage) return;
     this.pageChange.emit(this.pagination);
   }
 
