@@ -43,6 +43,10 @@ input {
     border: 1px solid var(--input-border-color);
     color: var(--body-text-color);
 
+    &.disabled {
+        cursor: not-allowed !important;
+    }
+
     input {
         outline: 0 !important;
         border-radius: .28571429rem;

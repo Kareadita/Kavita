@@ -103,7 +103,9 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     
     this.pagination = this.filterUtilityService.pagination();
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl();
-    this.filterSettings.presets.libraries = [this.libraryId];
+    if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
+    this.filterSettings.libraryDisabled = true;
+    console.log('presets: ', this.filterSettings.presets);
   }
 
   ngOnInit(): void {
@@ -154,6 +156,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    console.log('updateFilter: ', data.filter);
     this.loadPage();
   }
 

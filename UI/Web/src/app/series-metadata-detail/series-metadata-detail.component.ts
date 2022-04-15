@@ -72,7 +72,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
   goTo(queryParamName: FilterQueryParam, filter: any) {
     let params: any = {};
     params[queryParamName] = filter;
-    params['page'] = 1;
+    params[FilterQueryParam.Page] = 1;
     this.router.navigate(['library', this.series.libraryId], {queryParams: params});
   }
 

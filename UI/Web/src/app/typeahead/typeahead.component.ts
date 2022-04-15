@@ -148,10 +148,15 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
    * When a field is locked, we render custom css to indicate to the user. Does not affect functionality.
    */
   @Input() locked: boolean = false;
+  /**
+   * If disabled, a user will not be able to interact with the typeahead
+   */
+  @Input() disabled: boolean = false;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   @Output() onUnlock = new EventEmitter<void>();
   @Output() lockedChange = new EventEmitter<boolean>();
+  
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
@@ -274,6 +279,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) { 
     if (!this.hasFocus) { return; }
+    if (this.disabled) return;
 
     switch(event.key) {
       case KEY_CODES.DOWN_ARROW:
@@ -356,6 +362,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   handleOptionClick(opt: any) {
+    if (this.disabled) return;
     if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
       return;
     }
@@ -402,6 +409,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
+    if (this.disabled) return;
 
     if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
       return;
@@ -452,6 +460,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   unlock(event: any) {
+    if (this.disabled) return;
     this.locked = !this.locked;
     this.onUnlock.emit();
     this.lockedChange.emit(this.locked);

@@ -85,6 +85,72 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
 
+    // this.filter = this.seriesService.createSeriesFilter();
+    // this.readProgressGroup = new FormGroup({
+    //   read: new FormControl(this.filter.readStatus.read, []),
+    //   notRead: new FormControl(this.filter.readStatus.notRead, []),
+    //   inProgress: new FormControl(this.filter.readStatus.inProgress, []),
+    // });
+
+    // this.sortGroup = new FormGroup({
+    //   sortField: new FormControl(this.filter.sortOptions?.sortField || SortField.SortName, []),
+    // });
+
+    // this.seriesNameGroup = new FormGroup({
+    //   seriesNameQuery: new FormControl(this.filter.seriesNameQuery || '', [])
+    // });
+
+    // this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
+    //   this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
+    //   this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
+    //   this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
+
+    //   let sum = 0;
+    //   sum += (this.filter.readStatus.read ? 1 : 0);
+    //   sum += (this.filter.readStatus.inProgress ? 1 : 0);
+    //   sum += (this.filter.readStatus.notRead ? 1 : 0);
+
+    //   if (sum === 1) {
+    //     if (this.filter.readStatus.read) this.readProgressGroup.get('read')?.disable({ emitEvent: false });
+    //     if (this.filter.readStatus.notRead) this.readProgressGroup.get('notRead')?.disable({ emitEvent: false });
+    //     if (this.filter.readStatus.inProgress) this.readProgressGroup.get('inProgress')?.disable({ emitEvent: false });
+    //   } else {
+    //     this.readProgressGroup.get('read')?.enable({ emitEvent: false });
+    //     this.readProgressGroup.get('notRead')?.enable({ emitEvent: false });
+    //     this.readProgressGroup.get('inProgress')?.enable({ emitEvent: false });
+    //   }
+    // });
+
+    // this.sortGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
+    //   if (this.filter.sortOptions == null) {
+    //     this.filter.sortOptions = {
+    //       isAscending: this.isAscendingSort,
+    //       sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
+    //     };
+    //   }
+    //   this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
+    // });
+
+    // this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
+    //   map(val => (val || '').trim()),
+    //   distinctUntilChanged(), 
+    //   takeUntil(this.onDestory))
+    //   .subscribe(changes => {
+    //   this.filter.seriesNameQuery = changes;
+    // });
+  }
+
+  ngOnInit(): void {
+    if (this.filterSettings === undefined) {
+      this.filterSettings = new FilterSettings();
+    }
+
+    if (this.filterOpen) {
+      this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
+        this.filteringCollapsed = !openState;
+      });
+    }
+
     this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl(this.filter.readStatus.read, []),
@@ -138,18 +204,20 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       .subscribe(changes => {
       this.filter.seriesNameQuery = changes;
     });
+
+    this.loadFromPresetsAndSetup();
   }
 
-  ngOnInit(): void {
-    if (this.filterSettings === undefined) {
-      this.filterSettings = new FilterSettings();
-    }
+  ngOnDestroy() {
+    this.onDestory.next();
+    this.onDestory.complete();
+  }
 
-    if (this.filterOpen) {
-      this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
-        this.filteringCollapsed = !openState;
-      });
-    }
+  getPersonsSettings(role: PersonRole) {
+    return this.peopleSettings[role];
+  }
+
+  loadFromPresetsAndSetup() {
 
     if (this.filterSettings.presets) {
       this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets.readStatus.read);
@@ -173,21 +241,6 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
         this.seriesNameGroup.get('searchNameQuery')?.setValue(this.filterSettings.presets.seriesNameQuery);
       }
     }
-
-
-    this.setupTypeaheads();
-  }
-
-  ngOnDestroy() {
-    this.onDestory.next();
-    this.onDestory.complete();
-  }
-
-  getPersonsSettings(role: PersonRole) {
-    return this.peopleSettings[role];
-  }
-
-  setupTypeaheads() {
 
     this.setupFormatTypeahead();
 
@@ -251,7 +304,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.libraries && this.filterSettings.presets?.libraries.length > 0) {
       return this.librarySettings.fetchFn('').pipe(map(libraries => {
         this.librarySettings.savedData = libraries.filter(item => this.filterSettings.presets?.libraries.includes(item.id));
-        this.filter.libraries = this.librarySettings.savedData.map(item => item.id);
+        this.updateLibraryFilters(this.librarySettings.savedData);
+        console.log("loaded library from preset");
         return of(true);
       }));
     }
@@ -582,10 +636,11 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.sortGroup.get('sortField')?.setValue(SortField.SortName);
     this.isAscendingSort = true;
     // Apply any presets which will trigger the apply
-    this.setupTypeaheads();
+    this.loadFromPresetsAndSetup();
   }
 
   apply() {
+    console.log('Apply called');
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
     this.updateApplied++;
   }

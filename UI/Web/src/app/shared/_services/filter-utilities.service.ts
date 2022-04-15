@@ -86,9 +86,7 @@ export class FilterUtilitiesService {
   urlFromFilter(currentUrl: string, filter: SeriesFilter | undefined) {
     if (filter === undefined) return currentUrl;
     let params = '';
-    
 
-    
     params += this.joinFilter(filter.formats, FilterQueryParam.Format);
     params += this.joinFilter(filter.genres, FilterQueryParam.Genres);
     params += this.joinFilter(filter.ageRating, FilterQueryParam.AgeRating);
@@ -134,7 +132,7 @@ export class FilterUtilitiesService {
   private joinFilter(filterProp: Array<any>, key: string) {
     let params = '';
     if (filterProp.length > 0) {
-      params += `&${key}=` + filterProp.join(',');
+      params += `&${key}=${filterProp.join(',')}`;
     }
     return params;
   }

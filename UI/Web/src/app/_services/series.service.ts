@@ -195,6 +195,7 @@ export class SeriesService {
   }
 
   createSeriesFilter(filter?: SeriesFilter) {
+    if (filter !== undefined) return filter;
     const data: SeriesFilter = {
       formats: [],
       libraries: [],
@@ -225,8 +226,6 @@ export class SeriesService {
       seriesNameQuery: '',
     };
 
-    if (filter === undefined) return data;
-
-    return filter;
+    return data;
   }
 }

@@ -36,10 +36,10 @@
                 </div>
             </div>
 
-            <div class="col-md-2 me-3"*ngIf="!filterSettings.libraryDisabled">
+            <div class="col-md-2 me-3">
                 <div class="mb-3">
                     <label for="libraries" class="form-label">Libraries</label>
-                    <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads">
+                    <app-typeahead (selectedData)="updateLibraryFilters($event)" [settings]="librarySettings" [reset]="resetTypeaheads" [disabled]="filterSettings.libraryDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
