@@ -47,11 +47,11 @@ namespace API.Data.Metadata
         /// </summary>
         public float UserRating { get; set; }
 
-        public string AlternateSeries { get; set; } = string.Empty;
         public string StoryArc { get; set; } = string.Empty;
         public string SeriesGroup { get; set; } = string.Empty;
-        public string AlternativeSeries { get; set; } = string.Empty;
-        public string AlternativeNumber { get; set; } = string.Empty;
+        public string AlternateNumber { get; set; } = string.Empty;
+        public int AlternateCount { get; set; } = 0;
+        public string AlternateSeries { get; set; } = string.Empty;
 
         /// <summary>
         /// This is Epub only: calibre:title_sort
