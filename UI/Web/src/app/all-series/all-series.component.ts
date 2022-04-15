@@ -111,6 +111,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
+    console.log('updateFilter: ', data.filter);
     
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
     this.loadPage();
@@ -119,6 +120,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   loadPage() {
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
+      console.log('setting new filter as filter was undefined');
       this.filter = this.seriesService.createSeriesFilter();
     }
 

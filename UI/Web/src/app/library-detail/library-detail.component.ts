@@ -155,8 +155,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
     console.log('updateFilter: ', data.filter);
+    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
     this.loadPage();
   }
 

@@ -153,17 +153,17 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
     this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
-      read: new FormControl(this.filter.readStatus.read, []),
-      notRead: new FormControl(this.filter.readStatus.notRead, []),
-      inProgress: new FormControl(this.filter.readStatus.inProgress, []),
+      read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
+      notRead: new FormControl({value: this.filter.readStatus.notRead, disabled: this.filterSettings.readProgressDisabled}, []),
+      inProgress: new FormControl({value: this.filter.readStatus.inProgress, disabled: this.filterSettings.readProgressDisabled}, []),
     });
 
     this.sortGroup = new FormGroup({
-      sortField: new FormControl(this.filter.sortOptions?.sortField || SortField.SortName, []),
+      sortField: new FormControl({value: this.filter.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
     });
 
     this.seriesNameGroup = new FormGroup({
-      seriesNameQuery: new FormControl(this.filter.seriesNameQuery || '', [])
+      seriesNameQuery: new FormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
     });
 
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {

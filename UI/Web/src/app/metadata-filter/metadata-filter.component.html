@@ -250,15 +250,15 @@
                 <label class="form-label">Read Progress</label>
                 <form [formGroup]="readProgressGroup">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead" [disabled]="filterSettings.readProgressDisabled">
+                        <input class="form-check-input" type="checkbox" id="notread" formControlName="notRead">
                         <label class="form-check-label" for="notread">Unread</label>
                       </div>
                       <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="inprogress" formControlName="inProgress" [disabled]="filterSettings.readProgressDisabled">
+                        <input class="form-check-input" type="checkbox" id="inprogress" formControlName="inProgress">
                         <label class="form-check-label" for="inprogress">In Progress</label>
                       </div>
                       <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="read" formControlName="read" [disabled]="filterSettings.readProgressDisabled">
+                        <input class="form-check-input" type="checkbox" id="read" formControlName="read">
                         <label class="form-check-label" for="read">Read</label>
                       </div>
                 </form>
@@ -321,7 +321,7 @@
                         <label for="series-name" class="form-label">Series Name</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="seriesNameFilterTooltip" role="button" tabindex="0"></i>
                         <span class="visually-hidden" id="filter-series-name-help"><ng-container [ngTemplateOutlet]="seriesNameFilterTooltip"></ng-container></span>
                         <ng-template #seriesNameFilterTooltip>Series name will filter against Name, Sort Name, or Localized Name</ng-template>
-                        <input type="text" id="series-name" formControlName="seriesNameQuery" class="form-control" aria-describedby="filter-series-name-help" [disabled]="filterSettings.searchNameDisabled">
+                        <input type="text" id="series-name" formControlName="seriesNameQuery" class="form-control" aria-describedby="filter-series-name-help">
                     </div>
                 </form>
             </div>
@@ -335,7 +335,7 @@
                                 <i class="fa fa-arrow-down" title="Descending"></i>
                             </ng-template>
                         </button>
-                        <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;" [disabled]="filterSettings.sortDisabled">
+                        <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
                             <option [value]="SortField.SortName">Sort Name</option>
                             <option [value]="SortField.Created">Created</option>
                             <option [value]="SortField.LastModified">Last Modified</option> 
