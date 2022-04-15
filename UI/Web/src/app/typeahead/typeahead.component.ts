@@ -141,7 +141,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
    */
   @Input() settings!: TypeaheadSettings<any>;
   /**
-   * When true, component will re-init and set back to false.
+   * When true, will reset field to no selections. When false, will reset to saved data
    */
   @Input() reset: Subject<boolean> = new ReplaySubject(1);
   /**
@@ -183,8 +183,9 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.reset.pipe(takeUntil(this.onDestroy)).subscribe((reset: boolean) => {
-      this.clearSelections();
+    this.reset.pipe(takeUntil(this.onDestroy)).subscribe((resetToEmpty: boolean) => {
+      console.log('Resetting typeahead: ', resetToEmpty)
+      this.clearSelections(resetToEmpty);
       this.init();
     });
 
@@ -254,6 +255,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
 
     if (this.settings.savedData) {
+      console.log('loading with saved data: ', this.settings.savedData);
       if (this.settings.multiple) {
         this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);  
       }
@@ -353,9 +355,19 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.resetField();
   }
 
-  clearSelections() {
+  clearSelections(untoggleAll: boolean = false) {
     if (this.optionSelection) {
-      this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+      if (!untoggleAll && this.settings.savedData) {
+        const isArray = this.settings.savedData.hasOwnProperty('length');
+         if (isArray) {
+          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+         } else {
+          this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
+         }
+      } else {
+        this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+      }
+      
       this.selectedData.emit(this.optionSelection.selected());
       this.resetField();
     }

@@ -254,7 +254,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
     ]).subscribe(results => {
-      this.resetTypeaheads.next(true);
+      this.resetTypeaheads.next(false); // This clears out presets...
       if (this.filterSettings.openByDefault) {
         this.filteringCollapsed = false;
       }
@@ -280,7 +280,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.formats && this.filterSettings.presets?.formats.length > 0) {
       this.formatSettings.savedData = mangaFormatFilters.filter(item => this.filterSettings.presets?.formats.includes(item.value));
       this.filter.formats = this.formatSettings.savedData.map(item => item.value);
-      this.resetTypeaheads.next(true);
+      //this.resetTypeaheads.next(true);
     }
   }
 
@@ -305,7 +305,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return this.librarySettings.fetchFn('').pipe(map(libraries => {
         this.librarySettings.savedData = libraries.filter(item => this.filterSettings.presets?.libraries.includes(item.id));
         this.updateLibraryFilters(this.librarySettings.savedData);
-        console.log("loaded library from preset");
+        console.log("loaded library from preset", this.filter);
         return of(true);
       }));
     }
@@ -478,7 +478,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return fetch('').pipe(map(people => {
         personSettings.savedData = people.filter(item => presetField.includes(item.id));
         peopleFilterField = personSettings.savedData.map(item => item.id);
-        this.resetTypeaheads.next(true);
+        //this.resetTypeaheads.next(true);
         this.peopleSettings[role] = personSettings;
         this.updatePersonFilters(personSettings.savedData as Person[], role);
         return true;
@@ -504,7 +504,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.updateFromPreset('publisher', this.filter.publisher, this.filterSettings.presets?.publisher, PersonRole.Publisher),
       this.updateFromPreset('translators', this.filter.translators, this.filterSettings.presets?.translators, PersonRole.Translator)
     ]).pipe(map(results => {
-      this.resetTypeaheads.next(true);
+      //this.resetTypeaheads.next(true);
       return of(true);
     }));
   }
@@ -642,7 +642,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   apply() {
-    console.log('Apply called');
+    console.log('Apply called', this.filter);
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
     this.updateApplied++;
   }
