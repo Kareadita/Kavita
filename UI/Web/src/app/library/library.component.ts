@@ -3,6 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, filter, take, takeUntil } from 'rxjs/operators';
+import { FilterQueryParam } from '../shared/_services/filter-utilities.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import { Library } from '../_models/library';
@@ -153,19 +154,19 @@ export class LibraryComponent implements OnInit, OnDestroy {
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'recently updated series') {
       const params: any = {};
-      params['sortBy'] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
-      params['page'] = 1;
+      params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
+      params[FilterQueryParam.Page] = 1;
       this.router.navigate(['all-series'], {queryParams: params});
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
-      params['readStatus'] = 'true,false,false';
-      params['sortBy'] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
-      params['page'] = 1;
+      params[FilterQueryParam.ReadStatus] = 'true,false,false';
+      params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
+      params[FilterQueryParam.Page] = 1;
       this.router.navigate(['all-series'], {queryParams: params});
     }else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
-      params['sortBy'] = SortField.Created + ',false'; // sort by created, desc
-      params['page'] = 1;
+      params[FilterQueryParam.SortBy] = SortField.Created + ',false'; // sort by created, desc
+      params[FilterQueryParam.Page] = 1;
       this.router.navigate(['all-series'], {queryParams: params});
     } 
   }
