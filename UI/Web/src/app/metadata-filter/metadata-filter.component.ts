@@ -591,6 +591,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   updateRating(rating: any) {
+    if (this.filterSettings.ratingDisabled) return;
     this.filter.rating = rating;
   }
 
@@ -617,6 +618,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   updateSortOrder() {
+    if (this.filterSettings.sortDisabled) return;
     this.isAscendingSort = !this.isAscendingSort;
     if (this.filter.sortOptions === null) {
       this.filter.sortOptions = {

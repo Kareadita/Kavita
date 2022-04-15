@@ -13,9 +13,11 @@ export class FilterSettings {
     tagsDisabled = false;
     languageDisabled = false;
     publicationStatusDisabled = false;
+    searchNameDisabled = false;
     presets: SeriesFilter | undefined;
     /**
      * Should the filter section be open by default
+     * @deprecated This is deprecated UX pattern. New style is to show highlight on filter button. 
      */
     openByDefault = false;
   }
