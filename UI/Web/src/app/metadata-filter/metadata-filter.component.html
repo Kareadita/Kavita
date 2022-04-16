@@ -19,7 +19,7 @@
 
 <ng-template #filterSection>
     <ng-template #globalFilterTooltip>This is library agnostic</ng-template>
-    <div class="filter-section mx-auto pb-3">
+    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded">
         <div class="row justify-content-center g-0">
             <div class="col-md-2 me-3">
                 <div class="mb-3">

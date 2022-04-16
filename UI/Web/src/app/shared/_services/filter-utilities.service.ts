@@ -146,7 +146,6 @@ export class FilterUtilitiesService {
    filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot): [SeriesFilter, boolean] {
     const filter =  this.seriesService.createSeriesFilter();
     let anyChanged = false;
-    console.log('map: ', snapshot.queryParamMap);
 
     const format = snapshot.queryParamMap.get(FilterQueryParam.Format);
     if (format !== undefined && format !== null) {

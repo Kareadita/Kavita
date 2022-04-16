@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
@@ -143,7 +143,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   /**
    * When true, will reset field to no selections. When false, will reset to saved data
    */
-  @Input() reset: Subject<boolean> = new ReplaySubject(1);
+  @Input() reset: ReplaySubject<boolean> = new ReplaySubject(1);
   /**
    * When a field is locked, we render custom css to indicate to the user. Does not affect functionality.
    */
@@ -184,7 +184,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     this.reset.pipe(takeUntil(this.onDestroy)).subscribe((resetToEmpty: boolean) => {
-      console.log('Resetting typeahead: ', resetToEmpty)
       this.clearSelections(resetToEmpty);
       this.init();
     });
@@ -255,7 +254,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
 
     if (this.settings.savedData) {
-      console.log('loading with saved data: ', this.settings.savedData);
       if (this.settings.multiple) {
         this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);  
       }

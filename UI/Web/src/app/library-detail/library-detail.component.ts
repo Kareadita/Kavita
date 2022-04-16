@@ -110,7 +110,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.filterActiveCheck.libraries = [this.libraryId];
 
     this.filterSettings.libraryDisabled = true;
-    console.log('presets: ', this.filterSettings.presets);
   }
 
   ngOnInit(): void {
@@ -160,7 +159,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
-    console.log('updateFilter: ', data.filter);
+
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
     this.loadPage();
   }
