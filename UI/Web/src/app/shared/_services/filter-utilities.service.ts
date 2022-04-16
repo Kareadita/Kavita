@@ -70,10 +70,11 @@ export class FilterUtilitiesService {
 
   /**
    * Will fetch current page from route if present
+   * @param ActivatedRouteSnapshot to fetch page from. Must be from component else may get stale data
    * @returns A default pagination object
    */
-  pagination(): Pagination {
-    return {currentPage: parseInt(this.route.snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage: 30, totalItems: 0, totalPages: 1};
+  pagination(snapshot: ActivatedRouteSnapshot): Pagination {
+    return {currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage: 30, totalItems: 0, totalPages: 1};
   }
 
 
@@ -139,12 +140,13 @@ export class FilterUtilitiesService {
 
   /**
    * Returns a new instance of a filterSettings that is populated with filter presets from URL
+   * @param ActivatedRouteSnapshot to fetch page from. Must be from component else may get stale data
    * @returns The Preset filter and if something was set within
    */
-   filterPresetsFromUrl(): [SeriesFilter, boolean] {
-    const snapshot = this.route.snapshot;
+   filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot): [SeriesFilter, boolean] {
     const filter =  this.seriesService.createSeriesFilter();
     let anyChanged = false;
+    console.log('map: ', snapshot.queryParamMap);
 
     const format = snapshot.queryParamMap.get(FilterQueryParam.Format);
     if (format !== undefined && format !== null) {

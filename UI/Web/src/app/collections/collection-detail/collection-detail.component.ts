@@ -98,8 +98,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.seriesPagination = this.filterUtilityService.pagination();
-      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl();
+      this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
+      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
       this.filterSettings.presets.collectionTags = [tagId];
       
       this.updateTag(tagId);

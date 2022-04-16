@@ -79,8 +79,8 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - All Series');
 
-    this.pagination = this.filterUtilityService.pagination();
-    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl();
+    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
   }
 
   ngOnInit(): void {

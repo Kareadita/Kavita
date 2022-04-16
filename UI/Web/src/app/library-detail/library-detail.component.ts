@@ -37,6 +37,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
+  filterActiveCheck!: SeriesFilter;
 
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'Library', fragment: ''},
@@ -101,9 +102,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
-    this.pagination = this.filterUtilityService.pagination();
-    [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl();
+    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+    [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
+    // Setup filterActiveCheck to check filter against
+    this.filterActiveCheck = this.seriesService.createSeriesFilter();
+    this.filterActiveCheck.libraries = [this.libraryId];
+
     this.filterSettings.libraryDisabled = true;
     console.log('presets: ', this.filterSettings.presets);
   }
@@ -168,7 +173,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
 
     this.loadingSeries = true;
-    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
