@@ -132,9 +132,9 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
-            // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz
+            // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz, My Charms Are Wasted on Kuroiwa Medaka - Ch. 37.5 - Volume Extras
             new Regex(
-                @"(?<Series>.*)(\s|_|-)(?!Vol)(\s|_|-)(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
+                @"(?<Series>.*)(\s|_|-)(?!Vol)(\s|_|-)(?:Chapter)|(?:Ch\.)(\s|_|-)(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
             new Regex(

@@ -169,6 +169,7 @@ namespace API.Tests.Parser
         [InlineData("Love Hina - Volume 01 [Scans].pdf", "Love Hina")]
         [InlineData("It's Witching Time! 001 (Digital) (Anonymous1234)", "It's Witching Time!")]
         [InlineData("Zettai Karen Children v02 c003 - The Invisible Guardian (2) [JS Scans]", "Zettai Karen Children")]
+        [InlineData("My Charms Are Wasted on Kuroiwa Medaka - Ch. 37.5 - Volume Extras", "My Charms Are Wasted on Kuroiwa Medaka")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
