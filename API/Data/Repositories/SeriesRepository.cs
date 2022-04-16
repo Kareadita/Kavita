@@ -94,7 +94,7 @@ public interface ISeriesRepository
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
-    Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
+    IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30);
 }
 
@@ -884,19 +884,19 @@ public class SeriesRepository : ISeriesRepository
             .ToList();
     }
 
-    public async Task<IList<PublicationStatusDto>> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
+    public IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
     {
-        return await _context.Series
+        return  _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Select(s => s.Metadata.PublicationStatus)
             .Distinct()
+            .AsEnumerable()
             .Select(s => new PublicationStatusDto()
             {
                 Value = s,
                 Title = s.ToDescription()
             })
-            .OrderBy(s => s.Title)
-            .ToListAsync();
+            .OrderBy(s => s.Title);
     }
 
 
