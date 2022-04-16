@@ -254,7 +254,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
     ]).subscribe(results => {
-      this.resetTypeaheads.next(false); // This clears out presets...
+      this.resetTypeaheads.next(false); // Pass false to ensure we reset to the preset and not to an empty typeahead
       if (this.filterSettings.openByDefault) {
         this.filteringCollapsed = false;
       }
@@ -279,8 +279,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
     if (this.filterSettings.presets?.formats && this.filterSettings.presets?.formats.length > 0) {
       this.formatSettings.savedData = mangaFormatFilters.filter(item => this.filterSettings.presets?.formats.includes(item.value));
-      this.filter.formats = this.formatSettings.savedData.map(item => item.value);
-      //this.resetTypeaheads.next(true);
+      this.updateFormatFilters(this.formatSettings.savedData);
     }
   }
 
@@ -305,7 +304,6 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return this.librarySettings.fetchFn('').pipe(map(libraries => {
         this.librarySettings.savedData = libraries.filter(item => this.filterSettings.presets?.libraries.includes(item.id));
         this.updateLibraryFilters(this.librarySettings.savedData);
-        console.log("loaded library from preset", this.filter);
         return of(true);
       }));
     }
@@ -332,7 +330,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.genres && this.filterSettings.presets?.genres.length > 0) {
       return this.genreSettings.fetchFn('').pipe(map(genres => {
         this.genreSettings.savedData = genres.filter(item => this.filterSettings.presets?.genres.includes(item.id));
-        this.filter.genres = this.genreSettings.savedData.map(item => item.id);
+        this.updateGenreFilters(this.genreSettings.savedData);
         return of(true);
       }));
     }
@@ -359,7 +357,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.ageRating && this.filterSettings.presets?.ageRating.length > 0) {
       return this.ageRatingSettings.fetchFn('').pipe(map(rating => {
         this.ageRatingSettings.savedData = rating.filter(item => this.filterSettings.presets?.ageRating.includes(item.value));
-        this.filter.ageRating = this.ageRatingSettings.savedData.map(item => item.value);
+        this.updateAgeRating(this.ageRatingSettings.savedData);
         return of(true);
       }));
     }
@@ -386,7 +384,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.publicationStatus && this.filterSettings.presets?.publicationStatus.length > 0) {
       return this.publicationStatusSettings.fetchFn('').pipe(map(statuses => {
         this.publicationStatusSettings.savedData = statuses.filter(item => this.filterSettings.presets?.publicationStatus.includes(item.value));
-        this.filter.publicationStatus = this.publicationStatusSettings.savedData.map(item => item.value);
+        this.updatePublicationStatus(this.publicationStatusSettings.savedData);
         return of(true);
       }));
     }
@@ -412,7 +410,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.tags && this.filterSettings.presets?.tags.length > 0) {
       return this.tagsSettings.fetchFn('').pipe(map(tags => {
         this.tagsSettings.savedData = tags.filter(item => this.filterSettings.presets?.tags.includes(item.id));
-        this.filter.tags = this.tagsSettings.savedData.map(item => item.id);
+        this.updateTagFilters(this.tagsSettings.savedData);
         return of(true);
       }));
     }
@@ -438,7 +436,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.languages && this.filterSettings.presets?.languages.length > 0) {
       return this.languageSettings.fetchFn('').pipe(map(languages => {
         this.languageSettings.savedData = languages.filter(item => this.filterSettings.presets?.languages.includes(item.isoCode));
-        this.filter.languages = this.languageSettings.savedData.map(item => item.isoCode);
+        this.updateLanguages(this.languageSettings.savedData);
         return of(true);
       }));
     }
@@ -464,7 +462,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.collectionTags && this.filterSettings.presets?.collectionTags.length > 0) {
       return this.collectionSettings.fetchFn('').pipe(map(tags => {
         this.collectionSettings.savedData = tags.filter(item => this.filterSettings.presets?.collectionTags.includes(item.id));
-        this.filter.collectionTags = this.collectionSettings.savedData.map(item => item.id);
+        this.updateCollectionFilters(this.collectionSettings.savedData);
         return of(true);
       }));
     }
@@ -477,16 +475,15 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
       return fetch('').pipe(map(people => {
         personSettings.savedData = people.filter(item => presetField.includes(item.id));
-        peopleFilterField = personSettings.savedData.map(item => item.id);
-        //this.resetTypeaheads.next(true);
         this.peopleSettings[role] = personSettings;
-        this.updatePersonFilters(personSettings.savedData as Person[], role);
+        this.updatePersonFilters(personSettings.savedData, role);
         return true;
       }));
-    } else {
-      this.peopleSettings[role] = personSettings;
-      return of(true);
     }
+    
+    this.peopleSettings[role] = personSettings;
+    return of(true);
+
   }
 
   setupPersonTypeahead() {
@@ -503,8 +500,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.updateFromPreset('penciller', this.filter.penciller, this.filterSettings.presets?.penciller, PersonRole.Penciller),
       this.updateFromPreset('publisher', this.filter.publisher, this.filterSettings.presets?.publisher, PersonRole.Publisher),
       this.updateFromPreset('translators', this.filter.translators, this.filterSettings.presets?.translators, PersonRole.Translator)
-    ]).pipe(map(results => {
-      //this.resetTypeaheads.next(true);
+    ]).pipe(map(_ => {
       return of(true);
     }));
   }
@@ -603,7 +599,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.filter.publicationStatus = dtos.map(item => item.value) || [];
   }
 
-  updateLanguageRating(languages: Language[]) {
+  updateLanguages(languages: Language[]) {
     this.filter.languages = languages.map(item => item.isoCode) || [];
   }
 

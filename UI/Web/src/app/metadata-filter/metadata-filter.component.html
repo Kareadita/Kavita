@@ -289,7 +289,7 @@
 
             <div class="col-md-2 me-3">
                 <label for="languages" class="form-label">Language</label>
-                <app-typeahead (selectedData)="updateLanguageRating($event)" [settings]="languageSettings" 
+                <app-typeahead (selectedData)="updateLanguages($event)" [settings]="languageSettings" 
                 [reset]="resetTypeaheads" [disabled]="filterSettings.languageDisabled">
                     <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}
