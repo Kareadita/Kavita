@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
+import { FilterQueryParam } from '../shared/_services/filter-utilities.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { MangaFormat } from '../_models/manga-format';
 import { ReadingList } from '../_models/reading-list';
@@ -38,6 +39,10 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return TagBadgeCursor;
   }
 
+  get FilterQueryParam() {
+    return FilterQueryParam;
+  }
+
   constructor(public utilityService: UtilityService, public metadataService: MetadataService, private router: Router) { }
   
   ngOnChanges(changes: SimpleChanges): void {
@@ -64,10 +69,10 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     this.isCollapsed = !this.isCollapsed;
   }
 
-  goTo(queryParamName: string, filter: any) {
+  goTo(queryParamName: FilterQueryParam, filter: any) {
     let params: any = {};
     params[queryParamName] = filter;
-    params['page'] = 1;
+    params[FilterQueryParam.Page] = 1;
     this.router.navigate(['library', this.series.libraryId], {queryParams: params});
   }
 

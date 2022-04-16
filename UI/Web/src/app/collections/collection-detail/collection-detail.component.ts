@@ -15,7 +15,6 @@ import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-adde
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { FilterEvent, SeriesFilter } from 'src/app/_models/series-filter';
-import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
@@ -41,6 +40,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   summary: string = '';
 
   actionInProgress: boolean = false;
+  filterActiveCheck!: SeriesFilter;
   filterActive: boolean = false;
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -98,9 +98,11 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.seriesPagination = this.filterUtilityService.pagination();
-      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl();
+      this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
+      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
       this.filterSettings.presets.collectionTags = [tagId];
+      this.filterActiveCheck = this.seriesService.createSeriesFilter();
+      this.filterActiveCheck.collectionTags = [tagId];
       
       this.updateTag(tagId);
   }
@@ -161,7 +163,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.seriesService.getAllSeries(this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.seriesPagination = series.pagination;

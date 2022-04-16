@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
@@ -141,17 +141,22 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
    */
   @Input() settings!: TypeaheadSettings<any>;
   /**
-   * When true, component will re-init and set back to false.
+   * When true, will reset field to no selections. When false, will reset to saved data
    */
-  @Input() reset: Subject<boolean> = new ReplaySubject(1);
+  @Input() reset: ReplaySubject<boolean> = new ReplaySubject(1);
   /**
    * When a field is locked, we render custom css to indicate to the user. Does not affect functionality.
    */
   @Input() locked: boolean = false;
+  /**
+   * If disabled, a user will not be able to interact with the typeahead
+   */
+  @Input() disabled: boolean = false;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   @Output() onUnlock = new EventEmitter<void>();
   @Output() lockedChange = new EventEmitter<boolean>();
+  
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
@@ -178,8 +183,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
 
-    this.reset.pipe(takeUntil(this.onDestroy)).subscribe((reset: boolean) => {
-      this.clearSelections();
+    this.reset.pipe(takeUntil(this.onDestroy)).subscribe((resetToEmpty: boolean) => {
+      this.clearSelections(resetToEmpty);
       this.init();
     });
 
@@ -274,6 +279,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) { 
     if (!this.hasFocus) { return; }
+    if (this.disabled) return;
 
     switch(event.key) {
       case KEY_CODES.DOWN_ARROW:
@@ -347,15 +353,26 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.resetField();
   }
 
-  clearSelections() {
+  clearSelections(untoggleAll: boolean = false) {
     if (this.optionSelection) {
-      this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+      if (!untoggleAll && this.settings.savedData) {
+        const isArray = this.settings.savedData.hasOwnProperty('length');
+         if (isArray) {
+          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+         } else {
+          this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
+         }
+      } else {
+        this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+      }
+      
       this.selectedData.emit(this.optionSelection.selected());
       this.resetField();
     }
   }
 
   handleOptionClick(opt: any) {
+    if (this.disabled) return;
     if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
       return;
     }
@@ -402,6 +419,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
+    if (this.disabled) return;
 
     if (!this.settings.multiple && this.optionSelection.selected().length > 0) {
       return;
@@ -452,6 +470,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   unlock(event: any) {
+    if (this.disabled) return;
     this.locked = !this.locked;
     this.onUnlock.emit();
     this.lockedChange.emit(this.locked);

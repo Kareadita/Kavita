@@ -99,12 +99,12 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
     /// <returns></returns>
     [HttpGet("publication-status")]
-    public async Task<ActionResult<IList<AgeRatingDto>>> GetAllPublicationStatus(string? libraryIds)
+    public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
-        if (ids != null && ids.Count > 0)
+        if (ids is {Count: > 0})
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
+            return Ok(_unitOfWork.SeriesRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
         }
 
         return Ok(Enum.GetValues<PublicationStatus>().Select(t => new PublicationStatusDto()

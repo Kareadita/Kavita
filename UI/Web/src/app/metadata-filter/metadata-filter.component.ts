@@ -53,7 +53,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
-  resetTypeaheads: Subject<boolean> = new ReplaySubject(1);
+  resetTypeaheads: ReplaySubject<boolean> = new ReplaySubject(1);
 
    /**
    * Controls the visiblity of extended controls that sit below the main header.
@@ -71,6 +71,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   updateApplied: number = 0;
 
+  fullyLoaded: boolean = false;
+
 
   private onDestory: Subject<void> = new Subject();
 
@@ -84,20 +86,32 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
     private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
+  }
+
+  ngOnInit(): void {
+    if (this.filterSettings === undefined) {
+      this.filterSettings = new FilterSettings();
+    }
+
+    if (this.filterOpen) {
+      this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
+        this.filteringCollapsed = !openState;
+      });
+    }
 
     this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
-      read: new FormControl(this.filter.readStatus.read, []),
-      notRead: new FormControl(this.filter.readStatus.notRead, []),
-      inProgress: new FormControl(this.filter.readStatus.inProgress, []),
+      read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
+      notRead: new FormControl({value: this.filter.readStatus.notRead, disabled: this.filterSettings.readProgressDisabled}, []),
+      inProgress: new FormControl({value: this.filter.readStatus.inProgress, disabled: this.filterSettings.readProgressDisabled}, []),
     });
 
     this.sortGroup = new FormGroup({
-      sortField: new FormControl(this.filter.sortOptions?.sortField || SortField.SortName, []),
+      sortField: new FormControl({value: this.filter.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
     });
 
     this.seriesNameGroup = new FormGroup({
-      seriesNameQuery: new FormControl(this.filter.seriesNameQuery || '', [])
+      seriesNameQuery: new FormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
     });
 
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
@@ -138,19 +152,21 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       .subscribe(changes => {
       this.filter.seriesNameQuery = changes;
     });
+
+    this.loadFromPresetsAndSetup();
   }
 
-  ngOnInit(): void {
-    if (this.filterSettings === undefined) {
-      this.filterSettings = new FilterSettings();
-    }
+  ngOnDestroy() {
+    this.onDestory.next();
+    this.onDestory.complete();
+  }
 
-    if (this.filterOpen) {
-      this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
-        this.filteringCollapsed = !openState;
-      });
-    }
+  getPersonsSettings(role: PersonRole) {
+    return this.peopleSettings[role];
+  }
 
+  loadFromPresetsAndSetup() {
+    this.fullyLoaded = false;
     if (this.filterSettings.presets) {
       this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets.readStatus.read);
       this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets.readStatus.notRead);
@@ -174,21 +190,6 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       }
     }
 
-
-    this.setupTypeaheads();
-  }
-
-  ngOnDestroy() {
-    this.onDestory.next();
-    this.onDestory.complete();
-  }
-
-  getPersonsSettings(role: PersonRole) {
-    return this.peopleSettings[role];
-  }
-
-  setupTypeaheads() {
-
     this.setupFormatTypeahead();
 
     forkJoin([
@@ -201,7 +202,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
     ]).subscribe(results => {
-      this.resetTypeaheads.next(true);
+      this.fullyLoaded = true;
+      this.resetTypeaheads.next(false); // Pass false to ensure we reset to the preset and not to an empty typeahead
       if (this.filterSettings.openByDefault) {
         this.filteringCollapsed = false;
       }
@@ -226,8 +228,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
     if (this.filterSettings.presets?.formats && this.filterSettings.presets?.formats.length > 0) {
       this.formatSettings.savedData = mangaFormatFilters.filter(item => this.filterSettings.presets?.formats.includes(item.value));
-      this.filter.formats = this.formatSettings.savedData.map(item => item.value);
-      this.resetTypeaheads.next(true);
+      this.updateFormatFilters(this.formatSettings.savedData);
     }
   }
 
@@ -251,7 +252,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.libraries && this.filterSettings.presets?.libraries.length > 0) {
       return this.librarySettings.fetchFn('').pipe(map(libraries => {
         this.librarySettings.savedData = libraries.filter(item => this.filterSettings.presets?.libraries.includes(item.id));
-        this.filter.libraries = this.librarySettings.savedData.map(item => item.id);
+        this.updateLibraryFilters(this.librarySettings.savedData);
         return of(true);
       }));
     }
@@ -278,7 +279,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.genres && this.filterSettings.presets?.genres.length > 0) {
       return this.genreSettings.fetchFn('').pipe(map(genres => {
         this.genreSettings.savedData = genres.filter(item => this.filterSettings.presets?.genres.includes(item.id));
-        this.filter.genres = this.genreSettings.savedData.map(item => item.id);
+        this.updateGenreFilters(this.genreSettings.savedData);
         return of(true);
       }));
     }
@@ -305,7 +306,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.ageRating && this.filterSettings.presets?.ageRating.length > 0) {
       return this.ageRatingSettings.fetchFn('').pipe(map(rating => {
         this.ageRatingSettings.savedData = rating.filter(item => this.filterSettings.presets?.ageRating.includes(item.value));
-        this.filter.ageRating = this.ageRatingSettings.savedData.map(item => item.value);
+        this.updateAgeRating(this.ageRatingSettings.savedData);
         return of(true);
       }));
     }
@@ -332,7 +333,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.publicationStatus && this.filterSettings.presets?.publicationStatus.length > 0) {
       return this.publicationStatusSettings.fetchFn('').pipe(map(statuses => {
         this.publicationStatusSettings.savedData = statuses.filter(item => this.filterSettings.presets?.publicationStatus.includes(item.value));
-        this.filter.publicationStatus = this.publicationStatusSettings.savedData.map(item => item.value);
+        this.updatePublicationStatus(this.publicationStatusSettings.savedData);
         return of(true);
       }));
     }
@@ -358,7 +359,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.tags && this.filterSettings.presets?.tags.length > 0) {
       return this.tagsSettings.fetchFn('').pipe(map(tags => {
         this.tagsSettings.savedData = tags.filter(item => this.filterSettings.presets?.tags.includes(item.id));
-        this.filter.tags = this.tagsSettings.savedData.map(item => item.id);
+        this.updateTagFilters(this.tagsSettings.savedData);
         return of(true);
       }));
     }
@@ -384,7 +385,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.languages && this.filterSettings.presets?.languages.length > 0) {
       return this.languageSettings.fetchFn('').pipe(map(languages => {
         this.languageSettings.savedData = languages.filter(item => this.filterSettings.presets?.languages.includes(item.isoCode));
-        this.filter.languages = this.languageSettings.savedData.map(item => item.isoCode);
+        this.updateLanguages(this.languageSettings.savedData);
         return of(true);
       }));
     }
@@ -410,7 +411,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterSettings.presets?.collectionTags && this.filterSettings.presets?.collectionTags.length > 0) {
       return this.collectionSettings.fetchFn('').pipe(map(tags => {
         this.collectionSettings.savedData = tags.filter(item => this.filterSettings.presets?.collectionTags.includes(item.id));
-        this.filter.collectionTags = this.collectionSettings.savedData.map(item => item.id);
+        this.updateCollectionFilters(this.collectionSettings.savedData);
         return of(true);
       }));
     }
@@ -423,16 +424,15 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
       return fetch('').pipe(map(people => {
         personSettings.savedData = people.filter(item => presetField.includes(item.id));
-        peopleFilterField = personSettings.savedData.map(item => item.id);
-        this.resetTypeaheads.next(true);
         this.peopleSettings[role] = personSettings;
-        this.updatePersonFilters(personSettings.savedData as Person[], role);
+        this.updatePersonFilters(personSettings.savedData, role);
         return true;
       }));
-    } else {
-      this.peopleSettings[role] = personSettings;
-      return of(true);
     }
+    
+    this.peopleSettings[role] = personSettings;
+    return of(true);
+
   }
 
   setupPersonTypeahead() {
@@ -449,8 +449,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.updateFromPreset('penciller', this.filter.penciller, this.filterSettings.presets?.penciller, PersonRole.Penciller),
       this.updateFromPreset('publisher', this.filter.publisher, this.filterSettings.presets?.publisher, PersonRole.Publisher),
       this.updateFromPreset('translators', this.filter.translators, this.filterSettings.presets?.translators, PersonRole.Translator)
-    ]).pipe(map(results => {
-      this.resetTypeaheads.next(true);
+    ]).pipe(map(_ => {
       return of(true);
     }));
   }
@@ -537,6 +536,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   updateRating(rating: any) {
+    if (this.filterSettings.ratingDisabled) return;
     this.filter.rating = rating;
   }
 
@@ -548,7 +548,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.filter.publicationStatus = dtos.map(item => item.value) || [];
   }
 
-  updateLanguageRating(languages: Language[]) {
+  updateLanguages(languages: Language[]) {
     this.filter.languages = languages.map(item => item.isoCode) || [];
   }
 
@@ -563,6 +563,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   updateSortOrder() {
+    if (this.filterSettings.sortDisabled) return;
     this.isAscendingSort = !this.isAscendingSort;
     if (this.filter.sortOptions === null) {
       this.filter.sortOptions = {
@@ -582,7 +583,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.sortGroup.get('sortField')?.setValue(SortField.SortName);
     this.isAscendingSort = true;
     // Apply any presets which will trigger the apply
-    this.setupTypeaheads();
+    this.loadFromPresetsAndSetup();
   }
 
   apply() {

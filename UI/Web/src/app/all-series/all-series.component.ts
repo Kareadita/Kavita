@@ -31,6 +31,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filterActiveCheck!: SeriesFilter;
   filterActive: boolean = false;
 
   bulkActionCallback = (action: Action, data: any) => {
@@ -79,8 +80,9 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - All Series');
 
-    this.pagination = this.filterUtilityService.pagination();
-    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl();
+    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
+    this.filterActiveCheck = this.seriesService.createSeriesFilter();
   }
 
   ngOnInit(): void {
@@ -117,12 +119,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
-    if (this.filter == undefined) {
-      this.filter = this.seriesService.createSeriesFilter();
-    }
-
-    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterSettings.presets);
+    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.seriesService.getAllSeries(this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
