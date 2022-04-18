@@ -84,7 +84,7 @@ namespace API.Tests.Extensions
         }
 
         [Fact]
-        public void OnDuplicateFiles_Test_Should_Not_Error()
+        public void GetChapterByRange_On_Duplicate_Files_Test_Should_Not_Error()
         {
             var info = new ParserInfo()
             {
