@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
 using API.Parser;
@@ -28,8 +28,8 @@ namespace API.Extensions
         {
             var specialTreatment = info.IsSpecialInfo();
             return specialTreatment
-                ? chapters.SingleOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath)))
-                : chapters.SingleOrDefault(c => c.Range == info.Chapters);
+                ? chapters.FirstOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath)))
+                : chapters.FirstOrDefault(c => c.Range == info.Chapters);
         }
     }
 }
