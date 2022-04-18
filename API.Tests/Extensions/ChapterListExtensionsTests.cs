@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
@@ -83,9 +83,37 @@ namespace API.Tests.Extensions
             Assert.Equal(chapterList[0], actualChapter);
         }
 
+        [Fact]
+        public void OnDuplicateFiles_Test_Should_Not_Error()
+        {
+            var info = new ParserInfo()
+            {
+                Chapters = "0",
+                Edition = "",
+                Format = MangaFormat.Archive,
+                FullFilePath = "/manga/detective comics #001.cbz",
+                Filename = "detective comics #001.cbz",
+                IsSpecial = true,
+                Series = "detective comics",
+                Title = "detective comics",
+                Volumes = "0"
+            };
+
+            var chapterList = new List<Chapter>()
+            {
+                CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
+                CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
+            };
+
+            var actualChapter = chapterList.GetChapterByRange(info);
+
+            Assert.Equal(chapterList[0], actualChapter);
+
+        }
+
         #region GetFirstChapterWithFiles
 
-        [Fact]
+    [Fact]
         public void GetFirstChapterWithFiles_ShouldReturnAllChapters()
         {
             var chapterList = new List<Chapter>()
