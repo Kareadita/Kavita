@@ -12,7 +12,7 @@ namespace API.Parser
         public const string DefaultVolume = "0";
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
-        public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp)";
+        public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub|\.pdf";
         public const string MacOsMetadataFileStartsWith = @"._";
