@@ -179,6 +179,7 @@ namespace API.Tests.Parser
         [InlineData(".test.jpg", false)]
         [InlineData("!test.jpg", true)]
         [InlineData("test.webp", true)]
+        [InlineData("test.gif", true)]
         public void IsImageTest(string filename, bool expected)
         {
             Assert.Equal(expected, IsImage(filename));
