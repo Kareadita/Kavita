@@ -21,6 +21,8 @@
         max-width: 250px;
         padding: 0px;
         box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
     }
 
     .popover {
