@@ -332,7 +332,7 @@
                 <li [ngbNavItem]="tabs[4]">
                     <a ngbNavLink>{{tabs[4]}}</a>
                     <ng-template ngbNavContent>
-                      <app-edit-series-relation [series]="series"></app-edit-series-relation>
+                      <app-edit-series-relation [series]="series" (save)="saveNestedComponents"></app-edit-series-relation>
                     </ng-template>
                   </li>
                 <li [ngbNavItem]="tabs[5]">

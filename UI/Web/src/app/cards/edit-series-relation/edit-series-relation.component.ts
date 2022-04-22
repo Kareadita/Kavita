@@ -1,12 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { map, Subject, Observable, of, firstValueFrom } from 'rxjs';
+import { map, Subject, Observable, of, firstValueFrom, takeUntil } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { SearchResult } from 'src/app/_models/search-result';
 import { Series } from 'src/app/_models/series';
 import { RelationKind, RelationKinds } from 'src/app/_models/series-detail/relation-kind';
-import { FilterEvent } from 'src/app/_models/series-filter';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -25,10 +24,15 @@ interface RelationControl {
 export class EditSeriesRelationComponent implements OnInit, OnDestroy {
 
   @Input() series!: Series;
+  /**
+   * This will tell the component to save based on it's internal state
+   */
+  @Input() save: EventEmitter<void> = new EventEmitter();
   relationOptions = RelationKinds;
 
   relations: Array<RelationControl> = [];
   seriesSettings: TypeaheadSettings<SearchResult> = new TypeaheadSettings();
+
 
 
 
@@ -49,6 +53,8 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
         this.setupRelationRows(relations.doujinshis, RelationKind.Doujinshi);
 
     });
+
+    this.save.pipe(takeUntil(this.onDestroy)).subscribe(() => this.saveState());
   }
 
   ngOnDestroy(): void {
@@ -114,7 +120,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     return of(seriesSettings);
   }
 
-  save() {
+  saveState() {
     const adaptations = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Adaptation && item.series !== undefined).map(item => item.series!.id);
     const characters = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Character && item.series !== undefined).map(item => item.series!.id);
     const contains = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Contains && item.series !== undefined).map(item => item.series!.id);
@@ -127,6 +133,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     const alternativeVersions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeVersion && item.series !== undefined).map(item => item.series!.id);
     const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
     this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis).subscribe(() => {});
+    
   }
 
 }
