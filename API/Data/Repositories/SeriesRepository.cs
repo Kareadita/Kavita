@@ -1015,6 +1015,9 @@ public class SeriesRepository : ISeriesRepository
             SideStories = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SideStory),
             SpinOffs = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SpinOff),
             Others = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Other),
+            AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting),
+            AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion),
+            Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi),
         };
     }
 

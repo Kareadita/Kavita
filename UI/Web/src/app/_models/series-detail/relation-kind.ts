@@ -6,7 +6,10 @@ export enum RelationKind {
     SideStory = 5,
     Character = 6,
     Contains = 7,
-    Other = 8
+    Other = 8,
+    AlternativeSetting = 9,
+    AlternativeVersion = 10,
+    Doujinshi = 11
 }
 
 export const RelationKinds = [
@@ -14,8 +17,11 @@ export const RelationKinds = [
     {text: 'Sequel', value: RelationKind.Sequel},
     {text: 'Spin Off', value: RelationKind.SpinOff},
     {text: 'Adaptation', value: RelationKind.Adaptation},
+    {text: 'Alternative Setting', value: RelationKind.AlternativeSetting},
+    {text: 'Alternative Version', value: RelationKind.AlternativeVersion},
     {text: 'Side Story', value: RelationKind.SideStory},
     {text: 'Character', value: RelationKind.Character},
     {text: 'Contains', value: RelationKind.Contains},
+    {text: 'Doujinshi', value: RelationKind.Doujinshi},
     {text: 'Other', value: RelationKind.Other},
 ];

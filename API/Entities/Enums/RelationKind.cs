@@ -46,5 +46,21 @@ public enum RelationKind
     /// When nothing else fits
     /// </summary>
     [Description("Other")]
-    Other = 8
+    Other = 8,
+    /// <summary>
+    /// Same universe/world/reality/timeline, completely different characters
+    /// </summary>
+    [Description("Alternative Setting")]
+    AlternativeSetting = 9,
+    /// <summary>
+    /// Same setting, same characters, story is told differently
+    /// </summary>
+    [Description("Alternative Version")]
+    AlternativeVersion = 10,
+    /// <summary>
+    /// Doujinshi or Fan work
+    /// </summary>
+    [Description("Doujinshi")]
+    Doujinshi = 11
+
 }

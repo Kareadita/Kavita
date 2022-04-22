@@ -18,4 +18,7 @@ public class RelatedSeriesDto
     public IEnumerable<SeriesDto> Characters { get; set; }
     public IEnumerable<SeriesDto> Contains { get; set; }
     public IEnumerable<SeriesDto> Others { get; set; }
+    public IEnumerable<SeriesDto> AlternativeSettings { get; set; }
+    public IEnumerable<SeriesDto> AlternativeVersions { get; set; }
+    public IEnumerable<SeriesDto> Doujinshis { get; set; }
 }

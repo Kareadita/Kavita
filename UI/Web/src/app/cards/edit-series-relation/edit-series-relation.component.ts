@@ -44,6 +44,9 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
         this.setupRelationRows(relations.spinOffs, RelationKind.SpinOff);
         this.setupRelationRows(relations.adaptations, RelationKind.Adaptation);
         this.setupRelationRows(relations.others, RelationKind.Other);
+        this.setupRelationRows(relations.alternativeSettings, RelationKind.AlternativeSetting);
+        this.setupRelationRows(relations.alternativeVersions, RelationKind.AlternativeVersion);
+        this.setupRelationRows(relations.doujinshis, RelationKind.Doujinshi);
 
     });
   }
@@ -112,15 +115,18 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   }
 
   save() {
-    const adaptations = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.Adaptation && item.series !== undefined).map(item => item.series!.id);
-    const characters = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.Character && item.series !== undefined).map(item => item.series!.id);
-    const contains = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.Contains && item.series !== undefined).map(item => item.series!.id);
-    const others = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.Other && item.series !== undefined).map(item => item.series!.id);
-    const prequels = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.Prequel && item.series !== undefined).map(item => item.series!.id);
-    const sequels = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.Sequel && item.series !== undefined).map(item => item.series!.id);
-    const sideStories = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.SideStory && item.series !== undefined).map(item => item.series!.id);
-    const spinOffs = this.relations.filter(item => (item.formControl.value as RelationKind) === RelationKind.SpinOff && item.series !== undefined).map(item => item.series!.id);
-    this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs).subscribe(() => {});
+    const adaptations = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Adaptation && item.series !== undefined).map(item => item.series!.id);
+    const characters = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Character && item.series !== undefined).map(item => item.series!.id);
+    const contains = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Contains && item.series !== undefined).map(item => item.series!.id);
+    const others = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Other && item.series !== undefined).map(item => item.series!.id);
+    const prequels = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Prequel && item.series !== undefined).map(item => item.series!.id);
+    const sequels = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Sequel && item.series !== undefined).map(item => item.series!.id);
+    const sideStories = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.SideStory && item.series !== undefined).map(item => item.series!.id);
+    const spinOffs = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.SpinOff && item.series !== undefined).map(item => item.series!.id);
+    const alternativeSettings = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeSetting && item.series !== undefined).map(item => item.series!.id);
+    const alternativeVersions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeVersion && item.series !== undefined).map(item => item.series!.id);
+    const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
+    this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis).subscribe(() => {});
   }
 
 }

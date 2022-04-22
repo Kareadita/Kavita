@@ -13,6 +13,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { MessageHubService } from 'src/app/_services/message-hub.service';
 import { Subject } from 'rxjs';
+import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 
 @Component({
   selector: 'app-series-card',
@@ -26,11 +27,15 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * If the entity is selected or not. 
    */
-   @Input() selected: boolean = false;
-   /**
-    * If the entity should show selection code
-    */
-   @Input() allowSelection: boolean = false;
+  @Input() selected: boolean = false;
+  /**
+   * If the entity should show selection code
+   */
+  @Input() allowSelection: boolean = false;
+  /**
+   * If the Series has a relationship to display
+   */
+  @Input() relation: RelationKind | undefined = undefined;
 
   @Output() clicked = new EventEmitter<Series>();
   @Output() reload = new EventEmitter<boolean>();

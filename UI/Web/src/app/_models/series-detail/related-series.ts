@@ -10,4 +10,7 @@ export interface RelatedSeries {
     characters: Array<Series>;
     contains: Array<Series>;
     others: Array<Series>;
+    alternativeSettings: Array<Series>;
+    alternativeVersions: Array<Series>;
+    doujinshis: Array<Series>;
 }

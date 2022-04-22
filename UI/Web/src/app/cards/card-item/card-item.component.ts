@@ -71,11 +71,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * This will supress the cannot read archive warning when total pages is 0
    */
-   @Input() supressArchiveWarning: boolean = false;
+  @Input() supressArchiveWarning: boolean = false;
   /**
     * The number of updates/items within the card. If less than 2, will not be shown.
     */
-   @Input() count: number = 0;
+  @Input() count: number = 0;
+  /**
+   * Additional information to show on the overlay area. Will always render. 
+   */
+  @Input() overlayInformation: string = '';
   /**
    * Event emitted when item is clicked
    */

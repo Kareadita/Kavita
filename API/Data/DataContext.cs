@@ -71,15 +71,6 @@ namespace API.Data
                 .HasOne(pt => pt.TargetSeries)
                 .WithMany(t => t.RelationOf)
                 .HasForeignKey(pt => pt.TargetSeriesId);
-
-
-
-
-            // modelBuilder.Entity<SeriesRelation>()
-            //     .HasOne(pt => pt.Series)
-            //     .WithMany(p => p.Sequels)
-            //     .HasForeignKey(pt => pt.TargetSeriesId)
-            //     .OnDelete(DeleteBehavior.Restrict);
         }
 
 

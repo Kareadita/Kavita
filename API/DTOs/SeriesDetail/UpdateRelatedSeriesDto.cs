@@ -13,4 +13,7 @@ public class UpdateRelatedSeriesDto
     public IList<int> Sequels { get; set; }
     public IList<int> SideStories { get; set; }
     public IList<int> SpinOffs { get; set; }
+    public IList<int> AlternativeSettings { get; set; }
+    public IList<int> AlternativeVersions { get; set; }
+    public IList<int> Doujinshis { get; set; }
 }

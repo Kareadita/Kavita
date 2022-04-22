@@ -36,6 +36,10 @@ import { NavService } from '../_services/nav.service';
 import { RelationKind } from '../_models/series-detail/relation-kind';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 
+interface RelatedSeris {
+  series: Series;
+  relation: RelationKind;
+}
 
 enum TabID {
   Related = 0,
@@ -109,7 +113,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
-  trackBySeriesIdentiy = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
+  trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
 
   /**
    * Are there any related series
@@ -118,7 +122,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   /**
    * Related Series. Sorted by backend
    */
-  relations: Array<Series> = [];
+  relations: Array<RelatedSeris> = [];
 
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
@@ -374,9 +378,19 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
       // TODO: Move this to a forkJoin?
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
-        this.relations = [...relations.prequels, ...relations.sequels, ...relations.sideStories, 
-          ...relations.spinOffs, ...relations.adaptations, ...relations.contains, ...relations.characters, 
-          ...relations.others];
+        this.relations = [
+          ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
+          ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
+          ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)), 
+          ...relations.spinOffs.map(item => this.createRelatedSeries(item, RelationKind.SpinOff)),
+          ...relations.adaptations.map(item => this.createRelatedSeries(item, RelationKind.Adaptation)),
+          ...relations.contains.map(item => this.createRelatedSeries(item, RelationKind.Contains)),
+          ...relations.characters.map(item => this.createRelatedSeries(item, RelationKind.Character)), 
+          ...relations.others.map(item => this.createRelatedSeries(item, RelationKind.Other)),
+          ...relations.alternativeSettings.map(item => this.createRelatedSeries(item, RelationKind.AlternativeSetting)),
+          ...relations.alternativeVersions.map(item => this.createRelatedSeries(item, RelationKind.AlternativeVersion)),
+          ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi))
+        ];
         if (this.relations.length > 0) {
           this.hasRelations = true;
         }
@@ -396,6 +410,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     }, err => {
       this.router.navigateByUrl('/libraries');
     });
+  }
+
+  createRelatedSeries(series: Series, relation: RelationKind) {
+    return {series, relation} as RelatedSeris;
   }
 
   /**

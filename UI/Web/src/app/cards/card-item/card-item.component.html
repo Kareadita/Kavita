@@ -30,6 +30,9 @@
         <span class="badge bg-primary">{{count}}</span>
       </div>
       <div class="card-overlay"></div>
+      <div class="overlay-information" *ngIf="overlayInformation !== '' ||  overlayInformation !== undefined">
+        <span class="card-title library" style="margin: auto;" [ngbTooltip]="overlayInformation" placement="top">{{overlayInformation}}</span>
+      </div>
     </div>
 
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
