@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { map, Subject, Observable, of, firstValueFrom, takeUntil } from 'rxjs';
+import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
 import { SearchResult } from 'src/app/_models/search-result';
@@ -28,6 +28,8 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
    * This will tell the component to save based on it's internal state
    */
   @Input() save: EventEmitter<void> = new EventEmitter();
+
+  @Output() saveApi = new ReplaySubject(1);
   relationOptions = RelationKinds;
 
   relations: Array<RelationControl> = [];
@@ -132,6 +134,10 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     const alternativeSettings = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeSetting && item.series !== undefined).map(item => item.series!.id);
     const alternativeVersions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeVersion && item.series !== undefined).map(item => item.series!.id);
     const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
+    
+    // TODO: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
+
+    //this.saveApi.next(this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis));
     this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis).subscribe(() => {});
     
   }
