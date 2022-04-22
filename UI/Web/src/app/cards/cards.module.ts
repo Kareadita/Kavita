@@ -21,7 +21,6 @@ import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/b
 import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
 import { FileInfoComponent } from './file-info/file-info.component';
-import { BookmarkComponent } from './bookmark/bookmark.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 
 
@@ -42,7 +41,6 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     BulkAddToCollectionComponent,
     ChapterMetadataDetailComponent,
     FileInfoComponent,
-    BookmarkComponent,
   ],
   imports: [
     CommonModule,

@@ -8,6 +8,7 @@ import { Series } from 'src/app/_models/series';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 
+// TODO: Remove component, side nav is a better experience
 @Component({
   selector: 'app-bookmarks-modal',
   templateUrl: './bookmarks-modal.component.html',

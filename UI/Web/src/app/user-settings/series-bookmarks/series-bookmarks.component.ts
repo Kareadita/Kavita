@@ -10,6 +10,7 @@ import { Series } from 'src/app/_models/series';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
+// TODO: Remove this entirely
 @Component({
   selector: 'app-series-bookmarks',
   templateUrl: './series-bookmarks.component.html',

@@ -192,9 +192,9 @@
                         </ngb-panel>
                 </ngb-accordion>
               </ng-container>
-              <ng-container *ngIf="tab.fragment === 'bookmarks'">
+              <!-- <ng-container *ngIf="tab.fragment === 'bookmarks'">
                 <app-series-bookmarks></app-series-bookmarks>
-              </ng-container>
+              </ng-container> -->
               <ng-container *ngIf="tab.fragment === 'password'">
                 <ng-container *ngIf="(isAdmin || hasChangePasswordRole); else noPermission">
                     <p>Change your Password</p>
