@@ -23,6 +23,7 @@ import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapte
 import { FileInfoComponent } from './file-info/file-info.component';
 import { BookmarkComponent } from './bookmark/bookmark.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
+import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 
 
 
@@ -43,6 +44,7 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     ChapterMetadataDetailComponent,
     FileInfoComponent,
     BookmarkComponent,
+    EditSeriesRelationComponent,
   ],
   imports: [
     CommonModule,
@@ -60,6 +62,7 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,
+
 
 
 
@@ -84,7 +87,8 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
     BulkOperationsComponent,
-    ChapterMetadataDetailComponent
+    ChapterMetadataDetailComponent,
+    EditSeriesRelationComponent
   ]
 })
 export class CardsModule { }

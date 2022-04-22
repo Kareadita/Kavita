@@ -33,9 +33,12 @@ import { ReaderService } from '../_services/reader.service';
 import { ReadingListService } from '../_services/reading-list.service';
 import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
+import { RelationKind } from '../_models/series-detail/relation-kind';
+import { RelatedSeries } from '../_models/series-detail/related-series';
 
 
 enum TabID {
+  Related = 0,
   Specials = 1,
   Storyline = 2,
   Volumes = 3,
@@ -106,6 +109,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+  trackBySeriesIdentiy = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
+
+  /**
+   * Are there any related series
+   */
+  hasRelations: boolean = false;
+  /**
+   * Related Series. Sorted by backend
+   */
+  relations: Array<Series> = [];
 
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
@@ -358,6 +371,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
+
+      // TODO: Move this to a forkJoin?
+      this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
+        this.relations = [...relations.prequels, ...relations.sequels, ...relations.sideStories, 
+          ...relations.spinOffs, ...relations.adaptations, ...relations.contains, ...relations.characters, 
+          ...relations.others];
+        if (this.relations.length > 0) {
+          this.hasRelations = true;
+        }
+      });
 
       this.seriesService.getSeriesDetail(this.seriesId).subscribe(detail => {
         this.hasSpecials = detail.specials.length > 0;

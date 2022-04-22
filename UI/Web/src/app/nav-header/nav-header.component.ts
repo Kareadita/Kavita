@@ -49,19 +49,9 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document, 
     private scrollService: ScrollService) { }
 
-  ngOnInit(): void {
-    // this.navService.darkMode$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
-    //   if (res) {
-    //     this.document.body.classList.remove('bg-light');
-    //     this.document.body.classList.add('bg-dark');
-    //   } else {
-    //     this.document.body.classList.remove('bg-dark');
-    //     this.document.body.classList.add('bg-light');
-    //   }
-    // });
-  }
+  ngOnInit(): void {}
 
-  @HostListener("window:scroll", [])
+  @HostListener("body:scroll", [])
   checkBackToTopNeeded() {
     const offset = this.scrollService.scrollPosition;
     if (offset > 100) {

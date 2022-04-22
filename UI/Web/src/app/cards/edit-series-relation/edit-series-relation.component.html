@@ -1,0 +1,42 @@
+<p class="alert alert-primary" role="alert">
+    Error goes here if there is one (like validation errors)
+</p>
+
+<div class="container-fluid">
+    <!-- Todo: need a table or something for simple layout for single labels-->
+    <div class="row g-0">
+        <label class="form-label col-md-6">Target Series</label>
+        <label class="form-label col-md-6">Relationship</label>
+    </div>
+    
+    <form>
+        <div class="row g-0" *ngFor="let relation of relations; let idx = index; let isLast = last;">
+            <div class="col-md-5">
+                <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings">
+                    <ng-template #badgeItem let-item let-position="idx">
+                        {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                        {{item.name}}
+                    </ng-template>
+                </app-typeahead>
+            </div>
+            <div class="col-md-4  ms-2">
+                <select class="form-select" [formControl]="relation.formControl">
+                    <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.text}}</option>
+                </select>
+            </div>
+            <div class="col-md-2 ms-2">
+                <button class="btn btn-outline-secondary" (click)="removeRelation(idx)">Remove</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row g-0 mt-3 mb-3">
+        <button class="btn btn-outline-secondary col-md-12" (click)="addNewRelation()">Add Relationship</button>
+    </div>
+
+    <div class="d-flex flex-row">
+        <button class="btn btn-primary p-2" (click)="save()">Save</button>
+    </div>
+</div>

@@ -39,7 +39,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   isCollapsed = true;
   volumeCollapsed: any = {};
-  tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Info'];
+  tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Related', 'Info'];
   active = this.tabs[0];
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;

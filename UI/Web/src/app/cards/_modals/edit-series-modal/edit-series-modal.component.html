@@ -330,7 +330,13 @@
                   </ng-template>
                 </li>
                 <li [ngbNavItem]="tabs[4]">
-                  <a ngbNavLink>{{tabs[4]}}</a>
+                    <a ngbNavLink>{{tabs[4]}}</a>
+                    <ng-template ngbNavContent>
+                      <app-edit-series-relation [series]="series"></app-edit-series-relation>
+                    </ng-template>
+                  </li>
+                <li [ngbNavItem]="tabs[5]">
+                  <a ngbNavLink>{{tabs[5]}}</a>
                   <ng-template ngbNavContent>
                     <h4>Information</h4>
                     <div class="row g-0 mb-2">

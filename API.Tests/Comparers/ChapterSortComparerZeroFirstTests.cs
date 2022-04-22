@@ -14,4 +14,11 @@ public class ChapterSortComparerZeroFirstTests
     {
         Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerZeroFirst()).ToArray());
     }
+
+    [Theory]
+    [InlineData(new[] {1.0, 0.5, 0.3}, new[] {0.3, 0.5, 1.0})]
+    public void ChapterSortComparerZeroFirstTest_Doubles(double[] input, double[] expected)
+    {
+        Assert.Equal(expected, input.OrderBy(f => f, new ChapterSortComparerZeroFirst()).ToArray());
+    }
 }

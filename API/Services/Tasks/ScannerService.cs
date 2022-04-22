@@ -272,13 +272,8 @@ public class ScannerService : IScannerService
 
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
-        // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-        //     MessageFactory.ScanLibraryProgressEvent(libraryId, 0F));
-
 
         var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path));
-        // var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
-        // var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
         _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
 
         foreach (var folderPath in library.Folders)
@@ -305,8 +300,6 @@ public class ScannerService : IScannerService
 
         await CleanupDbEntities();
 
-        // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-        //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
     }
 

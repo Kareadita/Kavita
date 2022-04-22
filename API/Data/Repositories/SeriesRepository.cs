@@ -11,6 +11,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -23,6 +24,17 @@ using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
+
+[Flags]
+public enum SeriesIncludes
+{
+    None = 1,
+    Volumes = 2,
+    Metadata = 4,
+    Related = 8,
+    //Related = 16,
+    //UserPreferences = 32
+}
 
 internal class RecentlyAddedSeries
 {
@@ -68,7 +80,7 @@ public interface ISeriesRepository
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);
     Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<bool> DeleteSeriesAsync(int seriesId);
-    Task<Series> GetSeriesByIdAsync(int seriesId);
+    Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
@@ -96,6 +108,9 @@ public interface ISeriesRepository
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30);
+    Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
+
+    Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -376,19 +391,35 @@ public class SeriesRepository : ISeriesRepository
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    public async Task<Series> GetSeriesByIdAsync(int seriesId)
+    public async Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
-        return await _context.Series
-            .Include(s => s.Volumes)
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.CollectionTags)
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.Genres)
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.People)
+        var query = _context.Series
             .Where(s => s.Id == seriesId)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync();
+            .AsSplitQuery();
+
+         if (includes.HasFlag(SeriesIncludes.Volumes))
+         {
+             query = query.Include(s => s.Volumes);
+         }
+
+         if (includes.HasFlag(SeriesIncludes.Related))
+         {
+             query = query.Include(s => s.Relations)
+                 .ThenInclude(r => r.TargetSeries)
+                 .Include(s => s.RelationOf);
+         }
+
+         if (includes.HasFlag(SeriesIncludes.Metadata))
+         {
+             query = query.Include(s => s.Metadata)
+                 .ThenInclude(m => m.CollectionTags)
+                 .Include(s => s.Metadata)
+                 .ThenInclude(m => m.Genres)
+                 .Include(s => s.Metadata)
+                 .ThenInclude(m => m.People);
+         }
+
+         return await query.SingleOrDefaultAsync();
     }
 
     /// <summary>
@@ -937,6 +968,82 @@ public class SeriesRepository : ISeriesRepository
          }
 
          return seriesMap.Values.AsEnumerable();
+    }
+
+    public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind)
+    {
+        var libraryIds = _context.AppUser
+            .Where(u => u.Id == userId)
+            .SelectMany(l => l.Libraries.Select(lib => lib.Id));
+        var usersSeriesIds = _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Id);
+
+        var targetSeries = _context.SeriesRelation
+            .Where(sr =>
+                sr.SeriesId == seriesId && sr.RelationKind == kind && usersSeriesIds.Contains(sr.TargetSeriesId))
+            .Include(sr => sr.TargetSeries)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Select(sr => sr.TargetSeriesId);
+
+        return await _context.Series
+            .Where(s => targetSeries.Contains(s.Id))
+            .AsSplitQuery()
+            .AsNoTracking()
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId)
+    {
+        var libraryIds = _context.AppUser
+            .Where(u => u.Id == userId)
+            .SelectMany(l => l.Libraries.Select(lib => lib.Id));
+        var usersSeriesIds = _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Id);
+
+        return new RelatedSeriesDto()
+        {
+            SourceSeriesId = seriesId,
+            Adaptations = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Adaptation),
+            Characters = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Character),
+            Prequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Prequel),
+            Sequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Sequel),
+            Contains = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Contains),
+            SideStories = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SideStory),
+            SpinOffs = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SpinOff),
+            Others = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Other),
+        };
+    }
+
+    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind)
+    {
+
+        // This works
+        return await _context.Series.SelectMany(s =>
+            s.Relations.Where(sr => sr.RelationKind == kind && sr.SeriesId == seriesId)
+                .Select(sr => sr.TargetSeries))
+            .AsSplitQuery()
+            .AsNoTracking()
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        // This code works fine
+        return await _context.Series
+            .Where(s => _context.SeriesRelation
+                .Where(sr =>
+                    sr.SeriesId == seriesId && sr.RelationKind == kind && usersSeriesIds.Contains(sr.TargetSeriesId))
+                .Include(sr => sr.TargetSeries)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .Select(sr => sr.TargetSeriesId)
+                .Contains(s.Id))
+            .AsSplitQuery()
+            .AsNoTracking()
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
     private async Task<IEnumerable<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId, int maxRecords = 3000)
