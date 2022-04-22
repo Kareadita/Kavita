@@ -102,8 +102,9 @@ $image-width: 160px;
 
 .overlay-information {
     position: absolute;
-    top: 211px;
-    width: $image-width;
+    top: 5px;
+    border-radius: 15px;
+    padding: 0 10px;
     background-color: var(--card-bg-color);
 }
 
