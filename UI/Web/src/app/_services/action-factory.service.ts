@@ -3,7 +3,6 @@ import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Library } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
-import { PageBookmark } from '../_models/page-bookmark';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
@@ -18,6 +17,9 @@ export enum Action {
   Info = 5,
   RefreshMetadata = 6,
   Download = 7,
+  /**
+   * @deprecated This is no longer supported. Use the dedicated page instead
+   */
   Bookmarks = 8,
   IncognitoRead = 9,
   AddToReadingList = 10,
@@ -219,12 +221,6 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
           requiresAdmin: false
       }, 
-      {
-        action: Action.Bookmarks,
-        title: 'Bookmarks',
-        callback: this.dummyCallback,
-          requiresAdmin: false
-      },
       {
         action: Action.AddToReadingList,
         title: 'Add to Reading List',

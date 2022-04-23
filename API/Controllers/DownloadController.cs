@@ -171,7 +171,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
 
-            var files = await _bookmarkService.GetBookmarkFilesById(user.Id, downloadBookmarkDto.Bookmarks.Select(b => b.Id));
+            var files = await _bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
             var filename = $"{series.Name} - Bookmarks.zip";
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,

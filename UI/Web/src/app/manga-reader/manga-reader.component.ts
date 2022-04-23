@@ -27,6 +27,7 @@ import { LibraryType } from '../_models/library';
 import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
+import { SeriesService } from '../_services/series.service';
 
 const PREFETCH_PAGES = 8;
 
@@ -79,6 +80,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If this is true, no progress will be saved.
    */
   incognitoMode: boolean = false;
+  /**
+   * If this is true, we are reading a bookmark. ChapterId will be 0. There is no continuous reading. Progress is not saved. Bookmark control is removed.
+   */
+  bookmarkMode: boolean = false;
 
   /**
    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order.
@@ -257,7 +262,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
 
-  getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
+  //getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
   get PageNumber() {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
@@ -326,7 +331,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
               public utilityService: UtilityService, private renderer: Renderer2, 
-              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
+              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
+              private seriesService: SeriesService) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
   }
@@ -347,6 +353,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
+    this.bookmarkMode = this.route.snapshot.queryParamMap.get('bookmarkMode') === 'true';
 
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
@@ -506,11 +513,41 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.goToPageEvent.complete();
     }
 
+    if (this.bookmarkMode) {
+      this.readerService.getBookmarkInfo(this.seriesId).subscribe(bookmarkInfo => {
+        this.setPageNum(0);
+        this.title = bookmarkInfo.seriesName + ' Bookmarks';
+        this.libraryType = bookmarkInfo.libraryType;
+        this.maxPages = bookmarkInfo.pages;
+
+        // Due to change detection rules in Angular, we need to re-create the options object to apply the change
+        const newOptions: Options = Object.assign({}, this.pageOptions);
+        newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
+        this.pageOptions = newOptions;
+        this.inSetup = false;
+        this.prevChapterDisabled = true;
+        this.nextChapterDisabled = true;
+  
+        const images = [];
+        for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
+          images.push(new Image());
+        }
+  
+        this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
+
+        this.render();
+      });
+
+      return;
+
+    }
+
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId),
       bookmarks: this.readerService.getBookmarks(this.chapterId),
     }).pipe(take(1)).subscribe(results => {
+
 
       if (this.readingListMode && results.chapterInfo.seriesFormat === MangaFormat.EPUB) {
         // Redirect to the book reader.
@@ -1049,12 +1086,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       if (offsetIndex < this.maxPages - 1) {
-        item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
+        // if (this.bookmarkMode) item.src = this.readerService.getBookmarkPageUrl(this.seriesId, offsetIndex);
+        // else item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
+        item.src = this.getPageUrl(offsetIndex);
         index += 1;
       }
     }, this.cachedImages.size() - 3);
 
     //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
+  }
+
+  getPageUrl(pageNum: number) {
+    if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
+    return this.readerService.getPageUrl(this.chapterId, pageNum);
   }
 
   loadPage() {
@@ -1067,10 +1111,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       if (this.layoutMode === LayoutMode.Single) {
-        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+        //this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
       } else {
-        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-        this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
+        // this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+        // this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
+        this.canvasImage2.src = this.getPageUrl(this.pageNum + 1); // TODO: I need to handle last page correctly
       }
       this.canvasImage.onload = () => this.renderPage();
 
@@ -1143,7 +1190,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       tempPageNum = this.pageNum + 1;
     }
 
-    if (!this.incognitoMode) {
+    if (!this.incognitoMode || !this.bookmarkMode) {
       this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
   }
@@ -1297,7 +1344,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
     this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
-    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    if (!this.bookmarkMode) {
+      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
   }
 
   getWindowDimensions() {

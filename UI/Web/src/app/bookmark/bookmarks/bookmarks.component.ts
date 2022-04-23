@@ -1,4 +1,5 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take, takeWhile, finalize, Subject, forkJoin } from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
@@ -32,7 +33,8 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   constructor(private readerService: ReaderService, private seriesService: SeriesService, 
     private downloadService: DownloadService, private toastr: ToastrService,
     private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService, 
-    public imageService: ImageService, private actionFactoryService: ActionFactoryService) { }
+    public imageService: ImageService, private actionFactoryService: ActionFactoryService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.loadBookmarks();
@@ -128,12 +130,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   }
 
   viewBookmarks(series: Series) {
-    // TODO: Open the manga reader with bookmarkMode
-    // const bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
-    // bookmarkModalRef.componentInstance.series = series;
-    // bookmarkModalRef.closed.pipe(take(1)).subscribe(() => {
-    //   this.loadBookmarks();
-    // });
+    this.router.navigate(['library', series.libraryId, 'series', series.id, 'manga', 0], {queryParams: {incognitoMode: false, bookmarkMode: true}});
   }
 
   async clearBookmarks(series: Series) {
