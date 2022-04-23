@@ -89,20 +89,6 @@
                 </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[3]" *ngIf="!tabs[3].disabled">
-                <a ngbNavLink>{{tabs[3].title}}</a>
-                <ng-template ngbNavContent>
-                    <div class="row g-0">
-                        <ng-container *ngFor="let bookmark of bookmarks; let idx = index">
-                            <!-- <app-bookmark [bookmark]="bookmark" class="col-auto" (bookmarkRemoved)="removeBookmark(bookmark, idx)"></app-bookmark> -->
-                        </ng-container>
-                        <ng-container *ngIf="bookmarks.length === 0">
-                            No bookmarks yet
-                        </ng-container>
-                    </div>
-                </ng-template>
-            </li>
-
             <li [ngbNavItem]="tabs[4]" *ngIf="!tabs[4].disabled">
                 <a ngbNavLink>{{tabs[4].title}}</a>
                 <ng-template ngbNavContent>

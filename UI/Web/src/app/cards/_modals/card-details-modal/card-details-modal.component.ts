@@ -66,9 +66,8 @@ export class CardDetailsModalComponent implements OnInit {
   chapterActions: ActionItem<Chapter>[] = [];
   libraryType: LibraryType = LibraryType.Manga; 
 
-  bookmarks: PageBookmark[] = [];
 
-  tabs = [{title: 'General', disabled: false}, {title: 'Metadata', disabled: false}, {title: 'Cover', disabled: false}, {title: 'Bookmarks', disabled: false}, {title: 'Info', disabled: false}];
+  tabs = [{title: 'General', disabled: false}, {title: 'Metadata', disabled: false}, {title: 'Cover', disabled: false}, {title: 'Info', disabled: false}];
   active = this.tabs[0];
 
   chapterMetadata!: ChapterMetadata;
@@ -99,17 +98,6 @@ export class CardDetailsModalComponent implements OnInit {
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
 
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
-
-    let bookmarkApi;
-    if (this.isChapter) {
-      bookmarkApi = this.readerService.getBookmarks(this.chapter.id);
-    } else {
-      bookmarkApi = this.readerService.getBookmarksForVolume(this.data.id);
-    }
-
-    bookmarkApi.pipe(take(1)).subscribe(bookmarks => {
-      this.bookmarks = bookmarks;
-    });
 
     this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
       this.chapterMetadata = metadata;
@@ -239,11 +227,5 @@ export class CardDetailsModalComponent implements OnInit {
     } else {
       this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
     }
-  }
-
-  removeBookmark(bookmark: PageBookmark, index: number) {
-    this.readerService.unbookmark(bookmark.seriesId, bookmark.volumeId, bookmark.chapterId, bookmark.page).subscribe(() => {
-      this.bookmarks.splice(index, 1);
-    });
   }
 }

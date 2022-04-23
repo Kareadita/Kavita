@@ -33,7 +33,6 @@ import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { PipeModule } from './pipe/pipe.module';
-import { ColorPickerModule } from 'ngx-color-picker';
 import { SidenavModule } from './sidenav/sidenav.module';
 
 
@@ -63,8 +62,9 @@ import { SidenavModule } from './sidenav/sidenav.module';
 
     NgbDropdownModule, // Nav
     NgbPopoverModule, // Nav Events toggle
-    NgbRatingModule, // Series Detail & Filter
     NgbNavModule,
+
+    NgbRatingModule, // Series Detail & Filter
     NgbPaginationModule,
 
     NgbCollapseModule, // Login
@@ -76,8 +76,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     CollectionsModule,
     ReadingListModule,
     RegistrationModule,
-
-    ColorPickerModule, // User preferences
 
     NgbAccordionModule, // ThemeTest Component only
     PipeModule,
