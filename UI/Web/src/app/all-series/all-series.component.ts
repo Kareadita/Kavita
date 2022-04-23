@@ -26,7 +26,6 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   series: Series[] = [];
   loadingSeries = false;
   pagination!: Pagination;
-  actions: ActionItem<Library>[] = [];
   filter: SeriesFilter | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();

@@ -21,7 +21,7 @@
                 <!-- {{this.pageNum}} -->
                 <!-- {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)"> - {{PageNumber + 1}}</ng-container> -->
 
-                <button class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="isCurrentPageBookmarked" title="{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{isCurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
+                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="isCurrentPageBookmarked" title="{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{isCurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
             </div>
         </div>
     </div>
@@ -47,7 +47,7 @@
                 class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
                 <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
-                    <img [src]="readerService.getPageUrl(this.chapterId, PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
+                    <img [src]="getPageUrl(PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
                 </ng-container>
             </div>
 

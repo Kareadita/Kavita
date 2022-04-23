@@ -74,6 +74,41 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Returns an image for a given bookmark series. Side effect: This will cache the bookmark images for reading.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="apiKey">Api key for the user the bookmarks are on</param>
+        /// <param name="page"></param>
+        /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
+        /// <returns></returns>
+        [HttpGet("bookmark-image")]
+        public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
+        {
+            if (page < 0) page = 0;
+            var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+            var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
+            if (page > totalPages)
+            {
+                page = totalPages;
+            }
+
+            try
+            {
+                var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
+                var format = Path.GetExtension(path).Replace(".", "");
+
+                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
+                return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+            }
+            catch (Exception)
+            {
+                _cacheService.CleanupBookmarks(new []{ seriesId });
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
         /// </summary>
         /// <param name="chapterId"></param>
@@ -101,6 +136,29 @@ namespace API.Controllers
                 IsSpecial = dto.IsSpecial,
                 Pages = dto.Pages,
                 ChapterTitle = dto.ChapterTitle ?? string.Empty
+            });
+        }
+
+        /// <summary>
+        /// Returns various information about all bookmark files for a Series. Side effect: This will cache the bookmark images for reading.
+        /// </summary>
+        /// <param name="seriesId">Series Id for all bookmarks</param>
+        /// <returns></returns>
+        [HttpGet("bookmark-info")]
+        public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var totalPages = await _cacheService.CacheBookmarkForSeries(user.Id, seriesId);
+            // TODO: Change Includes to None from LinkedSeries branch
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+
+            return Ok(new BookmarkInfoDto()
+            {
+                SeriesName = series.Name,
+                SeriesFormat = series.Format,
+                SeriesId = series.Id,
+                LibraryId = series.LibraryId,
+                Pages = totalPages,
             });
         }
 

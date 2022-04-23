@@ -389,7 +389,7 @@ public class BookmarkServiceTests
             VolumeId = 1
         }, $"{CacheDirectory}1/0001.jpg");
 
-        var files = await bookmarkService.GetBookmarkFilesById(1, new[] {1});
+        var files = await bookmarkService.GetBookmarkFilesById(new[] {1});
         var actualFiles = ds.GetFiles(BookmarkDirectory, searchOption: SearchOption.AllDirectories);
         Assert.Equal(files.Select(API.Parser.Parser.NormalizePath).ToList(), actualFiles.Select(API.Parser.Parser.NormalizePath).ToList());
     }

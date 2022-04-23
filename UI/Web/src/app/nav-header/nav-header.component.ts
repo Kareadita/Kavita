@@ -1,9 +1,10 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { fromEvent, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ScrollService } from '../scroll.service';
+import { FilterQueryParam } from '../shared/_services/filter-utilities.service';
 import { CollectionTag } from '../_models/collection-tag';
 import { Library } from '../_models/library';
 import { PersonRole } from '../_models/person';
@@ -45,13 +46,13 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   searchFocused: boolean = false;
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public accountService: AccountService, private router: Router, public navService: NavService, 
-    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document, 
+  constructor(public accountService: AccountService, private router: Router, public navService: NavService,
+    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
     private scrollService: ScrollService) { }
 
   ngOnInit(): void {}
 
-  @HostListener("body:scroll", [])
+  @HostListener('body:scroll', [])
   checkBackToTopNeeded() {
     const offset = this.scrollService.scrollPosition;
     if (offset > 100) {
@@ -77,7 +78,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     this.document.getElementById('content')?.focus();
   }
 
-  
+
 
   onChangeSearch(val: string) {
       this.isLoading = true;
@@ -96,50 +97,46 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   goTo(queryParamName: string, filter: any) {
     let params: any = {};
     params[queryParamName] = filter;
-    params['page'] = 1;
+    params[FilterQueryParam.Page] = 1;
     this.clearSearch();
     this.router.navigate(['all-series'], {queryParams: params});
   }
 
   goToPerson(role: PersonRole, filter: any) {
-    // TODO: Move this to utility service
     this.clearSearch();
     switch(role) {
       case PersonRole.Writer:
-        this.goTo('writers', filter);
+        this.goTo(FilterQueryParam.Writers, filter);
         break;
       case PersonRole.Artist:
-        this.goTo('artists', filter);
+        this.goTo(FilterQueryParam.Artists, filter);
         break;
       case PersonRole.Character:
-        this.goTo('character', filter);
+        this.goTo(FilterQueryParam.Character, filter);
         break;
       case PersonRole.Colorist:
-        this.goTo('colorist', filter);
+        this.goTo(FilterQueryParam.Colorist, filter);
         break;
       case PersonRole.Editor:
-        this.goTo('editor', filter);
+        this.goTo(FilterQueryParam.Editor, filter);
         break;
       case PersonRole.Inker:
-        this.goTo('inker', filter);
+        this.goTo(FilterQueryParam.Inker, filter);
         break;
       case PersonRole.CoverArtist:
-        this.goTo('coverArtists', filter);
-        break;
-      case PersonRole.Inker:
-        this.goTo('inker', filter);
+        this.goTo(FilterQueryParam.CoverArtists, filter);
         break;
       case PersonRole.Letterer:
-        this.goTo('letterer', filter);
+        this.goTo(FilterQueryParam.Letterer, filter);
         break;
       case PersonRole.Penciller:
-        this.goTo('penciller', filter);
+        this.goTo(FilterQueryParam.Penciller, filter);
         break;
       case PersonRole.Publisher:
-        this.goTo('publisher', filter);
+        this.goTo(FilterQueryParam.Publisher, filter);
         break;
       case PersonRole.Translator:
-        this.goTo('translator', filter);
+        this.goTo(FilterQueryParam.Translator, filter);
         break;
     }
   }
@@ -173,10 +170,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
 
   scrollToTop() {
-    window.scroll({
-      top: 0,
-      behavior: 'smooth' 
-    });
+    this.scrollService.scrollTo(0, this.document.body);
   }
 
   focusUpdate(searchFocused: boolean) {

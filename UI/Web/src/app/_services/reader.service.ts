@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
+import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
 import { Volume } from '../_models/volume';
@@ -48,12 +49,24 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/remove-bookmarks', {seriesId});
   }
 
+  /**
+   * Used exclusively for reading multiple bookmarks from a series
+   * @param seriesId 
+   */
+  getBookmarkInfo(seriesId: number) {
+    return this.httpClient.get<BookmarkInfo>(this.baseUrl + 'reader/bookmark-info?seriesId=' + seriesId);
+  }
+
   getProgress(chapterId: number) {
     return this.httpClient.get<ProgressBookmark>(this.baseUrl + 'reader/get-progress?chapterId=' + chapterId);
   }
 
   getPageUrl(chapterId: number, page: number) {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
+  }
+
+  getBookmarkPageUrl(seriesId: number, apiKey: string, page: number) {
+    return this.baseUrl + 'reader/bookmark-image?seriesId=' + seriesId + '&page=' + page + '&apiKey=' + encodeURIComponent(apiKey);
   }
 
   getChapterInfo(chapterId: number) {

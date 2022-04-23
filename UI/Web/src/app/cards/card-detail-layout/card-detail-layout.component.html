@@ -24,7 +24,7 @@
         </div>
 
         <p *ngIf="items.length === 0 && !isLoading">
-            There is no data
+            <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
         </p>
     </div>
 </ng-container>
@@ -86,3 +86,8 @@
 </div>
 </ng-template>
 
+<div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
+    <div class="spinner-border text-secondary loading" role="status">
+        <span class="invisible">Loading...</span>
+    </div>
+</div>

@@ -17,7 +17,8 @@ public interface IBookmarkService
     Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark> bookmarks);
     Task<bool> BookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto, string imageToBookmark);
     Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto);
-    Task<IEnumerable<string>> GetBookmarkFilesById(int userId, IEnumerable<int> bookmarkIds);
+    Task<IEnumerable<string>> GetBookmarkFilesById(IEnumerable<int> bookmarkIds);
+
 }
 
 public class BookmarkService : IBookmarkService
@@ -141,7 +142,7 @@ public class BookmarkService : IBookmarkService
         return true;
     }
 
-    public async Task<IEnumerable<string>> GetBookmarkFilesById(int userId, IEnumerable<int> bookmarkIds)
+    public async Task<IEnumerable<string>> GetBookmarkFilesById(IEnumerable<int> bookmarkIds)
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
