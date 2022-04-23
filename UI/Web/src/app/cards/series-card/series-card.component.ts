@@ -96,9 +96,6 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       case(Action.Edit):
         this.openEditModal(series);
         break;
-      case(Action.Bookmarks):
-        this.actionService.openBookmarkModal(series, (series) => {/* No Operation */ });
-        break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series, (series) => {/* No Operation */ });
         break;

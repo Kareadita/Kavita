@@ -1,6 +1,5 @@
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { APP_BASE_HREF } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,7 +21,6 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
 import { CarouselModule } from './carousel/carousel.module';
 
 import { TypeaheadModule } from './typeahead/typeahead.module';
-import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
@@ -35,7 +33,6 @@ import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { PipeModule } from './pipe/pipe.module';
-import { ColorPickerModule } from 'ngx-color-picker';
 import { SidenavModule } from './sidenav/sidenav.module';
 
 
@@ -48,7 +45,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     LibraryDetailComponent,
     SeriesDetailComponent,
     ReviewSeriesModalComponent,
-    RecentlyAddedComponent,
     DashboardComponent,
     EventsWidgetComponent,
     SeriesMetadataDetailComponent,
@@ -66,8 +62,9 @@ import { SidenavModule } from './sidenav/sidenav.module';
 
     NgbDropdownModule, // Nav
     NgbPopoverModule, // Nav Events toggle
-    NgbRatingModule, // Series Detail & Filter
     NgbNavModule,
+
+    NgbRatingModule, // Series Detail & Filter
     NgbPaginationModule,
 
     NgbCollapseModule, // Login
@@ -79,8 +76,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     CollectionsModule,
     ReadingListModule,
     RegistrationModule,
-
-    ColorPickerModule, // User preferences
 
     NgbAccordionModule, // ThemeTest Component only
     PipeModule,

@@ -17,6 +17,7 @@ import { Tag } from '../_models/tag';
 import { CollectionTagService } from '../_services/collection-tag.service';
 import { LibraryService } from '../_services/library.service';
 import { MetadataService } from '../_services/metadata.service';
+import { NavService } from '../_services/nav.service';
 import { SeriesService } from '../_services/series.service';
 import { FilterSettings } from './filter-settings';
 
@@ -42,6 +43,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
+  //@ContentChild('commentDrawer') commentDrawer: 
 
 
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
@@ -74,7 +76,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   fullyLoaded: boolean = false;
 
 
-  private onDestory: Subject<void> = new Subject();
+  private onDestroy: Subject<void> = new Subject();
 
   get PersonRole(): typeof PersonRole {
     return PersonRole;
@@ -94,7 +96,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     }
 
     if (this.filterOpen) {
-      this.filterOpen.pipe(takeUntil(this.onDestory)).subscribe(openState => {
+      this.filterOpen.pipe(takeUntil(this.onDestroy)).subscribe(openState => {
         this.filteringCollapsed = !openState;
       });
     }
@@ -114,7 +116,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       seriesNameQuery: new FormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
     });
 
-    this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
+    this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
       this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
       this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
       this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
@@ -135,7 +137,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.sortGroup.valueChanges.pipe(takeUntil(this.onDestory)).subscribe(changes => {
+    this.sortGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
       if (this.filter.sortOptions == null) {
         this.filter.sortOptions = {
           isAscending: this.isAscendingSort,
@@ -148,7 +150,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
       map(val => (val || '').trim()),
       distinctUntilChanged(), 
-      takeUntil(this.onDestory))
+      takeUntil(this.onDestroy))
       .subscribe(changes => {
       this.filter.seriesNameQuery = changes;
     });
@@ -156,9 +158,14 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.loadFromPresetsAndSetup();
   }
 
+  close() {
+    this.filterOpen.emit(false);
+    this.filteringCollapsed = true;
+  }
+
   ngOnDestroy() {
-    this.onDestory.next();
-    this.onDestory.complete();
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   getPersonsSettings(role: PersonRole) {

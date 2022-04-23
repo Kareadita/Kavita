@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
-import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
@@ -10,8 +9,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
-import { ReadingListsComponent } from './reading-list/reading-lists/reading-lists.component';
-import { AllCollectionsComponent } from './collections/all-collections/all-collections.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 
@@ -46,6 +43,10 @@ const routes: Routes = [
     loadChildren: () => import('../app/announcements/announcements.module').then(m => m.AnnouncementsModule)
   },
   {
+    path: 'bookmarks',
+    loadChildren: () => import('../app/bookmark/bookmark.module').then(m => m.BookmarkModule)
+  },
+  {
     path: '',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],
@@ -68,8 +69,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {path: 'library', component: DashboardComponent},
-      {path: 'recently-added', component: RecentlyAddedComponent},
-      {path: 'all-series', component: AllSeriesComponent},
+      {path: 'all-series', component: AllSeriesComponent}, // TODO: This might be better as a separate module
 
     ]
   },

@@ -3,7 +3,6 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { BookmarksModalComponent } from '../cards/_modals/bookmarks-modal/bookmarks-modal.component';
 import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
@@ -300,25 +299,6 @@ export class ActionService implements OnDestroy {
         callback();
       }
     });
-  }
-
-
-  openBookmarkModal(series: Series, callback?: SeriesActionCallback) {
-    if (this.bookmarkModalRef != null) { return; }
-      this.bookmarkModalRef = this.modalService.open(BookmarksModalComponent, { scrollable: true, size: 'lg' });
-      this.bookmarkModalRef.componentInstance.series = series;
-      this.bookmarkModalRef.closed.pipe(take(1)).subscribe(() => {
-        this.bookmarkModalRef = null;
-        if (callback) {
-          callback(series);
-        }
-      });
-      this.bookmarkModalRef.dismissed.pipe(take(1)).subscribe(() => {
-        this.bookmarkModalRef = null;
-        if (callback) {
-          callback(series);
-        }
-      });
   }
 
   addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {

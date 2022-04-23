@@ -263,9 +263,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       case(Action.Delete):
         this.deleteSeries(series);
         break;
-      case(Action.Bookmarks):
-        this.actionService.openBookmarkModal(series, () => this.actionInProgress = false);
-        break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
         break;

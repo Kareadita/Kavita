@@ -1,6 +1,5 @@
 <app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
     <h2 title>
-        <app-card-actionables [actions]="actions"></app-card-actionables>
         All Series
     </h2>
     <h6 subtitle>{{pagination?.totalItems}} Series</h6>

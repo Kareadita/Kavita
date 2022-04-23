@@ -1,9 +1,9 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
-import { filter, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { filter, map, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { UtilityService } from '../../shared/_services/utility.service';
+import { Breakpoint, UtilityService } from '../../shared/_services/utility.service';
 import { Library } from '../../_models/library';
 import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
@@ -29,12 +29,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
-  private onDestory: Subject<void> = new Subject();
+  private onDestroy: Subject<void> = new Subject();
 
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
-    private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService) { }
+    private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService, private router: Router) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -49,16 +49,27 @@ export class SideNavComponent implements OnInit, OnDestroy {
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     });
 
-    this.messageHub.messages$.pipe(takeUntil(this.onDestory), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
       this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
       });
     });
+
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd), 
+            takeUntil(this.onDestroy),
+            map(evt => evt as NavigationEnd))
+      .subscribe((evt: NavigationEnd) => {
+        if (this.utilityService.getActiveBreakpoint() < Breakpoint.Desktop) {
+          // collapse side nav
+          this.navService.toggleSideNav();
+        }
+      });
   }
 
   ngOnDestroy(): void {
-    this.onDestory.next();
-    this.onDestory.complete();
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   handleAction(action: Action, library: Library) {

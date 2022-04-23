@@ -38,6 +38,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
+  @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
 
 
   // Filter Code

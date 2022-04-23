@@ -1,4 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Subject, takeUntil } from 'rxjs';
+import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
+import { NavService } from 'src/app/_services/nav.service';
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -9,7 +12,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
   templateUrl: './side-nav-companion-bar.component.html',
   styleUrls: ['./side-nav-companion-bar.component.scss']
 })
-export class SideNavCompanionBarComponent implements OnInit {
+export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
   /**
    * If the page should show a filter
    */
@@ -34,10 +37,26 @@ export class SideNavCompanionBarComponent implements OnInit {
 
   isFilterOpen = false;
 
-  constructor() { }
+  private onDestroy: Subject<void> = new Subject();
+
+  constructor(private navService: NavService, private utilityService: UtilityService) {
+  }
 
   ngOnInit(): void {
     this.isFilterOpen = this.filterOpenByDefault;
+
+    // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
+    this.navService.sideNavCollapsed$.pipe(takeUntil(this.onDestroy)).subscribe(sideNavCollapsed => {
+      if (this.isFilterOpen && sideNavCollapsed && this.utilityService.getActiveBreakpoint() < Breakpoint.Desktop) {
+        this.isFilterOpen = false;
+        this.filterOpen.emit(this.isFilterOpen);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+      this.onDestroy.next();
+      this.onDestroy.complete();
   }
 
   toggleFilter() {
