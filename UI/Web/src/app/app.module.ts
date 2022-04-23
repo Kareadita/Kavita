@@ -1,6 +1,5 @@
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { APP_BASE_HREF } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,7 +21,6 @@ import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review
 import { CarouselModule } from './carousel/carousel.module';
 
 import { TypeaheadModule } from './typeahead/typeahead.module';
-import { RecentlyAddedComponent } from './recently-added/recently-added.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CardsModule } from './cards/cards.module';
 import { CollectionsModule } from './collections/collections.module';
@@ -48,7 +46,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     LibraryDetailComponent,
     SeriesDetailComponent,
     ReviewSeriesModalComponent,
-    RecentlyAddedComponent,
     DashboardComponent,
     EventsWidgetComponent,
     SeriesMetadataDetailComponent,

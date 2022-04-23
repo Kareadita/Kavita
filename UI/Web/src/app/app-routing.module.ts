@@ -69,7 +69,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {path: 'library', component: DashboardComponent},
-      //{path: 'recently-added', component: RecentlyAddedComponent}, // This is no longer used, can remove component
       {path: 'all-series', component: AllSeriesComponent}, // TODO: This might be better as a separate module
 
     ]
