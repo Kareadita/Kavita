@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SeriesBookmarksComponent } from './series-bookmarks/series-bookmarks.component';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { NgbAccordionModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -17,7 +16,6 @@ import { ColorPickerModule } from 'ngx-color-picker';
 
 @NgModule({
   declarations: [
-    SeriesBookmarksComponent,
     UserPreferencesComponent,
     ApiKeyComponent,
     ThemeManagerComponent,

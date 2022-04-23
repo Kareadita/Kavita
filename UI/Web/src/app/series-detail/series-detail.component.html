@@ -72,13 +72,27 @@
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
-                <div class="row g-0">
+                
+                <app-card-detail-layout 
+                    [isLoading]="isLoading"
+                    [items]="specials">
+                    <ng-template #cardItem let-item let-position="idx">
+                        <app-card-item class="col-auto p-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
+                        [imageUrl]="imageService.getChapterCoverImage(item.id)"
+                        [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                        (selection)="bulkSelectionService.handleCardSelection('special', position, chapters.length, $event)"
+                        [selected]="bulkSelectionService.isCardSelected('special', position)" [allowSelection]="true"></app-card-item>
+                        
+                    </ng-template>
+                </app-card-detail-layout>
+
+                <!-- <div class="row g-0">
                     <ng-container *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
                         <app-card-item class="col-auto p-2" [entity]="chapter" [title]="chapter.title || chapter.range" (click)="openChapter(chapter)"
                         [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
                         [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('special', idx, chapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('special', idx)" [allowSelection]="true"></app-card-item>
                     </ng-container>
-                </div>
+                </div> -->
               </ng-template>
             </li>
             <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">

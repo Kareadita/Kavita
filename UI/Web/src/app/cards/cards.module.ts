@@ -5,7 +5,6 @@ import { LibraryCardComponent } from './library-card/library-card.component';
 import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-chooser.component';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
-import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-modal.component';
 import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -33,7 +32,6 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
@@ -77,7 +75,6 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
