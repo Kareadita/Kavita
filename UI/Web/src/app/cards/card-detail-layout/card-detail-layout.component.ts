@@ -51,6 +51,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
 
   private onDestory: Subject<void> = new Subject();
+  isMobile: boolean = false;
 
   constructor(private seriesService: SeriesService) {
     this.filter = this.seriesService.createSeriesFilter();
@@ -64,6 +65,9 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
       console.log('filter settings was empty, creating our own');
       this.filterSettings = new FilterSettings();
     }
+
+    this.isMobile = window.innerWidth <= 480;
+    window.onresize = () => this.isMobile = window.innerWidth <= 480;
   }
 
   ngOnDestroy() {

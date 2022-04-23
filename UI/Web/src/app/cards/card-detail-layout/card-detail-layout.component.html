@@ -17,10 +17,7 @@
 
 <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
-
-
-
-<ng-container [ngTemplateOutlet]="cardTemplate" *ngIf="pagination.totalItems / pagination.itemsPerPage > 6; else cardTemplate">
+<ng-container *ngIf="pagination.totalItems > 6 || isMobile; else cardTemplate">
     <div class="d-flex justify-content-center row g-0 mt-2 mb-2">
         <div class="col-auto ps-1 pe-1 mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>

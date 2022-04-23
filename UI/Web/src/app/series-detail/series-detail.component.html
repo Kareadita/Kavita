@@ -74,7 +74,7 @@
                 <ng-template ngbNavContent>
                   <div class="row g-0">
                       <ng-container *ngFor="let item of relations; let idx = index; trackBy: trackByRelatedSeriesIdentiy">
-                        <app-series-card [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                        <app-series-card class="col-auto p-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
                         <!--(reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"-->
                       </ng-container>
                   </div>
