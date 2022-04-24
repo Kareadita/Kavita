@@ -1,17 +1,12 @@
-<p class="alert alert-primary" role="alert">
-    Error goes here if there is one (like validation errors)
-</p>
-
 <div class="container-fluid">
-    <!-- Todo: need a table or something for simple layout for single labels-->
-    <div class="row g-0">
-        <label class="form-label col-md-6">Target Series</label>
-        <label class="form-label col-md-6">Relationship</label>
+    <div class="row g-0" *ngIf="relations.length > 0">
+        <label class="form-label col-md-7">Target Series</label>
+        <label class="form-label col-md-5">Relationship</label>
     </div>
     
     <form>
         <div class="row g-0 mb-3" *ngFor="let relation of relations; let idx = index; let isLast = last;">
-            <div class="col-sm-12 col-md-8">
+            <div class="col-sm-12 col-md-7">
                 <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings">
                     <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}}
@@ -21,7 +16,7 @@
                     </ng-template>
                 </app-typeahead>
             </div>
-            <div class="col-sm-auto col-md-2">
+            <div class="col-sm-auto col-md-3">
                 <select class="form-select" [formControl]="relation.formControl">
                     <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.text}}</option>
                 </select>
