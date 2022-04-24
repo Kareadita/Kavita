@@ -89,8 +89,8 @@
                 </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[4]" *ngIf="!tabs[4].disabled">
-                <a ngbNavLink>{{tabs[4].title}}</a>
+            <li [ngbNavItem]="tabs[3]" *ngIf="!tabs[3].disabled">
+                <a ngbNavLink>{{tabs[3].title}}</a>
                 <ng-template ngbNavContent>
                     <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
                     <ul class="list-unstyled">
