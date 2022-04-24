@@ -6,6 +6,7 @@ using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
+using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.DTOs.Theme;
 using API.Entities;
@@ -96,6 +97,10 @@ namespace API.Helpers
                     opt =>
                         opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
+            // CreateMap<SeriesRelation, RelatedSeriesDto>()
+            //     .ForMember(dest => dest.Adaptations,
+            //         opt =>
+            //             opt.MapFrom(src => src.Where(p => p.Role == PersonRole.Writer)))
 
             CreateMap<AppUser, UserDto>();
             CreateMap<SiteTheme, SiteThemeDto>();

@@ -6,8 +6,10 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -338,6 +340,80 @@ namespace API.Controllers
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return await _seriesService.GetSeriesDetail(seriesId, userId);
+        }
+
+        /// <summary>
+        /// Fetches the related series for a given series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="relation">Type of Relationship to pull back</param>
+        /// <returns></returns>
+        [HttpGet("related")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRelatedSeries(int seriesId, RelationKind relation)
+        {
+            // Send back a custom DTO with each type or maybe sorted in some way
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesForRelationKind(userId, seriesId, relation));
+        }
+
+        [HttpGet("all-related")]
+        public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
+        {
+            // Send back a custom DTO with each type or maybe sorted in some way
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId));
+        }
+
+        [Authorize(Policy="RequireAdminRole")]
+        [HttpPost("update-related")]
+        public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
+        {
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related);
+
+            UpdateRelationForKind(dto.Adaptations, series.Relations.Where(r => r.RelationKind == RelationKind.Adaptation).ToList(), series, RelationKind.Adaptation);
+            UpdateRelationForKind(dto.Characters, series.Relations.Where(r => r.RelationKind == RelationKind.Character).ToList(), series, RelationKind.Character);
+            UpdateRelationForKind(dto.Contains, series.Relations.Where(r => r.RelationKind == RelationKind.Contains).ToList(), series, RelationKind.Contains);
+            UpdateRelationForKind(dto.Others, series.Relations.Where(r => r.RelationKind == RelationKind.Other).ToList(), series, RelationKind.Other);
+            UpdateRelationForKind(dto.SideStories, series.Relations.Where(r => r.RelationKind == RelationKind.SideStory).ToList(), series, RelationKind.SideStory);
+            UpdateRelationForKind(dto.SpinOffs, series.Relations.Where(r => r.RelationKind == RelationKind.SpinOff).ToList(), series, RelationKind.SpinOff);
+            UpdateRelationForKind(dto.AlternativeSettings, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeSetting).ToList(), series, RelationKind.AlternativeSetting);
+            UpdateRelationForKind(dto.AlternativeVersions, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeVersion).ToList(), series, RelationKind.AlternativeVersion);
+            UpdateRelationForKind(dto.Doujinshis, series.Relations.Where(r => r.RelationKind == RelationKind.Doujinshi).ToList(), series, RelationKind.Doujinshi);
+            UpdateRelationForKind(dto.Prequels, series.Relations.Where(r => r.RelationKind == RelationKind.Prequel).ToList(), series, RelationKind.Prequel);
+            UpdateRelationForKind(dto.Sequels, series.Relations.Where(r => r.RelationKind == RelationKind.Sequel).ToList(), series, RelationKind.Sequel);
+
+            if (!_unitOfWork.HasChanges()) return Ok();
+            if (await _unitOfWork.CommitAsync()) return Ok();
+
+
+            return BadRequest("There was an issue updating relationships");
+        }
+
+        private void UpdateRelationForKind(IList<int> dtoTargetSeriesIds, IEnumerable<SeriesRelation> adaptations, Series series, RelationKind kind)
+        {
+            foreach (var adaptation in adaptations.Where(adaptation => !dtoTargetSeriesIds.Contains(adaptation.TargetSeriesId)))
+            {
+                // If the seriesId isn't in dto, it means we've removed or reclassified
+                series.Relations.Remove(adaptation);
+            }
+
+            // At this point, we only have things to add
+            foreach (var targetSeriesId in dtoTargetSeriesIds)
+            {
+                // This ensures we don't allow any duplicates to be added
+                if (series.Relations.SingleOrDefault(r =>
+                        r.RelationKind == kind && r.TargetSeriesId == targetSeriesId) !=
+                    null) continue;
+
+                series.Relations.Add(new SeriesRelation()
+                {
+                    Series = series,
+                    SeriesId = series.Id,
+                    TargetSeriesId = targetSeriesId,
+                    RelationKind = kind
+                });
+                _unitOfWork.SeriesRepository.Update(series);
+            }
         }
     }
 }

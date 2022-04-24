@@ -47,7 +47,7 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
 
     // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
     this.navService.sideNavCollapsed$.pipe(takeUntil(this.onDestroy)).subscribe(sideNavCollapsed => {
-      if (this.isFilterOpen && sideNavCollapsed && this.utilityService.getActiveBreakpoint() < Breakpoint.Desktop) {
+      if (this.isFilterOpen && sideNavCollapsed && this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
         this.isFilterOpen = false;
         this.filterOpen.emit(this.isFilterOpen);
       }

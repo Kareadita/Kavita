@@ -9,6 +9,8 @@ import { CollectionTag } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
+import { RelatedSeries } from '../_models/series-detail/related-series';
+import { RelationKind } from '../_models/series-detail/relation-kind';
 import { SeriesDetail } from '../_models/series-detail/series-detail';
 import { SeriesFilter } from '../_models/series-filter';
 import { SeriesGroup } from '../_models/series-group';
@@ -180,6 +182,19 @@ export class SeriesService {
         return this._cachePaginatedResults(response, this.paginatedSeriesForTagsResults);
       })
     );
+  }
+
+  getRelatedForSeries(seriesId: number) {
+    return this.httpClient.get<RelatedSeries>(this.baseUrl + 'series/all-related?seriesId=' + seriesId);
+  }
+
+  updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>, 
+    contains: Array<number>, others: Array<number>, prequels: Array<number>, 
+    sequels: Array<number>, sideStories: Array<number>, spinOffs: Array<number>,
+    alternativeSettings: Array<number>, alternativeVersions: Array<number>, doujinshis: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'series/update-related?seriesId=' + seriesId, 
+    {seriesId, adaptations, characters, sequels, prequels, contains, others, sideStories, spinOffs,
+     alternativeSettings, alternativeVersions, doujinshis}); 
   }
 
   getSeriesDetail(seriesId: number) {

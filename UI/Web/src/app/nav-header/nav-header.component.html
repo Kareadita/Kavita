@@ -9,97 +9,97 @@
           <label for="nav-search" class="form-label visually-hidden">Search series</label>
           <div class="ng-autocomplete">
             <app-grouped-typeahead
-            #search
-            id="nav-search"
-            [minQueryLength]="2"
-            initialValue=""
-            placeholder="Search…"
-            [grouppedData]="searchResults"
-            (inputChanged)="onChangeSearch($event)"
-            (clearField)="clearSearch()"
-            (focusChanged)="focusUpdate($event)"
-          >
+              #search
+              id="nav-search"
+              [minQueryLength]="2"
+              initialValue=""
+              placeholder="Search…"
+              [grouppedData]="searchResults"
+              (inputChanged)="onChangeSearch($event)"
+              (clearField)="clearSearch()"
+              (focusChanged)="focusUpdate($event)"
+            >
 
-          <ng-template #libraryTemplate let-item>
-            <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
-              <div class="ms-1">
-                <span>{{item.name}}</span>
+            <ng-template #libraryTemplate let-item>
+              <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
+                <div class="ms-1">
+                  <span>{{item.name}}</span>
+                </div>
               </div>
-            </div>
-          </ng-template>
+            </ng-template>
 
-          <ng-template #seriesTemplate let-item>
-            <div style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
-              <div style="width: 24px" class="me-1">
-                <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+            <ng-template #seriesTemplate let-item>
+              <div style="display: flex;padding: 5px;" (click)="clickSeriesSearchResult(item)">
+                <div style="width: 24px" class="me-1">
+                  <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"></app-image>
+                </div>
+                <div class="ms-1">
+                  <app-series-format [format]="item.format"></app-series-format>
+                  <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName">{{item.name}}</span>
+                  <ng-template #localizedName>
+                    <span [innerHTML]="item.localizedName"></span>
+                  </ng-template>
+                  <div class="form-text" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
+                </div>
               </div>
-              <div class="ms-1">
-                <app-series-format [format]="item.format"></app-series-format>
-                <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName">{{item.name}}</span>
-                <ng-template #localizedName>
-                  <span [innerHTML]="item.localizedName"></span>
-                </ng-template>
-                <div class="form-text" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
-              </div>
-            </div>
-          </ng-template>
+            </ng-template>
 
-          <ng-template #collectionTemplate let-item>
-            <div style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
-              <div style="width: 24px" class="me-1">
-                <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
+            <ng-template #collectionTemplate let-item>
+              <div style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
+                <div style="width: 24px" class="me-1">
+                  <app-image class="me-3 search-result" width="24px" [imageUrl]="imageService.getCollectionCoverImage(item.id)"></app-image>
+                </div>
+                <div class="ms-1">
+                  <span>{{item.title}}</span>
+                  <span *ngIf="item.promoted">
+                    &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
+                    <span class="visually-hidden">(promoted)</span>
+                  </span>
+                </div>
               </div>
-              <div class="ms-1">
-                <span>{{item.title}}</span>
-                <span *ngIf="item.promoted">
-                  &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
-                  <span class="visually-hidden">(promoted)</span>
-                </span>
-              </div>
-            </div>
-          </ng-template>
+            </ng-template>
 
-          <ng-template #readingListTemplate let-item>
-            <div style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
-              <div class="ms-1">
-                <span>{{item.title}}</span>
-                <span *ngIf="item.promoted">
-                  &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
-                  <span class="visually-hidden">(promoted)</span>
-                </span>
+            <ng-template #readingListTemplate let-item>
+              <div style="display: flex;padding: 5px;" (click)="clickReadingListSearchResult(item)">
+                <div class="ms-1">
+                  <span>{{item.title}}</span>
+                  <span *ngIf="item.promoted">
+                    &nbsp;<i class="fa fa-angle-double-up" aria-hidden="true" title="Promoted"></i>
+                    <span class="visually-hidden">(promoted)</span>
+                  </span>
+                </div>
               </div>
-            </div>
-          </ng-template>
+            </ng-template>
 
-          <ng-template #tagTemplate let-item>
-            <div style="display: flex;padding: 5px;" (click)="goTo('tags', item.id)">
-              <div class="ms-1">
-                <span>{{item.title}}</span>
+            <ng-template #tagTemplate let-item>
+              <div style="display: flex;padding: 5px;" (click)="goTo('tags', item.id)">
+                <div class="ms-1">
+                  <span>{{item.title}}</span>
+                </div>
               </div>
-            </div>
-          </ng-template>
+            </ng-template>
 
-          <ng-template #personTemplate let-item>
-            <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
-              <div class="ms-1">
-                
-                <div [innerHTML]="item.name"></div>
-                <div>{{item.role | personRole}}</div>
+            <ng-template #personTemplate let-item>
+              <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
+                <div class="ms-1">
+                  
+                  <div [innerHTML]="item.name"></div>
+                  <div>{{item.role | personRole}}</div>
+                </div>
               </div>
-            </div>
-          </ng-template>
+            </ng-template>
 
-          <ng-template #genreTemplate let-item>
-            <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
-              <div class="ms-1">
-                <div [innerHTML]="item.title"></div>
+            <ng-template #genreTemplate let-item>
+              <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
+                <div class="ms-1">
+                  <div [innerHTML]="item.title"></div>
+                </div>
               </div>
-            </div>
-          </ng-template>
+            </ng-template>
 
-          <ng-template #noResultsTemplate let-notFound>
-            No results found
-          </ng-template>
+            <ng-template #noResultsTemplate let-notFound>
+              No results found
+            </ng-template>
 
           </app-grouped-typeahead>
           </div>

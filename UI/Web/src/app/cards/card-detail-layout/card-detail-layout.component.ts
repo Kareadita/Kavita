@@ -52,6 +52,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
 
   private onDestory: Subject<void> = new Subject();
+  isMobile: boolean = false;
 
   constructor(private seriesService: SeriesService) {
     this.filter = this.seriesService.createSeriesFilter();
@@ -62,9 +63,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
 
     if (this.filterSettings === undefined) {
-      console.log('filter settings was empty, creating our own');
       this.filterSettings = new FilterSettings();
     }
+
+    if (this.pagination === undefined) {
+      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1}
+    }
+
+    this.isMobile = window.innerWidth <= 480;
+    window.onresize = () => this.isMobile = window.innerWidth <= 480;
   }
 
   ngOnDestroy() {

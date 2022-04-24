@@ -69,6 +69,17 @@
     <ng-container>
         <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
+            <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
+                <a ngbNavLink>Related</a>
+                <ng-template ngbNavContent>
+                  <div class="row g-0">
+                      <ng-container *ngFor="let item of relations; let idx = index; trackBy: trackByRelatedSeriesIdentiy">
+                        <app-series-card class="col-auto p-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                        <!--(reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"-->
+                      </ng-container>
+                  </div>
+                </ng-template>
+              </li>
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>

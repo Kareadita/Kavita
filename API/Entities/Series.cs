@@ -66,8 +66,17 @@ public class Series : IEntityDate
     public DateTime LastChapterAdded { get; set; }
 
     public SeriesMetadata Metadata { get; set; }
+
     public ICollection<AppUserRating> Ratings { get; set; } = new List<AppUserRating>();
     public ICollection<AppUserProgress> Progress { get; set; } = new List<AppUserProgress>();
+
+    /// <summary>
+    /// Relations to other Series, like Sequels, Prequels, etc
+    /// </summary>
+    /// <remarks>1 to Many relationship</remarks>
+    public virtual ICollection<SeriesRelation> Relations { get; set; } = new List<SeriesRelation>();
+    public virtual ICollection<SeriesRelation> RelationOf { get; set; } = new List<SeriesRelation>();
+
 
     // Relationships
     public List<Volume> Volumes { get; set; }

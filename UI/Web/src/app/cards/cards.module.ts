@@ -21,6 +21,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
 import { FileInfoComponent } from './file-info/file-info.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
+import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 
 
 
@@ -39,19 +40,20 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     BulkAddToCollectionComponent,
     ChapterMetadataDetailComponent,
     FileInfoComponent,
+    EditSeriesRelationComponent,
   ],
   imports: [
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
     FormsModule, // EditCollectionsModal
-    
+
     PipeModule,
     SharedModule,
     TypeaheadModule, // edit series modal
 
     MetadataFilterModule,
-    
+
     NgbNavModule,
     NgbTooltipModule, // Card item
     NgbCollapseModule,
@@ -79,7 +81,8 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
     BulkOperationsComponent,
-    ChapterMetadataDetailComponent
+    ChapterMetadataDetailComponent,
+    EditSeriesRelationComponent
   ]
 })
 export class CardsModule { }

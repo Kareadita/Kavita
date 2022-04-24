@@ -4,7 +4,6 @@ import { of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Library, LibraryType } from '../_models/library';
-import { SearchResult } from '../_models/search-result';
 import { SearchResultGroup } from '../_models/search/search-result-group';
 
 

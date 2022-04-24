@@ -33,9 +33,16 @@ import { ReaderService } from '../_services/reader.service';
 import { ReadingListService } from '../_services/reading-list.service';
 import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
+import { RelationKind } from '../_models/series-detail/relation-kind';
+import { RelatedSeries } from '../_models/series-detail/related-series';
 
+interface RelatedSeris {
+  series: Series;
+  relation: RelationKind;
+}
 
 enum TabID {
+  Related = 0,
   Specials = 1,
   Storyline = 2,
   Volumes = 3,
@@ -106,6 +113,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+  trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+
+  /**
+   * Are there any related series
+   */
+  hasRelations: boolean = false;
+  /**
+   * Related Series. Sorted by backend
+   */
+  relations: Array<RelatedSeris> = [];
 
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
@@ -356,6 +373,27 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+      // TODO: Move this to a forkJoin?
+      this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
+        this.relations = [
+          ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
+          ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
+          ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)), 
+          ...relations.spinOffs.map(item => this.createRelatedSeries(item, RelationKind.SpinOff)),
+          ...relations.adaptations.map(item => this.createRelatedSeries(item, RelationKind.Adaptation)),
+          ...relations.contains.map(item => this.createRelatedSeries(item, RelationKind.Contains)),
+          ...relations.characters.map(item => this.createRelatedSeries(item, RelationKind.Character)), 
+          ...relations.others.map(item => this.createRelatedSeries(item, RelationKind.Other)),
+          ...relations.alternativeSettings.map(item => this.createRelatedSeries(item, RelationKind.AlternativeSetting)),
+          ...relations.alternativeVersions.map(item => this.createRelatedSeries(item, RelationKind.AlternativeVersion)),
+          ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
+          ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
+        ];
+        if (this.relations.length > 0) {
+          this.hasRelations = true;
+        }
+      });
+
       this.seriesService.getSeriesDetail(this.seriesId).subscribe(detail => {
         this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
@@ -370,6 +408,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     }, err => {
       this.router.navigateByUrl('/libraries');
     });
+  }
+
+  createRelatedSeries(series: Series, relation: RelationKind) {
+    return {series, relation} as RelatedSeris;
   }
 
   /**

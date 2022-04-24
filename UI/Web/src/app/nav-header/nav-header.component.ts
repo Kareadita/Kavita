@@ -1,10 +1,10 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { from, fromEvent, Subject } from 'rxjs';
+import { fromEvent, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ScrollService } from '../scroll.service';
-import { FilterQueryParam, FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
+import { FilterQueryParam } from '../shared/_services/filter-utilities.service';
 import { CollectionTag } from '../_models/collection-tag';
 import { Library } from '../_models/library';
 import { PersonRole } from '../_models/person';
@@ -46,19 +46,20 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   searchFocused: boolean = false;
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public accountService: AccountService, private router: Router, public navService: NavService, 
-    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document, 
-    private scrollService: ScrollService, private filterUtilityService: FilterUtilitiesService) { }
+  constructor(public accountService: AccountService, private router: Router, public navService: NavService,
+    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
+    private scrollService: ScrollService) { }
 
-  ngOnInit(): void {
-    fromEvent(this.document.body, 'scroll').pipe(takeUntil(this.onDestroy)).subscribe(() => {
-      const offset = this.scrollService.scrollPosition;
-      if (offset > 100) {
-        this.backToTopNeeded = true;
-      } else if (offset < 40) {
-          this.backToTopNeeded = false;
-      }
-    })
+  ngOnInit(): void {}
+
+  @HostListener('body:scroll', [])
+  checkBackToTopNeeded() {
+    const offset = this.scrollService.scrollPosition;
+    if (offset > 100) {
+      this.backToTopNeeded = true;
+    } else if (offset < 40) {
+        this.backToTopNeeded = false;
+    }
   }
 
   ngOnDestroy() {
@@ -77,7 +78,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     this.document.getElementById('content')?.focus();
   }
 
-  
+
 
   onChangeSearch(val: string) {
       this.isLoading = true;
