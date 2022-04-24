@@ -62,7 +62,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
       .subscribe((evt: NavigationEnd) => {
         if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
           // collapse side nav
-          this.navService.toggleSideNav();
+          this.navService.sideNavCollapsed$.pipe(take(1)).subscribe(collapsed => {
+            console.log('Side nav collapsed: ', collapsed);
+            if (!collapsed) {
+              this.navService.toggleSideNav();
+            }
+          });
         }
       });
   }
