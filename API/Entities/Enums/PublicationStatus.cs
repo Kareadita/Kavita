@@ -18,6 +18,11 @@ public enum PublicationStatus
     /// Publication has finished releasing
     /// </summary>
     [Description("Completed")]
-    Completed = 2
+    Completed = 2,
+    /// <summary>
+    /// Publication has been cancelled
+    /// </summary>
+    [Description("Cancelled")]
+    Cancelled = 3
 
 }
