@@ -31,6 +31,8 @@ export class RelationshipPipe implements PipeTransform {
         return 'Side Story';
       case RelationKind.SpinOff:
         return 'Spin Off';
+      case RelationKind.Parent:
+        return 'Parent';
       default:
         return '';
     }
