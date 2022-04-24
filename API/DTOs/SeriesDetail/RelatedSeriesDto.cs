@@ -21,4 +21,5 @@ public class RelatedSeriesDto
     public IEnumerable<SeriesDto> AlternativeSettings { get; set; }
     public IEnumerable<SeriesDto> AlternativeVersions { get; set; }
     public IEnumerable<SeriesDto> Doujinshis { get; set; }
+    public IEnumerable<SeriesDto> Parent { get; set; }
 }

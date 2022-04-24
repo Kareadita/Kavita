@@ -1018,31 +1018,25 @@ public class SeriesRepository : ISeriesRepository
             AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting),
             AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion),
             Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi),
+            Parent = await _context.Series
+                .SelectMany(s =>
+                    s.RelationOf.Where(r => r.TargetSeriesId == seriesId
+                                             && usersSeriesIds.Contains(r.TargetSeriesId)
+                                             && r.RelationKind != RelationKind.Prequel
+                                             && r.RelationKind != RelationKind.Sequel)
+                        .Select(sr => sr.Series))
+                .AsSplitQuery()
+                .AsNoTracking()
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .ToListAsync()
         };
     }
 
     private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind)
     {
-
-        // This works
         return await _context.Series.SelectMany(s =>
-            s.Relations.Where(sr => sr.RelationKind == kind && sr.SeriesId == seriesId)
+            s.Relations.Where(sr => sr.RelationKind == kind && sr.SeriesId == seriesId && usersSeriesIds.Contains(sr.TargetSeriesId))
                 .Select(sr => sr.TargetSeries))
-            .AsSplitQuery()
-            .AsNoTracking()
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
-
-        // This code works fine
-        return await _context.Series
-            .Where(s => _context.SeriesRelation
-                .Where(sr =>
-                    sr.SeriesId == seriesId && sr.RelationKind == kind && usersSeriesIds.Contains(sr.TargetSeriesId))
-                .Include(sr => sr.TargetSeries)
-                .AsSplitQuery()
-                .AsNoTracking()
-                .Select(sr => sr.TargetSeriesId)
-                .Contains(s.Id))
             .AsSplitQuery()
             .AsNoTracking()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)

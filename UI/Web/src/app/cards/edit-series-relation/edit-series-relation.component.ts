@@ -34,13 +34,14 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
 
   relations: Array<RelationControl> = [];
   seriesSettings: TypeaheadSettings<SearchResult> = new TypeaheadSettings();
-
+  libraryNames: {[key:number]: string} = {};
 
 
 
   private onDestroy: Subject<void> = new Subject<void>();
 
-  constructor(private seriesService: SeriesService, private utilityService: UtilityService, public imageService: ImageService, private libraryService: LibraryService) { }
+  constructor(private seriesService: SeriesService, private utilityService: UtilityService, 
+    public imageService: ImageService, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
     this.seriesService.getRelatedForSeries(this.series.id).subscribe(async relations => {
@@ -53,7 +54,10 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
         this.setupRelationRows(relations.alternativeSettings, RelationKind.AlternativeSetting);
         this.setupRelationRows(relations.alternativeVersions, RelationKind.AlternativeVersion);
         this.setupRelationRows(relations.doujinshis, RelationKind.Doujinshi);
+    });
 
+    this.libraryService.getLibraryNames().subscribe(names => {
+      this.libraryNames = names;
     });
 
     this.save.pipe(takeUntil(this.onDestroy)).subscribe(() => this.saveState());

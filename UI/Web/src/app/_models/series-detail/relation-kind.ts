@@ -9,7 +9,11 @@ export enum RelationKind {
     Other = 8,
     AlternativeSetting = 9,
     AlternativeVersion = 10,
-    Doujinshi = 11
+    Doujinshi = 11,
+    /**
+     * This is UI only. Backend will generate Parent series for everything but Prequel/Sequel
+     */
+    Parent = 12
 }
 
 export const RelationKinds = [

@@ -386,7 +386,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           ...relations.others.map(item => this.createRelatedSeries(item, RelationKind.Other)),
           ...relations.alternativeSettings.map(item => this.createRelatedSeries(item, RelationKind.AlternativeSetting)),
           ...relations.alternativeVersions.map(item => this.createRelatedSeries(item, RelationKind.AlternativeVersion)),
-          ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi))
+          ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
+          ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
         ];
         if (this.relations.length > 0) {
           this.hasRelations = true;
