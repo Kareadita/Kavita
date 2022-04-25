@@ -916,10 +916,16 @@ public class ScannerService : IScannerService
             chapter.TotalCount = comicInfo.Count;
         }
 
+        // This needs to check against both Number and Volume to calculate Count
         if (!string.IsNullOrEmpty(comicInfo.Number) && float.Parse(comicInfo.Number) > 0)
         {
             chapter.Count = (int) Math.Floor(float.Parse(comicInfo.Number));
         }
+        if (!string.IsNullOrEmpty(comicInfo.Volume) && float.Parse(comicInfo.Volume) > 0)
+        {
+            chapter.Count = Math.Max(chapter.Count, (int) Math.Floor(float.Parse(comicInfo.Volume)));
+        }
+
 
 
 

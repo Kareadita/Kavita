@@ -35,7 +35,7 @@ namespace API.Entities.Metadata
         /// </summary>
         public string Language { get; set; } = string.Empty;
         /// <summary>
-        /// Total number of issues in the series
+        /// Total number of issues/volumes in the series
         /// </summary>
         public int Count { get; set; } = 0;
         public PublicationStatus PublicationStatus { get; set; }
