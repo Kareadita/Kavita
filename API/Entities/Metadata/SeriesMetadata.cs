@@ -37,7 +37,11 @@ namespace API.Entities.Metadata
         /// <summary>
         /// Total number of issues/volumes in the series
         /// </summary>
-        public int Count { get; set; } = 0;
+        public int TotalCount { get; set; } = 0;
+        /// <summary>
+        /// Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)
+        /// </summary>
+        public int MaxCount { get; set; } = 0;
         public PublicationStatus PublicationStatus { get; set; }
 
         // Locks

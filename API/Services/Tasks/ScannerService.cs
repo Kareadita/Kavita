@@ -577,12 +577,22 @@ public class ScannerService : IScannerService
         // Set the AgeRating as highest in all the comicInfos
         if (!series.Metadata.AgeRatingLocked) series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
+        series.Metadata.TotalCount = chapters.Max(chapter => chapter.TotalCount);
+        series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
+        // To not have to rely completely on ComicInfo, try to parse out if the series is complete by checking parsed filenames as well.
+        if (series.Metadata.MaxCount != series.Metadata.TotalCount)
+        {
+            var maxVolume = series.Volumes.Max(v => v.Number);
+            var maxChapter = chapters.Max(c => (int) float.Parse(c.Number));
+            if (maxVolume == series.Metadata.TotalCount) series.Metadata.MaxCount = maxVolume;
+            else if (maxChapter == series.Metadata.TotalCount) series.Metadata.MaxCount = maxChapter;
+        }
 
-        series.Metadata.Count = chapters.Max(chapter => chapter.TotalCount);
+
         if (!series.Metadata.PublicationStatusLocked)
         {
             series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
-            if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count && series.Metadata.Count > 0)
+            if (series.Metadata.MaxCount >= series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Completed;
             }

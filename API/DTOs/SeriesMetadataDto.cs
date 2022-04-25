@@ -45,11 +45,11 @@ namespace API.DTOs
         /// </summary>
         public string Language { get; set; } = string.Empty;
         /// <summary>
-        /// Number in the TotalCount of issues
+        /// Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)
         /// </summary>
-        public int Count { get; set; }
+        public int MaxCount { get; set; } = 0;
         /// <summary>
-        /// Total number of issues for the series
+        /// Total number of issues/volumes for the series
         /// </summary>
         public int TotalCount { get; set; }
         /// <summary>

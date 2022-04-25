@@ -39,3 +39,15 @@
         cursor: pointer !important;
     }
 }
+
+.filled {
+    border: 1px solid var(--tagbadge-typeahead-border-color);
+    color: var(--tagbadge-typeahead-text-color);
+    background-color: var(--tagbadge-typeahead-bg-color);
+}
+
+.outline {
+    border: 1px solid var(--tagbadge-border-color);
+    color: var(--tagbadge-text-color);
+    background-color: var(--tagbadge-bg-color);
+}
