@@ -29,6 +29,7 @@ export enum TagBadgeCursor {
 export class TagBadgeComponent implements OnInit {
 
   @Input() selectionMode: TagBadgeCursor = TagBadgeCursor.Selectable;
+  @Input() fillStyle: 'filled' | 'outline' = 'outline';
 
   cursor: string = 'default';
 

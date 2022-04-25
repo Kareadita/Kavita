@@ -2,7 +2,7 @@
     <ng-container title>
         <h2 style="margin-bottom: 0px">
             <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
-            {{series?.name}}
+            <span>{{series?.name}}</span>
         </h2>
     </ng-container>
     <ng-container subtitle *ngIf="series?.localizedName !== series?.name">
@@ -20,9 +20,9 @@
                 <div class="col-auto">
                     <button class="btn btn-primary" (click)="read()">
                         <span>
-                            <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}"></i>
+                            <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}} me-1"></i>
                         </span>
-                        <span class="d-none d-sm-inline-block">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
+                        <span class="d-none d-sm-inline-block">{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
                 <div class="col-auto ms-2" *ngIf="isAdmin">
@@ -69,34 +69,6 @@
     <ng-container>
         <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs mb-2" [destroyOnHide]="false" (navChange)="onNavChange($event)">
-            <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
-                <a ngbNavLink>Related</a>
-                <ng-template ngbNavContent>
-                  <div class="row g-0">
-                      <ng-container *ngFor="let item of relations; let idx = index; trackBy: trackByRelatedSeriesIdentiy">
-                        <app-series-card class="col-auto p-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
-                        <!--(reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"-->
-                      </ng-container>
-                  </div>
-                </ng-template>
-              </li>
-            <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
-              <a ngbNavLink>Specials</a>
-              <ng-template ngbNavContent>
-                
-                <app-card-detail-layout 
-                    [isLoading]="isLoading"
-                    [items]="specials">
-                    <ng-template #cardItem let-item let-position="idx">
-                        <app-card-item class="col-auto p-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
-                        [imageUrl]="imageService.getChapterCoverImage(item.id)"
-                        [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                        (selection)="bulkSelectionService.handleCardSelection('special', position, chapters.length, $event)"
-                        [selected]="bulkSelectionService.isCardSelected('special', position)" [allowSelection]="true"></app-card-item>
-                    </ng-template>
-                </app-card-detail-layout>
-              </ng-template>
-            </li>
             <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
@@ -146,6 +118,32 @@
                             [selected]="bulkSelectionService.isCardSelected('chapter', position)" [allowSelection]="true"></app-card-item>
                         </ng-template>
                     </app-card-detail-layout>
+                </ng-template>
+            </li>
+            <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
+              <a ngbNavLink>Specials</a>
+              <ng-template ngbNavContent>
+                <app-card-detail-layout 
+                    [isLoading]="isLoading"
+                    [items]="specials">
+                    <ng-template #cardItem let-item let-position="idx">
+                        <app-card-item class="col-auto p-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
+                        [imageUrl]="imageService.getChapterCoverImage(item.id)"
+                        [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                        (selection)="bulkSelectionService.handleCardSelection('special', position, chapters.length, $event)"
+                        [selected]="bulkSelectionService.isCardSelected('special', position)" [allowSelection]="true"></app-card-item>
+                    </ng-template>
+                </app-card-detail-layout>
+              </ng-template>
+            </li>
+            <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
+                <a ngbNavLink>Related</a>
+                <ng-template ngbNavContent>
+                    <div class="row g-0">
+                        <ng-container *ngFor="let item of relations; let idx = index; trackBy: trackByRelatedSeriesIdentiy">
+                        <app-series-card class="col-auto p-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                        </ng-container>
+                    </div>
                 </ng-template>
             </li>
         </ul>

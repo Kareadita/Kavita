@@ -8,7 +8,11 @@
     <ng-container *ngIf="series">
         <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date" class="col-auto">{{seriesMetadata.releaseYear}}</app-tag-badge>
         <app-tag-badge *ngIf="seriesMetadata.language !== null && seriesMetadata.language !== ''" title="Language" a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.language}}</app-tag-badge>
-        <app-tag-badge title="Publication Status" a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.publicationStatus | publicationStatus}}</app-tag-badge>
+        
+        <app-tag-badge title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})" [fillStyle]="seriesMetadata.maxCount != 0 && seriesMetadata.maxCount >= seriesMetadata.totalCount ? 'filled' : 'outline'" a11y-click="13,32" class="col-auto" 
+        (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" 
+        [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.publicationStatus | publicationStatus}}</app-tag-badge>
+
         <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Format, series.format)" [selectionMode]="TagBadgeCursor.Clickable">
             <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
         </app-tag-badge>

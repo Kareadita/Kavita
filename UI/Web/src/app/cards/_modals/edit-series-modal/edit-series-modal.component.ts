@@ -22,6 +22,15 @@ import { MetadataService } from 'src/app/_services/metadata.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
+enum TabID {
+  General = 0,
+  Metadata = 1,
+  People = 2,
+  CoverImage = 3,
+  Related = 4,
+  Info = 5,
+}
+
 @Component({
   selector: 'app-edit-series-modal',
   templateUrl: './edit-series-modal.component.html',
@@ -41,6 +50,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   volumeCollapsed: any = {};
   tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Related', 'Info'];
   active = this.tabs[0];
+  activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   private readonly onDestroy = new Subject<void>();
@@ -81,6 +91,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   get PersonRole() {
     return PersonRole;
+  }
+
+  get TabID(): typeof TabID {
+    return TabID;
   }
 
   getPersonsSettings(role: PersonRole) {

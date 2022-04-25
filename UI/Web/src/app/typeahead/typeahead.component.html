@@ -6,7 +6,7 @@
     </span>
     </ng-container>
     <div class="typeahead-input" [ngClass]="{'disabled': disabled}" (click)="onInputFocus($event)">
-        <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index">
+        <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index" fillStyle="filled">
           <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i }"></ng-container>
           <i class="fa fa-times" *ngIf="!disabled" (click)="toggleSelection(option)" tabindex="0" aria-label="close"></i>
         </app-tag-badge>

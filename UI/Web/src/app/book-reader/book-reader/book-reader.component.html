@@ -113,8 +113,8 @@
         <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px'}"
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
-        <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
-        <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
+        <div class="left {{clickOverlayClass('left')}} no-observe" [ngStyle]="{'padding-top': topOffset + 'px'}" (click)="prevPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
+        <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" [ngStyle]="{'padding-top': topOffset + 'px'}" (click)="nextPage()" *ngIf="clickToPaginate" tabindex="-1"></div>
 
         <div *ngIf="page !== undefined && scrollbarNeeded" (click)="$event.stopPropagation();">
             <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
