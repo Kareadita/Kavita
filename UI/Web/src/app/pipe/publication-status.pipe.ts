@@ -11,6 +11,8 @@ export class PublicationStatusPipe implements PipeTransform {
       case PublicationStatus.OnGoing: return 'Ongoing';
       case PublicationStatus.Hiatus: return 'Hiatus';
       case PublicationStatus.Completed: return 'Completed';
+      case PublicationStatus.Cancelled: return 'Cancelled';
+      case PublicationStatus.Ended: return 'Ended';
       
       default: return '';
     }

@@ -595,6 +595,9 @@ public class ScannerService : IScannerService
             if (series.Metadata.MaxCount >= series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Completed;
+            } else if (series.Metadata.TotalCount > 0 && series.Metadata.MaxCount > 0)
+            {
+                series.Metadata.PublicationStatus = PublicationStatus.Ended;
             }
         }
 
