@@ -44,33 +44,40 @@ namespace API.Data
         public DbSet<SeriesRelation> SeriesRelation { get; set; }
 
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(builder);
 
 
-            modelBuilder.Entity<AppUser>()
+            builder.Entity<AppUser>()
                 .HasMany(ur => ur.UserRoles)
                 .WithOne(u => u.User)
                 .HasForeignKey(ur => ur.UserId)
                 .IsRequired();
 
-            modelBuilder.Entity<AppRole>()
+            builder.Entity<AppRole>()
                 .HasMany(ur => ur.UserRoles)
                 .WithOne(u => u.Role)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
 
-            modelBuilder.Entity<SeriesRelation>()
+            builder.Entity<SeriesRelation>()
                 .HasOne(pt => pt.Series)
                 .WithMany(p => p.Relations)
                 .HasForeignKey(pt => pt.SeriesId)
                 .OnDelete(DeleteBehavior.ClientCascade);
 
-            modelBuilder.Entity<SeriesRelation>()
+            builder.Entity<SeriesRelation>()
                 .HasOne(pt => pt.TargetSeries)
                 .WithMany(t => t.RelationOf)
                 .HasForeignKey(pt => pt.TargetSeriesId);
+
+            builder.Entity<AppUserPreferences>()
+                .Property(b => b.BookThemeName)
+                .HasDefaultValue("Dark");
+            builder.Entity<AppUserPreferences>()
+                .Property(b => b.BackgroundColor)
+                .HasDefaultValue("#000000");
         }
 
 

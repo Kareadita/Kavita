@@ -1,0 +1,9 @@
+.dot {
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+}
+
+.active {
+    border: 1px solid var(--primary-color);
+}

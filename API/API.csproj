@@ -104,6 +104,7 @@
     <Compile Remove="DTOs\Email\SmtpConfig.cs" />
     <Compile Remove="DTOs\Email\EmailOptionsDto.cs" />
     <Compile Remove="Helpers\Converters\SmtpConverter.cs" />
+    <Compile Remove="Data\Migrations\DataContextModelSnapshot.cs" />
   </ItemGroup>
 
   <ItemGroup>

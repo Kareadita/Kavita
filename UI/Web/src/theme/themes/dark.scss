@@ -74,7 +74,7 @@
     --toast-info-bg-color: #2F96B4;
     --toast-warning-bg-color: #F89406;
 
-    /* Checkboxes */
+    /* Checkboxes/Switch */
     --checkbox-checked-bg-color: var(--primary-color);
     --checkbox-border-color: var(--input-focused-border-color);
     --checkbox-focus-border-color: var(--primary-color);
@@ -150,14 +150,15 @@
 
     /* Accordion */
     --accordion-header-text-color: rgba(74, 198, 148, 0.9);
-    --accordion-header-bg-color: rgba(52, 60, 70, 0.5); /* This is a good accent color */
-    --accordion-body-bg-color: rgba(22,27,34,0.5);
+    --accordion-header-bg-color: rgba(52, 60, 70, 0.5);
+    --accordion-body-bg-color: #292929;
     --accordion-body-border-color: rgba(239, 239, 239, 0.125);
     --accordion-body-text-color: var(--body-text-color);
     --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
-    --accordion-header-collapsed-bg-color: rgba(22,27,34,0.5);
+    --accordion-header-collapsed-bg-color: #292929;
     --accordion-button-focus-border-color: unset;
     --accordion-button-focus-box-shadow: unset;
+    --accordion-active-body-bg-color: #292929;
 
     /* Breadcrumb */
     --breadcrumb-bg-color: #292d32;
@@ -190,6 +191,8 @@
 
     /* Slider */
     --slider-text-color: white;
+    --input-range-color: var(--primary-color);
+    --input-range-active-color: var(--primary-color-darker-shade);
 
     /* Manga Reader */
     --manga-reader-overlay-filter: blur(10px);
@@ -210,7 +213,9 @@
     --carousel-hover-header-text-decoration: none;
 
     /** Drawer */
-    --drawer-background-color: black;
+    --drawer-background-color: black; // TODO: Remove this for bg
+    --drawer-bg-color: #292929;
+    --drawer-text-color: white;
 
     /** Event Widget */
     --event-widget-bg-color: rgb(1, 4, 9);

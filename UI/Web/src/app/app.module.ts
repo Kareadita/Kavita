@@ -77,11 +77,15 @@ import { SidenavModule } from './sidenav/sidenav.module';
     ReadingListModule,
     RegistrationModule,
 
+    //ColorPickerModule, // User preferences
+
     NgbAccordionModule, // ThemeTest Component only
     PipeModule,
 
     PipeModule,
     SidenavModule, // For sidenav
+
+    NgbAccordionModule, // ThemeTest Component only
 
 
     ToastrModule.forRoot({

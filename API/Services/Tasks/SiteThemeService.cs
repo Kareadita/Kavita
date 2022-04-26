@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -7,24 +6,23 @@ using API.Entities;
 using API.Entities.Enums.Theme;
 using API.SignalR;
 using Kavita.Common;
-using Microsoft.AspNetCore.SignalR;
 
 namespace API.Services.Tasks;
 
-public interface ISiteThemeService
+public interface IThemeService
 {
     Task<string> GetContent(int themeId);
     Task Scan();
     Task UpdateDefault(int themeId);
 }
 
-public class SiteThemeService : ISiteThemeService
+public class ThemeService : IThemeService
 {
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
 
-    public SiteThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork, IEventHub eventHub)
+    public ThemeService(IDirectoryService directoryService, IUnitOfWork unitOfWork, IEventHub eventHub)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
@@ -36,7 +34,6 @@ public class SiteThemeService : ISiteThemeService
     /// </summary>
     /// <param name="themeId"></param>
     /// <returns></returns>
-    /// <exception cref="KavitaException"></exception>
     public async Task<string> GetContent(int themeId)
     {
         var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId);
@@ -55,7 +52,8 @@ public class SiteThemeService : ISiteThemeService
     {
         _directoryService.ExistOrCreate(_directoryService.SiteThemeDirectory);
         var reservedNames = Seed.DefaultThemes.Select(t => t.NormalizedName).ToList();
-        var themeFiles = _directoryService.GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
+        var themeFiles = _directoryService
+            .GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
             .Where(name => !reservedNames.Contains(Parser.Parser.Normalize(name))).ToList();
 
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
@@ -91,7 +89,8 @@ public class SiteThemeService : ISiteThemeService
             });
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeName, ProgressEventType.Updated));
+                MessageFactory.SiteThemeProgressEvent(_directoryService.FileSystem.Path.GetFileName(themeFile), themeName,
+                    ProgressEventType.Updated));
         }
 
 
@@ -116,9 +115,9 @@ public class SiteThemeService : ISiteThemeService
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SiteThemeProgressEvent("",  "", ProgressEventType.Ended));
-
+            MessageFactory.SiteThemeProgressEvent("", "", ProgressEventType.Ended));
     }
+
 
     /// <summary>
     /// Removes the theme and any references to it from Pref and sets them to the default at the time.

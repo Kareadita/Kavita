@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
 import { ThemeService } from 'src/app/theme.service';
+import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { SiteTheme, ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';

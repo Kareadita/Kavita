@@ -82,11 +82,12 @@ namespace API.Controllers
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
-            existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
             existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
             preferencesDto.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+            existingPreferences.BookThemeName = preferencesDto.BookReaderThemeName;
+            existingPreferences.PageLayoutMode = preferencesDto.BookReaderLayoutMode;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
 
             // TODO: Remove this code - this overrides layout mode to be single until the mode is released
