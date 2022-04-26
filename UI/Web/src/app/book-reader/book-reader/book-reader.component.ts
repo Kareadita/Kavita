@@ -334,8 +334,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Find the element that is on screen to bookmark against
 
-    // ?! Instead of using readingSectionElemRef, can we use readingHtml which has the book content inside it? 
-
     const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
                             .filter(element => !element.classList.contains('no-observe'))
                             .filter(entry => {
@@ -959,12 +957,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
+    const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
     if (this.layoutMode === BookPageLayoutMode.Default) {
-      const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
+      //const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
       // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
       setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
     } else {
+      // This doesn't work as the css isn't loaded yet. 
       const fromLeftOffset = element.getBoundingClientRect().left + window.pageXOffset;
+      const pages = fromTopOffset / parseInt(this.ColumnHeight.replace('px', ''));
+      console.log('fromLeftOffset: ', fromLeftOffset);
+      console.log('pages: ', pages);
+      console.log('scroll total: ', pages * 980);
       // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
       setTimeout(() => this.scrollService.scrollTo(fromLeftOffset, this.reader.nativeElement), 10);
 
