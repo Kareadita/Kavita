@@ -22,6 +22,10 @@ namespace API.Parser
         /// </summary>
         public string SeriesSort { get; set; } = string.Empty;
         /// <summary>
+        /// This can be filled in from ComicInfo.xml/Epub during scanning. Will update the LocalizedName field on <see cref="Entities.Series"/>
+        /// </summary>
+        public string LocalizedSeries { get; set; } = string.Empty;
+        /// <summary>
         /// Represents the parsed volumes from a file. By default, will be 0 which means that nothing could be parsed.
         /// If Volumes is 0 and Chapters is 0, the file is a special. If Chapters is non-zero, then no volume could be parsed.
         /// <example>Beastars Vol 3-4 will map to "3-4"</example>

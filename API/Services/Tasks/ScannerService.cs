@@ -457,9 +457,13 @@ public class ScannerService : IScannerService
             if (existingSeries != null) continue;
 
             var s = DbFactory.Series(infos[0].Series);
-            if (!string.IsNullOrEmpty(infos[0].SeriesSort))
+            if (!s.SortNameLocked && !string.IsNullOrEmpty(infos[0].SeriesSort))
             {
                 s.SortName = infos[0].SeriesSort;
+            }
+            if (!s.LocalizedNameLocked && !string.IsNullOrEmpty(infos[0].LocalizedSeries))
+            {
+                s.LocalizedName = infos[0].LocalizedSeries;
             }
             s.Format = key.Format;
             s.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.

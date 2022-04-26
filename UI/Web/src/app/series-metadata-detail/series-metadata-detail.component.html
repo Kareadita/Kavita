@@ -9,7 +9,7 @@
         <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date" class="col-auto">{{seriesMetadata.releaseYear}}</app-tag-badge>
         <app-tag-badge *ngIf="seriesMetadata.language !== null && seriesMetadata.language !== ''" title="Language" a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.language}}</app-tag-badge>
         
-        <app-tag-badge title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})" [fillStyle]="seriesMetadata.maxCount != 0 && seriesMetadata.maxCount >= seriesMetadata.totalCount ? 'filled' : 'outline'" a11y-click="13,32" class="col-auto" 
+        <app-tag-badge title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})" [fillStyle]="seriesMetadata.maxCount != 0 && seriesMetadata.totalCount != 0 && seriesMetadata.maxCount >= seriesMetadata.totalCount ? 'filled' : 'outline'" a11y-click="13,32" class="col-auto" 
         (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" 
         [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.publicationStatus | publicationStatus}}</app-tag-badge>
 
