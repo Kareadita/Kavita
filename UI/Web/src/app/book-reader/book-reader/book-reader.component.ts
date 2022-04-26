@@ -3,7 +3,7 @@ import {DOCUMENT, Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, Subject } from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { debounceTime, filter, take, takeUntil, tap } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -307,45 +307,56 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     // check scroll offset and if offset is after any of the "id" markers, save progress
     fromEvent(this.reader.nativeElement, 'scroll')
-      .pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event) => {
+      .pipe(
+        debounceTime(200), 
+        takeUntil(this.onDestroy)) 
+      .subscribe((event) => {
         if (this.isLoading) return;
 
-        // Highlight the current chapter we are on
-        if (Object.keys(this.pageAnchors).length !== 0) {
-          // get the height of the document so we can capture markers that are halfway on the document viewport
-          const verticalOffset = this.scrollService.scrollPosition + (this.document.body.offsetHeight / 2);
-
-          const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
-          if (alreadyReached.length > 0) {
-            this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
-          } else {
-            this.currentPageAnchor = '';
-          }
-        }
-
-
-        // Find the element that is on screen to bookmark against
-        const intersectingEntries = Array.from(this.readingSectionElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
-                                .filter(element => !element.classList.contains('no-observe'))
-                                .filter(entry => {
-                                  return this.utilityService.isInViewport(entry, this.topOffset);
-                                });
-
-        intersectingEntries.sort(this.sortElements);
-
-        if (intersectingEntries.length > 0) {
-          let path = this.getXPathTo(intersectingEntries[0]);
-            if (path === '') { return; }
-            if (!path.startsWith('id')) {
-              path = '//html[1]/' + path;
-            }
-            this.lastSeenScrollPartPath = path;
-        }
-
-        if (this.lastSeenScrollPartPath !== '') {
-          this.saveProgress();
-        }
+        this.handleScrollEvent();
     });
+  }
+
+  handleScrollEvent() {
+    // Highlight the current chapter we are on
+    if (Object.keys(this.pageAnchors).length !== 0) {
+      // get the height of the document so we can capture markers that are halfway on the document viewport
+      const verticalOffset = this.scrollService.scrollPosition + (this.document.body.offsetHeight / 2);
+
+      const alreadyReached = Object.values(this.pageAnchors).filter((i: number) => i <= verticalOffset);
+      if (alreadyReached.length > 0) {
+        this.currentPageAnchor = Object.keys(this.pageAnchors)[alreadyReached.length - 1];
+      } else {
+        this.currentPageAnchor = '';
+      }
+    }
+
+
+    // Find the element that is on screen to bookmark against
+
+    // ?! Instead of using readingSectionElemRef, can we use readingHtml which has the book content inside it? 
+
+    const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
+                            .filter(element => !element.classList.contains('no-observe'))
+                            .filter(entry => {
+                              return this.utilityService.isInViewport(entry, this.topOffset);
+                            });
+
+    intersectingEntries.sort(this.sortElements);
+
+    if (intersectingEntries.length > 0) {
+      let path = this.getXPathTo(intersectingEntries[0]);
+        if (path === '') { return; }
+        if (!path.startsWith('id')) {
+          path = '//html[1]/' + path;
+        }
+        this.lastSeenScrollPartPath = path;
+    }
+
+    if (this.lastSeenScrollPartPath !== '') {
+      console.log('[SaveProgress] from handleScrollEvent');
+      this.saveProgress();
+    }
   }
 
   saveProgress() {
@@ -445,6 +456,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.maxPages = results.chapter.pages;
         this.chapters = results.chapters;
         this.pageNum = results.progress.pageNum;
+        if (results.progress.bookScrollId) this.lastSeenScrollPartPath = results.progress.bookScrollId;
+        
 
 
         this.continuousChaptersStack.push(this.chapterId);
@@ -459,6 +472,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (this.pageNum >= this.maxPages) {
           this.pageNum = this.maxPages - 1;
+          console.log('[SaveProgress] from init when pageNum is more than maxPages');
           this.saveProgress();
         }
 
@@ -662,7 +676,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    this.saveProgress();
+    // console.log('[SaveProgress] from loadPage');
+    // this.saveProgress();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
@@ -762,6 +777,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
+
+    console.log('[SaveProgress] from setupPage');
+    this.saveProgress();
   }
 
 
@@ -797,6 +815,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         //       path = '//html[1]/' + path;
         //     }
         //     this.lastSeenScrollPartPath = path;
+        // The offset of an element is always 0 for column mode 1. 
+        console.log('[SaveProgress] from prev Page');
         this.saveProgress();
         return;
       }
@@ -835,6 +855,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (scrollOffset + pageWidth < totalScroll) {
         this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);
+        this.handleScrollEvent(); 
+        console.log('[SaveProgress] from nextPage');
         this.saveProgress();
         return;
       }
@@ -945,6 +967,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const fromLeftOffset = element.getBoundingClientRect().left + window.pageXOffset;
       // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
       setTimeout(() => this.scrollService.scrollTo(fromLeftOffset, this.reader.nativeElement), 10);
+
+      // TODO: But if we keep track of the virtual page we are on, we can use that * total width of the column to scroll properly
+
     }
 
 
