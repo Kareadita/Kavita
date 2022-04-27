@@ -126,6 +126,11 @@ namespace API.Services.Tasks.Scanner
                 {
                     info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
                 }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+                {
+                    info.SeriesSort = info.ComicInfo.LocalizedSeries.Trim();
+                }
             }
 
             TrackSeries(info);
@@ -145,7 +150,7 @@ namespace API.Services.Tasks.Scanner
             info.Series = MergeName(info);
 
             var existingKey = _scannedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && ps.NormalizedName == Parser.Parser.Normalize(info.Series));
+                ps.Format == info.Format && (ps.NormalizedName == Parser.Parser.Normalize(info.Series) || ps.NormalizedName == Parser.Parser.Normalize(info.LocalizedSeries)));
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
@@ -174,8 +179,11 @@ namespace API.Services.Tasks.Scanner
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
             var existingName =
-                _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries && p.Key.Format == info.Format)
+                _scannedSeries.SingleOrDefault(p =>
+                        (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                         Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) && p.Key.Format == info.Format)
                 .Key;
             if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
             {
