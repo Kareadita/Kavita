@@ -533,6 +533,13 @@ public class ScannerService : IScannerService
                 }
             }
 
+            // parsedInfos[0] is not the first volume or chapter. We need to find it
+            var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
+            if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
+            {
+                series.LocalizedName = localizedSeries;
+            }
+
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, library.Type);

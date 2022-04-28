@@ -129,7 +129,7 @@ namespace API.Services.Tasks.Scanner
 
                 if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
                 {
-                    info.SeriesSort = info.ComicInfo.LocalizedSeries.Trim();
+                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
                 }
             }
 
@@ -149,13 +149,16 @@ namespace API.Services.Tasks.Scanner
             // Check if normalized info.Series already exists and if so, update info to use that name instead
             info.Series = MergeName(info);
 
+            var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedLocalizedSeries = Parser.Parser.Normalize(info.LocalizedSeries);
             var existingKey = _scannedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && (ps.NormalizedName == Parser.Parser.Normalize(info.Series) || ps.NormalizedName == Parser.Parser.Normalize(info.LocalizedSeries)));
+                ps.Format == info.Format && (ps.NormalizedName == normalizedSeries
+                                             || ps.NormalizedName == normalizedLocalizedSeries));
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
                 Name = info.Series,
-                NormalizedName = Parser.Parser.Normalize(info.Series)
+                NormalizedName = normalizedSeries
             };
 
             _scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
