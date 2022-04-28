@@ -126,6 +126,11 @@ namespace API.Services.Tasks.Scanner
                 {
                     info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
                 }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+                {
+                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
+                }
             }
 
             TrackSeries(info);
@@ -144,13 +149,16 @@ namespace API.Services.Tasks.Scanner
             // Check if normalized info.Series already exists and if so, update info to use that name instead
             info.Series = MergeName(info);
 
+            var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedLocalizedSeries = Parser.Parser.Normalize(info.LocalizedSeries);
             var existingKey = _scannedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && ps.NormalizedName == Parser.Parser.Normalize(info.Series));
+                ps.Format == info.Format && (ps.NormalizedName == normalizedSeries
+                                             || ps.NormalizedName == normalizedLocalizedSeries));
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
                 Name = info.Series,
-                NormalizedName = Parser.Parser.Normalize(info.Series)
+                NormalizedName = normalizedSeries
             };
 
             _scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
@@ -174,8 +182,11 @@ namespace API.Services.Tasks.Scanner
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
             var existingName =
-                _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries && p.Key.Format == info.Format)
+                _scannedSeries.SingleOrDefault(p =>
+                        (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                         Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) && p.Key.Format == info.Format)
                 .Key;
             if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
             {

@@ -258,11 +258,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   backgroundColor: string = '#FFFFFF';
 
+  getPageUrl = (pageNum: number) => {
+    if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
+    return this.readerService.getPageUrl(this.chapterId, pageNum);
+  }
 
   private readonly onDestroy = new Subject<void>();
-
-
-  //getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
   get PageNumber() {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
@@ -1096,10 +1097,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
-  getPageUrl(pageNum: number) {
-    if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
-    return this.readerService.getPageUrl(this.chapterId, pageNum);
-  }
+  
 
   loadPage() {
     if (!this.canvas || !this.ctx) { return; }

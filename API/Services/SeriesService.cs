@@ -254,7 +254,6 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            // This should be normalized name
             var normalizedTitle = Parser.Parser.Normalize(tagTitle);
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
@@ -299,10 +298,11 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tagTitle);
+            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
             if (existingTag != null)
             {
-                if (series.Metadata.Tags.All(t => t.Title != tagTitle))
+                if (series.Metadata.Tags.All(t => t.NormalizedTitle != normalizedTitle))
                 {
 
                     handleAdd(existingTag);
