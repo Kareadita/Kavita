@@ -391,10 +391,14 @@ namespace API.Services
 
             try
             {
-                using var epubBook = EpubReader.OpenBook(filePath, BookService.BookReaderOptions);
+                using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
                 var publicationDate =
                     epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(date => date.Event == "publication")?.Date;
 
+                if (string.IsNullOrEmpty(publicationDate))
+                {
+                    publicationDate = epubBook.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
+                }
                 var info =  new ComicInfo()
                 {
                     Summary = epubBook.Schema.Package.Metadata.Description,
@@ -512,7 +516,7 @@ namespace API.Services
 
            try
            {
-                using var epubBook = EpubReader.OpenBook(filePath, BookService.BookReaderOptions);
+                using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
 
                 // <meta content="The Dark Tower" name="calibre:series"/>
                 // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
