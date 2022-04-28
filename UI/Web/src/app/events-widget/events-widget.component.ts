@@ -83,7 +83,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
     const message = event.payload as NotificationProgressEvent;
     let data;
-
+    let index = -1;
     switch (event.payload.eventType) {
       case 'single':
         const values = this.singleUpdateSource.getValue();
@@ -92,20 +92,12 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         this.activeEvents += 1;
         break;
       case 'started':
-        data = this.progressEventsSource.getValue();
-        data.push(message);
+        // Sometimes we can receive 2 started on long running scans, so better to just treat as a merge then.
+        data = this.mergeOrUpdate(this.progressEventsSource.getValue(), message);
         this.progressEventsSource.next(data);
-        this.activeEvents += 1;
         break;
       case 'updated':
-        data = this.progressEventsSource.getValue();
-        const index = data.findIndex(m => m.name === message.name);
-        if (index < 0) {
-          data.push(message);
-          this.activeEvents += 1;
-        } else {
-          data[index] = message;
-        }
+        data = this.mergeOrUpdate(this.progressEventsSource.getValue(), message);
         this.progressEventsSource.next(data);
         break;
       case 'ended':
@@ -117,6 +109,18 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
       default:
         break;
     }
+  }
+
+  private mergeOrUpdate(data: NotificationProgressEvent[], message: NotificationProgressEvent) {
+    const index = data.findIndex(m => m.name === message.name);
+    // Sometimes we can receive 2 started on long running scans, so better to just treat as a merge then.
+    if (index < 0) {
+      data.push(message);
+      this.activeEvents += 1;
+    } else {
+      data[index] = message;
+    }
+    return data;
   }
 
 

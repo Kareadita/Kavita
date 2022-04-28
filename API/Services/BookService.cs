@@ -20,6 +20,7 @@ using Microsoft.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
+using VersOne.Epub.Options;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace API.Services
@@ -59,6 +60,13 @@ namespace API.Services
         private readonly StylesheetParser _cssParser = new ();
         private static readonly RecyclableMemoryStreamManager StreamManager = new ();
         private const string CssScopeClass = ".book-content";
+        public static readonly EpubReaderOptions BookReaderOptions = new()
+        {
+            PackageReaderOptions = new PackageReaderOptions()
+            {
+                IgnoreMissingToc = true
+            }
+        };
 
         public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
         {
@@ -383,7 +391,7 @@ namespace API.Services
 
             try
             {
-                using var epubBook = EpubReader.OpenBook(filePath);
+                using var epubBook = EpubReader.OpenBook(filePath, BookService.BookReaderOptions);
                 var publicationDate =
                     epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(date => date.Event == "publication")?.Date;
 
@@ -450,7 +458,7 @@ namespace API.Services
                    return docReader.GetPageCount();
                }
 
-               using var epubBook = EpubReader.OpenBook(filePath);
+               using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
                return epubBook.Content.Html.Count;
             }
             catch (Exception ex)
@@ -504,7 +512,7 @@ namespace API.Services
 
            try
            {
-                using var epubBook = EpubReader.OpenBook(filePath);
+                using var epubBook = EpubReader.OpenBook(filePath, BookService.BookReaderOptions);
 
                 // <meta content="The Dark Tower" name="calibre:series"/>
                 // <meta content="Wolves of the Calla" name="calibre:title_sort"/>
@@ -669,8 +677,7 @@ namespace API.Services
                 return GetPdfCoverImage(fileFilePath, fileName, outputDirectory);
             }
 
-            using var epubBook = EpubReader.OpenBook(fileFilePath);
-
+            using var epubBook = EpubReader.OpenBook(fileFilePath, BookReaderOptions);
 
             try
             {
