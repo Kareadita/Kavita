@@ -12,7 +12,6 @@ import { ThemeTestComponent } from './theme-test/theme-test.component';
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
 // TODO: Use Prefetching of LazyLoaded Modules 
 const routes: Routes = [
-  {path: '', component: UserLoginComponent},
   {
     path: 'admin',
     canActivate: [AdminGuard],
@@ -43,7 +42,6 @@ const routes: Routes = [
   },
   {
     path: 'bookmarks',
-    canActivate: [AuthGuard],
     loadChildren: () => import('../app/bookmark/bookmark.module').then(m => m.BookmarkModule)
   },
   {
@@ -51,34 +49,40 @@ const routes: Routes = [
     loadChildren: () => import('../app/all-series/all-series.module').then(m => m.AllSeriesModule)
   },
   {
-    path: '',
+    path: 'libraries',
+    loadChildren: () => import('../app/dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: 'library',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],
     children: [
-      {path: 'library/:id', component: LibraryDetailComponent},
-      {path: 'library/:libraryId/series/:seriesId', component: SeriesDetailComponent},
       {
-        path: 'library/:libraryId/series/:seriesId/manga',
+        path: ':libraryId', 
+        pathMatch: 'full',
+        loadChildren: () => import('../app/library-detail/library-detail.module').then(m => m.LibraryDetailModule)
+      },
+      {
+        path: ':libraryId/series/:seriesId', 
+        pathMatch: 'full',
+        component: SeriesDetailComponent
+      },
+      {
+        path: ':libraryId/series/:seriesId/manga',
         loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
       },
       {
-        path: 'library/:libraryId/series/:seriesId/book',
+        path: ':libraryId/series/:seriesId/book',
         loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
-      }
-    ]
-  },
-  {
-    path: '',
-    runGuardsAndResolvers: 'always',
-    canActivate: [AuthGuard],
-    children: [
-      {path: 'library', component: DashboardComponent},
+      },
     ]
   },
   {path: 'theme', component: ThemeTestComponent},
 
-  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
-  {path: '**', component: UserLoginComponent, pathMatch: 'full'}
+  {path: 'login', component: UserLoginComponent},
+
+  {path: '**', component: UserLoginComponent, pathMatch: 'full'},
+  {path: '', component: UserLoginComponent},
 ];
 
 @NgModule({

@@ -7,24 +7,19 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {
-  NgbAccordionModule, NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbPopoverModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+  NgbAccordionModule, NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbPopoverModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
-import { LibraryComponent } from './library/library.component';
 import { SharedModule } from './shared/shared.module';
-import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
 import { TypeaheadModule } from './typeahead/typeahead.module';
-import { DashboardComponent } from './dashboard/dashboard.component';
 import { CardsModule } from './cards/cards.module';
-import { CollectionsModule } from './collections/collections.module';
-import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { EventsWidgetComponent } from './events-widget/events-widget.component';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
@@ -33,23 +28,24 @@ import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { PipeModule } from './pipe/pipe.module';
 import { SidenavModule } from './sidenav/sidenav.module';
-import { AllSeriesModule } from './all-series/all-series.module';
+
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    NavHeaderComponent,
+    
+    NavHeaderComponent, // TODO: Move to NavModule 
+    EventsWidgetComponent, // TODO: Move to NavModule 
+    GroupedTypeaheadComponent, // TODO: Move to NavModule 
+
     UserLoginComponent,
-    LibraryComponent,
-    LibraryDetailComponent,
-    SeriesDetailComponent,
-    ReviewSeriesModalComponent,
-    DashboardComponent,
-    EventsWidgetComponent,
-    SeriesMetadataDetailComponent,
-    GroupedTypeaheadComponent,
-    ThemeTestComponent,
+
+    SeriesDetailComponent, // TODO: Move to SeriesDetailModule
+    ReviewSeriesModalComponent, // TODO: Move to SeriesDetailModule
+    SeriesMetadataDetailComponent, // TODO: Move to SeriesDetailModule
+
+    ThemeTestComponent, // TODO: Move to a Test module or something so it's not initially loaded as it's just for devs
   ],
   imports: [
     HttpClientModule,
@@ -71,9 +67,14 @@ import { AllSeriesModule } from './all-series/all-series.module';
     SharedModule,
     CarouselModule,
     TypeaheadModule,
+    
     CardsModule,
-    CollectionsModule,
-    ReadingListModule,
+
+    //LibraryDetailModule, // TODO: Remove this once we validate lazy loading works
+
+    //CollectionsModule,
+    //ReadingListModule,
+
     RegistrationModule,
 
     NgbAccordionModule, // ThemeTest Component only
