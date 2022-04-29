@@ -30,6 +30,7 @@ public class RecommendedController : BaseApiController
 
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetQuickReads(user.Id, libraryId, userParams);
+
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);
     }
@@ -46,6 +47,7 @@ public class RecommendedController : BaseApiController
 
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetHighlyRated(user.Id, libraryId, userParams);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);
     }
@@ -62,6 +64,8 @@ public class RecommendedController : BaseApiController
 
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetMoreIn(user.Id, libraryId, genreId, userParams);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
+
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);
     }
