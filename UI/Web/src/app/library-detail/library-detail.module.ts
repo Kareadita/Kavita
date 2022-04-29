@@ -5,20 +5,22 @@ import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { PipeModule } from '../pipe/pipe.module';
 import { LibraryDetailRoutingModule } from './library-detail-routing.module';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
+import { LibraryRecommendedComponent } from './library-recommended/library-recommended.component';
+import { CarouselModule } from '../carousel/carousel.module';
 
 
 
 @NgModule({
-  declarations: [LibraryDetailComponent],
+  declarations: [LibraryDetailComponent, LibraryRecommendedComponent],
   imports: [
     CommonModule,
 
     NgbNavModule,
 
+    CarouselModule, // because this is heavy, we might want recommended in a new url
+
     PipeModule,
     SharedSideNavCardsModule,
-
-    //DashboardModule, // Temp this needs the dashboard until we have better Recommended screen
     
     LibraryDetailRoutingModule
   ]

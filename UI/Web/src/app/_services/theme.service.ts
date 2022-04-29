@@ -4,11 +4,10 @@ import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityCon
 import { DomSanitizer } from '@angular/platform-browser';
 import { map, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { ConfirmService } from './shared/confirm.service';
-import { NotificationProgressEvent } from './_models/events/notification-progress-event';
-import { SiteThemeProgressEvent } from './_models/events/site-theme-progress-event';
-import { SiteTheme, ThemeProvider } from './_models/preferences/site-theme';
-import { EVENTS, MessageHubService } from './_services/message-hub.service';
+import { ConfirmService } from '../shared/confirm.service';
+import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
+import { SiteTheme, ThemeProvider } from '../_models/preferences/site-theme';
+import { EVENTS, MessageHubService } from './message-hub.service';
 
 
 

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
-import { ThemeService } from 'src/app/theme.service';
+import { ThemeService } from 'src/app/_services/theme.service';
 import { SiteTheme, ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';

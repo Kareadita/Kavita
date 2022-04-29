@@ -1,8 +1,10 @@
+import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { PaginatedResult } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { SeriesFilter, SortField } from 'src/app/_models/series-filter';
 import { Volume } from 'src/app/_models/volume';
@@ -200,5 +202,31 @@ export class UtilityService {
   }
   private isObject(object: any) {
     return object != null && typeof object === 'object';
+  }
+
+  addPaginationIfExists(params: HttpParams, pageNum?: number, itemsPerPage?: number) {
+    if (pageNum !== null && pageNum !== undefined && itemsPerPage !== null && itemsPerPage !== undefined) {
+      params = params.append('pageNumber', pageNum + '');
+      params = params.append('pageSize', itemsPerPage + '');
+    }
+    return params;
+  }
+
+  createPaginatedResult(response: any, paginatedVariable: PaginatedResult<any[]> | undefined = undefined) {
+    if (paginatedVariable === undefined) {
+      paginatedVariable = new PaginatedResult();
+    }
+    if (response.body === null) {
+      paginatedVariable.result = [];
+    } else {
+      paginatedVariable.result = response.body;
+    }
+
+    const pageHeader = response.headers?.get('Pagination');
+    if (pageHeader !== null) {
+      paginatedVariable.pagination = JSON.parse(pageHeader);
+    }
+
+    return paginatedVariable;
   }
 }

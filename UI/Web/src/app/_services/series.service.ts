@@ -3,14 +3,13 @@ import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { ChapterMetadata } from '../_models/chapter-metadata';
 import { CollectionTag } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
-import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
 import { RelatedSeries } from '../_models/series-detail/related-series';
-import { RelationKind } from '../_models/series-detail/relation-kind';
 import { SeriesDetail } from '../_models/series-detail/series-detail';
 import { SeriesFilter } from '../_models/series-filter';
 import { SeriesGroup } from '../_models/series-group';
@@ -27,43 +26,28 @@ export class SeriesService {
   paginatedResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
   paginatedSeriesForTagsResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
 
-  constructor(private httpClient: HttpClient, private imageService: ImageService) { }
-
-  _cachePaginatedResults(response: any, paginatedVariable: PaginatedResult<any[]>) {
-    if (response.body === null) {
-      paginatedVariable.result = [];
-    } else {
-      paginatedVariable.result = response.body;
-    }
-
-    const pageHeader = response.headers.get('Pagination');
-    if (pageHeader !== null) {
-      paginatedVariable.pagination = JSON.parse(pageHeader);
-    }
-
-    return paginatedVariable;
-  }
+  constructor(private httpClient: HttpClient, private imageService: ImageService, private utilityService: UtilityService) { }
 
   getAllSeries(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
-    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = this.createSeriesFilter(filter);
 
     return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all', data, {observe: 'response', params}).pipe(
       map((response: any) => {
-        return this._cachePaginatedResults(response, this.paginatedResults);
+        return this.utilityService.createPaginatedResult(response, this.paginatedResults);
       })
     );
   }
 
   getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
-    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = this.createSeriesFilter(filter);
 
     return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map((response: any) => {
-        return this._cachePaginatedResults(response, this.paginatedResults);
+        return this.utilityService.createPaginatedResult(response, this.paginatedResults);
       })
     );
   }
@@ -123,11 +107,11 @@ export class SeriesService {
   getRecentlyAdded(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     const data = this.createSeriesFilter(filter);
     let params = new HttpParams();
-    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
     return this.httpClient.post<Series[]>(this.baseUrl + 'series/recently-added?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map(response => {
-        return this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
+        return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
       })
     );
   }
@@ -140,11 +124,11 @@ export class SeriesService {
     const data = this.createSeriesFilter(filter);
 
     let params = new HttpParams();
-    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
     return this.httpClient.post<Series[]>(this.baseUrl + 'series/on-deck?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map(response => {
-        return this._cachePaginatedResults(response, new PaginatedResult<Series[]>());
+        return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
     }));
   }
 
@@ -175,11 +159,11 @@ export class SeriesService {
   getSeriesForTag(collectionTagId: number, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
 
-    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
     return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'series/series-by-collection?collectionId=' + collectionTagId, {observe: 'response', params}).pipe(
       map((response: any) => {
-        return this._cachePaginatedResults(response, this.paginatedSeriesForTagsResults);
+        return this.utilityService.createPaginatedResult(response, this.paginatedSeriesForTagsResults);
       })
     );
   }
@@ -201,13 +185,7 @@ export class SeriesService {
     return this.httpClient.get<SeriesDetail>(this.baseUrl + 'series/series-detail?seriesId=' + seriesId);
   }
 
-  _addPaginationIfExists(params: HttpParams, pageNum?: number, itemsPerPage?: number) {
-    if (pageNum !== null && pageNum !== undefined && itemsPerPage !== null && itemsPerPage !== undefined) {
-      params = params.append('pageNumber', pageNum + '');
-      params = params.append('pageSize', itemsPerPage + '');
-    }
-    return params;
-  }
+  
 
   createSeriesFilter(filter?: SeriesFilter) {
     if (filter !== undefined) return filter;

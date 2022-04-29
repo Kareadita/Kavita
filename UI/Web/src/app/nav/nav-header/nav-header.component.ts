@@ -1,9 +1,9 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { fromEvent, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ScrollService } from '../../scroll.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
 import { CollectionTag } from '../../_models/collection-tag';
 import { Library } from '../../_models/library';

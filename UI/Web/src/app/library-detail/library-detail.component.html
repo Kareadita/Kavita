@@ -10,7 +10,7 @@
               <a ngbNavLink>{{tab.title | sentenceCase}}</a>
               <ng-template ngbNavContent>
                 <ng-container *ngIf="tab.title === 'Recommended'">
-                  <!-- <app-dashboard [libraryId]="libraryId"></app-dashboard> -->
+                  <app-library-recommended [libraryId]="libraryId"></app-library-recommended>
                 </ng-container>
                 <ng-container *ngIf="tab.title === 'Library'">
                     <app-card-detail-layout 
