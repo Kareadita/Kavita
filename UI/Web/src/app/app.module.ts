@@ -28,12 +28,12 @@ import { ReadingListModule } from './reading-list/reading-list.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { EventsWidgetComponent } from './events-widget/events-widget.component';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
-import { AllSeriesComponent } from './all-series/all-series.component';
 import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { PipeModule } from './pipe/pipe.module';
 import { SidenavModule } from './sidenav/sidenav.module';
+import { AllSeriesModule } from './all-series/all-series.module';
 
 
 @NgModule({
@@ -48,7 +48,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     DashboardComponent,
     EventsWidgetComponent,
     SeriesMetadataDetailComponent,
-    AllSeriesComponent,
     GroupedTypeaheadComponent,
     ThemeTestComponent,
   ],

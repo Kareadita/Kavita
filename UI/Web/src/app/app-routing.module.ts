@@ -6,12 +6,11 @@ import { UserLoginComponent } from './user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
-
+// TODO: Use Prefetching of LazyLoaded Modules 
 const routes: Routes = [
   {path: '', component: UserLoginComponent},
   {
@@ -44,7 +43,12 @@ const routes: Routes = [
   },
   {
     path: 'bookmarks',
+    canActivate: [AuthGuard],
     loadChildren: () => import('../app/bookmark/bookmark.module').then(m => m.BookmarkModule)
+  },
+  {
+    path: 'all-series',
+    loadChildren: () => import('../app/all-series/all-series.module').then(m => m.AllSeriesModule)
   },
   {
     path: '',
@@ -69,8 +73,6 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       {path: 'library', component: DashboardComponent},
-      {path: 'all-series', component: AllSeriesComponent}, // TODO: This might be better as a separate module
-
     ]
   },
   {path: 'theme', component: ThemeTestComponent},
