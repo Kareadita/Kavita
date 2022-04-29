@@ -65,7 +65,7 @@ const routes: Routes = [
       {
         path: ':libraryId/series/:seriesId', 
         pathMatch: 'full',
-        component: SeriesDetailComponent
+        loadChildren: () => import('../app/series-detail/series-detail.module').then(m => m.SeriesDetailModule)
       },
       {
         path: ':libraryId/series/:seriesId/manga',

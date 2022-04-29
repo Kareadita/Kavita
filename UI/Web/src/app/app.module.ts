@@ -7,22 +7,18 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {
-  NgbAccordionModule, NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbPopoverModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
+  NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
-import { UserLoginComponent } from './registration/user-login/user-login.component';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { SharedModule } from './shared/shared.module';
-import { SeriesDetailComponent } from './series-detail/series-detail.component';
-import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
 import { CarouselModule } from './carousel/carousel.module';
 
 import { TypeaheadModule } from './typeahead/typeahead.module';
 import { CardsModule } from './cards/cards.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { EventsWidgetComponent } from './events-widget/events-widget.component';
-import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { PipeModule } from './pipe/pipe.module';
@@ -38,12 +34,6 @@ import { SidenavModule } from './sidenav/sidenav.module';
     EventsWidgetComponent, // TODO: Move to NavModule 
     GroupedTypeaheadComponent, // TODO: Move to NavModule 
 
-    //UserLoginComponent,
-
-    SeriesDetailComponent, // TODO: Move to SeriesDetailModule
-    ReviewSeriesModalComponent, // TODO: Move to SeriesDetailModule
-    SeriesMetadataDetailComponent, // TODO: Move to SeriesDetailModule
-
     ThemeTestComponent, // TODO: Move to a Test module or something so it's not initially loaded as it's just for devs
   ],
   imports: [
@@ -58,19 +48,12 @@ import { SidenavModule } from './sidenav/sidenav.module';
     NgbPopoverModule, // Nav Events toggle
     NgbNavModule,
 
-    NgbRatingModule, // Series Detail & Filter
-    NgbPaginationModule,
-
-    //NgbCollapseModule, // Login
-    NgbCollapseModule, // Series Metadata
 
     SharedModule,
     CarouselModule,
     TypeaheadModule,
     
     CardsModule,
-
-    //RegistrationModule,
 
     NgbAccordionModule, // ThemeTest Component only
     PipeModule,
