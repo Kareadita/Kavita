@@ -2,8 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AllSeriesComponent } from './all-series.component';
 import { AllSeriesRoutingModule } from './all-series-routing.module';
-import { SidenavModule } from '../sidenav/sidenav.module';
-import { CardsModule } from '../cards/cards.module';
+import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 
 
 
@@ -15,8 +14,7 @@ import { CardsModule } from '../cards/cards.module';
     CommonModule,
     AllSeriesRoutingModule,
 
-    SidenavModule,
-    CardsModule
+    SharedSideNavCardsModule
 
   ]
 })

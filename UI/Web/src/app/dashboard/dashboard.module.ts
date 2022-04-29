@@ -1,11 +1,10 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CardsModule } from '../cards/cards.module';
-import { SidenavModule } from '../sidenav/sidenav.module';
 import { DashboardRoutingModule } from './dashboard-routing.module';
 
 import { CarouselModule } from '../carousel/carousel.module';
 import { DashboardComponent } from './dashboard.component';
+import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 
 
 
@@ -16,8 +15,7 @@ import { DashboardComponent } from './dashboard.component';
 
     CarouselModule,
 
-    CardsModule,
-    SidenavModule,
+    SharedSideNavCardsModule,
 
     DashboardRoutingModule
   ]

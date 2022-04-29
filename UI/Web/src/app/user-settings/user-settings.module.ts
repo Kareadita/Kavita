@@ -9,8 +9,8 @@ import { ApiKeyComponent } from './api-key/api-key.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
-import { SidenavModule } from '../sidenav/sidenav.module';
 import { ColorPickerModule } from 'ngx-color-picker';
+import { SidenavModule } from '../sidenav/sidenav.module';
 
 
 
@@ -24,14 +24,18 @@ import { ColorPickerModule } from 'ngx-color-picker';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+
     NgbAccordionModule,
     NgbNavModule,
     NgbTooltipModule,
+
     NgxSliderModule,
-    UserSettingsRoutingModule,
+    ColorPickerModule, // User prefernces background color
+    
     PipeModule,
     SidenavModule,
-    ColorPickerModule, // User prefernces background color
+
+    UserSettingsRoutingModule,
   ],
   exports: [
     SiteThemeProviderPipe,

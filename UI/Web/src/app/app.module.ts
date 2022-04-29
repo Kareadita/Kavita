@@ -26,22 +26,8 @@ import { NavModule } from './nav/nav.module';
     AppRoutingModule,
     BrowserAnimationsModule,
 
-    //ReactiveFormsModule,
-    //FormsModule, // EditCollection Modal
-
-    //SharedModule, // Comes from NavModule
-    //CarouselModule,
-    // TypeaheadModule,
-    // CardsModule, // ThemeTest Component only
-    // NgbAccordionModule, // ThemeTest Component only
-    // NgbNavModule, // ThemeTest Component only
-
-
-    //PipeModule,
-    SidenavModule, // For sidenav
-    
+    SidenavModule, 
     NavModule,
-
 
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',

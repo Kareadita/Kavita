@@ -3,14 +3,13 @@ import { CommonModule } from '@angular/common';
 import { SeriesDetailRoutingModule } from './series-detail-routing.module';
 import { NgbCollapseModule, NgbNavModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { SeriesDetailComponent } from './series-detail.component';
-import { CardsModule } from '../cards/cards.module';
-import { SidenavModule } from '../sidenav/sidenav.module';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { ReviewSeriesModalComponent } from './review-series-modal/review-series-modal.component';
 import { SharedModule } from '../shared/shared.module';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { PipeModule } from '../pipe/pipe.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 
 
 
@@ -31,9 +30,7 @@ import { ReactiveFormsModule } from '@angular/forms';
     TypeaheadModule,
     PipeModule,
     SharedModule, // person badge, badge expander (these 2 can be their own module)
-
-    CardsModule,
-    SidenavModule,
+    SharedSideNavCardsModule,
 
     SeriesDetailRoutingModule
   ]

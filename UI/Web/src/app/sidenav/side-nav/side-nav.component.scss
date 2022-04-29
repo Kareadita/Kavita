@@ -25,7 +25,7 @@
         border: var(--side-nav-border-closed);
     }
 
-    .side-nav-item:first() {
+    .side-nav-item:first {
         border-top-left-radius: var(--side-nav-border-radius);
         border-top-right-radius: var(--side-nav-border-radius);
     }
@@ -52,7 +52,7 @@
             box-shadow: none;
         }
 
-        .side-nav-item:first() {
+        .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
         }
