@@ -20,11 +20,11 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { Stack } from 'src/app/shared/data-structures/stack';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
-import { ScrollService } from 'src/app/scroll.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
-import { ThemeService } from 'src/app/theme.service';
+import { ThemeService } from 'src/app/_services/theme.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 
 
 interface PageStyle {
@@ -415,7 +415,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
 
     if (libraryId === null || seriesId === null || chapterId === null) {
-      this.router.navigateByUrl('/library');
+      this.router.navigateByUrl('/libraries');
       return;
     }
 

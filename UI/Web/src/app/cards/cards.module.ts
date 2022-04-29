@@ -54,7 +54,6 @@ import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-
 
     MetadataFilterModule,
 
-    NgbNavModule,
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,

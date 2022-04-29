@@ -2,9 +2,8 @@ import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angul
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { debounceTime, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { FilterSettings } from '../metadata-filter/filter-settings';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
@@ -18,6 +17,7 @@ import { EVENTS, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
+import { FilterSettings } from '../metadata-filter/filter-settings';
 
 @Component({
   selector: 'app-library-detail',
@@ -87,8 +87,9 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
     private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
-    const routeId = this.route.snapshot.paramMap.get('id');
+    const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
+      console.log('Redirecting due to not seeing libraryId in route');
       this.router.navigateByUrl('/libraries');
       return;
     }

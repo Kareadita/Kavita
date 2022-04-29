@@ -1,13 +1,13 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
-import { FilterQueryParam } from '../shared/_services/filter-utilities.service';
-import { UtilityService } from '../shared/_services/utility.service';
-import { MangaFormat } from '../_models/manga-format';
-import { ReadingList } from '../_models/reading-list';
-import { Series } from '../_models/series';
-import { SeriesMetadata } from '../_models/series-metadata';
-import { MetadataService } from '../_services/metadata.service';
+import { TagBadgeCursor } from '../../shared/tag-badge/tag-badge.component';
+import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
+import { UtilityService } from '../../shared/_services/utility.service';
+import { MangaFormat } from '../../_models/manga-format';
+import { ReadingList } from '../../_models/reading-list';
+import { Series } from '../../_models/series';
+import { SeriesMetadata } from '../../_models/series-metadata';
+import { MetadataService } from '../../_services/metadata.service';
 
 @Component({
   selector: 'app-series-metadata-detail',

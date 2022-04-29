@@ -1,10 +1,9 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild } from '@angular/core';
+import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
-import { KEY_CODES } from '../shared/_services/utility.service';
-import { SearchResultGroup } from '../_models/search/search-result-group';
+import { KEY_CODES } from '../../shared/_services/utility.service';
+import { SearchResultGroup } from '../../_models/search/search-result-group';
 
 @Component({
   selector: 'app-grouped-typeahead',

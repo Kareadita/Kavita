@@ -4,14 +4,14 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { SettingsService } from '../admin/settings.service';
-import { AddEmailToAccountMigrationModalComponent } from '../registration/add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
-import { User } from '../_models/user';
-import { AccountService } from '../_services/account.service';
-import { MemberService } from '../_services/member.service';
-import { NavService } from '../_services/nav.service';
+import { SettingsService } from '../../admin/settings.service';
+import { AddEmailToAccountMigrationModalComponent } from '../add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
+import { User } from '../../_models/user';
+import { AccountService } from '../../_services/account.service';
+import { MemberService } from '../../_services/member.service';
+import { NavService } from '../../_services/nav.service';
 
-// TODO: Move this into registration module
+
 @Component({
   selector: 'app-user-login',
   templateUrl: './user-login.component.html',
@@ -48,7 +48,7 @@ export class UserLoginComponent implements OnInit {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.navService.showSideNav();
-        this.router.navigateByUrl('/library');
+        this.router.navigateByUrl('/libraries');
       }
     });
 
@@ -96,7 +96,7 @@ export class UserLoginComponent implements OnInit {
         localStorage.setItem('kavita--auth-intersection-url', '');
         this.router.navigateByUrl(pageResume);
       } else {
-        this.router.navigateByUrl('/library');
+        this.router.navigateByUrl('/libraries');
       }
     }, err => {
       if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {

@@ -1,20 +1,20 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { fromEvent, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ScrollService } from '../scroll.service';
-import { FilterQueryParam } from '../shared/_services/filter-utilities.service';
-import { CollectionTag } from '../_models/collection-tag';
-import { Library } from '../_models/library';
-import { PersonRole } from '../_models/person';
-import { ReadingList } from '../_models/reading-list';
-import { SearchResult } from '../_models/search-result';
-import { SearchResultGroup } from '../_models/search/search-result-group';
-import { AccountService } from '../_services/account.service';
-import { ImageService } from '../_services/image.service';
-import { LibraryService } from '../_services/library.service';
-import { NavService } from '../_services/nav.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
+import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
+import { CollectionTag } from '../../_models/collection-tag';
+import { Library } from '../../_models/library';
+import { PersonRole } from '../../_models/person';
+import { ReadingList } from '../../_models/reading-list';
+import { SearchResult } from '../../_models/search-result';
+import { SearchResultGroup } from '../../_models/search/search-result-group';
+import { AccountService } from '../../_services/account.service';
+import { ImageService } from '../../_services/image.service';
+import { LibraryService } from '../../_services/library.service';
+import { NavService } from '../../_services/nav.service';
 
 @Component({
   selector: 'app-nav-header',

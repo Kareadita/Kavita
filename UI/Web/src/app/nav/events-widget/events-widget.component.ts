@@ -2,16 +2,15 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { UpdateNotificationModalComponent } from '../shared/update-notification/update-notification-modal.component';
-import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
-import { UpdateVersionEvent } from '../_models/events/update-version-event';
-import { User } from '../_models/user';
-import { AccountService } from '../_services/account.service';
-import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
-import { ErrorEvent } from '../_models/events/error-event';
-import { ConfirmService } from '../shared/confirm.service';
-import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
-import { ServerService } from '../_services/server.service';
+import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
+import { ConfirmService } from 'src/app/shared/confirm.service';
+import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
+import { ErrorEvent } from 'src/app/_models/events/error-event';
+import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
+import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event';
+import { User } from 'src/app/_models/user';
+import { AccountService } from 'src/app/_services/account.service';
+import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 
 @Component({
   selector: 'app-nav-events-toggle',

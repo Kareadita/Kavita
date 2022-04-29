@@ -38,21 +38,24 @@ import { PipeModule } from '../pipe/pipe.module';
     RouterModule,
     ReactiveFormsModule,
     NgbCollapseModule,
-    NgbTooltipModule, // RegisterMemberComponent
+    NgbTooltipModule, // TODO: Validate if we still need this
     PipeModule,
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
     ReadMoreComponent, // Used globably
-    DrawerComponent, // Can be replaced with boostrap offscreen canvas (v5)
-    ShowIfScrollbarDirective, // Used book reader only?
+    DrawerComponent, // Can be replaced with boostrap offscreen canvas (v5) (also used in book reader and series metadata filter)
     A11yClickDirective, // Used globally
     SeriesFormatComponent, // Used globally
     TagBadgeComponent, // Used globally
     CircularLoaderComponent, // Used in Cards only
+    ImageComponent, // Used globally
+
+    ShowIfScrollbarDirective, // Used book reader only?
+
     PersonBadgeComponent,  // Used Series Detail
-    BadgeExpanderComponent, // Used globally
-    ImageComponent // Used globally
+    BadgeExpanderComponent, // Used Series Detail/Metadata
+    
   ],
 })
 export class SharedModule { }
