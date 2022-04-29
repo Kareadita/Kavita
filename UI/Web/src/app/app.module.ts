@@ -10,7 +10,7 @@ import {
   NgbAccordionModule, NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbPaginationModule, NgbPopoverModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { NavHeaderComponent } from './nav-header/nav-header.component';
 import { JwtInterceptor } from './_interceptors/jwt.interceptor';
-import { UserLoginComponent } from './user-login/user-login.component';
+import { UserLoginComponent } from './registration/user-login/user-login.component';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { SharedModule } from './shared/shared.module';
@@ -23,7 +23,6 @@ import { CardsModule } from './cards/cards.module';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { EventsWidgetComponent } from './events-widget/events-widget.component';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
-import { RegistrationModule } from './registration/registration.module';
 import { GroupedTypeaheadComponent } from './grouped-typeahead/grouped-typeahead.component';
 import { ThemeTestComponent } from './theme-test/theme-test.component';
 import { PipeModule } from './pipe/pipe.module';
@@ -39,7 +38,7 @@ import { SidenavModule } from './sidenav/sidenav.module';
     EventsWidgetComponent, // TODO: Move to NavModule 
     GroupedTypeaheadComponent, // TODO: Move to NavModule 
 
-    UserLoginComponent,
+    //UserLoginComponent,
 
     SeriesDetailComponent, // TODO: Move to SeriesDetailModule
     ReviewSeriesModalComponent, // TODO: Move to SeriesDetailModule
@@ -62,7 +61,8 @@ import { SidenavModule } from './sidenav/sidenav.module';
     NgbRatingModule, // Series Detail & Filter
     NgbPaginationModule,
 
-    NgbCollapseModule, // Login
+    //NgbCollapseModule, // Login
+    NgbCollapseModule, // Series Metadata
 
     SharedModule,
     CarouselModule,
@@ -70,12 +70,7 @@ import { SidenavModule } from './sidenav/sidenav.module';
     
     CardsModule,
 
-    //LibraryDetailModule, // TODO: Remove this once we validate lazy loading works
-
-    //CollectionsModule,
-    //ReadingListModule,
-
-    RegistrationModule,
+    //RegistrationModule,
 
     NgbAccordionModule, // ThemeTest Component only
     PipeModule,

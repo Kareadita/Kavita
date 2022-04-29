@@ -1,5 +1,5 @@
 import { of } from 'rxjs';
-import { MemberService } from '../_services/member.service';
+import { MemberService } from '../../_services/member.service';
 import { UserLoginComponent } from './user-login.component';
 
 xdescribe('UserLoginComponent', () => {

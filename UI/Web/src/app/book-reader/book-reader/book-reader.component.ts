@@ -415,7 +415,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
 
     if (libraryId === null || seriesId === null || chapterId === null) {
-      this.router.navigateByUrl('/library');
+      this.router.navigateByUrl('/libraries');
       return;
     }
 

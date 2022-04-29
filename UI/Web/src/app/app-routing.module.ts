@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { LibraryDetailComponent } from './library-detail/library-detail.component';
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
-import { UserLoginComponent } from './user-login/user-login.component';
+import { UserLoginComponent } from './registration/user-login/user-login.component';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { DashboardComponent } from './dashboard/dashboard.component';
@@ -79,10 +79,8 @@ const routes: Routes = [
   },
   {path: 'theme', component: ThemeTestComponent},
 
-  {path: 'login', component: UserLoginComponent},
-
-  {path: '**', component: UserLoginComponent, pathMatch: 'full'},
-  {path: '', component: UserLoginComponent},
+  {path: 'login', loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)},
+  {path: '**', loadChildren: () => import('../app/dashboard/dashboard.module').then(m => m.DashboardModule), pathMatch: 'full'},
 ];
 
 @NgModule({
