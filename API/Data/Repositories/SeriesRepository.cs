@@ -416,7 +416,9 @@ public class SeriesRepository : ISeriesRepository
                  .Include(s => s.Metadata)
                  .ThenInclude(m => m.Genres)
                  .Include(s => s.Metadata)
-                 .ThenInclude(m => m.People);
+                 .ThenInclude(m => m.People)
+                 .Include(s => s.Metadata)
+                 .ThenInclude(m => m.Tags);
          }
 
          return await query.SingleOrDefaultAsync();

@@ -285,14 +285,11 @@ public class SeriesService : ISeriesService
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.Tags.ToList();
-        foreach (var existing in existingTags)
+        foreach (var existing in existingTags.Where(existing => tags.SingleOrDefault(t => t.Id == existing.Id) == null))
         {
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-            {
-                // Remove tag
-                series.Metadata.Tags.Remove(existing);
-                isModified = true;
-            }
+            // Remove tag
+            series.Metadata.Tags.Remove(existing);
+            isModified = true;
         }
 
         // At this point, all tags that aren't in dto have been removed.
