@@ -453,19 +453,11 @@ namespace API.Parser
         private static readonly Regex[] MangaEditionRegex = {
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
-                @"(?<Edition>({|\(|\[).* Edition(}|\)|\]))",
-                MatchOptions, RegexTimeout),
-            // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
-            new Regex(
                 @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
                 MatchOptions, RegexTimeout),
             // To Love Ru v01 Uncensored (Ch.001-007)
             new Regex(
                 @"(\b|_)(?<Edition>Uncensored)(\b|_)",
-                MatchOptions, RegexTimeout),
-            // AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz
-            new Regex(
-                @"(\b|_)(?<Edition>Full(?: |_)Color)(\b|_)?",
                 MatchOptions, RegexTimeout),
         };
 
