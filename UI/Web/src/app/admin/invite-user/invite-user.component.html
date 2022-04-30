@@ -6,7 +6,8 @@
 </div>
 <div class="modal-body">
     <p>
-        Invite a user to your server. Enter their email in and we will send them an email to create an account.
+        Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can host your own 
+        email service or use a fake email (Forgot User will not work). 
     </p>
 
     <form [formGroup]="inviteForm" *ngIf="emailLink === ''">
@@ -44,6 +45,10 @@
 
 </div>
 <div class="modal-footer">
+    <!-- <div class="form-check form-switch">
+        <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" role="switch">
+        <label for="stat-collection" class="form-check-label">Send Data</label>
+    </div> -->
     <button type="button" class="btn btn-secondary" (click)="close()">
         Cancel
     </button>
