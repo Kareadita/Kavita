@@ -80,6 +80,10 @@ export class SeriesService {
     return this.httpClient.get<Series | null>(this.baseUrl + 'series/series-for-mangafile?mangaFileId=' + mangaFileId);
   }
 
+  getSeriesForChapter(chapterId: number) {
+    return this.httpClient.get<Series | null>(this.baseUrl + 'series/series-for-chapter?chapterId=' + chapterId);
+  }
+
   delete(seriesId: number) {
     return this.httpClient.delete<boolean>(this.baseUrl + 'series/' + seriesId);
   }

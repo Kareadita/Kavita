@@ -1,3 +1,4 @@
+import { Chapter } from "../chapter";
 import { Library } from "../library";
 import { MangaFile } from "../manga-file";
 import { SearchResult } from "../search-result";
@@ -12,6 +13,7 @@ export class SearchResultGroup {
     genres: Array<Tag> = [];
     tags: Array<Tag> = [];
     files: Array<MangaFile> = [];
+    chapters: Array<Chapter> = [];
 
     reset() {
         this.libraries = [];
@@ -22,5 +24,6 @@ export class SearchResultGroup {
         this.genres = [];
         this.tags = [];
         this.files = [];
+        this.chapters = []; 
     }
 }
