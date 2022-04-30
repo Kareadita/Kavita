@@ -77,7 +77,7 @@ const routes: Routes = [
     loadChildren: () => import('../app/dev-only/dev-only.module').then(m => m.DevOnlyModule)
   },
   {path: 'login', loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)},
-  {path: '**', loadChildren: () => import('../app/dashboard/dashboard.module').then(m => m.DashboardModule), pathMatch: 'full'},
+  {path: '**', pathMatch: 'full', redirectTo: 'libraries'},
 ];
 
 @NgModule({
