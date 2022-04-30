@@ -133,7 +133,14 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            TrackSeries(info);
+            try
+            {
+                TrackSeries(info);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
+            }
         }
 
 
@@ -183,8 +190,9 @@ namespace API.Services.Tasks.Scanner
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
+            // We use FirstOrDefault because this was introduced late in development and users might have 2 series with both names
             var existingName =
-                _scannedSeries.SingleOrDefault(p =>
+                _scannedSeries.FirstOrDefault(p =>
                         (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
                          Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) && p.Key.Format == info.Format)
                 .Key;

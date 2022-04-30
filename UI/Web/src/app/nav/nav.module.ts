@@ -8,6 +8,7 @@ import { SharedModule } from '../shared/shared.module';
 import { PipeModule } from '../pipe/pipe.module';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 
 
@@ -20,6 +21,7 @@ import { ReactiveFormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    RouterModule,
 
     NgbDropdownModule,
     NgbPopoverModule,

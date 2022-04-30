@@ -170,6 +170,7 @@ namespace API.Tests.Parser
         [InlineData("It's Witching Time! 001 (Digital) (Anonymous1234)", "It's Witching Time!")]
         [InlineData("Zettai Karen Children v02 c003 - The Invisible Guardian (2) [JS Scans]", "Zettai Karen Children")]
         [InlineData("My Charms Are Wasted on Kuroiwa Medaka - Ch. 37.5 - Volume Extras", "My Charms Are Wasted on Kuroiwa Medaka")]
+        [InlineData("Highschool of the Dead - Full Color Edition v02 [Uasaha] (Yen Press)", "Highschool of the Dead - Full Color Edition")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
@@ -253,13 +254,13 @@ namespace API.Tests.Parser
 
         [Theory]
         [InlineData("Tenjou Tenge Omnibus", "Omnibus")]
-        [InlineData("Tenjou Tenge {Full Contact Edition}", "Full Contact Edition")]
-        [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "Full Contact Edition")]
+        [InlineData("Tenjou Tenge {Full Contact Edition}", "")]
+        [InlineData("Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", "")]
         [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
         [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
         [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
         [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "")]
-        [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "Full Color")]
+        [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "")]
         [InlineData("Love Hina Omnibus v05 (2015) (Digital-HD) (Asgard-Empire).cbz", "Omnibus")]
         public void ParseEditionTest(string input, string expected)
         {

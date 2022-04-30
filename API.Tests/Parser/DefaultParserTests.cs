@@ -122,7 +122,7 @@ public class DefaultParserTests
         filepath = @"E:\Manga\Tenjo Tenge (Color)\Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Tenjo Tenge", Volumes = "1", Edition = "Full Contact Edition",
+            Series = "Tenjo Tenge {Full Contact Edition}", Volumes = "1", Edition = "",
             Chapters = "0", Filename = "Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         });

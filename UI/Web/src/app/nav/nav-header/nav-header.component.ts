@@ -3,7 +3,10 @@ import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { Chapter } from 'src/app/_models/chapter';
+import { MangaFile } from 'src/app/_models/manga-file';
 import { ScrollService } from 'src/app/_services/scroll.service';
+import { SeriesService } from 'src/app/_services/series.service';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
 import { CollectionTag } from '../../_models/collection-tag';
 import { Library } from '../../_models/library';
@@ -48,7 +51,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService,
     private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
-    private scrollService: ScrollService) { }
+    private scrollService: ScrollService, private seriesService: SeriesService) { }
 
   ngOnInit(): void {}
 
@@ -152,6 +155,24 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     const libraryId = item.libraryId;
     const seriesId = item.seriesId;
     this.router.navigate(['library', libraryId, 'series', seriesId]);
+  }
+
+  clickFileSearchResult(item: MangaFile) {
+    this.clearSearch();
+    this.seriesService.getSeriesForMangaFile(item.id).subscribe(series => {
+      if (series !== undefined && series !== null) {
+        this.router.navigate(['library', series.libraryId, 'series', series.id]);
+      }
+    })
+  }
+
+  clickChapterSearchResult(item: Chapter) {
+    this.clearSearch();
+    this.seriesService.getSeriesForChapter(item.id).subscribe(series => {
+      if (series !== undefined && series !== null) {
+        this.router.navigate(['library', series.libraryId, 'series', series.id]);
+      }
+    })
   }
 
   clickLibraryResult(item: Library) {

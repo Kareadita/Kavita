@@ -59,6 +59,8 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
   @ContentChild('libraryTemplate') libraryTemplate!: TemplateRef<any>;
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
+  @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
+  @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
   
 
   hasFocus: boolean = false;
@@ -74,7 +76,11 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   get hasData() {
-    return this.grouppedData.persons.length || this.grouppedData.collections.length || this.grouppedData.series.length || this.grouppedData.persons.length || this.grouppedData.tags.length || this.grouppedData.genres.length;
+    return !(this.noResultsTemplate != undefined && !this.grouppedData.persons.length && !this.grouppedData.collections.length 
+      && !this.grouppedData.series.length && !this.grouppedData.persons.length && !this.grouppedData.tags.length && !this.grouppedData.genres.length && !this.grouppedData.libraries.length
+      && !this.grouppedData.files.length && !this.grouppedData.chapters.length);
+
+    //return this.grouppedData.persons.length || this.grouppedData.collections.length || this.grouppedData.series.length || this.grouppedData.persons.length || this.grouppedData.tags.length || this.grouppedData.genres.length;
   }
 
 
