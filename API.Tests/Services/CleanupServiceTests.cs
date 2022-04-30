@@ -364,7 +364,7 @@ public class CleanupServiceTests
     #region CleanupBackups
 
     [Fact]
-    public void CleanupBackups_LeaveOneFile_SinceAllAreExpired()
+    public async Task CleanupBackups_LeaveOneFile_SinceAllAreExpired()
     {
         var filesystem = CreateFileSystem();
         var filesystemFile = new MockFileData("")
@@ -378,12 +378,12 @@ public class CleanupServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
             ds);
-        cleanupService.CleanupBackups();
+        await cleanupService.CleanupBackups();
         Assert.Single(ds.GetFiles(BackupDirectory, searchOption: SearchOption.AllDirectories));
     }
 
     [Fact]
-    public void CleanupBackups_LeaveLestExpired()
+    public async Task CleanupBackups_LeaveLestExpired()
     {
         var filesystem = CreateFileSystem();
         var filesystemFile = new MockFileData("")
@@ -400,7 +400,7 @@ public class CleanupServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
             ds);
-        cleanupService.CleanupBackups();
+        await cleanupService.CleanupBackups();
         Assert.True(filesystem.File.Exists($"{BackupDirectory}randomfile.zip"));
     }
 

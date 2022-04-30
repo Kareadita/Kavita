@@ -45,6 +45,8 @@ export class LibraryRecommendedComponent implements OnInit {
     this.genre$.subscribe(genre => {
       this.moreIn$ = this.recommendationService.getMoreIn(this.libraryId, genre.id).pipe(map(p => p.result), shareReplay());
     });
+
+    
     
   }
 

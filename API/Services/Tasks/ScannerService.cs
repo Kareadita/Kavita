@@ -195,7 +195,7 @@ public class ScannerService : IScannerService
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
         if (folders.Any(f => !_directoryService.IsDriveMounted(f)))
         {
-            _logger.LogError("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
+            _logger.LogCritical("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
 
             await _eventHub.SendMessageAsync(MessageFactory.Error,
                 MessageFactory.ErrorEvent("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
@@ -267,6 +267,7 @@ public class ScannerService : IScannerService
         if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+
             return;
         }
 

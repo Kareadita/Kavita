@@ -44,6 +44,15 @@
               </div>
             </ng-template>
 
+            <ng-template #fileTemplate let-item>
+              <div style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
+                <div class="ms-1">
+                  <app-series-format [format]="item.format"></app-series-format>
+                  <span>{{item.filePath}}</span>
+                </div>
+              </div>
+            </ng-template>
+
             <ng-template #collectionTemplate let-item>
               <div style="display: flex;padding: 5px;" (click)="clickCollectionSearchResult(item)">
                 <div style="width: 24px" class="me-1">

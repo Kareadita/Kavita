@@ -59,6 +59,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
   @ContentChild('libraryTemplate') libraryTemplate!: TemplateRef<any>;
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
+  @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
   
 
   hasFocus: boolean = false;

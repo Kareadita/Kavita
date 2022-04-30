@@ -1,4 +1,7 @@
 
+
+<!-- TODO: If there is nothing, then show a message -->
+
 <ng-container *ngIf="onDeck$ | async as onDeck">
     <app-carousel-reel [items]="onDeck" title="On Deck">
         <ng-template #carouselItem let-item let-position="idx">

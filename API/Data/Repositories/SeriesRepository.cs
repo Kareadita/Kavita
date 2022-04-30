@@ -21,7 +21,9 @@ using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.Common.Extensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 
 namespace API.Data.Repositories;
 
@@ -115,6 +117,7 @@ public interface ISeriesRepository
     Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams);
+    Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -308,7 +311,7 @@ public class SeriesRepository : ISeriesRepository
         var hasYearInQuery = !string.IsNullOrEmpty(justYear);
         var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
 
-        result.Series = await _context.Series
+        result.Series = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
                         || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
@@ -320,7 +323,7 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking()
             .AsSplitQuery()
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
 
         result.ReadingLists = await _context.ReadingList
@@ -364,6 +367,19 @@ public class SeriesRepository : ISeriesRepository
             .OrderBy(t => t.Title)
             .Distinct()
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+
+        var fileIds = _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .AsSplitQuery()
+            .SelectMany(s => s.Volumes)
+            .SelectMany(v => v.Chapters)
+            .SelectMany(c => c.Files.Select(f => f.Id));
+
+        result.Files = await _context.MangaFile
+            .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
+            .AsSplitQuery()
+            .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         return result;
@@ -1042,6 +1058,20 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
 
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId)
+    {
+        var libraryIds = GetLibraryIdsForUser(userId);
+        return await _context.MangaFile
+            .Where(m => m.Id == mangaFileId)
+            .AsSplitQuery()
+            .Select(f => f.Chapter)
+            .Select(c => c.Volume)
+            .Select(v => v.Series)
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .SingleOrDefaultAsync();
     }
 
 

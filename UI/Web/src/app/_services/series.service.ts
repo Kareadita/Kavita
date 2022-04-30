@@ -76,8 +76,8 @@ export class SeriesService {
     return this.httpClient.get<ChapterMetadata>(this.baseUrl + 'series/chapter-metadata?chapterId=' + chapterId);
   }
 
-  getData(id: number) {
-    return of(id);
+  getSeriesForMangaFile(mangaFileId: number) {
+    return this.httpClient.get<Series | null>(this.baseUrl + 'series/series-for-mangafile?mangaFileId=' + mangaFileId);
   }
 
   delete(seriesId: number) {
