@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { auditTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
@@ -206,26 +206,30 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       'typeahead': this.typeaheadControl
     });
 
+
     this.filteredOptions = this.typeaheadForm.get('typeahead')!.valueChanges
       .pipe(
         // Adjust input box to grow
         tap(val => {
           if (this.inputElem != null && this.inputElem.nativeElement != null) {
-            this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 15 * ((this.typeaheadControl.value + '').length + 1) + 'px');
+            this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 15 * (val.trim().length + 1) + 'px');
             this.focusedIndex = 0;
           }
         }),
-        debounceTime(this.settings.debounce),
+        map(val => val.trim()),
+        auditTime(this.settings.debounce),
+        distinctUntilChanged(),
         filter(val => {
           // If minimum filter characters not met, do not filter
           if (this.settings.minCharacters === 0) return true;
 
-          if (!val || val.trim().length < this.settings.minCharacters) {
+          if (!val || val.length < this.settings.minCharacters) {
             return false;
           }
 
           return true;
         }),
+        
         switchMap(val => {
           this.isLoadingOptions = true;
           let results: Observable<any[]>;
@@ -241,12 +245,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         tap((filteredOptions) => {
           this.isLoadingOptions = false; 
           this.focusedIndex = 0; 
-          //this.updateShowAddItem(filteredOptions);
           setTimeout(() => {
             this.updateShowAddItem(filteredOptions);
             this.updateHighlight();
           }, 10);
           setTimeout(() => this.updateHighlight(), 20);
+          
         }),
         shareReplay(),
         takeUntil(this.onDestroy)
