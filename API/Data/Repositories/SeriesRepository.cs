@@ -353,6 +353,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
             .AsSplitQuery()
+            .Take(maxRecords)
             .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -363,6 +364,7 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .OrderBy(t => t.Title)
             .Distinct()
+            .Take(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -372,6 +374,7 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .OrderBy(t => t.Title)
             .Distinct()
+            .Take(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -385,7 +388,7 @@ public class SeriesRepository : ISeriesRepository
         result.Files = await _context.MangaFile
             .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
             .AsSplitQuery()
-            .Take(10)
+            .Take(maxRecords)
             .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
@@ -395,7 +398,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%"))
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
-            .Take(10)
+            .Take(maxRecords)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
