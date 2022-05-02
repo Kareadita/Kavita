@@ -40,7 +40,7 @@ export class AppComponent implements OnInit {
     this.setDocHeight();
   }
 
-  @HostListener('orientationchange')
+  @HostListener('window:orientationchange', ['$event'])
   onOrientationChange() {
     this.setDocHeight();
   }
