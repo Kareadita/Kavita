@@ -35,8 +35,8 @@ export class AppComponent implements OnInit {
       });
   }
 
-  @HostListener('resize')
-  onResize() {
+  @HostListener('window:resize', ['$event'])
+  onResize(){
     this.setDocHeight();
   }
 

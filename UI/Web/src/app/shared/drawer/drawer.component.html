@@ -1,6 +1,6 @@
 <div
   class="drawer-container"
-  [ngStyle]="{'top': options.topOffset + 'px', 'padding-bottom': options.topOffset + 'px'}"
+  [ngStyle]="{'top': options.topOffset + 'px','height': 'calc(100% - ' + options.topOffset + 'px)'}"
   [class.is-open]="isOpen"
   [class.position-right]="position === 'right'"
   [class.position-left]="position === 'left'"

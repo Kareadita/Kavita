@@ -6,7 +6,7 @@
     <div>
         <ng-content select="[main]"></ng-content>
     </div>
-    <div class="align-self-end align-items-center ">
+    <div>
         <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleFilter()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
             <i class="fa fa-filter" aria-hidden="true"></i>
             <span class="visually-hidden">Sort / Filter</span>
