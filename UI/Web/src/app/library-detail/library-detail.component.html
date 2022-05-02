@@ -7,7 +7,12 @@
     <div main>
         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills" style="flex-wrap: nowrap;">
             <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
-              <a ngbNavLink>{{tab.title | sentenceCase}}</a>
+              <a ngbNavLink>
+                  <span class="d-none d-sm-flex">{{tab.title | sentenceCase}}</span>
+                  <span class="d-flex d-sm-none">
+                      <i class="fa {{tab.icon}}" aria-hidden="true"></i>
+                  </span>
+              </a>
               <ng-template ngbNavContent>
                 <ng-container *ngIf="tab.title === 'Recommended'">
                   <app-library-recommended [libraryId]="libraryId"></app-library-recommended>
