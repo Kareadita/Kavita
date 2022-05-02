@@ -8,7 +8,7 @@
         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills" style="flex-wrap: nowrap;">
             <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
               <a ngbNavLink>
-                  <span class="d-none d-sm-flex">{{tab.title | sentenceCase}}</span>
+                  <span class="d-none d-sm-flex"><i class="fa {{tab.icon}} me-1" aria-hidden="true"></i> {{tab.title | sentenceCase}}</span>
                   <span class="d-flex d-sm-none">
                       <i class="fa {{tab.icon}}" aria-hidden="true"></i>
                   </span>
