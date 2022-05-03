@@ -7,7 +7,7 @@ import { KEY_CODES } from '../shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
 /**
-   * SelectionModel<T> is used for keeping track of multiple selections. Simple interface with ability to toggle. 
+   * SelectionModel<T> is used for keeping track of multiple selections. Simple interface with ability to toggle.
    * @param selectedState Optional state to set selectedOptions to. If not passed, defaults to false.
    * @param selectedOptions Optional data elements to inform the SelectionModel of. If not passed, as toggle() occur, items are tracked.
    * @param propAccessor Optional string that points to a unique field within the T type. Used for quickly looking up.
@@ -39,7 +39,7 @@ export class SelectionModel<T> {
     if (compareFn != undefined || compareFn != null) {
       lookupMethod = compareFn;
     }
-    
+
     const dataItem = this._data.filter(d => lookupMethod(d.value, data));
     if (dataItem.length > 0) {
       if (selectedState != undefined) {
@@ -66,9 +66,9 @@ export class SelectionModel<T> {
     if (compareFn != undefined || compareFn != null) {
       lookupMethod = compareFn;
     }
-    
+
     dataItem = this._data.filter(d => lookupMethod(d.value, data));
-    
+
     if (dataItem.length > 0) {
       return dataItem[0].selected;
     }
@@ -76,7 +76,7 @@ export class SelectionModel<T> {
   }
 
   /**
-   * 
+   *
    * @returns If some of the items are selected, but not all
    */
   hasSomeSelected(): boolean {
@@ -85,7 +85,7 @@ export class SelectionModel<T> {
   }
 
   /**
-   * 
+   *
    * @returns All Selected items
    */
   selected(): Array<T> {
@@ -93,7 +93,7 @@ export class SelectionModel<T> {
   }
 
   /**
-   * 
+   *
    * @returns All Non-Selected items
    */
    unselected(): Array<T> {
@@ -101,7 +101,7 @@ export class SelectionModel<T> {
   }
 
   /**
-   * 
+   *
    * @returns Last element added/tracked or undefined if nothing is tracked
    */
   peek(): T | undefined {
@@ -115,17 +115,17 @@ export class SelectionModel<T> {
   shallowEqual(object1: T, object2: T) {
     const keys1 = Object.keys(object1);
     const keys2 = Object.keys(object2);
-  
+
     if (keys1.length !== keys2.length) {
       return false;
     }
-  
+
     for (let key of keys1) {
       if ((object1 as any)[key] !== (object2 as any)[key]) {
         return false;
       }
     }
-  
+
     return true;
   }
 }
@@ -156,7 +156,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   @Output() onUnlock = new EventEmitter<void>();
   @Output() lockedChange = new EventEmitter<boolean>();
-  
+
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
   @ContentChild('optionItem') optionTemplate!: TemplateRef<any>;
@@ -171,7 +171,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   isLoadingOptions: boolean = false;
   typeaheadControl!: FormControl;
   typeaheadForm!: FormGroup;
-  
+
   private readonly onDestroy = new Subject<void>();
 
   constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document) { }
@@ -206,7 +206,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       'typeahead': this.typeaheadControl
     });
 
-
     this.filteredOptions = this.typeaheadForm.get('typeahead')!.valueChanges
       .pipe(
         // Adjust input box to grow
@@ -218,7 +217,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         }),
         map(val => val.trim()),
         auditTime(this.settings.debounce),
-        distinctUntilChanged(),
+        distinctUntilChanged(), // ?!: BUG Doesn't trigger the search to run when filtered array changes
         filter(val => {
           // If minimum filter characters not met, do not filter
           if (this.settings.minCharacters === 0) return true;
@@ -229,7 +228,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
           return true;
         }),
-        
+
         switchMap(val => {
           this.isLoadingOptions = true;
           let results: Observable<any[]>;
@@ -243,14 +242,14 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           return results;
         }),
         tap((filteredOptions) => {
-          this.isLoadingOptions = false; 
-          this.focusedIndex = 0; 
+          this.isLoadingOptions = false;
+          this.focusedIndex = 0;
           setTimeout(() => {
             this.updateShowAddItem(filteredOptions);
             this.updateHighlight();
           }, 10);
           setTimeout(() => this.updateHighlight(), 20);
-          
+
         }),
         shareReplay(),
         takeUntil(this.onDestroy)
@@ -259,7 +258,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
     if (this.settings.savedData) {
       if (this.settings.multiple) {
-        this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);  
+        this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
       }
        else {
          const isArray = this.settings.savedData.hasOwnProperty('length');
@@ -281,7 +280,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:keydown', ['$event'])
-  handleKeyPress(event: KeyboardEvent) { 
+  handleKeyPress(event: KeyboardEvent) {
     if (!this.hasFocus) { return; }
     if (this.disabled) return;
 
@@ -304,22 +303,13 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       {
         this.document.querySelectorAll('.list-group-item').forEach((item, index) => {
           if (item.classList.contains('active')) {
-            this.filteredOptions.pipe(take(1)).subscribe((opts: any[]) => {  
+            this.filteredOptions.pipe(take(1)).subscribe((opts: any[]) => {
               // This isn't giving back the filtered array, but everything
-              
-              if (this.settings.addIfNonExisting && item.classList.contains('add-item')) {
-                this.addNewItem(this.typeaheadControl.value);
-                this.resetField();
-                this.focusedIndex = 0;
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-              }
+              event.preventDefault();
+              event.stopPropagation();
 
               (item as HTMLElement).click();
               this.focusedIndex = 0;
-              event.preventDefault();
-              event.stopPropagation();
             });
           }
         });
@@ -369,7 +359,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       } else {
         this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
       }
-      
+
       this.selectedData.emit(this.optionSelection.selected());
       this.resetField();
     }
@@ -388,7 +378,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   addNewItem(title: string) {
-    if (this.settings.addTransformFn == undefined) {
+    if (this.settings.addTransformFn == undefined || !this.settings.addIfNonExisting) {
       return;
     }
     const newItem = this.settings.addTransformFn(title);
@@ -400,8 +390,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * 
-   * @param item 
+   *
+   * @param item
    * @returns True if the item is NOT selected already
    */
   filterSelected(item: any) {
@@ -432,18 +422,19 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     if (this.inputElem) {
       // hack: To prevent multiple typeaheads from being open at once, click document then trigger the focus
       this.document.body.click();
+
       this.inputElem.nativeElement.focus();
       this.hasFocus = true;
     }
 
-   
+
     this.openDropdown();
   }
 
 
   resetField() {
     if (this.inputElem && this.inputElem.nativeElement) {
-      this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);  
+      this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 4, RendererStyleFlags2.Important);
     }
     this.typeaheadControl.setValue('');
     this.focusedIndex = 0;
@@ -463,11 +454,11 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   updateShowAddItem(options: any[]) {
-    this.showAddItem = this.settings.addIfNonExisting && this.typeaheadControl.value.trim() 
-          && this.typeaheadControl.value.trim().length >= Math.max(this.settings.minCharacters, 1) 
+    this.showAddItem = this.settings.addIfNonExisting && this.typeaheadControl.value.trim()
+          && this.typeaheadControl.value.trim().length >= Math.max(this.settings.minCharacters, 1)
           && this.typeaheadControl.dirty
           && (typeof this.settings.compareFn == 'function' && this.settings.compareFn(options, this.typeaheadControl.value.trim()).length === 0);
-    
+
     if (this.showAddItem) {
       this.hasFocus = true;
     }
