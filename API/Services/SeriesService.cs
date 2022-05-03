@@ -456,7 +456,7 @@ public class SeriesService : ISeriesService
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => float.Parse(v.Name))
+            .OrderBy(v => Parser.Parser.MinimumNumberFromRange(v.Name))
             .ToList();
         var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
