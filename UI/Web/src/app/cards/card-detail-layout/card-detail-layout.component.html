@@ -35,7 +35,7 @@
 <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
 
 <ng-template #cardTemplate>
-<div class="row justify-content-evenly justify-content-sm-start g-0 mt-3 mb-3">
+<div class="row justify-content-evenly justify-content-sm-start g-0 mb-3">
     <div class="col-auto ps-1 pe-1 mt-1 mb-1" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
     </div>

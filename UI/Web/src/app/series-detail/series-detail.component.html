@@ -94,7 +94,7 @@
                         [isLoading]="isLoading"
                         [items]="volumes">
                         <ng-template #cardItem let-item let-position="idx">
-                            <app-card-item class="col-auto p-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
+                            <app-card-item class="col-auto" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                                   [imageUrl]="imageService.getVolumeCoverImage(item.id) + '&offset=' + coverImageOffset"
                                   [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions" 
                                   (selection)="bulkSelectionService.handleCardSelection('volume', position, volumes.length, $event)" 
@@ -111,7 +111,7 @@
                         [isLoading]="isLoading"
                         [items]="chapters">
                         <ng-template #cardItem let-item let-position="idx">
-                            <app-card-item class="col-auto p-2" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
+                            <app-card-item class="col-auto" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
                             [imageUrl]="imageService.getChapterCoverImage(item.id) + '&offset=' + coverImageOffset"
                             [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions" 
                             (selection)="bulkSelectionService.handleCardSelection('chapter', position, chapters.length, $event)"
@@ -127,7 +127,7 @@
                     [isLoading]="isLoading"
                     [items]="specials">
                     <ng-template #cardItem let-item let-position="idx">
-                        <app-card-item class="col-auto p-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
+                        <app-card-item class="col-auto" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
                         [imageUrl]="imageService.getChapterCoverImage(item.id)"
                         [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
                         (selection)="bulkSelectionService.handleCardSelection('special', position, chapters.length, $event)"
@@ -141,7 +141,7 @@
                 <ng-template ngbNavContent>
                     <div class="row g-0">
                         <ng-container *ngFor="let item of relations; let idx = index; trackBy: trackByRelatedSeriesIdentiy">
-                        <app-series-card class="col-auto p-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
+                        <app-series-card class="col-auto" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
                         </ng-container>
                     </div>
                 </ng-template>
