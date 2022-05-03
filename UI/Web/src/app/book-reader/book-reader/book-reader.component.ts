@@ -176,7 +176,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   darkMode = true;
   backgroundColor: string = 'white';
-  topOffset: number = 0; // Offset for drawer and rendering canvas
+  /**
+   * Offset for drawer and rendering canvas. Fixed to 62px.
+   */
+  topOffset: number = 62;
   /**
    * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
    * Will hide if all content in book is absolute positioned
@@ -271,7 +274,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ColumnHeight() {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       // Take the height after page loads, subtract the top/bottom bar and the extra 20 pixels we add on
-      return this.windowHeight - (this.topOffset *2) - (20*2) + 'px';
+      //return this.windowHeight - (this.topOffset *2) - (20*2) + 'px'; // Pre-fixed height action bar
+      return this.windowHeight - (this.topOffset *2) + 'px';
     }
     return 'unset';
   }
@@ -696,7 +700,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         //this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
         this.updateReaderStyles(this.pageStyles);
         // We need to get the offset after we ensure the title has rendered
-        requestAnimationFrame(() => this.topOffset = this.stickyTopElemRef.nativeElement?.getBoundingClientRect().height);
+        //requestAnimationFrame(() => this.topOffset = this.stickyTopElemRef.nativeElement?.getBoundingClientRect().height); // ?! Removed because it's now fixed at 62px
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
         if (imgs === null || imgs.length === 0) {
@@ -949,7 +953,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleDrawer() {
-    this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
+    //this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight; // ?! Removed because it's now fixed at 62px
     this.drawerOpen = !this.drawerOpen;
   }
 

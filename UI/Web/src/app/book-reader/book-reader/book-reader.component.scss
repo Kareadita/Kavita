@@ -41,11 +41,11 @@
 $dark-form-background-no-opacity: rgb(1, 4, 9);
 $primary-color: #0062cc;
 
+
+//          Drawer
 .control-container {
     padding-bottom: 5px;
 }
-
-
 
 .page-stub {
     margin-top: 6px;
@@ -53,35 +53,43 @@ $primary-color: #0062cc;
     padding-right: 2px;
 }
 
+//          Drawer End
+
 .fixed-top {
     z-index: 1022;
-}
-
-
-
-.reading-bar {
-    background-color: var(--br-actionbar-bg-color); 
-    overflow: hidden;
-    box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
-    max-height: 62px;
 }
 
 .dark-mode .overlay {
     opacity: 0;
 }
 
-@media(max-width: 875px) {
-    .book-title {
-        display: none;
+
+// TODO: Refactor this to action bar
+.action-bar {
+    background-color: var(--br-actionbar-bg-color); 
+    overflow: hidden;
+    box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
+    max-height: 62px;
+
+    .book-title-text {
+        text-align: center;
+        text-overflow: ellipsis;
     }
     
-} 
-
-.book-title {
-    margin-top: 10px;
-    text-align: center;
-    text-transform: capitalize;
+    @media(max-width: 875px) {
+        .book-title {
+            display: none;
+        }
+    } 
+    
+    .book-title {
+        margin-top: 10px;
+        text-align: center;
+        text-transform: capitalize;
+    }
 }
+
+
 
 .reading-section {
     max-height: 100vh;
@@ -137,10 +145,8 @@ $primary-color: #0062cc;
     }
 }
 
-.drawer-body {
-    padding-bottom: 20px;
-}
 
+// This is applied to images in the backend
 ::ng-deep .scale-width {
     max-width: 100%;
     object-fit: contain;
@@ -148,7 +154,6 @@ $primary-color: #0062cc;
     break-inside: avoid;
     break-before: column;
     max-height: 100vh;
-
 }
 
 
@@ -157,10 +162,7 @@ $primary-color: #0062cc;
     color: $primary-color;
 }
 
-.book-title-text {
-    text-align: center;
-    text-overflow: ellipsis;
-}
+
 
 
 

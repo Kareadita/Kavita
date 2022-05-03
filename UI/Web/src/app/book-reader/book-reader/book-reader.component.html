@@ -48,10 +48,10 @@
         </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section {{ColumnLayout}}" [ngStyle]="{'padding-top': topOffset + 20 + 'px'}"
+    <div #readingSection class="reading-section {{ColumnLayout}}" [ngStyle]="{'padding-top': '62px'}"
         [@isLoading]="isLoading ? true : false">
 
-        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': topOffset + 20 + 'px', 'margin': '0px 0px', 'height': 'auto', 'max-height': ColumnHeight, 'column-width': ColumnWidth}"
+        <div #readingHtml class="book-content" [ngStyle]="{'padding-bottom': '62px', 'margin': '0px 0px', 'height': 'auto', 'max-height': ColumnHeight, 'column-width': ColumnWidth}"
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
         <ng-container  *ngIf="clickToPaginate">
@@ -65,7 +65,7 @@
     </div>
 
     <ng-template #actionBar>
-        <div class="reading-bar row g-0 justify-content-between">
+        <div class="action-bar row g-0 justify-content-between">
             <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()"
                 [disabled]="IsPrevDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
