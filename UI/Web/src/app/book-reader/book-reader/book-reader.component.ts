@@ -694,14 +694,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
+        // NOTE: This was moved to the backend
         // Apply scaling class to all images to ensure they scale down to max width to not blow out the reader
-        Array.from(imgs).forEach(img => {
-          this.renderer.addClass(img, 'scale-width');
-          //const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
-          //this.renderer.setStyle(img, 'max-width', pageWidth + 'px');
-          //this.renderer.setStyle(img, 'max-height', this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2));
-          //this.renderer.setStyle(img, 'max-height', (this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2) - 40) + 'px');
-        });
+        // Array.from(imgs).forEach(img => {
+        //   this.renderer.addClass(img, 'scale-width');
+        //   //const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
+        //   //this.renderer.setStyle(img, 'max-width', pageWidth + 'px');
+        //   //this.renderer.setStyle(img, 'max-height', this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2));
+        //   //this.renderer.setStyle(img, 'max-height', (this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2) - 40) + 'px');
+        // });
 
         Promise.all(Array.from(imgs)
         .filter(img => !img.complete)
