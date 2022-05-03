@@ -495,8 +495,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }, 200);
       });
     });
+  }
 
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any){
+    // Update the window Height
+    this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
+  }
 
+  @HostListener('window:orientationchange', ['$event'])
+  onOrientationChange() {
+    // Update the window Height
+    this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
   }
 
   @HostListener('window:keydown', ['$event'])

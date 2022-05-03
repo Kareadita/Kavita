@@ -81,8 +81,8 @@
                     </div>
                 </ng-container>
                 <ng-template #showTitle>
-                    <span class="book-title-text">{{bookTitle}}</span>
                     <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode</span>)</span>
+                    <span class="book-title-text ms-1" [title]="bookTitle">{{bookTitle}}</span>
                 </ng-template>
             </div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i><span class="d-none d-sm-block">&nbsp;Close</span></button>

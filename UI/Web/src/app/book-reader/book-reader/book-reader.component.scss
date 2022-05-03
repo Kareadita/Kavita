@@ -63,6 +63,7 @@ $primary-color: #0062cc;
     background-color: var(--br-actionbar-bg-color); 
     overflow: hidden;
     box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
+    max-height: 62px;
 }
 
 .dark-mode .overlay {
@@ -156,7 +157,10 @@ $primary-color: #0062cc;
     color: $primary-color;
 }
 
-
+.book-title-text {
+    text-align: center;
+    text-overflow: ellipsis;
+}
 
 
 

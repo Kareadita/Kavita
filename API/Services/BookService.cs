@@ -247,67 +247,62 @@ namespace API.Services
         private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
         {
             var images = doc.DocumentNode.SelectNodes("//img");
-            if (images != null)
+            if (images == null) return;
+
+            foreach (var image in images)
             {
-                foreach (var image in images)
+                if (image.Name != "img") continue;
+
+                string key = null;
+                if (image.Attributes["src"] != null)
                 {
-                    if (image.Name != "img") continue;
-
-                    // Need to do for xlink:href
-                    if (image.Attributes["src"] == null) continue;
-
-                    var imageFile = image.Attributes["src"].Value;
-                    if (!book.Content.Images.ContainsKey(imageFile))
-                    {
-                        // TODO: Refactor the Key code to a method to allow the hacks to be tested
-                        var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
-                        if (correctedKey != null)
-                        {
-                            imageFile = correctedKey;
-                        } else if (imageFile.StartsWith(".."))
-                        {
-                            // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
-                            correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
-                            if (correctedKey != null)
-                            {
-                                imageFile = correctedKey;
-                            }
-                        }
-
-
-
-                    }
-
-                    image.Attributes.Remove("src");
-                    image.Attributes.Add("src", $"{apiBase}" + imageFile);
-                    image.AddClass("scale-width"); // Add a custom class that the reader uses to ensure images stay within reader
+                    key = "src";
                 }
+                else if (image.Attributes["xlink:href"] != null)
+                {
+                    key = "xlink:href";
+                }
+
+                if (string.IsNullOrEmpty(key)) continue;
+
+                var imageFile = GetKeyForImage(book, image.Attributes[key].Value);
+                image.Attributes.Remove(key);
+                image.Attributes.Add(key, $"{apiBase}" + imageFile);
+
+                // Add a custom class that the reader uses to ensure images stay within reader
+                image.AddClass("scale-width");
             }
 
-            images = doc.DocumentNode.SelectNodes("//image");
-            if (images != null)
+        }
+
+        /// <summary>
+        /// Returns the image key associated with the file. Contains some basic fallback logic.
+        /// </summary>
+        /// <param name="book"></param>
+        /// <param name="imageFile"></param>
+        /// <returns></returns>
+        private static string GetKeyForImage(EpubBookRef book, string imageFile)
+        {
+            if (!book.Content.Images.ContainsKey(imageFile))
             {
-                foreach (var image in images)
+                var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+                if (correctedKey != null)
                 {
-                    if (image.Name != "image") continue;
-
-                    if (image.Attributes["xlink:href"] != null)
+                    imageFile = correctedKey;
+                }
+                else if (imageFile.StartsWith(".."))
+                {
+                    // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
+                    correctedKey =
+                        book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
+                    if (correctedKey != null)
                     {
-                        var imageFile = image.Attributes["xlink:href"].Value;
-                        if (!book.Content.Images.ContainsKey(imageFile))
-                        {
-                            var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
-                            if (correctedKey != null)
-                            {
-                                imageFile = correctedKey;
-                            }
-                        }
-
-                        image.Attributes.Remove("xlink:href");
-                        image.Attributes.Add("xlink:href", $"{apiBase}" + imageFile);
+                        imageFile = correctedKey;
                     }
                 }
             }
+
+            return imageFile;
         }
 
         private static string PrepareFinalHtml(HtmlDocument doc, HtmlNode body)
