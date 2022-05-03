@@ -1,5 +1,5 @@
 <div class="offcanvas offcanvas-{{position}}" [class.show]="isOpen" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel"
-[ngStyle]="{'top': options.topOffset + 'px', 'visibility': isOpen ? 'visible' : 'hidden', 'padding-bottom': options.topOffset + 'px'}" role="dialog">
+[ngStyle]="{'top': options.topOffset + 'px', 'visibility': isOpen ? 'visible' : 'hidden'}" role="dialog">
   <div class="offcanvas-header">
     <div class="offcanvas-title" id="offcanvasLabel">
       <ng-content select="[header]"></ng-content>
