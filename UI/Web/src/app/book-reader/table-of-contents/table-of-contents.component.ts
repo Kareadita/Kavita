@@ -1,8 +1,5 @@
-import { DOCUMENT } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, Inject, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { debounceTime, fromEvent, Subject, takeUntil } from 'rxjs';
-import { ScrollService } from 'src/app/scroll.service';
-import { BookService } from '../book.service';
+import { Subject } from 'rxjs';
 import { BookChapterItem } from '../_models/book-chapter-item';
 
 @Component({
