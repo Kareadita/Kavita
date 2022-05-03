@@ -85,8 +85,27 @@
                 </ul>
             </ng-container>
 
-            <ng-container *ngIf="noResultsTemplate != undefined && searchTerm.length > 0 && !grouppedData.persons.length && !grouppedData.collections.length 
-                && !grouppedData.series.length && !grouppedData.persons.length && !grouppedData.tags.length && !grouppedData.genres.length && !grouppedData.libraries.length">
+            <ng-container *ngIf="chapterTemplate !== undefined && grouppedData.chapters.length > 0">
+                <li class="list-group-item section-header"><h5>Chapters</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.chapters; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="fileTemplate !== undefined && grouppedData.files.length > 0">
+                <li class="list-group-item section-header"><h5>Files</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.files; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="!hasData && searchTerm.length > 0">
               <ul class="list-group results">
                 <li class="list-group-item">
                   <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>

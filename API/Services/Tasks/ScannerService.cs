@@ -195,7 +195,7 @@ public class ScannerService : IScannerService
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
         if (folders.Any(f => !_directoryService.IsDriveMounted(f)))
         {
-            _logger.LogError("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
+            _logger.LogCritical("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
 
             await _eventHub.SendMessageAsync(MessageFactory.Error,
                 MessageFactory.ErrorEvent("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
@@ -267,6 +267,7 @@ public class ScannerService : IScannerService
         if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+
             return;
         }
 
@@ -460,9 +461,13 @@ public class ScannerService : IScannerService
             if (existingSeries != null) continue;
 
             var s = DbFactory.Series(infos[0].Series);
-            if (!string.IsNullOrEmpty(infos[0].SeriesSort))
+            if (!s.SortNameLocked && !string.IsNullOrEmpty(infos[0].SeriesSort))
             {
                 s.SortName = infos[0].SeriesSort;
+            }
+            if (!s.LocalizedNameLocked && !string.IsNullOrEmpty(infos[0].LocalizedSeries))
+            {
+                s.LocalizedName = infos[0].LocalizedSeries;
             }
             s.Format = key.Format;
             s.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
@@ -530,6 +535,13 @@ public class ScannerService : IScannerService
                 {
                     series.SortName = parsedInfos[0].SeriesSort;
                 }
+            }
+
+            // parsedInfos[0] is not the first volume or chapter. We need to find it
+            var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
+            if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
+            {
+                series.LocalizedName = localizedSeries;
             }
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));

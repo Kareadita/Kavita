@@ -1,17 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
-import { TypeaheadSettings } from '../typeahead/typeahead-settings';
-import { ChapterMetadata } from '../_models/chapter-metadata';
 import { Genre } from '../_models/genre';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
 import { Language } from '../_models/metadata/language';
 import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
-import { Person, PersonRole } from '../_models/person';
+import { Person } from '../_models/person';
 import { Tag } from '../_models/tag';
 
 @Injectable({

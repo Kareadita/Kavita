@@ -7,10 +7,15 @@
     <div main>
         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills" style="flex-wrap: nowrap;">
             <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
-              <a ngbNavLink>{{tab.title | sentenceCase}}</a>
+              <a ngbNavLink>
+                  <span class="d-none d-sm-flex align-items-center"><i class="fa {{tab.icon}} me-1" style="padding-right: 5px;" aria-hidden="true"></i> {{tab.title | sentenceCase}}</span>
+                  <span class="d-flex d-sm-none">
+                      <i class="fa {{tab.icon}}" aria-hidden="true"></i>
+                  </span>
+              </a>
               <ng-template ngbNavContent>
                 <ng-container *ngIf="tab.title === 'Recommended'">
-                  <app-library [libraryId]="libraryId"></app-library>
+                  <app-library-recommended [libraryId]="libraryId"></app-library-recommended>
                 </ng-container>
                 <ng-container *ngIf="tab.title === 'Library'">
                     <app-card-detail-layout 

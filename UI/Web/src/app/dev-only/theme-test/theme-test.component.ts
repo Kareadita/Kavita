@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
-import { ThemeService } from '../theme.service';
-import { MangaFormat } from '../_models/manga-format';
-import { Person, PersonRole } from '../_models/person';
-import { Series } from '../_models/series';
-import { NavService } from '../_services/nav.service';
+import { TagBadgeCursor } from '../../shared/tag-badge/tag-badge.component';
+import { ThemeService } from '../../_services/theme.service';
+import { MangaFormat } from '../../_models/manga-format';
+import { Person, PersonRole } from '../../_models/person';
+import { Series } from '../../_models/series';
+import { NavService } from '../../_services/nav.service';
 
 @Component({
   selector: 'app-theme-test',

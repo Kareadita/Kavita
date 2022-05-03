@@ -2,7 +2,7 @@
     <div class="container-fluid">
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
       <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
-      <a class="navbar-brand dark-exempt" routerLink="/library" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="d-none d-md-inline"> Kavita</span></a>
+      <a class="navbar-brand dark-exempt" routerLink="/libraries" routerLinkActive="active"><img class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="d-none d-md-inline"> Kavita</span></a>
       <ul class="navbar-nav col me-auto">
         
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
@@ -39,7 +39,7 @@
                   <ng-template #localizedName>
                     <span [innerHTML]="item.localizedName"></span>
                   </ng-template>
-                  <div class="form-text" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
+                  <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
                 </div>
               </div>
             </ng-template>
@@ -84,7 +84,7 @@
                 <div class="ms-1">
                   
                   <div [innerHTML]="item.name"></div>
-                  <div>{{item.role | personRole}}</div>
+                  <div class="text-light fst-italic">{{item.role | personRole}}</div>
                 </div>
               </div>
             </ng-template>
@@ -93,6 +93,28 @@
               <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
                 <div class="ms-1">
                   <div [innerHTML]="item.title"></div>
+                </div>
+              </div>
+            </ng-template>
+
+            
+
+            <ng-template #chapterTemplate let-item>
+              <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
+                <div class="ms-1">
+                  <ng-container *ngIf="item.files.length > 0">
+                    <app-series-format [format]="item.files[0].format"></app-series-format>
+                  </ng-container>
+                  <span>{{item.titleName}}</span>
+                </div>
+              </div>
+            </ng-template>
+
+            <ng-template #fileTemplate let-item>
+              <div style="display: flex;padding: 5px;" (click)="clickFileSearchResult(item)">
+                <div class="ms-1">
+                  <app-series-format [format]="item.format"></app-series-format>
+                  <span>{{item.filePath}}</span>
                 </div>
               </div>
             </ng-template>

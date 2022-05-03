@@ -13,7 +13,7 @@ import { ConfirmService } from '../shared/confirm.service';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { DownloadService } from '../shared/_services/download.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
+import { ReviewSeriesModalComponent } from './review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
@@ -33,8 +33,8 @@ import { ReaderService } from '../_services/reader.service';
 import { ReadingListService } from '../_services/reading-list.service';
 import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
-import { RelationKind } from '../_models/series-detail/relation-kind';
 import { RelatedSeries } from '../_models/series-detail/related-series';
+import { RelationKind } from '../_models/series-detail/relation-kind';
 
 interface RelatedSeris {
   series: Series;

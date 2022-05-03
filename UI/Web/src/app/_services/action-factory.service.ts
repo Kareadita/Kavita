@@ -250,7 +250,7 @@ export class ActionFactoryService {
       },
       {
         action: Action.IncognitoRead,
-        title: 'Read in Incognito',
+        title: 'Read Incognito',
         callback: this.dummyCallback,
         requiresAdmin: false
       },
@@ -277,7 +277,7 @@ export class ActionFactoryService {
       },
       {
         action: Action.IncognitoRead,
-        title: 'Read in Incognito',
+        title: 'Read Incognito',
         callback: this.dummyCallback,
         requiresAdmin: false
       },

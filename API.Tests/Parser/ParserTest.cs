@@ -63,6 +63,7 @@ namespace API.Tests.Parser
         [InlineData("- The Title", false, "The Title")]
         [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
+        [InlineData("Something - Full Color Edition", false, "Something - Full Color Edition")]
         public void CleanTitleTest(string input, bool isComic, string expected)
         {
             Assert.Equal(expected, CleanTitle(input, isComic));
@@ -198,6 +199,7 @@ namespace API.Tests.Parser
         [InlineData("ch1/cover.png", true)]
         [InlineData("ch1/backcover.png", false)]
         [InlineData("backcover.png", false)]
+        [InlineData("back_cover.png", false)]
         public void IsCoverImageTest(string inputPath, bool expected)
         {
             Assert.Equal(expected, IsCoverImage(inputPath));

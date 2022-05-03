@@ -1,19 +1,12 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { LibraryDetailComponent } from './library-detail/library-detail.component';
-import { SeriesDetailComponent } from './series-detail/series-detail.component';
-import { UserLoginComponent } from './user-login/user-login.component';
+import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
-import { DashboardComponent } from './dashboard/dashboard.component';
-import { AllSeriesComponent } from './all-series/all-series.component';
 import { AdminGuard } from './_guards/admin.guard';
-import { ThemeTestComponent } from './theme-test/theme-test.component';
 
 // TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
-
+// TODO: Use Prefetching of LazyLoaded Modules 
 const routes: Routes = [
-  {path: '', component: UserLoginComponent},
   {
     path: 'admin',
     canActivate: [AdminGuard],
@@ -47,40 +40,48 @@ const routes: Routes = [
     loadChildren: () => import('../app/bookmark/bookmark.module').then(m => m.BookmarkModule)
   },
   {
-    path: '',
+    path: 'all-series',
+    loadChildren: () => import('../app/all-series/all-series.module').then(m => m.AllSeriesModule)
+  },
+  {
+    path: 'libraries',
+    loadChildren: () => import('../app/dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: 'library',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],
     children: [
-      {path: 'library/:id', component: LibraryDetailComponent},
-      {path: 'library/:libraryId/series/:seriesId', component: SeriesDetailComponent},
       {
-        path: 'library/:libraryId/series/:seriesId/manga',
+        path: ':libraryId', 
+        pathMatch: 'full',
+        loadChildren: () => import('../app/library-detail/library-detail.module').then(m => m.LibraryDetailModule)
+      },
+      {
+        path: ':libraryId/series/:seriesId', 
+        pathMatch: 'full',
+        loadChildren: () => import('../app/series-detail/series-detail.module').then(m => m.SeriesDetailModule)
+      },
+      {
+        path: ':libraryId/series/:seriesId/manga',
         loadChildren: () => import('../app/manga-reader/manga-reader.module').then(m => m.MangaReaderModule)
       },
       {
-        path: 'library/:libraryId/series/:seriesId/book',
+        path: ':libraryId/series/:seriesId/book',
         loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
-      }
+      },
     ]
   },
   {
-    path: '',
-    runGuardsAndResolvers: 'always',
-    canActivate: [AuthGuard],
-    children: [
-      {path: 'library', component: DashboardComponent},
-      {path: 'all-series', component: AllSeriesComponent}, // TODO: This might be better as a separate module
-
-    ]
+    path: 'theme',
+    loadChildren: () => import('../app/dev-only/dev-only.module').then(m => m.DevOnlyModule)
   },
-  {path: 'theme', component: ThemeTestComponent},
-
-  {path: 'login', component: UserLoginComponent}, // TODO: move this to registration module
-  {path: '**', component: UserLoginComponent, pathMatch: 'full'}
+  {path: 'login', loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)},
+  {path: '**', pathMatch: 'full', redirectTo: 'libraries'},
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, {scrollPositionRestoration: 'enabled'})],
+  imports: [RouterModule.forRoot(routes, {scrollPositionRestoration: 'enabled', preloadingStrategy: PreloadAllModules})],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

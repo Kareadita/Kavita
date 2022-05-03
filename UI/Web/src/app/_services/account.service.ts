@@ -7,7 +7,7 @@ import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
-import { ThemeService } from '../theme.service';
+import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 
 @Injectable({

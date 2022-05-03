@@ -254,7 +254,6 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            // This should be normalized name
             var normalizedTitle = Parser.Parser.Normalize(tagTitle);
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
@@ -286,23 +285,21 @@ public class SeriesService : ISeriesService
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.Tags.ToList();
-        foreach (var existing in existingTags)
+        foreach (var existing in existingTags.Where(existing => tags.SingleOrDefault(t => t.Id == existing.Id) == null))
         {
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-            {
-                // Remove tag
-                series.Metadata.Tags.Remove(existing);
-                isModified = true;
-            }
+            // Remove tag
+            series.Metadata.Tags.Remove(existing);
+            isModified = true;
         }
 
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tagTitle);
+            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
             if (existingTag != null)
             {
-                if (series.Metadata.Tags.All(t => t.Title != tagTitle))
+                if (series.Metadata.Tags.All(t => t.NormalizedTitle != normalizedTitle))
                 {
 
                     handleAdd(existingTag);

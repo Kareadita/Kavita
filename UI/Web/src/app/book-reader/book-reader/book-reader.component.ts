@@ -17,16 +17,16 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { Stack } from 'src/app/shared/data-structures/stack';
 import { MemberService } from 'src/app/_services/member.service';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
-import { ScrollService } from 'src/app/scroll.service';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
-import { ThemeService } from 'src/app/theme.service';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
 import { PageStyle } from '../reader-settings/reader-settings.component';
 import { User } from 'src/app/_models/user';
 import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
+import { ThemeService } from 'src/app/_services/theme.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 
 
 enum TabID {
@@ -308,8 +308,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // check scroll offset and if offset is after any of the "id" markers, save progress
     fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(
-        debounceTime(200), 
-        takeUntil(this.onDestroy)) 
+        debounceTime(200),
+        takeUntil(this.onDestroy))
       .subscribe((event) => {
         if (this.isLoading) return;
 
@@ -393,7 +393,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
 
     if (libraryId === null || seriesId === null || chapterId === null) {
-      this.router.navigateByUrl('/library');
+      this.router.navigateByUrl('/libraries');
       return;
     }
 
@@ -455,7 +455,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chapters = results.chapters;
         this.pageNum = results.progress.pageNum;
         if (results.progress.bookScrollId) this.lastSeenScrollPartPath = results.progress.bookScrollId;
-        
+
 
 
         this.continuousChaptersStack.push(this.chapterId);
@@ -813,7 +813,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         //       path = '//html[1]/' + path;
         //     }
         //     this.lastSeenScrollPartPath = path;
-        // The offset of an element is always 0 for column mode 1. 
+        // The offset of an element is always 0 for column mode 1.
         console.log('[SaveProgress] from prev Page');
         this.saveProgress();
         return;
@@ -853,7 +853,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (scrollOffset + pageWidth < totalScroll) {
         this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);
-        this.handleScrollEvent(); 
+        this.handleScrollEvent();
         console.log('[SaveProgress] from nextPage');
         this.saveProgress();
         return;
@@ -963,7 +963,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
       setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
     } else {
-      // This doesn't work as the css isn't loaded yet. 
+      // This doesn't work as the css isn't loaded yet.
       const fromLeftOffset = element.getBoundingClientRect().left + window.pageXOffset;
       const pages = fromTopOffset / parseInt(this.ColumnHeight.replace('px', ''));
       console.log('fromLeftOffset: ', fromLeftOffset);
