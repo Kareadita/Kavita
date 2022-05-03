@@ -35,12 +35,12 @@ export class AppComponent implements OnInit {
       });
   }
 
-  @HostListener('resize')
-  onResize() {
+  @HostListener('window:resize', ['$event'])
+  onResize(){
     this.setDocHeight();
   }
 
-  @HostListener('orientationchange')
+  @HostListener('window:orientationchange', ['$event'])
   onOrientationChange() {
     this.setDocHeight();
   }

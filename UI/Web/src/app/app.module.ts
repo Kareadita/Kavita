@@ -15,10 +15,10 @@ import { NavModule } from './nav/nav.module';
 
 
 
+
 @NgModule({
   declarations: [
     AppComponent,
-
   ],
   imports: [
     HttpClientModule,

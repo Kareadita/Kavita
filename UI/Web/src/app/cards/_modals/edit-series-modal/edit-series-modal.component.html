@@ -352,6 +352,8 @@
                         <div class="col-md-6">Max Items: {{metadata.maxCount}}</div>
                         <div class="col-md-6">Total Items: {{metadata.totalCount}}</div>
                         <div class="col-md-6">Publication Status: {{metadata.publicationStatus | publicationStatus}}</div>
+                        <div class="col-md-6">Total Pages: {{series.pages}}</div>
+
                     </div>
                     <h4>Volumes</h4>
                     <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">

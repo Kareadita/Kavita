@@ -39,9 +39,9 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterActive: boolean = false;
   filterActiveCheck!: SeriesFilter;
 
-  tabs: Array<{title: string, fragment: string}> = [
-    {title: 'Library', fragment: ''},
-    {title: 'Recommended', fragment: 'recomended'},
+  tabs: Array<{title: string, fragment: string, icon: string}> = [
+    {title: 'Library', fragment: '', icon: 'fa-landmark'},
+    {title: 'Recommended', fragment: 'recomended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
 
