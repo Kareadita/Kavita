@@ -64,7 +64,6 @@ $primary-color: #0062cc;
 }
 
 
-// TODO: Refactor this to action bar
 .action-bar {
     background-color: var(--br-actionbar-bg-color); 
     overflow: hidden;
@@ -106,6 +105,9 @@ $primary-color: #0062cc;
 .book-content {
     position: relative;
     padding-top: 20px;
+    padding-bottom: 20px;
+    margin: 0px 0px;
+    height: calc(var(--vh)*100); // This will ensure bottom bar extends to the bottom of the screen
 
     a, :link {
         color: var(--brtheme-link-text-color);
