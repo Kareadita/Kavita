@@ -8,7 +8,6 @@ import { BookService } from 'src/app/book-reader/book.service';
 import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
-import { NavService } from 'src/app/_services/nav.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
@@ -71,9 +70,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   backgroundColor: any; // TODO: Hook into user pref
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
-    private navService: NavService, private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
+    private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
     private router: Router) {
-    this.fontFamilies = this.bookService.getFontFamilies().map(f => f.family);
+    this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
 
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
