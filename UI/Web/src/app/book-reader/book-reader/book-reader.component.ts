@@ -958,7 +958,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       partSelector = partSelector.substr(1, partSelector.length);
     }
 
-    let element = null;
+    let element: Element | null = null;
     if (partSelector.startsWith('//') || partSelector.startsWith('id(')) {
       // Part selector is a XPATH
       element = this.getElementFromXPath(partSelector);
@@ -968,6 +968,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
+    element.setAttribute('style', 'border: 1px solid red');
+
     const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
     if (this.layoutMode === BookPageLayoutMode.Default) {
       //const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
@@ -975,19 +977,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
     } else {
       // This doesn't work as the css isn't loaded yet.
-      const fromLeftOffset = element.getBoundingClientRect().left + window.pageXOffset;
-      const pages = fromTopOffset / parseInt(this.ColumnHeight.replace('px', ''));
-      console.log('fromLeftOffset: ', fromLeftOffset);
-      console.log('pages: ', pages);
-      console.log('scroll total: ', pages * 980);
+      //const fromLeftOffset = element.getBoundingClientRect().left + window.pageXOffset;
+      // let fromLeftOffset = (fromTopOffset / parseFloat(this.ColumnHeight.replace('px',''))) * parseFloat(this.ColumnWidth.replace('px', '')) + window.pageXOffset;
+      // const columnHeight = parseInt(this.ColumnHeight.replace('px', ''), 10);
+      // const pages = fromTopOffset / columnHeight;
+      // console.log('column width: ', this.ColumnWidth);
+      // console.log('column height: ', this.ColumnHeight);
+      // console.log('Height: ', this.windowHeight);
+
+
+      // console.log('fromLeftOffset: ', fromLeftOffset);
+      // console.log('pages: ', pages);
+      // //console.log('number of pages to increment innerheight: ', fromTopOffset / window.innerHeight - (this.topOffset *2));
+      // console.log('scroll total: ', parseInt(pages + '') * parseFloat(this.ColumnWidth.replace('px', ''))); // 980
+      // fromLeftOffset = parseInt(pages + '') * parseFloat(this.ColumnWidth.replace('px', ''))
+
+
       // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
-      setTimeout(() => this.scrollService.scrollTo(fromLeftOffset, this.reader.nativeElement), 10);
-
-      // TODO: But if we keep track of the virtual page we are on, we can use that * total width of the column to scroll properly
-
+      setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
     }
-
-
   }
 
 
