@@ -28,6 +28,11 @@
     src: url(../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf) format("truetype");
 }
 
+@font-face {
+    font-family: "OpenDyslexic2";
+    src: url(../../../assets/fonts/OpenDyslexic2/OpenDyslexic-Regular.otf) format("opentype");
+}
+
 :root {
     --br-actionbar-button-text-color: #6c757d;
 

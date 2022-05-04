@@ -9,7 +9,7 @@ import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ThemeService } from 'src/app/_services/theme.service';
-import { BookService } from '../book.service';
+import { BookService, FontFamily } from '../book.service';
 import { BookBlackTheme } from '../_models/book-black-theme';
 import { BookDarkTheme } from '../_models/book-dark-theme';
 import { BookWhiteTheme } from '../_models/book-white-theme';
@@ -93,7 +93,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * List of all font families user can select from
    */
-  fontFamilies: Array<string> = [];
+  fontOptions: Array<string> = [];
+  fontFamilies: Array<FontFamily> = [];
   /**
    * Internal property used to capture all the different css properties to render on all elements
    */
@@ -131,80 +132,83 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     
     this.fontFamilies = this.bookService.getFontFamilies();
+    this.fontOptions = this.fontFamilies.map(f => f.title);
 
-      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-        if (user) {
-          this.user = user;
-          
-          if (this.user.preferences.bookReaderFontFamily === undefined) {
-            this.user.preferences.bookReaderFontFamily = 'default';
-          }
-          if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
-            this.user.preferences.bookReaderFontSize = 100;
-          }
-          if (this.user.preferences.bookReaderLineSpacing === undefined || this.user.preferences.bookReaderLineSpacing < 100) {
-            this.user.preferences.bookReaderLineSpacing = 100;
-          }
-          if (this.user.preferences.bookReaderMargin === undefined) {
-            this.user.preferences.bookReaderMargin = 0;
-          }
-          if (this.user.preferences.bookReaderReadingDirection === undefined) {
-            this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
-          }
-
-
-          this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
-          
-          this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
-          this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(familyName => {
-            if (familyName === 'default') {
-              this.pageStyles['font-family'] = 'inherit';
-            } else {
-              this.pageStyles['font-family'] = "'" + familyName + "'";
-            }
-
-            this.styleUpdate.emit(this.pageStyles);
-          });
-          
-          this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
-          this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            this.pageStyles['font-size'] = value + '%';
-            this.styleUpdate.emit(this.pageStyles);
-          });
-
-          this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
-          this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            this.clickToPaginateChanged.emit(value);
-          });
-
-
-          this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
-          this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            this.pageStyles['line-height'] = value + '%';
-            this.styleUpdate.emit(this.pageStyles);
-          });
-
-          this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
-          this.settingsForm.get('bookReaderMargin')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
-            this.pageStyles['margin-left'] = value + '%';
-            this.pageStyles['margin-right'] = value + '%';
-            this.styleUpdate.emit(this.pageStyles);
-          });
-
-          this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
-          this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
-            console.log(layoutMode);
-            this.layoutModeUpdate.emit(layoutMode);
-          });
-
-          this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
-          this.resetSettings();
-        } else {
-          this.resetSettings();
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user) {
+        this.user = user;
+        
+        if (this.user.preferences.bookReaderFontFamily === undefined) {
+          this.user.preferences.bookReaderFontFamily = 'default';
+        }
+        if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
+          this.user.preferences.bookReaderFontSize = 100;
+        }
+        if (this.user.preferences.bookReaderLineSpacing === undefined || this.user.preferences.bookReaderLineSpacing < 100) {
+          this.user.preferences.bookReaderLineSpacing = 100;
+        }
+        if (this.user.preferences.bookReaderMargin === undefined) {
+          this.user.preferences.bookReaderMargin = 0;
+        }
+        if (this.user.preferences.bookReaderReadingDirection === undefined) {
+          this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
         }
 
+
+        this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
         
-      });
+        this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
+        this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(fontName => {
+          const familyName = this.fontFamilies.filter(f => f.title === fontName)[0].family;
+          console.log('Font selected', familyName);
+          if (familyName === 'default') {
+            this.pageStyles['font-family'] = 'inherit';
+          } else {
+            this.pageStyles['font-family'] = "'" + familyName + "'";
+          }
+
+          this.styleUpdate.emit(this.pageStyles);
+        });
+        
+        this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
+        this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.pageStyles['font-size'] = value + '%';
+          this.styleUpdate.emit(this.pageStyles);
+        });
+
+        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
+        this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.clickToPaginateChanged.emit(value);
+        });
+
+
+        this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
+        this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.pageStyles['line-height'] = value + '%';
+          this.styleUpdate.emit(this.pageStyles);
+        });
+
+        this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
+        this.settingsForm.get('bookReaderMargin')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.pageStyles['margin-left'] = value + '%';
+          this.pageStyles['margin-right'] = value + '%';
+          this.styleUpdate.emit(this.pageStyles);
+        });
+
+        this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
+        this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
+          console.log(layoutMode);
+          this.layoutModeUpdate.emit(layoutMode);
+        });
+
+        this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
+        this.resetSettings();
+      } else {
+        this.resetSettings();
+      }
+
+      
+    });
   }
 
   ngOnDestroy(): void {

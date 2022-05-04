@@ -73,7 +73,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
     private navService: NavService, private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
     private router: Router) {
-    this.fontFamilies = this.bookService.getFontFamilies();
+    this.fontFamilies = this.bookService.getFontFamilies().map(f => f.family);
 
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);

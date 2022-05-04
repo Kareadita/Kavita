@@ -14,7 +14,7 @@
                         <div class="mb-3">
                             <label for="library-type" class="form-label">Font Family</label>
                             <select class="form-control" id="library-type" formControlName="bookReaderFontFamily">
-                                <option [value]="opt" *ngFor="let opt of fontFamilies; let i = index">{{opt | titlecase}}</option>
+                                <option [value]="opt" *ngFor="let opt of fontOptions; let i = index">{{opt | titlecase}}</option>
                             </select>
                         </div>
                     </div>
