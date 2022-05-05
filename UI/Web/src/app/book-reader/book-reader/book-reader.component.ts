@@ -27,6 +27,7 @@ import { User } from 'src/app/_models/user';
 import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
+import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
 
 
 enum TabID {
@@ -218,6 +219,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   windowHeight: number = 0;
 
   user!: User;
+
+  /**
+   * Used to keep track of direction user is paging, to help with virtual paging on column layout
+   */
+  pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
 
 
@@ -696,7 +702,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.addLinkClickHandlers();
         this.updateReaderStyles(this.pageStyles);
-        //this.topOffset = this.stickyTopElemRef.nativeElement?.offsetHeight;
         this.updateReaderStyles(this.pageStyles);
 
         const imgs = this.readingSectionElemRef.nativeElement.querySelectorAll('img');
@@ -705,56 +710,33 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
-        // NOTE: This was moved to the backend
-        // Apply scaling class to all images to ensure they scale down to max width to not blow out the reader
-        // Array.from(imgs).forEach(img => {
-        //   this.renderer.addClass(img, 'scale-width');
-        //   //const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2 + 20;
-        //   //this.renderer.setStyle(img, 'max-width', pageWidth + 'px');
-        //   //this.renderer.setStyle(img, 'max-height', this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2));
-        //   //this.renderer.setStyle(img, 'max-height', (this.readingSectionElemRef.nativeElement.clientHeight - (this.topOffset * 2) - 40) + 'px');
-        // });
-
         Promise.all(Array.from(imgs)
-        .filter(img => !img.complete)
-        .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
-        .then(() => {
-          console.log('all Images loaded');
-          this.setupPage(part, scrollTop);
-          this.updateImagesWithHeight();
-
-        });
+          .filter(img => !img.complete)
+          .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
+          .then(() => {
+            this.setupPage(part, scrollTop);
+            this.updateImagesWithHeight();
+          });
       }, 10);
     });
   }
 
+  /**
+   * Applies a max-height inline css property on each image in the page if the layout mode is column-based, else it removes the property
+   */
   updateImagesWithHeight() {
     const images = this.readingSectionElemRef.nativeElement.querySelectorAll('img') || [];
 
-    // if (this.readingHtml === undefined) {
-    //   console.error('Trying to update scaling on images without the images being injected');
-    //   return;
-    // }
-
     if (this.layoutMode !== BookPageLayoutMode.Default) {
-
-      console.log('window height: ', window.innerHeight);
-      console.log('readingHtml height: ', this.readingHtml?.nativeElement?.clientHeight || 0);
-
-      const height = window.innerHeight - (this.topOffset *2) - (20*2)  + 'px'; // - 10 - 60
+      const height = this.ColumnHeight;
       Array.from(images).forEach(img => {
-        // reading area height - offset from reading bars - 20 padding on top and bottom - 10 padding top
-        // Then we need wiggle room
         this.renderer.setStyle(img, 'max-height', height);
-        console.log('setting max height: ', height);
       });
     } else {
       Array.from(images).forEach(img => {
         this.renderer.removeStyle(img, 'max-height');
       });
     }
-
-
   }
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
@@ -782,7 +764,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (scrollTop !== undefined && scrollTop !== 0) {
       this.scrollService.scrollTo(scrollTop, this.reader.nativeElement);
     } else {
-      this.scrollService.scrollTo(0, this.reader.nativeElement);
+
+      if (this.layoutMode === BookPageLayoutMode.Default) {
+        this.scrollService.scrollTo(0, this.reader.nativeElement);
+      } else {
+        this.reader.nativeElement.children
+        // We need to check if we are paging back, because we need to adjust the scroll
+        if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
+          this.scrollService.scrollToX(this.readingHtml.nativeElement.scrollWidth, this.readingHtml.nativeElement);
+        } else {
+          this.scrollService.scrollToX(0, this.readingHtml.nativeElement);
+        }
+        
+      }
+
+      
     }
 
     // we need to click the document before arrow keys will scroll down.
@@ -805,10 +801,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setPageNum(pageNum: number) {
     this.pageNum = Math.max(Math.min(pageNum, this.maxPages), 0);
+
+    if (this.pageNum >= this.maxPages - 10) {
+      // Tell server to cache the next chapter
+      if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
+        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
+          this.nextChapterPrefetched = true;
+        });
+      }
+    } else if (this.pageNum <= 10) {
+      if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
+        this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+          this.prevChapterPrefetched = true;
+        });
+      }
+    }
   }
 
   prevPage() {
     const oldPageNum = this.pageNum;
+
+    this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
 
     // We need to handle virtual paging before we increment the actual page
     if (this.layoutMode !== BookPageLayoutMode.Default) {
@@ -818,14 +831,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (scrollOffset - pageWidth >= 0) {
         this.scrollService.scrollToX(scrollOffset - pageWidth, this.readingHtml.nativeElement);
-        // TODO: I need a way to trigger a "scroll" or get the first element on this screen that's visible
-        // let path = this.getXPathTo(intersectingEntries[0]);
-        //     if (path === '') { return; }
-        //     if (!path.startsWith('id')) {
-        //       path = '//html[1]/' + path;
-        //     }
-        //     this.lastSeenScrollPartPath = path;
-        // The offset of an element is always 0 for column mode 1.
         console.log('[SaveProgress] from prev Page');
         this.saveProgress();
         return;
@@ -846,6 +851,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (oldPageNum === this.pageNum) { return; }
 
+    // If prev and in default layout, need to handle somehow
+
     this.loadPage();
   }
 
@@ -854,6 +861,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
+
+    this.pagingDirection = PAGING_DIRECTION.FORWARD;
 
     // We need to handle virtual paging before we increment the actual page
     if (this.layoutMode !== BookPageLayoutMode.Default) {
@@ -968,7 +977,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (element === null) return;
 
-    //element.setAttribute('style', 'border: 1px solid red');
+    element.setAttribute('style', 'border: 1px solid red');
 
     if (this.layoutMode === BookPageLayoutMode.Default) {
       const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
@@ -1031,9 +1040,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         // HACK: This is a bug with how browsers change the background color for fullscreen mode
-        //this.renderer.setStyle(this.reader.nativeElement, 'background', this.themeService.getCssVariable('--bs-body-color')); // This works
+        this.renderer.setStyle(this.reader.nativeElement, 'background', this.themeService.getCssVariable('--bs-body-color')); 
         if (!this.darkMode) {
-          this.renderer.setStyle(this.reader.nativeElement, 'background', 'white'); // TODO: CHange this to theme background color
+          this.renderer.setStyle(this.reader.nativeElement, 'background', 'white');
         }
       });
     }
