@@ -1,5 +1,6 @@
+<!-- IDEA: Move the whole reader drawer into this component and have it self contained -->
 <form [formGroup]="settingsForm">
-    <ngb-accordion [closeOthers]="false" #acc="ngbAccordion" activeIds="general-panel">
+    <ngb-accordion [closeOthers]="false" #acc="ngbAccordion" [activeIds]="['general-panel', 'reader-panel', 'color-panel']">
         <ngb-panel id="general-panel" title="General Settings">
             <ng-template ngbPanelHeader>
                 <h2 class="accordion-header">
