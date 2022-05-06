@@ -389,12 +389,8 @@ public class OpdsController : BaseApiController
         var userParams = new UserParams()
         {
             PageNumber = pageNumber,
-            PageSize = 20
         };
-        var results = await _unitOfWork.SeriesRepository.GetOnDeck(userId, 0, userParams, _filterDto);
-        var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize)
-            .Take(userParams.PageSize).ToList();
-        var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
+        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, 0, userParams, _filterDto);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 

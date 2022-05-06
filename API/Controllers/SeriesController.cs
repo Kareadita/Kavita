@@ -243,12 +243,8 @@ namespace API.Controllers
         [HttpPost("on-deck")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
-            // NOTE: This has to be done manually like this due to the DistinctBy requirement
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var results = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
-
-            var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize).Take(userParams.PageSize).ToList();
-            var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
+            var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
 
             await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
 

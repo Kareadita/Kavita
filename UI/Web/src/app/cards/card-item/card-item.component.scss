@@ -5,7 +5,7 @@ $image-height: 230px;
 $image-width: 160px;
 
 .error-banner {
-    width: 160px;
+    width: $image-width;
     height: 18px;
     background-color: var(--toast-error-bg-color);
     font-size: 12px;
@@ -52,7 +52,7 @@ $image-width: 160px;
 }
 
 .progress-banner {
-    width: 160px;
+    width: $image-width;
     height: 5px;
 
     .progress {
@@ -163,7 +163,7 @@ $image-width: 160px;
     top: 0;
     left: 0;
     width: 100%;
-    height: 230px;
+    height: $image-height;
     z-index: 10;
     transition: all 0.2s;
 }
