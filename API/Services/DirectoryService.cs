@@ -69,7 +69,7 @@ namespace API.Services
         private readonly ILogger<DirectoryService> _logger;
 
        private static readonly Regex ExcludeDirectories = new Regex(
-          @"@eaDir|\.DS_Store|\.qpkg",
+          @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
           RegexOptions.Compiled | RegexOptions.IgnoreCase);
        private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
            RegexOptions.Compiled | RegexOptions.IgnoreCase);
