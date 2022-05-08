@@ -35,7 +35,6 @@
 
 :root {
     --br-actionbar-button-text-color: #6c757d;
-
     --accordion-body-bg-color: black;
     --accordion-header-bg-color: grey;
     --br-actionbar-button-hover-border-color: #6c757d;
@@ -154,7 +153,7 @@ $primary-color: #0062cc;
 
 
 // This is applied to images in the backend
-::ng-deep .scale-width {
+::ng-deep .kavita-scale-width {
     max-width: 100%;
     object-fit: contain;
     object-position: top center;
