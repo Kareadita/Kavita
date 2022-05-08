@@ -1188,7 +1188,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       tempPageNum = this.pageNum + 1;
     }
 
-    if (!this.incognitoMode || !this.bookmarkMode) {
+    if (!this.incognitoMode && !this.bookmarkMode) {
       this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
   }

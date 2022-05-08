@@ -103,7 +103,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
-  isShiftDown: boolean = false;
+
+  /**
+   * Handles touch events for selection on mobile devices
+   */
+  prevTouchTime: number = 0;
+  /**
+   * Handles touch events for selection on mobile devices to ensure you are touch scrolling
+   */
+  prevOffset: number = 0;
 
   private user: User | undefined;
 
@@ -157,11 +165,11 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate), 
     map(evt => evt.payload as UserProgressUpdateEvent), takeUntil(this.onDestroy)).subscribe(updateEvent => {
-      if (this.user !== undefined && this.user.username !== updateEvent.username) return;
+      if (this.user === undefined || this.user.username !== updateEvent.username) return;
       if (this.utilityService.isChapter(this.entity) && updateEvent.chapterId !== this.entity.id) return;
       if (this.utilityService.isVolume(this.entity) && updateEvent.volumeId !== this.entity.id) return;
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
-
+      
       this.read = updateEvent.pagesRead;
     });
   }
@@ -172,8 +180,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
   }
 
 
-  prevTouchTime: number = 0;
-  prevOffset: number = 0;
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
     if (!this.allowSelection) return;
@@ -195,7 +201,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     if (verticalOffset != this.prevOffset) {
       this.prevTouchTime = 0;
-
       return;
     }
 

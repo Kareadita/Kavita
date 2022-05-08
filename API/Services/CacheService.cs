@@ -7,6 +7,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -145,6 +146,12 @@ namespace API.Services
                 else if (file.Format == MangaFormat.Epub)
                 {
                     removeNonImages = false;
+                    if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
+                    {
+                        _logger.LogError("{Archive} does not exist on disk", files[0].FilePath);
+                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
+                    }
+
                     _directoryService.ExistOrCreate(extractPath);
                     _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
                 }

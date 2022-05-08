@@ -63,10 +63,6 @@ label, select, .clickable {
   cursor: default;
 }
 
-html, body {
-  height: calc(var(--vh)*100 - 56px);
-}
-
 // Needed for fullscreen
 app-root {
   background-color: inherit;
