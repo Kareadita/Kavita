@@ -46,7 +46,7 @@
                         </span>
                     </div>
 
-                    <div class="row g-0 justify-content-between">
+                    <div class="row g-0 justify-content-between mt-2">
                         <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
                     </div>
                 </div>
@@ -74,7 +74,8 @@
                     <label for="tap-pagination" class="form-label">Tap Pagination</label>
                     <div class="accent" id="tap-pagination-help">Click the edges of the screen to paginate</div>
                     <div class="form-check form-switch">
-                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="tap-pagination-help">
+                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tap-pagination-help">
+                        <label>{{settingsForm.get('bookReaderTapToPaginate')?.value ? 'On' : 'Off'}} </label>
                     </div>
                 </div>
                 <div class="controls">
