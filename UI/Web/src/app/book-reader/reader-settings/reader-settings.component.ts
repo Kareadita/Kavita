@@ -160,7 +160,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(fontName => {
           const familyName = this.fontFamilies.filter(f => f.title === fontName)[0].family;
-          console.log('Font selected', familyName);
           if (familyName === 'default') {
             this.pageStyles['font-family'] = 'inherit';
           } else {
