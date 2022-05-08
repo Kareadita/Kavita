@@ -361,7 +361,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.lastSeenScrollPartPath !== '') {
-      console.log('[SaveProgress] from handleScrollEvent');
       this.saveProgress();
     }
   }
@@ -479,7 +478,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (this.pageNum >= this.maxPages) {
           this.pageNum = this.maxPages - 1;
-          console.log('[SaveProgress] from init when pageNum is more than maxPages');
           this.saveProgress();
         }
 
@@ -608,7 +606,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadChapterPage(event: {pageNum: number, part: string}) {
-    console.log('loading page', event.pageNum);
     this.setPageNum(event.pageNum);
     this.loadPage('id("' + event.part + '")');
   }
@@ -693,9 +690,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = true;
 
-    // console.log('[SaveProgress] from loadPage');
-    // this.saveProgress();
-
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
       this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
 
@@ -749,11 +743,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         || this.document.body.clientWidth;
 
     this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, this.windowHeight);
-
-    console.log('height: ', this.windowHeight);
     this.updateLayoutMode(this.layoutMode || BookPageLayoutMode.Default);
-
-
 
     // Find all the part ids and their top offset
     this.setupPageAnchors();
@@ -775,16 +765,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           this.scrollService.scrollToX(0, this.readingHtml.nativeElement);
         }
-        
-      }
-
-      
+      }  
     }
 
     // we need to click the document before arrow keys will scroll down.
     this.reader.nativeElement.focus();
-
-    console.log('[SaveProgress] from setupPage');
     this.saveProgress();
   }
 
@@ -831,7 +816,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (scrollOffset - pageWidth >= 0) {
         this.scrollService.scrollToX(scrollOffset - pageWidth, this.readingHtml.nativeElement);
-        console.log('[SaveProgress] from prev Page');
         this.saveProgress();
         return;
       }
@@ -875,7 +859,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (scrollOffset + pageWidth < totalScroll) {
         this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);
         this.handleScrollEvent();
-        console.log('[SaveProgress] from nextPage');
         this.saveProgress();
         return;
       }
@@ -944,7 +927,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Remove all themes
     Array.from(this.document.querySelectorAll('style[id^="brtheme-"]')).forEach(elem => elem.remove());
 
-    console.log('Setting Theme: ', theme);
     this.darkMode = theme.isDarkTheme;
 
     const styleElem = this.renderer.createElement('style');
@@ -952,7 +934,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     styleElem.innerHTML = theme.content;
 
 
-    console.log('Injected dark styles into book-content')
     this.renderer.appendChild(this.document.querySelector('.reading-section'), styleElem);
     // I need to also apply the selector onto the body so that any css variables will take effect
     this.themeService.setBookTheme(theme.selector);
