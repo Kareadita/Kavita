@@ -395,19 +395,36 @@ namespace API.Services
                 {
                     publicationDate = epubBook.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
                 }
+                var dateParsed = DateTime.TryParse(publicationDate, out var date);
+                var year = 0;
+                var month = 0;
+                var day = 0;
+                switch (dateParsed)
+                {
+                    case true:
+                        year = date.Year;
+                        month = date.Month;
+                        day = date.Day;
+                        break;
+                    case false when !string.IsNullOrEmpty(publicationDate) && publicationDate.Length == 4:
+                        int.TryParse(publicationDate, out year);
+                        break;
+                }
+
                 var info =  new ComicInfo()
                 {
                     Summary = epubBook.Schema.Package.Metadata.Description,
                     Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
-                    Month = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Month : 0,
-                    Day = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Day : 0,
-                    Year = !string.IsNullOrEmpty(publicationDate) ? DateTime.Parse(publicationDate).Year : 0,
+                    Month = month,
+                    Day = day,
+                    Year = year,
                     Title = epubBook.Title,
                     Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
                     LanguageISO = epubBook.Schema.Package.Metadata.Languages.FirstOrDefault() ?? string.Empty
-
                 };
+                ComicInfo.CleanComicInfo(info);
+
                 // Parse tags not exposed via Library
                 foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
                 {

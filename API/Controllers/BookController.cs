@@ -211,7 +211,6 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             var path = _cacheService.GetCachedEpubFile(chapter.Id, chapter);
 
-
             using var book = await EpubReader.OpenBookAsync(path, BookService.BookReaderOptions);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
 

@@ -34,6 +34,18 @@
         </app-badge-expander>
     </div>
 </div>
+<div class="row g-0" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">
+    <div class="col-md-4">
+        <h5>Tags</h5>
+    </div>
+    <div class="col-md-8">
+        <app-badge-expander [items]="seriesMetadata.tags">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+                <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Tags, item.id)" [selectionMode]="TagBadgeCursor.Clickable">{{item.title}}</app-tag-badge>
+            </ng-template>  
+        </app-badge-expander>
+    </div>
+</div>
 <div class="row g-0 mt-1" *ngIf="seriesMetadata.collectionTags && seriesMetadata.collectionTags.length > 0">
     <div class="col-md-4">
         <h5>Collections</h5>
@@ -159,18 +171,6 @@
             <app-badge-expander [items]="seriesMetadata.letterers">
                 <ng-template #badgeExpanderItem let-item let-position="idx">
                     <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Letterer, item.id)" [person]="item"></app-person-badge>
-                </ng-template>  
-            </app-badge-expander>
-        </div>
-    </div>
-    <div class="row g-0" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">
-        <div class="col-md-4">
-            <h5>Tags</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.tags">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Tags, item.id)" [selectionMode]="TagBadgeCursor.Clickable">{{item.title}}</app-tag-badge>
                 </ng-template>  
             </app-badge-expander>
         </div>

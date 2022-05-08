@@ -45,12 +45,16 @@ public class DownloadService : IDownloadService
         {
             contentType = Path.GetExtension(filepath).ToLowerInvariant() switch
             {
-                ".cbz" => "application/zip",
-                ".cbr" => "application/vnd.rar",
-                ".cb7" => "application/x-compressed",
+                ".cbz" => "application/x-cbz",
+                ".cbr" => "application/x-cbr",
+                ".cb7" => "application/x-cb7",
+                ".cbt" => "application/x-cbt",
                 ".epub" => "application/epub+zip",
                 ".7z" => "application/x-7z-compressed",
                 ".7zip" => "application/x-7z-compressed",
+                ".rar" => "application/vnd.rar",
+                ".zip" => "application/zip",
+                ".tar.gz" => "application/gzip",
                 ".pdf" => "application/pdf",
                 _ => contentType
             };
