@@ -6,9 +6,10 @@
     </div>
     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" (click)="close()"></button>
   </div>
-  <div class="row pe-2">
+  <div class="offcanvas-header row">
     <ng-content select="[subheader]"></ng-content>
   </div>
+  
   <div class="offcanvas-body">
     <ng-content select="[body]"></ng-content>
   </div>

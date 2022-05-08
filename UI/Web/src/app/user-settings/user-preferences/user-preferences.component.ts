@@ -2,7 +2,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { Options } from '@angular-slider/ngx-slider';
 import { Title } from '@angular/platform-browser';
 import { BookService } from 'src/app/book-reader/book.service';
 import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes } from 'src/app/_models/preferences/preferences';
@@ -13,6 +12,11 @@ import { SettingsService } from 'src/app/admin/settings.service';
 import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
 import { forkJoin } from 'rxjs';
+
+enum AccordionPanelID {
+  ImageReader = 'image-reader',
+  BookReader = 'book-reader'
+}
 
 @Component({
   selector: 'app-user-preferences',
@@ -39,22 +43,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   resetPasswordErrors: string[] = [];
 
   obserableHandles: Array<any> = [];
-
-  bookReaderLineSpacingOptions: Options = {
-    floor: 100,
-    ceil: 250,
-    step: 10,
-  };
-  bookReaderMarginOptions: Options = {
-    floor: 0,
-    ceil: 30,
-    step: 5,
-  };
-  bookReaderFontSizeOptions: Options = {
-    floor: 50,
-    ceil: 300,
-    step: 10,
-  };
   fontFamilies: Array<string> = [];
 
   tabs: Array<{title: string, fragment: string}> = [
@@ -67,7 +55,9 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsEnabled: boolean = false;
   makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
 
-  backgroundColor: any; // TODO: Hook into user pref
+  get AccordionPanelID() {
+    return AccordionPanelID;
+  }
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
     private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
@@ -181,7 +171,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
-      backgroundColor: this.user.preferences.backgroundColor,
+      backgroundColor: modelSettings.backgroundColor, // this.user.preferences.backgroundColor,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
