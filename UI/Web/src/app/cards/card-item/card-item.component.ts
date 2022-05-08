@@ -103,7 +103,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
-  isShiftDown: boolean = false;
+
+  /**
+   * Handles touch events for selection on mobile devices
+   */
+  prevTouchTime: number = 0;
+  /**
+   * Handles touch events for selection on mobile devices to ensure you are touch scrolling
+   */
+  prevOffset: number = 0;
 
   private user: User | undefined;
 
@@ -172,8 +180,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
   }
 
 
-  prevTouchTime: number = 0;
-  prevOffset: number = 0;
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
     if (!this.allowSelection) return;
@@ -195,7 +201,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     if (verticalOffset != this.prevOffset) {
       this.prevTouchTime = 0;
-
       return;
     }
 
