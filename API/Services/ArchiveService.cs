@@ -437,6 +437,12 @@ namespace API.Services
 
             if (Directory.Exists(extractPath)) return;
 
+            if (!_directoryService.FileSystem.File.Exists(archivePath))
+            {
+                _logger.LogError("{Archive} does not exist on disk", archivePath);
+                throw new KavitaException($"{archivePath} does not exist on disk");
+            }
+
             var sw = Stopwatch.StartNew();
 
             try
