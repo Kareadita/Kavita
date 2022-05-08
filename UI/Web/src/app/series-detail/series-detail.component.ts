@@ -134,7 +134,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
     const selectedSpecialIndexes = this.bulkSelectionService.getSelectedCardsForSource('special');
 
-    const selectedChapterIds = this.chapters.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
+    // NOTE: This needs to check current tab as chapter array will be different
+    let chapterArray = this.storyChapters;
+    if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters;
+
+    const selectedChapterIds = chapterArray.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
     const selectedVolumeIds = this.volumes.filter((_volume, index: number) => selectedVolumeIndexes.includes(index + ''));
     const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
     const chapters = [...selectedChapterIds, ...selectedSpecials];
