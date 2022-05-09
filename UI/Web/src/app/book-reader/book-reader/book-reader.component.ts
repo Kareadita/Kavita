@@ -508,12 +508,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   onResize(event: any){
     // Update the window Height
     this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
+    this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
   }
 
   @HostListener('window:orientationchange', ['$event'])
   onOrientationChange() {
     // Update the window Height
     this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
+    this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
   }
 
   @HostListener('window:keydown', ['$event'])

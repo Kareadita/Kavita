@@ -246,13 +246,13 @@ namespace API.Services
 
         private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
         {
-            var images = doc.DocumentNode.SelectNodes("//img");
+            var images = doc.DocumentNode.SelectNodes("//img")
+                         ?? doc.DocumentNode.SelectNodes("//image");
+
             if (images == null) return;
 
             foreach (var image in images)
             {
-                if (image.Name != "img") continue;
-
                 string key = null;
                 if (image.Attributes["src"] != null)
                 {
