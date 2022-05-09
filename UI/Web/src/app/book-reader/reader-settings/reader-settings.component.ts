@@ -179,6 +179,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
           this.clickToPaginateChanged.emit(value);
         });
+        this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); // Emit first time so book reader gets the setting
 
 
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));

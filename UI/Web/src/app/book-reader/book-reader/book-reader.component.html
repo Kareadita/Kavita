@@ -54,7 +54,7 @@
         <div #readingHtml class="book-content" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}"
             [innerHtml]="page" *ngIf="page !== undefined"></div>
 
-        <ng-container  *ngIf="clickToPaginate">
+        <ng-container *ngIf="clickToPaginate">
             <div class="left {{clickOverlayClass('left')}} no-observe" [ngStyle]="{'padding-top': topOffset + 'px'}" (click)="prevPage()" tabindex="-1"></div>
             <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" [ngStyle]="{'padding-top': topOffset + 'px'}" (click)="nextPage()" tabindex="-1"></div>
         </ng-container>

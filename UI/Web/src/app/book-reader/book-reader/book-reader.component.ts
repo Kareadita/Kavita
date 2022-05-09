@@ -901,7 +901,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingHtml === undefined || !this.readingHtml.nativeElement) return;
 
     // Before we apply styles, let's get an element on the screen so we can scroll to it after any shifts
-    // TODO: Figure this out
     let resumeElement: string | null = null;
     const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
@@ -1111,10 +1110,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   showPaginationOverlay(clickToPaginate: boolean) {
     this.clickToPaginate = clickToPaginate;
 
-    // if (this.clickToPaginateVisualOverlayTimeout2 !== undefined) {
-    //   clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-    //   this.clickToPaginateVisualOverlayTimeout2 = undefined;
-    // }
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
     if (!clickToPaginate) { return; }
 
