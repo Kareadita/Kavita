@@ -153,9 +153,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         if (this.user.preferences.bookReaderReadingDirection === undefined) {
           this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
         }
-
-
         this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
+        this.readingDirection.emit(this.readingDirectionModel);
         
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(fontName => {
@@ -197,9 +196,9 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
         this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
         this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
-          console.log(layoutMode);
           this.layoutModeUpdate.emit(layoutMode);
         });
+        this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
 
         this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
         this.resetSettings();
