@@ -156,8 +156,7 @@ namespace API.Services
 
         public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book)
         {
-            // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be
-            // Scoped
+            // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
             var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
             var importBuilder = new StringBuilder();
             foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
