@@ -25,7 +25,7 @@
                             <a ngbNavLink>Settings</a>
                             <ng-template ngbNavContent>
                                 <app-reader-settings
-                                    (colorThemeUpdate)="setOverrideStyles($event)"
+                                    (colorThemeUpdate)="updateColorTheme($event)"
                                     (styleUpdate)="updateReaderStyles($event)"
                                     (clickToPaginateChanged)="showPaginationOverlay($event)"
                                     (fullscreen)="toggleFullscreen()"

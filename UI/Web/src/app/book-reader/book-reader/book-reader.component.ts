@@ -3,7 +3,7 @@ import {DOCUMENT, Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, Subject } from 'rxjs';
-import { debounceTime, filter, take, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -24,10 +24,10 @@ import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
 import { PageStyle } from '../reader-settings/reader-settings.component';
 import { User } from 'src/app/_models/user';
-import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
+import { element } from 'protractor';
 
 
 enum TabID {
@@ -77,6 +77,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   volumeId!: number;
   chapterId!: number;
   chapter!: Chapter;
+  user!: User;
+
   /**
    * Reading List id. Defaults to -1.
    */
@@ -112,30 +114,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * A stack of the chapter ids we come across during continuous reading mode. When we traverse a boundary, we use this to avoid extra API calls.
    * @see Stack
    */
-  continuousChaptersStack: Stack<number> = new Stack(); // TODO: See if this can be moved into reader service so we can reduce code duplication between readers
+  continuousChaptersStack: Stack<number> = new Stack(); // TODO: See if continuousChaptersStack can be moved into reader service so we can reduce code duplication between readers (and also use ChapterInfo with it instead)
 
+  /**
+   * Belongs to the drawer component
+   */
   activeTabId: TabID = TabID.Settings;
-
+  /**
+   * Belongs to drawer component
+   */
   drawerOpen = false;
+  /**
+   * If we are loading from backend
+   */
   isLoading = true;
+  /**
+   * Title of the book. Rendered in action bars
+   */
   bookTitle: string = '';
-
-  clickToPaginate = false;
   /**
    * The boolean that decides if the clickToPaginate overlay is visible or not.
    */
   clickToPaginateVisualOverlay = false;
   clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
   clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
-
-  page: SafeHtml | undefined = undefined; // This is the html we get from the server
-  styles: SafeHtml | undefined = undefined; // This is the css we get from the server
-
-  @ViewChild('readingHtml', {static: false}) readingHtml!: ElementRef<HTMLDivElement>;
-  @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('reader', {static: true}) reader!: ElementRef;
-
+  /**
+   * This is the html we get from the server
+   */
+  page: SafeHtml | undefined = undefined;
   /**
    * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
@@ -187,9 +193,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   scrollbarNeeded = false;
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
-
-  private readonly onDestroy = new Subject<void>();
-
+  clickToPaginate = false;
+  /**
+   * A anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
+   */
   pageAnchors: {[n: string]: number } = {};
   currentPageAnchor: string = '';
   /**
@@ -200,7 +207,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Library Type used for rendering chapter or issue
    */
    libraryType: LibraryType = LibraryType.Book;
-
   /**
    * If the web browser is in fullscreen mode
    */
@@ -211,19 +217,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   layoutMode: BookPageLayoutMode = BookPageLayoutMode.Default;
 
-
   /**
    * Width of the document (in non-column layout), used for column layout virtual paging
    */
   windowWidth: number = 0;
   windowHeight: number = 0;
 
-  user!: User;
-
   /**
    * Used to keep track of direction user is paging, to help with virtual paging on column layout
    */
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
+
+  private readonly onDestroy = new Subject<void>();
+
+  @ViewChild('readingHtml', {static: false}) readingHtml!: ElementRef<HTMLDivElement>;
+  @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('reader', {static: true}) reader!: ElementRef;
 
 
 
@@ -507,15 +517,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:resize', ['$event'])
   onResize(event: any){
     // Update the window Height
-    this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
-    this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
+    this.updateWidthAndHeightCalcs();
   }
 
   @HostListener('window:orientationchange', ['$event'])
   onOrientationChange() {
     // Update the window Height
-    this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
-    this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
+    this.updateWidthAndHeightCalcs();
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -892,6 +900,27 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageStyles = pageStyles;
     if (this.readingHtml === undefined || !this.readingHtml.nativeElement) return;
 
+    // Before we apply styles, let's get an element on the screen so we can scroll to it after any shifts
+    // TODO: Figure this out
+    let resumeElement: string | null = null;
+    const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
+      .filter(element => !element.classList.contains('no-observe'))
+      .filter(entry => {
+        return this.utilityService.isInViewport(entry, this.topOffset);
+      });
+
+    intersectingEntries.sort(this.sortElements);
+
+    if (intersectingEntries.length > 0) {
+      let path = this.getXPathTo(intersectingEntries[0]);
+      if (path === '') { return; }
+      if (!path.startsWith('id')) {
+      path = '//html[1]/' + path;
+      }
+      resumeElement = path;
+    }
+
+
     // Line Height must be placed on each element in the page
 
     // Apply page level overrides
@@ -918,12 +947,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           }
           this.renderer.setStyle(elem, item[0], item[1], RendererStyleFlags2.Important);
         });
-
     }
 
+    // TAfter layout shifts, we need to refocus the scroll bar
+    if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null) {
+      this.updateWidthAndHeightCalcs();
+      this.scrollTo(resumeElement); // This works pretty well, but not perfect
+    }
   }
 
-  setOverrideStyles(theme: BookTheme) {
+  /**
+   * Applies styles and classes that control theme
+   * @param theme 
+   */
+  updateColorTheme(theme: BookTheme) {
     // TODO: Put optimization in to avoid any work if the theme is the same as selected (or have reading settings control handle that)
 
     // Remove all themes
@@ -939,6 +976,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderer.appendChild(this.document.querySelector('.reading-section'), styleElem);
     // I need to also apply the selector onto the body so that any css variables will take effect
     this.themeService.setBookTheme(theme.selector);
+  }
+
+  updateWidthAndHeightCalcs() {
+    this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
+    this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
   }
 
   toggleDrawer() {
