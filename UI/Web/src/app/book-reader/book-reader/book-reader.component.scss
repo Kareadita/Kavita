@@ -98,7 +98,7 @@ $primary-color: #0062cc;
     max-height: 100vh;
     width: 100%;
     //overflow: auto;  // This will break progress reporting
-    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
 }
 
 .reader-container {
@@ -111,7 +111,7 @@ $primary-color: #0062cc;
     padding-top: 20px;
     padding-bottom: 20px;
     margin: 0px 0px;
-    height: calc(var(--vh)*100); // This will ensure bottom bar extends to the bottom of the screen
+    height: calc(var(--vh, 1vh) * 100); // This will ensure bottom bar extends to the bottom of the screen
 
     a, :link {
         color: var(--brtheme-link-text-color);
