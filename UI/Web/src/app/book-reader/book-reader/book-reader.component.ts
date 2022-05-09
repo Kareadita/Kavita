@@ -808,20 +808,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   prevPage() {
     const oldPageNum = this.pageNum;
+    console.log("oldpagenum:",oldPageNum);
 
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
 
     // We need to handle virtual paging before we increment the actual page
     const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
+    console.log("scrolloffset:",scrollOffset);
     if (this.layoutMode !== BookPageLayoutMode.Default && scrollOffset > 0) {
 
       
       const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
+      
       const columnPadding = 20;
       const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - margin + columnPadding;
 
       const scrollLeft = scrollOffset - pageWidth;
-      if (scrollLeft > 0 || scrollLeft < 0) {
+      if (scrollLeft > 0 || scrollLeft <= 0) {
+        console.log("scrollLeft:",scrollLeft);
         if (scrollLeft < 0) {
           this.scrollService.scrollToX(0, this.readingHtml.nativeElement);
         } else {
