@@ -350,25 +350,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-
     // Find the element that is on screen to bookmark against
-
-    const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
-                            .filter(element => !element.classList.contains('no-observe'))
-                            .filter(entry => {
-                              return this.utilityService.isInViewport(entry, this.topOffset);
-                            });
-
-    intersectingEntries.sort(this.sortElements);
-
-    if (intersectingEntries.length > 0) {
-      let path = this.getXPathTo(intersectingEntries[0]);
-        if (path === '') { return; }
-        if (!path.startsWith('id')) {
-          path = '//html[1]/' + path;
-        }
-        this.lastSeenScrollPartPath = path;
-    }
+    const xpath: string | null | undefined = this.getFirstVisibleElementXPath();
+    if (xpath !== null && xpath !== undefined) this.lastSeenScrollPartPath = xpath;
 
     if (this.lastSeenScrollPartPath !== '') {
       this.saveProgress();
@@ -518,12 +502,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   onResize(event: any){
     // Update the window Height
     this.updateWidthAndHeightCalcs();
+
+    const resumeElement = this.getFirstVisibleElementXPath();
+    if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
+      this.scrollTo(resumeElement); // This works pretty well, but not perfect
+    }
   }
 
   @HostListener('window:orientationchange', ['$event'])
   onOrientationChange() {
     // Update the window Height
     this.updateWidthAndHeightCalcs();
+    const resumeElement = this.getFirstVisibleElementXPath();
+    if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
+      this.scrollTo(resumeElement); // This works pretty well, but not perfect
+    }
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -893,14 +886,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.loadPage();
   }
 
-  /**
-   * Applies styles onto the html of the book page
-   */
-  updateReaderStyles(pageStyles: PageStyle) {
-    this.pageStyles = pageStyles;
-    if (this.readingHtml === undefined || !this.readingHtml.nativeElement) return;
-
-    // Before we apply styles, let's get an element on the screen so we can scroll to it after any shifts
+  getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
     const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
@@ -918,6 +904,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       resumeElement = path;
     }
+    return resumeElement;
+  }
+
+  /**
+   * Applies styles onto the html of the book page
+   */
+  updateReaderStyles(pageStyles: PageStyle) {
+    this.pageStyles = pageStyles;
+    if (this.readingHtml === undefined || !this.readingHtml.nativeElement) return;
+
+    // Before we apply styles, let's get an element on the screen so we can scroll to it after any shifts
+    const resumeElement: string | null | undefined = this.getFirstVisibleElementXPath();
 
 
     // Line Height must be placed on each element in the page
@@ -948,8 +946,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    // TAfter layout shifts, we need to refocus the scroll bar
-    if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null) {
+    // After layout shifts, we need to refocus the scroll bar
+    if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.updateWidthAndHeightCalcs();
       this.scrollTo(resumeElement); // This works pretty well, but not perfect
     }
