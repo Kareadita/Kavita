@@ -224,6 +224,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   windowHeight: number = 0;
 
   /**
+   * used to track if a click is a drag or not, for opening menu
+   */
+  mousePosition = {
+    x: 0,
+    y: 0
+  };
+
+  /**
    * Used to keep track of direction user is paging, to help with virtual paging on column layout
    */
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
@@ -814,10 +822,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // We need to handle virtual paging before we increment the actual page
     const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
     if (this.layoutMode !== BookPageLayoutMode.Default && scrollOffset > 0) {
-
-      
       const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
-      
       const columnPadding = 20;
       const pageWidth = this.readingSectionElemRef.nativeElement.clientWidth - margin + columnPadding;
 
@@ -1164,19 +1169,24 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   toggleMenu(event: MouseEvent) {
-    console.log('event: ', event);
-    console.log('target: ', (event.target as Element));
-
     const targetElement = (event.target as Element);
+    const mouseOffset = 5;
 
     if (targetElement.getAttribute('onclick') !== null || targetElement.getAttribute('href') !== null || targetElement.getAttribute('role') !== null) {
       // Don't do anything, it's actionable
       return;
     }
 
-    // TODO: Check if it's a drag event
+    if (
+      Math.abs(this.mousePosition.x - event.screenX) <= mouseOffset &&
+      Math.abs(this.mousePosition.y - event.screenY) <= mouseOffset
+    ) {
+      this.drawerOpen = true;
+    }
+  }
 
-    //this.drawerOpen = true;
-    
+  mouseDown($event: MouseEvent) {
+    this.mousePosition.x = $event.screenX;
+    this.mousePosition.y = $event.screenY;
   }
 }
