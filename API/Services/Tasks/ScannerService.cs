@@ -301,6 +301,9 @@ public class ScannerService : IScannerService
 
         await CleanupDbEntities();
 
+        // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
+        //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
     }
 
@@ -712,7 +715,7 @@ public class ScannerService : IScannerService
             }
         }
 
-        // BUG: The issue here is that people is just from chapter, but series metadata might already have some people on it
+        // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
         // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();
         PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,

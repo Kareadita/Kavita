@@ -18,5 +18,12 @@ export class ScrollService {
       top: top,
       behavior: 'smooth' 
     });
-  }  
+  }
+  
+  scrollToX(left: number, el: Element | Window = window) {
+    el.scroll({
+      left: left,
+      behavior: 'auto'
+    });
+  }
 }

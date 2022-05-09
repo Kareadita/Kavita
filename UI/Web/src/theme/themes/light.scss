@@ -3,24 +3,28 @@
     --color-scheme: light;
     --primary-color: #4ac694;
     --primary-color-dark-shade: #3B9E76;
+    --primary-color-darker-shade: #338A67;
+    --primary-color-darkest-shade: #25624A;
     --error-color: #ff4136;
-    --bs-body-bg: #fff; 
+    --bs-body-bg: #fff;
     --body-text-color: #333;
-    --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
-    
+    --btn-icon-filter: none;
+
     /* Navbar */
     --navbar-bg-color: black;
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
-  
+
     /* Inputs */
     --input-bg-color: #fff;
     --input-focused-border-color: #ccc;
     --input-bg-readonly-color: unset;
     --input-placeholder-color: #aeaeae;
     --input-border-color: #ccc;
-  
+    --input-range-color: var(--primary-color);
+    --input-range-active-color: var(--primary-color-darker-shade);
+
     /* Buttons */
     --btn-primary-text-color: black;
     --btn-primary-bg-color: white;
@@ -69,30 +73,31 @@
     --side-nav-active-bg-color: rgba(0,0,0,0.5);
     --side-nav-item-active-text-color: white;
     --side-nav-overlay-color: rgba(0,0,0,0.5);
-  
-    
+
+
     /* Checkboxes */
     --checkbox-checked-bg-color: var(--primary-color);
     --checkbox-bg-color: white;
     --checkbox-border-color: var(--primary-color);
     --checkbox-focus-border-color: var(--input-border-color);
-  
+
     /* Tagbadge */
     --tagbadge-bg-color: #c9c9c9;
-  
+
     /* Toasts */
     --toast-success-bg-color: rgba(74, 198, 148, 0.9);
     --toast-error-bg-color: #BD362F;
     --toast-info-bg-color: #2F96B4;
     --toast-warning-bg-color: #F89406;
-  
+
     /* Rating star */
     --ratingstar-star-empty: #b0c4de;
     --ratingstar-star-filled: var(--primary-color);
-  
+
     /* Global */
-    --accent-bg-color: rgba(206, 206, 206, 0.5);
-    --accent-text-color: black;
+    --accent-bg-color: rgba(206, 206, 206, 0.5); // Drawer had: var(--bs-body-bg)
+    --accent-text-color: grey;
+    --accent-text-size: 0.8rem;
     --hr-color: rgba(239, 239, 239, 0.125);
     --grid-breakpoints-xs: $grid-breakpoint-xs;
     --grid-breakpoints-sm: $grid-breakpoint-sm;
@@ -102,7 +107,7 @@
     --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
     --brand-font-family: "Spartan", sans-serif;
     --text-muted-color: #aaa;
-  
+
     /* Breadcrumb */
     --breadcrumb-bg-color: #eaeaea;
     --breadcrumb-item-text-color: var(--body-text-color);
@@ -113,7 +118,7 @@
     --card-progress-bar-color: var(--primary-color);
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
     --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
-  
+
     /* List items */
     --list-group-item-text-color: var(--body-text-color);
     --list-group-item-bg-color: white;
@@ -121,13 +126,13 @@
     --list-group-hover-bg-color: #eaeaea;
     --list-group-item-border-color: rgba(239, 239, 239, 0.125);
     --list-group-active-border-color: none;
-  
+
     /* Dropdown */
     --dropdown-item-hover-text-color: white;
     --dropdown-item-hover-bg-color: var(--primary-color);
     --dropdown-overlay-color: rgba(0,0,0,0.5);
     --dropdown-item-bg-color: white;
-    
+
     /* Manga Reader */
     --manga-reader-overlay-filter: blur(10px);
     --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
@@ -135,7 +140,7 @@
     --manga-reader-bg-color: black;
     --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);
     --manga-reader-prev-highlight-bg-color: rgba(65, 105, 225, 0.5);
-   
+
     /* Radios */
     --radio-accent-color: var(--primary-color);
     --radio-hover-accent-color: var(--primary-color-dark-shade);
@@ -146,7 +151,9 @@
     --carousel-hover-header-text-decoration: underline;
 
     /** Drawer */
-    --drawer-background-color: white;
+    --drawer-background-color: white; // TODO: Use bg
+    --drawer-bg-color: white;
+    --drawer-text-color: black;
 
     /* Pagination */
     --pagination-active-link-border-color: var(--primary-color);
@@ -172,4 +179,17 @@
     --popover-arrow-color: lightgrey;
     --popover-bg-color: lightgrey;
     --popover-border-color: lightgrey;
-}
+
+    /* Accordion */
+    --accordion-header-text-color: rgba(74, 198, 148, 0.9);
+    --accordion-header-bg-color: var(--bs-body-bg);
+    --accordion-body-bg-color: var(--bs-body-bg);
+    --accordion-active-body-bg-color: var(--bs-body-bg);
+    --accordion-body-border-color: rgba(239, 239, 239, 0.125);
+    --accordion-body-text-color: var(--body-text-color);
+    --accordion-header-collapsed-text-color: var(--body-text-color);
+    --accordion-header-collapsed-bg-color: var(--bs-body-bg);
+    --accordion-button-focus-border-color: rgba(74, 198, 148, 0.9);
+    --accordion-button-focus-box-shadow: unset;
+
+  }

@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Theme;
 
-public class UpdateDefaultSiteThemeDto
+public class UpdateDefaultThemeDto
 {
     public int ThemeId { get; set; }
 }

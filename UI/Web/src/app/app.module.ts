@@ -26,7 +26,7 @@ import { NavModule } from './nav/nav.module';
     AppRoutingModule,
     BrowserAnimationsModule,
 
-    SidenavModule, 
+    SidenavModule,
     NavModule,
 
     ToastrModule.forRoot({

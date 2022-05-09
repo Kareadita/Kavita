@@ -25,6 +25,7 @@ namespace API.Entities
         /// </example>
         /// </summary>
         public ReaderMode ReaderMode { get; set; }
+
         /// <summary>
         /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
         /// </summary>
@@ -41,10 +42,6 @@ namespace API.Entities
         /// Manga Reader Option: Background color of the reader
         /// </summary>
         public string BackgroundColor { get; set; } = "#000000";
-        /// <summary>
-        /// Book Reader Option: Should the background color be dark
-        /// </summary>
-        public bool BookReaderDarkMode { get; set; } = true;
         /// <summary>
         /// Book Reader Option: Override extra Margin
         /// </summary>
@@ -74,7 +71,17 @@ namespace API.Entities
         /// </summary>
         /// <remarks>Should default to Dark</remarks>
         public SiteTheme Theme { get; set; }
-
+        /// <summary>
+        /// Book Reader Option: The color theme to decorate the book contents
+        /// </summary>
+        /// <remarks>Should default to Dark</remarks>
+        public string BookThemeName { get; set; } = "Dark";
+        /// <summary>
+        /// Book Reader Option: The way a page from a book is rendered. Default is as book dictates, 1 column is fit to height,
+        /// 2 column is fit to height, 2 columns
+        /// </summary>
+        /// <remarks>Defaults to Default</remarks>
+        public BookPageLayoutMode PageLayoutMode { get; set; } = BookPageLayoutMode.Default;
 
 
         public AppUser AppUser { get; set; }

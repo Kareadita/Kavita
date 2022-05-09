@@ -2,7 +2,7 @@ import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
-import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
+import { UtilityService } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from '../typeahead/typeahead-settings';
 import { CollectionTag } from '../_models/collection-tag';
 import { Genre } from '../_models/genre';
@@ -17,8 +17,8 @@ import { Tag } from '../_models/tag';
 import { CollectionTagService } from '../_services/collection-tag.service';
 import { LibraryService } from '../_services/library.service';
 import { MetadataService } from '../_services/metadata.service';
-import { NavService } from '../_services/nav.service';
 import { SeriesService } from '../_services/series.service';
+import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 
 @Component({
@@ -43,7 +43,6 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
-  //@ContentChild('commentDrawer') commentDrawer: 
 
 
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
@@ -87,7 +86,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
-    private utilityService: UtilityService, private collectionTagService: CollectionTagService) {
+    private utilityService: UtilityService, private collectionTagService: CollectionTagService, public toggleService: ToggleService) {
   }
 
   ngOnInit(): void {
@@ -98,6 +97,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     if (this.filterOpen) {
       this.filterOpen.pipe(takeUntil(this.onDestroy)).subscribe(openState => {
         this.filteringCollapsed = !openState;
+        this.toggleService.set(!this.filteringCollapsed);
       });
     }
 
@@ -161,6 +161,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   close() {
     this.filterOpen.emit(false);
     this.filteringCollapsed = true;
+    this.toggleService.set(!this.filteringCollapsed);
   }
 
   ngOnDestroy() {
@@ -213,6 +214,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.resetTypeaheads.next(false); // Pass false to ensure we reset to the preset and not to an empty typeahead
       if (this.filterSettings.openByDefault) {
         this.filteringCollapsed = false;
+        this.toggleService.set(!this.filteringCollapsed);
       }
       this.apply();
     });
@@ -596,6 +598,16 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   apply() {
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
     this.updateApplied++;
+  }
+
+  toggleSelected() {
+    //this.filteringCollapsed = !this.filteringCollapsed;
+    this.toggleService.toggle();
+  }
+
+  setToggle(event: any) {
+    console.log('set toggle', event);
+    this.toggleService.set(!this.filteringCollapsed);
   }
 
 }

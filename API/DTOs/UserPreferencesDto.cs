@@ -1,4 +1,5 @@
-﻿using API.Entities;
+﻿using API.DTOs.Theme;
+using API.Entities;
 using API.Entities.Enums;
 
 namespace API.DTOs
@@ -74,5 +75,7 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>Should default to Dark</remarks>
         public SiteTheme Theme { get; set; }
+        public string BookReaderThemeName { get; set; }
+        public BookPageLayoutMode BookReaderLayoutMode { get; set; }
     }
 }

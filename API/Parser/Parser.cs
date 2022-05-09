@@ -43,7 +43,7 @@ namespace API.Parser
             MatchOptions, RegexTimeout);
 
 
-        private static readonly string XmlRegexExtensions = @"\.xml";
+        private const string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
             MatchOptions, RegexTimeout);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
@@ -999,7 +999,7 @@ namespace API.Parser
 
         public static bool HasBlacklistedFolderInPath(string path)
         {
-            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._");
+            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._") || path.Contains(".qpkg");
         }
 
 
