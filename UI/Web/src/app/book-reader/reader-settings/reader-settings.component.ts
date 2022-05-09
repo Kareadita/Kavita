@@ -154,7 +154,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
           this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
         }
         this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
-        this.readingDirection.emit(this.readingDirectionModel);
+        
         
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(fontName => {
@@ -178,8 +178,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
           this.clickToPaginateChanged.emit(value);
         });
-        this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); // Emit first time so book reader gets the setting
-
 
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
         this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
@@ -198,9 +196,15 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
           this.layoutModeUpdate.emit(layoutMode);
         });
-        this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
+        
 
         this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
+
+        // Emit first time so book reader gets the setting
+        this.readingDirection.emit(this.readingDirectionModel);
+        this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); 
+        this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
+
         this.resetSettings();
       } else {
         this.resetSettings();
