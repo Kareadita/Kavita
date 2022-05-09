@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angu
 import { Subject, takeUntil } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { NavService } from 'src/app/_services/nav.service';
+import { ToggleService } from 'src/app/_services/toggle.service';
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -39,7 +40,7 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
 
   private onDestroy: Subject<void> = new Subject();
 
-  constructor(private navService: NavService, private utilityService: UtilityService) {
+  constructor(private navService: NavService, private utilityService: UtilityService, public toggleService: ToggleService) {
   }
 
   ngOnInit(): void {
