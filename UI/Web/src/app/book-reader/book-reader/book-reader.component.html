@@ -52,7 +52,7 @@
         [@isLoading]="isLoading ? true : false">
 
         <div #readingHtml class="book-content" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}"
-            [innerHtml]="page" *ngIf="page !== undefined"></div>
+            [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)"></div>
 
         <ng-container *ngIf="clickToPaginate">
             <div class="left {{clickOverlayClass('left')}} no-observe" [ngStyle]="{'padding-top': topOffset + 'px'}" (click)="prevPage()" tabindex="-1"></div>

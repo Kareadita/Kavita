@@ -27,7 +27,6 @@ import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
-import { element } from 'protractor';
 
 
 enum TabID {
@@ -180,9 +179,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   pageStyles!: PageStyle;
 
-
-  darkMode = true;
-  backgroundColor: string = 'white';
   /**
    * Offset for drawer and rendering canvas. Fixed to 62px.
    */
@@ -194,6 +190,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   scrollbarNeeded = false;
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
   clickToPaginate = false;
+  /**
+   * Used solely for fullscreen to apply a hack
+   */
+  darkMode = true;
   /**
    * A anchors that map to the page number. When you click on one of these, we will load a given page up for the user.
    */
@@ -1151,5 +1151,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return side === 'right' ? 'highlight' : 'highlight-2';
     }
     return side === 'right' ? 'highlight-2' : 'highlight';
+  }
+
+  toggleMenu(event: MouseEvent) {
+    console.log('event: ', event);
+    console.log('target: ', (event.target as Element));
+
+    const targetElement = (event.target as Element);
+
+    if (targetElement.getAttribute('onclick') !== null || targetElement.getAttribute('href') !== null || targetElement.getAttribute('role') !== null) {
+      // Don't do anything, it's actionable
+      return;
+    }
+
+    // TODO: Check if it's a drag event
+
+    //this.drawerOpen = true;
+    
   }
 }
