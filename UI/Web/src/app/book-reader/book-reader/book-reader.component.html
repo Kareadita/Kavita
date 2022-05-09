@@ -51,7 +51,7 @@
     <div #readingSection class="reading-section {{ColumnLayout}}" [ngStyle]="{'padding-top': '62px'}"
         [@isLoading]="isLoading ? true : false">
 
-        <div #readingHtml class="book-content" [ngStyle]="{'columns': 'auto', 'max-height': ColumnHeight, 'column-width': ColumnWidth}"
+        <div #readingHtml class="book-content" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}"
             [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
         <ng-container *ngIf="clickToPaginate">

@@ -749,11 +749,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
     // Virtual Paging stuff
-    this.windowWidth = window.innerWidth
-        || this.document.documentElement.clientWidth
-        || this.document.body.clientWidth;
+    // this.windowWidth = window.innerWidth
+    //     || this.document.documentElement.clientWidth
+    //     || this.document.body.clientWidth;
 
-    this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, this.windowHeight);
+    // this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
+    this.updateWidthAndHeightCalcs();
     this.updateLayoutMode(this.layoutMode || BookPageLayoutMode.Default);
 
     // Find all the part ids and their top offset
@@ -834,7 +835,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.scrollService.scrollToX(scrollLeft, this.readingHtml.nativeElement);
         }
         this.handleScrollEvent();
-        this.saveProgress();
+        //this.saveProgress();
         return;
       }
     }
