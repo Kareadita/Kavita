@@ -77,6 +77,10 @@ $primary-color: #0062cc;
     .book-title-text {
         text-align: center;
         text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     
     @media(max-width: 875px) {
@@ -89,6 +93,7 @@ $primary-color: #0062cc;
         margin-top: 10px;
         text-align: center;
         text-transform: capitalize;
+        max-height: inherit;
     }
 }
 
