@@ -35,7 +35,7 @@ namespace API.Data
             return new Volume()
             {
                 Name = volumeNumber,
-                Number = (int) Parser.Parser.MinimumNumberFromRange(volumeNumber),
+                Number = (int) Parser.Parser.MinNumberFromRange(volumeNumber),
                 Chapters = new List<Chapter>()
             };
         }
@@ -46,7 +46,7 @@ namespace API.Data
             var specialTitle = specialTreatment ? info.Filename : info.Chapters;
             return new Chapter()
             {
-                Number = specialTreatment ? "0" : Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty,
+                Number = specialTreatment ? "0" : Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty,
                 Range = specialTreatment ? info.Filename : info.Chapters,
                 Title = (specialTreatment && info.Format == MangaFormat.Epub)
                     ? info.Title

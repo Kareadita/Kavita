@@ -926,25 +926,7 @@ namespace API.Parser
         }
 
 
-        public static float MaximumNumberFromRange(string range)
-        {
-            try
-            {
-                if (!Regex.IsMatch(range, @"^[\d-.]+$"))
-                {
-                    return (float) 0.0;
-                }
-
-                var tokens = range.Replace("_", string.Empty).Split("-");
-                return tokens.Max(float.Parse);
-            }
-            catch
-            {
-                return (float) 0.0;
-            }
-        }
-
-        public static float MinimumNumberFromRange(string range)
+        public static float MinNumberFromRange(string range)
         {
             try
             {
@@ -955,6 +937,24 @@ namespace API.Parser
 
                 var tokens = range.Replace("_", string.Empty).Split("-");
                 return tokens.Min(float.Parse);
+            }
+            catch
+            {
+                return (float) 0.0;
+            }
+        }
+
+        public static float MaxNumberFromRange(string range)
+        {
+            try
+            {
+                if (!Regex.IsMatch(range, @"^[\d-.]+$"))
+                {
+                    return (float) 0.0;
+                }
+
+                var tokens = range.Replace("_", string.Empty).Split("-");
+                return tokens.Max(float.Parse);
             }
             catch
             {

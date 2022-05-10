@@ -31,7 +31,7 @@ namespace API.Tests.Helpers
             return new Volume()
             {
                 Name = volumeNumber,
-                Number = (int) API.Parser.Parser.MinimumNumberFromRange(volumeNumber),
+                Number = (int) API.Parser.Parser.MinNumberFromRange(volumeNumber),
                 Pages = pages,
                 Chapters = chaps
             };
@@ -43,7 +43,7 @@ namespace API.Tests.Helpers
             {
                 IsSpecial = isSpecial,
                 Range = range,
-                Number = API.Parser.Parser.MinimumNumberFromRange(range) + string.Empty,
+                Number = API.Parser.Parser.MinNumberFromRange(range) + string.Empty,
                 Files = files ?? new List<MangaFile>(),
                 Pages = pageCount,
 
