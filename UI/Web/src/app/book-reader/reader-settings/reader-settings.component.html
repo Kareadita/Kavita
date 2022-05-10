@@ -63,23 +63,26 @@
                 </h2>
             </ng-template>
             <ng-template ngbPanelContent>
-                <div class="controls">
+                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
                     <label id="readingdirection" class="form-label">Reading Direction</label>
                     <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirectionModel === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                         <i class="fa {{readingDirectionModel === ReadingDirection.LeftToRight ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i>
                         <span class="phone-hidden">&nbsp;{{readingDirectionModel === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                     </button>
                 </div>
-                <div class="controls">
-                    <label for="tap-pagination" class="form-label">Tap Pagination</label>
-                    <div class="accent" id="tap-pagination-help">Click the edges of the screen to paginate</div>
+                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                    <label for="tap-pagination" class="form-label">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tapPagination-help"></i></label>
+                    <ng-template #tapPaginationTooltip>Click the edges of the screen to paginate</ng-template>
+                    <span class="visually-hidden" id="tapPagination-help">
+                        <ng-container [ngTemplateOutlet]="tapPaginationTooltip"></ng-container>
+                    </span>
                     <div class="form-check form-switch">
                         <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tap-pagination-help">
                         <label>{{settingsForm.get('bookReaderTapToPaginate')?.value ? 'On' : 'Off'}} </label>
                     </div>
                 </div>
-                <div class="controls">
-                    <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="0" aria-describedby="fullscreen-help"></i></label>
+                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                    <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
                     <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
                     <span class="visually-hidden" id="fullscreen-help">
                         <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
@@ -91,7 +94,11 @@
                 </div>
 
                 <div class="controls">
-                    <label id="layout-mode" class="form-label">Layout Mode</label>
+                    <label id="layout-mode" class="form-label">Layout Mode&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="layoutTooltip" role="button" tabindex="1" aria-describedby="layout-help"></i></label>
+                    <ng-template #layoutTooltip>Default: Mirrors epub file (usually one long scrolling page per chapter).<br/>1 Column: Creates a single virtual page at a time.<br/>2 Column: Creates two virtual at a time pages side-by-side.</ng-template>
+                    <span class="visually-hidden" id="layout-help">
+                        <ng-container [ngTemplateOutlet]="layoutTooltip"></ng-container>
+                    </span>
                     <br>
                     <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
                         <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Default" class="btn-check" id="layout-mode-default" autocomplete="off">
@@ -120,7 +127,7 @@
             <ng-template ngbPanelContent>
                 <div class="controls">
                     <ng-container *ngFor="let theme of themes">
-                        <button class="btn btn-icon" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
+                        <button class="btn btn-icon color" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
                             <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
                             {{theme.name}}
                         </button>
