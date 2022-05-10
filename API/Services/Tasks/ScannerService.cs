@@ -910,7 +910,7 @@ public class ScannerService : IScannerService
 
     private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, ComicInfo? info)
     {
-        var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+        var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
             _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) return;
 
