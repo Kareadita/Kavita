@@ -83,12 +83,17 @@ $primary-color: #0062cc;
     opacity: 0;
 }
 
+::ng-deep .bg-warning  {
+    background-color: yellow;
+}
+
 
 .action-bar {
     background-color: var(--br-actionbar-bg-color); 
     overflow: hidden;
     box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
-    max-height: 62px;
+    max-height: 38px;
+    height: 38px;
 
     .book-title-text {
         text-align: center;
@@ -124,6 +129,7 @@ $primary-color: #0062cc;
     width: 100%;
     //overflow: auto;  // This will break progress reporting
     height: calc(var(--vh, 1vh) * 100);
+    padding-top: 38px;
 }
 
 .reader-container {
@@ -153,7 +159,13 @@ $primary-color: #0062cc;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
+
+        &.debug {
+            column-rule: 20px solid rebeccapurple;
+        }
     }
+
+    
 }
 
 .column-layout-2 {
@@ -163,7 +175,13 @@ $primary-color: #0062cc;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
+
+        &.debug {
+            column-rule: 20px solid rebeccapurple;
+        }
     }
+
+    
 
 }
 
@@ -205,6 +223,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
+    padding-top: 38px;
 }
 
 // This class pushes the click area to the left a bit to let users click the scrollbar
@@ -218,6 +237,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
+    padding-top: 38px;
 }
 
 .left {
@@ -230,6 +250,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
+    padding-top: 38px;
 }
 
 .highlight {

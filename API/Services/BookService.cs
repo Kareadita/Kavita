@@ -282,22 +282,21 @@ namespace API.Services
         /// <returns></returns>
         private static string GetKeyForImage(EpubBookRef book, string imageFile)
         {
-            if (!book.Content.Images.ContainsKey(imageFile))
+            if (book.Content.Images.ContainsKey(imageFile)) return imageFile;
+
+            var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+            if (correctedKey != null)
             {
-                var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+                imageFile = correctedKey;
+            }
+            else if (imageFile.StartsWith(".."))
+            {
+                // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
+                correctedKey =
+                    book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
                 if (correctedKey != null)
                 {
                     imageFile = correctedKey;
-                }
-                else if (imageFile.StartsWith(".."))
-                {
-                    // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
-                    correctedKey =
-                        book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
-                    if (correctedKey != null)
-                    {
-                        imageFile = correctedKey;
-                    }
                 }
             }
 
@@ -320,12 +319,11 @@ namespace API.Services
         private static void RewriteAnchors(int page, HtmlDocument doc, Dictionary<string, int> mappings)
         {
             var anchors = doc.DocumentNode.SelectNodes("//a");
-            if (anchors != null)
+            if (anchors == null) return;
+
+            foreach (var anchor in anchors)
             {
-                foreach (var anchor in anchors)
-                {
-                    BookService.UpdateLinks(anchor, mappings, page);
-                }
+                UpdateLinks(anchor, mappings, page);
             }
         }
 

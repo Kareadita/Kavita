@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
@@ -13,6 +13,7 @@ import { BookService, FontFamily } from '../book.service';
 import { BookBlackTheme } from '../_models/book-black-theme';
 import { BookDarkTheme } from '../_models/book-dark-theme';
 import { BookWhiteTheme } from '../_models/book-white-theme';
+import { BookReaderStateService } from '../_services/book-reader-state.service';
 
 /**
  * Used for book reader. Do not use for other components
@@ -63,7 +64,6 @@ const mobileBreakpointMarginOverride = 700;
   styleUrls: ['./reader-settings.component.scss']
 })
 export class ReaderSettingsComponent implements OnInit, OnDestroy {
-
   /**
    * Outputs when clickToPaginate is changed
    */
@@ -127,7 +127,9 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
 
-  constructor(private bookService: BookService, private accountService: AccountService, @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
+  constructor(private bookService: BookService, private accountService: AccountService, 
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService,
+    public bookReaderState: BookReaderStateService) {}
 
   ngOnInit(): void {
     
@@ -196,12 +198,21 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
           this.layoutModeUpdate.emit(layoutMode);
         });
+
+        this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user.preferences.bookReaderImmersiveMode, []));
+        this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((immersiveMode: boolean) => {
+          this.bookReaderState.setImmersiveMode(immersiveMode);
+        });
         
 
         this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
 
         // Emit first time so book reader gets the setting
         this.readingDirection.emit(this.readingDirectionModel);
+        this.readingDirection.subscribe(d => {
+          // TODO: Refactor away the eventemitter
+          this.bookReaderState.setReadingDirection(d);
+        })
         this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); 
         this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
 

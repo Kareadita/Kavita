@@ -77,10 +77,22 @@
                         <ng-container [ngTemplateOutlet]="tapPaginationTooltip"></ng-container>
                     </span>
                     <div class="form-check form-switch">
-                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tap-pagination-help">
+                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tapPagination-help">
                         <label>{{settingsForm.get('bookReaderTapToPaginate')?.value ? 'On' : 'Off'}} </label>
                     </div>
                 </div>
+                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                    <label for="immersive-mode" class="form-label">Immersive Mode&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
+                    <ng-template #immersiveModeTooltip>This will hide the menu behind a click on the reader document. This should be used in conjunction with tap to paginate, but isn't required</ng-template>
+                    <span class="visually-hidden" id="immersiveMode-help">
+                        <ng-container [ngTemplateOutlet]="immersiveModeTooltip"></ng-container>
+                    </span>
+                    <div class="form-check form-switch">
+                        <input type="checkbox" id="immersive-mode" formControlName="bookReaderImmersiveMode" class="form-check-input" aria-labelledby="immersiveMode-help">
+                        <label>{{settingsForm.get('bookReaderImmersiveMode')?.value ? 'On' : 'Off'}} </label>
+                    </div>
+                </div>
+                <!-- TODO: move this inline style into a class -->
                 <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
                     <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
                     <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>

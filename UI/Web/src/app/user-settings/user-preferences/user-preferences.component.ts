@@ -114,6 +114,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
       this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
       this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
+      this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
     });
@@ -152,6 +153,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
     this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
+    this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
   }
 
   resetPasswordForm() {
@@ -180,7 +182,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),
       bookReaderThemeName: modelSettings.bookReaderThemeName,
-      theme: modelSettings.theme
+      theme: modelSettings.theme,
+      bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode
     };
 
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
