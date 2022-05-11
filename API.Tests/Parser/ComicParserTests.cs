@@ -81,6 +81,7 @@ namespace API.Tests.Parser
         [InlineData("Bd Fr-Aldebaran-Antares-t6", "Aldebaran-Antares")]
         [InlineData("Tintin - T22 Vol 714 pour Sydney", "Tintin")]
         [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
+        [InlineData("Métal Hurlant-n°31", "Métal Hurlant")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             filename = replaceUnderscores(filename);
@@ -130,6 +131,7 @@ namespace API.Tests.Parser
         [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
         [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "0")]
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
+        [InlineData("Métal Hurlant-n°31", "0")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             filename = replaceUnderscores(filename);
@@ -176,6 +178,7 @@ namespace API.Tests.Parser
         [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
         [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "1")]
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "0")]
+        [InlineData("Métal Hurlant-n°31", "31")]
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
