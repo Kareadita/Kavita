@@ -111,6 +111,10 @@ $primary-color: #0062cc;
         text-transform: capitalize;
         max-height: inherit;
     }
+
+    .next-page-highlight {
+        color: var(--primary-color);
+    }
 }
 
 

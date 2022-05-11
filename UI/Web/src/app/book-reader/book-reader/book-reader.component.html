@@ -65,11 +65,10 @@
 
     <ng-template #actionBar>
         <div class="action-bar row g-0 justify-content-between">
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1" (click)="prevPage()"
+            <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="prevPage()"
                 [disabled]="IsPrevDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}}" aria-hidden="true"></i>
-                <!-- TODO: Show a highlight color if this IsNextChapter -->
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
             </button>
             <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back">
                 <i class="fa fa-reply" aria-hidden="true"></i>
@@ -91,8 +90,7 @@
             <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
                 [disabled]="IsNextDisabled"
                 (click)="nextPage()" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}}" aria-hidden="true"></i>
-                <!-- TODO: Show a highlight color if this IsNextChapter -->
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
             </button>
         </div>
     </ng-template>
