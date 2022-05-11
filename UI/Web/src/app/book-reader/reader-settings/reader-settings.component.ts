@@ -13,7 +13,6 @@ import { BookService, FontFamily } from '../book.service';
 import { BookBlackTheme } from '../_models/book-black-theme';
 import { BookDarkTheme } from '../_models/book-dark-theme';
 import { BookWhiteTheme } from '../_models/book-white-theme';
-import { BookReaderStateService } from '../_services/book-reader-state.service';
 
 /**
  * Used for book reader. Do not use for other components
@@ -132,8 +131,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
   constructor(private bookService: BookService, private accountService: AccountService, 
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService,
-    public bookReaderState: BookReaderStateService) {}
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
 
   ngOnInit(): void {
     
@@ -209,7 +207,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
             this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
           }
           this.immersiveMode.emit(immersiveMode);
-          this.bookReaderState.setImmersiveMode(immersiveMode);
         });
         
 
@@ -217,10 +214,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
         // Emit first time so book reader gets the setting
         this.readingDirection.emit(this.readingDirectionModel);
-        this.readingDirection.subscribe(d => {
-          // TODO: Refactor away the eventemitter
-          this.bookReaderState.setReadingDirection(d);
-        })
         this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); 
         this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
 

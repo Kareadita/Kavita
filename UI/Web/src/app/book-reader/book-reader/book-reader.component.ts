@@ -27,8 +27,6 @@ import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
-import { bookLayoutModes } from 'src/app/_models/preferences/preferences';
-import { BookReaderStateService } from '../_services/book-reader-state.service';
 
 
 enum TabID {
@@ -345,7 +343,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService,
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
     private scrollService: ScrollService, private utilityService: UtilityService, private libraryService: LibraryService,
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService, public bookReaderState: BookReaderStateService) {
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
@@ -458,8 +456,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.init();
       }
     });
-
-    this.bookReaderState.readingDirection$.pipe(takeUntil(this.onDestroy), tap(d => this.readingDirection = d));
   }
 
   init() {
@@ -1232,21 +1228,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const targetElement = (event.target as Element);
     const mouseOffset = 5;
 
-    this.bookReaderState.immersiveMode$.pipe(take(1)).subscribe((mode) => {
-      if (!mode) return;
-      if (targetElement.getAttribute('onclick') !== null || targetElement.getAttribute('href') !== null || targetElement.getAttribute('role') !== null || targetElement.getAttribute('kavita-part') != null) {
-        // Don't do anything, it's actionable
-        return;
-      }
-  
-      if (
-        Math.abs(this.mousePosition.x - event.screenX) <= mouseOffset &&
-        Math.abs(this.mousePosition.y - event.screenY) <= mouseOffset
-      ) {
-        this.drawerOpen = true;
-        this.bookReaderState.setDrawerOpen(true);
-      }
-    });
+    if (!this.immersiveMode) return;
+    if (targetElement.getAttribute('onclick') !== null || targetElement.getAttribute('href') !== null || targetElement.getAttribute('role') !== null || targetElement.getAttribute('kavita-part') != null) {
+      // Don't do anything, it's actionable
+      return;
+    }
+
+    if (
+      Math.abs(this.mousePosition.x - event.screenX) <= mouseOffset &&
+      Math.abs(this.mousePosition.y - event.screenY) <= mouseOffset
+    ) {
+      this.drawerOpen = true;
+    }
+
   }
 
   mouseDown($event: MouseEvent) {

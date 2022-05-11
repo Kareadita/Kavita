@@ -9,7 +9,6 @@ import { PipeModule } from '../pipe/pipe.module';
 import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableOfContentsComponent } from './table-of-contents/table-of-contents.component';
 import { ReaderSettingsComponent } from './reader-settings/reader-settings.component';
-import { BookReaderStateService } from './_services/book-reader-state.service';
 
 
 @NgModule({
@@ -28,8 +27,6 @@ import { BookReaderStateService } from './_services/book-reader-state.service';
   ], exports: [
     BookReaderComponent,
     SafeStylePipe
-  ], providers: [
-    BookReaderStateService
   ]
 })
 export class BookReaderModule { }
