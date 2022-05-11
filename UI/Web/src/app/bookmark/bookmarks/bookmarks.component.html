@@ -1,9 +1,8 @@
 <app-side-nav-companion-bar [hasFilter]="false">
     <h2 title>
-        <app-card-actionables [actions]="actions"></app-card-actionables>
         Bookmarks
     </h2>
-    <h6 subtitle style="margin-left:40px;">{{series?.length}} Series</h6>
+    <h6 subtitle>{{series?.length}} Series</h6>
 </app-side-nav-companion-bar>
 <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 <app-card-detail-layout 
