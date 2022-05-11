@@ -5,6 +5,7 @@ import { ReadingDirection } from 'src/app/_models/preferences/reading-direction'
 @Injectable()
 export class BookReaderStateService {
 
+  // TODO: REmove this service
   private immersiveModeSource: ReplaySubject<boolean> = new ReplaySubject(1);
   public immersiveMode$ = this.immersiveModeSource.asObservable();
 
@@ -28,6 +29,6 @@ export class BookReaderStateService {
     this.readingDirectionSource.next(state);
   }
 
-  
+
 
 }

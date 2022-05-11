@@ -88,6 +88,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
    * Outputs when reading direction is changed
    */
   @Output() readingDirection: EventEmitter<ReadingDirection> = new EventEmitter();
+  /**
+   * Outputs when immersive mode is changed
+   */
+  @Output() immersiveMode: EventEmitter<boolean> = new EventEmitter();
   
   user!: User;
   /**
@@ -201,6 +205,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
         this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user.preferences.bookReaderImmersiveMode, []));
         this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((immersiveMode: boolean) => {
+          if (immersiveMode) {
+            this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
+          }
+          this.immersiveMode.emit(immersiveMode);
           this.bookReaderState.setImmersiveMode(immersiveMode);
         });
         

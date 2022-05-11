@@ -83,7 +83,7 @@
                 </div>
                 <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
                     <label for="immersive-mode" class="form-label">Immersive Mode&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
-                    <ng-template #immersiveModeTooltip>This will hide the menu behind a click on the reader document. This should be used in conjunction with tap to paginate, but isn't required</ng-template>
+                    <ng-template #immersiveModeTooltip>This will hide the menu behind a click on the reader document and turn tap to paginate on</ng-template>
                     <span class="visually-hidden" id="immersiveMode-help">
                         <ng-container [ngTemplateOutlet]="immersiveModeTooltip"></ng-container>
                     </span>

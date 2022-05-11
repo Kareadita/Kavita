@@ -40,6 +40,7 @@
                                     (fullscreen)="toggleFullscreen()"
                                     (layoutModeUpdate)="updateLayoutMode($event)"
                                     (readingDirection)="readingDirection = $event"
+                                    (immersiveMode)="immersiveMode = $event"
                                 ></app-reader-settings>
                             </ng-template>
                           </li>
@@ -73,7 +74,7 @@
     </div>
 
     <ng-template #actionBar>
-        <div class="action-bar row g-0 justify-content-between" *ngIf="!(bookReaderState.immersiveMode$ | async) || drawerOpen">
+        <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen">
             <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="prevPage()"
                 [disabled]="IsPrevDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
