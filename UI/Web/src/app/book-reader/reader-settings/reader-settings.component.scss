@@ -1,5 +1,5 @@
 .controls {
-    margin: 0.5rem 0 0;
+    margin: 0.25rem 0 0.25rem;
 
     .form-label {
         margin: 0;
@@ -36,4 +36,8 @@
 
 .active {
     border: 1px solid var(--primary-color);
+}
+
+::ng-deep .accordion-body {
+    padding: 0.25rem 1rem 1rem !important;
 }

@@ -18,9 +18,8 @@
                 </div>
             </div>
             <div body class="drawer-body">
-                <!-- TODO: Center align the tab pills -->
                 <nav role="navigation">
-                    <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-pills mb-2" [destroyOnHide]="false">
+                    <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
                         <li [ngbNavItem]="TabID.Settings">
                             <a ngbNavLink>Settings</a>
                             <ng-template ngbNavContent>

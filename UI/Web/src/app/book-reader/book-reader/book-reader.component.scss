@@ -57,6 +57,22 @@ $primary-color: #0062cc;
     padding-right: 2px;
 }
 
+.drawer-body {
+    .reader-pills {
+        justify-content: center;
+        margin: 0 0.25rem;
+
+        li a {
+            border: 1px solid var(--primary-color);
+            margin: 0 0.25rem;
+
+            .active {
+                border: unset;
+            }
+        }
+    }
+}
+
 //          Drawer End
 
 .fixed-top {
@@ -113,8 +129,6 @@ $primary-color: #0062cc;
 
 .book-content {
     position: relative;
-    padding-top: 20px;
-    padding-bottom: 20px;
     margin: 0px 0px;
     height: calc(var(--vh, 1vh) * 100); // This will ensure bottom bar extends to the bottom of the screen
 

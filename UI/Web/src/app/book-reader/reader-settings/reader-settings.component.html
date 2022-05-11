@@ -94,7 +94,7 @@
                 </div>
 
                 <div class="controls">
-                    <label id="layout-mode" class="form-label">Layout Mode&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="layoutTooltip" role="button" tabindex="1" aria-describedby="layout-help"></i></label>
+                    <label id="layout-mode" class="form-label" style="margin-bottom:0.5rem">Layout Mode&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="layoutTooltip" role="button" tabindex="1" aria-describedby="layout-help"></i></label>
                     <ng-template #layoutTooltip>Default: Mirrors epub file (usually one long scrolling page per chapter).<br/>1 Column: Creates a single virtual page at a time.<br/>2 Column: Creates two virtual pages at a time laid out side-by-side.</ng-template>
                     <span class="visually-hidden" id="layout-help">
                         <ng-container [ngTemplateOutlet]="layoutTooltip"></ng-container>
