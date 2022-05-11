@@ -103,13 +103,12 @@ export class CardItemComponent implements OnInit, OnDestroy {
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
-
   /**
    * Handles touch events for selection on mobile devices
    */
   prevTouchTime: number = 0;
   /**
-   * Handles touch events for selection on mobile devices to ensure you are touch scrolling
+   * Handles touch events for selection on mobile devices to ensure you aren't touch scrolling
    */
   prevOffset: number = 0;
 

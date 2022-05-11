@@ -183,7 +183,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromPagination(this.pagination);
+    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
     this.loadPage();
   }
 
