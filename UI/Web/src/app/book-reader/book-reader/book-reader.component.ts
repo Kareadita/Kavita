@@ -749,11 +749,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
 
     // Virtual Paging stuff
-    // this.windowWidth = window.innerWidth
-    //     || this.document.documentElement.clientWidth
-    //     || this.document.body.clientWidth;
-
-    // this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
     this.updateWidthAndHeightCalcs();
     this.updateLayoutMode(this.layoutMode || BookPageLayoutMode.Default);
 
@@ -801,16 +796,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.pageNum >= this.maxPages - 10) {
       // Tell server to cache the next chapter
-      if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
+      if (!this.nextChapterPrefetched) {
         this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
           this.nextChapterPrefetched = true;
         });
+      } else {
+        this.nextChapterDisabled = this.nextChapterId === CHAPTER_ID_DOESNT_EXIST;
+        console.log('next chapter disabled');
       }
     } else if (this.pageNum <= 10) {
-      if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
+      if (!this.prevChapterPrefetched) {
         this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
           this.prevChapterPrefetched = true;
         });
+      } else {
+        this.prevChapterDisabled = this.prevChapterId === CHAPTER_ID_DOESNT_EXIST;
       }
     }
   }
