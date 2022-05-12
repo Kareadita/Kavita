@@ -76,8 +76,8 @@
             [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
         <ng-container *ngIf="clickToPaginate">
-            <div class="left {{clickOverlayClass('left')}} no-observe" (click)="prevPage()" tabindex="-1"></div>
-            <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="nextPage()" tabindex="-1"></div>
+            <div class="left {{clickOverlayClass('left')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)" tabindex="-1"></div>
+            <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" tabindex="-1"></div>
         </ng-container>
 
         <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();">
@@ -87,8 +87,8 @@
 
     <ng-template #actionBar>
         <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen">
-            <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="prevPage()"
-                [disabled]="IsPrevDisabled"
+            <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+                [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsPrevDisabled : IsNextDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
                 <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
             </button>
@@ -110,8 +110,8 @@
             </div>
             <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
             <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
-                [disabled]="IsNextDisabled"
-                (click)="nextPage()" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
+                [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
+                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
                 <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
             </button>
         </div>

@@ -263,6 +263,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return ReadingDirection;
   }
 
+  get PAGING_DIRECTION() {
+    return PAGING_DIRECTION;
+  }
+
   /**
    * Disables the Left most button
    */
@@ -848,6 +852,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
     }
+  }
+
+  movePage(direction: PAGING_DIRECTION) {
+    if (direction === PAGING_DIRECTION.BACKWARDS) {
+      this.prevPage();
+      return;
+    }
+
+    this.nextPage();
   }
 
   prevPage() {
