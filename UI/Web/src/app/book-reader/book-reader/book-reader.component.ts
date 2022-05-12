@@ -856,11 +856,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
 
     // We need to handle virtual paging before we increment the actual page
-    if (this.layoutMode !== BookPageLayoutMode.Default) { //  && scrollOffset > 0
+    if (this.layoutMode !== BookPageLayoutMode.Default) {
       const [currentVirtualPage, _, pageWidth] = this.getVirtualPage();
 
       if (currentVirtualPage > 1) {
-        this.scrollService.scrollToX(currentVirtualPage * pageWidth, this.readingHtml.nativeElement);
+        this.scrollService.scrollToX(currentVirtualPage - 1 * pageWidth, this.readingHtml.nativeElement);
         this.handleScrollEvent();
         return;
       }
@@ -939,7 +939,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns 
    */
   getVirtualPage() {
-    if (this.readingHtml === undefined || this.readingSectionElemRef === undefined) return [0, 0, 0];
+    if (this.readingHtml === undefined || this.readingSectionElemRef === undefined) return [1, 1, 0];
 
     const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
     const totalScroll = this.readingHtml.nativeElement.scrollWidth;
@@ -950,19 +950,33 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // console.log('page width: ', pageWidth);
     // console.log('delta: ', totalScroll - scrollOffset)
 
-    // If everything fits on a single page
-    if (totalScroll - pageWidth === 0) {
-      return [1, 1, pageWidth];
-    }
+    // // If everything fits on a single page
+    // if (totalScroll - pageWidth === 0) {
+    //   return [1, 1, pageWidth];
+    // }
 
-    // totalVirtualPages needs to be -1 because we can't scroll to totalOffset only on page 2
+    // // totalVirtualPages needs to be -1 because we can't scroll to totalOffset only on page 2
 
-    const currentVirtualPage = Math.max(1, (scrollOffset === 0) ? 1 : Math.round(scrollOffset / pageWidth));
-    let totalVirtualPages = Math.max(1, Math.round((totalScroll - pageWidth) / pageWidth));
+    // const currentVirtualPage = Math.max(1, (scrollOffset === 0) ? 1 : Math.round(scrollOffset / pageWidth));
 
-    
+    const delta = totalScroll - scrollOffset;
+    //let totalVirtualPages = Math.max(1, Math.round((totalScroll - pageWidth) / pageWidth));
+    const totalVirtualPages = Math.max(1, Math.round((totalScroll) / pageWidth));
+    let currentVirtualPage = 1;
 
-    //console.log('currentPage: ', currentVirtualPage , ' totalPage: ', totalVirtualPages);
+    // If first virtual page, i.e. totalScroll and delta are the same value
+    if (totalScroll - delta === 0) {
+      currentVirtualPage = 1;
+    // If second virtual page
+    } else if (totalScroll - delta === pageWidth) {
+      currentVirtualPage = 2;
+
+    // Otherwise do math to get correct page. i.e. scrollOffset + pageWidth (this accounts for first page offset)
+    } else {
+      currentVirtualPage = Math.min(Math.max(1, Math.round((scrollOffset + pageWidth) / pageWidth)), totalVirtualPages);
+    } 
+
+    console.log('currentPage: ', currentVirtualPage , ' totalPage: ', totalVirtualPages);
     
     return [currentVirtualPage, totalVirtualPages, pageWidth];
   }
