@@ -39,7 +39,7 @@ interface HistoryPoint {
   scrollOffset: number;
 }
 
-const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up
+const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
 const CHAPTER_ID_NOT_FETCHED = -2;
 const CHAPTER_ID_DOESNT_EXIST = -1;
 
@@ -263,14 +263,26 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return ReadingDirection;
   }
 
+  /**
+   * Disables the Left most button
+   */
   get IsPrevDisabled(): boolean {
-    // TODO: hook in virtual paging
+    const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       // Acting as Previous button
-      return this.prevPageDisabled && this.pageNum === 0;
+      const condition =  this.prevPageDisabled && this.pageNum === 0 ;
+      if (this.layoutMode !== BookPageLayoutMode.Default) {
+        return condition && currentVirtualPage === 0;
+      }
+      return condition;
+
     } else {
       // Acting as a Next button
-      return this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+      const condition =  this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+      if (this.layoutMode !== BookPageLayoutMode.Default) {
+        return condition && currentVirtualPage === totalVirtualPages;
+      }
+      return condition;
     }
   }
 
@@ -928,6 +940,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
+    console.log('margin: ', margin);
     const columnGap = 20;
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + columnGap;
   }
@@ -942,13 +955,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
     const totalScroll = this.readingHtml.nativeElement.scrollWidth;
     const pageWidth = this.getPageWidth();
+    const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
 
     console.log('scrollOffset: ', scrollOffset);
     console.log('totalScroll: ', totalScroll);
     console.log('page width: ', pageWidth);
+    console.log('delta: ', totalScroll - scrollOffset)
 
-    const totalVirtualPages = Math.round(totalScroll / pageWidth);
-    const currentVirtualPage = (scrollOffset === 0) ? 1 : Math.round(scrollOffset / pageWidth);
+    const currentVirtualPage = (scrollOffset === 0) ? 0 : Math.round(scrollOffset / pageWidth);
+    const totalVirtualPages = Math.round((totalScroll - pageWidth) / pageWidth); // ?! totalVirtualPages needs to be -1 because we can't scroll to totalOffset
 
     console.log('currentPage: ', currentVirtualPage , ' totalPage: ', totalVirtualPages);
     
