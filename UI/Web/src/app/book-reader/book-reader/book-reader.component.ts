@@ -808,9 +808,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reader.nativeElement.children
         // We need to check if we are paging back, because we need to adjust the scroll
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-          this.scrollService.scrollToX(this.readingHtml.nativeElement.scrollWidth, this.readingHtml.nativeElement);
+          setTimeout(() => this.scrollService.scrollToX(this.readingHtml.nativeElement.scrollWidth, this.readingHtml.nativeElement));
         } else {
-          this.scrollService.scrollToX(0, this.readingHtml.nativeElement);
+          setTimeout(() => this.scrollService.scrollToX(0, this.readingHtml.nativeElement));
         }
       }  
     }
@@ -856,21 +856,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
 
     // We need to handle virtual paging before we increment the actual page
-    const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
     if (this.layoutMode !== BookPageLayoutMode.Default) { //  && scrollOffset > 0
-      // TODO: Clean this up
-
       const [currentVirtualPage, _, pageWidth] = this.getVirtualPage();
-      const scrollLeft = scrollOffset - pageWidth;
-      console.log('scrolling to ', scrollLeft);
 
       if (currentVirtualPage > 1) {
-        // if (currentVirtualPage === 1) {
-        //   this.scrollService.scrollToX(0, this.readingHtml.nativeElement);
-        // } else {
-        //   this.scrollService.scrollToX(scrollLeft, this.readingHtml.nativeElement);
-        // }
-        this.scrollService.scrollToX(scrollLeft, this.readingHtml.nativeElement);
+        this.scrollService.scrollToX(currentVirtualPage * pageWidth, this.readingHtml.nativeElement);
         this.handleScrollEvent();
         return;
       }
@@ -940,7 +930,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingSectionElemRef == null) return 0;
 
     const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
-    console.log('margin: ', margin);
     const columnGap = 20;
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + columnGap;
   }
@@ -955,17 +944,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
     const totalScroll = this.readingHtml.nativeElement.scrollWidth;
     const pageWidth = this.getPageWidth();
-    const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
 
-    console.log('scrollOffset: ', scrollOffset);
-    console.log('totalScroll: ', totalScroll);
-    console.log('page width: ', pageWidth);
-    console.log('delta: ', totalScroll - scrollOffset)
+    // console.log('scrollOffset: ', scrollOffset);
+    // console.log('totalScroll: ', totalScroll);
+    // console.log('page width: ', pageWidth);
+    // console.log('delta: ', totalScroll - scrollOffset)
 
-    const currentVirtualPage = (scrollOffset === 0) ? 0 : Math.round(scrollOffset / pageWidth);
-    const totalVirtualPages = Math.round((totalScroll - pageWidth) / pageWidth); // ?! totalVirtualPages needs to be -1 because we can't scroll to totalOffset
+    // If everything fits on a single page
+    if (totalScroll - pageWidth === 0) {
+      return [1, 1, pageWidth];
+    }
 
-    console.log('currentPage: ', currentVirtualPage , ' totalPage: ', totalVirtualPages);
+    // totalVirtualPages needs to be -1 because we can't scroll to totalOffset only on page 2
+
+    const currentVirtualPage = Math.max(1, (scrollOffset === 0) ? 1 : Math.round(scrollOffset / pageWidth));
+    let totalVirtualPages = Math.max(1, Math.round((totalScroll - pageWidth) / pageWidth));
+
+    
+
+    //console.log('currentPage: ', currentVirtualPage , ' totalPage: ', totalVirtualPages);
     
     return [currentVirtualPage, totalVirtualPages, pageWidth];
   }
