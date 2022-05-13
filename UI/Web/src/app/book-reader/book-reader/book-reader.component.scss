@@ -151,15 +151,17 @@ $primary-color: #0062cc;
 }
 
 .pagination-cont {
+    background: var(--br-actionbar-bg-color);
     border-radius: 5px;
     padding: 5px 15px;
     margin: 0 0 5px;
+    border: var(--drawer-pagination-border);
 }
 
 .virt-pagination-cont {
     padding-bottom: 5px;
     margin-bottom: 5px;
-    box-shadow: inset 0 -1px 0 rgb(0 0 0 / 13%);
+    box-shadow: var(--drawer-pagination-horizontal-rule);
 }
 
 

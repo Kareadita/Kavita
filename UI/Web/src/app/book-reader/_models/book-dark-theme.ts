@@ -13,6 +13,8 @@ export const BookDarkTheme = `
   /* Drawer */
   --drawer-bg-color: #292929;
   --drawer-text-color: white;
+  --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(255 255 255 / 20%);
+  --drawer-pagination-border: 1px solid rgb(0 0 0 / 13%);
 
   /* Accordion */
   --accordion-header-text-color: rgba(74, 198, 148, 0.9);
@@ -87,6 +89,7 @@ export const BookDarkTheme = `
     --br-actionbar-button-text-color: white;
     --br-actionbar-button-hover-border-color: #6c757d;
     --br-actionbar-bg-color: black;
+    
 }
 
 
@@ -126,11 +129,4 @@ background-color: initial !important;
 .book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
 .book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
 
-.pagination-cont {
-  background: #000;
-}
-
-.virt-pagination-cont {
-  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 20%) !important;
-}
 `;

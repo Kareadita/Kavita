@@ -2,15 +2,14 @@
 export const BookWhiteTheme = `
   :root .brtheme-white {
     --br-actionbar-bg-color: white;
+
+    /* Drawer */
+    --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(0 0 0 / 13%);
+    --drawer-pagination-border: 1px solid rgb(0 0 0 / 13%);
   }
   .reader-container {
     color: black !important;
     background-image: none !important;
     background-color: white !important;
-  }
-
-  .pagination-cont {
-    background: transparent;
-    border: 1px solid rgb(0 0 0 / 13%);
   }
 `;
