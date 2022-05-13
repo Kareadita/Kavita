@@ -860,7 +860,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const [currentVirtualPage, _, pageWidth] = this.getVirtualPage();
 
       if (currentVirtualPage > 1) {
-        this.scrollService.scrollToX((currentVirtualPage - 1) * pageWidth, this.readingHtml.nativeElement);
+
+        // -2 apparently goes back 1 virtual page...
+        this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.readingHtml.nativeElement);
         this.handleScrollEvent();
         return;
       }
@@ -898,7 +900,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (currentVirtualPage < totalVirtualPages) {
         //this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);
-        this.scrollService.scrollToX((currentVirtualPage + 1) * pageWidth, this.readingHtml.nativeElement);
+        // +0 apparently goes forward 1 virtual page...
+        this.scrollService.scrollToX((currentVirtualPage + 0) * pageWidth, this.readingHtml.nativeElement);
         this.handleScrollEvent();
         return;
       }
