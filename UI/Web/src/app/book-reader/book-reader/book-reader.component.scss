@@ -139,6 +139,7 @@ $primary-color: #0062cc;
 
 .book-content {
     position: relative;
+    padding: 20px 0;
     margin: 0px 0px;
     height: calc(var(--vh, 1vh) * 100); // This will ensure bottom bar extends to the bottom of the screen
 
@@ -147,6 +148,19 @@ $primary-color: #0062cc;
     }
 
     background-color: var(--brtheme-bg-color);
+}
+
+.pagination-cont {
+    background: var(--navbar-bg-color);
+    border-radius: 5px;
+    padding: 5px 15px;
+    margin: 0 0 5px;
+}
+
+.virt-pagination-cont {
+    border-bottom: 1px solid var(--side-nav-bg-color);
+    padding-bottom: 5px;
+    margin-bottom: 5px;
 }
 
 
