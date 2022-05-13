@@ -2,8 +2,8 @@ import { AfterViewInit, Component, ElementRef, HostListener, Inject, OnDestroy, 
 import {DOCUMENT, Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, fromEvent, Subject } from 'rxjs';
-import { debounceTime, take, takeUntil, tap } from 'rxjs/operators';
+import { forkJoin, fromEvent, of, Subject } from 'rxjs';
+import { catchError, debounceTime, take, takeUntil, tap } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -274,7 +274,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       // Acting as Previous button
-      const condition =  this.prevPageDisabled && this.pageNum === 0 ;
+      const condition =  this.prevPageDisabled && this.pageNum === 0;
       if (this.layoutMode !== BookPageLayoutMode.Default) {
         return condition && currentVirtualPage === 0;
       }
@@ -292,9 +292,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get IsNextDisabled(): boolean {
     // TODO: hook in virtual paging
+    const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
+
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       // Acting as Next button
-      return this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+      const condition = this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+      if (this.layoutMode !== BookPageLayoutMode.Default) {
+        return condition && currentVirtualPage === totalVirtualPages;
+      }
+      return condition;
     } else {
       // Acting as Previous button
       return this.prevPageDisabled && this.pageNum === 0;
@@ -502,8 +508,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.volumeId = results.chapter.volumeId;
         this.maxPages = results.chapter.pages;
         this.chapters = results.chapters;
-        this.pageNum = results.progress.pageNum;
+        //this.pageNum = results.progress.pageNum;
         if (results.progress.bookScrollId) this.lastSeenScrollPartPath = results.progress.bookScrollId;
+
+        this.setPageNum(results.progress.pageNum);
 
 
 
@@ -840,14 +848,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.pageNum >= this.maxPages - 10) {
       // Tell server to cache the next chapter
-      if (!this.nextChapterPrefetched && this.nextChapterId !== CHAPTER_ID_DOESNT_EXIST  && !this.nextChapterDisabled) {
-        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
+      if (!this.nextChapterPrefetched && this.nextChapterId !== CHAPTER_ID_DOESNT_EXIST) { //   && !this.nextChapterDisabled
+        this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1), catchError(err => {
+          this.nextChapterDisabled = true;
+          return of(null);
+        })).subscribe(res => {
           this.nextChapterPrefetched = true;
         });
       }
     } else if (this.pageNum <= 10) {
-      if (!this.prevChapterPrefetched  && this.prevChapterId !== CHAPTER_ID_DOESNT_EXIST && !this.prevChapterDisabled) {
-        this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+      if (!this.prevChapterPrefetched  && this.prevChapterId !== CHAPTER_ID_DOESNT_EXIST) { //  && !this.prevChapterDisabled
+        this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1), catchError(err => {
+          this.prevChapterDisabled = true;
+          return of(null);
+        })).subscribe(res => {
           this.prevChapterPrefetched = true;
         });
       }
@@ -907,8 +921,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // We need to handle virtual paging before we increment the actual page
     if (this.layoutMode !== BookPageLayoutMode.Default) {
-
-      const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
       const [currentVirtualPage, totalVirtualPages, pageWidth] = this.getVirtualPage();
 
       if (currentVirtualPage < totalVirtualPages) {
