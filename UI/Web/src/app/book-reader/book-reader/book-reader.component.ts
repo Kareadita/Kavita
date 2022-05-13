@@ -271,44 +271,46 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Disables the Left most button
    */
   get IsPrevDisabled(): boolean {
-    const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
     if (this.readingDirection === ReadingDirection.LeftToRight) {
       // Acting as Previous button
-      const condition =  this.prevPageDisabled && this.pageNum === 0;
+      return this.isPrevPageDisabled();
+    }
+
+    // Acting as a Next button
+    return this.isNextPageDisabled();
+  }
+
+  get IsNextDisabled(): boolean {
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      // Acting as Next button
+      return this.isNextPageDisabled();
+    }
+    // Acting as Previous button
+    return this.isPrevPageDisabled();
+  }
+
+  isNextPageDisabled() {
+    const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
+    const condition = this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+      if (this.layoutMode !== BookPageLayoutMode.Default) {
+        return condition && currentVirtualPage === totalVirtualPages;
+      }
+      return condition;
+  }
+
+  isPrevPageDisabled() {
+    const [currentVirtualPage,,] = this.getVirtualPage();
+    const condition =  this.prevPageDisabled && this.pageNum === 0;
       if (this.layoutMode !== BookPageLayoutMode.Default) {
         return condition && currentVirtualPage === 0;
       }
       return condition;
-
-    } else {
-      // Acting as a Next button
-      const condition =  this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
-      if (this.layoutMode !== BookPageLayoutMode.Default) {
-        return condition && currentVirtualPage === totalVirtualPages;
-      }
-      return condition;
-    }
   }
 
-  get IsNextDisabled(): boolean {
-    // TODO: hook in virtual paging
-    const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
-
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      // Acting as Next button
-      const condition = this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
-      if (this.layoutMode !== BookPageLayoutMode.Default) {
-        return condition && currentVirtualPage === totalVirtualPages;
-      }
-      return condition;
-    } else {
-      // Acting as Previous button
-      return this.prevPageDisabled && this.pageNum === 0;
-    }
-  }
-
+  /**
+   * Determines if we show >> or >
+   */
   get IsNextChapter(): boolean {
-
     if (this.layoutMode === BookPageLayoutMode.Default) {
       return this.pageNum + 1 >= this.maxPages;
     }
@@ -316,17 +318,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
     if (this.readingHtml == null) return this.pageNum + 1 >= this.maxPages;
 
-    const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
-    const totalScroll = this.readingHtml.nativeElement.scrollWidth;
-    return this.pageNum + 1 >= this.maxPages && (scrollOffset === totalScroll);
+    return this.pageNum + 1 >= this.maxPages && (currentVirtualPage === totalVirtualPages);
   }
+  /**
+   * Determines if we show << or <
+   */
   get IsPrevChapter(): boolean {
     if (this.layoutMode === BookPageLayoutMode.Default) {
       return this.pageNum === 0;
     }
 
-    // TODO: Hook in virtual paging here
-    return this.pageNum === 0;
+    const [currentVirtualPage,,] = this.getVirtualPage();
+    if (this.readingHtml == null) return this.pageNum + 1 >= this.maxPages;
+
+    return this.pageNum === 0 && (currentVirtualPage === 0);
   }
 
   get ColumnWidth() {
@@ -508,10 +513,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.volumeId = results.chapter.volumeId;
         this.maxPages = results.chapter.pages;
         this.chapters = results.chapters;
-        //this.pageNum = results.progress.pageNum;
+        this.pageNum = results.progress.pageNum;
         if (results.progress.bookScrollId) this.lastSeenScrollPartPath = results.progress.bookScrollId;
-
-        this.setPageNum(results.progress.pageNum);
 
 
 
@@ -534,13 +537,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.nextChapterId = chapterId;
           if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
             this.nextChapterDisabled = true;
+            this.nextChapterPrefetched = true;
+            return;
           }
+          this.setPageNum(this.pageNum);
         });
         this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
           this.prevChapterId = chapterId;
           if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
             this.prevChapterDisabled = true;
+            this.prevChapterPrefetched = true; // If there is no prev chapter, then mark it as prefetched
+            return;
           }
+          this.setPageNum(this.pageNum);
         });
 
         // Check if user progress has part, if so load it so we scroll to it
@@ -857,7 +866,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
       }
     } else if (this.pageNum <= 10) {
-      if (!this.prevChapterPrefetched  && this.prevChapterId !== CHAPTER_ID_DOESNT_EXIST) { //  && !this.prevChapterDisabled
+      if (!this.prevChapterPrefetched && this.prevChapterId !== CHAPTER_ID_DOESNT_EXIST) { //  && !this.prevChapterDisabled
         this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1), catchError(err => {
           this.prevChapterDisabled = true;
           return of(null);
