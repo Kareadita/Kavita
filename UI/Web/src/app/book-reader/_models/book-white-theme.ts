@@ -8,4 +8,9 @@ export const BookWhiteTheme = `
     background-image: none !important;
     background-color: white !important;
   }
+
+  .pagination-cont {
+    background: transparent;
+    border: 1px solid rgb(0 0 0 / 13%);
+  }
 `;

@@ -125,4 +125,12 @@ background-color: initial !important;
   
 .book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
 .book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
+
+.pagination-cont {
+  background: #000;
+}
+
+.virt-pagination-cont {
+  box-shadow: inset 0 -1px 0 rgb(255 255 255 / 20%) !important;
+}
 `;
