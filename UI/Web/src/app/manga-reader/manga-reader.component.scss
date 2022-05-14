@@ -20,6 +20,7 @@ img {
 .reading-area {
   position: relative;
   overflow: auto;
+  height: calc(var(--vh)*100);
 }
 
 .image-container {
@@ -33,17 +34,19 @@ img {
   align-items: center;
 
     &.full-width {
-      display: grid;
-      align-content: center;
-      justify-content: center;
-      align-items: center;
-      justify-items: center;
+      width: 100vw;
       height: calc(var(--vh)*100);
+      display: grid;
     }
 
     &.full-height {
-      overflow: auto;
       height: 100vh;
+      display: grid;
+    }
+
+    &.original {
+      height: 100vh;
+      display: grid;
     }
 
   #image-1 {
@@ -106,17 +109,22 @@ img {
 .full-height {
   width: auto;
   margin: 0 auto;
-  max-height: 100%;
+  max-height: calc(var(--vh)*100);
   vertical-align: top;
 }
 
 .original {
-  align-self: center;  
+  align-self: center;
+  width: auto;
+  margin: 0 auto;
+  vertical-align: top;
 }
 
 .full-width {
-  max-width: 100%;
-  align-self: center;  
+  width: 100%;
+  margin: 0 auto;
+  vertical-align: top;
+  max-width: fit-content;
 
   &.double {
     width: 50%;
