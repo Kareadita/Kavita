@@ -156,8 +156,7 @@ namespace API.Services
 
         public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book)
         {
-            // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be
-            // Scoped
+            // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
             var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
             var importBuilder = new StringBuilder();
             foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
@@ -246,13 +245,13 @@ namespace API.Services
 
         private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
         {
-            var images = doc.DocumentNode.SelectNodes("//img");
+            var images = doc.DocumentNode.SelectNodes("//img")
+                         ?? doc.DocumentNode.SelectNodes("//image");
+
             if (images == null) return;
 
             foreach (var image in images)
             {
-                if (image.Name != "img") continue;
-
                 string key = null;
                 if (image.Attributes["src"] != null)
                 {
@@ -283,22 +282,21 @@ namespace API.Services
         /// <returns></returns>
         private static string GetKeyForImage(EpubBookRef book, string imageFile)
         {
-            if (!book.Content.Images.ContainsKey(imageFile))
+            if (book.Content.Images.ContainsKey(imageFile)) return imageFile;
+
+            var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+            if (correctedKey != null)
             {
-                var correctedKey = book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+                imageFile = correctedKey;
+            }
+            else if (imageFile.StartsWith(".."))
+            {
+                // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
+                correctedKey =
+                    book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
                 if (correctedKey != null)
                 {
                     imageFile = correctedKey;
-                }
-                else if (imageFile.StartsWith(".."))
-                {
-                    // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
-                    correctedKey =
-                        book.Content.Images.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
-                    if (correctedKey != null)
-                    {
-                        imageFile = correctedKey;
-                    }
                 }
             }
 
@@ -321,12 +319,11 @@ namespace API.Services
         private static void RewriteAnchors(int page, HtmlDocument doc, Dictionary<string, int> mappings)
         {
             var anchors = doc.DocumentNode.SelectNodes("//a");
-            if (anchors != null)
+            if (anchors == null) return;
+
+            foreach (var anchor in anchors)
             {
-                foreach (var anchor in anchors)
-                {
-                    BookService.UpdateLinks(anchor, mappings, page);
-                }
+                UpdateLinks(anchor, mappings, page);
             }
         }
 

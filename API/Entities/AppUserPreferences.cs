@@ -82,6 +82,11 @@ namespace API.Entities
         /// </summary>
         /// <remarks>Defaults to Default</remarks>
         public BookPageLayoutMode PageLayoutMode { get; set; } = BookPageLayoutMode.Default;
+        /// <summary>
+        /// Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this.
+        /// </summary>
+        /// <remarks>Defaults to false</remarks>
+        public bool BookReaderImmersiveMode { get; set; } = false;
 
 
         public AppUser AppUser { get; set; }

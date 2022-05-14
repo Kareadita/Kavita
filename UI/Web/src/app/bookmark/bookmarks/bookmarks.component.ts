@@ -71,6 +71,9 @@ export class BookmarksComponent implements OnInit, OnDestroy {
       case(Action.DownloadBookmark):
         this.downloadBookmarks(series);
         break;
+      case(Action.ViewSeries):
+        this.router.navigate(['library', series.libraryId, 'series', series.id]);
+        break;
       default:
         break;
     }

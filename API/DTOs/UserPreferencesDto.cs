@@ -77,5 +77,10 @@ namespace API.DTOs
         public SiteTheme Theme { get; set; }
         public string BookReaderThemeName { get; set; }
         public BookPageLayoutMode BookReaderLayoutMode { get; set; }
+        /// <summary>
+        /// Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this.
+        /// </summary>
+        /// <remarks>Defaults to false</remarks>
+        public bool BookReaderImmersiveMode { get; set; } = false;
     }
 }

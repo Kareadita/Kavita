@@ -49,11 +49,11 @@ export class FilterUtilitiesService {
    * @param pagination 
    * @param filter 
    */
-  updateUrlFromFilter(pagination: Pagination, filter: SeriesFilter) {
-    let params = '?page=' + pagination.currentPage;
+  updateUrlFromFilter(pagination: Pagination, filter: SeriesFilter | undefined) {
+    const params = '?page=' + pagination.currentPage;
   
-      const url = this.urlFromFilter(window.location.href.split('?')[0] + params, filter);
-      window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
+    const url = this.urlFromFilter(window.location.href.split('?')[0] + params, filter);
+    window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
   }
 
   /**

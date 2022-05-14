@@ -124,7 +124,9 @@ public class ScannerService : IScannerService
                     var path = Directory.GetParent(existingFolder)?.FullName;
                     if (!folderPaths.Contains(path) || !folderPaths.Any(p => p.Contains(path ?? string.Empty)))
                     {
-                        _logger.LogInformation("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
+                        _logger.LogCritical("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
+                        await _eventHub.SendMessageAsync(MessageFactory.Error,
+                            MessageFactory.ErrorEvent($"Scan of {series.Name} aborted", $"{series.OriginalName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library"));
                         return;
                     }
                     if (!string.IsNullOrEmpty(path))
@@ -597,8 +599,8 @@ public class ScannerService : IScannerService
         // To not have to rely completely on ComicInfo, try to parse out if the series is complete by checking parsed filenames as well.
         if (series.Metadata.MaxCount != series.Metadata.TotalCount)
         {
-            var maxVolume = series.Volumes.Max(v => v.Number);
-            var maxChapter = chapters.Max(c => (int) float.Parse(c.Number));
+            var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
+            var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
             if (maxVolume == series.Metadata.TotalCount) series.Metadata.MaxCount = maxVolume;
             else if (maxChapter == series.Metadata.TotalCount) series.Metadata.MaxCount = maxChapter;
         }
@@ -863,7 +865,7 @@ public class ScannerService : IScannerService
             // Add files
             var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info);
-            chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty;
+            chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty;
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
         }
 
@@ -910,7 +912,7 @@ public class ScannerService : IScannerService
 
     private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, ComicInfo? info)
     {
-        var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+        var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
             _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) return;
 

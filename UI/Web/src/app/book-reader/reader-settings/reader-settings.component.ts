@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, EventEmitter, Inject, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
@@ -63,7 +63,6 @@ const mobileBreakpointMarginOverride = 700;
   styleUrls: ['./reader-settings.component.scss']
 })
 export class ReaderSettingsComponent implements OnInit, OnDestroy {
-
   /**
    * Outputs when clickToPaginate is changed
    */
@@ -88,6 +87,10 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
    * Outputs when reading direction is changed
    */
   @Output() readingDirection: EventEmitter<ReadingDirection> = new EventEmitter();
+  /**
+   * Outputs when immersive mode is changed
+   */
+  @Output() immersiveMode: EventEmitter<boolean> = new EventEmitter();
   
   user!: User;
   /**
@@ -127,7 +130,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
 
-  constructor(private bookService: BookService, private accountService: AccountService, @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
+  constructor(private bookService: BookService, private accountService: AccountService, 
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
 
   ngOnInit(): void {
     
@@ -153,9 +157,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         if (this.user.preferences.bookReaderReadingDirection === undefined) {
           this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
         }
-
-
         this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
+        
         
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
         this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(fontName => {
@@ -180,7 +183,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
           this.clickToPaginateChanged.emit(value);
         });
 
-
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
         this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
           this.pageStyles['line-height'] = value + '%';
@@ -196,11 +198,25 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
         this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
         this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
-          console.log(layoutMode);
           this.layoutModeUpdate.emit(layoutMode);
         });
 
+        this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user.preferences.bookReaderImmersiveMode, []));
+        this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((immersiveMode: boolean) => {
+          if (immersiveMode) {
+            this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
+          }
+          this.immersiveMode.emit(immersiveMode);
+        });
+        
+
         this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
+
+        // Emit first time so book reader gets the setting
+        this.readingDirection.emit(this.readingDirectionModel);
+        this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); 
+        this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
+
         this.resetSettings();
       } else {
         this.resetSettings();

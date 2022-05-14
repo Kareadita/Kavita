@@ -27,6 +27,7 @@ export interface Preferences {
     bookReaderReadingDirection: ReadingDirection;
     bookReaderThemeName: string;
     bookReaderLayoutMode: BookPageLayoutMode;
+    bookReaderImmersiveMode: boolean;
 
     // Global
     theme: SiteTheme;

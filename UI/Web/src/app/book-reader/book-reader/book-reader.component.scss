@@ -57,6 +57,22 @@ $primary-color: #0062cc;
     padding-right: 2px;
 }
 
+.drawer-body {
+    .reader-pills {
+        justify-content: center;
+        margin: 0 0.25rem;
+
+        li a {
+            border: 1px solid var(--primary-color);
+            margin: 0 0.25rem;
+
+            .active {
+                border: unset;
+            }
+        }
+    }
+}
+
 //          Drawer End
 
 .fixed-top {
@@ -67,16 +83,25 @@ $primary-color: #0062cc;
     opacity: 0;
 }
 
+::ng-deep .bg-warning  {
+    background-color: yellow;
+}
+
 
 .action-bar {
     background-color: var(--br-actionbar-bg-color); 
     overflow: hidden;
     box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
-    max-height: 62px;
+    max-height: 38px;
+    height: 38px;
 
     .book-title-text {
         text-align: center;
         text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     
     @media(max-width: 875px) {
@@ -89,6 +114,11 @@ $primary-color: #0062cc;
         margin-top: 10px;
         text-align: center;
         text-transform: capitalize;
+        max-height: inherit;
+    }
+
+    .next-page-highlight {
+        color: var(--primary-color);
     }
 }
 
@@ -98,7 +128,8 @@ $primary-color: #0062cc;
     max-height: 100vh;
     width: 100%;
     //overflow: auto;  // This will break progress reporting
-    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+    padding-top: 38px;
 }
 
 .reader-container {
@@ -108,16 +139,29 @@ $primary-color: #0062cc;
 
 .book-content {
     position: relative;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px 0;
     margin: 0px 0px;
-    height: calc(var(--vh)*100); // This will ensure bottom bar extends to the bottom of the screen
+    height: calc(var(--vh, 1vh) * 100); // This will ensure bottom bar extends to the bottom of the screen
 
     a, :link {
         color: var(--brtheme-link-text-color);
     }
 
     background-color: var(--brtheme-bg-color);
+}
+
+.pagination-cont {
+    background: var(--br-actionbar-bg-color);
+    border-radius: 5px;
+    padding: 5px 15px;
+    margin: 0 0 5px;
+    border: var(--drawer-pagination-border);
+}
+
+.virt-pagination-cont {
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    box-shadow: var(--drawer-pagination-horizontal-rule);
 }
 
 
@@ -130,7 +174,13 @@ $primary-color: #0062cc;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
+
+        &.debug {
+            column-rule: 20px solid rebeccapurple;
+        }
     }
+
+    
 }
 
 .column-layout-2 {
@@ -140,7 +190,13 @@ $primary-color: #0062cc;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
+
+        &.debug {
+            column-rule: 20px solid rebeccapurple;
+        }
     }
+
+    
 
 }
 
@@ -182,6 +238,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
+    padding-top: 38px;
 }
 
 // This class pushes the click area to the left a bit to let users click the scrollbar
@@ -195,6 +252,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
+    padding-top: 38px;
 }
 
 .left {
@@ -207,6 +265,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
+    padding-top: 38px;
 }
 
 .highlight {

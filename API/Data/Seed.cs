@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -22,35 +21,36 @@ namespace API.Data
         /// <summary>
         /// Generated on Startup. Seed.SeedSettings must run before
         /// </summary>
-        public static IList<ServerSetting> DefaultSettings;
+        public static ImmutableArray<ServerSetting> DefaultSettings;
 
-        public static readonly IList<SiteTheme> DefaultThemes = new List<SiteTheme>
-        {
-            new()
+        public static readonly ImmutableArray<SiteTheme> DefaultThemes = ImmutableArray.Create(
+            new List<SiteTheme>
             {
-                Name = "Dark",
-                NormalizedName = Parser.Parser.Normalize("Dark"),
-                Provider = ThemeProvider.System,
-                FileName = "dark.scss",
-                IsDefault = true,
-            },
-            new()
-            {
-                Name = "Light",
-                NormalizedName = Parser.Parser.Normalize("Light"),
-                Provider = ThemeProvider.System,
-                FileName = "light.scss",
-                IsDefault = false,
-            },
-            new()
-            {
-                Name = "E-Ink",
-                NormalizedName = Parser.Parser.Normalize("E-Ink"),
-                Provider = ThemeProvider.System,
-                FileName = "e-ink.scss",
-                IsDefault = false,
-            },
-        };
+                new()
+                {
+                    Name = "Dark",
+                    NormalizedName = Parser.Parser.Normalize("Dark"),
+                    Provider = ThemeProvider.System,
+                    FileName = "dark.scss",
+                    IsDefault = true,
+                },
+                new()
+                {
+                    Name = "Light",
+                    NormalizedName = Parser.Parser.Normalize("Light"),
+                    Provider = ThemeProvider.System,
+                    FileName = "light.scss",
+                    IsDefault = false,
+                },
+                new()
+                {
+                    Name = "E-Ink",
+                    NormalizedName = Parser.Parser.Normalize("E-Ink"),
+                    Provider = ThemeProvider.System,
+                    FileName = "e-ink.scss",
+                    IsDefault = false,
+                },
+            }.ToArray());
 
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
         {
@@ -91,24 +91,32 @@ namespace API.Data
         public static async Task SeedSettings(DataContext context, IDirectoryService directoryService)
         {
             await context.Database.EnsureCreatedAsync();
-
-            DefaultSettings = new List<ServerSetting>()
+            DefaultSettings = ImmutableArray.Create(new List<ServerSetting>()
             {
-                new () {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
-                new () {Key = ServerSettingKey.TaskScan, Value = "daily"},
-                new () {Key = ServerSettingKey.LoggingLevel, Value = "Information"}, // Not used from DB, but DB is sync with appSettings.json
-                new () {Key = ServerSettingKey.TaskBackup, Value = "daily"},
-                new () {Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)},
-                new () {Key = ServerSettingKey.Port, Value = "5000"}, // Not used from DB, but DB is sync with appSettings.json
-                new () {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
-                new () {Key = ServerSettingKey.EnableOpds, Value = "false"},
-                new () {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
-                new () {Key = ServerSettingKey.BaseUrl, Value = "/"},
-                new () {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
-                new () {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
-                new () {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
-                new () {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
-            };
+                new() {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
+                new() {Key = ServerSettingKey.TaskScan, Value = "daily"},
+                new()
+                {
+                    Key = ServerSettingKey.LoggingLevel, Value = "Information"
+                }, // Not used from DB, but DB is sync with appSettings.json
+                new() {Key = ServerSettingKey.TaskBackup, Value = "daily"},
+                new()
+                {
+                    Key = ServerSettingKey.BackupDirectory, Value = Path.GetFullPath(DirectoryService.BackupDirectory)
+                },
+                new()
+                {
+                    Key = ServerSettingKey.Port, Value = "5000"
+                }, // Not used from DB, but DB is sync with appSettings.json
+                new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
+                new() {Key = ServerSettingKey.EnableOpds, Value = "false"},
+                new() {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
+                new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
+                new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
+                new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
+                new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
+                new() {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
+            }.ToArray());
 
             foreach (var defaultSetting in DefaultSettings)
             {

@@ -158,7 +158,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromPagination(this.seriesPagination);
+    this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, undefined);
     this.loadPage();
   }
 

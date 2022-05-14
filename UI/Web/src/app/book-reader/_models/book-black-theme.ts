@@ -13,6 +13,9 @@ export const BookBlackTheme = `
   /* Drawer */
   --drawer-bg-color: #292929;
   --drawer-text-color: white;
+  --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(255 255 255 / 20%);
+  --drawer-pagination-border: 1px solid rgb(0 0 0 / 13%);
+  
 
   /* Accordion */
   --accordion-header-text-color: rgba(74, 198, 148, 0.9);
