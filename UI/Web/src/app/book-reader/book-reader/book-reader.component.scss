@@ -44,6 +44,7 @@
 
 $dark-form-background-no-opacity: rgb(1, 4, 9);
 $primary-color: #0062cc;
+$action-bar-height: 38px;
 
 
 //          Drawer
@@ -92,8 +93,8 @@ $primary-color: #0062cc;
     background-color: var(--br-actionbar-bg-color); 
     overflow: hidden;
     box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
-    max-height: 38px;
-    height: 38px;
+    max-height: $action-bar-height;
+    height: $action-bar-height;
 
     .book-title-text {
         text-align: center;
@@ -138,19 +139,18 @@ $primary-color: #0062cc;
 }
 
 .reading-section {
-    //max-height: 100vh;
     width: 100%;
     //overflow: auto;  // This will break progress reporting
     height: 100vh;
-    padding-top: 38px;
+    padding-top: $action-bar-height;
     position: relative;
 
     &.column-layout-1 {
-        height: calc((var(--vh, 1vh) * 100) - 38px);
+        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 
     &.column-layout-2 {
-        height: calc((var(--vh, 1vh) * 100) - 38px);
+        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 }
 
@@ -159,11 +159,11 @@ $primary-color: #0062cc;
     height: 100%;
 
     &.column-layout-1 {
-        height: calc((var(--vh, 1vh) * 100) - 38px);
+        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 
     &.column-layout-2 {
-        height: calc((var(--vh, 1vh) * 100) - 38px);
+        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 }
 
@@ -171,14 +171,13 @@ $primary-color: #0062cc;
     position: relative;
     padding: 20px 0;
     margin: 0px 0px;
-    //height: calc((var(--vh, 1vh) * 100) - 38px);
 
     &.column-layout-1 {
-        height: calc((var(--vh) * 100) - 76px);
+        height: calc((var(--vh) * 100) - calc($action-bar-height * 2));
     }
 
     &.column-layout-2 {
-        height: calc((var(--vh) * 100) - 76px);
+        height: calc((var(--vh) * 100) - calc($action-bar-height * 2));
     }
 
     a, :link {
@@ -276,7 +275,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
-    padding-top: 38px;
+    padding-top: $action-bar-height;
 }
 
 // This class pushes the click area to the left a bit to let users click the scrollbar
@@ -290,7 +289,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
-    padding-top: 38px;
+    padding-top: $action-bar-height;
 }
 
 .left {
@@ -303,7 +302,7 @@ $primary-color: #0062cc;
     cursor: pointer;
     opacity: 0;
     background: transparent;
-    padding-top: 38px;
+    padding-top: $action-bar-height;
 }
 
 .highlight {
