@@ -1,4 +1,4 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container" tabindex="0" #reader>
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}}" tabindex="0" #reader>
     <div class="fixed-top" #stickyTop>
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
@@ -53,7 +53,7 @@
                                     (clickToPaginateChanged)="showPaginationOverlay($event)"
                                     (fullscreen)="toggleFullscreen()"
                                     (layoutModeUpdate)="updateLayoutMode($event)"
-                                    (readingDirection)="readingDirection = $event"
+                                    (readingDirection)="updateReadingDirection($event)"
                                     (immersiveMode)="immersiveMode = $event"
                                 ></app-reader-settings>
                             </ng-template>
@@ -73,17 +73,19 @@
     </div>
 
     <div #readingSection class="reading-section {{ColumnLayout}}" [@isLoading]="isLoading ? true : false">
+        <div #readingCont class="book-container {{ColumnLayout}}">
 
-        <div #readingHtml class="book-content" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}"
-            [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
+            <div #readingHtml class="book-content {{ColumnLayout}}" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}"
+                [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
-        <ng-container *ngIf="clickToPaginate">
-            <div class="left {{clickOverlayClass('left')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)" tabindex="-1"></div>
-            <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" tabindex="-1"></div>
-        </ng-container>
+            <ng-container *ngIf="clickToPaginate">
+                <div class="left {{clickOverlayClass('left')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)" tabindex="-1"></div>
+                <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" tabindex="-1"></div>
+            </ng-container>
 
-        <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();">
-            <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();">
+                <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+            </div>
         </div>
     </div>
 

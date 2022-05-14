@@ -524,8 +524,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.libraryType = type;
         });
 
-        this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
-
+        // We need to think about if the user modified this and this function call is a continuous reader one
+        //this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
+        this.updateImagesWithHeight();
 
 
         if (this.pageNum >= this.maxPages) {
@@ -586,9 +587,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
     if (event.key === KEY_CODES.RIGHT_ARROW) {
-      this.nextPage();
+      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
     } else if (event.key === KEY_CODES.LEFT_ARROW) {
-      this.prevPage();
+      this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
     } else if (event.key === KEY_CODES.ESC_KEY) {
       this.closeReader();
     } else if (event.key === KEY_CODES.SPACE) {
@@ -791,7 +792,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Applies a max-height inline css property on each image in the page if the layout mode is column-based, else it removes the property
    */
   updateImagesWithHeight() {
-    const images = this.readingSectionElemRef.nativeElement.querySelectorAll('img') || [];
+
+    const images = this.readingSectionElemRef?.nativeElement.querySelectorAll('img') || [];
 
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       const height = this.ColumnHeight;
@@ -807,7 +809,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
-    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
+    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
 
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
@@ -877,6 +879,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Given a direction, calls the next or prev page method
+   * @param direction Direction to move 
+   */
   movePage(direction: PAGING_DIRECTION) {
     if (direction === PAGING_DIRECTION.BACKWARDS) {
       this.prevPage();
@@ -896,7 +902,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const [currentVirtualPage, _, pageWidth] = this.getVirtualPage();
 
       if (currentVirtualPage > 1) {
-
         // -2 apparently goes back 1 virtual page...
         this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.readingHtml.nativeElement);
         this.handleScrollEvent();
@@ -904,11 +909,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      this.setPageNum(this.pageNum - 1);
-    } else {
-      this.setPageNum(this.pageNum + 1);
-    }
+    this.setPageNum(this.pageNum - 1);
 
     if (oldPageNum === 0) {
       // Move to next volume/chapter automatically
@@ -933,7 +934,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const [currentVirtualPage, totalVirtualPages, pageWidth] = this.getVirtualPage();
 
       if (currentVirtualPage < totalVirtualPages) {
-        //this.scrollService.scrollToX(scrollOffset + pageWidth, this.readingHtml.nativeElement);
         // +0 apparently goes forward 1 virtual page...
         this.scrollService.scrollToX((currentVirtualPage) * pageWidth, this.readingHtml.nativeElement);
         this.handleScrollEvent();
@@ -949,11 +949,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
 
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      this.setPageNum(this.pageNum + 1);
-    } else {
-      this.setPageNum(this.pageNum - 1);
-    }
+    this.setPageNum(this.pageNum + 1);
 
     if (oldPageNum === this.pageNum) { return; }
 
@@ -982,23 +978,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
     const totalScroll = this.readingHtml.nativeElement.scrollWidth;
     const pageWidth = this.getPageWidth();
-
-    // console.log('scrollOffset: ', scrollOffset);
-    // console.log('totalScroll: ', totalScroll);
-    // console.log('page width: ', pageWidth);
-    // console.log('delta: ', totalScroll - scrollOffset)
-
-    // // If everything fits on a single page
-    // if (totalScroll - pageWidth === 0) {
-    //   return [1, 1, pageWidth];
-    // }
-
-    // // totalVirtualPages needs to be -1 because we can't scroll to totalOffset only on page 2
-
-    // const currentVirtualPage = Math.max(1, (scrollOffset === 0) ? 1 : Math.round(scrollOffset / pageWidth));
-
     const delta = totalScroll - scrollOffset;
-    //let totalVirtualPages = Math.max(1, Math.round((totalScroll - pageWidth) / pageWidth));
+
     const totalVirtualPages = Math.max(1, Math.round((totalScroll) / pageWidth));
     let currentVirtualPage = 1;
 
@@ -1014,8 +995,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       currentVirtualPage = Math.min(Math.max(1, Math.round((scrollOffset + pageWidth) / pageWidth)), totalVirtualPages);
     } 
 
-    console.log('currentPage: ', currentVirtualPage , ' totalPage: ', totalVirtualPages);
-    
     return [currentVirtualPage, totalVirtualPages, pageWidth];
   }
 
@@ -1203,6 +1182,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Remove any max-heights from column layout
     this.updateImagesWithHeight();
+  }
+
+  updateReadingDirection(readingDirection: ReadingDirection) {
+    this.readingDirection = readingDirection;
   }
 
   // Table of Contents
