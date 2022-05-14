@@ -141,7 +141,6 @@ $primary-color: #0062cc;
     position: relative;
     padding: 20px 0;
     margin: 0px 0px;
-    height: calc(var(--vh, 1vh) * 100); // This will ensure bottom bar extends to the bottom of the screen
 
     a, :link {
         color: var(--brtheme-link-text-color);
