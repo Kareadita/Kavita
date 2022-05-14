@@ -524,8 +524,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.libraryType = type;
         });
 
-        this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
-
+        // We need to think about if the user modified this and this function call is a continuous reader one
+        //this.updateLayoutMode(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default);
+        this.updateImagesWithHeight();
 
 
         if (this.pageNum >= this.maxPages) {
