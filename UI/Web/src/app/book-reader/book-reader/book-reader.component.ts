@@ -808,7 +808,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
-    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingContElemRef.nativeElement.clientHeight;
+    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
 
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
