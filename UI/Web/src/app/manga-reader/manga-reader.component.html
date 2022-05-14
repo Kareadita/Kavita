@@ -38,7 +38,7 @@
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
             </div>
-            <div class="image-container" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
+            <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
                     'fit-to-width-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
                     'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
                     'original-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage,
