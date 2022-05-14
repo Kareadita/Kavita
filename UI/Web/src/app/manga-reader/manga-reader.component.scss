@@ -18,15 +18,12 @@ img {
 } 
 
 .reading-area {
-  display: flex;
-  justify-content: center;
   position: relative;
   overflow: auto;
 }
 
 .image-container {
   text-align: center;
-  height: 100vh;
 
   // Original
   //display: block;
@@ -34,6 +31,20 @@ img {
   // New (for centering in both axis)
   //display: flex; // Leave this off as it can cutoff the image
   align-items: center;
+
+    &.full-width {
+      display: grid;
+      align-content: center;
+      justify-content: center;
+      align-items: center;
+      justify-items: center;
+      height: calc(var(--vh)*100);
+    }
+
+    &.full-height {
+      overflow: auto;
+      height: 100vh;
+    }
 
   #image-1 {
     &.double {
