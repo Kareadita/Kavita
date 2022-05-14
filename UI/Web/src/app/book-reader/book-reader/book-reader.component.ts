@@ -291,7 +291,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isNextPageDisabled() {
     const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
-    const condition = this.nextPageDisabled && this.pageNum + 1 > this.maxPages - 1;
+    const condition = (this.nextPageDisabled || this.nextChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum + 1 > this.maxPages - 1;
       if (this.layoutMode !== BookPageLayoutMode.Default) {
         return condition && currentVirtualPage === totalVirtualPages;
       }
@@ -300,7 +300,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isPrevPageDisabled() {
     const [currentVirtualPage,,] = this.getVirtualPage();
-    const condition =  this.prevPageDisabled && this.pageNum === 0;
+    const condition =  (this.prevPageDisabled || this.prevChapterId === CHAPTER_ID_DOESNT_EXIST) && this.pageNum === 0;
       if (this.layoutMode !== BookPageLayoutMode.Default) {
         return condition && currentVirtualPage === 0;
       }
@@ -1091,8 +1091,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param theme 
    */
   updateColorTheme(theme: BookTheme) {
-    // TODO: Put optimization in to avoid any work if the theme is the same as selected (or have reading settings control handle that)
-
     // Remove all themes
     Array.from(this.document.querySelectorAll('style[id^="brtheme-"]')).forEach(elem => elem.remove());
 
