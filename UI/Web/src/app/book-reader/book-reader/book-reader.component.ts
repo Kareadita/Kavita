@@ -243,6 +243,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   @ViewChild('readingHtml', {static: false}) readingHtml!: ElementRef<HTMLDivElement>;
+  @ViewChild('readingCont', {static: false}) readingContElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: true}) reader!: ElementRef;
@@ -807,7 +808,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
-    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingSectionElemRef.nativeElement.clientHeight;
+    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.readingContElemRef.nativeElement.clientHeight;
 
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
