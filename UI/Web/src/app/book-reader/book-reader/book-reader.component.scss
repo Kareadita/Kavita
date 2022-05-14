@@ -122,26 +122,64 @@ $primary-color: #0062cc;
     }
 }
 
-
-
-.reading-section {
-    max-height: 100vh;
-    width: 100%;
-    //overflow: auto;  // This will break progress reporting
-    height: calc(var(--vh, 1vh) * 100);
-    padding-top: 38px;
-}
-
 .reader-container {
     outline: none; // Only the reading section itself shouldn't receive any outline. We use it to shift focus in fullscreen mode
     overflow: auto;
+    height: calc(var(--vh, 1vh) * 100);
+    position: relative;
+
+    &.column-layout-1 {
+        height: calc(var(--vh) * 100);
+    }
+
+    &.column-layout-2 {
+        height: calc(var(--vh) * 100);
+    }
+}
+
+.reading-section {
+    //max-height: 100vh;
+    width: 100%;
+    //overflow: auto;  // This will break progress reporting
+    height: 100vh;
+    padding-top: 38px;
+    position: relative;
+
+    &.column-layout-1 {
+        height: calc((var(--vh, 1vh) * 100) - 38px);
+    }
+
+    &.column-layout-2 {
+        height: calc((var(--vh, 1vh) * 100) - 38px);
+    }
+}
+
+.book-container {
+    position: relative;
+    height: 100%;
+
+    &.column-layout-1 {
+        height: calc((var(--vh, 1vh) * 100) - 38px);
+    }
+
+    &.column-layout-2 {
+        height: calc((var(--vh, 1vh) * 100) - 38px);
+    }
 }
 
 .book-content {
     position: relative;
     padding: 20px 0;
     margin: 0px 0px;
-    height: calc(var(--vh, 1vh) * 100); // This will ensure bottom bar extends to the bottom of the screen
+    //height: calc((var(--vh, 1vh) * 100) - 38px);
+
+    &.column-layout-1 {
+        height: calc((var(--vh) * 100) - 76px);
+    }
+
+    &.column-layout-2 {
+        height: calc((var(--vh) * 100) - 76px);
+    }
 
     a, :link {
         color: var(--brtheme-link-text-color);
