@@ -249,6 +249,9 @@ img {
   }
 
   .pagination-area {
+    cursor: pointer;
+    z-index: 2;
+
     i {
         color: white;
         font-size: 42px;
@@ -262,8 +265,6 @@ img {
       height: calc(var(--vh)*100);
       //background: rgba(0, 0, 0, 0);
       background:rgba(0, 0, 255, 0.5);
-      z-index: 2;
-      cursor: pointer;
     }
     
     .top {
@@ -274,8 +275,6 @@ img {
         height: $side-width;
         //background: rgba(0, 0, 0, 0);
         background:rgba(0, 0, 255, 0.5);
-        z-index: 2;
-        cursor: pointer;
     }
     
     .left {
@@ -286,8 +285,6 @@ img {
         height: calc(var(--vh)*100);
         //background: rgba(0, 0, 0, 0);
         background:rgba(0, 0, 255, 0.5);
-        z-index: 2;
-        cursor: pointer;
     }
     
     .bottom {
@@ -297,8 +294,6 @@ img {
         width: 100%;
         height: $side-width;
         background: rgba(0, 0, 0, 0);
-        z-index: 2;
-        cursor: pointer;
     }
   }
 
