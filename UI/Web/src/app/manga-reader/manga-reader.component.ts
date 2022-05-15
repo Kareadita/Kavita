@@ -116,6 +116,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = true;
 
   @ViewChild('reader') reader!: ElementRef;
+  @ViewChild('readingArea') readingArea!: ElementRef;
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
   /**
@@ -279,6 +280,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get isCurrentPageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
+  }
+
+  get WindowHeight() {
+    return this.readingArea?.nativeElement.scrollHeight + 'px';
   }
 
 

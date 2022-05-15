@@ -262,9 +262,7 @@ img {
       right: 0px;
       top: 0px;
       width: $side-width;
-      height: calc(var(--vh)*100);
-      //background: rgba(0, 0, 0, 0);
-      background:rgba(0, 0, 255, 0.5);
+      background: rgba(0, 0, 0, 0);
     }
     
     .top {
@@ -272,9 +270,7 @@ img {
         right: 0px;
         top: 0px;
         width: 100%;
-        height: $side-width;
-        //background: rgba(0, 0, 0, 0);
-        background:rgba(0, 0, 255, 0.5);
+        background: rgba(0, 0, 0, 0);
     }
     
     .left {
@@ -282,17 +278,14 @@ img {
         left: 0px;
         top: 0px;
         width: $side-width;
-        height: calc(var(--vh)*100);
-        //background: rgba(0, 0, 0, 0);
-        background:rgba(0, 0, 255, 0.5);
+        background: rgba(0, 0, 0, 0);
     }
     
     .bottom {
-        position: absolute;
+        position: fixed; // I couldn't figure out how to do this with abs, so only the bottom bar will not be scrollable
         left: 0px;
         bottom: 0px;
         width: 100%;
-        height: $side-width;
         background: rgba(0, 0, 0, 0);
     }
   }
