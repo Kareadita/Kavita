@@ -116,6 +116,7 @@ namespace API.Controllers
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
+            if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
 

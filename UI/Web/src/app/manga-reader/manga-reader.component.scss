@@ -159,52 +159,6 @@ img {
 }
 
 
-
-.right {
-    position: fixed;
-    right: 0px;
-    top: 0px;
-    width: $side-width;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
-}
-
-.top {
-    position: fixed;
-    right: 0px;
-    top: 0px;
-    width: 100%;
-    height: $side-width;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
-}
-
-.left {
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    width: $side-width;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
-}
-
-.bottom {
-    position: fixed;
-    left: 0px;
-    bottom: 0px;
-    width: 100%;
-    height: $side-width;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
-}
-
-
 // Splitting Icon
 .split {
     height: 20px;
@@ -295,13 +249,44 @@ img {
   }
 
   .pagination-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
 
     i {
         color: white;
         font-size: 42px;
+    }
+
+    .right {
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      width: $side-width;
+      background: rgba(0, 0, 0, 0);
+    }
+    
+    .top {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 100%;
+        background: rgba(0, 0, 0, 0);
+    }
+    
+    .left {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: $side-width;
+        background: rgba(0, 0, 0, 0);
+    }
+    
+    .bottom {
+        position: fixed; // I couldn't figure out how to do this with abs, so only the bottom bar will not be scrollable
+        left: 0px;
+        bottom: 0px;
+        width: 100%;
+        background: rgba(0, 0, 0, 0);
     }
   }
 

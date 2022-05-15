@@ -31,13 +31,30 @@
         </div>
     </ng-container>
 
-    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}">
+    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div [ngClass]="{'d-none': !renderWithCanvas }">
                 <canvas #content class="{{getFittingOptionClass()}}"
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
             </div>
+
+            <div class="pagination-area">
+                <!-- Pagination controls and screen hints-->
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? WindowHeight: 25 + '%')}">
+                    <div *ngIf="showClickOverlay">
+                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
+                         title="Previous Page" aria-hidden="true"></i>
+                    </div>
+                </div>
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')" [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? WindowHeight: 25 + '%')}">
+                    <div *ngIf="showClickOverlay">
+                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
+                         title="Next Page" aria-hidden="true"></i>
+                    </div>
+                </div>
+            </div>
+
             <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
                     'fit-to-width-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
                     'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
@@ -50,22 +67,6 @@
                     <img [src]="getPageUrl(PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
                 </ng-container>
             </div>
-
-            <ng-container>
-                <!-- Pagination controls and screen hints-->
-                <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')">
-                    <div *ngIf="showClickOverlay">
-                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
-                         title="Next Page" aria-hidden="true"></i>
-                    </div>
-                </div>
-                <div class="pagination-area {{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')">
-                    <div *ngIf="showClickOverlay">
-                        <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
-                         title="Previous Page" aria-hidden="true"></i>
-                    </div>
-                </div>
-            </ng-container>
 
         </ng-container>
 

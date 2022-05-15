@@ -116,6 +116,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = true;
 
   @ViewChild('reader') reader!: ElementRef;
+  @ViewChild('readingArea') readingArea!: ElementRef;
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
   /**
@@ -279,6 +280,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get isCurrentPageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
+  }
+
+  get WindowHeight() {
+    return this.readingArea?.nativeElement.scrollHeight + 'px';
   }
 
 
@@ -1008,6 +1013,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.ctx || !this.canvas) { return; }
 
     this.canvasImage.onload = null;
+    console.log('canvasImage: ', this.canvasImage?.height);
 
     this.setCanvasSize();
 
@@ -1105,7 +1111,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
 
     this.canvasImage = this.cachedImages.current();
-
 
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       if (this.layoutMode === LayoutMode.Single) {
@@ -1351,7 +1356,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
-          const windowHeight = window.innerHeight
+    const windowHeight = window.innerHeight
                   || document.documentElement.clientHeight
                   || document.body.clientHeight;
     return [windowWidth, windowHeight];
