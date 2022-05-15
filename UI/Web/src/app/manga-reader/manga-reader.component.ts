@@ -1008,6 +1008,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.ctx || !this.canvas) { return; }
 
     this.canvasImage.onload = null;
+    console.log('canvasImage: ', this.canvasImage?.height);
 
     this.setCanvasSize();
 
@@ -1105,7 +1106,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
 
     this.canvasImage = this.cachedImages.current();
-
 
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       if (this.layoutMode === LayoutMode.Single) {
@@ -1351,7 +1351,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
-          const windowHeight = window.innerHeight
+    const windowHeight = window.innerHeight
                   || document.documentElement.clientHeight
                   || document.body.clientHeight;
     return [windowWidth, windowHeight];

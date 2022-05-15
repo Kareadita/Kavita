@@ -38,18 +38,6 @@
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
             </div>
-            <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
-                    'fit-to-width-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
-                    'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
-                    'original-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage,
-                    'reverse': ShouldRenderReverseDouble}">
-                <img [src]="canvasImage.src" id="image-1"
-                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
-
-                <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
-                    <img [src]="getPageUrl(PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
-                </ng-container>
-            </div>
 
             <ng-container>
                 <!-- Pagination controls and screen hints-->
@@ -66,6 +54,19 @@
                     </div>
                 </div>
             </ng-container>
+
+            <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
+                    'fit-to-width-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
+                    'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
+                    'original-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage,
+                    'reverse': ShouldRenderReverseDouble}">
+                <img [src]="canvasImage.src" id="image-1"
+                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+
+                <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
+                    <img [src]="getPageUrl(PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
+                </ng-container>
+            </div>
 
         </ng-container>
 
