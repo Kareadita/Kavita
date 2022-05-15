@@ -818,7 +818,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setupPage(part?: string | undefined, scrollTop?: number | undefined) {
     this.isLoading = false;
-    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
 
     // Virtual Paging stuff
     this.updateWidthAndHeightCalcs();
@@ -1099,6 +1098,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateWidthAndHeightCalcs() {
     this.windowHeight = Math.max(this.readingSectionElemRef.nativeElement.clientHeight, window.innerHeight);
     this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
+
+    // Recalculate if bottom action bar is needed
+    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
   }
 
   toggleDrawer() {
@@ -1193,6 +1195,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Remove any max-heights from column layout
     this.updateImagesWithHeight();
+
+    // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
+    setTimeout(() => {this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;});
   }
 
   updateReadingDirection(readingDirection: ReadingDirection) {
