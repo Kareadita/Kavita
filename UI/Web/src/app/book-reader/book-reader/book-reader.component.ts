@@ -27,6 +27,7 @@ import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
+import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 
 
 enum TabID {
@@ -362,6 +363,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case BookPageLayoutMode.Column2:
         return 'column-layout-2';
     }
+  }
+
+  get PageHeightForPagination() {
+    if (this.layoutMode === BookPageLayoutMode.Default) {
+      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - (this.topOffset * 2) + 'px';
+    }
+
+    return this.ColumnHeight;
   }
 
 
@@ -1000,6 +1009,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
+    if (this.readingHtml === null) return null;
+
     const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {

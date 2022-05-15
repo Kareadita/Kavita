@@ -73,15 +73,21 @@
     </div>
 
     <div #readingSection class="reading-section {{ColumnLayout}}" [@isLoading]="isLoading ? true : false">
-        <div #readingCont class="book-container {{ColumnLayout}}">
+        
+        <ng-container *ngIf="clickToPaginate">
+            <div class="left {{clickOverlayClass('left')}} no-observe" 
+                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+                 tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
+            <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
+                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+                 tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
+        </ng-container>
+
+        <div class="book-container {{ColumnLayout}}">
 
             <div #readingHtml class="book-content {{ColumnLayout}}" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}"
                 [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
-            <ng-container *ngIf="clickToPaginate">
-                <div class="left {{clickOverlayClass('left')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)" tabindex="-1"></div>
-                <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" tabindex="-1"></div>
-            </ng-container>
 
             <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();">
                 <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
