@@ -216,6 +216,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         this.readingDirection.emit(this.readingDirectionModel);
         this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); 
         this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
+        this.immersiveMode.emit(this.user.preferences.bookReaderImmersiveMode);
 
         this.resetSettings();
       } else {

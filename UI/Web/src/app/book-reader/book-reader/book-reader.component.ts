@@ -125,6 +125,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   drawerOpen = false;
   /**
+   * If the action bar is visible
+   */
+  actionBarVisible = true;
+  /**
    * Book reader setting that hides the menuing system
    */
   immersiveMode: boolean = false;
@@ -1105,6 +1109,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   toggleDrawer() {
     this.drawerOpen = !this.drawerOpen;
+
+    if (this.immersiveMode) {
+      this.actionBarVisible = false;
+    }
   }
 
   scrollTo(partSelector: string) {
@@ -1197,11 +1205,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateImagesWithHeight();
 
     // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
+    if (this.readingHtml == null) {
+      setTimeout(() => this.updateLayoutMode(this.layoutMode), 10);
+      return;
+    }
     setTimeout(() => {this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;});
   }
 
   updateReadingDirection(readingDirection: ReadingDirection) {
     this.readingDirection = readingDirection;
+  }
+
+  updateImmersiveMode(immersiveMode: boolean) {
+    this.immersiveMode = immersiveMode;
+    if (this.immersiveMode && !this.drawerOpen) {
+      this.actionBarVisible = false;
+    }
   }
 
   // Table of Contents
@@ -1299,7 +1318,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       Math.abs(this.mousePosition.x - event.screenX) <= mouseOffset &&
       Math.abs(this.mousePosition.y - event.screenY) <= mouseOffset
     ) {
-      this.drawerOpen = true;
+      this.actionBarVisible = !this.actionBarVisible;
     }
 
   }
