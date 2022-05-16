@@ -35,7 +35,7 @@
 <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
 
 <ng-template #cardTemplate>
-<div class="card-container row g-0 mb-3">
+<div class="card-container row g-0 mt-3 mb-3">
     <div class="card col-auto mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
     </div>
