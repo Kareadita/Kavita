@@ -1106,8 +1106,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
 
   loadPage() {
-    if (!this.canvas || !this.ctx) { return; }
-
     this.isLoading = true;
 
     this.canvasImage = this.cachedImages.current();
@@ -1128,6 +1126,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.renderPage();
     }
     this.prefetch();
+    this.isLoading = false;
   }
 
   setReadingDirection() {
@@ -1262,6 +1261,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case ReaderMode.Webtoon:
         this.readerMode = ReaderMode.LeftRight;
         break;
+    }
+
+    // We must set this here because loadPage from render doesn't call if we aren't page splitting
+    if (this.readerMode !== ReaderMode.Webtoon) {
+      this.canvasImage = this.cachedImages.current();
+      this.isLoading = true;
     }
 
     this.updateForm();
