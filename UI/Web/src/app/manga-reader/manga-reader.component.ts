@@ -118,6 +118,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('reader') reader!: ElementRef;
   @ViewChild('readingArea') readingArea!: ElementRef;
   @ViewChild('content') canvas: ElementRef | undefined;
+  @ViewChild('image') image!: ElementRef;
   private ctx!: CanvasRenderingContext2D;
   /**
    * Used to render a page on the canvas or in the image tag. This Image element is prefetched by the cachedImages buffer
@@ -286,6 +287,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.readingArea?.nativeElement.scrollHeight + 'px';
   }
 
+  get ImageHeight() {
+      return this.image?.nativeElement.height + 'px';
+  }
 
   get splitIconClass() {
     if (this.isSplitLeftToRight()) {
@@ -438,6 +442,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
     this.canvasImage.onload = () => this.renderPage();
+    this.getWindowDimensions();
   }
 
   ngOnDestroy() {
@@ -1049,6 +1054,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const windowHeight = window.innerHeight
               || document.documentElement.clientHeight
               || document.body.clientHeight;
+
+              console.log(windowHeight);
 
       const needsSplitting = this.isCoverImage();
       let newScale = this.generalSettingsForm.get('fittingOption')?.value;
