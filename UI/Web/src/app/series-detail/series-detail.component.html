@@ -92,7 +92,8 @@
 
                     <app-card-detail-layout 
                         [isLoading]="isLoading"
-                        [items]="volumes">
+                        [items]="volumes"
+                        [filteringDisabled]="true">
                         <ng-template #cardItem let-item let-position="idx">
                             <app-card-item class="col-auto" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                                   [imageUrl]="imageService.getVolumeCoverImage(item.id) + '&offset=' + coverImageOffset"
@@ -109,7 +110,8 @@
                 <ng-template ngbNavContent>
                     <app-card-detail-layout 
                         [isLoading]="isLoading"
-                        [items]="chapters">
+                        [items]="chapters"
+                        [filteringDisabled]="true">
                         <ng-template #cardItem let-item let-position="idx">
                             <app-card-item class="col-auto" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
                             [imageUrl]="imageService.getChapterCoverImage(item.id) + '&offset=' + coverImageOffset"
@@ -125,7 +127,8 @@
               <ng-template ngbNavContent>
                 <app-card-detail-layout 
                     [isLoading]="isLoading"
-                    [items]="specials">
+                    [items]="specials"
+                    [filteringDisabled]="true">
                     <ng-template #cardItem let-item let-position="idx">
                         <app-card-item class="col-auto" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
                         [imageUrl]="imageService.getChapterCoverImage(item.id)"
