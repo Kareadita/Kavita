@@ -81,7 +81,7 @@ namespace API.Data
         }
 
 
-        void OnEntityTracked(object sender, EntityTrackedEventArgs e)
+        static void OnEntityTracked(object sender, EntityTrackedEventArgs e)
         {
             if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
             {
@@ -91,7 +91,7 @@ namespace API.Data
 
         }
 
-        void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
+        static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
         {
             if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
                 entity.LastModified = DateTime.Now;
