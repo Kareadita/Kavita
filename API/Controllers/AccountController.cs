@@ -353,6 +353,7 @@ namespace API.Controllers
             _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
             // Check if there is an existing invite
+            dto.Email = dto.Email.Trim();
             var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
             if (emailValidationErrors.Any())
             {
