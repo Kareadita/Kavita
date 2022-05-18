@@ -78,65 +78,55 @@
                             [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
                             [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
                         </ng-container>
-                          <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
-                              <app-card-item class="col-auto p-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
-                              [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
-                              [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, storyChapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
-                          </ng-container>
+                        <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
+                            <app-card-item class="col-auto p-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
+                            [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
+                            [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, storyChapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
+                        </ng-container>
                     </div>
                 </ng-template>
             </li>
             <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
                 <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Volumes'}}</a>
                 <ng-template ngbNavContent>
-
-                    <app-card-detail-layout 
-                        [isLoading]="isLoading"
-                        [items]="volumes"
-                        [filteringDisabled]="true">
-                        <ng-template #cardItem let-item let-position="idx">
-                            <app-card-item class="col-auto" [entity]="item" [title]="item.name" (click)="openVolume(item)"
+                    <div class="card-container row g-0">
+                        <ng-container *ngFor="let item of volumes; let idx = index; trackBy: trackByVolumeIdentity">
+                            <app-card-item class="col-auto p-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                                   [imageUrl]="imageService.getVolumeCoverImage(item.id) + '&offset=' + coverImageOffset"
                                   [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions" 
-                                  (selection)="bulkSelectionService.handleCardSelection('volume', position, volumes.length, $event)" 
-                                  [selected]="bulkSelectionService.isCardSelected('volume', position)" [allowSelection]="true">
+                                  (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" 
+                                  [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true">
                                 </app-card-item>
-                        </ng-template>
-                    </app-card-detail-layout>
+                        </ng-container>
+                    </div>
                 </ng-template>
               </li>
             <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
                 <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
                 <ng-template ngbNavContent>
-                    <app-card-detail-layout 
-                        [isLoading]="isLoading"
-                        [items]="chapters"
-                        [filteringDisabled]="true">
-                        <ng-template #cardItem let-item let-position="idx">
+                    <div class="card-container row g-0">
+                        <ng-container *ngFor="let item of chapters; let idx = index; trackBy: trackByChapterIdentity">
                             <app-card-item class="col-auto" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
                             [imageUrl]="imageService.getChapterCoverImage(item.id) + '&offset=' + coverImageOffset"
                             [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions" 
-                            (selection)="bulkSelectionService.handleCardSelection('chapter', position, chapters.length, $event)"
-                            [selected]="bulkSelectionService.isCardSelected('chapter', position)" [allowSelection]="true"></app-card-item>
-                        </ng-template>
-                    </app-card-detail-layout>
+                            (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)"
+                            [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
+                        </ng-container>
+                    </div>
                 </ng-template>
             </li>
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
-                <app-card-detail-layout 
-                    [isLoading]="isLoading"
-                    [items]="specials"
-                    [filteringDisabled]="true">
-                    <ng-template #cardItem let-item let-position="idx">
+                <div class="card-container row g-0">
+                    <ng-container *ngFor="let item of specials; let idx = index; trackBy: trackByChapterIdentity">
                         <app-card-item class="col-auto" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
                         [imageUrl]="imageService.getChapterCoverImage(item.id)"
                         [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
-                        (selection)="bulkSelectionService.handleCardSelection('special', position, chapters.length, $event)"
-                        [selected]="bulkSelectionService.isCardSelected('special', position)" [allowSelection]="true"></app-card-item>
-                    </ng-template>
-                </app-card-detail-layout>
+                        (selection)="bulkSelectionService.handleCardSelection('special', idx, chapters.length, $event)"
+                        [selected]="bulkSelectionService.isCardSelected('special', idx)" [allowSelection]="true"></app-card-item>
+                    </ng-container>
+                </div>
               </ng-template>
             </li>
             <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
