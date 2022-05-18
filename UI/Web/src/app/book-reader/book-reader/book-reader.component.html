@@ -97,7 +97,6 @@
 
     <ng-template #actionBar>
         <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
-            {{actionBarVisible}}
             <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
                 [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsPrevDisabled : IsNextDisabled"
                 title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
