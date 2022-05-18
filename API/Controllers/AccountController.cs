@@ -455,6 +455,11 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
 
+            if (user == null)
+            {
+                return BadRequest("The email does not match the registered email");
+            }
+
             // Validate Password and Username
             var validationErrors = new List<ApiException>();
             validationErrors.AddRange(await _accountService.ValidateUsername(dto.Username));
