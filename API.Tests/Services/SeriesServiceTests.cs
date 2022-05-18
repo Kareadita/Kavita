@@ -770,7 +770,7 @@ public class SeriesServiceTests
             {
                 SeriesId = 1,
                 Publishers = new List<PersonDto>() {new () {Id = 0, Name = "Existing Person", Role = PersonRole.Publisher}},
-                PublisherLocked = true
+                PublishersLocked = true
             },
             CollectionTags = new List<CollectionTagDto>()
         });

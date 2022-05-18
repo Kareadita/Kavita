@@ -464,11 +464,14 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     }
   }
 
-  unlock(event: any) {
+  toggleLock(event: any) {
     if (this.disabled) return;
     this.locked = !this.locked;
-    this.onUnlock.emit();
     this.lockedChange.emit(this.locked);
+
+    if (!this.locked) {
+      this.onUnlock.emit();
+    }
   }
 
 }
