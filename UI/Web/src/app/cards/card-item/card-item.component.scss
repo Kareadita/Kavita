@@ -25,9 +25,8 @@ $image-width: 160px;
     padding-right: 0px;
     box-sizing: border-box;
     position: relative;
-    background-color: var(--card-bg-color);
     color: var(--card-text-color);
-    border-color: var(--card-border-color);
+    border: 1px var(--card-border-color);
 
 }
 
@@ -150,6 +149,11 @@ $image-width: 160px;
 
 .card-body {
     padding: 5px !important;
+    background-color: var(--card-bg-color);
+    border-width: var(--card-border-width);
+    border-style: var(--card-border-style);
+    border-color: var(--card-border-color);
+    border-radius: 0.25em;
 }
 
 .library {
