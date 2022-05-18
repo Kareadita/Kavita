@@ -72,7 +72,7 @@
             <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
-                    <div class="row g-0">
+                    <div class="card-container row g-0">
                         <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                             <app-card-item class="col-auto p-2" *ngIf="volume.number != 0" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
                             [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
