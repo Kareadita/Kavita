@@ -146,8 +146,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     if (library === undefined) {
       lib = {id: this.libraryId, name: this.libraryName};
     }
+    console.log('lib: ', lib);
     switch (action) {
       case(Action.ScanLibrary):
+        console.log('action handler');
         this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):
@@ -155,6 +157,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         break;
       default:
         break;
+    }
+  }
+
+  performAction(action: ActionItem<any>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action.action, undefined);
     }
   }
 
