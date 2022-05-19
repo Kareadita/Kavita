@@ -33,23 +33,7 @@ namespace API.Data
                     Provider = ThemeProvider.System,
                     FileName = "dark.scss",
                     IsDefault = true,
-                },
-                new()
-                {
-                    Name = "Light",
-                    NormalizedName = Parser.Parser.Normalize("Light"),
-                    Provider = ThemeProvider.System,
-                    FileName = "light.scss",
-                    IsDefault = false,
-                },
-                new()
-                {
-                    Name = "E-Ink",
-                    NormalizedName = Parser.Parser.Normalize("E-Ink"),
-                    Provider = ThemeProvider.System,
-                    FileName = "e-ink.scss",
-                    IsDefault = false,
-                },
+                }
             }.ToArray());
 
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)
@@ -84,6 +68,10 @@ namespace API.Data
                     await context.SiteTheme.AddAsync(theme);
                 }
             }
+
+            // Remove themes we no longer support (v0.5.3)
+            var defunctThemes = context.SiteTheme.Where(s => s.Name.Equals("Light") || s.Name.Equals("E-Ink"));
+            context.SiteTheme.RemoveRange(defunctThemes);
 
             await context.SaveChangesAsync();
         }
