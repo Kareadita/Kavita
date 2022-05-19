@@ -85,3 +85,7 @@
 .scroll-to-top:hover {
     animation: MoveUpDown 1s linear infinite;
 }
+
+.text-light {
+    color: var(--search-result-text-lite-color) !important;
+}

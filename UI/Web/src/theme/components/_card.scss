@@ -3,6 +3,7 @@
     color: var(--card-text-color);
     border-color: var(--card-border-color);
     position: relative;
+    border: var(--card-border);
 
     .card-overlay {
         background-color: var(--card-overlay-bg-color);

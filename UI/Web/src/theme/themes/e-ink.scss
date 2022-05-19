@@ -19,7 +19,7 @@
   /* Inputs */
   --input-bg-color: #fff;
   --input-focused-border-color: #ccc;
-  --input-bg-readonly-color: unset;
+  --input-bg-readonly-color: rgba(0,0,0,0.2);
   --input-placeholder-color: #aeaeae;
   --input-border-color: #ccc;
   --input-range-color: var(--primary-color);
@@ -113,6 +113,8 @@
 
   /* Card */
   --card-text-color: #000;
+  --card-border-width: 0 1px 1px 1px;
+  --card-border-style: solid;
   --card-border-color: #ccc;
   --card-progress-bar-color: var(--primary-color);
   --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
@@ -178,4 +180,10 @@
   --popover-bg-color: lightgrey;
   --popover-border-color: lightgrey;
 
+  /* Search */
+  --search-result-text-lite-color: rgba(0,0,0,1);
+
+  /* Bulk Selection */
+  --bulk-selection-text-color: white;
+  --bulk-selection-highlight-text-color: white;
 }

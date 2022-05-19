@@ -184,7 +184,9 @@
     /* Card */
     --card-bg-color: rgba(22,27,34,0.5);
     --card-text-color: var(--body-text-color);
-    --card-border-color: rgba(239, 239, 239, 0.125);
+    --card-border-width: 0 1px 1px 1px;
+    --card-border-style: solid;
+    --card-border-color: transparent;
     --card-progress-bar-color: var(--primary-color);
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
     --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
@@ -223,4 +225,12 @@
     --event-widget-text-color: var(--body-text-color);
     --event-widget-item-border-color: rgba(53, 53, 53, 0.5);
     --event-widget-border-color: rgba(1, 4, 9, 0.5);
+
+    /* Search */
+    --search-result-text-lite-color: initial;
+
+    /* Bulk Selection */
+    --bulk-selection-text-color: var(--navbar-text-color);
+    --bulk-selection-highlight-text-color: var(--primary-color);
+
   }

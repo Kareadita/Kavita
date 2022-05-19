@@ -4,7 +4,7 @@ import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem, SeriesFilter, SortField } from 'src/app/_models/series-filter';
+import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
