@@ -248,6 +248,8 @@ img {
       width: 100%;
   }
 
+  $pagination-bg: rgba(0, 0, 0, 0);
+
   .pagination-area {
     cursor: pointer;
     z-index: 2;
@@ -262,7 +264,7 @@ img {
       right: 0px;
       top: 0px;
       width: $side-width;
-      background: rgba(0, 0, 0, 0);
+      background: $pagination-bg;
     }
     
     .top {
@@ -270,7 +272,7 @@ img {
         right: 0px;
         top: 0px;
         width: 100%;
-        background: rgba(0, 0, 0, 0);
+        background: $pagination-bg;
     }
     
     .left {
@@ -278,7 +280,7 @@ img {
         left: 0px;
         top: 0px;
         width: $side-width;
-        background: rgba(0, 0, 0, 0);
+        background: $pagination-bg;
     }
     
     .bottom {
@@ -286,7 +288,7 @@ img {
         left: 0px;
         bottom: 0px;
         width: 100%;
-        background: rgba(0, 0, 0, 0);
+        background: $pagination-bg;
     }
   }
 

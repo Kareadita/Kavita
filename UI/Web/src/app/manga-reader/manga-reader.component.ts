@@ -288,7 +288,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ImageHeight() {
-      return this.image?.nativeElement.height + 'px';
+    // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
+    if (this.isCoverImage()) {
+      return this.WindowHeight;
+    }
+    return this.image?.nativeElement.height + 'px';
   }
 
   get splitIconClass() {
