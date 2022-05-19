@@ -228,4 +228,9 @@
 
     /* Search */
     --search-result-text-lite-color: initial;
+
+    /* Bulk Selection */
+    --bulk-selection-text-color: var(--navbar-text-color);
+    --bulk-selection-highlight-text-color: var(--primary-color);
+
   }
