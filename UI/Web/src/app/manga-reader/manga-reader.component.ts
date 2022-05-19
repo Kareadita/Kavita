@@ -283,8 +283,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.bookmarks.hasOwnProperty(this.pageNum);
   }
 
+  get WindowWidth() {
+    return this.readingArea?.nativeElement.scrollWidth + 'px';
+  }
+
   get WindowHeight() {
     return this.readingArea?.nativeElement.scrollHeight + 'px';
+  }
+
+  get ImageWidth() {
+    return this.image?.nativeElement.width + 'px';
   }
 
   get ImageHeight() {
