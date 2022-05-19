@@ -33,23 +33,7 @@ namespace API.Data
                     Provider = ThemeProvider.System,
                     FileName = "dark.scss",
                     IsDefault = true,
-                },
-                new()
-                {
-                    Name = "Light",
-                    NormalizedName = Parser.Parser.Normalize("Light"),
-                    Provider = ThemeProvider.System,
-                    FileName = "light.scss",
-                    IsDefault = false,
-                },
-                new()
-                {
-                    Name = "E-Ink",
-                    NormalizedName = Parser.Parser.Normalize("E-Ink"),
-                    Provider = ThemeProvider.System,
-                    FileName = "e-ink.scss",
-                    IsDefault = false,
-                },
+                }
             }.ToArray());
 
         public static async Task SeedRoles(RoleManager<AppRole> roleManager)

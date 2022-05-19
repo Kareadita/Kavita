@@ -147,12 +147,15 @@ namespace API
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+                    var themeService = serviceProvider.GetRequiredService<IThemeService>();
 
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
+
+                    await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

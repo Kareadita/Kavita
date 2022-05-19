@@ -87,7 +87,7 @@ public class SiteThemeServiceTests
             UserName = "Joe",
             UserPreferences = new AppUserPreferences
             {
-                Theme = Seed.DefaultThemes[1]
+                Theme = Seed.DefaultThemes[0]
             }
         });
 
