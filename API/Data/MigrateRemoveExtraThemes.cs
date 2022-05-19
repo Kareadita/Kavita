@@ -33,7 +33,6 @@ public static class MigrateRemoveExtraThemes
         await themeService.UpdateDefault(darkTheme.Id);
 
         // Update all users to Dark theme if they are on Light/E-Ink
-        var users = await unitOfWork.UserRepository.GetAllUsers();
         foreach (var pref in await unitOfWork.UserRepository.GetAllPreferencesByThemeAsync(lightTheme.Id))
         {
             pref.Theme = darkTheme;
