@@ -69,10 +69,6 @@ namespace API.Data
                 }
             }
 
-            // Remove themes we no longer support (v0.5.3)
-            var defunctThemes = context.SiteTheme.Where(s => s.Name.Equals("Light") || s.Name.Equals("E-Ink"));
-            context.SiteTheme.RemoveRange(defunctThemes);
-
             await context.SaveChangesAsync();
         }
 
