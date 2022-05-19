@@ -20,7 +20,7 @@ img {
 .reading-area {
   position: relative;
   overflow: auto;
-  height: calc(var(--vh)*100);
+  //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
 }
 
 .image-container {
@@ -248,7 +248,8 @@ img {
       width: 100%;
   }
 
-  $pagination-bg: rgba(0, 0, 0, 0);
+  //$pagination-bg: rgba(0, 0, 0, 0);
+  $pagination-bg: rgba(0, 0, 255, 0.4);
 
   .pagination-area {
     cursor: pointer;

@@ -31,7 +31,7 @@
         </div>
     </ng-container>
 
-    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}" #readingArea>
+    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div [ngClass]="{'d-none': !renderWithCanvas }">
                 <canvas #content class="{{getFittingOptionClass()}}"

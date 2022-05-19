@@ -1030,7 +1030,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.ctx || !this.canvas) { return; }
 
     this.canvasImage.onload = null;
-    console.log('canvasImage: ', this.canvasImage?.height);
 
     this.setCanvasSize();
 
@@ -1066,8 +1065,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const windowHeight = window.innerHeight
               || document.documentElement.clientHeight
               || document.body.clientHeight;
-
-              console.log(windowHeight);
 
       const needsSplitting = this.isCoverImage();
       let newScale = this.generalSettingsForm.get('fittingOption')?.value;
