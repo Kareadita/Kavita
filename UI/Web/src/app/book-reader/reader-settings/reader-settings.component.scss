@@ -1,6 +1,12 @@
 .controls {
     margin: 0.25rem 0 0.25rem;
 
+    .form-select {
+        option{
+            background-color: var(--input-bg-color);
+        }
+    }
+
     .form-label {
         margin: 0;
     }
