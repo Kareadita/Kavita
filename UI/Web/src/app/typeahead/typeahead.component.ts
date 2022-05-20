@@ -455,6 +455,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   updateShowAddItem(options: any[]) {
+    // ?! BUG This will still technicially allow you to add the same thing as a previously added item. (Code will just toggle it though)
     this.showAddItem = this.settings.addIfNonExisting && this.typeaheadControl.value.trim()
           && this.typeaheadControl.value.trim().length >= Math.max(this.settings.minCharacters, 1)
           && this.typeaheadControl.dirty
