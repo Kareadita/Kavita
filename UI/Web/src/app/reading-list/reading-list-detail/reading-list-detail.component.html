@@ -20,7 +20,7 @@
           <button class="btn btn-primary" title="Read" (click)="read()">
               <span>
                   <i class="fa fa-book-open" aria-hidden="true"></i>
-                  <span class="read-btn--text">&nbsp;Read</span> <!-- IDEA: We can provide them the ability to read/continue like we do with a series -->
+                  <span class="read-btn--text">&nbsp;Read</span>
               </span>
           </button>
         </div>
@@ -47,7 +47,7 @@
 
 
     <div *ngIf="items.length === 0">
-      No chapters added
+      Nothing added
     </div>    
 
     <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
