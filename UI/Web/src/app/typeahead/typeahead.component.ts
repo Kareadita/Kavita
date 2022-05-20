@@ -217,7 +217,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         }),
         map(val => val.trim()),
         auditTime(this.settings.debounce),
-        distinctUntilChanged(), // ?!: BUG Doesn't trigger the search to run when filtered array changes
+        //distinctUntilChanged(), // ?!: BUG Doesn't trigger the search to run when filtered array changes
         filter(val => {
           // If minimum filter characters not met, do not filter
           if (this.settings.minCharacters === 0) return true;
@@ -405,6 +405,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   openDropdown() {
     setTimeout(() => {
       this.typeaheadControl.setValue(this.typeaheadControl.value);
+      this.hasFocus = true;
     });
   }
 
