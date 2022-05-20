@@ -150,8 +150,7 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
             var totalPages = await _cacheService.CacheBookmarkForSeries(user.Id, seriesId);
-            // TODO: Change Includes to None from LinkedSeries branch
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
 
             return Ok(new BookmarkInfoDto()
             {
@@ -172,11 +171,6 @@ namespace API.Controllers
 
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
-            // var series = new List<SeriesDto>()
-            //     {await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(markReadDto.SeriesId, user.Id)};
-            // await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
-            // await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            //     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markReadDto.SeriesId, series[0], series[0].Pages));
             return Ok();
         }
 
@@ -194,16 +188,6 @@ namespace API.Controllers
 
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
-            // Should I do this for every chapter? Maybe in a background task?
-            // foreach (var chapterId in await
-            //              _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new List<int>() {markReadDto.SeriesId}))
-            // {
-            //     await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            //         MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, chapterId, MessageFactoryEntityTypes.Chapter, 0));
-            // }
-            //
-            // await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            //     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markReadDto.SeriesId, MessageFactoryEntityTypes.Series, 0));
             return Ok();
         }
 
@@ -580,6 +564,7 @@ namespace API.Controllers
 
             if (await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
             {
+                BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
                 return Ok();
             }
 
@@ -599,6 +584,7 @@ namespace API.Controllers
 
             if (await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
             {
+                BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
                 return Ok();
             }
 
