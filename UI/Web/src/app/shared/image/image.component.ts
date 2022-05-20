@@ -51,10 +51,13 @@ export class ImageComponent implements OnChanges, OnDestroy {
           if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
           const enityType = this.imageService.getEntityTypeFromUrl(this.imageUrl);
           if (enityType === updateEvent.entityType) {
-            const tokens = this.imageUrl.split('?')[1].split('&random=');
+            const tokens = this.imageUrl.split('?')[1].split('&');
 
             //...seriesId=123&random=
-            const id = tokens[0].replace(enityType + 'Id=', '');
+            let id = tokens[0].replace(enityType + 'Id=', '');
+            if (id.includes('&')) {
+              id = id.split('&')[0];
+            }
             if (id === (updateEvent.id + '')) {
               this.imageUrl = this.imageService.randomize(this.imageUrl);
             }
