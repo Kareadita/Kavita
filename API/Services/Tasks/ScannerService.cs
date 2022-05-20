@@ -215,12 +215,12 @@ public class ScannerService : IScannerService
             // That way logging and UI informing is all in one place with full context
             _logger.LogError("Some of the root folders for the library are empty. " +
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                             "Scan will be aborted. " +
+                             "Scan has be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
 
             await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent( $"Some of the root folders for the library, {libraryName}, are empty.",
                 "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                "Scan will be aborted. " +
+                "Scan has be aborted. " +
                 "Check that your mount is connected or change the library's root folder and rescan"));
 
             return false;
