@@ -283,12 +283,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.bookmarks.hasOwnProperty(this.pageNum);
   }
 
+  get WindowWidth() {
+    return this.readingArea?.nativeElement.scrollWidth + 'px';
+  }
+
   get WindowHeight() {
     return this.readingArea?.nativeElement.scrollHeight + 'px';
   }
 
+  get ImageWidth() {
+    return this.image?.nativeElement.width + 'px';
+  }
+
   get ImageHeight() {
-      return this.image?.nativeElement.height + 'px';
+    // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
+    if (this.isCoverImage()) {
+      return this.WindowHeight;
+    }
+    return this.image?.nativeElement.height + 'px';
   }
 
   get splitIconClass() {
@@ -1018,7 +1030,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.ctx || !this.canvas) { return; }
 
     this.canvasImage.onload = null;
-    console.log('canvasImage: ', this.canvasImage?.height);
 
     this.setCanvasSize();
 
@@ -1054,8 +1065,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const windowHeight = window.innerHeight
               || document.documentElement.clientHeight
               || document.body.clientHeight;
-
-              console.log(windowHeight);
 
       const needsSplitting = this.isCoverImage();
       let newScale = this.generalSettingsForm.get('fittingOption')?.value;

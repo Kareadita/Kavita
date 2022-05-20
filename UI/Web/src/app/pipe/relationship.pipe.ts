@@ -10,7 +10,7 @@ export class RelationshipPipe implements PipeTransform {
     if (relationship === undefined) return '';
     switch (relationship) {
       case RelationKind.Adaptation:
-        return 'Adaptaion';
+        return 'Adaptation';
       case RelationKind.AlternativeSetting:
         return 'Alternative Setting';
       case RelationKind.AlternativeVersion:

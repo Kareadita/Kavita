@@ -32,6 +32,7 @@ namespace API.Services
         string GetCachedEpubFile(int chapterId, Chapter chapter);
         public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
         Task<int> CacheBookmarkForSeries(int userId, int seriesId);
+        void CleanupBookmarkCache(int bookmarkDtoSeriesId);
     }
     public class CacheService : ICacheService
     {
@@ -239,6 +240,18 @@ namespace API.Services
             _directoryService.CopyFilesToDirectory(files, destDirectory);
             _directoryService.Flatten(destDirectory);
             return files.Count;
+        }
+
+        /// <summary>
+        /// Clears a cached bookmarks for a series id folder
+        /// </summary>
+        /// <param name="seriesId"></param>
+        public void CleanupBookmarkCache(int seriesId)
+        {
+            var destDirectory = _directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, seriesId + "_bookmarks");
+            if (!_directoryService.Exists(destDirectory)) return;
+
+            _directoryService.ClearAndDeleteDirectory(destDirectory);
         }
     }
 }

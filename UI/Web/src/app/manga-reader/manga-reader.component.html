@@ -31,9 +31,9 @@
         </div>
     </ng-container>
 
-    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor}" #readingArea>
+    <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
-            <div [ngClass]="{'d-none': !renderWithCanvas }">
+            <div class="image-container" [ngClass]="{'d-none': !renderWithCanvas }">
                 <canvas #content class="{{getFittingOptionClass()}}"
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
@@ -47,7 +47,7 @@
                          title="Previous Page" aria-hidden="true"></i>
                     </div>
                 </div>
-                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')" [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: 25 + '%')}">
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')" [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: 25 + '%'), 'left': (readerMode === ReaderMode.LeftRight && (this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL) ? ImageWidth: 'inherit')}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
                          title="Next Page" aria-hidden="true"></i>

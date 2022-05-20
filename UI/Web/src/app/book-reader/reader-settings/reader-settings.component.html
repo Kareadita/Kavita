@@ -94,7 +94,8 @@
                 </div>
                 <!-- TODO: move this inline style into a class -->
                 <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
-                    <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
+                    <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top"
+                         [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
                     <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
                     <span class="visually-hidden" id="fullscreen-help">
                         <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>

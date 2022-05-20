@@ -102,6 +102,8 @@ namespace API.Controllers
 
                 if (_unitOfWork.HasChanges())
                 {
+                    await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
                     await _unitOfWork.CommitAsync();
                     return Ok();
                 }
@@ -245,6 +247,10 @@ namespace API.Controllers
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
+                    await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(chapter.VolumeId, MessageFactoryEntityTypes.Volume), false);
+                    await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                        MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
                     return Ok();
                 }
 

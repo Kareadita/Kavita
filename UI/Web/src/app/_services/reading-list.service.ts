@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { UtilityService } from '../shared/_services/utility.service';
 import { PaginatedResult } from '../_models/pagination';
 import { ReadingList, ReadingListItem } from '../_models/reading-list';
 import { ActionItem } from './action-factory.service';
@@ -13,7 +14,7 @@ export class ReadingListService {
 
   baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
   getReadingList(readingListId: number) {
     return this.httpClient.get<ReadingList>(this.baseUrl + 'readinglist?readingListId=' + readingListId);
@@ -21,11 +22,11 @@ export class ReadingListService {
 
   getReadingLists(includePromoted: boolean = true, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
-    params = this._addPaginationIfExists(params, pageNum, itemsPerPage);
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
     return this.httpClient.post<PaginatedResult<ReadingList[]>>(this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted, {}, {observe: 'response', params}).pipe(
       map((response: any) => {
-        return this._cachePaginatedResults(response, new PaginatedResult<ReadingList[]>());
+        return this.utilityService.createPaginatedResult(response, new PaginatedResult<ReadingList[]>());
       })
     );
   }
@@ -85,30 +86,5 @@ export class ReadingListService {
   actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, isAdmin: boolean) {
     if (readingList?.promoted && !isAdmin) return false;
     return true;
-  }
-
-  _addPaginationIfExists(params: HttpParams, pageNum?: number, itemsPerPage?: number) {
-    // TODO: Move to utility service
-    if (pageNum !== null && pageNum !== undefined && itemsPerPage !== null && itemsPerPage !== undefined) {
-      params = params.append('pageNumber', pageNum + '');
-      params = params.append('pageSize', itemsPerPage + '');
-    }
-    return params;
-  }
-
-  _cachePaginatedResults(response: any, paginatedVariable: PaginatedResult<any[]>) {
-    // TODO: Move to utility service
-    if (response.body === null) {
-      paginatedVariable.result = [];
-    } else {
-      paginatedVariable.result = response.body;
-    }
-
-    const pageHeader = response.headers.get('Pagination');
-    if (pageHeader !== null) {
-      paginatedVariable.pagination = JSON.parse(pageHeader);
-    }
-
-    return paginatedVariable;
   }
 }

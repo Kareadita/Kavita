@@ -284,6 +284,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   }
 
   toggleFullscreen() {
+    this.isFullscreen = !this.isFullscreen;
     this.fullscreen.emit();
   }
 }

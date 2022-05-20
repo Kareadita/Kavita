@@ -182,7 +182,7 @@ namespace API.Services.Tasks
         /// </summary>
         public Task CleanupBookmarks()
         {
-            // This is disabled for now while we test and validate a new method of deleting bookmarks
+            // TODO: This is disabled for now while we test and validate a new method of deleting bookmarks
             return Task.CompletedTask;
             // Search all files in bookmarks/ except bookmark files and delete those
             // var bookmarkDirectory =
