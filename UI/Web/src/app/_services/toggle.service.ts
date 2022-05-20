@@ -18,6 +18,7 @@ export class ToggleService {
     .pipe(filter(event => event instanceof NavigationStart))
     .subscribe((event) => {
       this.toggleState = false;
+      this.toggleStateSource.next(this.toggleState);
     });
     this.toggleStateSource.next(false);
   }
@@ -26,7 +27,6 @@ export class ToggleService {
     this.toggleState = !this.toggleState;
     this.toggleStateSource.pipe(take(1)).subscribe(state => {
       this.toggleState = !state;
-      console.log('Toggle: ', this.toggleState)
       this.toggleStateSource.next(this.toggleState);
     });
     
