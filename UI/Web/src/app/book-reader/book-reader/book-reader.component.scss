@@ -253,7 +253,7 @@ $action-bar-height: 38px;
     object-position: top center;
     break-inside: avoid;
     break-before: column;
-    max-height: calc((var(--vh)*100) - 116px);
+    max-height: calc((var(--vh)*100) - 116px) !important;
 }
 
 // This is applied to images in the backend
