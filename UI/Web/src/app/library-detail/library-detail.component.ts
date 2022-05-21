@@ -89,7 +89,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
     const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
-      console.log('Redirecting due to not seeing libraryId in route');
       this.router.navigateByUrl('/libraries');
       return;
     }
@@ -146,10 +145,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     if (library === undefined) {
       lib = {id: this.libraryId, name: this.libraryName};
     }
-    console.log('lib: ', lib);
     switch (action) {
       case(Action.ScanLibrary):
-        console.log('action handler');
         this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):
