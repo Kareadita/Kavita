@@ -1,10 +1,10 @@
 ﻿# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
 <div align="center">
 
-!![high level view](https://user-images.githubusercontent.com/735851/129777364-2c82d01e-5c03-4daf-b203-92b1d48e5b7b.gif)
+![new_github_preview_stills](https://user-images.githubusercontent.com/735851/169657008-37812c18-5490-4e2a-9dcb-4806f8c87c69.gif)
 
-Kavita is a fast, feature rich, cross platform reading server. Built with a focus for manga, 
-and the goal of being a full solution for all your reading needs. Setup your own server and share 
+Kavita is a fast, feature rich, cross platform reading server. Built with a focus for manga,
+and the goal of being a full solution for all your reading needs. Setup your own server and share
 your reading collection with your friends and family!
 
 [![Release](https://img.shields.io/github/release/Kareadita/Kavita.svg?style=flat&maxAge=3600)](https://github.com/Kareadita/Kavita/releases)
@@ -20,7 +20,7 @@ your reading collection with your friends and family!
 ## Goals
 - [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
-- [x] Dark and Light themes (and customizable themes)
+- [x] Dark mode and customizable theming support
 - [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
 - [x] Metadata should allow for collections, want to read integration from 3rd party services, genres.
 - [x] Ability to manage users, access, and ratings
@@ -43,47 +43,19 @@ Password: Demouser64
 ```
 
 ## Setup
-### Non-Docker
-- Unzip the archive for your target OS
-- Place in a directory that is writable. If on windows, do not place in Program Files
-- Linux users must ensure the directory & kavita.db is writable by Kavita (might require starting server once) 
-- Run Kavita
-- If you are updating, copy everything over into install location. All Kavita data is stored in config/, so nothing will be overwritten. 
-- Open localhost:5000 and setup your account and libraries in the UI.
-### Docker
-Running your Kavita server in docker is super easy! Barely an inconvenience. You can run it with this command: 
-
-```
-docker run --name kavita -p 5000:5000 \
--v /your/manga/directory:/manga \
--v /kavita/data/directory:/kavita/config \
---restart unless-stopped \
--d kizaing/kavita:latest
-```
-
-You can also run it via the docker-compose file:
-
-```
-version: '3'
-services:
-    kavita:
-        image: kizaing/kavita:latest
-        container_name: kavita
-        volumes:
-            - ./manga:/manga
-            - ./config:/kavita/config
-        ports:
-            - "5000:5000"
-        restart: unless-stopped
-```
+The easiest way to get started is to visit our Wiki which has up-to-date information on a variety of
+install methods and platforms.
+[https://wiki.kavitareader.com/en/install](https://wiki.kavitareader.com/en/install)
 
 **Note: Kavita is under heavy development and is being updated all the time, so the tag for current builds is `:nightly`. The `:latest` tag will be the latest stable release.**
 
 ## Feature Requests
-Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features.
+Got a great idea? Throw it up on our [Feature Request site](https://feats.kavitareader.com/) or vote on another idea. Please check the [Project Board](https://github.com/Kareadita/Kavita/projects) first for a list of planned features before you submit an idea.
 
 ## Notice
-Kavita is being actively developed and should be considered beta software until the 1.0 release. Kavita may be subject to changes in how the platform functions as it is being built out toward the vision. You may lose data and have to restart. The Kavita team strives to avoid any data loss.
+Kavita is being actively developed and should be considered beta software until the 1.0 release.
+Kavita may be subject to changes in how the platform functions as it is being built out toward the
+vision. You may lose data and have to restart. The Kavita team strives to avoid any data loss.
 
 ## Contributors
 
@@ -94,7 +66,7 @@ This project exists thanks to all the people who contribute. [Contribute](CONTRI
 
 
 ## Donate
-If you like Kavita, have gotten good use out of it or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards 
+If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
 expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below.
 
 ## Backers
@@ -119,7 +91,7 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 * [<img src="/Logo/dottrace.svg" alt="" width="32"> dotTrace](http://www.jetbrains.com/dottrace/)
 
 ## Palace-Designs
-We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png" alt="" width="128">](https://www.palace-designs.com/) who hosts our infrastructure pro-bono. 
+We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png" alt="" width="128">](https://www.palace-designs.com/) who hosts our infrastructure pro-bono.
 
 
 ### License
