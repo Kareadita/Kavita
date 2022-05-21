@@ -246,12 +246,16 @@ namespace API.Services
         private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
         {
             var images = doc.DocumentNode.SelectNodes("//img")
-                         ?? doc.DocumentNode.SelectNodes("//image");
+                         ?? doc.DocumentNode.SelectNodes("//image") ?? doc.DocumentNode.SelectNodes("//svg");
 
             if (images == null) return;
 
+
+            var parent = images.First().ParentNode;
+
             foreach (var image in images)
             {
+
                 string key = null;
                 if (image.Attributes["src"] != null)
                 {
@@ -269,7 +273,7 @@ namespace API.Services
                 image.Attributes.Add(key, $"{apiBase}" + imageFile);
 
                 // Add a custom class that the reader uses to ensure images stay within reader
-                image.AddClass("kavita-scale-width");
+                parent.AddClass("kavita-scale-width");
             }
 
         }
