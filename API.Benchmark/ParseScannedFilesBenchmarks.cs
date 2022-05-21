@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
+using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Parser;
 using API.Services;
@@ -46,7 +47,7 @@ namespace API.Benchmark
         /// Generate a list of Series and another list with
         /// </summary>
         [Benchmark]
-        public void MergeName()
+        public async Task MergeName()
         {
             var libraryPath = Path.Join(Directory.GetCurrentDirectory(),
                 "../../../Services/Test Data/ScannerService/Manga");
@@ -61,7 +62,7 @@ namespace API.Benchmark
                 Title = "A Town Where You Live",
                 Volumes = "1"
             };
-            _parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new [] {libraryPath}, "Manga");
+            await _parseScannedFiles.ScanLibrariesForSeries(LibraryType.Manga, new [] {libraryPath}, "Manga");
             _parseScannedFiles.MergeName(p1);
         }
     }

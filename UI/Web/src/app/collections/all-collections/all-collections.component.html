@@ -1,9 +1,8 @@
 <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
     <h2 title>
-        <app-card-actionables [actions]="collectionTagActions"></app-card-actionables>
         Collections
     </h2>
-    <h6 subtitle style="margin-left:40px;">{{collections.length}} Items</h6>
+    <h6 subtitle>{{collections.length}} Items</h6>
 </app-side-nav-companion-bar>
 <app-card-detail-layout
     [isLoading]="isLoading"

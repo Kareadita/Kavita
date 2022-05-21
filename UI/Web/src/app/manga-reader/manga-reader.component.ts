@@ -23,11 +23,11 @@ import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from './_models/rea
 import { layoutModes, pageSplitOptions, scalingOptions } from '../_models/preferences/preferences';
 import { ReaderMode } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
-import { LibraryService } from '../_services/library.service';
 import { LibraryType } from '../_models/library';
 import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
+import { SeriesService } from '../_services/series.service';
 
 const PREFETCH_PAGES = 8;
 
@@ -80,6 +80,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If this is true, no progress will be saved.
    */
   incognitoMode: boolean = false;
+  /**
+   * If this is true, we are reading a bookmark. ChapterId will be 0. There is no continuous reading. Progress is not saved. Bookmark control is removed.
+   */
+  bookmarkMode: boolean = false;
 
   /**
    * If this is true, chapters will be fetched in the order of a reading list, rather than natural series order.
@@ -112,7 +116,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading = true;
 
   @ViewChild('reader') reader!: ElementRef;
+  @ViewChild('readingArea') readingArea!: ElementRef;
   @ViewChild('content') canvas: ElementRef | undefined;
+  @ViewChild('image') image!: ElementRef;
   private ctx!: CanvasRenderingContext2D;
   /**
    * Used to render a page on the canvas or in the image tag. This Image element is prefetched by the cachedImages buffer
@@ -254,11 +260,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   backgroundColor: string = '#FFFFFF';
 
+  getPageUrl = (pageNum: number) => {
+    if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
+    return this.readerService.getPageUrl(this.chapterId, pageNum);
+  }
 
   private readonly onDestroy = new Subject<void>();
-
-
-  getPageUrl = (pageNum: number) => this.readerService.getPageUrl(this.chapterId, pageNum);
 
   get PageNumber() {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
@@ -276,6 +283,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.bookmarks.hasOwnProperty(this.pageNum);
   }
 
+  get WindowWidth() {
+    return this.readingArea?.nativeElement.scrollWidth + 'px';
+  }
+
+  get WindowHeight() {
+    return this.readingArea?.nativeElement.scrollHeight + 'px';
+  }
+
+  get ImageWidth() {
+    return this.image?.nativeElement.width + 'px';
+  }
+
+  get ImageHeight() {
+    // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
+    if (this.isCoverImage() || this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH) {
+      return this.WindowHeight;
+    }
+    return this.image?.nativeElement.height + 'px';
+  }
 
   get splitIconClass() {
     if (this.isSplitLeftToRight()) {
@@ -326,8 +352,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
-              private libraryService: LibraryService, public utilityService: UtilityService,
-              private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
+              public utilityService: UtilityService, private renderer: Renderer2, 
+              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
+              private seriesService: SeriesService) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
   }
@@ -348,6 +375,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
+    this.bookmarkMode = this.route.snapshot.queryParamMap.get('bookmarkMode') === 'true';
 
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
@@ -426,6 +454,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
     this.canvasImage.onload = () => this.renderPage();
+    this.getWindowDimensions();
   }
 
   ngOnDestroy() {
@@ -507,11 +536,41 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.goToPageEvent.complete();
     }
 
+    if (this.bookmarkMode) {
+      this.readerService.getBookmarkInfo(this.seriesId).subscribe(bookmarkInfo => {
+        this.setPageNum(0);
+        this.title = bookmarkInfo.seriesName + ' Bookmarks';
+        this.libraryType = bookmarkInfo.libraryType;
+        this.maxPages = bookmarkInfo.pages;
+
+        // Due to change detection rules in Angular, we need to re-create the options object to apply the change
+        const newOptions: Options = Object.assign({}, this.pageOptions);
+        newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
+        this.pageOptions = newOptions;
+        this.inSetup = false;
+        this.prevChapterDisabled = true;
+        this.nextChapterDisabled = true;
+  
+        const images = [];
+        for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
+          images.push(new Image());
+        }
+  
+        this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
+
+        this.render();
+      });
+
+      return;
+
+    }
+
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId),
       bookmarks: this.readerService.getBookmarks(this.chapterId),
     }).pipe(take(1)).subscribe(results => {
+
 
       if (this.readingListMode && results.chapterInfo.seriesFormat === MangaFormat.EPUB) {
         // Redirect to the book reader.
@@ -852,11 +911,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
     // If the prev page before we change current page is a cover image, we actually are skipping a page
-    console.log('Page ', this.PageNumber, ' is cover image: ', this.isCoverImage(this.cachedImages.prev()))
-    console.log('Page ', this.pageNum, ' is cover image: ', this.isCoverImage())
+    //console.log('Page ', this.PageNumber, ' is cover image: ', this.isCoverImage(this.cachedImages.prev()))
+    //console.log('Page ', this.pageNum, ' is cover image: ', this.isCoverImage())
     const pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage(this.cachedImages.prev())) ? 2: 1; 
     // BUG: isCoverImage works on canvasImage, where we need to know if the previous image is a cover image or not. 
-    console.log('pageAmt: ', pageAmount);
+    //console.log('pageAmt: ', pageAmount);
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
       if (this.isLoading) { return; }
 
@@ -992,7 +1051,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Reset scroll on non HEIGHT Fits
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-      window.scrollTo(0, 0);
+      this.document.body.scroll(0, 0)
     }
 
 
@@ -1050,7 +1109,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       if (offsetIndex < this.maxPages - 1) {
-        item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
+        // if (this.bookmarkMode) item.src = this.readerService.getBookmarkPageUrl(this.seriesId, offsetIndex);
+        // else item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
+        item.src = this.getPageUrl(offsetIndex);
         index += 1;
       }
     }, this.cachedImages.size() - 3);
@@ -1058,20 +1119,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
-  loadPage() {
-    if (!this.canvas || !this.ctx) { return; }
+  
 
+  loadPage() {
     this.isLoading = true;
 
     this.canvasImage = this.cachedImages.current();
 
-
     if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
       if (this.layoutMode === LayoutMode.Single) {
-        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+        //this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
       } else {
-        this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-        this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
+        // this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
+        // this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
+        this.canvasImage2.src = this.getPageUrl(this.pageNum + 1); // TODO: I need to handle last page correctly
       }
       this.canvasImage.onload = () => this.renderPage();
 
@@ -1079,6 +1142,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.renderPage();
     }
     this.prefetch();
+    this.isLoading = false;
   }
 
   setReadingDirection() {
@@ -1144,7 +1208,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       tempPageNum = this.pageNum + 1;
     }
 
-    if (!this.incognitoMode) {
+    if (!this.incognitoMode && !this.bookmarkMode) {
       this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
   }
@@ -1213,6 +1277,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case ReaderMode.Webtoon:
         this.readerMode = ReaderMode.LeftRight;
         break;
+    }
+
+    // We must set this here because loadPage from render doesn't call if we aren't page splitting
+    if (this.readerMode !== ReaderMode.Webtoon) {
+      this.canvasImage = this.cachedImages.current();
+      this.isLoading = true;
     }
 
     this.updateForm();
@@ -1298,14 +1368,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
     this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
-    this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    if (!this.bookmarkMode) {
+      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
   }
 
   getWindowDimensions() {
     const windowWidth = window.innerWidth
                   || document.documentElement.clientWidth
                   || document.body.clientWidth;
-          const windowHeight = window.innerHeight
+    const windowHeight = window.innerHeight
                   || document.documentElement.clientHeight
                   || document.body.clientHeight;
     return [windowWidth, windowHeight];

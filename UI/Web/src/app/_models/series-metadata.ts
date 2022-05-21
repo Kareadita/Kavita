@@ -8,8 +8,11 @@ import { Tag } from "./tag";
 export interface SeriesMetadata {
     seriesId: number;
     summary: string;
-    collectionTags: Array<CollectionTag>;
 
+    totalCount: number;
+    maxCount: number;
+
+    collectionTags: Array<CollectionTag>;
     genres: Array<Genre>;
     tags: Array<Tag>;
     writers: Array<Person>;

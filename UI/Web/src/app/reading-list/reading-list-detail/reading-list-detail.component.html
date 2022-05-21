@@ -3,45 +3,51 @@
     <span *ngIf="actions.length > 0">
       <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>
     </span>
-    {{readingList.title}}&nbsp;<span *ngIf="readingList?.promoted">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>&nbsp;
-    <span class="badge bg-primary rounded-pill" attr.aria-label="{{items.length}} total items">{{items.length}}</span>
+    {{readingList?.title}}&nbsp;<span *ngIf="readingList?.promoted">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
   </h2>
+  <h6 subtitle style="margin-left: 40px">{{items.length}} Items</h6>
 </app-side-nav-companion-bar>
 <div class="container-fluid mt-2" *ngIf="readingList">
-  <div class="mb-3">
-    <!-- Action row-->
-    <div class="row g-0">
-      <div class="col-auto me-2">
-        <button class="btn btn-primary" title="Read" (click)="read()">
-            <span>
-                <i class="fa fa-book-open" aria-hidden="true"></i>
-                <span class="read-btn--text">&nbsp;Read</span>
-            </span>
-        </button>
-      </div>
-      <div class="col-auto">
-          <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList?.promoted && !this.isAdmin">
+
+  <div class="row mb-3">
+    <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
+        <app-image maxWidth="300px" [imageUrl]="readingListImage"></app-image>
+    </div>
+    <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
+      <div class="row g-0 mb-3">
+        <div class="col-auto me-2">
+          <!-- Action row-->
+          <button class="btn btn-primary" title="Read" (click)="read()">
               <span>
-                  <i class="fa fa-check"></i>
+                  <i class="fa fa-book-open" aria-hidden="true"></i>
+                  <span class="read-btn--text">&nbsp;Read</span>
               </span>
-              <span class="read-btn--text">&nbsp;Remove Read</span>
           </button>
-      </div>
-      <div class="col-auto ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
-          <label class="form-check-label" for="accessibilit-mode">Order Numbers</label>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList?.promoted && !this.isAdmin">
+                <span>
+                    <i class="fa fa-check"></i>
+                </span>
+                <span class="read-btn--text">&nbsp;Remove Read</span>
+            </button>
+        </div>
+        <div class="col-auto ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
+            <label class="form-check-label" for="accessibilit-mode">Order Numbers</label>
+          </div>
         </div>
       </div>
-    </div>
-    <!-- Summary row-->
-    <div class="row g-0 mt-2">
-      <app-read-more [text]="readingListSummary" [maxLength]="250"></app-read-more>
-    </div>
+      <!-- Summary row-->
+      <div class="row g-0 mt-2">
+        <app-read-more [text]="readingListSummary" [maxLength]="250"></app-read-more>
+      </div>
     </div>
 
+
     <div *ngIf="items.length === 0">
-      No chapters added
+      Nothing added
     </div>    
 
     <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
@@ -63,6 +69,8 @@
                   <span *ngIf="item.promoted">
                     <i class="fa fa-angle-double-up" aria-hidden="true"></i>
                   </span>
+                  <br/>
+                  <a href="javascript:void(0);" (click)="readChapter(item)">Read</a>
                 </div>
               </div>
         </ng-template> 

@@ -5,7 +5,6 @@ import { LibraryCardComponent } from './library-card/library-card.component';
 import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-chooser.component';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
-import { BookmarksModalComponent } from './_modals/bookmarks-modal/bookmarks-modal.component';
 import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -21,8 +20,8 @@ import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/b
 import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
 import { FileInfoComponent } from './file-info/file-info.component';
-import { BookmarkComponent } from './bookmark/bookmark.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
+import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 
 
 
@@ -34,7 +33,6 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
@@ -42,21 +40,20 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     BulkAddToCollectionComponent,
     ChapterMetadataDetailComponent,
     FileInfoComponent,
-    BookmarkComponent,
+    EditSeriesRelationComponent,
   ],
   imports: [
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
     FormsModule, // EditCollectionsModal
-    
+
     PipeModule,
     SharedModule,
     TypeaheadModule, // edit series modal
 
     MetadataFilterModule,
-    
-    NgbNavModule,
+
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,
@@ -79,12 +76,12 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    BookmarksModalComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
     CardDetailsModalComponent,
     BulkOperationsComponent,
-    ChapterMetadataDetailComponent
+    ChapterMetadataDetailComponent,
+    EditSeriesRelationComponent
   ]
 })
 export class CardsModule { }

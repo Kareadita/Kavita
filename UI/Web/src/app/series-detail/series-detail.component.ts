@@ -1,10 +1,10 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgbModal, NgbNavChangeEvent, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
-import { finalize, map, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -13,7 +13,7 @@ import { ConfirmService } from '../shared/confirm.service';
 import { TagBadgeCursor } from '../shared/tag-badge/tag-badge.component';
 import { DownloadService } from '../shared/_services/download.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { ReviewSeriesModalComponent } from '../_modals/review-series-modal/review-series-modal.component';
+import { ReviewSeriesModalComponent } from './review-series-modal/review-series-modal.component';
 import { Chapter } from '../_models/chapter';
 import { ScanSeriesEvent } from '../_models/events/scan-series-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
@@ -33,9 +33,16 @@ import { ReaderService } from '../_services/reader.service';
 import { ReadingListService } from '../_services/reading-list.service';
 import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
+import { RelatedSeries } from '../_models/series-detail/related-series';
+import { RelationKind } from '../_models/series-detail/relation-kind';
 
+interface RelatedSeris {
+  series: Series;
+  relation: RelationKind;
+}
 
 enum TabID {
+  Related = 0,
   Specials = 1,
   Storyline = 2,
   Volumes = 3,
@@ -106,6 +113,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+  trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+
+  /**
+   * Are there any related series
+   */
+  hasRelations: boolean = false;
+  /**
+   * Related Series. Sorted by backend
+   */
+  relations: Array<RelatedSeris> = [];
 
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
@@ -117,7 +134,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     const selectedChapterIndexes = this.bulkSelectionService.getSelectedCardsForSource('chapter');
     const selectedSpecialIndexes = this.bulkSelectionService.getSelectedCardsForSource('special');
 
-    const selectedChapterIds = this.chapters.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
+    // NOTE: This needs to check current tab as chapter array will be different
+    let chapterArray = this.storyChapters;
+    if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters;
+
+    const selectedChapterIds = chapterArray.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
     const selectedVolumeIds = this.volumes.filter((_volume, index: number) => selectedVolumeIndexes.includes(index + ''));
     const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
     const chapters = [...selectedChapterIds, ...selectedSpecials];
@@ -263,9 +284,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       case(Action.Delete):
         this.deleteSeries(series);
         break;
-      case(Action.Bookmarks):
-        this.actionService.openBookmarkModal(series, () => this.actionInProgress = false);
-        break;
       case(Action.AddToReadingList):
         this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
         break;
@@ -359,6 +377,27 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+      // TODO: Move this to a forkJoin?
+      this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
+        this.relations = [
+          ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
+          ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
+          ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)), 
+          ...relations.spinOffs.map(item => this.createRelatedSeries(item, RelationKind.SpinOff)),
+          ...relations.adaptations.map(item => this.createRelatedSeries(item, RelationKind.Adaptation)),
+          ...relations.contains.map(item => this.createRelatedSeries(item, RelationKind.Contains)),
+          ...relations.characters.map(item => this.createRelatedSeries(item, RelationKind.Character)), 
+          ...relations.others.map(item => this.createRelatedSeries(item, RelationKind.Other)),
+          ...relations.alternativeSettings.map(item => this.createRelatedSeries(item, RelationKind.AlternativeSetting)),
+          ...relations.alternativeVersions.map(item => this.createRelatedSeries(item, RelationKind.AlternativeVersion)),
+          ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
+          ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
+        ];
+        if (this.relations.length > 0) {
+          this.hasRelations = true;
+        }
+      });
+
       this.seriesService.getSeriesDetail(this.seriesId).subscribe(detail => {
         this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
@@ -373,6 +412,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     }, err => {
       this.router.navigateByUrl('/libraries');
     });
+  }
+
+  createRelatedSeries(series: Series, relation: RelationKind) {
+    return {series, relation} as RelatedSeris;
   }
 
   /**

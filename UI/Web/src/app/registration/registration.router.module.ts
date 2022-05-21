@@ -5,8 +5,17 @@ import { ConfirmMigrationEmailComponent } from './confirm-migration-email/confir
 import { ConfirmResetPasswordComponent } from './confirm-reset-password/confirm-reset-password.component';
 import { RegisterComponent } from './register/register.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { UserLoginComponent } from './user-login/user-login.component';
 
 const routes: Routes = [
+  {
+    path: '',
+    component: UserLoginComponent
+  },
+  {
+    path: 'login',
+    component: UserLoginComponent
+  },
   {
       path: 'confirm-email',
       component: ConfirmEmailComponent,

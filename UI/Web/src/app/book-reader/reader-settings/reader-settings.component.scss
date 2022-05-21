@@ -1,0 +1,49 @@
+.controls {
+    margin: 0.25rem 0 0.25rem;
+
+    .form-select {
+        option{
+            background-color: var(--input-bg-color);
+        }
+    }
+
+    .form-label {
+        margin: 0;
+    }
+
+    .btn.btn-icon {
+        display: flex;
+        width: 50%;
+        justify-content: center;
+        align-items: center;
+        &.color {
+            display: unset;
+            width: auto;
+
+            .dot {
+                height: 25px;
+                width: 25px;
+                border-radius: 50%;
+                margin: 0 auto;
+            }
+        }
+    }
+
+    .form-check.form-switch {
+        width: 50%;
+        display: flex;
+        justify-content: center;
+
+        input {
+            margin-right: 0.25rem;
+        }
+    }
+}
+
+.active {
+    border: 1px solid var(--primary-color);
+}
+
+::ng-deep .accordion-body {
+    padding: 0.25rem 1rem 1rem !important;
+}

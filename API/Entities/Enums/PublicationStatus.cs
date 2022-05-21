@@ -18,6 +18,16 @@ public enum PublicationStatus
     /// Publication has finished releasing
     /// </summary>
     [Description("Completed")]
-    Completed = 2
+    Completed = 2,
+    /// <summary>
+    /// Publication has been cancelled
+    /// </summary>
+    [Description("Cancelled")]
+    Cancelled = 3,
+    /// <summary>
+    /// Publication has been completed, but Kavita doesn't have all issues/volumes accounted for
+    /// </summary>
+    [Description("Ended")]
+    Ended = 4
 
 }

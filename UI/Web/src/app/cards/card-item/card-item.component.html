@@ -7,7 +7,7 @@
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageService.errorImage"></app-image>
       </ng-container>
       
-      <div class="progress-banner" *ngIf="read < total && total > 0 && read !== (total -1)">
+      <div class="progress-banner" *ngIf="read < total && total > 0 && read !== total">
         <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
 
         <span class="download" *ngIf="download$ | async as download">
@@ -30,6 +30,11 @@
         <span class="badge bg-primary">{{count}}</span>
       </div>
       <div class="card-overlay"></div>
+      <div class="overlay-information" *ngIf="overlayInformation !== '' ||  overlayInformation !== undefined">
+        <div class="position-relative">
+          <span class="card-title library mx-auto" style="width: auto;" [ngbTooltip]="overlayInformation" placement="top">{{overlayInformation}}</span>
+        </div>
+      </div>
     </div>
 
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
@@ -47,6 +52,6 @@
         </span>
       </div>
       <span class="card-title library" [ngbTooltip]="subtitle" placement="top" *ngIf="subtitle.length > 0">{{subtitle}}</span>
-      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!supressLibraryLink && libraryName">{{libraryName | sentenceCase}}</a>
+      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!suppressLibraryLink && libraryName">{{libraryName | sentenceCase}}</a>
     </div>
 </div>

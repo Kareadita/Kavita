@@ -35,12 +35,12 @@ export class AppComponent implements OnInit {
       });
   }
 
-  @HostListener('resize')
-  onResize() {
+  @HostListener('window:resize', ['$event'])
+  onResize(){
     this.setDocHeight();
   }
 
-  @HostListener('orientationchange')
+  @HostListener('window:orientationchange', ['$event'])
   onOrientationChange() {
     this.setDocHeight();
   }
@@ -62,6 +62,7 @@ export class AppComponent implements OnInit {
 
   setDocHeight() {
     // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
-    this.document.documentElement.style.setProperty('--vh', `${window.innerHeight/100}px`);
+    let vh = window.innerHeight * 0.01;
+    this.document.documentElement.style.setProperty('--vh', `${vh}px`);
   }
 }

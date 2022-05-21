@@ -40,7 +40,7 @@ namespace API.Controllers
             if (dto.SeriesFormat == MangaFormat.Epub)
             {
                 var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
-                using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath);
+                using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.BookReaderOptions);
                 bookTitle = book.Title;
             }
 
@@ -63,7 +63,7 @@ namespace API.Controllers
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-            var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
             var key = BookService.CleanContentKeys(file);
             if (!book.Content.AllFiles.ContainsKey(key)) return BadRequest("File was not found in book");
@@ -87,7 +87,7 @@ namespace API.Controllers
         public async Task<ActionResult<ICollection<BookChapterItem>>> GetBookChapters(int chapterId)
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath);
+            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
 
             var navItems = await book.GetNavigationAsync();
@@ -211,8 +211,7 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             var path = _cacheService.GetCachedEpubFile(chapter.Id, chapter);
 
-
-            using var book = await EpubReader.OpenBookAsync(path);
+            using var book = await EpubReader.OpenBookAsync(path, BookService.BookReaderOptions);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);
 
             var counter = 0;

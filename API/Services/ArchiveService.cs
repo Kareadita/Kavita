@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Archive;
@@ -435,6 +436,12 @@ namespace API.Services
             if (!IsValidArchive(archivePath)) return;
 
             if (Directory.Exists(extractPath)) return;
+
+            if (!_directoryService.FileSystem.File.Exists(archivePath))
+            {
+                _logger.LogError("{Archive} does not exist on disk", archivePath);
+                throw new KavitaException($"{archivePath} does not exist on disk");
+            }
 
             var sw = Stopwatch.StartNew();
 

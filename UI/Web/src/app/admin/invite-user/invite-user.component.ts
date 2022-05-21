@@ -42,7 +42,7 @@ export class InviteUserComponent implements OnInit {
   invite() {
 
     this.isSending = true;
-    const email = this.inviteForm.get('email')?.value;
+    const email = this.inviteForm.get('email')?.value.trim();
     this.accountService.inviteUser({
       email,
       libraries: this.selectedLibraries,

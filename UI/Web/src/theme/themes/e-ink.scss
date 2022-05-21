@@ -2,12 +2,14 @@
   --color-scheme: light;
   --primary-color: black;
   --primary-color-dark-shade: #3B9E76;
+  --primary-color-darker-shade: #338A67;
+  --primary-color-darkest-shade: #25624A;
   --error-color: #ff4136;
-  --bs-body-bg: #fff; 
+  --bs-body-bg: #fff;
   --body-text-color: black;
   --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
 
-  
+
   /* Navbar */
   --navbar-bg-color: black;
   --navbar-text-color: white;
@@ -17,9 +19,11 @@
   /* Inputs */
   --input-bg-color: #fff;
   --input-focused-border-color: #ccc;
-  --input-bg-readonly-color: unset;
+  --input-bg-readonly-color: rgba(0,0,0,0.2);
   --input-placeholder-color: #aeaeae;
   --input-border-color: #ccc;
+  --input-range-color: var(--primary-color);
+  --input-range-active-color: var(--primary-color-darker-shade);
 
   /* Buttons */
   --btn-primary-text-color: black;
@@ -50,7 +54,7 @@
   --nav-tab-text-color: var(--body-text-color);
   --nav-tab-bg-color: black;
   --nav-tab-hover-border-color: black;
-  
+
   /* Checkboxes */
   --checkbox-checked-bg-color: var(--primary-color);
   --checkbox-bg-color: white;
@@ -109,6 +113,8 @@
 
   /* Card */
   --card-text-color: #000;
+  --card-border-width: 0 1px 1px 1px;
+  --card-border-style: solid;
   --card-border-color: #ccc;
   --card-progress-bar-color: var(--primary-color);
   --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
@@ -126,7 +132,7 @@
   --dropdown-item-hover-bg-color: var(--primary-color);
   --dropdown-overlay-color: rgba(0,0,0,0.5);
   --dropdown-item-bg-color: white;
-  
+
   /* Manga Reader */
   --manga-reader-overlay-filter: none;
   --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
@@ -134,7 +140,7 @@
   --manga-reader-bg-color: black;
   --manga-reader-next-highlight-bg-color: transparent;
   --manga-reader-prev-highlight-bg-color: transparent;
-  
+
   /* Radios */
   --radio-accent-color: var(--primary-color);
   --radio-hover-accent-color: var(--primary-color-dark-shade);
@@ -145,7 +151,9 @@
   --carousel-hover-header-text-decoration: none;
 
   /** Drawer */
-  --drawer-background-color: white;
+  --drawer-background-color: white;  // TODO: Remove this for bg
+  --drawer-bg-color: white;
+  --drawer-text-color: black;
 
   /* Pagination */
   --pagination-active-link-border-color: var(--primary-color);
@@ -163,7 +171,7 @@
   --event-widget-text-color: black;
   --event-widget-item-border-color: lightgrey;
   --event-widget-border-color: lightgrey;
-  
+
   /* Popover */
   --popover-body-bg-color: var(--navbar-bg-color);
   --popover-body-text-color: var(--navbar-text-color);
@@ -172,4 +180,10 @@
   --popover-bg-color: lightgrey;
   --popover-border-color: lightgrey;
 
+  /* Search */
+  --search-result-text-lite-color: rgba(0,0,0,1);
+
+  /* Bulk Selection */
+  --bulk-selection-text-color: white;
+  --bulk-selection-highlight-text-color: white;
 }

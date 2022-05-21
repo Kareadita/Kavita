@@ -1,4 +1,4 @@
-input, .form-control {
+input:not([type="range"]), .form-control {
     background-color: var(--input-bg-color);
     color: var(--input-text-color);
     border-color: var(--input-border-color);
@@ -22,4 +22,12 @@ input, .form-control {
     &::placeholder {
         color: var(--input-placeholder-color);
     }
+}
+
+.form-range::-webkit-slider-thumb:active {
+    background-color: var(--input-range-active-color);
+}
+
+.form-range::-webkit-slider-thumb {
+    background-color: var(--input-range-color);
 }

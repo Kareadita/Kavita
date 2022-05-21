@@ -35,7 +35,7 @@ namespace API.Data
             return new Volume()
             {
                 Name = volumeNumber,
-                Number = (int) Parser.Parser.MinimumNumberFromRange(volumeNumber),
+                Number = (int) Parser.Parser.MinNumberFromRange(volumeNumber),
                 Chapters = new List<Chapter>()
             };
         }
@@ -46,7 +46,7 @@ namespace API.Data
             var specialTitle = specialTreatment ? info.Filename : info.Chapters;
             return new Chapter()
             {
-                Number = specialTreatment ? "0" : Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty,
+                Number = specialTreatment ? "0" : Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty,
                 Range = specialTreatment ? info.Filename : info.Chapters,
                 Title = (specialTreatment && info.Format == MangaFormat.Epub)
                     ? info.Title
@@ -79,6 +79,29 @@ namespace API.Data
                 Title = title?.Trim(),
                 Summary = summary?.Trim(),
                 Promoted = promoted
+            };
+        }
+
+        public static ReadingList ReadingList(string title, string summary, bool promoted)
+        {
+            return new ReadingList()
+            {
+                NormalizedTitle = API.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+                Title = title?.Trim(),
+                Summary = summary?.Trim(),
+                Promoted = promoted,
+                Items = new List<ReadingListItem>()
+            };
+        }
+
+        public static ReadingListItem ReadingListItem(int index, int seriesId, int volumeId, int chapterId)
+        {
+            return new ReadingListItem()
+            {
+                Order = index,
+                ChapterId = chapterId,
+                SeriesId = seriesId,
+                VolumeId = volumeId
             };
         }
 

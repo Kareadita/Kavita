@@ -6,7 +6,7 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { LibraryModifiedEvent } from '../_models/events/library-modified-event';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
-import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
+import { ThemeProgressEvent } from '../_models/events/theme-progress-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
@@ -53,7 +53,11 @@ export enum EVENTS {
    /**
     * A library is created or removed from the instance
     */
-   LibraryModified = 'LibraryModified'
+   LibraryModified = 'LibraryModified',
+   /**
+    * A user updates an entities read progress
+    */
+   UserProgressUpdate = 'UserProgressUpdate',
 }
 
 export interface Message<T> {
@@ -153,13 +157,20 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SiteThemeProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.SiteThemeProgress,
-        payload: resp.body as SiteThemeProgressEvent
+        payload: resp.body as ThemeProgressEvent
       });
     });
 
     this.hubConnection.on(EVENTS.SeriesAddedToCollection, resp => {
       this.messagesSource.next({
         event: EVENTS.SeriesAddedToCollection,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.UserProgressUpdate, resp => {
+      this.messagesSource.next({
+        event: EVENTS.UserProgressUpdate,
         payload: resp.body
       });
     });

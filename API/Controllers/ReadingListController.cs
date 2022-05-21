@@ -7,6 +7,7 @@ using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
+using API.SignalR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -14,11 +15,13 @@ namespace API.Controllers
     public class ReadingListController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEventHub _eventHub;
         private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-        public ReadingListController(IUnitOfWork unitOfWork)
+        public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub)
         {
             _unitOfWork = unitOfWork;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -208,12 +211,8 @@ namespace API.Controllers
             {
                 return BadRequest("A list of this name already exists");
             }
-            user.ReadingLists.Add(new ReadingList()
-            {
-                Promoted = false,
-                Title = dto.Title,
-                Summary = string.Empty
-            });
+
+            user.ReadingLists.Add(DbFactory.ReadingList(dto.Title, string.Empty, false));
 
             if (!_unitOfWork.HasChanges()) return BadRequest("There was a problem creating list");
 
@@ -233,9 +232,12 @@ namespace API.Controllers
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
             if (readingList == null) return BadRequest("List does not exist");
 
+
+
             if (!string.IsNullOrEmpty(dto.Title))
             {
                 readingList.Title = dto.Title; // Should I check if this is unique?
+                readingList.NormalizedTitle = Parser.Parser.Normalize(readingList.Title);
             }
             if (!string.IsNullOrEmpty(dto.Title))
             {
@@ -243,6 +245,19 @@ namespace API.Controllers
             }
 
             readingList.Promoted = dto.Promoted;
+
+            readingList.CoverImageLocked = dto.CoverImageLocked;
+
+            if (!dto.CoverImageLocked)
+            {
+                readingList.CoverImageLocked = false;
+                readingList.CoverImage = string.Empty;
+                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
+                _unitOfWork.ReadingListRepository.Update(readingList);
+            }
+
+
 
             _unitOfWork.ReadingListRepository.Update(readingList);
 
@@ -455,14 +470,7 @@ namespace API.Controllers
             foreach (var chapter in chaptersForSeries)
             {
                 if (existingChapterExists.Contains(chapter.Id)) continue;
-
-                readingList.Items.Add(new ReadingListItem()
-                {
-                    Order = index,
-                    ChapterId = chapter.Id,
-                    SeriesId = seriesId,
-                    VolumeId = chapter.VolumeId
-                });
+                readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
                 index += 1;
             }
 

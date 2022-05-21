@@ -5,7 +5,7 @@ $image-height: 230px;
 $image-width: 160px;
 
 .error-banner {
-    width: 160px;
+    width: $image-width;
     height: 18px;
     background-color: var(--toast-error-bg-color);
     font-size: 12px;
@@ -25,9 +25,8 @@ $image-width: 160px;
     padding-right: 0px;
     box-sizing: border-box;
     position: relative;
-    background-color: var(--card-bg-color);
     color: var(--card-text-color);
-    border-color: var(--card-border-color);
+    border: 1px var(--card-border-color);
 
 }
 
@@ -52,7 +51,7 @@ $image-width: 160px;
 }
 
 .progress-banner {
-    width: 160px;
+    width: $image-width;
     height: 5px;
 
     .progress {
@@ -100,6 +99,14 @@ $image-width: 160px;
     }
 }
 
+.overlay-information {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    border-radius: 15px;
+    padding: 0 10px;
+    background-color: var(--card-bg-color);
+}
 
 .overlay {
     height: $image-height;
@@ -142,6 +149,11 @@ $image-width: 160px;
 
 .card-body {
     padding: 5px !important;
+    background-color: var(--card-bg-color);
+    border-width: var(--card-border-width);
+    border-style: var(--card-border-style);
+    border-color: var(--card-border-color);
+    border-radius: 0.25em;
 }
 
 .library {
@@ -155,7 +167,7 @@ $image-width: 160px;
     top: 0;
     left: 0;
     width: 100%;
-    height: 230px;
+    height: $image-height;
     z-index: 10;
     transition: all 0.2s;
 }

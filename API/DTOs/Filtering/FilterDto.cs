@@ -99,6 +99,5 @@ namespace API.DTOs.Filtering
         /// An optional name string to filter by. Empty string will ignore.
         /// </summary>
         public string SeriesNameQuery { get; init; } = string.Empty;
-
     }
 }

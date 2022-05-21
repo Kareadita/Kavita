@@ -14,6 +14,10 @@ namespace API.Data.Metadata
         public string Summary { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Series { get; set; } = string.Empty;
+        /// <summary>
+        /// Localized Series name. Not standard.
+        /// </summary>
+        public string LocalizedSeries { get; set; } = string.Empty;
         public string SeriesSort { get; set; } = string.Empty;
         public string Number { get; set; } = string.Empty;
         /// <summary>
@@ -47,11 +51,11 @@ namespace API.Data.Metadata
         /// </summary>
         public float UserRating { get; set; }
 
-        public string AlternateSeries { get; set; } = string.Empty;
         public string StoryArc { get; set; } = string.Empty;
         public string SeriesGroup { get; set; } = string.Empty;
-        public string AlternativeSeries { get; set; } = string.Empty;
-        public string AlternativeNumber { get; set; } = string.Empty;
+        public string AlternateNumber { get; set; } = string.Empty;
+        public int AlternateCount { get; set; } = 0;
+        public string AlternateSeries { get; set; } = string.Empty;
 
         /// <summary>
         /// This is Epub only: calibre:title_sort
@@ -93,6 +97,10 @@ namespace API.Data.Metadata
         public static void CleanComicInfo(ComicInfo info)
         {
             if (info == null) return;
+
+            info.Series = info.Series.Trim();
+            info.SeriesSort = info.SeriesSort.Trim();
+            info.LocalizedSeries = info.LocalizedSeries.Trim();
 
             info.Writer = Parser.Parser.CleanAuthor(info.Writer);
             info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { ThemeService } from 'src/app/theme.service';
+import { ThemeService } from 'src/app/_services/theme.service';
 import { AccountService } from 'src/app/_services/account.service';
 
 @Component({

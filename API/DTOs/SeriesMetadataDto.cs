@@ -45,11 +45,11 @@ namespace API.DTOs
         /// </summary>
         public string Language { get; set; } = string.Empty;
         /// <summary>
-        /// Number in the TotalCount of issues
+        /// Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)
         /// </summary>
-        public int Count { get; set; }
+        public int MaxCount { get; set; } = 0;
         /// <summary>
-        /// Total number of issues for the series
+        /// Total number of issues/volumes for the series
         /// </summary>
         public int TotalCount { get; set; }
         /// <summary>
@@ -69,16 +69,16 @@ namespace API.DTOs
         public bool PublicationStatusLocked { get; set; }
         public bool GenresLocked { get; set; }
         public bool TagsLocked { get; set; }
-        public bool WriterLocked { get; set; }
-        public bool CharacterLocked { get; set; }
-        public bool ColoristLocked { get; set; }
-        public bool EditorLocked { get; set; }
-        public bool InkerLocked { get; set; }
-        public bool LettererLocked { get; set; }
-        public bool PencillerLocked { get; set; }
-        public bool PublisherLocked { get; set; }
-        public bool TranslatorLocked { get; set; }
-        public bool CoverArtistLocked { get; set; }
+        public bool WritersLocked { get; set; }
+        public bool CharactersLocked { get; set; }
+        public bool ColoristsLocked { get; set; }
+        public bool EditorsLocked { get; set; }
+        public bool InkersLocked { get; set; }
+        public bool LetterersLocked { get; set; }
+        public bool PencillersLocked { get; set; }
+        public bool PublishersLocked { get; set; }
+        public bool TranslatorsLocked { get; set; }
+        public bool CoverArtistsLocked { get; set; }
 
 
         public int SeriesId { get; set; }

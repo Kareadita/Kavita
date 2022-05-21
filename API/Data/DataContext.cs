@@ -41,6 +41,7 @@ namespace API.Data
         public DbSet<Genre> Genre { get; set; }
         public DbSet<Tag> Tag { get; set; }
         public DbSet<SiteTheme> SiteTheme { get; set; }
+        public DbSet<SeriesRelation> SeriesRelation { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -59,10 +60,28 @@ namespace API.Data
                 .WithOne(u => u.Role)
                 .HasForeignKey(ur => ur.RoleId)
                 .IsRequired();
+
+            builder.Entity<SeriesRelation>()
+                .HasOne(pt => pt.Series)
+                .WithMany(p => p.Relations)
+                .HasForeignKey(pt => pt.SeriesId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+
+            builder.Entity<SeriesRelation>()
+                .HasOne(pt => pt.TargetSeries)
+                .WithMany(t => t.RelationOf)
+                .HasForeignKey(pt => pt.TargetSeriesId);
+
+            builder.Entity<AppUserPreferences>()
+                .Property(b => b.BookThemeName)
+                .HasDefaultValue("Dark");
+            builder.Entity<AppUserPreferences>()
+                .Property(b => b.BackgroundColor)
+                .HasDefaultValue("#000000");
         }
 
 
-        void OnEntityTracked(object sender, EntityTrackedEventArgs e)
+        static void OnEntityTracked(object sender, EntityTrackedEventArgs e)
         {
             if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
             {
@@ -72,7 +91,7 @@ namespace API.Data
 
         }
 
-        void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
+        static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
         {
             if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
                 entity.LastModified = DateTime.Now;

@@ -16,7 +16,7 @@ public class ComicInfoTests
     [InlineData("Early Childhood", AgeRating.EarlyChildhood)]
     [InlineData("Everyone 10+", AgeRating.Everyone10Plus)]
     [InlineData("M", AgeRating.Mature)]
-    [InlineData("MA 15+", AgeRating.Mature15Plus)]
+    [InlineData("MA15+", AgeRating.Mature15Plus)]
     [InlineData("Mature 17+", AgeRating.Mature17Plus)]
     [InlineData("Rating Pending", AgeRating.RatingPending)]
     [InlineData("X18+", AgeRating.X18Plus)]

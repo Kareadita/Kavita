@@ -124,7 +124,9 @@ public class ScannerService : IScannerService
                     var path = Directory.GetParent(existingFolder)?.FullName;
                     if (!folderPaths.Contains(path) || !folderPaths.Any(p => p.Contains(path ?? string.Empty)))
                     {
-                        _logger.LogInformation("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
+                        _logger.LogCritical("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
+                        await _eventHub.SendMessageAsync(MessageFactory.Error,
+                            MessageFactory.ErrorEvent($"Scan of {series.Name} aborted", $"{series.OriginalName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library"));
                         return;
                     }
                     if (!string.IsNullOrEmpty(path))
@@ -195,7 +197,7 @@ public class ScannerService : IScannerService
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
         if (folders.Any(f => !_directoryService.IsDriveMounted(f)))
         {
-            _logger.LogError("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
+            _logger.LogCritical("Some of the root folders for library ({LibraryName} are not accessible. Please check that drives are connected and rescan. Scan will be aborted", libraryName);
 
             await _eventHub.SendMessageAsync(MessageFactory.Error,
                 MessageFactory.ErrorEvent("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted",
@@ -213,12 +215,12 @@ public class ScannerService : IScannerService
             // That way logging and UI informing is all in one place with full context
             _logger.LogError("Some of the root folders for the library are empty. " +
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                             "Scan will be aborted. " +
+                             "Scan has be aborted. " +
                              "Check that your mount is connected or change the library's root folder and rescan");
 
             await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent( $"Some of the root folders for the library, {libraryName}, are empty.",
                 "Either your mount has been disconnected or you are trying to delete all series in the library. " +
-                "Scan will be aborted. " +
+                "Scan has be aborted. " +
                 "Check that your mount is connected or change the library's root folder and rescan"));
 
             return false;
@@ -267,18 +269,14 @@ public class ScannerService : IScannerService
         if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+
             return;
         }
 
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
-        // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-        //     MessageFactory.ScanLibraryProgressEvent(libraryId, 0F));
-
 
         var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path));
-        // var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService);
-        // var series = scanner.ScanLibrariesForSeries(library.Type, library.Folders.Select(fp => fp.Path), out var totalFiles, out var scanElapsedTime);
         _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
 
         foreach (var folderPath in library.Folders)
@@ -307,6 +305,7 @@ public class ScannerService : IScannerService
 
         // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
         //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
+
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
     }
 
@@ -464,9 +463,13 @@ public class ScannerService : IScannerService
             if (existingSeries != null) continue;
 
             var s = DbFactory.Series(infos[0].Series);
-            if (!string.IsNullOrEmpty(infos[0].SeriesSort))
+            if (!s.SortNameLocked && !string.IsNullOrEmpty(infos[0].SeriesSort))
             {
                 s.SortName = infos[0].SeriesSort;
+            }
+            if (!s.LocalizedNameLocked && !string.IsNullOrEmpty(infos[0].LocalizedSeries))
+            {
+                s.LocalizedName = infos[0].LocalizedSeries;
             }
             s.Format = key.Format;
             s.LibraryId = library.Id; // We have to manually set this since we aren't adding the series to the Library's series.
@@ -536,6 +539,13 @@ public class ScannerService : IScannerService
                 }
             }
 
+            // parsedInfos[0] is not the first volume or chapter. We need to find it
+            var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
+            if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
+            {
+                series.LocalizedName = localizedSeries;
+            }
+
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, library.Type);
@@ -564,8 +574,7 @@ public class ScannerService : IScannerService
     private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, LibraryType libraryType)
     {
         var isBook = libraryType == LibraryType.Book;
-        var firstVolume = series.Volumes.OrderBy(c => c.Number, new ChapterSortComparer()).FirstWithChapters(isBook);
-        var firstChapter = firstVolume?.Chapters.GetFirstChapterWithFiles();
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
         if (firstFile == null) return;
@@ -585,14 +594,27 @@ public class ScannerService : IScannerService
         // Set the AgeRating as highest in all the comicInfos
         if (!series.Metadata.AgeRatingLocked) series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
+        series.Metadata.TotalCount = chapters.Max(chapter => chapter.TotalCount);
+        series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
+        // To not have to rely completely on ComicInfo, try to parse out if the series is complete by checking parsed filenames as well.
+        if (series.Metadata.MaxCount != series.Metadata.TotalCount)
+        {
+            var maxVolume = series.Volumes.Max(v => (int) Parser.Parser.MaxNumberFromRange(v.Name));
+            var maxChapter = chapters.Max(c => (int) Parser.Parser.MaxNumberFromRange(c.Range));
+            if (maxVolume == series.Metadata.TotalCount) series.Metadata.MaxCount = maxVolume;
+            else if (maxChapter == series.Metadata.TotalCount) series.Metadata.MaxCount = maxChapter;
+        }
 
-        series.Metadata.Count = chapters.Max(chapter => chapter.TotalCount);
+
         if (!series.Metadata.PublicationStatusLocked)
         {
             series.Metadata.PublicationStatus = PublicationStatus.OnGoing;
-            if (chapters.Max(chapter => chapter.Count) >= series.Metadata.Count && series.Metadata.Count > 0)
+            if (series.Metadata.MaxCount >= series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Completed;
+            } else if (series.Metadata.TotalCount > 0 && series.Metadata.MaxCount > 0)
+            {
+                series.Metadata.PublicationStatus = PublicationStatus.Ended;
             }
         }
 
@@ -695,9 +717,50 @@ public class ScannerService : IScannerService
             }
         }
 
+        // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
+        // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();
         PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
-            people, person => series.Metadata.People.Remove(person));
+            people, person =>
+            {
+                switch (person.Role)
+                {
+                    case PersonRole.Writer:
+                        if (!series.Metadata.WriterLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Penciller:
+                        if (!series.Metadata.PencillerLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Inker:
+                        if (!series.Metadata.InkerLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Colorist:
+                        if (!series.Metadata.ColoristLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Letterer:
+                        if (!series.Metadata.LettererLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.CoverArtist:
+                        if (!series.Metadata.CoverArtistLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Editor:
+                        if (!series.Metadata.EditorLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Publisher:
+                        if (!series.Metadata.PublisherLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Character:
+                        if (!series.Metadata.CharacterLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Translator:
+                        if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
+                        break;
+                    case PersonRole.Other:
+                    default:
+                        series.Metadata.People.Remove(person);
+                        break;
+                }
+            });
     }
 
 
@@ -720,7 +783,7 @@ public class ScannerService : IScannerService
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
-            UpdateChapters(volume, infos);
+            UpdateChapters(series, volume, infos);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
 
             // Update all the metadata on the Chapters
@@ -767,7 +830,7 @@ public class ScannerService : IScannerService
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
-    private void UpdateChapters(Volume volume, IList<ParserInfo> parsedInfos)
+    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -789,32 +852,20 @@ public class ScannerService : IScannerService
             {
                 _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
-                volume.Chapters.Add(DbFactory.Chapter(info));
+                chapter = DbFactory.Chapter(info);
+                volume.Chapters.Add(chapter);
+                series.LastChapterAdded = DateTime.Now;
             }
             else
             {
                 chapter.UpdateFrom(info);
             }
 
-        }
-
-        // Add files
-        foreach (var info in parsedInfos)
-        {
-            var specialTreatment = info.IsSpecialInfo();
-            Chapter chapter;
-            try
-            {
-                chapter = volume.Chapters.GetChapterByRange(info);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception parsing chapter. Skipping {SeriesName} Vol {VolumeNumber} Chapter {ChapterNumber} - Special treatment: {NeedsSpecialTreatment}", info.Series, volume.Name, info.Chapters, specialTreatment);
-                continue;
-            }
             if (chapter == null) continue;
+            // Add files
+            var specialTreatment = info.IsSpecialInfo();
             AddOrUpdateFileForChapter(chapter, info);
-            chapter.Number = Parser.Parser.MinimumNumberFromRange(info.Chapters) + string.Empty;
+            chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty;
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
         }
 
@@ -861,7 +912,7 @@ public class ScannerService : IScannerService
 
     private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, ComicInfo? info)
     {
-        var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+        var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
             _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) return;
 
@@ -895,10 +946,16 @@ public class ScannerService : IScannerService
             chapter.TotalCount = comicInfo.Count;
         }
 
+        // This needs to check against both Number and Volume to calculate Count
         if (!string.IsNullOrEmpty(comicInfo.Number) && float.Parse(comicInfo.Number) > 0)
         {
             chapter.Count = (int) Math.Floor(float.Parse(comicInfo.Number));
         }
+        if (!string.IsNullOrEmpty(comicInfo.Volume) && float.Parse(comicInfo.Volume) > 0)
+        {
+            chapter.Count = Math.Max(chapter.Count, (int) Math.Floor(float.Parse(comicInfo.Volume)));
+        }
+
 
 
 

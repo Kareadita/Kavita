@@ -10,6 +10,7 @@ using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,19 @@ public class SeriesService : ISeriesService
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Returns the first chapter for a series to extract metadata from (ie Summary, etc)
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="isBookLibrary"></param>
+    /// <returns></returns>
+    public static Chapter GetFirstChapterForMetadata(Series series, bool isBookLibrary)
+    {
+        return series.Volumes.OrderBy(v => v.Number, new ChapterSortComparer())
+            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()))
+            .FirstOrDefault();
     }
 
     public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
@@ -137,24 +151,22 @@ public class SeriesService : ISeriesService
             UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
 
-            if (!updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked) series.Metadata.AgeRatingLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked) series.Metadata.PublicationStatusLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.LanguageLocked) series.Metadata.LanguageLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.GenresLocked) series.Metadata.GenresLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.TagsLocked) series.Metadata.TagsLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.CharacterLocked) series.Metadata.CharacterLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.ColoristLocked) series.Metadata.ColoristLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.EditorLocked) series.Metadata.EditorLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.InkerLocked) series.Metadata.InkerLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.LettererLocked) series.Metadata.LettererLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.PencillerLocked) series.Metadata.PencillerLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.PublisherLocked) series.Metadata.PublisherLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.TranslatorLocked) series.Metadata.TranslatorLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.CoverArtistLocked) series.Metadata.CoverArtistLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.WriterLocked) series.Metadata.WriterLocked = false;
-            if (!updateSeriesMetadataDto.SeriesMetadata.SummaryLocked) series.Metadata.SummaryLocked = false;
-
-
+            series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
+            series.Metadata.PublicationStatusLocked = updateSeriesMetadataDto.SeriesMetadata.PublicationStatusLocked;
+            series.Metadata.LanguageLocked = updateSeriesMetadataDto.SeriesMetadata.LanguageLocked;
+            series.Metadata.GenresLocked = updateSeriesMetadataDto.SeriesMetadata.GenresLocked;
+            series.Metadata.TagsLocked = updateSeriesMetadataDto.SeriesMetadata.TagsLocked;
+            series.Metadata.CharacterLocked = updateSeriesMetadataDto.SeriesMetadata.CharactersLocked;
+            series.Metadata.ColoristLocked = updateSeriesMetadataDto.SeriesMetadata.ColoristsLocked;
+            series.Metadata.EditorLocked = updateSeriesMetadataDto.SeriesMetadata.EditorsLocked;
+            series.Metadata.InkerLocked = updateSeriesMetadataDto.SeriesMetadata.InkersLocked;
+            series.Metadata.LettererLocked = updateSeriesMetadataDto.SeriesMetadata.LetterersLocked;
+            series.Metadata.PencillerLocked = updateSeriesMetadataDto.SeriesMetadata.PencillersLocked;
+            series.Metadata.PublisherLocked = updateSeriesMetadataDto.SeriesMetadata.PublishersLocked;
+            series.Metadata.TranslatorLocked = updateSeriesMetadataDto.SeriesMetadata.TranslatorsLocked;
+            series.Metadata.CoverArtistLocked = updateSeriesMetadataDto.SeriesMetadata.CoverArtistsLocked;
+            series.Metadata.WriterLocked = updateSeriesMetadataDto.SeriesMetadata.WritersLocked;
+            series.Metadata.SummaryLocked = updateSeriesMetadataDto.SeriesMetadata.SummaryLocked;
 
             if (!_unitOfWork.HasChanges())
             {
@@ -242,7 +254,6 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            // This should be normalized name
             var normalizedTitle = Parser.Parser.Normalize(tagTitle);
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
@@ -274,23 +285,21 @@ public class SeriesService : ISeriesService
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.Tags.ToList();
-        foreach (var existing in existingTags)
+        foreach (var existing in existingTags.Where(existing => tags.SingleOrDefault(t => t.Id == existing.Id) == null))
         {
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-            {
-                // Remove tag
-                series.Metadata.Tags.Remove(existing);
-                isModified = true;
-            }
+            // Remove tag
+            series.Metadata.Tags.Remove(existing);
+            isModified = true;
         }
 
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Title == tagTitle);
+            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
             if (existingTag != null)
             {
-                if (series.Metadata.Tags.All(t => t.Title != tagTitle))
+                if (series.Metadata.Tags.All(t => t.NormalizedTitle != normalizedTitle))
                 {
 
                     handleAdd(existingTag);
@@ -334,7 +343,7 @@ public class SeriesService : ISeriesService
             var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
             if (existingTag != null)
             {
-                if (series.Metadata.People.All(t => t.Name != tag.Name && t.Role == tag.Role))
+                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => !t.Name.Equals(tag.Name)))
                 {
                     handleAdd(existingTag);
                     isModified = true;
@@ -447,7 +456,7 @@ public class SeriesService : ISeriesService
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => float.Parse(v.Name))
+            .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
         var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
@@ -475,10 +484,10 @@ public class SeriesService : ISeriesService
         foreach (var chapter in chapters)
         {
             chapter.Title = FormatChapterTitle(chapter, libraryType);
-            if (chapter.IsSpecial)
-            {
-                specials.Add(chapter);
-            }
+            if (!chapter.IsSpecial) continue;
+
+            if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+            specials.Add(chapter);
         }
 
 

@@ -40,9 +40,9 @@
 
         <div class="mb-3">
             <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
-            <p class="accent" id="collection-info">Send anonymous usage and error information to Kavita's servers. This includes information on your browser, error reporting as well as OS and runtime version. We will use this information to prioritize features, bug fixes, and preformance tuning. Requires restart to take effect.</p>
+            <p class="accent" id="collection-info">Send anonymous usage and error information to Kavita's servers. This includes information on your browser, error reporting as well as OS and runtime version. We will use this information to prioritize features, bug fixes, and preformance tuning. Requires restart to take effect. See <a href="https://wiki.kavitareader.com/en/faq" target="_blank" referrerpolicy="no-refer">wiki</a> for what is collected.</p>
             <div class="form-check form-switch">
-                <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection">
+                <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" role="switch">
                 <label for="stat-collection" class="form-check-label">Send Data</label>
             </div>
         </div>
@@ -80,7 +80,7 @@
         <h4>Reoccuring Tasks</h4>
         <div class="mb-3">
             <label for="settings-tasks-scan" class="form-label">Library Scan</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>
-            <ng-template #taskScanTooltip>How often Kavita will scan and refresh metatdata around manga files.</ng-template>
+            <ng-template #taskScanTooltip>How often Kavita will scan and refresh metadata around manga files.</ng-template>
             <span class="visually-hidden" id="settings-tasks-scan-help">How often Kavita will scan and refresh metatdata around manga files.</span>
             <select class="form-select" aria-describedby="settings-tasks-scan-help" formControlName="taskScan" id="settings-tasks-scan">
                 <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>

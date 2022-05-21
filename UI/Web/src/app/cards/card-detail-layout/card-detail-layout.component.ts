@@ -1,16 +1,14 @@
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
+import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem, SeriesFilter, SortField } from 'src/app/_models/series-filter';
+import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
-
-const ANIMATION_SPEED = 300;
-
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -38,6 +36,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
+  @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
 
 
   // Filter Code
@@ -52,7 +51,11 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
   private onDestory: Subject<void> = new Subject();
 
-  constructor(private seriesService: SeriesService) {
+  get Breakpoint() {
+    return Breakpoint;
+  }
+
+  constructor(private seriesService: SeriesService, public utilityService: UtilityService) {
     this.filter = this.seriesService.createSeriesFilter();
   }
 
@@ -62,6 +65,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
+    }
+
+    if (this.pagination === undefined) {
+      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1}
     }
   }
 

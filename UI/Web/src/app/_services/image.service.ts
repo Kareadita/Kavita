@@ -1,12 +1,10 @@
-import { DOCUMENT } from '@angular/common';
-import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { ThemeService } from '../theme.service';
+import { ThemeService } from './theme.service';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { AccountService } from './account.service';
-import { NavService } from './nav.service';
 
 @Injectable({
   providedIn: 'root'
@@ -73,6 +71,10 @@ export class ImageService implements OnDestroy {
 
   getCollectionCoverImage(collectionTagId: number) {
     return this.baseUrl + 'image/collection-cover?collectionTagId=' + collectionTagId;
+  }
+
+  getReadingListCoverImage(readingListId: number) {
+    return this.baseUrl + 'image/readinglist-cover?readingListId=' + readingListId;
   }
 
   getChapterCoverImage(chapterId: number) {

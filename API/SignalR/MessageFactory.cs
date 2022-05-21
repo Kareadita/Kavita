@@ -7,6 +7,14 @@ using API.Entities;
 
 namespace API.SignalR
 {
+    public static class MessageFactoryEntityTypes
+    {
+        public const string Series = "series";
+        public const string Volume = "volume";
+        public const string Chapter = "chapter";
+        public const string CollectionTag = "collection";
+        public const string ReadingList = "readingList";
+    }
     public static class MessageFactory
     {
         /// <summary>
@@ -58,6 +66,10 @@ namespace API.SignalR
         /// </summary>
         private const string SiteThemeProgress = "SiteThemeProgress";
         /// <summary>
+        /// A custom book theme was removed or added
+        /// </summary>
+        private const string BookThemeProgress = "BookThemeProgress";
+        /// <summary>
         /// A type of event that has progress (determinate or indeterminate).
         /// The underlying event will have a name to give details on how to handle.
         /// </summary>
@@ -78,6 +90,11 @@ namespace API.SignalR
         /// When a library is created/deleted in the Server
         /// </summary>
         public const string LibraryModified = "LibraryModified";
+        /// <summary>
+        /// A user's progress was modified
+        /// </summary>
+        public const string UserProgressUpdate = "UserProgressUpdate";
+
 
 
         public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
@@ -320,12 +337,47 @@ namespace API.SignalR
             };
         }
 
+        public static SignalRMessage UserProgressUpdateEvent(int userId, string username, int seriesId, int volumeId, int chapterId, int pagesRead)
+        {
+            return new SignalRMessage()
+            {
+                Name = UserProgressUpdate,
+                Title = "Updating User Progress",
+                Progress = ProgressType.None,
+                Body = new
+                {
+                    UserId = userId,
+                    Username = username,
+                    SeriesId = seriesId,
+                    VolumeId = volumeId,
+                    ChapterId = chapterId,
+                    PagesRead = pagesRead,
+                }
+            };
+        }
+
         public static SignalRMessage SiteThemeProgressEvent(string subtitle, string themeName, string eventType)
         {
             return new SignalRMessage()
             {
                 Name = SiteThemeProgress,
                 Title = "Scanning Site Theme",
+                SubTitle = subtitle,
+                EventType = eventType,
+                Progress = ProgressType.Indeterminate,
+                Body = new
+                {
+                    ThemeName = themeName,
+                }
+            };
+        }
+
+        public static SignalRMessage BookThemeProgressEvent(string subtitle, string themeName, string eventType)
+        {
+            return new SignalRMessage()
+            {
+                Name = BookThemeProgress,
+                Title = "Scanning Book Theme",
                 SubTitle = subtitle,
                 EventType = eventType,
                 Progress = ProgressType.Indeterminate,

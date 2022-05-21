@@ -1,22 +1,22 @@
 <form [formGroup]="typeaheadForm">
   <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}">
     <ng-container *ngIf="settings.showLocked">
-      <span class="input-group-text clickable" (click)="unlock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
+      <span class="input-group-text clickable" (click)="toggleLock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
         <span class="visually-hidden">Field is locked</span>
     </span>
     </ng-container>
-    <div class="typeahead-input" (click)="onInputFocus($event)">
-        <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index">
+    <div class="typeahead-input" [ngClass]="{'disabled': disabled}" (click)="onInputFocus($event)">
+        <app-tag-badge *ngFor="let option of optionSelection.selected(); let i = index" fillStyle="filled">
           <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i }"></ng-container>
-          <i class="fa fa-times" (click)="toggleSelection(option)" tabindex="0" aria-label="close"></i>
+          <i class="fa fa-times" *ngIf="!disabled" (click)="toggleSelection(option)" tabindex="0" aria-label="close"></i>
         </app-tag-badge>
 
-        <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead">
+        <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead" *ngIf="!disabled">
         <div class="spinner-border spinner-border-sm {{settings.multiple ? 'close-offset' : ''}}" role="status" *ngIf="isLoadingOptions">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <ng-container *ngIf="settings.multiple && (selectedData | async) as selected">
-          <button class="btn btn-close float-end mt-2" *ngIf="selected.length > 0" style="font-size: 0.8rem;" (click)="clearSelections($event)"></button>
+        <ng-container *ngIf="!disabled && settings.multiple && (selectedData | async) as selected">
+          <button class="btn btn-close float-end mt-2" *ngIf="selected.length > 0" style="font-size: 0.8rem;" (click)="clearSelections()"></button>
         </ng-container>
     </div>
   </div>
@@ -28,7 +28,7 @@
           Add {{typeaheadControl.value}}...
       </li>
       <li *ngFor="let option of filteredOptions | async; let index = index;" (click)="handleOptionClick(option)"  
-          class="list-group-item" role="option"
+          class="list-group-item" role="option" [attr.data-index]="index"
           (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
         <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
       </li>

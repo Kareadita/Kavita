@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
-import { BehaviorSubject, fromEvent, merge, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
-import { ScrollService } from 'src/app/scroll.service';
+import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
+import { debounceTime, takeUntil } from 'rxjs/operators';
+import { ScrollService } from 'src/app/_services/scroll.service';
 import { ReaderService } from '../../_services/reader.service';
 import { PAGING_DIRECTION } from '../_models/reader-enums';
 import { WebtoonImage } from '../_models/webtoon-image';

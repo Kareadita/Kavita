@@ -7,6 +7,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -25,9 +26,13 @@ namespace API.Services
         /// </summary>
         /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
         void CleanupChapters(IEnumerable<int> chapterIds);
+        void CleanupBookmarks(IEnumerable<int> seriesIds);
         string GetCachedPagePath(Chapter chapter, int page);
+        string GetCachedBookmarkPagePath(int seriesId, int page);
         string GetCachedEpubFile(int chapterId, Chapter chapter);
         public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
+        Task<int> CacheBookmarkForSeries(int userId, int seriesId);
+        void CleanupBookmarkCache(int bookmarkDtoSeriesId);
     }
     public class CacheService : ICacheService
     {
@@ -35,16 +40,36 @@ namespace API.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDirectoryService _directoryService;
         private readonly IReadingItemService _readingItemService;
-        private readonly NumericComparer _numericComparer;
+        private readonly IBookmarkService _bookmarkService;
 
         public CacheService(ILogger<CacheService> logger, IUnitOfWork unitOfWork,
-            IDirectoryService directoryService, IReadingItemService readingItemService)
+            IDirectoryService directoryService, IReadingItemService readingItemService,
+            IBookmarkService bookmarkService)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _directoryService = directoryService;
             _readingItemService = readingItemService;
-            _numericComparer = new NumericComparer();
+            _bookmarkService = bookmarkService;
+        }
+
+        public string GetCachedBookmarkPagePath(int seriesId, int page)
+        {
+            // Calculate what chapter the page belongs to
+            var path = GetBookmarkCachePath(seriesId);
+            var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
+            files = files
+                .AsEnumerable()
+                .OrderByNatural(Path.GetFileNameWithoutExtension)
+                .ToArray();
+
+            if (files.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            // Since array is 0 based, we need to keep that in account (only affects last image)
+            return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
         }
 
         /// <summary>
@@ -122,6 +147,12 @@ namespace API.Services
                 else if (file.Format == MangaFormat.Epub)
                 {
                     removeNonImages = false;
+                    if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
+                    {
+                        _logger.LogError("{Archive} does not exist on disk", files[0].FilePath);
+                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
+                    }
+
                     _directoryService.ExistOrCreate(extractPath);
                     _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
                 }
@@ -146,6 +177,18 @@ namespace API.Services
             }
         }
 
+        /// <summary>
+        /// Removes the cached files and folders for a set of chapterIds
+        /// </summary>
+        /// <param name="seriesIds"></param>
+        public void CleanupBookmarks(IEnumerable<int> seriesIds)
+        {
+            foreach (var series in seriesIds)
+            {
+                _directoryService.ClearAndDeleteDirectory(GetBookmarkCachePath(series));
+            }
+        }
+
 
         /// <summary>
         /// Returns the cache path for a given Chapter. Should be cacheDirectory/{chapterId}/
@@ -155,6 +198,11 @@ namespace API.Services
         private string GetCachePath(int chapterId)
         {
             return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{chapterId}/"));
+        }
+
+        private string GetBookmarkCachePath(int seriesId)
+        {
+            return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{seriesId}_bookmarks/"));
         }
 
         /// <summary>
@@ -180,6 +228,30 @@ namespace API.Services
 
             // Since array is 0 based, we need to keep that in account (only affects last image)
             return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
+        }
+
+        public async Task<int> CacheBookmarkForSeries(int userId, int seriesId)
+        {
+            var destDirectory = _directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, seriesId + "_bookmarks");
+            if (_directoryService.Exists(destDirectory)) return _directoryService.GetFiles(destDirectory).Count();
+
+            var bookmarkDtos = await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(userId, seriesId);
+            var files = (await _bookmarkService.GetBookmarkFilesById(bookmarkDtos.Select(b => b.Id))).ToList();
+            _directoryService.CopyFilesToDirectory(files, destDirectory);
+            _directoryService.Flatten(destDirectory);
+            return files.Count;
+        }
+
+        /// <summary>
+        /// Clears a cached bookmarks for a series id folder
+        /// </summary>
+        /// <param name="seriesId"></param>
+        public void CleanupBookmarkCache(int seriesId)
+        {
+            var destDirectory = _directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, seriesId + "_bookmarks");
+            if (!_directoryService.Exists(destDirectory)) return;
+
+            _directoryService.ClearAndDeleteDirectory(destDirectory);
         }
     }
 }

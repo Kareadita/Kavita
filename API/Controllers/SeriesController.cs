@@ -6,8 +6,10 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -214,13 +216,6 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId));
         }
 
-        [HttpPost("recently-added-chapters")]
-        public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChaptersAlt()
-        {
-            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            return Ok(await _unitOfWork.SeriesRepository.GetRecentlyAddedChapters(userId));
-        }
-
         [HttpPost("all")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
@@ -248,12 +243,8 @@ namespace API.Controllers
         [HttpPost("on-deck")]
         public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
         {
-            // NOTE: This has to be done manually like this due to the DistinctBy requirement
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var results = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
-
-            var listResults = results.DistinctBy(s => s.Name).Skip((userParams.PageNumber - 1) * userParams.PageSize).Take(userParams.PageSize).ToList();
-            var pagedList = new PagedList<SeriesDto>(listResults, listResults.Count, userParams.PageNumber, userParams.PageSize);
+            var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
 
             await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
 
@@ -345,6 +336,106 @@ namespace API.Controllers
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return await _seriesService.GetSeriesDetail(seriesId, userId);
+        }
+
+        /// <summary>
+        /// Returns the series for the MangaFile id. If the user does not have access (shouldn't happen by the UI),
+        /// then null is returned
+        /// </summary>
+        /// <param name="mangaFileId"></param>
+        /// <returns></returns>
+        [HttpGet("series-for-mangafile")]
+        public async Task<ActionResult<SeriesDto>> GetSeriesForMangaFile(int mangaFileId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, userId));
+        }
+
+        /// <summary>
+        /// Returns the series for the Chapter id. If the user does not have access (shouldn't happen by the UI),
+        /// then null is returned
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
+        [HttpGet("series-for-chapter")]
+        public async Task<ActionResult<SeriesDto>> GetSeriesForChapter(int chapterId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, userId));
+        }
+
+        /// <summary>
+        /// Fetches the related series for a given series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="relation">Type of Relationship to pull back</param>
+        /// <returns></returns>
+        [HttpGet("related")]
+        public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRelatedSeries(int seriesId, RelationKind relation)
+        {
+            // Send back a custom DTO with each type or maybe sorted in some way
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetSeriesForRelationKind(userId, seriesId, relation));
+        }
+
+        [HttpGet("all-related")]
+        public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
+        {
+            // Send back a custom DTO with each type or maybe sorted in some way
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            return Ok(await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId));
+        }
+
+        [Authorize(Policy="RequireAdminRole")]
+        [HttpPost("update-related")]
+        public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
+        {
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related);
+
+            UpdateRelationForKind(dto.Adaptations, series.Relations.Where(r => r.RelationKind == RelationKind.Adaptation).ToList(), series, RelationKind.Adaptation);
+            UpdateRelationForKind(dto.Characters, series.Relations.Where(r => r.RelationKind == RelationKind.Character).ToList(), series, RelationKind.Character);
+            UpdateRelationForKind(dto.Contains, series.Relations.Where(r => r.RelationKind == RelationKind.Contains).ToList(), series, RelationKind.Contains);
+            UpdateRelationForKind(dto.Others, series.Relations.Where(r => r.RelationKind == RelationKind.Other).ToList(), series, RelationKind.Other);
+            UpdateRelationForKind(dto.SideStories, series.Relations.Where(r => r.RelationKind == RelationKind.SideStory).ToList(), series, RelationKind.SideStory);
+            UpdateRelationForKind(dto.SpinOffs, series.Relations.Where(r => r.RelationKind == RelationKind.SpinOff).ToList(), series, RelationKind.SpinOff);
+            UpdateRelationForKind(dto.AlternativeSettings, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeSetting).ToList(), series, RelationKind.AlternativeSetting);
+            UpdateRelationForKind(dto.AlternativeVersions, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeVersion).ToList(), series, RelationKind.AlternativeVersion);
+            UpdateRelationForKind(dto.Doujinshis, series.Relations.Where(r => r.RelationKind == RelationKind.Doujinshi).ToList(), series, RelationKind.Doujinshi);
+            UpdateRelationForKind(dto.Prequels, series.Relations.Where(r => r.RelationKind == RelationKind.Prequel).ToList(), series, RelationKind.Prequel);
+            UpdateRelationForKind(dto.Sequels, series.Relations.Where(r => r.RelationKind == RelationKind.Sequel).ToList(), series, RelationKind.Sequel);
+
+            if (!_unitOfWork.HasChanges()) return Ok();
+            if (await _unitOfWork.CommitAsync()) return Ok();
+
+
+            return BadRequest("There was an issue updating relationships");
+        }
+
+        private void UpdateRelationForKind(IList<int> dtoTargetSeriesIds, IEnumerable<SeriesRelation> adaptations, Series series, RelationKind kind)
+        {
+            foreach (var adaptation in adaptations.Where(adaptation => !dtoTargetSeriesIds.Contains(adaptation.TargetSeriesId)))
+            {
+                // If the seriesId isn't in dto, it means we've removed or reclassified
+                series.Relations.Remove(adaptation);
+            }
+
+            // At this point, we only have things to add
+            foreach (var targetSeriesId in dtoTargetSeriesIds)
+            {
+                // This ensures we don't allow any duplicates to be added
+                if (series.Relations.SingleOrDefault(r =>
+                        r.RelationKind == kind && r.TargetSeriesId == targetSeriesId) !=
+                    null) continue;
+
+                series.Relations.Add(new SeriesRelation()
+                {
+                    Series = series,
+                    SeriesId = series.Id,
+                    TargetSeriesId = targetSeriesId,
+                    RelationKind = kind
+                });
+                _unitOfWork.SeriesRepository.Update(series);
+            }
         }
     }
 }

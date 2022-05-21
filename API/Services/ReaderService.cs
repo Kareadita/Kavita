@@ -9,6 +9,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
@@ -33,13 +34,15 @@ public class ReaderService : IReaderService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReaderService> _logger;
+    private readonly IEventHub _eventHub;
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
-    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger)
+    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _eventHub = eventHub;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -211,9 +214,11 @@ public class ReaderService : IReaderService
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
-            if (!_unitOfWork.HasChanges()) return true;
-            if (await _unitOfWork.CommitAsync())
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
             {
+                var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                    MessageFactory.UserProgressUpdateEvent(userId, user.UserName, progressDto.SeriesId, progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
                 return true;
             }
         }
@@ -470,7 +475,7 @@ public class ReaderService : IReaderService
         {
             var chapters = volume.Chapters
                 .OrderBy(c => float.Parse(c.Number))
-                .Where(c => !c.IsSpecial && Parser.Parser.MaximumNumberFromRange(c.Range) <= chapterNumber);
+                .Where(c => !c.IsSpecial && Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber);
             MarkChaptersAsRead(user, volume.SeriesId, chapters);
         }
     }

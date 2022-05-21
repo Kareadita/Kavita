@@ -1,6 +1,5 @@
 <app-side-nav-companion-bar pageHeader="Home">
     <h2 title>
-        <app-card-actionables [actions]="actions"></app-card-actionables>
         Reading Lists
     </h2>
     <h6 subtitle>{{pagination?.totalItems}} Items</h6>
@@ -15,6 +14,6 @@
     (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
-        <app-card-item [title]="item.title" [entity]="item" [actions]="getActions(item)" [supressLibraryLink]="true" [imageUrl]="imageService.placeholderImage" (clicked)="handleClick(item)"></app-card-item>
+        <app-card-item [title]="item.title" [entity]="item" [actions]="getActions(item)" [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)" (clicked)="handleClick(item)"></app-card-item>
     </ng-template>
 </app-card-detail-layout>

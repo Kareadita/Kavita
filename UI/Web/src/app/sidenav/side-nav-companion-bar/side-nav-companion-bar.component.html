@@ -1,21 +1,17 @@
-<div class="mt-0">
-    <div class="row g-0">
-        <div class="col mr-auto">
-            <ng-content select="[title]"></ng-content>
-            <ng-content select="[subtitle]"></ng-content>
-        </div>
-        <div class="col mr-auto hide-if-empty">
-            <ng-content select="[main]"></ng-content>
-        </div>
-        <div class="col" *ngIf="hasFilter">
-            <div class="row justify-content-end">
-                <div class="col-auto align-self-end">
-                    <button *ngIf="hasFilter" class="btn btn-secondary btn-small" (click)="toggleFilter()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
-                        <i class="fa fa-filter" aria-hidden="true"></i>
-                        <span class="visually-hidden">Sort / Filter</span>
-                    </button>
-                </div>
-            </div>
-        </div>
+<div class="mt-0 d-flex justify-content-between align-items-center">
+    <div>
+        <ng-content select="[title]"></ng-content>
+        <ng-content select="[subtitle]"></ng-content>
     </div>
+    <div>
+        <ng-content select="[main]"></ng-content>
+    </div>
+    <div>
+        <!-- This can get out of sync with offcanvas component. We might need a service to handle communication and service resets to collapsed on route changes -->
+        <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleService.toggle()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
+            <i class="fa fa-filter" aria-hidden="true"></i>
+            <span class="visually-hidden">Sort / Filter</span>
+        </button>
+    </div>
+
 </div>

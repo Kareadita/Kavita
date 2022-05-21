@@ -109,7 +109,7 @@ namespace API.Services.Tasks.Scanner
                 }
                 if (!string.IsNullOrEmpty(info.ComicInfo.Series))
                 {
-                    info.Series = info.ComicInfo.Series;
+                    info.Series = info.ComicInfo.Series.Trim();
                 }
                 if (!string.IsNullOrEmpty(info.ComicInfo.Number))
                 {
@@ -119,16 +119,28 @@ namespace API.Services.Tasks.Scanner
                 // Patch is SeriesSort from ComicInfo
                 if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
                 {
-                    info.SeriesSort = info.ComicInfo.TitleSort;
+                    info.SeriesSort = info.ComicInfo.TitleSort.Trim();
                 }
 
                 if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
                 {
-                    info.SeriesSort = info.ComicInfo.SeriesSort;
+                    info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+                {
+                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
                 }
             }
 
-            TrackSeries(info);
+            try
+            {
+                TrackSeries(info);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
+            }
         }
 
 
@@ -144,13 +156,16 @@ namespace API.Services.Tasks.Scanner
             // Check if normalized info.Series already exists and if so, update info to use that name instead
             info.Series = MergeName(info);
 
+            var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedLocalizedSeries = Parser.Parser.Normalize(info.LocalizedSeries);
             var existingKey = _scannedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && ps.NormalizedName == Parser.Parser.Normalize(info.Series));
+                ps.Format == info.Format && (ps.NormalizedName == normalizedSeries
+                                             || ps.NormalizedName == normalizedLocalizedSeries));
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
                 Name = info.Series,
-                NormalizedName = Parser.Parser.Normalize(info.Series)
+                NormalizedName = normalizedSeries
             };
 
             _scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
@@ -174,8 +189,12 @@ namespace API.Services.Tasks.Scanner
         public string MergeName(ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
+            // We use FirstOrDefault because this was introduced late in development and users might have 2 series with both names
             var existingName =
-                _scannedSeries.SingleOrDefault(p => Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries && p.Key.Format == info.Format)
+                _scannedSeries.FirstOrDefault(p =>
+                        (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                         Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) && p.Key.Format == info.Format)
                 .Key;
             if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
             {

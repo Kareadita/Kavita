@@ -17,10 +17,21 @@ export enum Action {
   Info = 5,
   RefreshMetadata = 6,
   Download = 7,
+  /**
+   * @deprecated This is no longer supported. Use the dedicated page instead
+   */
   Bookmarks = 8,
   IncognitoRead = 9,
   AddToReadingList = 10,
-  AddToCollection = 11
+  AddToCollection = 11,
+  /**
+   * Essentially a download, but handled differently. Needed so card bubbles it up for handling
+   */
+  DownloadBookmark = 12,
+  /**
+   * Open Series detail page for said series
+   */
+  ViewSeries = 13
 }
 
 export interface ActionItem<T> {
@@ -46,6 +57,8 @@ export class ActionFactoryService {
   collectionTagActions: Array<ActionItem<CollectionTag>> = [];
 
   readingListActions: Array<ActionItem<ReadingList>> = [];
+
+  bookmarkActions: Array<ActionItem<Series>> = [];
 
   isAdmin = false;
   hasDownloadRole = false;
@@ -181,6 +194,12 @@ export class ActionFactoryService {
     return actions;
   }
 
+  getBookmarkActions(callback: (action: Action, series: Series) => void) {
+    const actions = this.bookmarkActions.map(a => {return {...a}});
+    actions.forEach(action => action.callback = callback);
+    return actions;
+  }
+
   filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
     if (action.action === Action.Bookmarks && series?.format === MangaFormat.EPUB) return false;
     return true;
@@ -206,12 +225,6 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
           requiresAdmin: false
       }, 
-      {
-        action: Action.Bookmarks,
-        title: 'Bookmarks',
-        callback: this.dummyCallback,
-          requiresAdmin: false
-      },
       {
         action: Action.AddToReadingList,
         title: 'Add to Reading List',
@@ -241,7 +254,7 @@ export class ActionFactoryService {
       },
       {
         action: Action.IncognitoRead,
-        title: 'Read in Incognito',
+        title: 'Read Incognito',
         callback: this.dummyCallback,
         requiresAdmin: false
       },
@@ -268,7 +281,7 @@ export class ActionFactoryService {
       },
       {
         action: Action.IncognitoRead,
-        title: 'Read in Incognito',
+        title: 'Read Incognito',
         callback: this.dummyCallback,
         requiresAdmin: false
       },
@@ -294,5 +307,26 @@ export class ActionFactoryService {
         requiresAdmin: false
       },
     ];
+
+    this.bookmarkActions = [
+      {
+        action: Action.ViewSeries,
+        title: 'View Series',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.DownloadBookmark,
+        title: 'Download',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.Delete,
+        title: 'Clear',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+    ]
   }
 }

@@ -18,15 +18,36 @@ img {
 } 
 
 .reading-area {
-  display: flex;
-  justify-content: center;
   position: relative;
+  overflow: auto;
+  //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
 }
 
 .image-container {
   text-align: center;
-  display: block;
-  height: 100vh;
+
+  // Original
+  //display: block;
+
+  // New (for centering in both axis)
+  //display: flex; // Leave this off as it can cutoff the image
+  align-items: center;
+
+    &.full-width {
+      width: 100vw;
+      height: calc(var(--vh)*100);
+      display: grid;
+    }
+
+    &.full-height {
+      height: 100vh;
+      display: grid;
+    }
+
+    &.original {
+      height: 100vh;
+      display: grid;
+    }
 
   #image-1 {
     &.double {
@@ -46,10 +67,6 @@ img {
     }
   }
 }
-
-// canvas {
-//     //position: absolute; // JOE: Not sure why we have this, but it breaks the renderer
-// }
 
 .reader {
     background-color: var(--manga-reader-bg-color);
@@ -92,25 +109,30 @@ img {
 .full-height {
   width: auto;
   margin: 0 auto;
-  height: 100%;
+  max-height: calc(var(--vh)*100);
   vertical-align: top;
 }
 
 .original {
-  align-self: center;  
+  align-self: center;
+  width: auto;
+  margin: 0 auto;
+  vertical-align: top;
 }
 
 .full-width {
-    width: 100%;
-    align-self: center;  
+  width: 100%;
+  margin: 0 auto;
+  vertical-align: top;
+  max-width: fit-content;
 
-    &.double {
-      width: 50%;
+  &.double {
+    width: 50%;
 
-      &.cover {
-        width: 100%;
-      }
+    &.cover {
+      width: 100%;
     }
+  }
 }
 
 .center-double {
@@ -119,11 +141,11 @@ img {
 }
 
 .fit-to-width-double-offset {
-  width: 100%;
+  max-width: 100%; // max-width fixes center alignment issue
 }
 
 .original-double-offset {
-  width: 100%;
+  max-width: 100%;
 }
 
 .fit-to-height-double-offset {
@@ -134,52 +156,6 @@ img {
   left: 50%;
   transform: translate(-50%, 0%);
   max-width: 100%;
-}
-
-
-
-.right {
-    position: fixed;
-    right: 0px;
-    top: 0px;
-    width: $side-width;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
-}
-
-.top {
-    position: fixed;
-    right: 0px;
-    top: 0px;
-    width: 100%;
-    height: $side-width;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
-}
-
-.left {
-    position: fixed;
-    left: 0px;
-    top: 0px;
-    width: $side-width;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
-}
-
-.bottom {
-    position: fixed;
-    left: 0px;
-    bottom: 0px;
-    width: 100%;
-    height: $side-width;
-    background: rgba(0, 0, 0, 0);
-    z-index: 2;
-    cursor: pointer;
 }
 
 
@@ -272,14 +248,48 @@ img {
       width: 100%;
   }
 
+  $pagination-bg: rgba(0, 0, 0, 0);
+  //$pagination-bg: rgba(0, 0, 255, 0.4);
+
   .pagination-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    cursor: pointer;
+    z-index: 2;
 
     i {
         color: white;
         font-size: 42px;
+    }
+
+    .right {
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      width: $side-width;
+      background: $pagination-bg;
+    }
+    
+    .top {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 100%;
+        background: $pagination-bg;
+    }
+    
+    .left {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: $side-width;
+        background: $pagination-bg;
+    }
+    
+    .bottom {
+        position: fixed; // I couldn't figure out how to do this with abs, so only the bottom bar will not be scrollable
+        left: 0px;
+        bottom: 0px;
+        width: 100%;
+        background: $pagination-bg;
     }
   }
 

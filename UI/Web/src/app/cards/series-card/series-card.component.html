@@ -1,6 +1,7 @@
 <ng-container *ngIf="data !== undefined">
-    <app-card-item [title]="data.name" [actions]="actions" [supressLibraryLink]="suppressLibraryLink" [imageUrl]="imageUrl" 
+    <app-card-item [title]="data.name" [actions]="actions" [suppressLibraryLink]="suppressLibraryLink" [imageUrl]="imageUrl" 
     [entity]="data" [total]="data.pages" [read]="data.pagesRead" (clicked)="handleClick()"
     [allowSelection]="allowSelection" (selection)="selection.emit(selected)" [selected]="selected"
+    [overlayInformation]="(relation | relationship)"
     ></app-card-item>
 </ng-container>

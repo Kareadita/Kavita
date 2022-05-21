@@ -27,7 +27,7 @@ public enum AgeRating
     KidsToAdults = 7,
     [Description("Teen")]
     Teen = 8,
-    [Description("MA 15+")]
+    [Description("MA15+")]
     Mature15Plus = 9,
     [Description("Mature 17+")]
     Mature17Plus = 10,

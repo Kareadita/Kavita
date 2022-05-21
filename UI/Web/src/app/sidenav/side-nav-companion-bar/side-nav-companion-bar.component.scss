@@ -1,5 +1,5 @@
 .hide-if-empty:empty {
-    display: none;
+    display: none !important;
 }
 
 ::ng-deep .companion-bar {

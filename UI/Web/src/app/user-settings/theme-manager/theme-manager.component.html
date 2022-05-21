@@ -8,7 +8,12 @@
         </div>
     </div>
 
+    <p *ngIf="isAdmin"> 
+        Looking for a light or e-ink theme? We have some custom themes you can use on our <a href="https://wiki.kavitareader.com/en/guides/settings/themes" target="_blank" rel="noopener noreferrer">wiki</a>.
+    </p>
+
     <div class="row g-0">
+        <h4>Site Themes</h4>
         <ng-container *ngFor="let theme of (themeService.themes$ | async)">
             <div class="card col-auto me-3 mb-3" style="width: 18rem;">
                 <div class="card-body">
@@ -20,6 +25,5 @@
               </div>
         </ng-container>
     </div>
-
 </div>
 

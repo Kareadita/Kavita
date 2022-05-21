@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using API.Entities.Enums;
 using API.Services;
@@ -132,11 +132,11 @@ public class DefaultParser
 
             if (!parsedVolume.Equals(Parser.DefaultVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
             {
-              if ((ret.Volumes.Equals(Parser.DefaultVolume) || string.IsNullOrEmpty(ret.Volumes)) && !parsedVolume.Equals(Parser.DefaultVolume))
+              if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.DefaultVolume)) && !parsedVolume.Equals(Parser.DefaultVolume))
               {
                 ret.Volumes = parsedVolume;
               }
-              if ((ret.Chapters.Equals(Parser.DefaultChapter) || string.IsNullOrEmpty(ret.Chapters)) && !parsedChapter.Equals(Parser.DefaultChapter))
+              if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter)) && !parsedChapter.Equals(Parser.DefaultChapter))
               {
                 ret.Chapters = parsedChapter;
               }

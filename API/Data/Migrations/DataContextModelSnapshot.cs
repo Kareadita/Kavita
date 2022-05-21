@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.4");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -166,15 +166,17 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("BackgroundColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("BookReaderDarkMode")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("#000000");
 
                     b.Property<string>("BookReaderFontFamily")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("BookReaderFontSize")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("BookReaderImmersiveMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("BookReaderLineSpacing")
@@ -189,7 +191,15 @@ namespace API.Data.Migrations
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BookThemeName")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Dark");
+
                     b.Property<int>("LayoutMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PageLayoutMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
@@ -520,9 +530,6 @@ namespace API.Data.Migrations
                     b.Property<bool>("ColoristLocked")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Count")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("CoverArtistLocked")
                         .HasColumnType("INTEGER");
 
@@ -542,6 +549,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("LettererLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MaxCount")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("PencillerLocked")
@@ -575,6 +585,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("TagsLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("TotalCount")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("TranslatorLocked")
                         .HasColumnType("INTEGER");
 
@@ -590,6 +603,30 @@ namespace API.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("SeriesMetadata");
+                });
+
+            modelBuilder.Entity("API.Entities.Metadata.SeriesRelation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("RelationKind")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TargetSeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SeriesId");
+
+                    b.HasIndex("TargetSeriesId");
+
+                    b.ToTable("SeriesRelation");
                 });
 
             modelBuilder.Entity("API.Entities.Person", b =>
@@ -621,10 +658,19 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("CoverImage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("CoverImageLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Promoted")
@@ -695,6 +741,9 @@ namespace API.Data.Migrations
                     b.Property<int>("Format")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("LastChapterAdded")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
@@ -731,9 +780,6 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("LibraryId");
-
-                    b.HasIndex("Name", "NormalizedName", "LocalizedName", "LibraryId", "Format")
-                        .IsUnique();
 
                     b.ToTable("Series");
                 });
@@ -1173,6 +1219,25 @@ namespace API.Data.Migrations
                     b.Navigation("Series");
                 });
 
+            modelBuilder.Entity("API.Entities.Metadata.SeriesRelation", b =>
+                {
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany("Relations")
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "TargetSeries")
+                        .WithMany("RelationOf")
+                        .HasForeignKey("TargetSeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Series");
+
+                    b.Navigation("TargetSeries");
+                });
+
             modelBuilder.Entity("API.Entities.ReadingList", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -1441,6 +1506,10 @@ namespace API.Data.Migrations
                     b.Navigation("Progress");
 
                     b.Navigation("Ratings");
+
+                    b.Navigation("RelationOf");
+
+                    b.Navigation("Relations");
 
                     b.Navigation("Volumes");
                 });

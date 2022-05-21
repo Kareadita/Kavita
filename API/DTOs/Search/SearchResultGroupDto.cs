@@ -17,5 +17,8 @@ public class SearchResultGroupDto
     public IEnumerable<PersonDto> Persons { get; set; }
     public IEnumerable<GenreTagDto> Genres { get; set; }
     public IEnumerable<TagDto> Tags { get; set; }
+    public IEnumerable<MangaFileDto> Files { get; set; }
+    public IEnumerable<ChapterDto> Chapters { get; set; }
+
 
 }

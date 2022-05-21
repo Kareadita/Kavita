@@ -40,7 +40,8 @@ export interface SortOptions {
 export enum SortField {
   SortName = 1,
   Created = 2,
-  LastModified = 3
+  LastModified = 3,
+  LastChapterAdded = 4
 }
 
 export interface ReadStatus {

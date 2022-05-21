@@ -1,0 +1,95 @@
+.dark-menu {
+    background-color: var(--navbar-bg-color);
+    border-color: var(--event-widget-border-color); // rgba(1, 4, 9, 0.5);
+}
+
+.dark-menu-item {
+    color: var(--event-widget-text-color);
+    background-color: var(--event-widget-item-bg-color); // rgb(1, 4, 9)
+    border-color: var(--event-widget-item-border-color); // rgba(53, 53, 53, 0.5)
+}
+
+// Popovers need to be their own component
+::ng-deep .bs-popover-bottom > .popover-arrow::after, .bs-popover-bottom > .popover-arrow::before {
+    border-bottom-color: transparent;
+}
+
+::ng-deep .nav-events {
+    
+    .popover-body {
+        min-width: 250px;
+        max-width: 250px;
+        padding: 0px;
+        box-shadow: 0px 0px 12px rgb(0 0 0 / 75%);
+        max-height: calc(100vh - 60px);
+        overflow-y: auto;
+    }
+
+    .popover {
+        min-width: 300px;
+    }
+}
+
+.progress-container {
+    width: 100%;
+}
+
+.progress {
+    padding: 0;
+}
+
+.accent-text {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow:hidden;
+    white-space:nowrap; 
+}
+
+.btn:focus, .btn:hover {
+    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
+}
+
+.small-spinner {
+    width: 1rem;
+    height: 1rem;
+}
+
+
+
+
+.btn-icon {
+    color: white;
+}
+
+.colored {
+    background-color: var(--primary-color);
+    border-radius: 60px;
+}
+
+.update-available {
+    cursor: pointer;
+    
+    i.fa {
+        color: var(--primary-color) !important;
+    }
+    color: var(--primary-color);
+}
+
+.error {
+    cursor: pointer;
+    position: relative;
+    .h6 {
+        color: var(--error-color);
+    }
+
+    i.fa {
+        color: var(--primary-color) !important;
+    }
+
+    .btn-close {
+        top: 5px;
+        right: 10px;
+        font-size: 11px;
+        position: absolute;
+    }
+}

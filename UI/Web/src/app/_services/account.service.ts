@@ -7,7 +7,7 @@ import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import { Router } from '@angular/router';
 import { MessageHubService } from './message-hub.service';
-import { ThemeService } from '../theme.service';
+import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 
 @Injectable({
@@ -235,9 +235,7 @@ export class AccountService implements OnDestroy {
     // set a timeout to refresh the token a minute before it expires
     const expires = new Date(jwtToken.exp * 1000);
     const timeout = expires.getTime() - Date.now() - (60 * 1000);
-    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(() => {
-      console.log('Token Refreshed');
-    }), timeout);
+    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(() => {}), timeout);
   }
 
   private stopRefreshTokenTimer() {

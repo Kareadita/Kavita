@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
@@ -22,6 +22,15 @@ import { MetadataService } from 'src/app/_services/metadata.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
+enum TabID {
+  General = 0,
+  Metadata = 1,
+  People = 2,
+  CoverImage = 3,
+  Related = 4,
+  Info = 5,
+}
+
 @Component({
   selector: 'app-edit-series-modal',
   templateUrl: './edit-series-modal.component.html',
@@ -39,8 +48,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   isCollapsed = true;
   volumeCollapsed: any = {};
-  tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Info'];
+  tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Related', 'Info'];
   active = this.tabs[0];
+  activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   private readonly onDestroy = new Subject<void>();
@@ -73,12 +83,18 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   coverImageReset = false;
 
+  saveNestedComponents: EventEmitter<void> = new EventEmitter();
+
   get Breakpoint(): typeof Breakpoint {
     return Breakpoint;
   }
 
   get PersonRole() {
     return PersonRole;
+  }
+
+  get TabID(): typeof TabID {
+    return TabID;
   }
 
   getPersonsSettings(role: PersonRole) {
@@ -219,10 +235,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       return {id: 0, title: title, promoted: false, coverImage: '', summary: '', coverImageLocked: false };
     });
     this.collectionTagSettings.compareFn = (options: CollectionTag[], filter: string) => {
-      // console.log('compareFN:')
-      // console.log('options: ', options);
-      // console.log('filter: ', filter);
-      // console.log('results: ', options.filter(m => this.utilityService.filter(m.title, filter)));
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
     this.collectionTagSettings.selectionCompareFn = (a: CollectionTag, b: CollectionTag) => {
@@ -423,6 +435,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     if (selectedIndex > 0 && this.selectedCover !== '') {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover));
     }
+
+    this.saveNestedComponents.emit();
+
 
 
     forkJoin(apis).subscribe(results => {

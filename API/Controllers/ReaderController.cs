@@ -11,6 +11,8 @@ using API.Entities;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
+using API.SignalR;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -25,23 +27,21 @@ namespace API.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
-        private readonly IDirectoryService _directoryService;
-        private readonly ICleanupService _cleanupService;
         private readonly IBookmarkService _bookmarkService;
+        private readonly IEventHub _eventHub;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
             IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
-            IReaderService readerService, IDirectoryService directoryService,
-            ICleanupService cleanupService, IBookmarkService bookmarkService)
+            IReaderService readerService, IBookmarkService bookmarkService,
+            IEventHub eventHub)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
-            _directoryService = directoryService;
-            _cleanupService = cleanupService;
             _bookmarkService = bookmarkService;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -74,6 +74,41 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Returns an image for a given bookmark series. Side effect: This will cache the bookmark images for reading.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <param name="apiKey">Api key for the user the bookmarks are on</param>
+        /// <param name="page"></param>
+        /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
+        /// <returns></returns>
+        [HttpGet("bookmark-image")]
+        public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
+        {
+            if (page < 0) page = 0;
+            var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+            var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
+            if (page > totalPages)
+            {
+                page = totalPages;
+            }
+
+            try
+            {
+                var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
+                var format = Path.GetExtension(path).Replace(".", "");
+
+                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
+                return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+            }
+            catch (Exception)
+            {
+                _cacheService.CleanupBookmarks(new []{ seriesId });
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
         /// </summary>
         /// <param name="chapterId"></param>
@@ -81,6 +116,7 @@ namespace API.Controllers
         [HttpGet("chapter-info")]
         public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
         {
+            if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("Could not find Chapter");
 
@@ -104,6 +140,28 @@ namespace API.Controllers
             });
         }
 
+        /// <summary>
+        /// Returns various information about all bookmark files for a Series. Side effect: This will cache the bookmark images for reading.
+        /// </summary>
+        /// <param name="seriesId">Series Id for all bookmarks</param>
+        /// <returns></returns>
+        [HttpGet("bookmark-info")]
+        public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var totalPages = await _cacheService.CacheBookmarkForSeries(user.Id, seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
+
+            return Ok(new BookmarkInfoDto()
+            {
+                SeriesName = series.Name,
+                SeriesFormat = series.Format,
+                SeriesId = series.Id,
+                LibraryId = series.LibraryId,
+                Pages = totalPages,
+            });
+        }
+
 
         [HttpPost("mark-read")]
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
@@ -111,13 +169,9 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
 
-            if (await _unitOfWork.CommitAsync())
-            {
-                return Ok();
-            }
+            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
-
-            return BadRequest("There was an issue saving progress");
+            return Ok();
         }
 
 
@@ -132,13 +186,9 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
             await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
 
-            if (await _unitOfWork.CommitAsync())
-            {
-                return Ok();
-            }
+            if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
-
-            return BadRequest("There was an issue saving progress");
+            return Ok();
         }
 
         /// <summary>
@@ -514,6 +564,7 @@ namespace API.Controllers
 
             if (await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
             {
+                BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
                 return Ok();
             }
 
@@ -533,6 +584,7 @@ namespace API.Controllers
 
             if (await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
             {
+                BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
                 return Ok();
             }
 

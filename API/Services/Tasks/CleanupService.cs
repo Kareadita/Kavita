@@ -64,6 +64,7 @@ namespace API.Services.Tasks
             await DeleteChapterCoverImages();
             await SendProgress(0.7F, "Cleaning deleted cover images");
             await DeleteTagCoverImages();
+            await DeleteReadingListCoverImages();
             await SendProgress(0.8F, "Cleaning deleted cover images");
             await SendProgress(1F, "Cleanup finished");
             _logger.LogInformation("Cleanup finished");
@@ -113,6 +114,16 @@ namespace API.Services.Tasks
         {
             var images = await _unitOfWork.CollectionTagRepository.GetAllCoverImagesAsync();
             var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.CollectionTagCoverImageRegex);
+            _directoryService.DeleteFiles(files.Where(file => !images.Contains(_directoryService.FileSystem.Path.GetFileName(file))));
+        }
+
+        /// <summary>
+        /// Removes all reading list images that are not in the database. They must follow <see cref="ImageService.ReadingListCoverImageRegex"/> filename pattern.
+        /// </summary>
+        public async Task DeleteReadingListCoverImages()
+        {
+            var images = await _unitOfWork.ReadingListRepository.GetAllCoverImagesAsync();
+            var files = _directoryService.GetFiles(_directoryService.CoverImageDirectory, ImageService.ReadingListCoverImageRegex);
             _directoryService.DeleteFiles(files.Where(file => !images.Contains(_directoryService.FileSystem.Path.GetFileName(file))));
         }
 
@@ -171,7 +182,7 @@ namespace API.Services.Tasks
         /// </summary>
         public Task CleanupBookmarks()
         {
-            // This is disabled for now while we test and validate a new method of deleting bookmarks
+            // TODO: This is disabled for now while we test and validate a new method of deleting bookmarks
             return Task.CompletedTask;
             // Search all files in bookmarks/ except bookmark files and delete those
             // var bookmarkDirectory =

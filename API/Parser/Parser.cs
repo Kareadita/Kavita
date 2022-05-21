@@ -12,7 +12,7 @@ namespace API.Parser
         public const string DefaultVolume = "0";
         private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
-        public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp)";
+        public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub|\.pdf";
         public const string MacOsMetadataFileStartsWith = @"._";
@@ -43,7 +43,7 @@ namespace API.Parser
             MatchOptions, RegexTimeout);
 
 
-        private static readonly string XmlRegexExtensions = @"\.xml";
+        private const string XmlRegexExtensions = @"\.xml";
         private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
             MatchOptions, RegexTimeout);
         private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
@@ -54,7 +54,7 @@ namespace API.Parser
             MatchOptions, RegexTimeout);
         private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
             MatchOptions, RegexTimeout);
-        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)((?<!back)cover|folder)(?![\w\d])",
+        private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
             MatchOptions, RegexTimeout);
 
         private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+]",
@@ -132,9 +132,9 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
-            // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz
+            // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz, My Charms Are Wasted on Kuroiwa Medaka - Ch. 37.5 - Volume Extras
             new Regex(
-                @"(?<Series>.*)(\s|_|-)(?!Vol)(\s|_|-)(?:Chapter)(\s|_|-)(?<Chapter>\d+)",
+                @"(?<Series>.+?)(\s|_|-)(?!Vol)(\s|_|-)((?:Chapter)|(?:Ch\.))(\s|_|-)(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
             new Regex(
@@ -453,19 +453,11 @@ namespace API.Parser
         private static readonly Regex[] MangaEditionRegex = {
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
-                @"(?<Edition>({|\(|\[).* Edition(}|\)|\]))",
-                MatchOptions, RegexTimeout),
-            // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
-            new Regex(
                 @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
                 MatchOptions, RegexTimeout),
             // To Love Ru v01 Uncensored (Ch.001-007)
             new Regex(
                 @"(\b|_)(?<Edition>Uncensored)(\b|_)",
-                MatchOptions, RegexTimeout),
-            // AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz
-            new Regex(
-                @"(\b|_)(?<Edition>Full(?: |_)Color)(\b|_)?",
                 MatchOptions, RegexTimeout),
         };
 
@@ -934,25 +926,7 @@ namespace API.Parser
         }
 
 
-        public static float MaximumNumberFromRange(string range)
-        {
-            try
-            {
-                if (!Regex.IsMatch(range, @"^[\d-.]+$"))
-                {
-                    return (float) 0.0;
-                }
-
-                var tokens = range.Replace("_", string.Empty).Split("-");
-                return tokens.Max(float.Parse);
-            }
-            catch
-            {
-                return (float) 0.0;
-            }
-        }
-
-        public static float MinimumNumberFromRange(string range)
+        public static float MinNumberFromRange(string range)
         {
             try
             {
@@ -963,6 +937,24 @@ namespace API.Parser
 
                 var tokens = range.Replace("_", string.Empty).Split("-");
                 return tokens.Min(float.Parse);
+            }
+            catch
+            {
+                return (float) 0.0;
+            }
+        }
+
+        public static float MaxNumberFromRange(string range)
+        {
+            try
+            {
+                if (!Regex.IsMatch(range, @"^[\d-.]+$"))
+                {
+                    return (float) 0.0;
+                }
+
+                var tokens = range.Replace("_", string.Empty).Split("-");
+                return tokens.Max(float.Parse);
             }
             catch
             {
@@ -1007,7 +999,7 @@ namespace API.Parser
 
         public static bool HasBlacklistedFolderInPath(string path)
         {
-            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._");
+            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._") || path.Contains(".qpkg");
         }
 
 

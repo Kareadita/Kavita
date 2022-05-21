@@ -3,7 +3,7 @@ import { NavigationStart, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Action, ActionFactoryService } from '../_services/action-factory.service';
 
-type DataSource = 'volume' | 'chapter' | 'special' | 'series';
+type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark';
 
 /**
  * Responsible for handling selections on cards. Can handle multiple card sources next to each other in different loops.
@@ -130,6 +130,10 @@ export class BulkSelectionService {
     const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection, Action.Delete];
     if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
       return this.actionFactory.getSeriesActions(callback).filter(item => allowedActions.includes(item.action));
+    }
+
+    if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
+      return this.actionFactory.getBookmarkActions(callback);
     }
 
     return this.actionFactory.getVolumeActions(callback).filter(item => allowedActions.includes(item.action));
