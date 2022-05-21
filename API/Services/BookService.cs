@@ -273,7 +273,8 @@ namespace API.Services
                 image.Attributes.Add(key, $"{apiBase}" + imageFile);
 
                 // Add a custom class that the reader uses to ensure images stay within reader
-                parent.AddClass("kavita-scale-width");
+                parent.AddClass("kavita-scale-width-container");
+                image.AddClass("kavita-scale-width");
             }
 
         }

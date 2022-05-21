@@ -59,6 +59,8 @@ $action-bar-height: 38px;
 }
 
 .drawer-body {
+    overflow: auto;
+
     .reader-pills {
         justify-content: center;
         margin: 0 0.25rem;
@@ -244,15 +246,24 @@ $action-bar-height: 38px;
     }
 }
 
-
 // This is applied to images in the backend
-::ng-deep .kavita-scale-width {
+::ng-deep .kavita-scale-width-container {
     width: auto;
     object-fit: contain;
     object-position: top center;
     break-inside: avoid;
     break-before: column;
     max-height: calc((var(--vh)*100) - 116px);
+}
+
+// This is applied to images in the backend
+::ng-deep .kavita-scale-width {
+    max-width: 100%;
+    object-fit: contain;
+    object-position: top center;
+    break-inside: avoid;
+    break-before: column;
+    max-height: 100vh;
 }
 
 
