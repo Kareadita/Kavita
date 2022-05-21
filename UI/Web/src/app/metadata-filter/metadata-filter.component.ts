@@ -601,12 +601,10 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   toggleSelected() {
-    //this.filteringCollapsed = !this.filteringCollapsed;
     this.toggleService.toggle();
   }
 
   setToggle(event: any) {
-    console.log('set toggle', event);
     this.toggleService.set(!this.filteringCollapsed);
   }
 
