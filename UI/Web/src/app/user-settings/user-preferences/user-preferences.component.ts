@@ -36,8 +36,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup = new FormGroup({});
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
-  isAdmin: boolean = false;
-  hasChangePasswordRole: boolean = false;
   hasChangePasswordAbility: Observable<boolean> = of(false);
 
   passwordsMatch = false;
@@ -84,7 +82,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - User Preferences');
 
-    this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(shareReplay(), map(user => {
+    this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), map(user => {
       return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
     }));
 
@@ -99,8 +97,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
       this.user = results.user;
       this.user.preferences = results.pref;
-      this.isAdmin = this.accountService.hasAdminRole(results.user);
-      this.hasChangePasswordRole = this.accountService.hasChangePasswordRole(results.user);
 
       if (this.fontFamilies.indexOf(this.user.preferences.bookReaderFontFamily) < 0) {
         this.user.preferences.bookReaderFontFamily = 'default';
