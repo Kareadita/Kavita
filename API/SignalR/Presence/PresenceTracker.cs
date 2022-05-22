@@ -89,6 +89,7 @@ namespace API.SignalR.Presence
 
         public Task<string[]> GetOnlineAdmins()
         {
+            // TODO: This might end in stale data, we want to get the online users, query against DB to check if they are admins then return
             string[] onlineUsers;
             lock (OnlineUsers)
             {
@@ -107,7 +108,7 @@ namespace API.SignalR.Presence
                 connectionIds = OnlineUsers.GetValueOrDefault(username)?.ConnectionIds;
             }
 
-            return Task.FromResult(connectionIds);
+            return Task.FromResult(connectionIds ?? new List<string>());
         }
     }
 }

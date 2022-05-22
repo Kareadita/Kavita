@@ -15,6 +15,7 @@ using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
 using API.Services;
+using API.SignalR;
 using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -40,13 +41,16 @@ namespace API.Controllers
         private readonly IAccountService _accountService;
         private readonly IEmailService _emailService;
         private readonly IHostEnvironment _environment;
+        private readonly IEventHub _eventHub;
 
         /// <inheritdoc />
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService, IUnitOfWork unitOfWork,
             ILogger<AccountController> logger,
-            IMapper mapper, IAccountService accountService, IEmailService emailService, IHostEnvironment environment)
+            IMapper mapper, IAccountService accountService,
+            IEmailService emailService, IHostEnvironment environment,
+            IEventHub eventHub)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -57,6 +61,7 @@ namespace API.Controllers
             _accountService = accountService;
             _emailService = emailService;
             _environment = environment;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -289,6 +294,7 @@ namespace API.Controllers
             {
                 dto.Roles.Add(PolicyConstants.PlebRole);
             }
+
             if (existingRoles.Except(dto.Roles).Any() || dto.Roles.Except(existingRoles).Any())
             {
                 var roles = dto.Roles;
@@ -326,9 +332,9 @@ namespace API.Controllers
                 lib.AppUsers.Add(user);
             }
 
-            if (!_unitOfWork.HasChanges()) return Ok();
-            if (await _unitOfWork.CommitAsync())
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
             {
+                await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
                 return Ok();
             }
 

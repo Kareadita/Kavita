@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { take, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { BookService } from 'src/app/book-reader/book.service';
 import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes } from 'src/app/_models/preferences/preferences';
@@ -11,7 +11,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -38,6 +38,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   user: User | undefined = undefined;
   isAdmin: boolean = false;
   hasChangePasswordRole: boolean = false;
+  hasChangePasswordAbility: Observable<boolean> = of(false);
 
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
@@ -82,6 +83,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - User Preferences');
+
+    this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(shareReplay(), map(user => {
+      return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
+    }));
 
     forkJoin({
       user: this.accountService.currentUser$.pipe(take(1)),

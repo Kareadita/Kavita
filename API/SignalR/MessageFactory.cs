@@ -94,6 +94,10 @@ namespace API.SignalR
         /// A user's progress was modified
         /// </summary>
         public const string UserProgressUpdate = "UserProgressUpdate";
+        /// <summary>
+        /// A user's account or preferences were updated and UI needs to refresh to stay in sync
+        /// </summary>
+        public const string UserUpdate = "UserUpdate";
 
 
 
@@ -384,6 +388,21 @@ namespace API.SignalR
                 Body = new
                 {
                     ThemeName = themeName,
+                }
+            };
+        }
+
+        public static SignalRMessage UserUpdateEvent(int userId, string userName)
+        {
+            return new SignalRMessage()
+            {
+                Name = UserUpdate,
+                Title = "User Update",
+                Progress = ProgressType.None,
+                Body = new
+                {
+                    UserId = userId,
+                    UserName = userName
                 }
             };
         }

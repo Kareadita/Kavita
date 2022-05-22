@@ -11,6 +11,7 @@ namespace API.SignalR;
 public interface IEventHub
 {
     Task SendMessageAsync(string method, SignalRMessage message, bool onlyAdmins = true);
+    Task SendMessageToAsync(string method, SignalRMessage message, int userId);
 }
 
 public class EventHub : IEventHub
@@ -41,5 +42,18 @@ public class EventHub : IEventHub
 
 
         await users.SendAsync(method, message);
+    }
+
+    /// <summary>
+    /// Sends a message directly to a user if they are connected
+    /// </summary>
+    /// <param name="method"></param>
+    /// <param name="message"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task SendMessageToAsync(string method, SignalRMessage message, int userId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        await _messageHub.Clients.User(user.UserName).SendAsync(method, message);
     }
 }

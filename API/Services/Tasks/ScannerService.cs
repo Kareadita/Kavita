@@ -789,7 +789,7 @@ public class ScannerService : IScannerService
             // Update all the metadata on the Chapters
             foreach (var chapter in volume.Chapters)
             {
-                var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+                var firstFile = chapter.Files.MinBy(x => x.Chapter);
                 if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
                 try
                 {
@@ -923,6 +923,7 @@ public class ScannerService : IScannerService
         }
 
         if (comicInfo == null) return;
+        _logger.LogDebug("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
         chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
 
