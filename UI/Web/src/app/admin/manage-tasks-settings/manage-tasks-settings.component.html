@@ -19,6 +19,53 @@
             </select>
         </div>
 
+        <h4>Ad-hoc Tasks</h4>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+              <th scope="col">Job Title</th>
+              <th scope="col">Description</th>
+              <th scope="col">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>
+                Convert Bookmarks to WebP
+              </td>
+              <td>
+                  Runs a long-running task which will convert all bookmarks to WebP. This is slow (especially on ARM devices).
+              </td>
+              <td>
+                <button class="btn btn-primary" (click)="runAdhocConvert()">Convert</button>
+              </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <h4>Reoccuring Tasks</h4>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Job Title</th>
+              <th scope="col">Last Executed</th>
+              <th scope="col">Cron</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let task of reoccuringTasks$ | async; index as i">
+              <th scope="row">{{ i + 1 }}</th>
+              <td>
+                {{task.id}}
+              </td>
+              <td>{{task.lastExecution | date:'short'}}</td>
+              <td>{{task.cron}}</td>
+            </tr>
+            </tbody>
+        </table>
+
+
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>

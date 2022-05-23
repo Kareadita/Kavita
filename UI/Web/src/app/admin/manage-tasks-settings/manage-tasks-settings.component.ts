@@ -4,8 +4,10 @@ import { ToastrService } from 'ngx-toastr';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
-import { take } from 'rxjs/operators';
-import { forkJoin } from 'rxjs';
+import { catchError, shareReplay, take } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { ServerService } from 'src/app/_services/server.service';
+import { Job } from 'src/app/_models/job/job';
 
 @Component({
   selector: 'app-manage-tasks-settings',
@@ -19,7 +21,9 @@ export class ManageTasksSettingsComponent implements OnInit {
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, private confirmService: ConfirmService) { }
+  reoccuringTasks$: Observable<Array<Job>> = of([]);
+
+  constructor(private settingsService: SettingsService, private toastr: ToastrService, private serverService: ServerService) { }
 
   ngOnInit(): void {
     forkJoin({
@@ -34,7 +38,9 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.serverSettings = result.settings;
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
-    })
+    });
+
+    this.reoccuringTasks$ = this.serverService.getReoccuringJobs().pipe(shareReplay());
   }
 
   resetForm() {
@@ -66,6 +72,11 @@ export class ManageTasksSettingsComponent implements OnInit {
     });
   }
 
+  runAdhocConvert() {
+    this.serverService.convertBookmarks().subscribe(() => {
+      this.toastr.success('Conversion of Bookmarks has been queued.');
+    });
+  }
 
 
 }

@@ -25,10 +25,10 @@ export class DashboardComponent implements OnInit {
 
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'General', fragment: TabID.General},
-    {title: 'Email', fragment: TabID.Email},
-    {title: 'Media', fragment: TabID.Media},
     {title: 'Users', fragment: TabID.Users},
     {title: 'Libraries', fragment: TabID.Libraries},
+    {title: 'Media', fragment: TabID.Media},
+    {title: 'Email', fragment: TabID.Email},
     {title: 'System', fragment: TabID.System},
     //{title: 'Plugins', fragment: TabID.Plugins},
     {title: 'Tasks', fragment: TabID.Tasks},

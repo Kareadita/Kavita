@@ -497,7 +497,7 @@ namespace API.Controllers
                 user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != dto.SeriesId).ToList();
                 _unitOfWork.UserRepository.Update(user);
 
-                if (await _unitOfWork.CommitAsync())
+                if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
                 {
                     try
                     {

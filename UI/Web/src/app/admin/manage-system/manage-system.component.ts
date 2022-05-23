@@ -80,7 +80,7 @@ export class ManageSystemComponent implements OnInit {
     this.backupDBInProgress = true;
     this.serverService.backupDatabase().subscribe(res => {
       this.backupDBInProgress = false;
-      this.toastr.success('Database has been backed up');
+      this.toastr.success('A job to backup the database has been queued');
     });
   }
 

@@ -63,6 +63,10 @@ export enum EVENTS {
     * A user updates account or preferences
     */
    UserUpdate = 'UserUpdate',
+   /**
+    * When bulk bookmarks are being converted
+    */
+   ConvertBookmarksProgress = 'ConvertBookmarksProgress',
 }
 
 export interface Message<T> {
@@ -140,6 +144,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.ScanLibraryProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.ConvertBookmarksProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ConvertBookmarksProgress,
         payload: resp.body
       });
     });
