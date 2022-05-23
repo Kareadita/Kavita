@@ -47,6 +47,12 @@ public class BookmarkServiceTests
         _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
     }
 
+    private BookmarkService Create(IDirectoryService ds)
+    {
+        return new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds,
+            Substitute.For<IImageService>(), Substitute.For<IEventHub>());
+    }
+
     #region Setup
 
     private static DbConnection CreateInMemoryDatabase()
@@ -121,7 +127,8 @@ public class BookmarkServiceTests
     public async Task BookmarkPage_ShouldCopyTheFileAndUpdateDB()
     {
         var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{CacheDirectory}1/0001.jpg", new MockFileData("123"));
+        var file = $"{CacheDirectory}1/0001.jpg";
+        filesystem.AddFile(file, new MockFileData("123"));
 
         // Delete all Series to reset state
         await ResetDB();
@@ -157,7 +164,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
+        var bookmarkService = Create(ds);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
 
         var result = await bookmarkService.BookmarkPage(user, new BookmarkDto()
@@ -166,7 +173,7 @@ public class BookmarkServiceTests
             Page = 1,
             SeriesId = 1,
             VolumeId = 1
-        }, $"{CacheDirectory}1/0001.jpg");
+        }, file);
 
 
         Assert.True(result);
@@ -227,7 +234,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
+        var bookmarkService = Create(ds);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
 
         var result = await bookmarkService.RemoveBookmarkPage(user, new BookmarkDto()
@@ -319,7 +326,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
+        var bookmarkService = Create(ds);
 
         await bookmarkService.DeleteBookmarkFiles(new [] {new AppUserBookmark()
         {
@@ -378,7 +385,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var bookmarkService = new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds);
+        var bookmarkService = Create(ds);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
 
         await bookmarkService.BookmarkPage(user, new BookmarkDto()

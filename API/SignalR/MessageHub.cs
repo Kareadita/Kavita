@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.SignalR
 {
-
     /// <summary>
     /// Generic hub for sending messages to UI
     /// </summary>
@@ -17,7 +16,6 @@ namespace API.SignalR
     public class MessageHub : Hub
     {
         private readonly IPresenceTracker _tracker;
-        //private static readonly HashSet<string> Connections = new HashSet<string>();
 
         public MessageHub(IPresenceTracker tracker)
         {
@@ -26,12 +24,6 @@ namespace API.SignalR
 
         public override async Task OnConnectedAsync()
         {
-
-            // lock (Connections)
-            // {
-            //     Connections.Add(Context.ConnectionId);
-            // }
-
             await _tracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId);
 
             var currentUsers = await PresenceTracker.GetOnlineUsers();
@@ -43,11 +35,6 @@ namespace API.SignalR
 
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            // lock (Connections)
-            // {
-            //     Connections.Remove(Context.ConnectionId);
-            // }
-
             await _tracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId);
 
             var currentUsers = await PresenceTracker.GetOnlineUsers();

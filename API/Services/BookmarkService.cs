@@ -110,7 +110,8 @@ public class BookmarkService : IBookmarkService
             _unitOfWork.UserRepository.Update(userWithBookmarks);
             await _unitOfWork.CommitAsync();
 
-            if ((await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP)
+            var convertToWebP = bool.Parse((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.ConvertBookmarkToWebP)).Value);
+            if (convertToWebP)
             {
                 // Enqueue a task to convert the bookmark to webP
                 BackgroundJob.Enqueue(() => ConvertBookmarkToWebP(bookmark.Id));
