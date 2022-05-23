@@ -6,6 +6,7 @@ import { SentenceCasePipe } from './sentence-case.pipe';
 import { PersonRolePipe } from './person-role.pipe';
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { RelationshipPipe } from './relationship.pipe';
+import { DefaultValuePipe } from './default-value.pipe';
 
 
 
@@ -16,7 +17,8 @@ import { RelationshipPipe } from './relationship.pipe';
     PublicationStatusPipe,
     SentenceCasePipe,
     SafeHtmlPipe,
-    RelationshipPipe
+    RelationshipPipe,
+    DefaultValuePipe
   ],
   imports: [
     CommonModule,
@@ -27,7 +29,8 @@ import { RelationshipPipe } from './relationship.pipe';
     PublicationStatusPipe,
     SentenceCasePipe,
     SafeHtmlPipe,
-    RelationshipPipe
+    RelationshipPipe,
+    DefaultValuePipe
   ]
 })
 export class PipeModule { }

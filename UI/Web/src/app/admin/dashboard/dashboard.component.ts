@@ -29,9 +29,9 @@ export class DashboardComponent implements OnInit {
     {title: 'Libraries', fragment: TabID.Libraries},
     {title: 'Media', fragment: TabID.Media},
     {title: 'Email', fragment: TabID.Email},
-    {title: 'System', fragment: TabID.System},
     //{title: 'Plugins', fragment: TabID.Plugins},
     {title: 'Tasks', fragment: TabID.Tasks},
+    {title: 'System', fragment: TabID.System},
   ];
   counter = this.tabs.length + 1;
   active = this.tabs[0];

@@ -29,15 +29,15 @@
             </tr>
             </thead>
             <tbody>
-            <tr>
-              <td>
-                Convert Bookmarks to WebP
+            <tr *ngFor="let task of adhocTasks; let idx = index;">
+              <td id="adhoctask--{{idx}}">
+                {{task.name}}
               </td>
               <td>
-                  Runs a long-running task which will convert all bookmarks to WebP. This is slow (especially on ARM devices).
+                {{task.description}}
               </td>
               <td>
-                <button class="btn btn-primary" (click)="runAdhocConvert()">Convert</button>
+                <button class="btn btn-primary" (click)="runAdhoc(task)" attr.aria-labelledby="adhoctask--{{idx}}">Run</button>
               </td>
             </tr>
             </tbody>
@@ -47,7 +47,6 @@
         <table class="table table-striped">
             <thead>
             <tr>
-              <th scope="col">#</th>
               <th scope="col">Job Title</th>
               <th scope="col">Last Executed</th>
               <th scope="col">Cron</th>
@@ -55,11 +54,10 @@
             </thead>
             <tbody>
             <tr *ngFor="let task of reoccuringTasks$ | async; index as i">
-              <th scope="row">{{ i + 1 }}</th>
               <td>
-                {{task.id}}
+                {{task.title | titlecase}}
               </td>
-              <td>{{task.lastExecution | date:'short'}}</td>
+              <td>{{task.lastExecution | date:'short' | defaultValue }}</td>
               <td>{{task.cron}}</td>
             </tr>
             </tbody>
