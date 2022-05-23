@@ -76,5 +76,10 @@ namespace API.Entities.Enums
         /// </summary>
         [Description("CustomEmailService")]
         EmailServiceUrl = 13,
+        /// <summary>
+        /// If Kavita should save bookmarks as WebP images
+        /// </summary>
+        [Description("ConvertBookmarkToWebP")]
+        ConvertBookmarkToWebP = 14,
     }
 }

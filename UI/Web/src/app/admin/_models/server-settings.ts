@@ -9,4 +9,5 @@ export interface ServerSettings {
     baseUrl: string;
     bookmarksDirectory: string;
     emailServiceUrl: string;
+    convertBookmarkToWebP: boolean;
 }

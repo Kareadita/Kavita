@@ -169,6 +169,13 @@ namespace API.Controllers
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
+                if (setting.Key == ServerSettingKey.ConvertBookmarkToWebP && updateSettingsDto.ConvertBookmarkToWebP + string.Empty != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.ConvertBookmarkToWebP + string.Empty;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
+
                 if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
                 {
                     // Validate new directory can be used

@@ -424,6 +424,7 @@ namespace API.Controllers
         /// </summary>
         /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
         /// <returns></returns>
+        [Obsolete("Deprecated. Use 'Tachiyomi/mark-chapter-until-as-read'")]
         [HttpPost("mark-chapter-until-as-read")]
         public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
         {
@@ -497,7 +498,7 @@ namespace API.Controllers
                 user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != dto.SeriesId).ToList();
                 _unitOfWork.UserRepository.Update(user);
 
-                if (await _unitOfWork.CommitAsync())
+                if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
                 {
                     try
                     {
