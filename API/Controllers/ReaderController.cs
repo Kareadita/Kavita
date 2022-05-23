@@ -424,6 +424,7 @@ namespace API.Controllers
         /// </summary>
         /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
         /// <returns></returns>
+        [Obsolete("Deprecated. Use 'Tachiyomi/mark-chapter-until-as-read'")]
         [HttpPost("mark-chapter-until-as-read")]
         public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
         {
