@@ -8,6 +8,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.SignalR;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -26,12 +27,15 @@ public class BookmarkService : IBookmarkService
     private readonly ILogger<BookmarkService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
+    private readonly IImageService _imageService;
 
-    public BookmarkService(ILogger<BookmarkService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService)
+    public BookmarkService(ILogger<BookmarkService> logger, IUnitOfWork unitOfWork,
+        IDirectoryService directoryService, IImageService imageService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
+        _imageService = imageService;
     }
 
     /// <summary>
@@ -87,18 +91,27 @@ public class BookmarkService : IBookmarkService
             var targetFolderStem = BookmarkStem(userWithBookmarks.Id, bookmarkDto.SeriesId, bookmarkDto.ChapterId);
             var targetFilepath = Path.Join(bookmarkDirectory, targetFolderStem);
 
-            userWithBookmarks.Bookmarks ??= new List<AppUserBookmark>();
-            userWithBookmarks.Bookmarks.Add(new AppUserBookmark()
+            var bookmark = new AppUserBookmark()
             {
                 Page = bookmarkDto.Page,
                 VolumeId = bookmarkDto.VolumeId,
                 SeriesId = bookmarkDto.SeriesId,
                 ChapterId = bookmarkDto.ChapterId,
                 FileName = Path.Join(targetFolderStem, fileInfo.Name)
-            });
+            };
+
             _directoryService.CopyFileToDirectory(imageToBookmark, targetFilepath);
+            userWithBookmarks.Bookmarks ??= new List<AppUserBookmark>();
+            userWithBookmarks.Bookmarks.Add(bookmark);
+
             _unitOfWork.UserRepository.Update(userWithBookmarks);
             await _unitOfWork.CommitAsync();
+
+            if ((await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP)
+            {
+                // Enqueue a task to convert the bookmark to webP
+                BackgroundJob.Enqueue(() => ConvertBookmarkToWebP(bookmark.Id));
+            }
         }
         catch (Exception ex)
         {
@@ -151,6 +164,44 @@ public class BookmarkService : IBookmarkService
         return bookmarks
             .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
                 b.FileName)));
+    }
+
+    /// <summary>
+    /// This is a job that runs after a bookmark is saved
+    /// </summary>
+    public async Task ConvertBookmarkToWebP(int bookmarkId)
+    {
+        var bookmarkDirectory =
+            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+        var convertBookmarkToWebP =
+            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
+
+        if (!convertBookmarkToWebP) return;
+
+        // Validate the bookmark still exists
+        var bookmark = await _unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId);
+        if (bookmark == null) return;
+
+        var fullSourcePath = _directoryService.FileSystem.Path.Join(bookmarkDirectory, bookmark.FileName);
+        var fullTargetDirectory = fullSourcePath.Replace(new FileInfo(bookmark.FileName).Name, string.Empty);
+        var targetFolderStem = BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId);
+
+        _logger.LogDebug("Converting {Source} bookmark into WebP at {Target}", fullSourcePath, fullTargetDirectory);
+
+        try
+        {
+            // Convert target file to webp then delete original target file and update bookmark
+            var targetFile = await _imageService.ConvertToWebP(fullSourcePath, fullTargetDirectory);
+            var targetName = new FileInfo(targetFile).Name;
+            bookmark.FileName = Path.Join(targetFolderStem, targetName);
+
+            _directoryService.DeleteFiles(new []{fullSourcePath});
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Could not convert bookmark to WebP");
+        }
+
     }
 
     private static string BookmarkStem(int userId, int seriesId, int chapterId)

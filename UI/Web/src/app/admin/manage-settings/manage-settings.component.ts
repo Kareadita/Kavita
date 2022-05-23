@@ -93,28 +93,28 @@ export class ManageSettingsComponent implements OnInit {
     });
   }
 
-  resetEmailServiceUrl() {
-    this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
-      this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
-      this.resetForm();
-      this.toastr.success('Email Service Reset');
-    }, (err: any) => {
-      console.error('error: ', err);
-    });
-  }
+  // resetEmailServiceUrl() {
+  //   this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+  //     this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
+  //     this.resetForm();
+  //     this.toastr.success('Email Service Reset');
+  //   }, (err: any) => {
+  //     console.error('error: ', err);
+  //   });
+  // }
 
-  testEmailServiceUrl() {
-    this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (result: EmailTestResult) => {
-      if (result.successful) {
-        this.toastr.success('Email Service Url validated');
-      } else {
-        this.toastr.error('Email Service Url did not respond. ' + result.errorMessage);
-      }
+  // testEmailServiceUrl() {
+  //   this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (result: EmailTestResult) => {
+  //     if (result.successful) {
+  //       this.toastr.success('Email Service Url validated');
+  //     } else {
+  //       this.toastr.error('Email Service Url did not respond. ' + result.errorMessage);
+  //     }
       
-    }, (err: any) => {
-      console.error('error: ', err);
-    });
+  //   }, (err: any) => {
+  //     console.error('error: ', err);
+  //   });
     
-  }
+  // }
 
 }
