@@ -7,7 +7,7 @@
                 <span class="visually-hidden" id="settings-convertBookmarkToWebP-help"><ng-container [ngTemplateOutlet]="convertBookmarkToWebPTooltip"></ng-container></span>
                 <div class="form-check form-switch">
                     <input id="bookmark-webp" type="checkbox" class="form-check-input" formControlName="convertBookmarkToWebP" role="switch">
-                    <label for="bookmark-webp" class="form-check-label" aria-describedby="settings-convertBookmarkToWebP-help">Convert</label>
+                    <label for="bookmark-webp" class="form-check-label" aria-describedby="settings-convertBookmarkToWebP-help">{{settingsForm.get('convertBookmarkToWebP')?.value ? 'WebP' : 'Original' }}</label>
                 </div>
             </div>
         </div>
