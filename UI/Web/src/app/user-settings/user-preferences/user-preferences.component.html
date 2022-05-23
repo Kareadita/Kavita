@@ -227,7 +227,8 @@
                 </form>
               </ng-container>
               <ng-container *ngIf="tab.fragment === 'password'">
-                <ng-container *ngIf="(isAdmin || hasChangePasswordRole); else noPermission">
+                
+                <ng-container *ngIf="(hasChangePasswordAbility | async); else noPermission">
                     <p>Change your Password</p>
                     <div class="alert alert-danger" role="alert" *ngIf="resetPasswordErrors.length > 0">
                         <div *ngFor="let error of resetPasswordErrors">{{error}}</div>

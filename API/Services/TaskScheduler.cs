@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
@@ -6,6 +7,7 @@ using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Tasks;
 using Hangfire;
+using Hangfire.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -23,6 +25,8 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
+
+
 }
 public class TaskScheduler : ITaskScheduler
 {

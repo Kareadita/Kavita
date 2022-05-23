@@ -20,6 +20,9 @@ import { LibrarySelectorComponent } from './library-selector/library-selector.co
 import { EditUserComponent } from './edit-user/edit-user.component';
 import { UserSettingsModule } from '../user-settings/user-settings.module';
 import { SidenavModule } from '../sidenav/sidenav.module';
+import { ManageMediaSettingsComponent } from './manage-media-settings/manage-media-settings.component';
+import { ManageEmailSettingsComponent } from './manage-email-settings/manage-email-settings.component';
+import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tasks-settings.component';
 
 
 
@@ -39,6 +42,9 @@ import { SidenavModule } from '../sidenav/sidenav.module';
     RoleSelectorComponent,
     LibrarySelectorComponent,
     EditUserComponent,
+    ManageMediaSettingsComponent,
+    ManageEmailSettingsComponent,
+    ManageTasksSettingsComponent,
   ],
   imports: [
     CommonModule,

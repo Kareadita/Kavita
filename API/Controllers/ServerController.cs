@@ -1,19 +1,24 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs.Jobs;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
 using Hangfire;
+using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TaskScheduler = System.Threading.Tasks.TaskScheduler;
 
 namespace API.Controllers
 {
@@ -29,10 +34,11 @@ namespace API.Controllers
         private readonly IStatsService _statsService;
         private readonly ICleanupService _cleanupService;
         private readonly IEmailService _emailService;
+        private readonly IBookmarkService _bookmarkService;
 
         public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger, IConfiguration config,
             IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-            ICleanupService cleanupService, IEmailService emailService)
+            ICleanupService cleanupService, IEmailService emailService, IBookmarkService bookmarkService)
         {
             _applicationLifetime = applicationLifetime;
             _logger = logger;
@@ -43,6 +49,7 @@ namespace API.Controllers
             _statsService = statsService;
             _cleanupService = cleanupService;
             _emailService = emailService;
+            _bookmarkService = bookmarkService;
         }
 
         /// <summary>
@@ -76,11 +83,10 @@ namespace API.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("backup-db")]
-        public async Task<ActionResult> BackupDatabase()
+        public ActionResult BackupDatabase()
         {
             _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
-            await _backupService.BackupDatabase();
-
+            RecurringJob.Trigger("backup");
             return Ok();
         }
 
@@ -92,6 +98,17 @@ namespace API.Controllers
         public async Task<ActionResult<ServerInfoDto>> GetVersion()
         {
            return Ok(await _statsService.GetServerInfo());
+        }
+
+        /// <summary>
+        /// Triggers the scheduling of the convert bookmarks job. Only one job will run at a time.
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost("convert-bookmarks")]
+        public ActionResult ScheduleConvertBookmarks()
+        {
+            BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToWebP());
+            return Ok();
         }
 
         [HttpGet("logs")]
@@ -133,6 +150,25 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> IsServerAccessible()
         {
             return await _emailService.CheckIfAccessible(Request.Host.ToString());
+        }
+
+        [HttpGet("jobs")]
+        public ActionResult<IEnumerable<JobDto>> GetJobs()
+        {
+            var recurringJobs = Hangfire.JobStorage.Current.GetConnection().GetRecurringJobs().Select(
+                dto =>
+                new JobDto() {
+                    Id = dto.Id,
+                    Title = dto.Id.Replace('-', ' '),
+                    Cron = dto.Cron,
+                    CreatedAt = dto.CreatedAt,
+                    LastExecution = dto.LastExecution,
+                });
+
+            // For now, let's just do something simple
+            //var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs("default", 0, int.MaxValue);
+            return Ok(recurringJobs);
+
         }
     }
 }

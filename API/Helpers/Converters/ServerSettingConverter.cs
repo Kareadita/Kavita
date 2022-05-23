@@ -48,6 +48,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.InstallVersion:
                         destination.InstallVersion = row.Value;
                         break;
+                    case ServerSettingKey.ConvertBookmarkToWebP:
+                        destination.ConvertBookmarkToWebP = bool.Parse(row.Value);
+                        break;
                 }
             }
 
