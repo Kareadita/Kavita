@@ -71,6 +71,16 @@ public class ScannerService : IScannerService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
         var folderPaths = library.Folders.Select(f => f.Path).ToList();
 
+        var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
+            .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
+            .ToList();
+
+        // TODO: Can we just get the folders to scan that have our series files?
+        if (!await CheckMounts(library.Name, seriesFolderPaths))
+        {
+            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            return;
+        }
 
         if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
         {
@@ -82,10 +92,15 @@ public class ScannerService : IScannerService
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
         var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
 
-        var dirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
+        var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(seriesFolderPaths, files.Select(f => f.FilePath).ToList());
+        if (seriesDirs.Keys.Count == 0)
+        {
+            _logger.LogDebug("Scan Series has files spread outside a main series folder. Defaulting to library folder");
+            seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
+        }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, dirs.Keys);
+        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, seriesDirs.Keys);
 
 
 
@@ -117,10 +132,10 @@ public class ScannerService : IScannerService
                 // We need to do an additional check for an edge case: If the scan ran and the files do not match the existing Series name, then it is very likely,
                 // the files have crap naming and if we don't correct, the series will get deleted due to the parser not being able to fallback onto folder parsing as the root
                 // is the series folder.
-                var existingFolder = dirs.Keys.FirstOrDefault(key => key.Contains(series.OriginalName));
-                if (dirs.Keys.Count == 1 && !string.IsNullOrEmpty(existingFolder))
+                var existingFolder = seriesDirs.Keys.FirstOrDefault(key => key.Contains(series.OriginalName));
+                if (seriesDirs.Keys.Count == 1 && !string.IsNullOrEmpty(existingFolder))
                 {
-                    dirs = new Dictionary<string, string>();
+                    seriesDirs = new Dictionary<string, string>();
                     var path = Directory.GetParent(existingFolder)?.FullName;
                     if (!folderPaths.Contains(path) || !folderPaths.Any(p => p.Contains(path ?? string.Empty)))
                     {
@@ -131,11 +146,11 @@ public class ScannerService : IScannerService
                     }
                     if (!string.IsNullOrEmpty(path))
                     {
-                        dirs[path] = string.Empty;
+                        seriesDirs[path] = string.Empty;
                     }
                 }
 
-                var (totalFiles2, scanElapsedTime2, parsedSeries2) = await ScanFiles(library, dirs.Keys);
+                var (totalFiles2, scanElapsedTime2, parsedSeries2) = await ScanFiles(library, seriesDirs.Keys);
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
                 totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
