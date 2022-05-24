@@ -7,6 +7,7 @@ import { PersonRolePipe } from './person-role.pipe';
 import { SafeHtmlPipe } from './safe-html.pipe';
 import { RelationshipPipe } from './relationship.pipe';
 import { DefaultValuePipe } from './default-value.pipe';
+import { CompactNumberPipe } from './compact-number.pipe';
 
 
 
@@ -18,7 +19,8 @@ import { DefaultValuePipe } from './default-value.pipe';
     SentenceCasePipe,
     SafeHtmlPipe,
     RelationshipPipe,
-    DefaultValuePipe
+    DefaultValuePipe,
+    CompactNumberPipe
   ],
   imports: [
     CommonModule,
@@ -30,7 +32,8 @@ import { DefaultValuePipe } from './default-value.pipe';
     SentenceCasePipe,
     SafeHtmlPipe,
     RelationshipPipe,
-    DefaultValuePipe
+    DefaultValuePipe,
+    CompactNumberPipe
   ]
 })
 export class PipeModule { }

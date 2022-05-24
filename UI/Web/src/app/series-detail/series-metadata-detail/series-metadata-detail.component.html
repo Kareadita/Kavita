@@ -71,11 +71,11 @@
             </app-icon-and-title>
         </div>
 
-        <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB'">
+        <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB' && series.wordCount > 0">
             <div class="vr m-2"></div>
             <div class="col-auto">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
-                    10K Words
+                    {{series.wordCount | compactNumber}} Words
                 </app-icon-and-title>
             </div>    
         </ng-container>

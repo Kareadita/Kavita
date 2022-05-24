@@ -4,8 +4,6 @@ import { AuthGuard } from './_guards/auth.guard';
 import { LibraryAccessGuard } from './_guards/library-access.guard';
 import { AdminGuard } from './_guards/admin.guard';
 
-// TODO: Once we modularize the components, use this and measure performance impact: https://angular.io/guide/lazy-loading-ngmodules#preloading-modules
-// TODO: Use Prefetching of LazyLoaded Modules 
 const routes: Routes = [
   {
     path: 'admin',
@@ -72,13 +70,9 @@ const routes: Routes = [
       },
     ]
   },
-  {
-    path: 'theme',
-    loadChildren: () => import('../app/dev-only/dev-only.module').then(m => m.DevOnlyModule)
-  },
   {path: 'login', loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)},
   {path: '**', pathMatch: 'full', redirectTo: 'libraries'},
-  {path: '', pathMatch: 'full', redirectTo: 'libraries'},
+  {path: '', pathMatch: 'full', redirectTo: 'login'},
 ];
 
 @NgModule({
