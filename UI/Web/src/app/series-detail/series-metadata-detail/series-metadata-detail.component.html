@@ -14,8 +14,8 @@
     <ng-container *ngIf="series">
         <ng-container *ngIf="seriesMetadata.releaseYear > 0">
             <div class="col-auto me-2">
-                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release date">
-                    Release Year: {{seriesMetadata.releaseYear}}
+                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
+                    {{seriesMetadata.releaseYear}}
                 </app-icon-and-title>
             </div>
             <div class="vr m-2"></div>
@@ -75,7 +75,7 @@
             <div class="vr m-2"></div>
             <div class="col-auto">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
-                    10K Total Words
+                    10K Words
                 </app-icon-and-title>
             </div>    
         </ng-container>
