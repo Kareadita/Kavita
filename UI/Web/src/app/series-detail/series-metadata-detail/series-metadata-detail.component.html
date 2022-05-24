@@ -4,33 +4,81 @@
 
 <!-- This first row will have random information about the series-->
 <div class="row g-0 mb-2">
-    <app-tag-badge title="Age Rating" *ngIf="seriesMetadata.ageRating" a11y-click="13,32" 
-        class="clickable col-auto" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" 
-        [selectionMode]="TagBadgeCursor.Clickable"><i class="fa-regular fa-eye me-1" aria-hidden="true"></i>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
-    
-    <ng-container>
-        <!-- TODO: Robbie can you code something nice here, feel free to adjust html/css. I will make a component afterwards -->
-        <div class="col-auto d-flex justify-content-center align-self-center align-items-center icon-and-title clickable" role="button" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)">
-            <i class="fas fa-eye mx-auto" aria-hidden="true" title="Age Rating" style="width: 20px;"></i>
-            <div>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</div>
+     <ng-container *ngIf="seriesMetadata.ageRating">
+        <div class="col-auto me-2">
+            <app-icon-and-title [clickable]="true" fontClasses="fas fa-eye" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
+                {{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}
+            </app-icon-and-title>
+        </div>
+    </ng-container>
+    <ng-container *ngIf="series">
+        <ng-container *ngIf="seriesMetadata.releaseYear > 0">
+            <div class="col-auto me-2">
+                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock" title="Release date">
+                    Release Year: {{seriesMetadata.releaseYear}}
+                </app-icon-and-title>
+            </div>
+            <div class="vr m-2"></div>
+        </ng-container>
+
+        <ng-container *ngIf="seriesMetadata.language !== null">
+            <div class="col-auto me-2">
+                <app-icon-and-title [clickable]="true" fontClasses="fas fa-language" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" title="Language">
+                    {{seriesMetadata.language | defaultValue:'English'}}
+                </app-icon-and-title>
+            </div>
+            <div class="vr m-2"></div>
+        </ng-container>
+
+        <ng-container>
+            <div class="col-auto me-2">
+                <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-hourglass-empty" (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
+                    {{seriesMetadata.publicationStatus | publicationStatus}}
+                </app-icon-and-title>
+            </div>
+            <div class="vr m-2"></div>
+        </ng-container>
+
+        <ng-container>
+            <div class="col-auto me-2">
+                <app-icon-and-title [clickable]="true" [fontClasses]="'fa ' + utilityService.mangaFormatIcon(series.format)" (click)="goTo(FilterQueryParam.Format, series.format)" title="Format">
+                    {{utilityService.mangaFormat(series.format)}}
+                </app-icon-and-title>
+            </div>
+            <div class="vr m-2"></div>
+        </ng-container>
+
+        <ng-container *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'">
+            <div class="col-auto m-2">
+                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock" title="Last Read">
+                    Last Read: {{series.latestReadDate | date:'shortDate'}}
+                </app-icon-and-title>
+            </div>
+            <div class="vr m-2"></div>
+        </ng-container>
+        
+
+        <div class="col-auto">
+            <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-file-lines">
+                {{series.pages}} Pages
+            </app-icon-and-title>
+        </div>
+        <div class="vr m-2"></div>
+
+        <div class="col-auto">
+            <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
+                1-2 Hours to Read
+            </app-icon-and-title>
         </div>
 
-    </ng-container>
-    
-    <ng-container *ngIf="series">
-        <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date" class="col-auto">{{seriesMetadata.releaseYear}}</app-tag-badge>
-        <app-tag-badge *ngIf="seriesMetadata.language !== null && seriesMetadata.language !== ''" title="Language" a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.language}}</app-tag-badge>
-        
-        <app-tag-badge title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})" [fillStyle]="seriesMetadata.maxCount != 0 && seriesMetadata.totalCount != 0 && seriesMetadata.maxCount >= seriesMetadata.totalCount ? 'filled' : 'outline'" a11y-click="13,32" class="col-auto" 
-        (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" 
-        [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.publicationStatus | publicationStatus}}</app-tag-badge>
-
-        <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Format, series.format)" [selectionMode]="TagBadgeCursor.Clickable">
-            <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
-        </app-tag-badge>
-        <app-tag-badge title="Last Read" class="col-auto" *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'"  [selectionMode]="TagBadgeCursor.Selectable">
-            <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>Last Read: {{series.latestReadDate | date:'shortDate'}}
-        </app-tag-badge>
+        <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB'">
+            <div class="vr m-2"></div>
+            <div class="col-auto">
+                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-book-open">
+                    10K Total Words
+                </app-icon-and-title>
+            </div>    
+        </ng-container>
     </ng-container>
 </div>
 
