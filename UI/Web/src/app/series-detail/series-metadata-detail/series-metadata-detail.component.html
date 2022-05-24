@@ -6,7 +6,7 @@
 <div class="row g-0 mb-2">
     <app-tag-badge title="Age Rating" *ngIf="seriesMetadata.ageRating" a11y-click="13,32" 
         class="clickable col-auto" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" 
-        [selectionMode]="TagBadgeCursor.Clickable"><i class="fa-regular fa-eye me-1" aria-hidden="true" title="Age Rating"></i>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
+        [selectionMode]="TagBadgeCursor.Clickable"><i class="fa-regular fa-eye me-1" aria-hidden="true"></i>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
     
     <ng-container *ngIf="seriesMetadata.ageRating">
         <!-- TODO: Robbie can you code something nice here, feel free to adjust html/css. I will make a component afterwards -->
@@ -29,7 +29,7 @@
             <app-series-format [format]="series.format">{{utilityService.mangaFormat(series.format)}}</app-series-format>
         </app-tag-badge>
         <app-tag-badge title="Last Read" class="col-auto" *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'"  [selectionMode]="TagBadgeCursor.Selectable">
-            Last Read: {{series.latestReadDate | date:'shortDate'}}
+            <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>Last Read: {{series.latestReadDate | date:'shortDate'}}
         </app-tag-badge>
     </ng-container>
 </div>
@@ -102,11 +102,6 @@
             </ng-template>  
         </app-badge-expander>
     </div>
-</div>
-
-<div class="row g-0">
-    <hr class="col mt-3" *ngIf="hasExtendedProperites" >
-    <a [class.hidden]="hasExtendedProperites" *ngIf="hasExtendedProperites" class="col col-md-auto align-self-end read-more-link" (click)="toggleView()">&nbsp;<i aria-hidden="true" class="fa fa-caret-{{isCollapsed ? 'down' : 'up'}}" aria-controls="extended-series-metadata"></i>&nbsp;See {{isCollapsed ? 'More' : 'Less'}}</a>
 </div>
 
 <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
@@ -225,4 +220,13 @@
             </app-badge-expander>
         </div>
     </div>
+</div>
+
+<div class="row g-0">
+    <hr class="col mt-3" *ngIf="hasExtendedProperites" >
+    <a [class.hidden]="hasExtendedProperites" *ngIf="hasExtendedProperites" 
+        class="col col-md-auto align-self-end read-more-link" (click)="toggleView()">
+            <i aria-hidden="true" class="fa fa-caret-{{isCollapsed ? 'down' : 'up'}} me-1" aria-controls="extended-series-metadata"></i>
+            See {{isCollapsed ? 'More' : 'Less'}}
+    </a>
 </div>
