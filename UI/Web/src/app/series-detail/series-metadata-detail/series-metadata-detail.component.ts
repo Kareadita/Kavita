@@ -26,6 +26,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
 
+  minHoursToRead: number = 1;
+  maxHoursToRead: number = 1;
+
   /**
    * Html representation of Series Summary
    */
@@ -58,8 +61,19 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
+
+      
+      
     }
-    
+    if (this.series !== null && this.series.wordCount > 0) {
+      if (this.series.format === MangaFormat.EPUB) {
+        this.minHoursToRead = parseInt(Math.round(this.series.wordCount / 30_000) + '', 10);
+        this.maxHoursToRead = parseInt(Math.round(this.series.wordCount / 10_260) + '', 10);
+      } else if (this.series.format === MangaFormat.IMAGE || this.series.format === MangaFormat.ARCHIVE) {
+        this.minHoursToRead = parseInt(Math.round((this.series.wordCount * 2.75) / 60) + '', 10);
+        this.maxHoursToRead = parseInt(Math.round((this.series.wordCount * 3.33) / 60) + '', 10);
+      }
+    }
   }
 
   ngOnInit(): void {

@@ -67,11 +67,11 @@
 
         <div class="col-auto">
             <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
-                1-2 Hours to Read
+                {{minHoursToRead}}-{{maxHoursToRead}} Hours
             </app-icon-and-title>
         </div>
 
-        <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB' && series.wordCount > 0">
+        <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0">
             <div class="vr m-2"></div>
             <div class="col-auto">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
