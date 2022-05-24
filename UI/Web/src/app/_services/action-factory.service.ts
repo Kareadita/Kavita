@@ -9,20 +9,53 @@ import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
 
 export enum Action {
+  /**
+   * Mark entity as read
+   */
   MarkAsRead = 0,
+  /**
+   * Mark entity as unread
+   */
   MarkAsUnread = 1,
+  /**
+   * Invoke a Scan Library
+   */
   ScanLibrary = 2,
+  /**
+   * Delete the entity
+   */
   Delete = 3,
+  /**
+   * Open edit modal
+   */
   Edit = 4,
+  /**
+   * Open details modal
+   */
   Info = 5,
+  /**
+   * Invoke a refresh covers
+   */
   RefreshMetadata = 6,
+  /**
+   * Download the entity
+   */
   Download = 7,
   /**
-   * @deprecated This is no longer supported. Use the dedicated page instead
+   * Invoke an Analyze Files which calculates word count
    */
-  Bookmarks = 8,
+  AnalyzeFiles = 8,
+  /**
+   * Read in incognito mode aka no progress tracking
+   */
   IncognitoRead = 9,
+  /**
+   * Add to reading list
+   */
   AddToReadingList = 10,
+  /**
+   * Add to collection
+   */
   AddToCollection = 11,
   /**
    * Essentially a download, but handled differently. Needed so card bubbles it up for handling
@@ -31,7 +64,7 @@ export enum Action {
   /**
    * Open Series detail page for said series
    */
-  ViewSeries = 13
+  ViewSeries = 13,
 }
 
 export interface ActionItem<T> {
@@ -93,6 +126,13 @@ export class ActionFactoryService {
         this.seriesActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Covers',
+          callback: this.dummyCallback,
+          requiresAdmin: true
+        });
+
+        this.seriesActions.push({
+          action: Action.AnalyzeFiles,
+          title: 'Analyze Files',
           callback: this.dummyCallback,
           requiresAdmin: true
         });
@@ -198,11 +238,6 @@ export class ActionFactoryService {
     const actions = this.bookmarkActions.map(a => {return {...a}});
     actions.forEach(action => action.callback = callback);
     return actions;
-  }
-
-  filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
-    if (action.action === Action.Bookmarks && series?.format === MangaFormat.EPUB) return false;
-    return true;
   }
 
   dummyCallback(action: Action, data: any) {}

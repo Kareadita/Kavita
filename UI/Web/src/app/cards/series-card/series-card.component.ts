@@ -71,7 +71,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: any) {
     if (this.data) {
-      this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series)).filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.data));
+      this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
       this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
     }
   }
@@ -102,10 +102,13 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
         this.openEditModal(series);
         break;
       case(Action.AddToReadingList):
-        this.actionService.addSeriesToReadingList(series, (series) => {/* No Operation */ });
+        this.actionService.addSeriesToReadingList(series);
         break;
       case(Action.AddToCollection):
-        this.actionService.addMultipleSeriesToCollectionTag([series], () => {/* No Operation */ });
+        this.actionService.addMultipleSeriesToCollectionTag([series]);
+        break;
+      case (Action.AnalyzeFiles):
+        this.actionService.analyzeFiles(series);
         break;
       default:
         break;

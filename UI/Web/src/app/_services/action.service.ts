@@ -121,11 +121,25 @@ export class ActionService implements OnDestroy {
   }
 
   /**
-   * Start a file scan for a Series (currently just does the library not the series directly)
+   * Start a file scan for a Series
    * @param series Series, must have libraryId and name populated
    * @param callback Optional callback to perform actions after API completes
    */
   scanSeries(series: Series, callback?: SeriesActionCallback) {
+    this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info('Scan queued for ' + series.name);
+      if (callback) {
+        callback(series);
+      }
+    });
+  }
+
+  /**
+   * Start a file scan for analyze files for a Series
+   * @param series Series, must have libraryId and name populated
+   * @param callback Optional callback to perform actions after API completes
+   */
+  analyzeFiles(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + series.name);
       if (callback) {

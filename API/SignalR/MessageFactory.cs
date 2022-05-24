@@ -102,7 +102,11 @@ namespace API.SignalR
         /// <summary>
         /// When bulk bookmarks are being converted
         /// </summary>
-        public const string ConvertBookmarksProgress = "ConvertBookmarksProgress";
+        private const string ConvertBookmarksProgress = "ConvertBookmarksProgress";
+        /// <summary>
+        /// When files are being scanned to calculate word count
+        /// </summary>
+        private const string WordCountAnalyzerProgress = "WordCountAnalyzerProgress";
 
 
 
@@ -145,6 +149,25 @@ namespace API.SignalR
                     SeriesId = seriesId,
                     SeriesName = seriesName,
                     LibraryId = libraryId
+                }
+            };
+        }
+
+
+        public static SignalRMessage WordCountAnalyzerProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
+        {
+            return new SignalRMessage()
+            {
+                Name = WordCountAnalyzerProgress,
+                Title = "Analyzing Word count",
+                SubTitle = subtitle,
+                EventType = eventType,
+                Progress = ProgressType.Determinate,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                    Progress = progress,
+                    EventTime = DateTime.Now
                 }
             };
         }
