@@ -269,6 +269,14 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("analyze")]
+        public ActionResult AnalyzeSeries(RefreshSeriesDto refreshSeriesDto)
+        {
+            _taskScheduler.AnalyzeFilesForSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            return Ok();
+        }
+
         [HttpGet("metadata")]
         public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
         {

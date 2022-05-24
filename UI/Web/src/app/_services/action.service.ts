@@ -140,7 +140,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   analyzeFiles(series: Series, callback?: SeriesActionCallback) {
-    this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
+    this.seriesService.analyzeFiles(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + series.name);
       if (callback) {
         callback(series);
