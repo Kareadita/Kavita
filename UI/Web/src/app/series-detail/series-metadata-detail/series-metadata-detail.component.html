@@ -4,7 +4,19 @@
 
 <!-- This first row will have random information about the series-->
 <div class="row g-0 mb-2">
-    <app-tag-badge title="Age Rating" *ngIf="seriesMetadata.ageRating" a11y-click="13,32" class="clickable col-auto" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" [selectionMode]="TagBadgeCursor.Clickable">{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
+    <app-tag-badge title="Age Rating" *ngIf="seriesMetadata.ageRating" a11y-click="13,32" 
+        class="clickable col-auto" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" 
+        [selectionMode]="TagBadgeCursor.Clickable"><i class="fa-regular fa-eye me-1" aria-hidden="true" title="Age Rating"></i>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
+    
+    <ng-container *ngIf="seriesMetadata.ageRating">
+        <!-- TODO: Robbie can you code something nice here, feel free to adjust html/css. I will make a component afterwards -->
+        <div class="icon-and-title clickable" role="button" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)">
+            <i class="fas fa-eye mx-auto" aria-hidden="true" title="Age Rating" style="width: 20px;"></i>
+            <div>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</div>
+        </div>
+
+    </ng-container>
+    
     <ng-container *ngIf="series">
         <app-tag-badge *ngIf="seriesMetadata.releaseYear > 0" title="Release date" class="col-auto">{{seriesMetadata.releaseYear}}</app-tag-badge>
         <app-tag-badge *ngIf="seriesMetadata.language !== null && seriesMetadata.language !== ''" title="Language" a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" [selectionMode]="TagBadgeCursor.Clickable">{{seriesMetadata.language}}</app-tag-badge>
