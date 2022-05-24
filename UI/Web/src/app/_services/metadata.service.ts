@@ -81,6 +81,7 @@ export class MetadataService {
    * All the potential language tags there can be
    */
   getAllValidLanguages() {
+    // TODO: Cache this information
     return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages');
   }
 

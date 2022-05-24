@@ -14,7 +14,7 @@
     <ng-container *ngIf="series">
         <ng-container *ngIf="seriesMetadata.releaseYear > 0">
             <div class="col-auto me-2">
-                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock" title="Release date">
+                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release date">
                     Release Year: {{seriesMetadata.releaseYear}}
                 </app-icon-and-title>
             </div>
@@ -24,7 +24,7 @@
         <ng-container *ngIf="seriesMetadata.language !== null">
             <div class="col-auto me-2">
                 <app-icon-and-title [clickable]="true" fontClasses="fas fa-language" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" title="Language">
-                    {{seriesMetadata.language | defaultValue:'English'}}
+                    {{seriesMetadata.language | defaultValue:'en'}}
                 </app-icon-and-title>
             </div>
             <div class="vr m-2"></div>
@@ -74,7 +74,7 @@
         <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB'">
             <div class="vr m-2"></div>
             <div class="col-auto">
-                <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-book-open">
+                <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
                     10K Total Words
                 </app-icon-and-title>
             </div>    
