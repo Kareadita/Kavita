@@ -6,7 +6,7 @@
         </h2>
     </ng-container>
     <ng-container subtitle *ngIf="series?.localizedName !== series?.name">
-        <h6 style="margin-left:40px;" title="Localized Name">{{series?.localizedName}}</h6>
+        <h6 class="subtitle-with-actionables" title="Localized Name">{{series?.localizedName}}</h6>
     </ng-container>
 </app-side-nav-companion-bar>
 <div class="container-fluid pt-2" *ngIf="series !== undefined">
