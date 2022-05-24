@@ -8,9 +8,9 @@
         class="clickable col-auto" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" 
         [selectionMode]="TagBadgeCursor.Clickable"><i class="fa-regular fa-eye me-1" aria-hidden="true"></i>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</app-tag-badge>
     
-    <ng-container *ngIf="seriesMetadata.ageRating">
+    <ng-container>
         <!-- TODO: Robbie can you code something nice here, feel free to adjust html/css. I will make a component afterwards -->
-        <div class="icon-and-title clickable" role="button" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)">
+        <div class="col-auto d-flex justify-content-center align-self-center align-items-center icon-and-title clickable" role="button" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)">
             <i class="fas fa-eye mx-auto" aria-hidden="true" title="Age Rating" style="width: 20px;"></i>
             <div>{{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}</div>
         </div>
