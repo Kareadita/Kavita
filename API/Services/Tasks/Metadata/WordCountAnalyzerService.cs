@@ -206,12 +206,13 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
-        var delimiter = new char[] {' '};
 
-        return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
-            .Where(node => node != null)
+        var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
+        if (textNodes == null) return 0;
+
+        return textNodes
             .Select(node => node.InnerText)
-            .Select(text => text.Split(delimiter, StringSplitOptions.RemoveEmptyEntries)
+            .Select(text => text.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
             .Select(words => words.Count())
             .Where(wordCount => wordCount > 0)
