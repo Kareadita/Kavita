@@ -65,7 +65,7 @@
         </div>
         <div class="vr m-2"></div>
 
-        <ng-container *ngIf="series.wordCount > 0">
+        <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
             <div class="col-auto">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
                     {{minHoursToRead}}{{maxHoursToRead !== minHoursToRead ? ('-' + maxHoursToRead) : ''}} Hours
