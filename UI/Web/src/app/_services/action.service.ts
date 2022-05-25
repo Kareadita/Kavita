@@ -64,6 +64,7 @@ export class ActionService implements OnDestroy {
     });
   }
 
+
   /**
    * Request a refresh of Metadata for a given Library
    * @param library Partial Library, must have id and name populated
@@ -84,6 +85,32 @@ export class ActionService implements OnDestroy {
 
     this.libraryService.refreshMetadata(library?.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + library.name);
+      if (callback) {
+        callback(library);
+      }
+    });
+  }
+
+  /**
+   * Request an analysis of files for a given Library (currently just word count)
+   * @param library Partial Library, must have id and name populated
+   * @param callback Optional callback to perform actions after API completes
+   * @returns 
+   */
+   async analyzeFiles(library: Partial<Library>, callback?: LibraryActionCallback) {
+    if (!library.hasOwnProperty('id') || library.id === undefined) {
+      return;
+    }
+
+    if (!await this.confirmService.alert('This is a long running process. Please give it the time to complete before invoking again.')) {
+      if (callback) {
+        callback(library);
+      }
+      return;
+    }
+
+    this.libraryService.analyze(library?.id).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info('Library file analysis queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -139,7 +166,7 @@ export class ActionService implements OnDestroy {
    * @param series Series, must have libraryId and name populated
    * @param callback Optional callback to perform actions after API completes
    */
-  analyzeFiles(series: Series, callback?: SeriesActionCallback) {
+  analyzeFilesForSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.analyzeFiles(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + series.name);
       if (callback) {

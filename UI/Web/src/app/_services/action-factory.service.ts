@@ -171,6 +171,13 @@ export class ActionFactoryService {
           callback: this.dummyCallback,
           requiresAdmin: true
         });
+
+        this.libraryActions.push({
+          action: Action.AnalyzeFiles,
+          title: 'Analyze Files',
+          callback: this.dummyCallback,
+          requiresAdmin: true
+        });
     
         this.chapterActions.push({
           action: Action.Edit,

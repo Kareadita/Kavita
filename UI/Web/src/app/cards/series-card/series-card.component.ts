@@ -108,7 +108,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
         this.actionService.addMultipleSeriesToCollectionTag([series]);
         break;
       case (Action.AnalyzeFiles):
-        this.actionService.analyzeFiles(series);
+        this.actionService.analyzeFilesForSeries(series);
         break;
       default:
         break;

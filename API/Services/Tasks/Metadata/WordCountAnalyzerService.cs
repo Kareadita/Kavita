@@ -3,10 +3,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.SignalR;
+using Hangfire;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using VersOne.Epub;
@@ -38,9 +40,81 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _cacheHelper = cacheHelper;
     }
 
+    [DisableConcurrentExecution(timeoutInSeconds: 360)]
+    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
-        var allSeries = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId);
+        var sw = Stopwatch.StartNew();
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, string.Empty));
+
+        // foreach (var series in await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId))
+        // {
+        //     await ProcessSeries(series);
+        // }
+
+        var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
+        var stopwatch = Stopwatch.StartNew();
+        var totalTime = 0L;
+        _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"));
+
+        for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
+        {
+            if (chunkInfo.TotalChunks == 0) continue;
+            totalTime += stopwatch.ElapsedMilliseconds;
+            stopwatch.Restart();
+
+            _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
+                chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
+
+            var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
+                new UserParams()
+                {
+                    PageNumber = chunk,
+                    PageSize = chunkInfo.ChunkSize
+                });
+            _logger.LogDebug("[MetadataService] Fetched {SeriesCount} series for refresh", nonLibrarySeries.Count);
+
+            var seriesIndex = 0;
+            foreach (var series in nonLibrarySeries)
+            {
+                var index = chunk * seriesIndex;
+                var progress =  Math.Max(0F, Math.Min(1F, index * 1F / chunkInfo.TotalSize));
+
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.WordCountAnalyzerProgressEvent(library.Id, progress, ProgressEventType.Updated, series.Name));
+
+                try
+                {
+                    await ProcessSeries(series, forceUpdate, false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
+                }
+                seriesIndex++;
+            }
+
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.CommitAsync();
+            }
+
+            _logger.LogInformation(
+                "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
+        }
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.WordCountAnalyzerProgressEvent(library.Id, 1F, ProgressEventType.Ended, $"Complete"));
+
+
+        _logger.LogInformation("[WordCountAnalyzerService] Updated metadata for {LibraryName} in {ElapsedMilliseconds} milliseconds", library.Name, sw.ElapsedMilliseconds);
 
     }
 
@@ -70,7 +144,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _logger.LogInformation("[WordCountAnalyzerService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }
 
-    private async Task ProcessSeries(Series series)
+    private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
         if (series.Format != MangaFormat.Epub) return;
 
@@ -96,7 +170,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         Math.Min(1F, (fileCounter * pageCounter) * 1F / (chapter.Files.Count * totalPages.Count)));
 
                     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                        MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress, ProgressEventType.Updated, file.FilePath));
+                        MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress, ProgressEventType.Updated, useFileName ? file.FilePath : series.Name));
                     sum += await GetWordCountFromHtml(bookPage);
                     pageCounter++;
                 }

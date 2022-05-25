@@ -291,7 +291,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.actionService.addMultipleSeriesToCollectionTag([series], () => this.actionInProgress = false);
         break;
       case (Action.AnalyzeFiles):
-        this.actionService.analyzeFiles(series, () => this.actionInProgress = false);
+        this.actionService.analyzeFilesForSeries(series, () => this.actionInProgress = false);
         break;
       default:
         break;

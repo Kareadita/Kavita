@@ -14,6 +14,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Parser;
+using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using Hangfire;
@@ -43,11 +44,12 @@ public class ScannerService : IScannerService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly ICacheHelper _cacheHelper;
+    private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
         IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService,
-        ICacheHelper cacheHelper)
+        ICacheHelper cacheHelper, IWordCountAnalyzerService wordCountAnalyzerService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -58,6 +60,7 @@ public class ScannerService : IScannerService
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _cacheHelper = cacheHelper;
+        _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
     [DisableConcurrentExecution(timeoutInSeconds: 360)]
@@ -318,10 +321,8 @@ public class ScannerService : IScannerService
 
         await CleanupDbEntities();
 
-        // await _eventHub.SendMessageAsync(SignalREvents.NotificationProgress,
-        //     MessageFactory.ScanLibraryProgressEvent(libraryId, 1F));
-
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
     }
 
     private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs)

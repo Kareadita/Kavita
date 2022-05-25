@@ -24,6 +24,7 @@ public interface ITaskScheduler
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
     void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
@@ -113,6 +114,11 @@ public class TaskScheduler : ITaskScheduler
 
         _logger.LogDebug("Scheduling stat collection daily");
         RecurringJob.AddOrUpdate("report-stats", () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
+    }
+
+    public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
+    {
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
     }
 
     public void CancelStatsTasks()
