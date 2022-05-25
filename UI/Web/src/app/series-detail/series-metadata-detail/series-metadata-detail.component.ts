@@ -9,6 +9,12 @@ import { Series } from '../../_models/series';
 import { SeriesMetadata } from '../../_models/series-metadata';
 import { MetadataService } from '../../_services/metadata.service';
 
+const MAX_WORDS_PER_HOUR = 30_000;
+const MIN_WORDS_PER_HOUR = 10_260;
+const MAX_PAGES_PER_MINUTE = 2.75;
+const MIN_PAGES_PER_MINUTE = 3.33;
+
+
 @Component({
   selector: 'app-series-metadata-detail',
   templateUrl: './series-metadata-detail.component.html',
@@ -25,6 +31,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
+
+  minHoursToRead: number = 1;
+  maxHoursToRead: number = 1;
 
   /**
    * Html representation of Series Summary
@@ -58,8 +67,19 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
+
+      
+      
     }
-    
+    if (this.series !== null && this.series.wordCount > 0) {
+      if (this.series.format === MangaFormat.EPUB) {
+        this.minHoursToRead = parseInt(Math.round(this.series.wordCount / MAX_WORDS_PER_HOUR) + '', 10);
+        this.maxHoursToRead = parseInt(Math.round(this.series.wordCount / MIN_WORDS_PER_HOUR) + '', 10);
+      } else if (this.series.format === MangaFormat.IMAGE || this.series.format === MangaFormat.ARCHIVE) {
+        this.minHoursToRead = parseInt(Math.round((this.series.wordCount * MAX_PAGES_PER_MINUTE) / 60) + '', 10);
+        this.maxHoursToRead = parseInt(Math.round((this.series.wordCount * MIN_PAGES_PER_MINUTE) / 60) + '', 10);
+      }
+    }
   }
 
   ngOnInit(): void {

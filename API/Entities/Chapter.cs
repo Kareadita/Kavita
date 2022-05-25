@@ -72,6 +72,11 @@ namespace API.Entities
         /// </summary>
         public int Count { get; set; } = 0;
 
+        /// <summary>
+        /// Total words in a Chapter (books only)
+        /// </summary>
+        public long WordCount { get; set; }
+
 
         /// <summary>
         /// All people attached at a Chapter level. Usually Comics will have different people per issue.
