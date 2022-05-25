@@ -78,7 +78,6 @@ public class ScannerService : IScannerService
             .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
             .ToList();
 
-        // TODO: Can we just get the folders to scan that have our series files?
         if (!await CheckMounts(library.Name, seriesFolderPaths))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");

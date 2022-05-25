@@ -50,11 +50,6 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, string.Empty));
 
-        // foreach (var series in await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId))
-        // {
-        //     await ProcessSeries(series);
-        // }
-
         var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
@@ -159,12 +154,12 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
             long sum = 0;
             var fileCounter = 1;
-            foreach (var file in chapter.Files)
+            foreach (var file in chapter.Files.Select(file => file.FilePath))
             {
                 var pageCounter = 1;
                 try
                 {
-                    using var book = await EpubReader.OpenBookAsync(file.FilePath, BookService.BookReaderOptions);
+                    using var book = await EpubReader.OpenBookAsync(file, BookService.BookReaderOptions);
 
                     var totalPages = book.Content.Html.Values;
                     foreach (var bookPage in totalPages)
@@ -174,7 +169,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
                         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                             MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress,
-                                ProgressEventType.Updated, useFileName ? file.FilePath : series.Name));
+                                ProgressEventType.Updated, useFileName ? file : series.Name));
                         sum += await GetWordCountFromHtml(bookPage);
                         pageCounter++;
                     }
@@ -186,7 +181,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                     _logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent("There was an issue counting words on an epub",
-                            $"{series.Name} - {file.FilePath}"));
+                            $"{series.Name} - {file}"));
                     return;
                 }
 
