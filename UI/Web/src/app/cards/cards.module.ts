@@ -5,7 +5,7 @@ import { LibraryCardComponent } from './library-card/library-card.component';
 import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-chooser.component';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
-import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule, NgbOffcanvasModule } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxFileDropModule } from 'ngx-file-drop';
@@ -22,6 +22,7 @@ import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapte
 import { FileInfoComponent } from './file-info/file-info.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
+import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-drawer.component';
 
 
 
@@ -41,6 +42,7 @@ import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-
     ChapterMetadataDetailComponent,
     FileInfoComponent,
     EditSeriesRelationComponent,
+    CardDetailDrawerComponent,
   ],
   imports: [
     CommonModule,
@@ -59,7 +61,7 @@ import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-
     NgbRatingModule,
 
 
-
+    NgbOffcanvasModule, // Series Detail, action of cards
     NgbNavModule, //Series Detail
     NgbPaginationModule, // CardDetailLayoutComponent
     NgbDropdownModule,
@@ -81,7 +83,9 @@ import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-
     CardDetailsModalComponent,
     BulkOperationsComponent,
     ChapterMetadataDetailComponent,
-    EditSeriesRelationComponent
+    EditSeriesRelationComponent,
+
+    NgbOffcanvasModule
   ]
 })
 export class CardsModule { }

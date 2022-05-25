@@ -1,0 +1,157 @@
+<div class="offcanvas-header">
+    <h5 class="offcanvas-title">
+        <span *ngIf="libraryType !== LibraryType.Comic else comicHeader" class="modal-title" id="modal-basic-title">
+            {{parentName}} - {{data.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + data.number : 'Special'}}</span>
+        <ng-template #comicHeader>
+            <span class="modal-title" id="modal-basic-title">
+            {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}}</span>
+        </ng-template>
+    </h5>
+    <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss('Cross click')"></button>
+</div>
+<!-- <div class="offcanvas-header row hide-if-empty">
+    by Joe
+</div> -->
+
+<div class="offcanvas-body">
+    <div class="d-flex">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="vertical" style="max-width: 135px;">     
+            <li [ngbNavItem]="tabs[TabID.General]">
+                <a ngbNavLink>General</a>
+                <ng-template ngbNavContent>
+                    <div class="container-fluid">
+                        <p *ngIf="summary$ | async as summary">
+                            {{summary}}
+                        </p>
+
+                        <div class="row g-0">
+                            
+
+                        </div>
+
+
+                        <div class="col-md-2 col-xs-4 col-sm-6">            
+                            <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                            ID: {{data.id}}
+                        </div>
+                        <div class="col-md-10 col-xs-8 col-sm-6">
+                            <div class="row g-0">
+                                <h4>
+                                    {{chapter?.titleName}}
+                                </h4>
+                                <span>
+                                    <span *ngIf="chapterMetadata && chapterMetadata.releaseDate !== null">Release Date: {{chapterMetadata.releaseDate | date: 'shortDate' || '-'}}</span>
+                                </span>
+                                <span class="text-accent">{{data.pages}} pages</span>
+                            </div>
+                            <div class="row g-0">
+                                <div class="col-auto">
+                                    Added: {{(chapter.created | date: 'short') || '-'}}
+                                </div>
+                            </div>
+                            <div class="row g-0">
+                                <div class="col-auto">
+                                    Age Rating: {{ageRating}}
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row g-0">
+                        <ng-container *ngIf="chapterMetadata !== undefined">
+                            <div class="row g-0" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
+                                <h6>Tags</h6>
+                                <app-badge-expander [items]="chapterMetadata.tags">
+                                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                                        <app-tag-badge>{{item.title}}</app-tag-badge>
+                                    </ng-template>  
+                                </app-badge-expander>
+                            </div>
+                            <div class="row g-0" *ngIf="chapterMetadata.genres && chapterMetadata.genres.length > 0">
+                                <h6>Genres</h6>
+                                <app-badge-expander [items]="chapterMetadata.genres">
+                                    <ng-template #badgeExpanderItem let-item let-position="idx">
+                                        <app-tag-badge>{{item.title}}</app-tag-badge>
+                                    </ng-template>  
+                                </app-badge-expander>
+                            </div>
+                        </ng-container>
+                    </div>
+                </ng-template>
+            </li>
+
+            <li [ngbNavItem]="tabs[TabID.Metadata]">
+                <a ngbNavLink>{{tabs[TabID.Metadata].title}}</a>
+                <ng-template ngbNavContent>
+                    <app-chapter-metadata-detail [chapter]="chapterMetadata"></app-chapter-metadata-detail>
+                </ng-template>
+            </li>
+
+            <li [ngbNavItem]="tabs[TabID.Cover]">
+                <a ngbNavLink>{{tabs[TabID.Cover].title}}</a>
+                <ng-template ngbNavContent>
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="chapter.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                    <div class="row g-0">
+                        <button class="btn btn-primary flex-end mb-2" [disabled]="coverImageSaveLoading" (click)="saveCoverImage()">
+                            <ng-container *ngIf="coverImageSaveLoading; else notSaving">
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span class="visually-hidden">Loading...</span>
+                            </ng-container>
+                            <ng-template #notSaving>
+                                Save
+                            </ng-template>
+                        </button>
+                    </div>
+                </ng-template>
+            </li>
+
+            <li [ngbNavItem]="tabs[TabID.Files]">
+                <a ngbNavLink>{{tabs[TabID.Files].title}}</a>
+                <ng-template ngbNavContent>
+                    <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
+                    <ul class="list-unstyled">
+                        <li class="d-flex my-4" *ngFor="let chapter of chapters">
+                            <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{utilityService.formatChapterName(libraryType, true, false)}} {{formatChapterNumber(chapter)}}">
+                                <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                            </a>
+                            <div class="flex-grow-1">
+                                <h5 class="mt-0 mb-1">
+                                    <span >
+                                        <span>
+                                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" 
+                                            [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
+                                            <ng-container *ngIf="chapter.number !== '0'; else specialHeader">
+                                                {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
+                                            </ng-container>
+                                        </span>
+                                        <span class="badge bg-primary rounded-pill ms-1">
+                                            <span *ngIf="chapter.pagesRead > 0 && chapter.pagesRead < chapter.pages">{{chapter.pagesRead}} / {{chapter.pages}}</span>
+                                            <span *ngIf="chapter.pagesRead === 0">UNREAD</span>
+                                            <span *ngIf="chapter.pagesRead === chapter.pages">READ</span>
+                                        </span>
+                                    </span>
+                                    <ng-template #specialHeader>Files</ng-template>
+                                </h5>
+                                <ul class="list-group">
+                                    <li *ngFor="let file of chapter.files" class="list-group-item no-hover">
+                                        <span>{{file.filePath}}</span>
+                                        <div class="row g-0">
+                                            <div class="col">
+                                                Pages: {{file.pages}}
+                                            </div>
+                                            <div class="col" *ngIf="data.hasOwnProperty('created')">
+                                                Added: {{(data.created | date: 'short') || '-'}}
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </ng-template>
+            </li>
+        </ul>
+        <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+    </div>
+</div>

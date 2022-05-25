@@ -1,7 +1,7 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgbModal, NgbNavChangeEvent } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
@@ -35,6 +35,7 @@ import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 import { RelationKind } from '../_models/series-detail/relation-kind';
+import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
 
 interface RelatedSeris {
   series: Series;
@@ -196,7 +197,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
-              private readingListService: ReadingListService, public navService: NavService
+              private readingListService: ReadingListService, public navService: NavService,
+              private offcanvasService: NgbOffcanvas
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -559,12 +561,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   openViewInfo(data: Volume | Chapter) {
-    const modalRef = this.modalService.open(CardDetailsModalComponent, { size: 'lg' });
-    modalRef.componentInstance.data = data;
-    modalRef.componentInstance.parentName = this.series?.name;
-    modalRef.componentInstance.seriesId = this.series?.id;
-    modalRef.componentInstance.libraryId = this.series?.libraryId;
-    modalRef.closed.subscribe((result: {coverImageUpdate: boolean}) => {
+    const drawerRef = this.offcanvasService.open(CardDetailDrawerComponent, {position: 'bottom'});
+    drawerRef.componentInstance.data = data;
+    drawerRef.componentInstance.parentName = this.series?.name;
+    drawerRef.componentInstance.seriesId = this.series?.id;
+    drawerRef.componentInstance.libraryId = this.series?.libraryId;
+    drawerRef.closed.subscribe((result: {coverImageUpdate: boolean}) => {
       if (result.coverImageUpdate) {
         this.coverImageOffset += 1;
       }
