@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -511,6 +512,11 @@ namespace API.Parser
                 @"(?!=.+)(\s{2,})(?!=.+)",
                 MatchOptions, RegexTimeout
         );
+
+        private static readonly ImmutableArray<string> FormatTagSpecialKeyowrds = ImmutableArray.Create(
+            "Special", "Reference", "Director's Cut", "Box Set", "Box-Set", "Annual", "Anthology", "Epilogue",
+            "One Shot", "One-Shot", "Prologue", "TPB", "Trade Paper Back", "Omnibus", "Compendium", "Absolute", "Graphic Novel",
+            "GN", "FCBD");
 
         public static MangaFormat ParseFormat(string filePath)
         {
@@ -1033,6 +1039,16 @@ namespace API.Parser
         public static string NormalizePath(string path)
         {
             return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Checks against a set of strings to validate if a ComicInfo.Format should receive special treatment
+        /// </summary>
+        /// <param name="comicInfoFormat"></param>
+        /// <returns></returns>
+        public static bool HasComicInfoSpecial(string comicInfoFormat)
+        {
+            return FormatTagSpecialKeyowrds.Contains(comicInfoFormat);
         }
     }
 }
