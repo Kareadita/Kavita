@@ -85,7 +85,7 @@ public class DefaultParser
         if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.DefaultVolume && !string.IsNullOrEmpty(isSpecial))
         {
             ret.IsSpecial = true;
-            ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
+            ParseFromFallbackFolders(filePath, rootPath, type, ref ret); // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
         }
 
         // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name

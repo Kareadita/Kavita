@@ -62,6 +62,11 @@ namespace API.Data.Metadata
         /// Represents the sort order for the title
         /// </summary>
         public string TitleSort { get; set; } = string.Empty;
+        /// <summary>
+        /// This comes from ComicInfo and is free form text. We use this to validate against a set of tags and mark a file as
+        /// special.
+        /// </summary>
+        public string Format { get; set; } = string.Empty;
 
         /// <summary>
         /// The translator, can be comma separated. This is part of ComicInfo.xml draft v2.1
