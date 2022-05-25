@@ -149,20 +149,21 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         if (series.Format != MangaFormat.Epub) return;
 
         long totalSum = 0;
-        try
-        {
-            foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
-            {
-                // This compares if it's changed since a file scan only
-                if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false,
-                        chapter.Files.FirstOrDefault()) && chapter.WordCount != 0)
-                    continue;
 
-                long sum = 0;
-                var fileCounter = 1;
-                foreach (var file in chapter.Files)
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            // This compares if it's changed since a file scan only
+            if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false,
+                    chapter.Files.FirstOrDefault()) && chapter.WordCount != 0)
+                continue;
+
+            long sum = 0;
+            var fileCounter = 1;
+            foreach (var file in chapter.Files)
+            {
+                var pageCounter = 1;
+                try
                 {
-                    var pageCounter = 1;
                     using var book = await EpubReader.OpenBookAsync(file.FilePath, BookService.BookReaderOptions);
 
                     var totalPages = book.Content.Html.Values;
@@ -180,22 +181,24 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
                     fileCounter++;
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
+                    await _eventHub.SendMessageAsync(MessageFactory.Error,
+                        MessageFactory.ErrorEvent("There was an issue counting words on an epub",
+                            $"{series.Name} - {file.FilePath}"));
+                    return;
+                }
 
-                chapter.WordCount = sum;
-                _unitOfWork.ChapterRepository.Update(chapter);
-                totalSum += sum;
             }
 
-            series.WordCount = totalSum;
-            _unitOfWork.SeriesRepository.Update(series);
+            chapter.WordCount = sum;
+            _unitOfWork.ChapterRepository.Update(chapter);
+            totalSum += sum;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
-            await _eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent("There was an issue counting words on an epub",
-                    series.Name));
-        }
+
+        series.WordCount = totalSum;
+        _unitOfWork.SeriesRepository.Update(series);
     }
 
 
