@@ -51,7 +51,7 @@
         <ng-container *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'">
             <div class="col-auto m-2">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock" title="Last Read">
-                    Last Read: {{series.latestReadDate | date:'shortDate'}}
+                    {{series.latestReadDate | date:'shortDate'}}
                 </app-icon-and-title>
             </div>
             <div class="vr m-2"></div>
