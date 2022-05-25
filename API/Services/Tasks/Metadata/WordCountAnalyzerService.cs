@@ -38,9 +38,10 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _cacheHelper = cacheHelper;
     }
 
-    public Task ScanLibrary(int libraryId, bool forceUpdate = false)
+    public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
-        return Task.CompletedTask;
+        var allSeries = await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(libraryId);
+
     }
 
     public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
@@ -77,21 +78,30 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
+            // This compares if it's changed since a file scan only
             if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, chapter.Files.FirstOrDefault()))
                 continue;
 
             long sum = 0;
+            var fileCounter = 1;
             foreach (var file in chapter.Files)
             {
-                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                    MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, 1F, ProgressEventType.Updated, file.FilePath));
-
-
+                var pageCounter = 1;
                 using var book = await EpubReader.OpenBookAsync(file.FilePath, BookService.BookReaderOptions);
-                foreach (var bookFile in book.Content.Html.Values)
+
+                var totalPages = book.Content.Html.Values;
+                foreach (var bookPage in totalPages)
                 {
-                    sum += await GetWordCountFromHtml(bookFile);
+                    var progress = Math.Max(0F,
+                        Math.Min(1F, (fileCounter * pageCounter) * 1F / (chapter.Files.Count * totalPages.Count)));
+
+                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                        MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress, ProgressEventType.Updated, file.FilePath));
+                    sum += await GetWordCountFromHtml(bookPage);
+                    pageCounter++;
                 }
+
+                fileCounter++;
             }
 
             chapter.WordCount = sum;
