@@ -5,8 +5,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class DefaultValuePipe implements PipeTransform {
 
-  transform(value: any): string {
-    if (value === null || value === undefined || value === '' || value === Infinity || value === NaN || value === {}) return '—';
+  transform(value: any, replacementString = '—'): string {
+    if (value === null || value === undefined || value === '' || value === Infinity || value === NaN || value === {}) return replacementString;
     return value;
   }
 

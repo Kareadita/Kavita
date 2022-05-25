@@ -6,7 +6,7 @@
         </h2>
     </ng-container>
     <ng-container subtitle *ngIf="series?.localizedName !== series?.name">
-        <h6 style="margin-left:40px;" title="Localized Name">{{series?.localizedName}}</h6>
+        <h6 class="subtitle-with-actionables" title="Localized Name">{{series?.localizedName}}</h6>
     </ng-container>
 </app-side-nav-companion-bar>
 <div class="container-fluid pt-2" *ngIf="series !== undefined">
@@ -62,6 +62,26 @@
                 <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"></app-series-metadata-detail>
             </div>
 
+            <!-- <ng-container>
+                <div class="row g-0">
+                    <div class="col-2">
+                        <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+                        {{series.pages}} Pages    
+                    </div>
+                    | 
+                    <div class="col-2">
+                        <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                        1-2 Hours to Read
+                    </div>
+                    <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB'">
+                    | 
+                    <div class="col-2">
+                        <i class="fa-regular fa-book-open" aria-hidden="true"></i>
+                        10K Total Words
+                    </div>    
+                    </ng-container>
+                </div>
+            </ng-container> -->
 
         </div>
     </div>
