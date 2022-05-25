@@ -122,6 +122,13 @@ namespace API.Services.Tasks.Scanner
                     info.SeriesSort = info.ComicInfo.TitleSort.Trim();
                 }
 
+                if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+                {
+                    info.IsSpecial = true;
+                    info.Chapters = Parser.Parser.DefaultChapter;
+                    info.Volumes = Parser.Parser.DefaultVolume;
+                }
+
                 if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
                 {
                     info.SeriesSort = info.ComicInfo.SeriesSort.Trim();

@@ -66,6 +66,9 @@ namespace API.Tests.Parser
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "3")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03.5 Ch. 023.5 - Volume 3 Extras.cbz", "3.5")]
+        [InlineData("幽游白书完全版 第03卷 天下", "3")]
+        [InlineData("阿衰online 第1册", "1")]
+        [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画卷2第25话", "2")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -246,6 +249,8 @@ namespace API.Tests.Parser
         [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", "0")]
         [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
         [InlineData("Samurai Jack Vol. 01 - The threads of Time", "0")]
+        [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
+        [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画卷2第25话", "25")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));

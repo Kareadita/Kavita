@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -100,6 +101,14 @@ namespace API.Parser
             // vol_001-1.cbz for MangaPy default naming convention
             new Regex(
                 @"(vol_)(?<Volume>\d+(\.\d)?)",
+                MatchOptions, RegexTimeout),
+            // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
+            new Regex(
+                @"第(?<Volume>\d+)(卷|册)",
+                MatchOptions, RegexTimeout),
+            // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
+            new Regex(
+                @"(卷|册)(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
         };
 
@@ -448,6 +457,10 @@ namespace API.Parser
             new Regex(
               @"(?<Volume>((vol|volume|v))?(\s|_)?\.?\d+)(\s|_)(Chp|Chapter)\.?(\s|_)?(?<Chapter>\d+)",
               MatchOptions, RegexTimeout),
+            // Chinese Chapter: 第n话 -> Chapter n, 【TFO汉化&Petit汉化】迷你偶像漫画第25话
+            new Regex(
+                @"第(?<Chapter>\d+)话",
+                MatchOptions, RegexTimeout),
 
         };
         private static readonly Regex[] MangaEditionRegex = {
@@ -511,6 +524,11 @@ namespace API.Parser
                 @"(?!=.+)(\s{2,})(?!=.+)",
                 MatchOptions, RegexTimeout
         );
+
+        private static readonly ImmutableArray<string> FormatTagSpecialKeyowrds = ImmutableArray.Create(
+            "Special", "Reference", "Director's Cut", "Box Set", "Box-Set", "Annual", "Anthology", "Epilogue",
+            "One Shot", "One-Shot", "Prologue", "TPB", "Trade Paper Back", "Omnibus", "Compendium", "Absolute", "Graphic Novel",
+            "GN", "FCBD");
 
         public static MangaFormat ParseFormat(string filePath)
         {
@@ -1033,6 +1051,16 @@ namespace API.Parser
         public static string NormalizePath(string path)
         {
             return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Checks against a set of strings to validate if a ComicInfo.Format should receive special treatment
+        /// </summary>
+        /// <param name="comicInfoFormat"></param>
+        /// <returns></returns>
+        public static bool HasComicInfoSpecial(string comicInfoFormat)
+        {
+            return FormatTagSpecialKeyowrds.Contains(comicInfoFormat);
         }
     }
 }
