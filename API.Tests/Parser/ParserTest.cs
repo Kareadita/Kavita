@@ -140,7 +140,7 @@ namespace API.Tests.Parser
         [InlineData("40.1_a", 0)]
         public void MinimumNumberFromRangeTest(string input, float expected)
         {
-            Assert.Equal(expected, MinimumNumberFromRange(input));
+            Assert.Equal(expected, MinNumberFromRange(input));
         }
 
         [Theory]
@@ -153,7 +153,7 @@ namespace API.Tests.Parser
         [InlineData("40.1_a", 0)]
         public void MaximumNumberFromRangeTest(string input, float expected)
         {
-            Assert.Equal(expected, MaximumNumberFromRange(input));
+            Assert.Equal(expected, MaxNumberFromRange(input));
         }
 
         [Theory]

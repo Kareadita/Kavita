@@ -19,7 +19,7 @@
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
                 <!-- {{this.pageNum}} -->
-                <!-- {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)"> - {{PageNumber + 1}}</ng-container> -->
+                {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1) && (this.pageNum > 0)"> - {{ this.pageNum + 1 }}</ng-container>
 
                 <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="isCurrentPageBookmarked" title="{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{isCurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
             </div>
@@ -43,11 +43,10 @@
                     'fit-to-height-double-offset': this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
                     'original-double-offset' : this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage,
                     'reverse': ShouldRenderReverseDouble}">
-                <img [src]="canvasImage.src" id="image-1"
-                class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                <img [src]="canvasImage.src" id="image-1" class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"/>
 
-                <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
-                    <img [src]="getPageUrl(PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
+                <ng-container *ngIf="ShouldRenderDoublePage">
+                    <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}"/>
                 </ng-container>
             </div>
 
@@ -130,11 +129,19 @@
                     <span class="visually-hidden">Settings</span>
                 </button>
             </div>
+            <div class="col">
+                <form [formGroup]="menuSettingsForm">
+                    <div class="form-check form-switch">
+                        <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label"/>
+                        <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+                    </div>
+                </form>
+            </div>
         </div>
         <div class="bottom-menu" *ngIf="settingsOpen && generalSettingsForm">
             <form [formGroup]="generalSettingsForm">
                 <div class="row mb-2">
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-4 col-sm-12">
                         <label for="page-splitting" class="form-label">Image Splitting</label>&nbsp;
                         <div class="split fa fa-image">
                             <div class="{{splitIconClass}}"></div>
@@ -143,8 +150,7 @@
                             <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
                         </select>
                     </div>
-
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-4 col-sm-12">
                         <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
                         <select class="form-control" id="page-fitting" formControlName="fittingOption">
                             <option value="full-height">Height</option>
@@ -152,25 +158,11 @@
                             <option value="original">Original</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="row mb-2">
-                    <div class="col-md-6 col-sm-12" *ngIf="false">
+                    <div class="col-md-4 col-sm-12" *ngIf="true">
                         <label for="layout-mode" class="form-label">Layout Mode</label>
                         <select class="form-control" id="page-fitting" formControlName="layoutMode">
-                            <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
+                        <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
                         </select>
-                    </div>
-                    <div class="col-md-6 col-sm-12">
-                        <div class="mb-3">
-                            <label id="auto-close-label" class="form-label"></label>
-                            <div class="mb-3">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
-                                    <label class="form-check-label" for="auto-close">Auto Close Menu</label>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </form>

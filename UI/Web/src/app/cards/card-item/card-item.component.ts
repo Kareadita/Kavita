@@ -69,9 +69,9 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Input() allowSelection: boolean = false;
   /**
-   * This will supress the cannot read archive warning when total pages is 0
+   * This will suppress the cannot read archive warning when total pages is 0
    */
-  @Input() supressArchiveWarning: boolean = false;
+  @Input() suppressArchiveWarning: boolean = false;
   /**
     * The number of updates/items within the card. If less than 2, will not be shown.
     */
@@ -103,13 +103,12 @@ export class CardItemComponent implements OnInit, OnDestroy {
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
-
   /**
    * Handles touch events for selection on mobile devices
    */
   prevTouchTime: number = 0;
   /**
-   * Handles touch events for selection on mobile devices to ensure you are touch scrolling
+   * Handles touch events for selection on mobile devices to ensure you aren't touch scrolling
    */
   prevOffset: number = 0;
 
@@ -134,7 +133,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
-      this.supressArchiveWarning = true;
+      this.suppressArchiveWarning = true;
     }
 
     if (this.suppressLibraryLink === false) {

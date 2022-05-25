@@ -27,7 +27,11 @@ export enum Action {
   /**
    * Essentially a download, but handled differently. Needed so card bubbles it up for handling
    */
-  DownloadBookmark = 12
+  DownloadBookmark = 12,
+  /**
+   * Open Series detail page for said series
+   */
+  ViewSeries = 13
 }
 
 export interface ActionItem<T> {
@@ -305,6 +309,12 @@ export class ActionFactoryService {
     ];
 
     this.bookmarkActions = [
+      {
+        action: Action.ViewSeries,
+        title: 'View Series',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
       {
         action: Action.DownloadBookmark,
         title: 'Download',

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.810.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Common", "Kavita.Common.csproj", "{9CFC38A2-6CAB-4CF4-8FDE-3E819896314D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9CFC38A2-6CAB-4CF4-8FDE-3E819896314D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CFC38A2-6CAB-4CF4-8FDE-3E819896314D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CFC38A2-6CAB-4CF4-8FDE-3E819896314D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CFC38A2-6CAB-4CF4-8FDE-3E819896314D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {21CF22D3-EC14-46CE-B6C9-539C3122EF76}
+	EndGlobalSection
+EndGlobal

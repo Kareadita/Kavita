@@ -25,7 +25,7 @@ namespace API.Tests.Services;
 
 public class SiteThemeServiceTests
 {
-    private readonly ILogger<SiteThemeService> _logger = Substitute.For<ILogger<SiteThemeService>>();
+    private readonly ILogger<ThemeService> _logger = Substitute.For<ILogger<ThemeService>>();
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
 
     private readonly DbConnection _connection;
@@ -87,7 +87,7 @@ public class SiteThemeServiceTests
             UserName = "Joe",
             UserPreferences = new AppUserPreferences
             {
-                Theme = Seed.DefaultThemes[1]
+                Theme = Seed.DefaultThemes[0]
             }
         });
 
@@ -135,7 +135,7 @@ public class SiteThemeServiceTests
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
         await siteThemeService.Scan();
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
@@ -148,7 +148,7 @@ public class SiteThemeServiceTests
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
         await siteThemeService.Scan();
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
@@ -167,7 +167,7 @@ public class SiteThemeServiceTests
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
         await siteThemeService.Scan();
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
@@ -188,7 +188,7 @@ public class SiteThemeServiceTests
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
 
         _context.SiteTheme.Add(new SiteTheme()
         {
@@ -213,7 +213,7 @@ public class SiteThemeServiceTests
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
 
         _context.SiteTheme.Add(new SiteTheme()
         {
@@ -241,7 +241,7 @@ public class SiteThemeServiceTests
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new SiteThemeService(ds, _unitOfWork, _messageHub);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
 
         _context.SiteTheme.Add(new SiteTheme()
         {

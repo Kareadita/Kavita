@@ -6,6 +6,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.Entities.Enums;
 using API.Extensions;
+using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,13 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IEventHub _eventHub;
 
-        public UsersController(IUnitOfWork unitOfWork, IMapper mapper)
+        public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _eventHub = eventHub;
         }
 
         [Authorize(Policy = "RequireAdminRole")]
@@ -69,7 +72,9 @@ namespace API.Controllers
         [HttpPost("update-preferences")]
         public async Task<ActionResult<UserPreferencesDto>> UpdatePreferences(UserPreferencesDto preferencesDto)
         {
-            var existingPreferences = await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername());
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+                AppUserIncludes.UserPreferences);
+            var existingPreferences = user.UserPreferences;
 
             existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
             existingPreferences.ScalingOption = preferencesDto.ScalingOption;
@@ -82,11 +87,13 @@ namespace API.Controllers
             existingPreferences.BookReaderMargin = preferencesDto.BookReaderMargin;
             existingPreferences.BookReaderLineSpacing = preferencesDto.BookReaderLineSpacing;
             existingPreferences.BookReaderFontFamily = preferencesDto.BookReaderFontFamily;
-            existingPreferences.BookReaderDarkMode = preferencesDto.BookReaderDarkMode;
             existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
             existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
             existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
             preferencesDto.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+            existingPreferences.BookThemeName = preferencesDto.BookReaderThemeName;
+            existingPreferences.PageLayoutMode = preferencesDto.BookReaderLayoutMode;
+            existingPreferences.BookReaderImmersiveMode = preferencesDto.BookReaderImmersiveMode;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
 
             // TODO: Remove this code - this overrides layout mode to be single until the mode is released
@@ -96,6 +103,7 @@ namespace API.Controllers
 
             if (await _unitOfWork.CommitAsync())
             {
+                await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
                 return Ok(preferencesDto);
             }
 

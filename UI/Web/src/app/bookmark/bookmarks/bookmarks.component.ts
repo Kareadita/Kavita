@@ -64,12 +64,13 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   async handleAction(action: Action, series: Series) {
     switch (action) {
       case(Action.Delete):
-        if (!await this.confirmService.confirm('Are you sure you want to clear all bookmarks for ' + series.name + '? This cannot be undone.')) {
-          break;
-        }
+        this.clearBookmarks(series);
         break;
       case(Action.DownloadBookmark):
         this.downloadBookmarks(series);
+        break;
+      case(Action.ViewSeries):
+        this.router.navigate(['library', series.libraryId, 'series', series.id]);
         break;
       default:
         break;

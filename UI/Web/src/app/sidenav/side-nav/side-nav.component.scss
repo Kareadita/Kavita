@@ -1,16 +1,19 @@
 .side-nav {
-    padding-bottom: 10px;
-    width: 190px;
+    padding: 10px 0 10px 0;
+    width: 12rem;
     background-color: var(--side-nav-bg-color);
-    height: calc(100vh - 85px);
+    height: calc(100vh - 90px);
     position: fixed;
     margin: 0;
-    left: 10px;
-    top: 73px;
+    left: 1em;
+    top: 80px;
     border-radius: var(--side-nav-border-radius);
-    transition: width var(--side-nav-openclose-transition), background-color var(--side-nav-bg-color-transition), border-color var(--side-nav-border-transition);
+    transition: width var(--side-nav-openclose-transition),
+        background-color var(--side-nav-bg-color-transition),
+        border-color var(--side-nav-border-transition);
     overflow: auto;
     border: var(--side-nav-border);
+    box-shadow: 4px 4px 2px 2px rgba(5, 5, 5, 0.5);
 
     &.hidden {
         display: none;
@@ -45,7 +48,7 @@
         z-index: 999;
         overflow: auto;
         border: var(--side-nav-mobile-border);
-    
+
         &.closed {
             width: 0;
             overflow: hidden;

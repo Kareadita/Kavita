@@ -25,14 +25,14 @@ export class CarouselReelComponent {
   nextPage() {
     if (this.swiper) {
       if (this.swiper.isEnd) return;
-      this.swiper.setProgress(this.swiper.progress + 0.25, 600);
+      this.swiper.setProgress(this.swiper.progress + 0.1, 1000);
     }
   }
 
   prevPage() {
     if (this.swiper) {
       if (this.swiper.isBeginning) return;
-      this.swiper.setProgress(this.swiper.progress - 0.25, 600);
+      this.swiper.setProgress(this.swiper.progress - 0.1, 1000);
     }
   }
 

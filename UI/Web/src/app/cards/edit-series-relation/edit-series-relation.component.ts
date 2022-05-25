@@ -55,6 +55,8 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
         this.setupRelationRows(relations.alternativeSettings, RelationKind.AlternativeSetting);
         this.setupRelationRows(relations.alternativeVersions, RelationKind.AlternativeVersion);
         this.setupRelationRows(relations.doujinshis, RelationKind.Doujinshi);
+        this.setupRelationRows(relations.contains, RelationKind.Contains);
+        this.setupRelationRows(relations.parent, RelationKind.Parent);
     });
 
     this.libraryService.getLibraryNames().subscribe(names => {

@@ -41,7 +41,7 @@
 
 
         .card-title {
-            font-family: 'Spartan', sans-serif;
+            font-family: var(--body-font-family), 'Helvetica Neue', sans-serif;
             font-weight: bold;
             display: inline-block;
             vertical-align: middle;
@@ -49,7 +49,7 @@
         }
 
         .card-text {
-            font-family: "EBGaramond", "Helvetica Neue", sans-serif;
+            font-family: var(--body-font-family), "Helvetica Neue", sans-serif;
         }
     }
 }

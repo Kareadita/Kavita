@@ -4,12 +4,16 @@
 }
 
 .accordion-item { 
-    background-color: var(--accordion-body-bg-color); //$dark-card-color;
+    background-color: var(--accordion-body-bg-color);
     color: var(--accordion-body-text-color);
     border-color: var(--accordion-body-border-color);
 
     div[role="tabpanel"] {
       background-color: var(--accordion-header-bg-color); 
+
+      .accordion-body {
+        background-color: var(--accordion-active-body-bg-color); 
+      }
     }
 }
 

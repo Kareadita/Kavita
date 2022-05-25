@@ -111,12 +111,10 @@ Package()
     cd ../$outputFolder/"$runtime"/
     tar -czvf ../kavita-$runtime.tar.gz Kavita
 
-
     ProgressEnd "Creating $runtime Package for $framework"
 
 
 }
-
 
 #UpdateVersionNumber
 

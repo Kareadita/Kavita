@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
@@ -24,7 +25,8 @@ export class ReadingListsComponent implements OnInit {
   isAdmin: boolean = false;
 
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-    private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService) { }
+    private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService,
+    private filterUtilityService: FilterUtilitiesService) { }
 
   ngOnInit(): void {
     this.loadPage();
@@ -84,7 +86,7 @@ export class ReadingListsComponent implements OnInit {
   }
 
   onPageChange(pagination: Pagination) {
-    window.history.replaceState(window.location.href, '', window.location.href.split('?')[0] + '?page=' + this.pagination.currentPage);
+    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);;
     this.loadPage();
   }
 

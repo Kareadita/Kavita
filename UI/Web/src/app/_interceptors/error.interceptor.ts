@@ -38,7 +38,7 @@ export class ErrorInterceptor implements HttpInterceptor {
             this.handleServerException(error);
             break;
           default:
-            // Don't throw multiple Something undexpected went wrong
+            // Don't throw multiple Something unexpected went wrong
             if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.') {
               this.toastr.error('Something unexpected went wrong.');
             }

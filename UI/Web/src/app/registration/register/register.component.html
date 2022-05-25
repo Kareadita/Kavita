@@ -1,26 +1,59 @@
 <app-splash-container>
-    <ng-container title><h2>Register</h2></ng-container>
+    <ng-container title><h3>Register</h3></ng-container>
     <ng-container body>
         <p>Complete the form to register an admin account</p>
         <form [formGroup]="registerForm" (ngSubmit)="submit()">
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
-                <input id="username" class="form-control" formControlName="username" type="text">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
+                <input
+                    id="username"
+                    class="form-control"
+                    formControlName="username"
+                    type="text"
+                />
+                <div
+                    id="inviteForm-validations"
+                    class="invalid-feedback"
+                    *ngIf="registerForm.dirty || registerForm.touched"
+                >
                     <div *ngIf="registerForm.get('username')?.errors?.required">
                         This field is required
                     </div>
                 </div>
             </div>
 
-            <div class="mb-3" style="width:100%">
-                <label for="email" class="form-label">Email</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
-                <ng-template #emailTooltip>Email does not have to be valid, it is used for forgot password flow. It is not sent outside the server unless forgot password is used without a custom email service host.</ng-template>
+            <div class="mb-3" style="width: 100%">
+                <label for="email" class="form-label">Email</label>&nbsp;<i
+                    class="fa fa-info-circle"
+                    placement="right"
+                    [ngbTooltip]="emailTooltip"
+                    role="button"
+                    tabindex="0"
+                ></i>
+                <ng-template #emailTooltip
+                    >Email does not have to be valid, it is used for forgot
+                    password flow. It is not sent outside the server unless
+                    forgot password is used without a custom email service
+                    host.</ng-template
+                >
                 <span class="visually-hidden" id="email-help">
-                    <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
+                    <ng-container
+                        [ngTemplateOutlet]="emailTooltip"
+                    ></ng-container>
                 </span>
-                <input class="form-control" type="email" id="email" formControlName="email" required aria-describedby="email-help">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
+                <input
+                    class="form-control"
+                    type="email"
+                    id="email"
+                    formControlName="email"
+                    required
+                    aria-describedby="email-help"
+                />
+                <div
+                    id="inviteForm-validations"
+                    class="invalid-feedback"
+                    *ngIf="registerForm.dirty || registerForm.touched"
+                >
                     <div *ngIf="registerForm.get('email')?.errors?.required">
                         This field is required
                     </div>
@@ -29,26 +62,56 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="mb-3">
-                <label for="password" class="form-label">Password</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
+                <label for="password" class="form-label">Password</label
+                >&nbsp;<i
+                    class="fa fa-info-circle"
+                    placement="right"
+                    [ngbTooltip]="passwordTooltip"
+                    role="button"
+                    tabindex="0"
+                ></i>
                 <ng-template #passwordTooltip>
                     Password must be between 6 and 32 characters in length
                 </ng-template>
-                <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
-                <input id="password" class="form-control" maxlength="32" minlength="6" formControlName="password" type="password" aria-describedby="password-help">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
+                <span class="visually-hidden" id="password-help"
+                    ><ng-container
+                        [ngTemplateOutlet]="passwordTooltip"
+                    ></ng-container
+                ></span>
+                <input
+                    id="password"
+                    class="form-control"
+                    maxlength="32"
+                    minlength="6"
+                    formControlName="password"
+                    type="password"
+                    aria-describedby="password-help"
+                />
+                <div
+                    id="inviteForm-validations"
+                    class="invalid-feedback"
+                    *ngIf="registerForm.dirty || registerForm.touched"
+                >
                     <div *ngIf="registerForm.get('password')?.errors?.required">
                         This field is required
                     </div>
-                    <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength">
+                    <div
+                        *ngIf="
+                            registerForm.get('password')?.errors?.minlength ||
+                            registerForm.get('password')?.errors?.maxLength
+                        "
+                    >
                         Password must be between 6 and 32 characters in length
                     </div>
                 </div>
             </div>
-        
+
             <div class="float-end">
-                <button class="btn btn-secondary alt" type="submit">Register</button>
+                <button class="btn btn-secondary alt" type="submit">
+                    Register
+                </button>
             </div>
         </form>
     </ng-container>

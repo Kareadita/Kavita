@@ -7,8 +7,16 @@
         <ng-content select="[main]"></ng-content>
     </div>
     <div>
-        <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleFilter()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
-            <i class="fa fa-filter" aria-hidden="true"></i>
+        <!-- This can get out of sync with offcanvas component. We might need a service to handle communication and service resets to collapsed on route changes -->
+        <button *ngIf="hasFilter"
+                class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small"
+                (click)="toggleService.toggle()"
+                [attr.aria-expanded]="filterOpen"
+                placement="left"
+                ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting"
+                attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
+            <i class="fa fa-filter"
+               aria-hidden="true"></i>
             <span class="visually-hidden">Sort / Filter</span>
         </button>
     </div>

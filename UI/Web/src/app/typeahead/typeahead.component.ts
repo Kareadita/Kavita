@@ -217,7 +217,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         }),
         map(val => val.trim()),
         auditTime(this.settings.debounce),
-        distinctUntilChanged(), // ?!: BUG Doesn't trigger the search to run when filtered array changes
+        //distinctUntilChanged(), // ?!: BUG Doesn't trigger the search to run when filtered array changes
         filter(val => {
           // If minimum filter characters not met, do not filter
           if (this.settings.minCharacters === 0) return true;
@@ -405,6 +405,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   openDropdown() {
     setTimeout(() => {
       this.typeaheadControl.setValue(this.typeaheadControl.value);
+      this.hasFocus = true;
     });
   }
 
@@ -454,6 +455,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   updateShowAddItem(options: any[]) {
+    // ?! BUG This will still technicially allow you to add the same thing as a previously added item. (Code will just toggle it though)
     this.showAddItem = this.settings.addIfNonExisting && this.typeaheadControl.value.trim()
           && this.typeaheadControl.value.trim().length >= Math.max(this.settings.minCharacters, 1)
           && this.typeaheadControl.dirty
@@ -464,11 +466,14 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     }
   }
 
-  unlock(event: any) {
+  toggleLock(event: any) {
     if (this.disabled) return;
     this.locked = !this.locked;
-    this.onUnlock.emit();
     this.lockedChange.emit(this.locked);
+
+    if (!this.locked) {
+      this.onUnlock.emit();
+    }
   }
 
 }

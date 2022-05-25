@@ -1,16 +1,20 @@
 // Global styles for the site. Keep this as small as possible
 
-html, body { height: 100%; overflow: hidden; }
+html,
 body {
-  margin: 0;
-  font-family: var(--body-font-family);
-  color: var(--body-text-color);
-  color-scheme: var(--color-scheme);
-  max-height: 100%;
-  overflow-y: auto;
-  //margin-top: 56px; // Set by nav service
+    height: 100%;
+    overflow: hidden;
 }
-
+body {
+    margin: 0;
+    font-family: var(--body-font-family);
+    font-size: 0.75em !important;
+    color: var(--body-text-color);
+    color-scheme: var(--color-scheme);
+    max-height: 100%;
+    overflow-y: auto;
+    //margin-top: 56px; // Set by nav service
+}
 
 hr {
     background-color: var(--hr-color);
@@ -24,4 +28,17 @@ hr {
 
 .text-muted {
     color: var(--text-muted-color) !important;
+}
+
+.form-control,
+.form-select,
+span {
+    font-size: 1em !important;
+}
+
+.mb-3,
+.pt-4 {
+    margin-bottom: 0.5em !important;
+    padding-top: 0.5em !important;
+    padding-left: 0.5em !important;
 }

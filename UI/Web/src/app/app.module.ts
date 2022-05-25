@@ -1,6 +1,5 @@
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -10,7 +9,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
-import { SidenavModule } from './sidenav/sidenav.module';
+import { SideNavModule } from './sidenav/sidenav.module';
 import { NavModule } from './nav/nav.module';
 
 
@@ -26,7 +25,7 @@ import { NavModule } from './nav/nav.module';
     AppRoutingModule,
     BrowserAnimationsModule,
 
-    SidenavModule, 
+    SideNavModule,
     NavModule,
 
     ToastrModule.forRoot({

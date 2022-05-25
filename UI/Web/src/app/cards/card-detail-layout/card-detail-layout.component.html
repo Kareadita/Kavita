@@ -1,21 +1,29 @@
-
-<div class="row mt-2 g-0 pb-2" *ngIf="header !== undefined && header.length > 0">
+<div class="row mt-2 g-0 pb-2"
+     *ngIf="header !== undefined && header.length > 0">
     <div class="col me-auto">
         <h2 style="display: inline-block">
-            <span *ngIf="actions.length > 0" class="">
-                <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
+            <span *ngIf="actions.length > 0"
+                  class="">
+                <app-card-actionables (actionHandler)="performAction($event)"
+                                      [actions]="actions"
+                                      [labelBy]="header"></app-card-actionables>&nbsp;
             </span>
             <span *ngIf="header !== undefined && header.length > 0">
                 {{header}}&nbsp;
-                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
+                <span class="badge bg-primary rounded-pill"
+                      attr.aria-label="{{pagination.totalItems}} total items"
+                      *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
             </span>
         </h2>
     </div>
 </div>
 
-<app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
+<app-metadata-filter [filterSettings]="filterSettings"
+                     [filterOpen]="filterOpen"
+                     (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
 
-<ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
+<ng-container [ngTemplateOutlet]="paginationTemplate"
+              [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
 <!-- <ng-container *ngIf="utilityService.getActiveBreakpoint() <= Breakpoint.Mobile; else cardTemplate">
     <div class="d-flex justify-content-center row g-0 mt-2 mb-2">
@@ -32,65 +40,74 @@
 
 <ng-container [ngTemplateOutlet]="cardTemplate"></ng-container>
 
-<ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
+<ng-container [ngTemplateOutlet]="paginationTemplate"
+              [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
 
 <ng-template #cardTemplate>
-<div class="row justify-content-evenly justify-content-sm-start g-0 mb-3">
-    <div class="col-auto ps-1 pe-1 mt-1 mb-1" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
-        <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+    <div class="card-container row g-0 mt-3 mb-3">
+        <div class="card col-auto mt-2 mb-2"
+             *ngFor="let item of items; trackBy:trackByIdentity; index as i">
+            <ng-container [ngTemplateOutlet]="itemTemplate"
+                          [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+        </div>
+
+        <p *ngIf="items.length === 0 && !isLoading">
+            <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+        </p>
     </div>
-
-    <p *ngIf="items.length === 0 && !isLoading">
-        <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-    </p>
-</div>
 </ng-template>
 
-<ng-template #paginationTemplate let-id="id">
-<div class="d-flex justify-content-center mb-0" *ngIf="pagination && items.length > 0">
-    <ngb-pagination
-        *ngIf="pagination.totalPages > 1"
-        [maxSize]="8"
-        [rotate]="true"
-        [ellipses]="false"
-        [(page)]="pagination.currentPage"
-        [pageSize]="pagination.itemsPerPage"
-        (pageChange)="onPageChange($event)"
-        [collectionSize]="pagination.totalItems">
+<ng-template #paginationTemplate
+             let-id="id">
+    <div class="d-flex justify-content-center mb-0"
+         *ngIf="pagination && items.length > 0">
+        <ngb-pagination *ngIf="pagination.totalPages > 1"
+                        [maxSize]="8"
+                        [rotate]="true"
+                        [ellipses]="false"
+                        [(page)]="pagination.currentPage"
+                        [pageSize]="pagination.itemsPerPage"
+                        (pageChange)="onPageChange($event)"
+                        [collectionSize]="pagination.totalItems">
 
-        <ng-template ngbPaginationPages let-page let-pages="pages" *ngIf="pagination.totalItems / pagination.itemsPerPage > 20">
-            <li class="ngb-custom-pages-item" *ngIf="pagination.totalPages > 1">
-                <div class="d-flex flex-nowrap px-2">
-                  <label
-                      id="paginationInputLabel-{{id}}"
-                      for="paginationInput-{{id}}"
-                      class="col-form-label me-2 ms-1 form-label"
-                  >Page</label>
-                  <input #i
-                      type="text"
-                      inputmode="numeric"
-                      pattern="[0-9]*"
-                      class="form-control custom-pages-input"
-                      id="paginationInput-{{id}}"
-                      [value]="page"
-                      (keyup.enter)="selectPageStr(i.value)"
-                      (blur)="selectPageStr(i.value)"
-                      (input)="formatInput($any($event).target)"
-                      attr.aria-labelledby="paginationInputLabel-{{id}} paginationDescription-{{id}}"
-                      [ngStyle]="{width: (0.5 + pagination.currentPage + '').length + 'rem'} "
-                  />
-                  <span id="paginationDescription-{{id}}" class="col-form-label text-nowrap px-2">
-                      of {{pagination.totalPages}}</span>
-                </div>
-            </li>
-        </ng-template>
+            <ng-template ngbPaginationPages
+                         let-page
+                         let-pages="pages"
+                         *ngIf="pagination.totalItems / pagination.itemsPerPage > 20">
+                <li class="ngb-custom-pages-item"
+                    *ngIf="pagination.totalPages > 1">
+                    <div class="d-flex flex-nowrap px-2">
+                        <label id="paginationInputLabel-{{id}}"
+                               for="paginationInput-{{id}}"
+                               class="col-form-label me-2 ms-1 form-label">Page</label>
+                        <input #i
+                               type="text"
+                               inputmode="numeric"
+                               pattern="[0-9]*"
+                               class="form-control custom-pages-input"
+                               id="paginationInput-{{id}}"
+                               [value]="page"
+                               (keyup.enter)="selectPageStr(i.value)"
+                               (blur)="selectPageStr(i.value)"
+                               (input)="formatInput($any($event).target)"
+                               attr.aria-labelledby="paginationInputLabel-{{id}} paginationDescription-{{id}}"
+                               [ngStyle]="{width: (0.5 + pagination.currentPage + '').length + 'rem'} " />
+                        <span id="paginationDescription-{{id}}"
+                              class="col-form-label text-nowrap px-2">
+                            of {{pagination.totalPages}}</span>
+                    </div>
+                </li>
+            </ng-template>
 
-    </ngb-pagination>
-</div>
+        </ngb-pagination>
+    </div>
 </ng-template>
 
-<div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
-    <div class="spinner-border text-secondary loading" role="status">
+<div class="mx-auto"
+     *ngIf="isLoading"
+     style="width: 200px;">
+    <div class="spinner-border text-secondary loading"
+         role="status">
         <span class="invisible">Loading...</span>
     </div>
 </div>

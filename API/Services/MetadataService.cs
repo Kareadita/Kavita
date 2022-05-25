@@ -62,7 +62,7 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     private async Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate)
     {
-        var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+        var firstFile = chapter.Files.MinBy(x => x.Chapter);
 
         if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
             return false;
@@ -97,11 +97,12 @@ public class MetadataService : IMetadataService
                 null, volume.Created, forceUpdate)) return false;
 
         volume.Chapters ??= new List<Chapter>();
-        var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).FirstOrDefault();
+        var firstChapter = volume.Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
         if (firstChapter == null) return false;
 
         volume.CoverImage = firstChapter.CoverImage;
         await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume), false);
+
 
         return true;
     }
@@ -133,8 +134,7 @@ public class MetadataService : IMetadataService
 
             if (!_cacheHelper.CoverImageExists(coverImage))
             {
-                coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
-                    .FirstOrDefault()?.CoverImage;
+                coverImage = series.Volumes[0].Chapters.MinBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)?.CoverImage;
             }
         }
         series.CoverImage = firstCover?.CoverImage ?? coverImage;

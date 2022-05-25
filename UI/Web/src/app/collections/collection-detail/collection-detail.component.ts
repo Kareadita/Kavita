@@ -1,4 +1,10 @@
-import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -9,26 +15,35 @@ import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
+import {
+  KEY_CODES,
+  UtilityService,
+} from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { FilterEvent, SeriesFilter } from 'src/app/_models/series-filter';
-import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
+import {
+  Action,
+  ActionFactoryService,
+  ActionItem,
+} from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
+import {
+  EVENTS,
+  MessageHubService,
+} from 'src/app/_services/message-hub.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
   selector: 'app-collection-detail',
   templateUrl: './collection-detail.component.html',
-  styleUrls: ['./collection-detail.component.scss']
+  styleUrls: ['./collection-detail.component.scss'],
 })
 export class CollectionDetailComponent implements OnInit, OnDestroy {
-
   collectionTag!: CollectionTag;
   tagImage: string = '';
   isLoading: boolean = true;
@@ -44,24 +59,32 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   filterActive: boolean = false;
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  
 
-  private onDestory: Subject<void> = new Subject<void>();
+  private onDestroy: Subject<void> = new Subject<void>();
 
   bulkActionCallback = (action: Action, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
+    const selectedSeriesIndexies =
+      this.bulkSelectionService.getSelectedCardsForSource('series');
+    const selectedSeries = this.series.filter((series, index: number) =>
+      selectedSeriesIndexies.includes(index + '')
+    );
 
     switch (action) {
       case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-        });
+        this.actionService.addMultipleSeriesToReadingList(
+          selectedSeries,
+          () => {
+            this.bulkSelectionService.deselectAll();
+          }
+        );
         break;
       case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
-        });
+        this.actionService.addMultipleSeriesToCollectionTag(
+          selectedSeries,
+          () => {
+            this.bulkSelectionService.deselectAll();
+          }
+        );
         break;
       case Action.MarkAsRead:
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
@@ -82,49 +105,68 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         });
         break;
     }
-  }
+  };
 
-  constructor(public imageService: ImageService, private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
-    private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
-    private modalService: NgbModal, private titleService: Title, 
-    public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
-    private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService) {
-      this.router.routeReuseStrategy.shouldReuseRoute = () => false;
+  constructor(
+    public imageService: ImageService,
+    private collectionService: CollectionTagService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private seriesService: SeriesService,
+    private toastr: ToastrService,
+    private actionFactoryService: ActionFactoryService,
+    private modalService: NgbModal,
+    private titleService: Title,
+    public bulkSelectionService: BulkSelectionService,
+    private actionService: ActionService,
+    private messageHub: MessageHubService,
+    private filterUtilityService: FilterUtilitiesService,
+    private utilityService: UtilityService
+  ) {
+    this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-      const routeId = this.route.snapshot.paramMap.get('id');
-      if (routeId === null) {
-        this.router.navigate(['collections']);
-        return;
-      }
-      const tagId = parseInt(routeId, 10);
+    const routeId = this.route.snapshot.paramMap.get('id');
+    if (routeId === null) {
+      this.router.navigate(['collections']);
+      return;
+    }
+    const tagId = parseInt(routeId, 10);
 
-      this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
-      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-      this.filterSettings.presets.collectionTags = [tagId];
-      this.filterActiveCheck = this.seriesService.createSeriesFilter();
-      this.filterActiveCheck.collectionTags = [tagId];
-      
-      this.updateTag(tagId);
+    this.seriesPagination = this.filterUtilityService.pagination(
+      this.route.snapshot
+    );
+    [this.filterSettings.presets, this.filterSettings.openByDefault] =
+      this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
+    this.filterSettings.presets.collectionTags = [tagId];
+    this.filterActiveCheck = this.seriesService.createSeriesFilter();
+    this.filterActiveCheck.collectionTags = [tagId];
+
+    this.updateTag(tagId);
   }
 
   ngOnInit(): void {
-    this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
+    this.collectionTagActions =
+      this.actionFactoryService.getCollectionTagActions(
+        this.handleCollectionActionCallback.bind(this)
+      );
 
-    this.messageHub.messages$.pipe(takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
-      if (event.event == EVENTS.SeriesAddedToCollection) {
-        const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
-        if (collectionEvent.tagId === this.collectionTag.id) {
+    this.messageHub.messages$
+      .pipe(takeUntil(this.onDestroy), debounceTime(2000))
+      .subscribe((event) => {
+        if (event.event == EVENTS.SeriesAddedToCollection) {
+          const collectionEvent = event.payload as SeriesAddedToCollectionEvent;
+          if (collectionEvent.tagId === this.collectionTag.id) {
+            this.loadPage();
+          }
+        } else if (event.event === EVENTS.SeriesRemoved) {
           this.loadPage();
         }
-      } else if (event.event === EVENTS.SeriesRemoved) {
-        this.loadPage();
-      }
-    });
+      });
   }
 
   ngOnDestroy() {
-    this.onDestory.next();
-    this.onDestory.complete();
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -142,18 +184,26 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   updateTag(tagId: number) {
-    this.collectionService.allTags().subscribe(tags => {
-      const matchingTags = tags.filter(t => t.id === tagId);
+    this.collectionService.allTags().subscribe((tags) => {
+      const matchingTags = tags.filter((t) => t.id === tagId);
       if (matchingTags.length === 0) {
-        this.toastr.error('You don\'t have access to any libraries this tag belongs to or this tag is invalid');
+        this.toastr.error(
+          "You don't have access to any libraries this tag belongs to or this tag is invalid"
+        );
         this.router.navigateByUrl('/');
         return;
       }
 
       this.collectionTag = matchingTags[0];
-      this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
-      this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
-      this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
+      this.summary = (
+        this.collectionTag.summary === null ? '' : this.collectionTag.summary
+      ).replace(/\n/g, '<br>');
+      this.tagImage = this.imageService.randomize(
+        this.imageService.getCollectionCoverImage(this.collectionTag.id)
+      );
+      this.titleService.setTitle(
+        'Kavita - ' + this.collectionTag.title + ' Collection'
+      );
     });
   }
 
@@ -163,25 +213,39 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    this.seriesService.getAllSeries(this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
-      this.series = series.result;
-      this.seriesPagination = series.pagination;
-      this.isLoading = false;
-      window.scrollTo(0, 0);
-    });
+    this.filterActive = !this.utilityService.deepEqual(
+      this.filter,
+      this.filterActiveCheck
+    );
+    this.seriesService
+      .getAllSeries(
+        this.seriesPagination?.currentPage,
+        this.seriesPagination?.itemsPerPage,
+        this.filter
+      )
+      .pipe(take(1))
+      .subscribe((series) => {
+        this.series = series.result;
+        this.seriesPagination = series.pagination;
+        this.isLoading = false;
+        window.scrollTo(0, 0);
+      });
   }
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
-    
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
+
+    if (!data.isFirst)
+      this.filterUtilityService.updateUrlFromFilter(
+        this.seriesPagination,
+        this.filter
+      );
     this.loadPage();
   }
 
   handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
     switch (action) {
-      case(Action.Edit):
+      case Action.Edit:
         this.openEditCollectionTagModal(this.collectionTag);
         break;
       default:
@@ -196,15 +260,21 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   }
 
   openEditCollectionTagModal(collectionTag: CollectionTag) {
-    const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
-    modalRef.componentInstance.tag = this.collectionTag;
-    modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
-      this.updateTag(this.collectionTag.id);
-      this.loadPage();
-      if (results.coverImageUpdated) {
-        this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
-      }
+    const modalRef = this.modalService.open(EditCollectionTagsComponent, {
+      size: 'lg',
+      scrollable: true,
     });
+    modalRef.componentInstance.tag = this.collectionTag;
+    modalRef.closed.subscribe(
+      (results: { success: boolean; coverImageUpdated: boolean }) => {
+        this.updateTag(this.collectionTag.id);
+        this.loadPage();
+        if (results.coverImageUpdated) {
+          this.tagImage = this.imageService.randomize(
+            this.imageService.getCollectionCoverImage(collectionTag.id)
+          );
+        }
+      }
+    );
   }
-
 }

@@ -1,11 +1,16 @@
-<app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
-    <h2 title>
-        All Series
-    </h2>
-    <h6 subtitle>{{pagination?.totalItems}} Series</h6>
+<app-side-nav-companion-bar
+    [hasFilter]="true"
+    [filterOpenByDefault]="filterSettings.openByDefault"
+    (filterOpen)="filterOpen.emit($event)"
+    [filterActive]="filterActive"
+>
+    <h3 title>All Series</h3>
+    <h6 subtitle>{{ pagination?.totalItems }} Series</h6>
 </app-side-nav-companion-bar>
-<app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-<app-card-detail-layout 
+<app-bulk-operations
+    [actionCallback]="bulkActionCallback"
+></app-bulk-operations>
+<app-card-detail-layout
     [isLoading]="loadingSeries"
     [items]="series"
     [pagination]="pagination"
@@ -13,10 +18,22 @@
     [filterOpen]="filterOpen"
     (applyFilter)="updateFilter($event)"
     (pageChange)="onPageChange($event)"
-    >
+>
     <ng-template #cardItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()" 
-        (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" 
-        [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
+        <app-series-card
+            [data]="item"
+            [libraryId]="item.libraryId"
+            (reload)="loadPage()"
+            (selection)="
+                bulkSelectionService.handleCardSelection(
+                    'series',
+                    position,
+                    series.length,
+                    $event
+                )
+            "
+            [selected]="bulkSelectionService.isCardSelected('series', position)"
+            [allowSelection]="true"
+        ></app-series-card>
     </ng-template>
 </app-card-detail-layout>

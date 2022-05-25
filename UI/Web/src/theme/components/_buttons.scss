@@ -1,75 +1,89 @@
 // TODO: Clean this code up
 
 .btn-primary {
-  color: var(--btn-primary-text-color);
-  background-color: var(--btn-primary-bg-color);
-  border-color: var(--btn-primary-border-color);
+    color: var(--btn-primary-text-color);
+    background-color: var(--btn-primary-bg-color);
+    border-color: var(--btn-primary-border-color);
 
-  &:hover {
-    color: var(--btn-primary-hover-text-color);
-    background-color: var(--btn-primary-hover-bg-color);
-    border-color: var(--btn-primary-hover-border-color);
-  }
+    &:hover {
+        color: var(--btn-primary-hover-text-color);
+        background-color: var(--btn-primary-hover-bg-color);
+        border-color: var(--btn-primary-hover-border-color);
+    }
 }
 
 .btn-close {
-  filter: var(--btn-icon-filter) !important;
+    filter: var(--btn-icon-filter) !important;
 }
 
-.btn-primary:disabled, .btn-primary.disabled {
-  background-color: var(--btn-disabled-bg-color);
-  color: var(--btn-disabled-text-color);
-  border-color: var(--btn-disabled-border-color);
+.btn-primary:disabled,
+.btn-primary.disabled {
+    background-color: var(--btn-disabled-bg-color);
+    color: var(--btn-disabled-text-color);
+    border-color: var(--btn-disabled-border-color);
 }
 
-button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
-  cursor: not-allowed;
-
+button:disabled,
+.form-control:disabled,
+.form-control[readonly],
+.disabled,
+:disabled {
+    cursor: not-allowed;
 }
 
 .btn-link {
     color: var(--body-text-color);
     > i {
-      color: var(--body-text-color) !important;
+        color: var(--body-text-color) !important;
     }
 
-    &:hover, &:focus {
-      color: var(--primary-color);
+    &:hover,
+    &:focus {
+        color: var(--primary-color);
     }
 }
 
-
 .btn-icon {
-  cursor: pointer;
-  color: var(--body-text-color);
-
-  &:hover, &:focus {
+    cursor: pointer;
     color: var(--body-text-color);
-  }
+    margin-right: 1em;
+    width: 2.4em;
+    height: 2.4em;
+    text-align: center;
+    padding: 0.375em;
+    border-radius: 2rem !important;
+
+    &:hover,
+    &:focus {
+        color: var(--body-text-color);
+    }
 }
 
 .btn-outline-secondary {
-  color: var(--body-text-color);
+    color: var(--body-text-color);
+    padding: 0.375em;
+    border-radius: 2rem !important;
 }
-  
+
 .btn.btn-secondary.alt {
     background-color: var(--btn-alt-bg-color);
     border-color: var(--btn-alt-border-color);
-  
+
     &:hover {
-      background-color: var(--btn-alt-hover-bg-color); 
+        background-color: var(--btn-alt-hover-bg-color);
     }
-  
+
     &:focus {
-      background-color: var(--btn-alt-focus-bg-color);
-      box-shadow: 0 0 0 0.2rem var(--btn-alt-focus-boxshadow-color); 
+        background-color: var(--btn-alt-focus-bg-color);
+        box-shadow: 0 0 0 0.2rem var(--btn-alt-focus-boxshadow-color);
     }
 }
 
 button i.fa {
-  color: var(--btn-fa-icon-color);
+    color: var(--btn-fa-icon-color);
 }
 
-.btn-check:focus + .btn, .btn:focus {
-  box-shadow: 0 0 0 0.25rem var(--btn-focus-boxshadow-color);
+.btn-check:focus + .btn,
+.btn:focus {
+    box-shadow: 0 0 0 0.2rem var(--btn-focus-boxshadow-color);
 }

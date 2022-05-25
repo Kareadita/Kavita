@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
@@ -6,6 +7,7 @@ using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Tasks;
 using Hangfire;
+using Hangfire.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -23,6 +25,8 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
+
+
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -36,7 +40,7 @@ public class TaskScheduler : ITaskScheduler
 
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
-    private readonly ISiteThemeService _siteThemeService;
+    private readonly IThemeService _themeService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     private static readonly Random Rnd = new Random();
@@ -45,7 +49,7 @@ public class TaskScheduler : ITaskScheduler
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        ISiteThemeService siteThemeService)
+        IThemeService themeService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -56,7 +60,7 @@ public class TaskScheduler : ITaskScheduler
         _cleanupService = cleanupService;
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
-        _siteThemeService = siteThemeService;
+        _themeService = themeService;
     }
 
     public async Task ScheduleTasks()
@@ -131,7 +135,7 @@ public class TaskScheduler : ITaskScheduler
     public void ScanSiteThemes()
     {
         _logger.LogInformation("Starting Site Theme scan");
-        BackgroundJob.Enqueue(() => _siteThemeService.Scan());
+        BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
     #endregion
@@ -149,6 +153,7 @@ public class TaskScheduler : ITaskScheduler
     public void ScanLibrary(int libraryId)
     {
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
+        // TODO: If a library scan is already queued up for libraryId, don't do anything
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());

@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.3");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.4");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -166,15 +166,17 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("BackgroundColor")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("BookReaderDarkMode")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("#000000");
 
                     b.Property<string>("BookReaderFontFamily")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("BookReaderFontSize")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("BookReaderImmersiveMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("BookReaderLineSpacing")
@@ -189,7 +191,15 @@ namespace API.Data.Migrations
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BookThemeName")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Dark");
+
                     b.Property<int>("LayoutMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PageLayoutMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")

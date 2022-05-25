@@ -3,9 +3,15 @@
     width: 200;
 }
 
-
 .viewport {
     width: 600px;
     height: 100%;
     overflow-y: auto;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 158px);
+    grid-gap: 0.1rem;
+    justify-content: space-around;
 }

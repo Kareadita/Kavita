@@ -4,6 +4,9 @@ using API.Services;
 
 namespace API.DTOs.Theme;
 
+/// <summary>
+/// Represents a set of css overrides the user can upload to Kavita and will load into webui
+/// </summary>
 public class SiteThemeDto
 {
     public int Id { get; set; }

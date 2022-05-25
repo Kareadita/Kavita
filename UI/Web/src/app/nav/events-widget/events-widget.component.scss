@@ -41,12 +41,13 @@
 .accent-text {
     width: 100%;
     text-overflow: ellipsis;
-    overflow:hidden;
-    white-space:nowrap; 
+    overflow: hidden;
+    white-space: nowrap; 
 }
 
 .btn:focus, .btn:hover {
-    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
+    box-shadow: 0 0 0 0.2rem var(--navbar-btn-hover-outline-color);
+    border-radius: 2rem;
 }
 
 .small-spinner {
@@ -54,16 +55,14 @@
     height: 1rem;
 }
 
-
-
-
 .btn-icon {
     color: white;
+    margin-right: 1em;
 }
 
 .colored {
     background-color: var(--primary-color);
-    border-radius: 60px;
+    border-radius: 2rem;
 }
 
 .update-available {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using NetVips;
+using SixLabors.ImageSharp;
+using Image = NetVips.Image;
 
 namespace API.Services;
 
@@ -19,6 +21,12 @@ public interface IImageService
     string CreateThumbnailFromBase64(string encodedImage, string fileName);
 
     string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory);
+    /// <summary>
+    /// Converts the passed image to webP and outputs it in the same directory
+    /// </summary>
+    /// <param name="filePath">Full path to the image to convert</param>
+    /// <returns>File of written webp image</returns>
+    Task<string> ConvertToWebP(string filePath, string outputPath);
 }
 
 public class ImageService : IImageService
@@ -93,6 +101,18 @@ public class ImageService : IImageService
         } catch (Exception) {/* Swallow exception */}
         thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
         return filename;
+    }
+
+    public async Task<string> ConvertToWebP(string filePath, string outputPath)
+    {
+        var file = _directoryService.FileSystem.FileInfo.FromFileName(filePath);
+        var fileName = file.Name.Replace(file.Extension, string.Empty);
+        var outputFile = Path.Join(outputPath, fileName + ".webp");
+
+
+        using var sourceImage = await SixLabors.ImageSharp.Image.LoadAsync(filePath);
+        await sourceImage.SaveAsWebpAsync(outputFile);
+        return outputFile;
     }
 
 

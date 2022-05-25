@@ -2,9 +2,9 @@
 {
     public class UserParams
     {
-        private const int MaxPageSize = 50;
+        private const int MaxPageSize = 100;
         public int PageNumber { get; set; } = 1;
-        private int _pageSize = 30;
+        private int _pageSize = 100;
 
         public int PageSize
         {

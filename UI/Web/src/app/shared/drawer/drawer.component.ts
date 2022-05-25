@@ -14,18 +14,20 @@ export class DrawerOptions {
   exportAs: "drawer"
 })
 export class DrawerComponent {
-
   @Input() isOpen = false;
   @Input() width: number = 400;
   /**
    * Side of the screen the drawer should animate from
    */
-  @Input() position: 'left' | 'right' | 'bottom' = 'left';
+  @Input() position: 'start' | 'end' | 'bottom' | 'top' = 'start';
   @Input() options: Partial<DrawerOptions> = new DrawerOptions();
   @Output() drawerClosed = new EventEmitter();
+  @Output() isOpenChange: EventEmitter<boolean> = new EventEmitter();
 
 
   close() {
-    this.drawerClosed.emit();
+    this.isOpen = false;
+    this.isOpenChange.emit(false);
+    this.drawerClosed.emit(false);
   }
 }

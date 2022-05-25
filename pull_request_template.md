@@ -7,7 +7,6 @@
 # Fixed
 - Fixed: Fixed a bug (Fixes #issue number)
 
-
 # Checklist (delete section)
 - Ensure your issues are not generic and instead talk about the feature or area they fix/enhance.
   - DONT: Fixed: Fixed a styling issue on top of screen

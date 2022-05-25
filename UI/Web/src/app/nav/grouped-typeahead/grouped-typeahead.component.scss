@@ -8,7 +8,7 @@ form {
 }
 
 .btn-close {
-    margin-top: 8px;
+    padding: 0.5rem;
     font-size: 0.8rem;
     position: absolute;
     right: 5px;
@@ -28,9 +28,10 @@ form {
     cursor: text;
     background-color: var(--input-bg-color);
     color: var(--body-text-color);
-    min-height: 38px;
+    min-height: 2rem;
+    max-width: 50vw;
     transition-property: all;
-    transition-duration: 0.3s;
+    transition-duration: 0.5s;
     display: block;
 
     .search {
@@ -41,7 +42,7 @@ form {
 
     input {
         outline: 0 !important;
-        border-radius: .28571429rem;
+        border-radius: 0.3rem;
         padding: 0px !important;
         min-height: 0px !important;
         max-width: 100% !important;
