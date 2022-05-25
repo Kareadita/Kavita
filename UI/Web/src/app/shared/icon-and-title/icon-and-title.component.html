@@ -1,6 +1,6 @@
-<div class="col-auto d-flex justify-content-center align-self-center align-items-center icon-and-title" [ngClass]="{'clickable': clickable}" [attr.role]="clickable ? 'button' : ''"
+<div class="d-flex justify-content-center align-self-center align-items-center icon-and-title" [ngClass]="{'clickable': clickable}" [attr.role]="clickable ? 'button' : ''"
     (click)="handleClick($event)">
-    <i class="{{fontClasses}} mx-auto" aria-hidden="true" [title]="title" style="width: 20px;"></i>
+    <i class="{{fontClasses}} mx-auto icon" aria-hidden="true" [title]="title"></i>
 
     <div style="padding-top: 5px">
         <ng-content></ng-content>
