@@ -149,45 +149,53 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         if (series.Format != MangaFormat.Epub) return;
 
         long totalSum = 0;
-
-        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        try
         {
-            // This compares if it's changed since a file scan only
-            if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, chapter.Files.FirstOrDefault()))
-                continue;
-
-            long sum = 0;
-            var fileCounter = 1;
-            foreach (var file in chapter.Files)
+            foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
             {
-                var pageCounter = 1;
-                using var book = await EpubReader.OpenBookAsync(file.FilePath, BookService.BookReaderOptions);
+                // This compares if it's changed since a file scan only
+                if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false,
+                        chapter.Files.FirstOrDefault()) && chapter.WordCount != 0)
+                    continue;
 
-                var totalPages = book.Content.Html.Values;
-                foreach (var bookPage in totalPages)
+                long sum = 0;
+                var fileCounter = 1;
+                foreach (var file in chapter.Files)
                 {
-                    var progress = Math.Max(0F,
-                        Math.Min(1F, (fileCounter * pageCounter) * 1F / (chapter.Files.Count * totalPages.Count)));
+                    var pageCounter = 1;
+                    using var book = await EpubReader.OpenBookAsync(file.FilePath, BookService.BookReaderOptions);
 
-                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                        MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress, ProgressEventType.Updated, useFileName ? file.FilePath : series.Name));
-                    sum += await GetWordCountFromHtml(bookPage);
-                    pageCounter++;
+                    var totalPages = book.Content.Html.Values;
+                    foreach (var bookPage in totalPages)
+                    {
+                        var progress = Math.Max(0F,
+                            Math.Min(1F, (fileCounter * pageCounter) * 1F / (chapter.Files.Count * totalPages.Count)));
+
+                        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                            MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress,
+                                ProgressEventType.Updated, useFileName ? file.FilePath : series.Name));
+                        sum += await GetWordCountFromHtml(bookPage);
+                        pageCounter++;
+                    }
+
+                    fileCounter++;
                 }
 
-                fileCounter++;
+                chapter.WordCount = sum;
+                _unitOfWork.ChapterRepository.Update(chapter);
+                totalSum += sum;
             }
 
-            chapter.WordCount = sum;
-            _unitOfWork.ChapterRepository.Update(chapter);
-            totalSum += sum;
+            series.WordCount = totalSum;
+            _unitOfWork.SeriesRepository.Update(series);
         }
-
-        series.WordCount = totalSum;
-        _unitOfWork.SeriesRepository.Update(series);
-
-        // TODO: Hook in ICacheHelper to not recalculate if file hasn't changed AND WordCount != 0
-
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent("There was an issue counting words on an epub",
+                    series.Name));
+        }
     }
 
 
@@ -198,6 +206,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         var delimiter = new char[] {' '};
 
         return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
+            .Where(node => node != null)
             .Select(node => node.InnerText)
             .Select(text => text.Split(delimiter, StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))

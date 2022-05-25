@@ -8,6 +8,7 @@ import { SafeHtmlPipe } from './safe-html.pipe';
 import { RelationshipPipe } from './relationship.pipe';
 import { DefaultValuePipe } from './default-value.pipe';
 import { CompactNumberPipe } from './compact-number.pipe';
+import { LanguageNamePipe } from './language-name.pipe';
 
 
 
@@ -20,7 +21,8 @@ import { CompactNumberPipe } from './compact-number.pipe';
     SafeHtmlPipe,
     RelationshipPipe,
     DefaultValuePipe,
-    CompactNumberPipe
+    CompactNumberPipe,
+    LanguageNamePipe
   ],
   imports: [
     CommonModule,
@@ -33,7 +35,8 @@ import { CompactNumberPipe } from './compact-number.pipe';
     SafeHtmlPipe,
     RelationshipPipe,
     DefaultValuePipe,
-    CompactNumberPipe
+    CompactNumberPipe,
+    LanguageNamePipe
   ]
 })
 export class PipeModule { }

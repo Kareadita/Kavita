@@ -20,6 +20,7 @@ export class MetadataService {
   baseUrl = environment.apiUrl;
 
   private ageRatingTypes: {[key: number]: string} | undefined = undefined;
+  private validLanguages: Array<Language> = [];
 
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
 
@@ -81,8 +82,12 @@ export class MetadataService {
    * All the potential language tags there can be
    */
   getAllValidLanguages() {
-    // TODO: Cache this information
-    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages');
+    if (this.validLanguages != undefined && this.validLanguages.length > 0) {
+      return of(this.validLanguages);
+    }
+    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages').pipe(map(l => this.validLanguages = l));
+
+    //return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages').pipe();
   }
 
   getAllPeople(libraries?: Array<number>) {

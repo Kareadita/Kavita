@@ -24,7 +24,7 @@
         <ng-container *ngIf="seriesMetadata.language !== null">
             <div class="col-auto me-2">
                 <app-icon-and-title [clickable]="true" fontClasses="fas fa-language" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" title="Language">
-                    {{seriesMetadata.language | defaultValue:'en'}}
+                    {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
                 </app-icon-and-title>
             </div>
             <div class="vr m-2"></div>
