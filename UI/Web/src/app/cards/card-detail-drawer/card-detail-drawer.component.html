@@ -26,18 +26,18 @@
                             ID: {{data.id}}
                         </div> -->
 
-                        <p *ngIf="summary$ | async as summary">
+                        <p *ngIf="summary$ | async as summary" class="mb-2">
                             {{summary}}
                         </p>
 
-                        <div class="row g-0">
+                        <div class="row g-0 mb-3">
                             <ng-container *ngIf="chapter.pages">
                                 <div class="col-auto mb-2">
                                     <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
                                         {{chapter.pages}} Pages
                                     </app-icon-and-title>
                                 </div>
-                                <div class="vr m-2"></div>
+                                <div class="vr d-none d-lg-block m-2"></div>
                             </ng-container>
 
                             <ng-container *ngIf="chapterMetadata !== undefined && chapterMetadata.releaseDate">
@@ -46,7 +46,7 @@
                                         {{chapterMetadata.releaseDate | date:'shortDate'}}
                                     </app-icon-and-title>
                                 </div>
-                                <div class="vr m-2"></div>
+                                <div class="vr d-none d-lg-block m-2"></div>
                             </ng-container>
 
                             <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
@@ -58,7 +58,7 @@
                             </ng-container>
                     
                             <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0">
-                                <div class="vr m-2"></div>
+                                <div class="vr d-none d-lg-block m-2"></div>
                                 <div class="col-auto mb-2">
                                     <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
                                         {{chapterMetadata.wordCount | compactNumber}} Words
@@ -68,7 +68,7 @@
 
                             <ng-container *ngIf="chapterMetadata !== undefined">
                                 <ng-container *ngIf="metadataService.getAgeRating(chapterMetadata.ageRating) | async as ageRating">
-                                    <div class="vr m-2"></div>
+                                    <div class="vr d-none d-lg-block m-2"></div>
                                     <div class="col-auto">
                                         <app-icon-and-title [clickable]="true" fontClasses="fas fa-eye" title="Age Rating">
                                             {{ageRating}}
@@ -78,7 +78,7 @@
                             </ng-container>
 
                             <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
-                                <div class="vr m-2"></div>
+                                <div class="vr d-none d-lg-block m-2"></div>
                                 <div class="col-auto">
                                     <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-file-import" title="Date Added">
                                         {{chapter.created | date:'short' || '-'}}
@@ -87,7 +87,7 @@
                             </ng-container>
 
                             <ng-container *ngIf="chapter.created">
-                                <div class="vr m-2"></div>
+                                <div class="vr d-none d-lg-block m-2"></div>
                                 <div class="col-auto">
                                     <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-fingerprint" title="ID">
                                         {{data.id}}

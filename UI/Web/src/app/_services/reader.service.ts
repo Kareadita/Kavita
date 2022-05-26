@@ -7,7 +7,11 @@ import { Chapter } from '../_models/chapter';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
-import { Volume } from '../_models/volume';
+
+export const MAX_WORDS_PER_HOUR = 30_000;
+export const MIN_WORDS_PER_HOUR = 10_260;
+export const MAX_PAGES_PER_MINUTE = 2.75;
+export const MIN_PAGES_PER_MINUTE = 3.33;
 
 @Injectable({
   providedIn: 'root'

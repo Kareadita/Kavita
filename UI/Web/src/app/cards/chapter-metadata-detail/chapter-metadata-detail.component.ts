@@ -41,19 +41,4 @@ export class ChapterMetadataDetailComponent implements OnInit {
       action.callback(action.action, chapter);
     }
   }
-
-  readChapter(chapter: Chapter) {
-    // if (chapter.pages === 0) {
-    //   this.toastr.error('There are no pages. Kavita was not able to read this archive.');
-    //   return;
-    // }
-
-    // if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-    //   this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'book', chapter.id]);
-    // } else {
-    //   this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
-    // }
-  }
-
-
 }
