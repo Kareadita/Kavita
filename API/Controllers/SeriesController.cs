@@ -394,6 +394,8 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId));
         }
 
+
+
         [Authorize(Policy="RequireAdminRole")]
         [HttpPost("update-related")]
         public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)

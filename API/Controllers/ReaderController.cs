@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
@@ -625,6 +626,40 @@ namespace API.Controllers
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
+        }
+
+        [HttpGet("time-left")]
+        public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+
+            // Get all sum of all chapters with progress that is complete then subtract from series. Multiply by modifiers
+            var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId);
+            if (series.Format == MangaFormat.Epub)
+            {
+                var chapters =
+                    await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(progress.Select(p => p.ChapterId).ToList());
+                // Word count
+                var wordsLeft = series.WordCount - chapters.Sum(c => c.WordCount);
+                return Ok(new HourEstimateRangeDto()
+                {
+                    MinHours = (int) Math.Round((wordsLeft / 10260F)),
+                    MaxHours = (int) Math.Round((wordsLeft / 30000F)),
+                    AvgHours = (int) Math.Round((wordsLeft / 30000F / (30000F - 10260F))),
+                });
+            }
+            else
+            {
+                var pagesLeft = series.Pages - progress.Sum(p => p.PagesRead);
+                return Ok(new HourEstimateRangeDto()
+                {
+                    MinHours = (int) Math.Round((pagesLeft / 3.33) / 60),
+                    MaxHours = (int) Math.Round((pagesLeft / 2.75) / 60),
+                    AvgHours = (int) Math.Round((pagesLeft / 3F) / 60),
+                });
+            }
+
         }
 
     }

@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { MetadataService } from 'src/app/_services/metadata.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -23,7 +22,7 @@ export class ChapterMetadataDetailComponent implements OnInit {
     return LibraryType;
   }
 
-  constructor(private metadataService: MetadataService, public utilityService: UtilityService) { }
+  constructor(public utilityService: UtilityService) { }
 
   ngOnInit(): void {
     this.roles = Object.keys(PersonRole).filter(role => /[0-9]/.test(role) === false);

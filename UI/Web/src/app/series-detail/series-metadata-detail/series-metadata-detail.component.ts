@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { MAX_WORDS_PER_HOUR, MIN_WORDS_PER_HOUR, MIN_PAGES_PER_MINUTE, MAX_PAGES_PER_MINUTE } from 'src/app/_services/reader.service';
+import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
+import { MAX_WORDS_PER_HOUR, MIN_WORDS_PER_HOUR, MIN_PAGES_PER_MINUTE, MAX_PAGES_PER_MINUTE, ReaderService } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../shared/tag-badge/tag-badge.component';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
 import { UtilityService } from '../../shared/_services/utility.service';
@@ -30,6 +31,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   minHoursToRead: number = 1;
   maxHoursToRead: number = 1;
+  readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
 
   /**
    * Html representation of Series Summary
@@ -48,7 +50,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return FilterQueryParam;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService, private router: Router) { }
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService, private router: Router, public readerService: ReaderService) {
+    
+  }
   
   ngOnChanges(changes: SimpleChanges): void {
     this.hasExtendedProperites = this.seriesMetadata.colorists.length > 0 || 
@@ -66,6 +70,8 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     }
     
     if (this.series !== null) {
+      this.readerService.getTimeLeft(this.series.id).subscribe((timeLeft) => this.readingTimeLeft = timeLeft);
+
       if (this.series.format === MangaFormat.EPUB && this.series.wordCount > 0) {
         this.minHoursToRead = parseInt(Math.round(this.series.wordCount / MAX_WORDS_PER_HOUR) + '', 10) || 1;
         this.maxHoursToRead = parseInt(Math.round(this.series.wordCount / MIN_WORDS_PER_HOUR) + '', 10) || 1;
