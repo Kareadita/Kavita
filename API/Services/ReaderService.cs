@@ -38,6 +38,14 @@ public class ReaderService : IReaderService
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
+    public const float MinWordsPerHour = 10260F;
+    public const float MaxWordsPerHour = 30000F;
+    public const float AvgWordsPerHour = MaxWordsPerHour / (MaxWordsPerHour - MinWordsPerHour);
+    public const float MinPagesPerHour = 3.33F / 60F;
+    public const float MaxPagesPerHour = 2.75F / 60F;
+    public const float AvgPagesPerHour = 3F / 60F;
+
+
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;

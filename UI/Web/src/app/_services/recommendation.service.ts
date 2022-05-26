@@ -22,6 +22,13 @@ export class RecommendationService {
       .pipe(map(response => this.utilityService.createPaginatedResult(response)));
   }
 
+  getQuickCatchupReads(libraryId: number, pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'recommended/quick-catchup-reads?libraryId=' + libraryId, {observe: 'response', params})
+      .pipe(map(response => this.utilityService.createPaginatedResult(response)));
+  }
+
   getHighlyRated(libraryId: number, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);

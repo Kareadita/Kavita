@@ -19,7 +19,7 @@ public class RecommendedController : BaseApiController
 
 
     /// <summary>
-    /// Quick Reads are series that are less than 2K pages in total.
+    /// Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.
     /// </summary>
     /// <param name="libraryId">Library to restrict series to</param>
     /// <returns></returns>
@@ -30,6 +30,24 @@ public class RecommendedController : BaseApiController
 
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetQuickReads(user.Id, libraryId, userParams);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.
+    /// </summary>
+    /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpGet("quick-catchup-reads")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams userParams)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+
+        userParams ??= new UserParams();
+        var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(user.Id, libraryId, userParams);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
         return Ok(series);

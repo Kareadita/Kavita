@@ -16,6 +16,7 @@ export class LibraryRecommendedComponent implements OnInit, OnDestroy {
   @Input() libraryId: number = 0;
 
   quickReads$!: Observable<Series[]>;
+  quickCatchups$!: Observable<Series[]>;
   highlyRated$!: Observable<Series[]>;
   onDeck$!: Observable<Series[]>;
   rediscover$!: Observable<Series[]>;
@@ -36,6 +37,9 @@ export class LibraryRecommendedComponent implements OnInit, OnDestroy {
     this.quickReads$ = this.recommendationService.getQuickReads(this.libraryId)
                       .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
 
+    this.quickCatchups$ = this.recommendationService.getQuickCatchupReads(this.libraryId)
+    .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
+
     this.highlyRated$ = this.recommendationService.getHighlyRated(this.libraryId)
                       .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
     
@@ -50,7 +54,7 @@ export class LibraryRecommendedComponent implements OnInit, OnDestroy {
       this.moreIn$ = this.recommendationService.getMoreIn(this.libraryId, genre.id).pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
     });
 
-    this.all$ = merge(this.quickReads$, this.highlyRated$, this.rediscover$, this.onDeck$, this.genre$).pipe(takeUntil(this.onDestroy));
+    this.all$ = merge(this.quickReads$, this.quickCatchups$, this.highlyRated$, this.rediscover$, this.onDeck$, this.genre$).pipe(takeUntil(this.onDestroy));
     this.all$.subscribe(() => this.noData = false);
     
   }

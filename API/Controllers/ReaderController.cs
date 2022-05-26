@@ -650,18 +650,18 @@ namespace API.Controllers
                 var wordsLeft = series.WordCount - chapters.Sum(c => c.WordCount);
                 return Ok(new HourEstimateRangeDto()
                 {
-                    MinHours = (int) Math.Round((wordsLeft / 10260F)),
-                    MaxHours = (int) Math.Round((wordsLeft / 30000F)),
-                    AvgHours = (int) Math.Round((wordsLeft / 30000F / (30000F - 10260F))),
+                    MinHours = (int) Math.Round((wordsLeft / ReaderService.MinWordsPerHour)),
+                    MaxHours = (int) Math.Round((wordsLeft / ReaderService.MaxWordsPerHour)),
+                    AvgHours = (int) Math.Round((wordsLeft / ReaderService.AvgWordsPerHour)),
                 });
             }
 
             var pagesLeft = series.Pages - progress.Sum(p => p.PagesRead);
             return Ok(new HourEstimateRangeDto()
             {
-                MinHours = (int) Math.Round((pagesLeft / 3.33) / 60),
-                MaxHours = (int) Math.Round((pagesLeft / 2.75) / 60),
-                AvgHours = (int) Math.Round((pagesLeft / 3F) / 60),
+                MinHours = (int) Math.Round((pagesLeft / ReaderService.MinPagesPerHour)),
+                MaxHours = (int) Math.Round((pagesLeft / ReaderService.MaxPagesPerHour)),
+                AvgHours = (int) Math.Round((pagesLeft / ReaderService.AvgPagesPerHour)),
             });
         }
 

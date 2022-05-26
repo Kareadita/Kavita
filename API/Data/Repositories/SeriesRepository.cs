@@ -17,6 +17,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
 using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -113,6 +114,7 @@ public interface ISeriesRepository
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
     Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams);
+    Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams);
@@ -1131,9 +1133,36 @@ public class SeriesRepository : ISeriesRepository
 
 
         var query = _context.Series
-            .Where(s => s.Pages < 2000 && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
-                        usersSeriesIds.Contains(s.Id))
+            .Where(s => (
+                ((s.Pages * ReaderService.AvgPagesPerHour < 10 && s.Format != MangaFormat.Epub)
+                || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub)))
+                    && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
+                         usersSeriesIds.Contains(s.Id))
             .Where(s => s.Metadata.PublicationStatus != PublicationStatus.OnGoing)
+            .AsSplitQuery()
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
+
+
+        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams)
+    {
+        var libraryIds = GetLibraryIdsForUser(userId, libraryId);
+        var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
+        var distinctSeriesIdsWithProgress = _context.AppUserProgresses
+            .Where(s => usersSeriesIds.Contains(s.SeriesId))
+            .Select(p => p.SeriesId)
+            .Distinct();
+
+
+        var query = _context.Series
+            .Where(s => (
+                            ((s.Pages * ReaderService.AvgPagesPerHour < 10 && s.Format != MangaFormat.Epub)
+                             || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub)))
+                        && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
+                        usersSeriesIds.Contains(s.Id))
+            .Where(s => s.Metadata.PublicationStatus == PublicationStatus.OnGoing)
             .AsSplitQuery()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
 
