@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
+import { MAX_WORDS_PER_HOUR, MIN_WORDS_PER_HOUR, MIN_PAGES_PER_MINUTE, MAX_PAGES_PER_MINUTE } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../shared/tag-badge/tag-badge.component';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
 import { UtilityService } from '../../shared/_services/utility.service';
@@ -8,11 +9,6 @@ import { ReadingList } from '../../_models/reading-list';
 import { Series } from '../../_models/series';
 import { SeriesMetadata } from '../../_models/series-metadata';
 import { MetadataService } from '../../_services/metadata.service';
-
-const MAX_WORDS_PER_HOUR = 30_000;
-const MIN_WORDS_PER_HOUR = 10_260;
-const MAX_PAGES_PER_MINUTE = 2.75;
-const MIN_PAGES_PER_MINUTE = 3.33;
 
 
 @Component({
@@ -72,10 +68,10 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     if (this.series !== null) {
       if (this.series.format === MangaFormat.EPUB && this.series.wordCount > 0) {
         this.minHoursToRead = parseInt(Math.round(this.series.wordCount / MAX_WORDS_PER_HOUR) + '', 10) || 1;
-        this.maxHoursToRead = parseInt(Math.round(this.series.wordCount / MIN_WORDS_PER_HOUR) + '', 10);
+        this.maxHoursToRead = parseInt(Math.round(this.series.wordCount / MIN_WORDS_PER_HOUR) + '', 10) || 1;
       } else if (this.series.format !== MangaFormat.EPUB) {
         this.minHoursToRead = parseInt(Math.round((this.series.pages / MIN_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
-        this.maxHoursToRead = parseInt(Math.round((this.series.pages / MAX_PAGES_PER_MINUTE) / 60) + '', 10);
+        this.maxHoursToRead = parseInt(Math.round((this.series.pages / MAX_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
       }
     }
   }

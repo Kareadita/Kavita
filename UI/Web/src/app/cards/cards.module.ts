@@ -67,7 +67,10 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     NgbDropdownModule,
     NgbProgressbarModule,
     NgxFileDropModule, // Cover Chooser
-    PipeModule // filter for BulkAddToCollectionComponent
+    PipeModule, // filter for BulkAddToCollectionComponent
+    
+
+    SharedModule, // IconAndTitleComponent
   ],
   exports: [
     CardItemComponent,

@@ -7,76 +7,149 @@
             {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}}</span>
         </ng-template>
     </h5>
-    <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss('Cross click')"></button>
+    <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()"></button>
 </div>
 <!-- <div class="offcanvas-header row hide-if-empty">
     by Joe
 </div> -->
 
-<div class="offcanvas-body">
+<div class="offcanvas-body pb-3">
     <div class="d-flex">
         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="vertical" style="max-width: 135px;">     
             <li [ngbNavItem]="tabs[TabID.General]">
                 <a ngbNavLink>General</a>
                 <ng-template ngbNavContent>
                     <div class="container-fluid">
+
+                        <!-- <div class="col-md-2 col-xs-4 col-sm-6">            
+                            <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                            ID: {{data.id}}
+                        </div> -->
+
                         <p *ngIf="summary$ | async as summary">
                             {{summary}}
                         </p>
 
                         <div class="row g-0">
-                            
-
-                        </div>
-
-
-                        <div class="col-md-2 col-xs-4 col-sm-6">            
-                            <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
-                            ID: {{data.id}}
-                        </div>
-                        <div class="col-md-10 col-xs-8 col-sm-6">
-                            <div class="row g-0">
-                                <h4>
-                                    {{chapter?.titleName}}
-                                </h4>
-                                <span>
-                                    <span *ngIf="chapterMetadata && chapterMetadata.releaseDate !== null">Release Date: {{chapterMetadata.releaseDate | date: 'shortDate' || '-'}}</span>
-                                </span>
-                                <span class="text-accent">{{data.pages}} pages</span>
-                            </div>
-                            <div class="row g-0">
-                                <div class="col-auto">
-                                    Added: {{(chapter.created | date: 'short') || '-'}}
+                            <ng-container *ngIf="chapter.pages">
+                                <div class="col-auto mb-2">
+                                    <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
+                                        {{chapter.pages}} Pages
+                                    </app-icon-and-title>
                                 </div>
-                            </div>
-                            <div class="row g-0">
-                                <div class="col-auto">
-                                    Age Rating: {{ageRating}}
+                                <div class="vr m-2"></div>
+                            </ng-container>
+
+                            <ng-container *ngIf="chapterMetadata !== undefined && chapterMetadata.releaseDate">
+                                <div class="col-auto mb-2">
+                                    <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release">
+                                        {{chapterMetadata.releaseDate | date:'shortDate'}}
+                                    </app-icon-and-title>
                                 </div>
-                            </div>
+                                <div class="vr m-2"></div>
+                            </ng-container>
+
+                            <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
+                                <div class="col-auto mb-2">
+                                    <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
+                                        {{minHoursToRead}}{{maxHoursToRead !== minHoursToRead ? ('-' + maxHoursToRead) : ''}} Hour{{minHoursToRead > 1 ? 's' : ''}}
+                                    </app-icon-and-title>
+                                </div>
+                            </ng-container>
+                    
+                            <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0">
+                                <div class="vr m-2"></div>
+                                <div class="col-auto mb-2">
+                                    <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
+                                        {{chapterMetadata.wordCount | compactNumber}} Words
+                                    </app-icon-and-title>
+                                </div>    
+                            </ng-container>
+
+                            <ng-container *ngIf="chapterMetadata !== undefined">
+                                <ng-container *ngIf="metadataService.getAgeRating(chapterMetadata.ageRating) | async as ageRating">
+                                    <div class="vr m-2"></div>
+                                    <div class="col-auto">
+                                        <app-icon-and-title [clickable]="true" fontClasses="fas fa-eye" title="Age Rating">
+                                            {{ageRating}}
+                                        </app-icon-and-title>
+                                    </div>
+                                </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
+                                <div class="vr m-2"></div>
+                                <div class="col-auto">
+                                    <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-file-import" title="Date Added">
+                                        {{chapter.created | date:'short' || '-'}}
+                                    </app-icon-and-title>
+                                </div>
+                            </ng-container>
+
+                            <ng-container *ngIf="chapter.created">
+                                <div class="vr m-2"></div>
+                                <div class="col-auto">
+                                    <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-fingerprint" title="ID">
+                                        {{data.id}}
+                                    </app-icon-and-title>
+                                </div>
+                            </ng-container>
                         </div>
 
+                        
 
-                    </div>
-                    <div class="row g-0">
+                        <!-- 2 rows to show some tags-->
                         <ng-container *ngIf="chapterMetadata !== undefined">
-                            <div class="row g-0" *ngIf="chapterMetadata.tags && chapterMetadata.tags.length > 0">
-                                <h6>Tags</h6>
-                                <app-badge-expander [items]="chapterMetadata.tags">
-                                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                                        <app-tag-badge>{{item.title}}</app-tag-badge>
-                                    </ng-template>  
-                                </app-badge-expander>
+                            <div class="row g-0 mb-2">
+                                <div class="col-md-6 col-sm-12">
+                                    <h6>Authors/Writers</h6>
+                                    <ng-container *ngIf="chapterMetadata.writers.length > 0; else noBadges">
+                                        <app-badge-expander [items]="chapterMetadata.writers">
+                                            <ng-template #badgeExpanderItem let-item let-position="idx">
+                                                <app-person-badge [person]="item"></app-person-badge>
+                                            </ng-template>  
+                                        </app-badge-expander>
+                                    </ng-container>
+                                </div>
+                                <div class="col-md-6 col-sm-12">
+                                    <h6>Genres</h6>
+                                    <ng-container *ngIf="chapterMetadata.genres.length > 0; else noBadges">
+                                        <app-badge-expander [items]="chapterMetadata.genres">
+                                            <ng-template #badgeExpanderItem let-item let-position="idx">
+                                                <app-tag-badge>{{item.title}}</app-tag-badge>
+                                            </ng-template>  
+                                        </app-badge-expander>
+                                    </ng-container>
+                                </div>
                             </div>
-                            <div class="row g-0" *ngIf="chapterMetadata.genres && chapterMetadata.genres.length > 0">
-                                <h6>Genres</h6>
-                                <app-badge-expander [items]="chapterMetadata.genres">
-                                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                                        <app-tag-badge>{{item.title}}</app-tag-badge>
-                                    </ng-template>  
-                                </app-badge-expander>
+                            <div class="row g-0 mb-2">
+                                <div class="col-md-6 col-sm-12">
+                                    <h6>Publisher</h6>
+                                    <ng-container *ngIf="chapterMetadata.publishers.length > 0; else noBadges">
+                                        <app-badge-expander [items]="chapterMetadata.publishers">
+                                            <ng-template #badgeExpanderItem let-item let-position="idx">
+                                                <app-person-badge [person]="item"></app-person-badge>
+                                            </ng-template>  
+                                        </app-badge-expander>
+                                    </ng-container>
+                                </div>
+                                <div class="col-md-6 col-sm-12">
+                                    <h6>Tags</h6>
+                                    <ng-container *ngIf="chapterMetadata.tags.length > 0; else noBadges">
+                                        <app-badge-expander [items]="chapterMetadata.tags">
+                                            <ng-template #badgeExpanderItem let-item let-position="idx">
+                                                <app-tag-badge>{{item.title}}</app-tag-badge>
+                                            </ng-template>  
+                                        </app-badge-expander>
+                                    </ng-container>
+                                </div>
                             </div>
+
+                            <ng-template #noBadges>
+                                Not defined
+                            </ng-template>
                         </ng-container>
+
                     </div>
                 </ng-template>
             </li>

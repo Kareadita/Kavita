@@ -17,7 +17,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
-import { ReaderService } from 'src/app/_services/reader.service';
+import { MAX_PAGES_PER_MINUTE, MAX_WORDS_PER_HOUR, MIN_PAGES_PER_MINUTE, MIN_WORDS_PER_HOUR, ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
@@ -77,7 +77,13 @@ export class CardDetailDrawerComponent implements OnInit {
   ageRating!: string;
 
   summary$: Observable<string> = of('');
+  minHoursToRead: number = 1;
+  maxHoursToRead: number = 1;
   
+
+  get MangaFormat() {
+    return MangaFormat;
+  }
 
   get Breakpoint() {
     return Breakpoint;
@@ -113,7 +119,16 @@ export class CardDetailDrawerComponent implements OnInit {
       this.chapterMetadata = metadata;
 
       this.metadataService.getAgeRating(this.chapterMetadata.ageRating).subscribe(ageRating => this.ageRating = ageRating);
+      
+      if (this.chapter.files[0].format === MangaFormat.EPUB && this.chapterMetadata.wordCount > 0) {
+        this.minHoursToRead = parseInt(Math.round(this.chapterMetadata.wordCount / MAX_WORDS_PER_HOUR) + '', 10) || 1;
+        this.maxHoursToRead = parseInt(Math.round(this.chapterMetadata.wordCount / MIN_WORDS_PER_HOUR) + '', 10) || 1;
+      } else if (this.chapter.files[0].format !== MangaFormat.EPUB) {
+        this.minHoursToRead = parseInt(Math.round((this.chapter.pages / MIN_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
+        this.maxHoursToRead = parseInt(Math.round((this.chapter.pages / MAX_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
+      }
     });
+
 
     if (this.isChapter) {
       this.summary$ = this.metadataService.getChapterSummary(this.data.id);
