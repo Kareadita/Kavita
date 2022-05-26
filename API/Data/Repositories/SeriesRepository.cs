@@ -1134,8 +1134,8 @@ public class SeriesRepository : ISeriesRepository
 
         var query = _context.Series
             .Where(s => (
-                ((s.Pages * ReaderService.AvgPagesPerHour < 10 && s.Format != MangaFormat.Epub)
-                || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub)))
+                (s.Pages / ReaderService.AvgPagesPerMinute / 60 < 10 && s.Format != MangaFormat.Epub)
+                || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub))
                     && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
                          usersSeriesIds.Contains(s.Id))
             .Where(s => s.Metadata.PublicationStatus != PublicationStatus.OnGoing)
@@ -1158,8 +1158,8 @@ public class SeriesRepository : ISeriesRepository
 
         var query = _context.Series
             .Where(s => (
-                            ((s.Pages * ReaderService.AvgPagesPerHour < 10 && s.Format != MangaFormat.Epub)
-                             || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub)))
+                            (s.Pages / ReaderService.AvgPagesPerMinute / 60 < 10 && s.Format != MangaFormat.Epub)
+                             || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub))
                         && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
                         usersSeriesIds.Contains(s.Id))
             .Where(s => s.Metadata.PublicationStatus == PublicationStatus.OnGoing)

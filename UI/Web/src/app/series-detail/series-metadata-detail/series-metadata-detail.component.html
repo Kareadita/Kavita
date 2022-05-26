@@ -90,7 +90,7 @@
         </ng-container>
 
 
-        <ng-container *ngIf="readingTimeLeft.minHours !== 1 && readingTimeLeft.maxHours !== 1">
+        <ng-container *ngIf="readingTimeLeft.minHours !== 1 && readingTimeLeft.maxHours !== 1 && readingTimeLeft.avgHours !== 0">
             <div class="vr d-none d-lg-block m-2"></div>
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-clock">

@@ -659,9 +659,9 @@ namespace API.Controllers
             var pagesLeft = series.Pages - progress.Sum(p => p.PagesRead);
             return Ok(new HourEstimateRangeDto()
             {
-                MinHours = (int) Math.Round((pagesLeft / ReaderService.MinPagesPerHour)),
-                MaxHours = (int) Math.Round((pagesLeft / ReaderService.MaxPagesPerHour)),
-                AvgHours = (int) Math.Round((pagesLeft / ReaderService.AvgPagesPerHour)),
+                MinHours = (int) Math.Round((pagesLeft / ReaderService.MinPagesPerMinute / 60F)),
+                MaxHours = (int) Math.Round((pagesLeft / ReaderService.MaxPagesPerMinute / 60F)),
+                AvgHours = (int) Math.Round((pagesLeft / ReaderService.AvgPagesPerMinute / 60F)),
             });
         }
 

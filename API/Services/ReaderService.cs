@@ -41,9 +41,9 @@ public class ReaderService : IReaderService
     public const float MinWordsPerHour = 10260F;
     public const float MaxWordsPerHour = 30000F;
     public const float AvgWordsPerHour = MaxWordsPerHour / (MaxWordsPerHour - MinWordsPerHour);
-    public const float MinPagesPerHour = 3.33F / 60F;
-    public const float MaxPagesPerHour = 2.75F / 60F;
-    public const float AvgPagesPerHour = 3F / 60F;
+    public const float MinPagesPerMinute = 3.33F;
+    public const float MaxPagesPerMinute = 2.75F;
+    public const float AvgPagesPerMinute = 3F;
 
 
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub)
