@@ -1,17 +1,35 @@
 <div class="offcanvas-header">
     <h5 class="offcanvas-title">
-        <span *ngIf="libraryType !== LibraryType.Comic else comicHeader" class="modal-title" id="modal-basic-title">
-            {{parentName}} - {{data.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + data.number : 'Special'}}</span>
-        <ng-template #comicHeader>
-            <span class="modal-title" id="modal-basic-title">
-            {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}}</span>
-        </ng-template>
+        <ng-container [ngSwitch]="libraryType">
+            <ng-container *ngSwitchCase="LibraryType.Comic">
+                <span class="modal-title" id="modal-basic-title">
+                    <ng-container *ngIf="chapter.titleName != ''; else fullComicTitle">
+                        {{chapter.titleName}}
+                    </ng-container>
+                    <ng-template #fullComicTitle>
+                        {{parentName}} - {{data.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + data.number : 'Special'}}
+                    </ng-template>
+                </span>
+            </ng-container>
+            <ng-container *ngSwitchCase="LibraryType.Manga">
+                <span class="modal-title" id="modal-basic-title">
+                    <ng-container *ngIf="chapter.titleName != ''; else fullMangaTitle">
+                        {{chapter.titleName}}
+                    </ng-container>
+                    <ng-template #fullMangaTitle>
+                        {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}}
+                    </ng-template>
+                </span>
+            </ng-container>
+            <ng-container *ngSwitchCase="LibraryType.Book">
+                <span class="modal-title" id="modal-basic-title">
+                    {{chapter.titleName}}
+                </span>
+            </ng-container>
+        </ng-container>
     </h5>
     <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()"></button>
 </div>
-<!-- <div class="offcanvas-header row hide-if-empty">
-    by Joe
-</div> -->
 
 <div class="offcanvas-body pb-3">
     <div class="d-flex">
@@ -67,7 +85,7 @@
                             </ng-container>
 
                             <ng-container *ngIf="chapterMetadata !== undefined">
-                                <ng-container *ngIf="metadataService.getAgeRating(chapterMetadata.ageRating) | async as ageRating">
+                                <ng-container *ngIf="ageRating !== '' && ageRating !== 'Unknown'">
                                     <div class="vr d-none d-lg-block m-2"></div>
                                     <div class="col-auto">
                                         <app-icon-and-title [clickable]="true" fontClasses="fas fa-eye" title="Age Rating">
@@ -75,24 +93,6 @@
                                         </app-icon-and-title>
                                     </div>
                                 </ng-container>
-                            </ng-container>
-
-                            <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
-                                <div class="vr d-none d-lg-block m-2"></div>
-                                <div class="col-auto">
-                                    <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-file-import" title="Date Added">
-                                        {{chapter.created | date:'short' || '-'}}
-                                    </app-icon-and-title>
-                                </div>
-                            </ng-container>
-
-                            <ng-container *ngIf="chapter.created">
-                                <div class="vr d-none d-lg-block m-2"></div>
-                                <div class="col-auto">
-                                    <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-fingerprint" title="ID">
-                                        {{data.id}}
-                                    </app-icon-and-title>
-                                </div>
                             </ng-container>
                         </div>
 
@@ -182,6 +182,24 @@
             <li [ngbNavItem]="tabs[TabID.Files]">
                 <a ngbNavLink>{{tabs[TabID.Files].title}}</a>
                 <ng-template ngbNavContent>
+                    <div class="row g-0 mb-3">
+                        <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
+                            <div class="col-auto">
+                                <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-file-import" title="Date Added">
+                                    Created: {{chapter.created | date:'short' || '-'}}
+                                </app-icon-and-title>
+                            </div>
+                        </ng-container>
+
+                        <ng-container>
+                            <div class="vr d-none d-lg-block m-2"></div>
+                            <div class="col-auto">
+                                <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-fingerprint" title="ID">
+                                    ID: {{data.id}}
+                                </app-icon-and-title>
+                            </div>
+                        </ng-container>
+                    </div>
                     <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
                     <ul class="list-unstyled">
                         <li class="d-flex my-4" *ngFor="let chapter of chapters">

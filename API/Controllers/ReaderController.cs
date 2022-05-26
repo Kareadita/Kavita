@@ -628,6 +628,12 @@ namespace API.Controllers
             return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
         }
 
+        /// <summary>
+        /// For the current user, returns an estimate on how long it would take to finish reading the series.
+        /// </summary>
+        /// <remarks>For Epubs, this does not check words inside a chapter due to overhead so may not work in all cases.</remarks>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("time-left")]
         public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
         {
@@ -649,17 +655,14 @@ namespace API.Controllers
                     AvgHours = (int) Math.Round((wordsLeft / 30000F / (30000F - 10260F))),
                 });
             }
-            else
-            {
-                var pagesLeft = series.Pages - progress.Sum(p => p.PagesRead);
-                return Ok(new HourEstimateRangeDto()
-                {
-                    MinHours = (int) Math.Round((pagesLeft / 3.33) / 60),
-                    MaxHours = (int) Math.Round((pagesLeft / 2.75) / 60),
-                    AvgHours = (int) Math.Round((pagesLeft / 3F) / 60),
-                });
-            }
 
+            var pagesLeft = series.Pages - progress.Sum(p => p.PagesRead);
+            return Ok(new HourEstimateRangeDto()
+            {
+                MinHours = (int) Math.Round((pagesLeft / 3.33) / 60),
+                MaxHours = (int) Math.Round((pagesLeft / 2.75) / 60),
+                AvgHours = (int) Math.Round((pagesLeft / 3F) / 60),
+            });
         }
 
     }
