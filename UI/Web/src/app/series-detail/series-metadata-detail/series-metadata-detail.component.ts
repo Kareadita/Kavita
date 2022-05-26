@@ -71,13 +71,13 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
       
       
     }
-    if (this.series !== null && this.series.wordCount > 0) {
-      if (this.series.format === MangaFormat.EPUB) {
+    if (this.series !== null) {
+      if (this.series.format === MangaFormat.EPUB && this.series.wordCount > 0) {
         this.minHoursToRead = parseInt(Math.round(this.series.wordCount / MAX_WORDS_PER_HOUR) + '', 10);
         this.maxHoursToRead = parseInt(Math.round(this.series.wordCount / MIN_WORDS_PER_HOUR) + '', 10);
-      } else {
-        this.minHoursToRead = parseInt(Math.round((this.series.wordCount * MAX_PAGES_PER_MINUTE) / 60) + '', 10);
-        this.maxHoursToRead = parseInt(Math.round((this.series.wordCount * MIN_PAGES_PER_MINUTE) / 60) + '', 10);
+      } else if (this.series.format !== MangaFormat.EPUB) {
+        this.minHoursToRead = parseInt(Math.round((this.series.pages / MIN_PAGES_PER_MINUTE) / 60) + '', 10);
+        this.maxHoursToRead = parseInt(Math.round((this.series.pages / MAX_PAGES_PER_MINUTE) / 60) + '', 10);
       }
     }
   }
