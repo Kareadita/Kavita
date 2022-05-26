@@ -2,3 +2,8 @@
     color: var(--drawer-text-color);
     background-color: var(--drawer-bg-color);
 }
+
+.offcanvas-end, .offcanvas-start, .offcanvas-top {
+    top: 56px;
+}
+
