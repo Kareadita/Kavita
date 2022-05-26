@@ -5,69 +5,69 @@
 <!-- This first row will have random information about the series-->
 <div class="row g-0 mb-4 mt-3">
      <ng-container *ngIf="seriesMetadata.ageRating">
-        <div class="col-auto">
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
             <app-icon-and-title [clickable]="true" fontClasses="fas fa-eye" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
                 {{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}
             </app-icon-and-title>
         </div>
-        <div class="vr m-2"></div>
+        <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
     <ng-container *ngIf="series">
         <ng-container *ngIf="seriesMetadata.releaseYear > 0">
-            <div class="col-auto mb-2">
+            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
                     {{seriesMetadata.releaseYear}}
                 </app-icon-and-title>
             </div>
-            <div class="vr m-2"></div>
+            <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
 
         <ng-container *ngIf="seriesMetadata.language !== null">
-            <div class="col-auto mb-2">
+            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
                 <app-icon-and-title [clickable]="true" fontClasses="fas fa-language" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" title="Language">
                     {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
                 </app-icon-and-title>
             </div>
-            <div class="vr m-2"></div>
+            <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
 
         <ng-container>
-            <div class="col-auto mb-2">
+            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title [clickable]="true" fontClasses="fa-solid fa-hourglass-empty" (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
                     {{seriesMetadata.publicationStatus | publicationStatus}}
                 </app-icon-and-title>
             </div>
-            <div class="vr m-2 mb-2"></div>
+            <div class="vr m-2 d-none d-lg-block"></div>
         </ng-container>
 
         <ng-container>
-            <div class="col-auto mb-2">
+            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title [clickable]="true" [fontClasses]="'fa ' + utilityService.mangaFormatIcon(series.format)" (click)="goTo(FilterQueryParam.Format, series.format)" title="Format">
                     {{utilityService.mangaFormat(series.format)}}
                 </app-icon-and-title>
             </div>
-            <div class="vr m-2"></div>
+            <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
 
         <ng-container *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'">
-            <div class="col-auto mb-2">
+            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock" title="Last Read">
                     {{series.latestReadDate | date:'shortDate'}}
                 </app-icon-and-title>
             </div>
-            <div class="vr m-2"></div>
+            <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
         
 
-        <div class="col-auto mb-2">
+        <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
             <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-file-lines">
                 {{series.pages}} Pages
             </app-icon-and-title>
         </div>
-        <div class="vr m-2"></div>
+        <div class="vr d-none d-lg-block m-2"></div>
 
         <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
-            <div class="col-auto mb-2">
+            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
                     {{minHoursToRead}}{{maxHoursToRead !== minHoursToRead ? ('-' + maxHoursToRead) : ''}} Hour{{minHoursToRead > 1 ? 's' : ''}}
                 </app-icon-and-title>
@@ -75,8 +75,8 @@
         </ng-container>
 
         <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0">
-            <div class="vr m-2"></div>
-            <div class="col-auto mb-2">
+            <div class="vr d-none d-lg-block m-2"></div>
+            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
                     {{series.wordCount | compactNumber}} Words
                 </app-icon-and-title>
