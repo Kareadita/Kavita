@@ -14,7 +14,8 @@ namespace API.Benchmark
         {
             //BenchmarkRunner.Run<ParseScannedFilesBenchmarks>();
             //BenchmarkRunner.Run<TestBenchmark>();
-            BenchmarkRunner.Run<ParserBenchmarks>();
+            //BenchmarkRunner.Run<ParserBenchmarks>();
+            BenchmarkRunner.Run<EpubBenchmark>();
 
         }
     }

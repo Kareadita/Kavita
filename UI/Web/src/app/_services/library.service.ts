@@ -74,6 +74,10 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId, {});
   }
 
+  analyze(libraryId: number) {
+    return this.httpClient.post(this.baseUrl + 'library/analyze?libraryId=' + libraryId, {});
+  }
+
   refreshMetadata(libraryId: number) {
     return this.httpClient.post(this.baseUrl + 'library/refresh-metadata?libraryId=' + libraryId, {});
   }

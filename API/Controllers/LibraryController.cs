@@ -166,6 +166,14 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("analyze")]
+        public ActionResult Analyze(int libraryId)
+        {
+            _taskScheduler.AnalyzeFilesForLibrary(libraryId);
+            return Ok();
+        }
+
         [HttpGet("libraries")]
         public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser()
         {

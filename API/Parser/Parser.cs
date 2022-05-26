@@ -102,6 +102,14 @@ namespace API.Parser
             new Regex(
                 @"(vol_)(?<Volume>\d+(\.\d)?)",
                 MatchOptions, RegexTimeout),
+            // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
+            new Regex(
+                @"第(?<Volume>\d+)(卷|册)",
+                MatchOptions, RegexTimeout),
+            // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
+            new Regex(
+                @"(卷|册)(?<Volume>\d+)",
+                MatchOptions, RegexTimeout),
         };
 
         private static readonly Regex[] MangaSeriesRegex = new[]
@@ -449,6 +457,10 @@ namespace API.Parser
             new Regex(
               @"(?<Volume>((vol|volume|v))?(\s|_)?\.?\d+)(\s|_)(Chp|Chapter)\.?(\s|_)?(?<Chapter>\d+)",
               MatchOptions, RegexTimeout),
+            // Chinese Chapter: 第n话 -> Chapter n, 【TFO汉化&Petit汉化】迷你偶像漫画第25话
+            new Regex(
+                @"第(?<Chapter>\d+)话",
+                MatchOptions, RegexTimeout),
 
         };
         private static readonly Regex[] MangaEditionRegex = {
