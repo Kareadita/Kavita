@@ -5,6 +5,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <ApplicationIcon>..\favicon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -39,7 +40,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Docnet.Core" Version="2.4.0-alpha.2" />
-    <PackageReference Include="ExCSS" Version="4.1.0" />
+    <PackageReference Include="ExCSS" Version="4.1.3" />
     <PackageReference Include="Flurl" Version="3.0.6" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="Hangfire" Version="1.7.29" />
@@ -63,7 +64,7 @@
     <PackageReference Include="NetVips.Native" Version="8.12.2" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.5" />
     <PackageReference Include="SharpCompress" Version="0.31.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.1" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.2" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.39.0.47922">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
