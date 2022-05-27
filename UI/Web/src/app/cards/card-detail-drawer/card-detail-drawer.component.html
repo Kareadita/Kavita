@@ -39,15 +39,15 @@
                 <ng-template ngbNavContent>
                     <div class="container-fluid" style="overflow: auto">
 
-                        <!-- <div class="col-md-2 col-xs-4 col-sm-6">            
-                            <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
-                            ID: {{data.id}}
-                        </div> -->
-
-                        <div *ngIf="summary$ | async as summary" class="row g-0">
-                            <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
+                        <div class="row g-0">
+                            <div class="d-none d-md-block col-md-2 col-lg-1">            
+                                <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                            </div> 
+                            <div *ngIf="summary$ | async as summary" class="col-md-10 col-lg-11">
+                                <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
+                            </div>
                         </div>
-
+                        
                         <div class="row g-0 mt-4 mb-3">
                             <ng-container *ngIf="chapter.pages">
                                 <div class="col-auto mb-2">
