@@ -1,4 +1,5 @@
-input:not([type="range"]), .form-control {
+input:not([type="range"]),
+.form-control {
     background-color: var(--input-bg-color);
     color: var(--input-text-color);
     border-color: var(--input-border-color);
@@ -6,7 +7,7 @@ input:not([type="range"]), .form-control {
     &:focus {
         border-color: var(--input-focused-border-color);
         background-color: var(--input-bg-color);
-        color: var(--input-text-color);
+        color: var(--input-focused-text-color);
         box-shadow: 0 0 0 0.25rem var(--input-focus-boxshadow-color);
     }
 

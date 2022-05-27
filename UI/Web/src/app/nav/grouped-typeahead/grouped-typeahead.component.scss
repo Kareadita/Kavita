@@ -2,7 +2,6 @@ form {
     max-height: 38px;
 }
 
-
 .search-result img {
     width: 100% !important;
 }
@@ -13,7 +12,6 @@ form {
     position: absolute;
     right: 5px;
 }
-
 
 .typeahead-input {
     border: 1px solid transparent;
@@ -38,7 +36,6 @@ form {
         display: flex;
         position: relative;
     }
-
 
     input {
         outline: 0 !important;
@@ -72,22 +69,18 @@ form {
         width: 99%;
         border-color: var(--input-focused-border-color);
     }
-
 }
 
-
-
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width:650px) {
+@media only screen and (max-width: 650px) {
     input {
-        width: 100%
+        width: 100%;
     }
 
     input:focus-visible {
         width: 100% !important;
     }
 }
-
 
 .section-header {
     color: var(--body-text-color);
@@ -100,20 +93,21 @@ form {
 
 .dropdown {
     width: 100vw;
-    height: calc(100vh - 57px); //header offset
+    height: 100vh; //header offset
     background: var(--dropdown-overlay-color);
     position: fixed;
     justify-content: center;
     left: 0;
+    top: 0;
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 9px;
+    margin-top: 0px;
 }
 
 .list-group {
     max-width: 600px;
-    z-index:1000;
+    z-index: 1000;
     overflow-y: auto;
     overflow-x: hidden;
     display: block;
@@ -136,7 +130,6 @@ form {
     padding: 5px 10px;
 }
 
-
 li {
     list-style: none;
     border-radius: 0px !important;
@@ -146,7 +139,6 @@ li {
 ul ul {
     border-radius: 0px !important;
 }
-
 
 .spinner-border {
     position: absolute;

@@ -10,7 +10,7 @@
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
 
     /* Navbar */
-    --navbar-bg-color: black;
+    --navbar-bg-color: #222;
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
@@ -19,7 +19,8 @@
     --input-bg-color: #343a40;
     --input-bg-readonly-color: #434648;
     --input-focused-border-color: #ccc;
-    --input-text-color: #fff;
+    --input-text-color: #aaa;
+    --input-focused-text-color: #333;
     --input-placeholder-color: #aeaeae;
     --input-border-color: #ccc;
     --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
@@ -90,13 +91,13 @@
     --tagbadge-filled-bg-color: var(--primary-color);
 
     /* Side Nav */
-    --side-nav-bg-color: rgba(0, 0, 0, 0.2);
+    --side-nav-bg-color: rgba(34, 34, 34, 1);
     --side-nav-mobile-bg-color: rgb(25, 26, 28);
-    --side-nav-openclose-transition: 0.15s ease-in-out;
+    --side-nav-openclose-transition: 0.25s ease-in-out;
     --side-nav-box-shadow: rgba(0, 0, 0, 0.5);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
-    --side-nav-hover-text-color: white;
-    --side-nav-hover-bg-color: black;
+    --side-nav-hover-text-color: rgba(255, 255, 255, 0.8);
+    --side-nav-hover-bg-color: rgba(68, 68, 68, 1);
     --side-nav-color: white;
     --side-nav-border-radius: 0.5rem;
     --side-nav-border: none;
