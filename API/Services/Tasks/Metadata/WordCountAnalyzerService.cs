@@ -40,7 +40,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _cacheHelper = cacheHelper;
     }
 
-    [DisableConcurrentExecution(timeoutInSeconds: 360)]
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {

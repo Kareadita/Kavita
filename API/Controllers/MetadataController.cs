@@ -149,4 +149,18 @@ public class MetadataController : BaseApiController
                 IsoCode = c.IetfLanguageTag
             }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
     }
+
+    /// <summary>
+    /// Returns summary for the chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("chapter-summary")]
+    public async Task<ActionResult<string>> GetChapterSummary(int chapterId)
+    {
+        if (chapterId <= 0) return BadRequest("Chapter does not exist");
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        if (chapter == null) return BadRequest("Chapter does not exist");
+        return Ok(chapter.Summary);
+    }
 }

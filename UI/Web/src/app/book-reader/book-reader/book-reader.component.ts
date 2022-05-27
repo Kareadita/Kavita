@@ -3,7 +3,7 @@ import {DOCUMENT, Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of, Subject } from 'rxjs';
-import { catchError, debounceTime, take, takeUntil, tap } from 'rxjs/operators';
+import { catchError, debounceTime, take, takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -27,7 +27,6 @@ import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
-import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 
 
 enum TabID {

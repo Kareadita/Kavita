@@ -4,10 +4,15 @@ import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
+import { HourEstimateRange } from '../_models/hour-estimate-range';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
-import { Volume } from '../_models/volume';
+
+export const MAX_WORDS_PER_HOUR = 30_000;
+export const MIN_WORDS_PER_HOUR = 10_260;
+export const MAX_PAGES_PER_MINUTE = 2.75;
+export const MIN_PAGES_PER_MINUTE = 3.33;
 
 @Injectable({
   providedIn: 'root'
@@ -122,6 +127,10 @@ export class ReaderService {
 
   getCurrentChapter(seriesId: number) {
     return this.httpClient.get<Chapter>(this.baseUrl + 'reader/continue-point?seriesId=' + seriesId);
+  }
+
+  getTimeLeft(seriesId: number) {
+    return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/time-left?seriesId=' + seriesId);
   }
 
   /**

@@ -12,7 +12,9 @@ export class LanguageNamePipe implements PipeTransform {
 
   transform(isoCode: string): Observable<string> {
     return this.metadataService.getAllValidLanguages().pipe(map(lang => {
-      return lang.filter(l => l.isoCode === isoCode)[0].title;
+      const l = lang.filter(l => l.isoCode === isoCode);
+      if (l.length > 0) return l[0].title;
+      return '';
     }));
   }
 

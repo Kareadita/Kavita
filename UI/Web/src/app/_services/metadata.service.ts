@@ -97,4 +97,8 @@ export class MetadataService {
     }
     return this.httpClient.get<Array<Person>>(this.baseUrl + method);
   }
+
+  getChapterSummary(chapterId: number) {
+    return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, {responseType: 'text' as 'json'});
+  }
 }

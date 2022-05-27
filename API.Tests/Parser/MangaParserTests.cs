@@ -69,6 +69,8 @@ namespace API.Tests.Parser
         [InlineData("幽游白书完全版 第03卷 天下", "3")]
         [InlineData("阿衰online 第1册", "1")]
         [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画卷2第25话", "2")]
+        [InlineData("63권#200", "63")]
+        [InlineData("시즌34삽화2", "34")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -250,7 +252,7 @@ namespace API.Tests.Parser
         [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
         [InlineData("Samurai Jack Vol. 01 - The threads of Time", "0")]
         [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
-        [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画卷2第25话", "25")]
+        [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));

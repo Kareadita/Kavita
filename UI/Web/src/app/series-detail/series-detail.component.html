@@ -61,28 +61,6 @@
             <div *ngIf="seriesMetadata" class="mt-2">
                 <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"></app-series-metadata-detail>
             </div>
-
-            <!-- <ng-container>
-                <div class="row g-0">
-                    <div class="col-2">
-                        <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
-                        {{series.pages}} Pages    
-                    </div>
-                    | 
-                    <div class="col-2">
-                        <i class="fa-regular fa-clock" aria-hidden="true"></i>
-                        1-2 Hours to Read
-                    </div>
-                    <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB'">
-                    | 
-                    <div class="col-2">
-                        <i class="fa-regular fa-book-open" aria-hidden="true"></i>
-                        10K Total Words
-                    </div>    
-                    </ng-container>
-                </div>
-            </ng-container> -->
-
         </div>
     </div>
 
