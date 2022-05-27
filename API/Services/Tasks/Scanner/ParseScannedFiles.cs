@@ -198,14 +198,31 @@ namespace API.Services.Tasks.Scanner
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
             // We use FirstOrDefault because this was introduced late in development and users might have 2 series with both names
-            var existingName =
-                _scannedSeries.FirstOrDefault(p =>
-                        (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
-                         Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) && p.Key.Format == info.Format)
-                .Key;
-            if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
+            try
             {
-                return existingName.Name;
+                var existingName =
+                    _scannedSeries.SingleOrDefault(p =>
+                            (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                             Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                            p.Key.Format == info.Format)
+                        .Key;
+
+                if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
+                {
+                    return existingName.Name;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Multiple series detected for {SeriesName}! This is critical to fix! There should only be 1", info.Series);
+                var values = _scannedSeries.Where(p =>
+                    (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                     Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                    p.Key.Format == info.Format);
+                foreach (var pair in values)
+                {
+                    _logger.LogCritical("Duplicate Series in DB matches with {SeriesName}: {DuplicateName}", info.Series, pair.Key.Name);
+                }
             }
 
             return info.Series;
