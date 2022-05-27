@@ -31,7 +31,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   minHoursToRead: number = 1;
   maxHoursToRead: number = 1;
-  readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
+  readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
 
   /**
    * Html representation of Series Summary

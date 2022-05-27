@@ -647,21 +647,25 @@ namespace API.Controllers
                 var chapters =
                     await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(progress.Select(p => p.ChapterId).ToList());
                 // Word count
-                var wordsLeft = series.WordCount - chapters.Sum(c => c.WordCount);
+                var progressCount = chapters.Sum(c => c.WordCount);
+                var wordsLeft = series.WordCount - progressCount;
                 return Ok(new HourEstimateRangeDto()
                 {
                     MinHours = (int) Math.Round((wordsLeft / ReaderService.MinWordsPerHour)),
                     MaxHours = (int) Math.Round((wordsLeft / ReaderService.MaxWordsPerHour)),
                     AvgHours = (int) Math.Round((wordsLeft / ReaderService.AvgWordsPerHour)),
+                    HasProgress = progressCount > 0
                 });
             }
 
-            var pagesLeft = series.Pages - progress.Sum(p => p.PagesRead);
+            var progressPageCount = progress.Sum(p => p.PagesRead);
+            var pagesLeft = series.Pages - progressPageCount;
             return Ok(new HourEstimateRangeDto()
             {
                 MinHours = (int) Math.Round((pagesLeft / ReaderService.MinPagesPerMinute / 60F)),
                 MaxHours = (int) Math.Round((pagesLeft / ReaderService.MaxPagesPerMinute / 60F)),
                 AvgHours = (int) Math.Round((pagesLeft / ReaderService.AvgPagesPerMinute / 60F)),
+                HasProgress = progressPageCount > 0
             });
         }
 
