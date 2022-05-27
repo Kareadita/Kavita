@@ -1,5 +1,5 @@
 .side-nav {
-    padding: 10px 0 10px 0;
+    padding: 15px 0;
     width: 12rem;
     background-color: var(--side-nav-bg-color);
     height: calc(100vh - 90px);
@@ -32,6 +32,11 @@
         border-top-left-radius: var(--side-nav-border-radius);
         border-top-right-radius: var(--side-nav-border-radius);
     }
+}
+
+.side-nav-icon {
+    padding: 0;
+    justify-content: center;
 }
 
 @media (max-width: 576px) {
