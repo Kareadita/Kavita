@@ -20,6 +20,14 @@
     </app-carousel-reel>
 </ng-container>
 
+<ng-container *ngIf="quickCatchups$ | async as quickCatchups">
+    <app-carousel-reel [items]="quickCatchups" title="Quick Catchups">
+        <ng-template #carouselItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+        </ng-template>
+    </app-carousel-reel>
+</ng-container>
+
 <ng-container *ngIf="highlyRated$ | async as highlyRated">
     <app-carousel-reel [items]="highlyRated" title="Highly Rated">
         <ng-template #carouselItem let-item let-position="idx">

@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
@@ -625,6 +626,47 @@ namespace API.Controllers
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
+        }
+
+        /// <summary>
+        /// For the current user, returns an estimate on how long it would take to finish reading the series.
+        /// </summary>
+        /// <remarks>For Epubs, this does not check words inside a chapter due to overhead so may not work in all cases.</remarks>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        [HttpGet("time-left")]
+        public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+
+            // Get all sum of all chapters with progress that is complete then subtract from series. Multiply by modifiers
+            var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId);
+            if (series.Format == MangaFormat.Epub)
+            {
+                var chapters =
+                    await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(progress.Select(p => p.ChapterId).ToList());
+                // Word count
+                var progressCount = chapters.Sum(c => c.WordCount);
+                var wordsLeft = series.WordCount - progressCount;
+                return Ok(new HourEstimateRangeDto()
+                {
+                    MinHours = (int) Math.Round((wordsLeft / ReaderService.MinWordsPerHour)),
+                    MaxHours = (int) Math.Round((wordsLeft / ReaderService.MaxWordsPerHour)),
+                    AvgHours = (int) Math.Round((wordsLeft / ReaderService.AvgWordsPerHour)),
+                    HasProgress = progressCount > 0
+                });
+            }
+
+            var progressPageCount = progress.Sum(p => p.PagesRead);
+            var pagesLeft = series.Pages - progressPageCount;
+            return Ok(new HourEstimateRangeDto()
+            {
+                MinHours = (int) Math.Round((pagesLeft / ReaderService.MinPagesPerMinute / 60F)),
+                MaxHours = (int) Math.Round((pagesLeft / ReaderService.MaxPagesPerMinute / 60F)),
+                AvgHours = (int) Math.Round((pagesLeft / ReaderService.AvgPagesPerMinute / 60F)),
+                HasProgress = progressPageCount > 0
+            });
         }
 
     }

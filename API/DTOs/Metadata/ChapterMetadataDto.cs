@@ -47,6 +47,10 @@ namespace API.DTOs.Metadata
         /// Total number of issues for the series
         /// </summary>
         public int TotalCount { get; set; }
+        /// <summary>
+        /// Number of Words for this chapter. Only applies to Epub
+        /// </summary>
+        public long WordCount { get; set; }
 
     }
 }

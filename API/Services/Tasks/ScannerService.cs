@@ -63,7 +63,7 @@ public class ScannerService : IScannerService
         _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
-    [DisableConcurrentExecution(timeoutInSeconds: 360)]
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanSeries(int libraryId, int seriesId, CancellationToken token)
     {
@@ -247,7 +247,7 @@ public class ScannerService : IScannerService
     }
 
 
-    [DisableConcurrentExecution(timeoutInSeconds: 360)]
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60 * 4)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries()
     {
@@ -267,7 +267,7 @@ public class ScannerService : IScannerService
     /// ie) all entities will be rechecked for new cover images and comicInfo.xml changes
     /// </summary>
     /// <param name="libraryId"></param>
-    [DisableConcurrentExecution(360)]
+    [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId)
     {
@@ -470,6 +470,7 @@ public class ScannerService : IScannerService
                 foreach (var series in duplicateSeries)
                 {
                     _logger.LogCritical("[ScannerService] Duplicate Series Found: {Key} maps with {Series}", key.Name, series.OriginalName);
+
                 }
 
                 continue;

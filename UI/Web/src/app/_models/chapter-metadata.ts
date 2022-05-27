@@ -17,6 +17,8 @@ export interface ChapterMetadata {
     summary: string;
     count: number;
     totalCount: number;
+    wordCount: number;
+    
     
 
     genres: Array<Genre>;

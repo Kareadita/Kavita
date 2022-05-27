@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.DTOs.Metadata;
+using API.Entities.Enums;
 
 namespace API.DTOs
 {
@@ -61,9 +62,5 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>Metadata field</remarks>
         public string TitleName { get; set; }
-        /// <summary>
-        /// Number of Words for this chapter. Only applies to Epub
-        /// </summary>
-        public long WordCount { get; set; }
     }
 }
