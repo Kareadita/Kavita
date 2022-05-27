@@ -80,6 +80,7 @@ export class CardDetailDrawerComponent implements OnInit {
   minHoursToRead: number = 1;
   maxHoursToRead: number = 1;
   
+  
 
   get MangaFormat() {
     return MangaFormat;
@@ -120,6 +121,8 @@ export class CardDetailDrawerComponent implements OnInit {
 
       this.metadataService.getAgeRating(this.chapterMetadata.ageRating).subscribe(ageRating => this.ageRating = ageRating);
       
+      //TODO: (for chapter) this.readerService.getTimeToRead(this.series.id).subscribe((time) => this.readingTime = time);
+
       if (this.chapter.files[0].format === MangaFormat.EPUB && this.chapterMetadata.wordCount > 0) {
         this.minHoursToRead = parseInt(Math.round(this.chapterMetadata.wordCount / MAX_WORDS_PER_HOUR) + '', 10) || 1;
         this.maxHoursToRead = parseInt(Math.round(this.chapterMetadata.wordCount / MIN_WORDS_PER_HOUR) + '', 10) || 1;

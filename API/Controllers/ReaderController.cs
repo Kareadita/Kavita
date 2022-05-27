@@ -628,6 +628,35 @@ namespace API.Controllers
             return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
         }
 
+
+        [HttpGet("read-time")]
+        public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToRead(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+
+            var progress = (await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId)).ToList();
+            if (series.Format == MangaFormat.Epub)
+            {
+                return Ok(new HourEstimateRangeDto()
+                {
+                    MinHours = (int) Math.Round((series.WordCount / ReaderService.MinWordsPerHour)),
+                    MaxHours = (int) Math.Round((series.WordCount / ReaderService.MaxWordsPerHour)),
+                    AvgHours = (int) Math.Round((series.WordCount / ReaderService.AvgWordsPerHour)),
+                    HasProgress = progress.Any()
+                });
+            }
+
+            return Ok(new HourEstimateRangeDto()
+            {
+                MinHours = (int) Math.Round((series.Pages / ReaderService.MinPagesPerMinute / 60F)),
+                MaxHours = (int) Math.Round((series.Pages / ReaderService.MaxPagesPerMinute / 60F)),
+                AvgHours = (int) Math.Round((series.Pages / ReaderService.AvgPagesPerMinute / 60F)),
+                HasProgress = progress.Any()
+            });
+        }
+
+
         /// <summary>
         /// For the current user, returns an estimate on how long it would take to finish reading the series.
         /// </summary>
