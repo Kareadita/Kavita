@@ -13,7 +13,7 @@
         border-color var(--side-nav-border-transition);
     overflow: auto;
     border: var(--side-nav-border);
-    box-shadow: 4px 4px 2px 2px rgba(5, 5, 5, 0.5);
+    box-shadow: 4px 4px 2px 2px #111d;
 
     &.hidden {
         display: none;

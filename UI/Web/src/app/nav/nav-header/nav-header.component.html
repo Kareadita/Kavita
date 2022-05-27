@@ -207,7 +207,7 @@
                   ngbDropdownToggle>
             <i
                class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i><span
-                  class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
+                  class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username}}</span>
           </button>
           <div ngbDropdownMenu>
             <a class="xs-only"
@@ -222,7 +222,7 @@
                target="_blank">Help</a>
             <a ngbDropdownItem
                routerLink="/announcements/"
-               *ngIf="accountService.hasAdminRole(user)">Annoucements</a>
+               *ngIf="accountService.hasAdminRole(user)">Announcements</a>
             <a ngbDropdownItem
                (click)="logout()">Logout</a>
           </div>
