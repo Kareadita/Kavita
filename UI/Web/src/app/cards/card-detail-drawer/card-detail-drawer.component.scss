@@ -1,6 +1,16 @@
 .hide-if-empty:empty {
-    display: none !important;
-  }
+  display: none !important;
+}
+
 .offcanvas-body {
     overflow: auto;
+}
+
+.offcanvas-header {
+  padding: 1rem 1rem 0;
+}
+
+.tab-content {
+  overflow: auto;
+  height: calc(40vh - 62px); // drawer height - offcanvas heading height
 }
