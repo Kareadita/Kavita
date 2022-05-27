@@ -231,7 +231,7 @@ namespace API.Services.Tasks.Scanner
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex, "Multiple series detected for {SeriesName}! This is critical to fix! There should only be 1", info.Series);
+                _logger.LogCritical(ex, "Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
                 var values = _scannedSeries.Where(p =>
                     (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
                      Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
@@ -240,6 +240,7 @@ namespace API.Services.Tasks.Scanner
                 {
                     _logger.LogCritical("Duplicate Series in DB matches with {SeriesName}: {DuplicateName}", info.Series, pair.Key.Name);
                 }
+
             }
 
             return info.Series;
