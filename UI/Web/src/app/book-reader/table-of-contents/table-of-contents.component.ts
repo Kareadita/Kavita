@@ -1,36 +1,39 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { Subject } from 'rxjs';
 import { BookChapterItem } from '../_models/book-chapter-item';
 
 @Component({
   selector: 'app-table-of-contents',
   templateUrl: './table-of-contents.component.html',
-  styleUrls: ['./table-of-contents.component.scss']
+  styleUrls: ['./table-of-contents.component.scss'],
 })
 export class TableOfContentsComponent implements OnInit, OnDestroy {
-
   @Input() chapterId!: number;
   @Input() pageNum!: number;
   @Input() currentPageAnchor!: string;
-  @Input() chapters:Array<BookChapterItem> = [];
+  @Input() chapters: Array<BookChapterItem> = [];
 
-  @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
-
-  
+  @Output() loadChapter: EventEmitter<{ pageNum: number; part: string }> =
+    new EventEmitter();
 
   private onDestroy: Subject<void> = new Subject();
 
-
-  pageAnchors: {[n: string]: number } = {};
+  pageAnchors: { [n: string]: number } = {};
 
   constructor() {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   ngOnDestroy(): void {
-      this.onDestroy.next();
-      this.onDestroy.complete();
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   cleanIdSelector(id: string) {
@@ -42,7 +45,6 @@ export class TableOfContentsComponent implements OnInit, OnDestroy {
   }
 
   loadChapterPage(pageNum: number, part: string) {
-    this.loadChapter.emit({pageNum, part});
+    this.loadChapter.emit({ pageNum, part });
   }
-
 }

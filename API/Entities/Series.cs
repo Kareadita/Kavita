@@ -65,6 +65,11 @@ public class Series : IEntityDate
     /// </summary>
     public DateTime LastChapterAdded { get; set; }
 
+    /// <summary>
+    /// Total words in a Series (books only)
+    /// </summary>
+    public long WordCount { get; set; }
+
     public SeriesMetadata Metadata { get; set; }
 
     public ICollection<AppUserRating> Ratings { get; set; } = new List<AppUserRating>();

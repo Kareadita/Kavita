@@ -1,28 +1,21 @@
-<app-side-nav-companion-bar
-    [hasFilter]="false"
-    (filterOpen)="filterOpen.emit($event)"
->
-    <h3 title>
-        <app-card-actionables
-            [actions]="collectionTagActions"
-        ></app-card-actionables>
+<app-side-nav-companion-bar [hasFilter]="false"
+                            (filterOpen)="filterOpen.emit($event)">
+    <h2 title>
         Collections
-    </h3>
-    <h6 subtitle style="margin-left: 40px">{{ collections.length }} Items</h6>
+    </h2>
+    <h6 subtitle>{{collections.length}} Items</h6>
 </app-side-nav-companion-bar>
-<app-card-detail-layout
-    [isLoading]="isLoading"
-    [items]="collections"
-    [filterOpen]="filterOpen"
->
-    <ng-template #cardItem let-item let-position="idx">
-        <app-card-item
-            [title]="item.title"
-            [entity]="item"
-            [actions]="collectionTagActions"
-            [imageUrl]="item.coverImage"
-            (clicked)="loadCollection(item)"
-            [count]="item.count"
-        ></app-card-item>
+<app-card-detail-layout [isLoading]="isLoading"
+                        [items]="collections"
+                        [filterOpen]="filterOpen">
+    <ng-template #cardItem
+                 let-item
+                 let-position="idx">
+        <app-card-item [title]="item.title"
+                       [entity]="item"
+                       [actions]="collectionTagActions"
+                       [imageUrl]="item.coverImage"
+                       (clicked)="loadCollection(item)"
+                       [count]="item.count"></app-card-item>
     </ng-template>
 </app-card-detail-layout>

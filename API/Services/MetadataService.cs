@@ -12,7 +12,9 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.Services.Tasks.Metadata;
 using API.SignalR;
+using Hangfire;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -194,6 +196,8 @@ public class MetadataService : IMetadataService
     /// <remarks>This can be heavy on memory first run</remarks>
     /// <param name="libraryId"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
+    [DisableConcurrentExecution(timeoutInSeconds: 360)]
+    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
@@ -256,9 +260,9 @@ public class MetadataService : IMetadataService
 
         await RemoveAbandonedMetadataKeys();
 
-
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
     }
+
 
     private async Task RemoveAbandonedMetadataKeys()
     {

@@ -290,6 +290,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       case(Action.AddToCollection):
         this.actionService.addMultipleSeriesToCollectionTag([series], () => this.actionInProgress = false);
         break;
+      case (Action.AnalyzeFiles):
+        this.actionService.analyzeFilesForSeries(series, () => this.actionInProgress = false);
+        break;
       default:
         break;
     }
@@ -372,12 +375,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
-              .filter(action => action.action !== Action.Edit)
-              .filter(action => this.actionFactoryService.filterBookmarksForFormat(action, this.series));
+              .filter(action => action.action !== Action.Edit);
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
-      // TODO: Move this to a forkJoin?
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
         this.relations = [
           ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),

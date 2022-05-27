@@ -1,15 +1,15 @@
 .user-review {
-  font-style: italic;
+    font-style: italic;
 }
 
 .rating-star {
-  margin-top: 2px;
-  font-size: 1.5rem;
+    margin-top: 2px;
+    font-size: 1.5rem;
 }
 
-.card-container{
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 158px);
-  grid-gap: 0.5rem;
-  justify-content: space-around;
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 158px);
+    grid-gap: 0.5rem;
+    justify-content: space-around;
 }

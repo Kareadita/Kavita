@@ -9,20 +9,53 @@ import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
 
 export enum Action {
+  /**
+   * Mark entity as read
+   */
   MarkAsRead = 0,
+  /**
+   * Mark entity as unread
+   */
   MarkAsUnread = 1,
+  /**
+   * Invoke a Scan Library
+   */
   ScanLibrary = 2,
+  /**
+   * Delete the entity
+   */
   Delete = 3,
+  /**
+   * Open edit modal
+   */
   Edit = 4,
+  /**
+   * Open details modal
+   */
   Info = 5,
+  /**
+   * Invoke a refresh covers
+   */
   RefreshMetadata = 6,
+  /**
+   * Download the entity
+   */
   Download = 7,
   /**
-   * @deprecated This is no longer supported. Use the dedicated page instead
+   * Invoke an Analyze Files which calculates word count
    */
-  Bookmarks = 8,
+  AnalyzeFiles = 8,
+  /**
+   * Read in incognito mode aka no progress tracking
+   */
   IncognitoRead = 9,
+  /**
+   * Add to reading list
+   */
   AddToReadingList = 10,
+  /**
+   * Add to collection
+   */
   AddToCollection = 11,
   /**
    * Essentially a download, but handled differently. Needed so card bubbles it up for handling
@@ -31,7 +64,7 @@ export enum Action {
   /**
    * Open Series detail page for said series
    */
-  ViewSeries = 13
+  ViewSeries = 13,
 }
 
 export interface ActionItem<T> {
@@ -42,10 +75,9 @@ export interface ActionItem<T> {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ActionFactoryService {
-
   libraryActions: Array<ActionItem<Library>> = [];
 
   seriesActions: Array<ActionItem<Series>> = [];
@@ -64,7 +96,7 @@ export class ActionFactoryService {
   hasDownloadRole = false;
 
   constructor(private accountService: AccountService) {
-    this.accountService.currentUser$.subscribe(user => {
+    this.accountService.currentUser$.subscribe((user) => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
         this.hasDownloadRole = this.accountService.hasDownloadRole(user);
@@ -80,63 +112,77 @@ export class ActionFactoryService {
           action: Action.Edit,
           title: 'Edit',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
         });
 
         this.seriesActions.push({
           action: Action.ScanLibrary,
           title: 'Scan Series',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
         });
 
         this.seriesActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Covers',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
+        });
+
+        this.seriesActions.push({
+          action: Action.AnalyzeFiles,
+          title: 'Analyze Files',
+          callback: this.dummyCallback,
+          requiresAdmin: true,
         });
 
         this.seriesActions.push({
           action: Action.Delete,
           title: 'Delete',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
         });
 
         this.seriesActions.push({
           action: Action.AddToCollection,
           title: 'Add to Collection',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
         });
 
         this.seriesActions.push({
           action: Action.Edit,
           title: 'Edit',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
         });
 
         this.libraryActions.push({
           action: Action.ScanLibrary,
           title: 'Scan Library',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
         });
 
         this.libraryActions.push({
           action: Action.RefreshMetadata,
           title: 'Refresh Covers',
           callback: this.dummyCallback,
-          requiresAdmin: true
+          requiresAdmin: true,
         });
-    
+
+        this.libraryActions.push({
+          action: Action.AnalyzeFiles,
+          title: 'Analyze Files',
+          callback: this.dummyCallback,
+          requiresAdmin: true,
+        });
+
         this.chapterActions.push({
           action: Action.Edit,
           title: 'Details',
           callback: this.dummyCallback,
-          requiresAdmin: false
+          requiresAdmin: false,
         });
       }
 
@@ -145,64 +191,77 @@ export class ActionFactoryService {
           action: Action.Download,
           title: 'Download',
           callback: this.dummyCallback,
-          requiresAdmin: false
+          requiresAdmin: false,
         });
 
         this.chapterActions.push({
           action: Action.Download,
           title: 'Download',
           callback: this.dummyCallback,
-          requiresAdmin: false
+          requiresAdmin: false,
         });
       }
     });
   }
 
   getLibraryActions(callback: (action: Action, library: Library) => void) {
-    const actions = this.libraryActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
+    const actions = this.libraryActions.map((a) => {
+      return { ...a };
+    });
+    actions.forEach((action) => (action.callback = callback));
     return actions;
   }
 
   getSeriesActions(callback: (action: Action, series: Series) => void) {
-    const actions = this.seriesActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
+    const actions = this.seriesActions.map((a) => {
+      return { ...a };
+    });
+    actions.forEach((action) => (action.callback = callback));
     return actions;
   }
 
   getVolumeActions(callback: (action: Action, volume: Volume) => void) {
-    const actions = this.volumeActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
+    const actions = this.volumeActions.map((a) => {
+      return { ...a };
+    });
+    actions.forEach((action) => (action.callback = callback));
     return actions;
   }
 
   getChapterActions(callback: (action: Action, chapter: Chapter) => void) {
-    const actions = this.chapterActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
+    const actions = this.chapterActions.map((a) => {
+      return { ...a };
+    });
+    actions.forEach((action) => (action.callback = callback));
     return actions;
   }
 
-  getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
-    const actions = this.collectionTagActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
+  getCollectionTagActions(
+    callback: (action: Action, collectionTag: CollectionTag) => void
+  ) {
+    const actions = this.collectionTagActions.map((a) => {
+      return { ...a };
+    });
+    actions.forEach((action) => (action.callback = callback));
     return actions;
   }
 
-  getReadingListActions(callback: (action: Action, readingList: ReadingList) => void) {
-    const actions = this.readingListActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
+  getReadingListActions(
+    callback: (action: Action, readingList: ReadingList) => void
+  ) {
+    const actions = this.readingListActions.map((a) => {
+      return { ...a };
+    });
+    actions.forEach((action) => (action.callback = callback));
     return actions;
   }
 
   getBookmarkActions(callback: (action: Action, series: Series) => void) {
-    const actions = this.bookmarkActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
+    const actions = this.bookmarkActions.map((a) => {
+      return { ...a };
+    });
+    actions.forEach((action) => (action.callback = callback));
     return actions;
-  }
-
-  filterBookmarksForFormat(action: ActionItem<Series>, series: Series) {
-    if (action.action === Action.Bookmarks && series?.format === MangaFormat.EPUB) return false;
-    return true;
   }
 
   dummyCallback(action: Action, data: any) {}
@@ -211,26 +270,26 @@ export class ActionFactoryService {
     this.libraryActions = [];
 
     this.collectionTagActions = [];
-    
+
     this.seriesActions = [
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
-          requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
-          requiresAdmin: false
-      }, 
+        requiresAdmin: false,
+      },
       {
         action: Action.AddToReadingList,
         title: 'Add to Reading List',
         callback: this.dummyCallback,
-        requiresAdmin: false
-      }
+        requiresAdmin: false,
+      },
     ];
 
     this.volumeActions = [
@@ -238,32 +297,32 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
-          requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.AddToReadingList,
         title: 'Add to Reading List',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.IncognitoRead,
         title: 'Read Incognito',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.Edit,
         title: 'Details',
         callback: this.dummyCallback,
-        requiresAdmin: false
-      }
+        requiresAdmin: false,
+      },
     ];
 
     this.chapterActions = [
@@ -271,25 +330,25 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.IncognitoRead,
         title: 'Read Incognito',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.AddToReadingList,
         title: 'Add to Reading List',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
     ];
 
@@ -298,13 +357,13 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'Edit',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.Delete,
         title: 'Delete',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
     ];
 
@@ -313,20 +372,20 @@ export class ActionFactoryService {
         action: Action.ViewSeries,
         title: 'View Series',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.DownloadBookmark,
         title: 'Download',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
       {
         action: Action.Delete,
         title: 'Clear',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
       },
-    ]
+    ];
   }
 }

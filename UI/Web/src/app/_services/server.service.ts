@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { ServerInfo } from '../admin/_models/server-info';
 import { UpdateVersionEvent } from '../_models/events/update-version-event';
+import { Job } from '../_models/job/job';
 
 @Injectable({
   providedIn: 'root'
@@ -39,5 +40,13 @@ export class ServerService {
 
   isServerAccessible() {
     return this.httpClient.get<boolean>(this.baseUrl + 'server/accessible');
+  }
+
+  getReoccuringJobs() {
+    return this.httpClient.get<Job[]>(this.baseUrl + 'server/jobs');
+  }
+
+  convertBookmarks() {
+    return this.httpClient.post(this.baseUrl + 'server/convert-bookmarks', {});
   }
 }

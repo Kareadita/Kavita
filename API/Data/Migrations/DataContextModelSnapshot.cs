@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.5");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -366,6 +366,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("VolumeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("WordCount")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -775,6 +778,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("SortNameLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("WordCount")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

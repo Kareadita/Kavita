@@ -9,11 +9,10 @@
                aria-hidden="true"></i>)</span>
     </h2>
     <h6 subtitle
-        style="margin-left: 40px">{{items.length}} Items</h6>
+        class="subtitle-with-actionables">{{items.length}} Items</h6>
 </app-side-nav-companion-bar>
 <div class="container-fluid mt-2"
      *ngIf="readingList">
-
     <div class="row mb-3">
         <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
             <app-image maxWidth="300px"
@@ -68,10 +67,10 @@
             Nothing added
         </div>
 
-        <app-dragable-ordered-list [items]="items"
-                                   (orderUpdated)="orderUpdated($event)"
-                                   (itemRemove)="itemRemoved($event)"
-                                   [accessibilityMode]="accessibilityMode">
+        <app-draggable-ordered-list [items]="items"
+                                    (orderUpdated)="orderUpdated($event)"
+                                    (itemRemove)="itemRemoved($event)"
+                                    [accessibilityMode]="accessibilityMode">
             <ng-template #draggableItem
                          let-item
                          let-position="idx">
@@ -105,7 +104,18 @@
                         <a href="javascript:void(0);"
                            (click)="readChapter(item)">Read</a>
                     </div>
+                    <div class="col-auto">
+                        <button class="btn btn-secondary"
+                                (click)="removeRead()"
+                                [disabled]="readingList?.promoted && !this.isAdmin">
+                            <span>
+                                <i class="fa fa-check"></i>
+                            </span>
+                            <span class="read-btn--text">&nbsp;Remove Read</span>
+                        </button>
+                    </div>
                 </div>
-            </ng-template>
-        </app-dragable-ordered-list>
     </div>
+    </ng-template>
+    </app-draggable-ordered-list>
+</div>

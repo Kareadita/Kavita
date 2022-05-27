@@ -11,7 +11,7 @@
     </ng-container>
     <ng-container subtitle
                   *ngIf="series?.localizedName !== series?.name">
-        <h6 style="margin-left:40px;"
+        <h6 class="subtitle-with-actionables"
             title="Localized Name">{{series?.localizedName}}</h6>
     </ng-container>
 </app-side-nav-companion-bar>
@@ -101,6 +101,26 @@
                                             [series]="series"></app-series-metadata-detail>
             </div>
 
+            <!-- <ng-container>
+                <div class="row g-0">
+                    <div class="col-2">
+                        <i class="fa-regular fa-file-lines" aria-hidden="true"></i>
+                        {{series.pages}} Pages    
+                    </div>
+                    | 
+                    <div class="col-2">
+                        <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                        1-2 Hours to Read
+                    </div>
+                    <ng-container *ngIf="utilityService.mangaFormat(series.format) === 'EPUB'">
+                    | 
+                    <div class="col-2">
+                        <i class="fa-regular fa-book-open" aria-hidden="true"></i>
+                        10K Total Words
+                    </div>    
+                    </ng-container>
+                </div>
+            </ng-container> -->
 
         </div>
     </div>
@@ -221,7 +241,7 @@
                 <ng-template ngbNavContent>
                     <div class="card-container row g-0">
                         <ng-container
-                                      *ngFor="let item of relations; let idx = index; trackBy: trackByRelatedSeriesIdentiy">
+                                      *ngFor="let item of relations; let idx = index; trackBy: trackByRelatedSeriesIdentity">
                             <app-series-card class="col-auto mt-2 mb-2"
                                              [data]="item.series"
                                              [libraryId]="item.series.libraryId"

@@ -6,6 +6,7 @@ using API.Data;
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Tasks;
+using API.Services.Tasks.Metadata;
 using Hangfire;
 using Hangfire.Storage;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,8 @@ public interface ITaskScheduler
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
     void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false);
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
@@ -41,6 +44,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IThemeService _themeService;
+    private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     private static readonly Random Rnd = new Random();
@@ -49,7 +53,7 @@ public class TaskScheduler : ITaskScheduler
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IThemeService themeService)
+        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -61,6 +65,7 @@ public class TaskScheduler : ITaskScheduler
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
         _themeService = themeService;
+        _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
     public async Task ScheduleTasks()
@@ -109,6 +114,11 @@ public class TaskScheduler : ITaskScheduler
 
         _logger.LogDebug("Scheduling stat collection daily");
         RecurringJob.AddOrUpdate("report-stats", () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
+    }
+
+    public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
+    {
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
     }
 
     public void CancelStatsTasks()
@@ -180,6 +190,12 @@ public class TaskScheduler : ITaskScheduler
     {
         _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId, CancellationToken.None));
+    }
+
+    public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)
+    {
+        _logger.LogInformation("Enqueuing analyze files scan for: {SeriesId}", seriesId);
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
     public void BackupDatabase()

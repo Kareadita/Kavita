@@ -5,7 +5,16 @@ import { ServerService } from 'src/app/_services/server.service';
 import { Title } from '@angular/platform-browser';
 import { NavService } from '../../_services/nav.service';
 
-
+enum TabID {
+  General = '',
+  Email = 'email',
+  Media = 'media',
+  Users = 'users',
+  Libraries = 'libraries',
+  System = 'system',
+  Plugins = 'plugins',
+  Tasks = 'tasks'
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -15,13 +24,21 @@ import { NavService } from '../../_services/nav.service';
 export class DashboardComponent implements OnInit {
 
   tabs: Array<{title: string, fragment: string}> = [
-    {title: 'General', fragment: ''},
-    {title: 'Users', fragment: 'users'},
-    {title: 'Libraries', fragment: 'libraries'},
-    {title: 'System', fragment: 'system'},
+    {title: 'General', fragment: TabID.General},
+    {title: 'Users', fragment: TabID.Users},
+    {title: 'Libraries', fragment: TabID.Libraries},
+    {title: 'Media', fragment: TabID.Media},
+    {title: 'Email', fragment: TabID.Email},
+    //{title: 'Plugins', fragment: TabID.Plugins},
+    {title: 'Tasks', fragment: TabID.Tasks},
+    {title: 'System', fragment: TabID.System},
   ];
   counter = this.tabs.length + 1;
   active = this.tabs[0];
+
+  get TabID() {
+    return TabID;
+  }
 
   constructor(public route: ActivatedRoute, private serverService: ServerService, 
     private toastr: ToastrService, private titleService: Title, public navService: NavService) {

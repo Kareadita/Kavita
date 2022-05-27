@@ -6,7 +6,8 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { LibraryModifiedEvent } from '../_models/events/library-modified-event';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
-import { SiteThemeProgressEvent } from '../_models/events/site-theme-progress-event';
+import { ThemeProgressEvent } from '../_models/events/theme-progress-event';
+import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
@@ -58,6 +59,14 @@ export enum EVENTS {
     * A user updates an entities read progress
     */
    UserProgressUpdate = 'UserProgressUpdate',
+   /**
+    * A user updates account or preferences
+    */
+   UserUpdate = 'UserUpdate',
+   /**
+    * When bulk bookmarks are being converted
+    */
+   ConvertBookmarksProgress = 'ConvertBookmarksProgress',
 }
 
 export interface Message<T> {
@@ -139,6 +148,13 @@ export class MessageHubService {
       });
     });
 
+    this.hubConnection.on(EVENTS.ConvertBookmarksProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ConvertBookmarksProgress,
+        payload: resp.body
+      });
+    });
+
     this.hubConnection.on(EVENTS.LibraryModified, resp => {
       this.messagesSource.next({
         event: EVENTS.LibraryModified,
@@ -157,7 +173,7 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SiteThemeProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.SiteThemeProgress,
-        payload: resp.body as SiteThemeProgressEvent
+        payload: resp.body as ThemeProgressEvent
       });
     });
 
@@ -172,6 +188,14 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.UserProgressUpdate,
         payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.UserUpdate, resp => {
+      console.log('got UserUpdate', resp);
+      this.messagesSource.next({
+        event: EVENTS.UserUpdate,
+        payload: resp.body as UserUpdateEvent
       });
     });
 

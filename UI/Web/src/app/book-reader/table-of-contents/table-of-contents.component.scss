@@ -1,11 +1,11 @@
 .table-of-contents li {
-  cursor: pointer;
+    cursor: pointer;
 
-  &.active {
-      font-weight: bold;
-  }
+    &.active {
+        font-weight: bold;
+    }
 }
 
 .chapter-title {
-  padding-inline-start: 1rem;
+    padding-inline-start: 1rem;
 }

@@ -84,6 +84,9 @@ export class SideNavComponent implements OnInit, OnDestroy {
       case(Action.RefreshMetadata):
         this.actionService.refreshMetadata(library);
         break;
+      case (Action.AnalyzeFiles):
+        this.actionService.analyzeFiles(library);
+        break;
       default:
         break;
     }

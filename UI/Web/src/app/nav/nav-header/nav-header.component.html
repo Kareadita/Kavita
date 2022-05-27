@@ -192,13 +192,11 @@
              *ngIf="user.roles.includes('Admin')"
              class="dark-exempt btn btn-icon"
              title="Server Settings">
-            <i class="fa fa-gears nav"
+            <i class="fa fa-cogs nav"
                aria-hidden="true"></i>
             <span class="visually-hidden">Server Settings</span>
           </a>
         </div>
-
-
         <div ngbDropdown
              class="nav-item dropdown"
              display="dynamic"
@@ -209,7 +207,7 @@
                   ngbDropdownToggle>
             <i
                class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i><span
-                  class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username}}</span>
+                  class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
           </button>
           <div ngbDropdownMenu>
             <a class="xs-only"
@@ -220,11 +218,11 @@
                routerLink="/preferences/">Settings</a>
             <a ngbDropdownItem
                href="https://wiki.kavitareader.com"
-               rel="noreferrer"
+               rel="noopener noreferrer"
                target="_blank">Help</a>
             <a ngbDropdownItem
                routerLink="/announcements/"
-               *ngIf="accountService.hasAdminRole(user)">Announcements</a>
+               *ngIf="accountService.hasAdminRole(user)">Annoucements</a>
             <a ngbDropdownItem
                (click)="logout()">Logout</a>
           </div>

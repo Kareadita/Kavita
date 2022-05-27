@@ -1,7 +1,7 @@
 /**
  * A font family to inject into the book reader
  */
- export interface ThemeFont {
+export interface ThemeFont {
   /**
    * Name/Font-family
    */
@@ -11,5 +11,4 @@
    */
   fontSrc: string;
   format: 'truetype';
-
 }

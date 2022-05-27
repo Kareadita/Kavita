@@ -48,13 +48,13 @@
         <div class="card col-auto mt-2 mb-2"
              *ngFor="let item of items; trackBy:trackByIdentity; index as i">
             <ng-container [ngTemplateOutlet]="itemTemplate"
-                          [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+                          [ngTemplateOutletContext]="{ $implicit: item, idx: i }">
+            </ng-container>
         </div>
-
-        <p *ngIf="items.length === 0 && !isLoading">
-            <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-        </p>
     </div>
+    <p *ngIf="items.length === 0 && !isLoading">
+        <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+    </p>
 </ng-template>
 
 <ng-template #paginationTemplate

@@ -89,7 +89,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
     const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
-      console.log('Redirecting due to not seeing libraryId in route');
       this.router.navigateByUrl('/libraries');
       return;
     }
@@ -158,6 +157,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  performAction(action: ActionItem<any>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action.action, undefined);
+    }
+  }
+
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
 
@@ -183,7 +188,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromPagination(this.pagination);
+    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
     this.loadPage();
   }
 

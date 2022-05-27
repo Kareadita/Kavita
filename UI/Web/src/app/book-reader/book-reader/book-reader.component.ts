@@ -129,7 +129,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   actionBarVisible = true;
   /**
-   * Book reader setting that hides the menuing system
+   * Book reader setting that hides the menu system
    */
   immersiveMode: boolean = false;
   /**
@@ -151,11 +151,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   page: SafeHtml | undefined = undefined;
   /**
-   * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
    nextChapterId: number = CHAPTER_ID_NOT_FETCHED;
    /**
-    * Previous Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+    * Previous Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
     */
    prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
    /**
@@ -251,10 +251,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: true}) reader!: ElementRef;
-
-
-
-
 
   get BookPageLayoutMode() {
     return BookPageLayoutMode;
@@ -1301,9 +1297,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
-
-
-
+x
   toggleMenu(event: MouseEvent) {
     const targetElement = (event.target as Element);
     const mouseOffset = 5;

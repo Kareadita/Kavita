@@ -8,82 +8,166 @@ import { ReadingList, ReadingListItem } from '../_models/reading-list';
 import { ActionItem } from './action-factory.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ReadingListService {
-
   baseUrl = environment.apiUrl;
 
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+  constructor(
+    private httpClient: HttpClient,
+    private utilityService: UtilityService
+  ) {}
 
   getReadingList(readingListId: number) {
-    return this.httpClient.get<ReadingList>(this.baseUrl + 'readinglist?readingListId=' + readingListId);
-  }
-
-  getReadingLists(includePromoted: boolean = true, pageNum?: number, itemsPerPage?: number) {
-    let params = new HttpParams();
-    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-
-    return this.httpClient.post<PaginatedResult<ReadingList[]>>(this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted, {}, {observe: 'response', params}).pipe(
-      map((response: any) => {
-        return this.utilityService.createPaginatedResult(response, new PaginatedResult<ReadingList[]>());
-      })
+    return this.httpClient.get<ReadingList>(
+      this.baseUrl + 'readinglist?readingListId=' + readingListId
     );
   }
 
+  getReadingLists(
+    includePromoted: boolean = true,
+    pageNum?: number,
+    itemsPerPage?: number
+  ) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(
+      params,
+      pageNum,
+      itemsPerPage
+    );
+
+    return this.httpClient
+      .post<PaginatedResult<ReadingList[]>>(
+        this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted,
+        {},
+        { observe: 'response', params }
+      )
+      .pipe(
+        map((response: any) => {
+          return this.utilityService.createPaginatedResult(
+            response,
+            new PaginatedResult<ReadingList[]>()
+          );
+        })
+      );
+  }
+
   getReadingListsForSeries(seriesId: number) {
-    return this.httpClient.get<ReadingList[]>(this.baseUrl + 'readinglist/lists-for-series?seriesId=' + seriesId);
+    return this.httpClient.get<ReadingList[]>(
+      this.baseUrl + 'readinglist/lists-for-series?seriesId=' + seriesId
+    );
   }
 
   getListItems(readingListId: number) {
-    return this.httpClient.get<ReadingListItem[]>(this.baseUrl + 'readinglist/items?readingListId=' + readingListId);
+    return this.httpClient.get<ReadingListItem[]>(
+      this.baseUrl + 'readinglist/items?readingListId=' + readingListId
+    );
   }
 
   createList(title: string) {
-    return this.httpClient.post<ReadingList>(this.baseUrl + 'readinglist/create', {title});
+    return this.httpClient.post<ReadingList>(
+      this.baseUrl + 'readinglist/create',
+      { title }
+    );
   }
 
-  update(model: {readingListId: number, title?: string, summary?: string, promoted: boolean}) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update', model, { responseType: 'text' as 'json' });
+  update(model: {
+    readingListId: number;
+    title?: string;
+    summary?: string;
+    promoted: boolean;
+  }) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/update', model, {
+      responseType: 'text' as 'json',
+    });
   }
 
-  updateByMultiple(readingListId: number, seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds}, { responseType: 'text' as 'json' });
+  updateByMultiple(
+    readingListId: number,
+    seriesId: number,
+    volumeIds: Array<number>,
+    chapterIds?: Array<number>
+  ) {
+    return this.httpClient.post(
+      this.baseUrl + 'readinglist/update-by-multiple',
+      { readingListId, seriesId, volumeIds, chapterIds },
+      { responseType: 'text' as 'json' }
+    );
   }
 
   updateByMultipleSeries(readingListId: number, seriesIds: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(
+      this.baseUrl + 'readinglist/update-by-multiple-series',
+      { readingListId, seriesIds },
+      { responseType: 'text' as 'json' }
+    );
   }
 
   updateBySeries(readingListId: number, seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-series', {readingListId, seriesId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(
+      this.baseUrl + 'readinglist/update-by-series',
+      { readingListId, seriesId },
+      { responseType: 'text' as 'json' }
+    );
   }
 
   updateByVolume(readingListId: number, seriesId: number, volumeId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-volume', {readingListId, seriesId, volumeId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(
+      this.baseUrl + 'readinglist/update-by-volume',
+      { readingListId, seriesId, volumeId },
+      { responseType: 'text' as 'json' }
+    );
   }
 
   updateByChapter(readingListId: number, seriesId: number, chapterId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-chapter', {readingListId, seriesId, chapterId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(
+      this.baseUrl + 'readinglist/update-by-chapter',
+      { readingListId, seriesId, chapterId },
+      { responseType: 'text' as 'json' }
+    );
   }
 
   delete(readingListId: number) {
-    return this.httpClient.delete(this.baseUrl + 'readinglist?readingListId=' + readingListId, { responseType: 'text' as 'json' });
+    return this.httpClient.delete(
+      this.baseUrl + 'readinglist?readingListId=' + readingListId,
+      { responseType: 'text' as 'json' }
+    );
   }
 
-  updatePosition(readingListId: number, readingListItemId: number, fromPosition: number, toPosition: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-position', {readingListId, readingListItemId, fromPosition, toPosition}, { responseType: 'text' as 'json' });
+  updatePosition(
+    readingListId: number,
+    readingListItemId: number,
+    fromPosition: number,
+    toPosition: number
+  ) {
+    return this.httpClient.post(
+      this.baseUrl + 'readinglist/update-position',
+      { readingListId, readingListItemId, fromPosition, toPosition },
+      { responseType: 'text' as 'json' }
+    );
   }
 
   deleteItem(readingListId: number, readingListItemId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/delete-item', {readingListId, readingListItemId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(
+      this.baseUrl + 'readinglist/delete-item',
+      { readingListId, readingListItemId },
+      { responseType: 'text' as 'json' }
+    );
   }
 
   removeRead(readingListId: number) {
-    return this.httpClient.post<string>(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, {}, { responseType: 'text' as 'json' });
+    return this.httpClient.post<string>(
+      this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId,
+      {},
+      { responseType: 'text' as 'json' }
+    );
   }
 
-  actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, isAdmin: boolean) {
+  actionListFilter(
+    action: ActionItem<ReadingList>,
+    readingList: ReadingList,
+    isAdmin: boolean
+  ) {
     if (readingList?.promoted && !isAdmin) return false;
     return true;
   }

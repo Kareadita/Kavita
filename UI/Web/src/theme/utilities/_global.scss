@@ -24,6 +24,7 @@ hr {
     background-color: var(--accent-bg-color) !important;
     color: var(--accent-text-color) !important;
     box-shadow: inset 0px 0px 8px 1px var(--accent-bg-color) !important;
+    font-size: var(--accent-text-size) !important;
 }
 
 .text-muted {
@@ -41,4 +42,7 @@ span {
     margin-bottom: 0.5em !important;
     padding-top: 0.5em !important;
     padding-left: 0.5em !important;
+}
+.subtitle-with-actionables {
+    margin-left: 32px;
 }

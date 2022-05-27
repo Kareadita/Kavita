@@ -43,7 +43,7 @@ export class ThemeService implements OnDestroy {
     @Inject(DOCUMENT) private document: Document,
     private httpClient: HttpClient,
     messageHub: MessageHubService,
-    private domSantizer: DomSanitizer,
+    private domSanitizer: DomSanitizer,
     private confirmService: ConfirmService
   ) {
     this.renderer = rendererFactory.createRenderer(null, null);
@@ -193,7 +193,7 @@ export class ThemeService implements OnDestroy {
       })
       .pipe(
         map((encodedCss) => {
-          return this.domSantizer.sanitize(SecurityContext.STYLE, encodedCss);
+          return this.domSanitizer.sanitize(SecurityContext.STYLE, encodedCss);
         })
       );
   }
