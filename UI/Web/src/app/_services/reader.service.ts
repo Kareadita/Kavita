@@ -137,6 +137,10 @@ export class ReaderService {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/read-time?seriesId=' + seriesId);
   }
 
+  getManualTimeToRead(wordCount: number, pageCount: number, isEpub: boolean) {
+    return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/manual-read-time?wordCount=' + wordCount + '&pageCount=' + pageCount + '&isEpub=' + isEpub);
+  }
+
   /**
    * Captures current body color and forces background color to be black. Call @see resetOverrideStyles() on destroy of component to revert changes
    */

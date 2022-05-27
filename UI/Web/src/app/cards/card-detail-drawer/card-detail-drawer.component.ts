@@ -6,6 +6,7 @@ import { Observable, of, take } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
+import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -77,6 +78,7 @@ export class CardDetailDrawerComponent implements OnInit {
   ageRating!: string;
 
   summary$: Observable<string> = of('');
+  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
   minHoursToRead: number = 1;
   maxHoursToRead: number = 1;
   
@@ -121,15 +123,13 @@ export class CardDetailDrawerComponent implements OnInit {
 
       this.metadataService.getAgeRating(this.chapterMetadata.ageRating).subscribe(ageRating => this.ageRating = ageRating);
       
-      //TODO: (for chapter) this.readerService.getTimeToRead(this.series.id).subscribe((time) => this.readingTime = time);
-
-      if (this.chapter.files[0].format === MangaFormat.EPUB && this.chapterMetadata.wordCount > 0) {
-        this.minHoursToRead = parseInt(Math.round(this.chapterMetadata.wordCount / MAX_WORDS_PER_HOUR) + '', 10) || 1;
-        this.maxHoursToRead = parseInt(Math.round(this.chapterMetadata.wordCount / MIN_WORDS_PER_HOUR) + '', 10) || 1;
-      } else if (this.chapter.files[0].format !== MangaFormat.EPUB) {
-        this.minHoursToRead = parseInt(Math.round((this.chapter.pages / MIN_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
-        this.maxHoursToRead = parseInt(Math.round((this.chapter.pages / MAX_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
+      let totalPages = this.chapter.pages;
+      if (!this.isChapter) {
+        // Need to account for multiple chapters if this is a volume
+        totalPages = this.utilityService.asVolume(this.data).chapters.map(c => c.pages).reduce((sum, d) => sum + d);
       }
+
+      this.readerService.getManualTimeToRead(this.chapterMetadata.wordCount, totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
     });
 
 

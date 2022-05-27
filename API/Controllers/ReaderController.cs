@@ -629,8 +629,39 @@ namespace API.Controllers
         }
 
 
+        /// <summary>
+        /// Given word count, page count, and if the entity is an epub file, this will return the read time.
+        /// </summary>
+        /// <param name="wordCount"></param>
+        /// <param name="pageCount"></param>
+        /// <param name="isEpub"></param>
+        /// <returns>Will always assume no progress as it's not privy</returns>
+        [HttpGet("manual-read-time")]
+        public ActionResult<HourEstimateRangeDto> GetManualReadTime(int wordCount, int pageCount, bool isEpub)
+        {
+
+            if (isEpub)
+            {
+                return Ok(new HourEstimateRangeDto()
+                {
+                    MinHours = (int) Math.Round((wordCount / ReaderService.MinWordsPerHour)),
+                    MaxHours = (int) Math.Round((wordCount / ReaderService.MaxWordsPerHour)),
+                    AvgHours = (int) Math.Round((wordCount / ReaderService.AvgWordsPerHour)),
+                    HasProgress = false
+                });
+            }
+
+            return Ok(new HourEstimateRangeDto()
+            {
+                MinHours = (int) Math.Round((pageCount / ReaderService.MinPagesPerMinute / 60F)),
+                MaxHours = (int) Math.Round((pageCount / ReaderService.MaxPagesPerMinute / 60F)),
+                AvgHours = (int) Math.Round((pageCount / ReaderService.AvgPagesPerMinute / 60F)),
+                HasProgress = false
+            });
+        }
+
         [HttpGet("read-time")]
-        public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToRead(int seriesId)
+        public async Task<ActionResult<HourEstimateRangeDto>> GetReadTime(int seriesId)
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);

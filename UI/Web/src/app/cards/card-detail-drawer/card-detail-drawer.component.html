@@ -70,7 +70,7 @@
                             <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
                                 <div class="col-auto mb-2">
                                     <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
-                                        {{minHoursToRead}}{{maxHoursToRead !== minHoursToRead ? ('-' + maxHoursToRead) : ''}} Hour{{minHoursToRead > 1 ? 's' : ''}}
+                                        {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
                                     </app-icon-and-title>
                                 </div>
                             </ng-container>
