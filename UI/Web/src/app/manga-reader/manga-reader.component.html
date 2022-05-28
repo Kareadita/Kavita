@@ -102,7 +102,7 @@
                 <img #image
                      [src]="canvasImage.src"
                      id="image-1"
-                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
+                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" />
 
                 <ng-container *ngIf="ShouldRenderDoublePage">
                     <img #image
