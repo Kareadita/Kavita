@@ -199,7 +199,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         'bookReaderImmersiveMode',
         new FormControl(this.user?.preferences.bookReaderImmersiveMode, [])
       );
-
       this.settingsForm.addControl(
         'theme',
         new FormControl(this.user.preferences.theme, [])

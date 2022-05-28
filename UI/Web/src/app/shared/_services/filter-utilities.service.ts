@@ -34,50 +34,34 @@ export enum FilterQueryParam {
   /**
    * This is a pagination control
    */
-  Page = 'page',
+  Page = 'page'
 }
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class FilterUtilitiesService {
-  constructor(
-    private route: ActivatedRoute,
-    private seriesService: SeriesService
-  ) {}
+
+  constructor(private route: ActivatedRoute, private seriesService: SeriesService) { }
 
   /**
    * Updates the window location with a custom url based on filter and pagination objects
-   * @param pagination
-   * @param filter
+   * @param pagination 
+   * @param filter 
    */
-  updateUrlFromFilter(
-    pagination: Pagination,
-    filter: SeriesFilter | undefined
-  ) {
+  updateUrlFromFilter(pagination: Pagination, filter: SeriesFilter | undefined) {
     const params = '?page=' + pagination.currentPage;
-
-    const url = this.urlFromFilter(
-      window.location.href.split('?')[0] + params,
-      filter
-    );
-    window.history.replaceState(
-      window.location.href,
-      '',
-      this.replacePaginationOnUrl(url, pagination)
-    );
+  
+    const url = this.urlFromFilter(window.location.href.split('?')[0] + params, filter);
+    window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
   }
 
   /**
-   * Patches the page query param in the window location.
-   * @param pagination
+   * Patches the page query param in the window location.  
+   * @param pagination 
    */
   updateUrlFromPagination(pagination: Pagination) {
-    window.history.replaceState(
-      window.location.href,
-      '',
-      this.replacePaginationOnUrl(window.location.href, pagination)
-    );
+    window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(window.location.href, pagination));
   }
 
   private replacePaginationOnUrl(url: string, pagination: Pagination) {
@@ -90,13 +74,9 @@ export class FilterUtilitiesService {
    * @returns A default pagination object
    */
   pagination(snapshot: ActivatedRouteSnapshot): Pagination {
-    return {
-      currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10),
-      itemsPerPage: 100,
-      totalItems: 0,
-      totalPages: 1,
-    };
+    return {currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage: 30, totalItems: 0, totalPages: 1};
   }
+
 
   /**
    * Returns the current url with query params for the filter
@@ -111,26 +91,17 @@ export class FilterUtilitiesService {
     params += this.joinFilter(filter.formats, FilterQueryParam.Format);
     params += this.joinFilter(filter.genres, FilterQueryParam.Genres);
     params += this.joinFilter(filter.ageRating, FilterQueryParam.AgeRating);
-    params += this.joinFilter(
-      filter.publicationStatus,
-      FilterQueryParam.PublicationStatus
-    );
+    params += this.joinFilter(filter.publicationStatus, FilterQueryParam.PublicationStatus);
     params += this.joinFilter(filter.tags, FilterQueryParam.Tags);
     params += this.joinFilter(filter.languages, FilterQueryParam.Languages);
-    params += this.joinFilter(
-      filter.collectionTags,
-      FilterQueryParam.CollectionTags
-    );
+    params += this.joinFilter(filter.collectionTags, FilterQueryParam.CollectionTags);
     params += this.joinFilter(filter.libraries, FilterQueryParam.Libraries);
 
     params += this.joinFilter(filter.writers, FilterQueryParam.Writers);
     params += this.joinFilter(filter.artists, FilterQueryParam.Artists);
     params += this.joinFilter(filter.character, FilterQueryParam.Character);
     params += this.joinFilter(filter.colorist, FilterQueryParam.Colorist);
-    params += this.joinFilter(
-      filter.coverArtist,
-      FilterQueryParam.CoverArtists
-    );
+    params += this.joinFilter(filter.coverArtist, FilterQueryParam.CoverArtists);
     params += this.joinFilter(filter.editor, FilterQueryParam.Editor);
     params += this.joinFilter(filter.inker, FilterQueryParam.Inker);
     params += this.joinFilter(filter.letterer, FilterQueryParam.Letterer);
@@ -139,23 +110,12 @@ export class FilterUtilitiesService {
     params += this.joinFilter(filter.translators, FilterQueryParam.Translator);
 
     // readStatus (we need to do an additonal check as there is a default case)
-    if (
-      filter.readStatus &&
-      filter.readStatus.inProgress !== true &&
-      filter.readStatus.notRead !== true &&
-      filter.readStatus.read !== true
-    ) {
+    if (filter.readStatus && filter.readStatus.inProgress !== true && filter.readStatus.notRead !== true && filter.readStatus.read !== true) {
       params += `&${FilterQueryParam.ReadStatus}=${filter.readStatus.inProgress},${filter.readStatus.notRead},${filter.readStatus.read}`;
     }
 
     // sortBy (additional check to not save to url if default case)
-    if (
-      filter.sortOptions &&
-      !(
-        filter.sortOptions.sortField === SortField.SortName &&
-        filter.sortOptions.isAscending === true
-      )
-    ) {
+    if (filter.sortOptions && !(filter.sortOptions.sortField === SortField.SortName && filter.sortOptions.isAscending === true)) {
       params += `&${FilterQueryParam.SortBy}=${filter.sortOptions.sortField},${filter.sortOptions.isAscending}`;
     }
 
@@ -164,11 +124,9 @@ export class FilterUtilitiesService {
     }
 
     if (filter.seriesNameQuery !== '') {
-      params += `&${FilterQueryParam.Name}=${encodeURIComponent(
-        filter.seriesNameQuery
-      )}`;
+      params += `&${FilterQueryParam.Name}=${encodeURIComponent(filter.seriesNameQuery)}`;
     }
-
+    
     return currentUrl + params;
   }
 
@@ -185,56 +143,37 @@ export class FilterUtilitiesService {
    * @param ActivatedRouteSnapshot to fetch page from. Must be from component else may get stale data
    * @returns The Preset filter and if something was set within
    */
-  filterPresetsFromUrl(
-    snapshot: ActivatedRouteSnapshot
-  ): [SeriesFilter, boolean] {
-    const filter = this.seriesService.createSeriesFilter();
+   filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot): [SeriesFilter, boolean] {
+    const filter =  this.seriesService.createSeriesFilter();
     let anyChanged = false;
 
     const format = snapshot.queryParamMap.get(FilterQueryParam.Format);
     if (format !== undefined && format !== null) {
-      filter.formats = [
-        ...filter.formats,
-        ...format.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.formats = [...filter.formats, ...format.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const genres = snapshot.queryParamMap.get(FilterQueryParam.Genres);
     if (genres !== undefined && genres !== null) {
-      filter.genres = [
-        ...filter.genres,
-        ...genres.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.genres = [...filter.genres, ...genres.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const ageRating = snapshot.queryParamMap.get(FilterQueryParam.AgeRating);
     if (ageRating !== undefined && ageRating !== null) {
-      filter.ageRating = [
-        ...filter.ageRating,
-        ...ageRating.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.ageRating = [...filter.ageRating, ...ageRating.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
-    const publicationStatus = snapshot.queryParamMap.get(
-      FilterQueryParam.PublicationStatus
-    );
+    const publicationStatus = snapshot.queryParamMap.get(FilterQueryParam.PublicationStatus);
     if (publicationStatus !== undefined && publicationStatus !== null) {
-      filter.publicationStatus = [
-        ...filter.publicationStatus,
-        ...publicationStatus.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.publicationStatus = [...filter.publicationStatus, ...publicationStatus.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const tags = snapshot.queryParamMap.get(FilterQueryParam.Tags);
     if (tags !== undefined && tags !== null) {
-      filter.tags = [
-        ...filter.tags,
-        ...tags.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.tags = [...filter.tags, ...tags.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
@@ -246,126 +185,83 @@ export class FilterUtilitiesService {
 
     const writers = snapshot.queryParamMap.get(FilterQueryParam.Writers);
     if (writers !== undefined && writers !== null) {
-      filter.writers = [
-        ...filter.writers,
-        ...writers.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.writers = [...filter.writers, ...writers.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const artists = snapshot.queryParamMap.get(FilterQueryParam.Artists);
     if (artists !== undefined && artists !== null) {
-      filter.artists = [
-        ...filter.artists,
-        ...artists.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.artists = [...filter.artists, ...artists.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const character = snapshot.queryParamMap.get(FilterQueryParam.Character);
     if (character !== undefined && character !== null) {
-      filter.character = [
-        ...filter.character,
-        ...character.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.character = [...filter.character, ...character.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const colorist = snapshot.queryParamMap.get(FilterQueryParam.Colorist);
     if (colorist !== undefined && colorist !== null) {
-      filter.colorist = [
-        ...filter.colorist,
-        ...colorist.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.colorist = [...filter.colorist, ...colorist.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
-    const coverArtists = snapshot.queryParamMap.get(
-      FilterQueryParam.CoverArtists
-    );
+    const coverArtists = snapshot.queryParamMap.get(FilterQueryParam.CoverArtists);
     if (coverArtists !== undefined && coverArtists !== null) {
-      filter.coverArtist = [
-        ...filter.coverArtist,
-        ...coverArtists.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.coverArtist = [...filter.coverArtist, ...coverArtists.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const editor = snapshot.queryParamMap.get(FilterQueryParam.Editor);
     if (editor !== undefined && editor !== null) {
-      filter.editor = [
-        ...filter.editor,
-        ...editor.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.editor = [...filter.editor, ...editor.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const inker = snapshot.queryParamMap.get(FilterQueryParam.Inker);
     if (inker !== undefined && inker !== null) {
-      filter.inker = [
-        ...filter.inker,
-        ...inker.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.inker = [...filter.inker, ...inker.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const letterer = snapshot.queryParamMap.get(FilterQueryParam.Letterer);
     if (letterer !== undefined && letterer !== null) {
-      filter.letterer = [
-        ...filter.letterer,
-        ...letterer.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.letterer = [...filter.letterer, ...letterer.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const penciller = snapshot.queryParamMap.get(FilterQueryParam.Penciller);
     if (penciller !== undefined && penciller !== null) {
-      filter.penciller = [
-        ...filter.penciller,
-        ...penciller.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.penciller = [...filter.penciller, ...penciller.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const publisher = snapshot.queryParamMap.get(FilterQueryParam.Publisher);
     if (publisher !== undefined && publisher !== null) {
-      filter.publisher = [
-        ...filter.publisher,
-        ...publisher.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.publisher = [...filter.publisher, ...publisher.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const translators = snapshot.queryParamMap.get(FilterQueryParam.Translator);
     if (translators !== undefined && translators !== null) {
-      filter.translators = [
-        ...filter.translators,
-        ...translators.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.translators = [...filter.translators, ...translators.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
     const libraries = snapshot.queryParamMap.get(FilterQueryParam.Libraries);
     if (libraries !== undefined && libraries !== null) {
-      filter.libraries = [
-        ...filter.libraries,
-        ...libraries.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.libraries = [...filter.libraries, ...libraries.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
-    const collectionTags = snapshot.queryParamMap.get(
-      FilterQueryParam.CollectionTags
-    );
+    const collectionTags = snapshot.queryParamMap.get(FilterQueryParam.CollectionTags);
     if (collectionTags !== undefined && collectionTags !== null) {
-      filter.collectionTags = [
-        ...filter.collectionTags,
-        ...collectionTags.split(',').map((item) => parseInt(item, 10)),
-      ];
+      filter.collectionTags = [...filter.collectionTags, ...collectionTags.split(',').map(item => parseInt(item, 10))];
       anyChanged = true;
     }
 
-    // Rating, seriesName,
+    // Rating, seriesName, 
     const rating = snapshot.queryParamMap.get(FilterQueryParam.Rating);
     if (rating !== undefined && rating !== null && parseInt(rating, 10) > 0) {
       filter.rating = parseInt(rating, 10);
@@ -375,7 +271,7 @@ export class FilterUtilitiesService {
     /// Read status is encoded as true,true,true
     const readStatus = snapshot.queryParamMap.get(FilterQueryParam.ReadStatus);
     if (readStatus !== undefined && readStatus !== null) {
-      const values = readStatus.split(',').map((i) => i === 'true');
+      const values = readStatus.split(',').map(i => i === 'true');
       if (values.length === 3) {
         filter.readStatus.inProgress = values[0];
         filter.readStatus.notRead = values[1];
@@ -393,21 +289,18 @@ export class FilterUtilitiesService {
       if (values.length === 2) {
         filter.sortOptions = {
           isAscending: values[1] === 'true',
-          sortField: Number(values[0]),
-        };
+          sortField: Number(values[0])
+        }
         anyChanged = true;
       }
     }
 
     const searchNameQuery = snapshot.queryParamMap.get(FilterQueryParam.Name);
-    if (
-      searchNameQuery !== undefined &&
-      searchNameQuery !== null &&
-      searchNameQuery !== ''
-    ) {
+    if (searchNameQuery !== undefined && searchNameQuery !== null && searchNameQuery !== '') {
       filter.seriesNameQuery = decodeURIComponent(searchNameQuery);
       anyChanged = true;
     }
+    
 
     return [filter, false]; // anyChanged. Testing out if having a filter active but keep drawer closed by default works better
   }

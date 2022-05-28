@@ -351,6 +351,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
           () => (this.actionInProgress = false)
         );
         break;
+      case Action.AnalyzeFiles:
+        this.actionService.analyzeFilesForSeries(
+          series,
+          () => (this.actionInProgress = false)
+        );
+        break;
       default:
         break;
     }

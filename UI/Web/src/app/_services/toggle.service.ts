@@ -7,7 +7,6 @@ import { filter, ReplaySubject, take } from 'rxjs';
 })
 export class ToggleService {
   toggleState: boolean = false;
-
   private toggleStateSource: ReplaySubject<boolean> =
     new ReplaySubject<boolean>(1);
   public toggleState$ = this.toggleStateSource.asObservable();

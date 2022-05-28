@@ -1,4 +1,4 @@
-import { ThemeProvider } from './site-theme';
+﻿import { ThemeProvider } from './site-theme';
 
 /**
  * Theme for the the book reader contents

@@ -340,11 +340,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ImageHeight() {
     // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
-    if (
-      this.isCoverImage() ||
-      this.generalSettingsForm.get('fittingOption')?.value ===
-        FITTING_OPTION.WIDTH
-    ) {
+    if (this.isCoverImage() || this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH) {
       return this.WindowHeight;
     }
     return this.image?.nativeElement.height + 'px';
@@ -1386,10 +1382,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.layoutMode !== LayoutMode.Single &&
         this.ShouldRenderDoublePage
       ) {
-        this.canvasImage.src = this.getPageUrl(this.PageNumber);
-        this.canvasImage2.src = this.getPageUrl(this.PageNumber + 1);
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
+        this.canvasImage2.src = this.getPageUrl(this.pageNum + 1);
       } else {
-        this.canvasImage.src = this.getPageUrl(this.PageNumber);
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
       }
       this.canvasImage.onload = () => this.renderPage();
       this.canvasImage2.onload = () => this.renderPage();
@@ -1718,14 +1714,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getWindowDimensions() {
-    const windowWidth =
-      window.innerWidth ||
-      document.documentElement.clientWidth ||
-      document.body.clientWidth;
-    const windowHeight =
-      window.innerHeight ||
-      document.documentElement.clientHeight ||
-      document.body.clientHeight;
+    const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+    const windowHeight = window.innerHeight
+                  || document.documentElement.clientHeight
+                  || document.body.clientHeight;
     return [windowWidth, windowHeight];
   }
 

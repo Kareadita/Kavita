@@ -2,9 +2,9 @@
 :root {
     --color-scheme: light;
     --primary-color: #4ac694;
-    --primary-color-dark-shade: #3b9e76;
-    --primary-color-darker-shade: #338a67;
-    --primary-color-darkest-shade: #25624a;
+    --primary-color-dark-shade: #3B9E76;
+    --primary-color-darker-shade: #338A67;
+    --primary-color-darkest-shade: #25624A;
     --error-color: #ff4136;
     --bs-body-bg: #fff;
     --body-text-color: #333;
@@ -19,7 +19,7 @@
     /* Inputs */
     --input-bg-color: #fff;
     --input-focused-border-color: #ccc;
-    --input-bg-readonly-color: rgba(0, 0, 0, 0.2);
+    --input-bg-readonly-color: rgba(0,0,0,0.2);
     --input-placeholder-color: #aeaeae;
     --input-border-color: #ccc;
     --input-range-color: var(--primary-color);
@@ -72,7 +72,8 @@
     --side-nav-item-active-color: var(--primary-color);
     --side-nav-active-bg-color: rgba(0, 0, 0, 0.5);
     --side-nav-item-active-text-color: white;
-    --side-nav-overlay-color: rgba(0, 0, 0, 0.5);
+    --side-nav-overlay-color: rgba(0,0,0,0.5);
+
 
     /* Checkboxes */
     --checkbox-checked-bg-color: var(--primary-color);
@@ -85,21 +86,16 @@
 
     /* Toasts */
     --toast-success-bg-color: rgba(74, 198, 148, 0.9);
-    --toast-error-bg-color: #bd362f;
-    --toast-info-bg-color: #2f96b4;
-    --toast-warning-bg-color: #f89406;
+    --toast-error-bg-color: #BD362F;
+    --toast-info-bg-color: #2F96B4;
+    --toast-warning-bg-color: #F89406;
 
     /* Rating star */
     --ratingstar-star-empty: #b0c4de;
     --ratingstar-star-filled: var(--primary-color);
 
     /* Global */
-    --accent-bg-color: rgba(
-        206,
-        206,
-        206,
-        0.5
-    ); // Drawer had: var(--bs-body-bg)
+    --accent-bg-color: rgba(206, 206, 206, 0.5); // Drawer had: var(--bs-body-bg)
     --accent-text-color: grey;
     --accent-text-size: 0.8rem;
     --hr-color: rgba(239, 239, 239, 0.125);
@@ -199,9 +195,9 @@
     --accordion-button-focus-box-shadow: unset;
 
     /* Search */
-    --search-result-text-lite-color: rgba(0, 0, 0, 1);
+    --search-result-text-lite-color: rgba(0,0,0,1);
 
     /* Bulk Selection */
-    --bulk-selection-text-color: var(--navbar-text-color);
-    --bulk-selection-highlight-text-color: var(--primary-color);
-}
+  --bulk-selection-text-color: var(--navbar-text-color);
+  --bulk-selection-highlight-text-color: var(--primary-color);
+  }

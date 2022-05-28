@@ -137,6 +137,13 @@ export class ActionFactoryService {
         });
 
         this.seriesActions.push({
+          action: Action.AnalyzeFiles,
+          title: 'Analyze Files',
+          callback: this.dummyCallback,
+          requiresAdmin: true,
+        });
+
+        this.seriesActions.push({
           action: Action.Delete,
           title: 'Delete',
           callback: this.dummyCallback,
