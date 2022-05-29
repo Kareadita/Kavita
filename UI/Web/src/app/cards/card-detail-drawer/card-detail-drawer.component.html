@@ -52,7 +52,7 @@
                             <ng-container *ngIf="chapter.pages">
                                 <div class="col-auto mb-2">
                                     <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
-                                        {{chapter.pages}} Pages
+                                        {{chapter.pages | number:''}} Pages
                                     </app-icon-and-title>
                                 </div>
                                 <div class="vr d-none d-lg-block m-2"></div>
@@ -70,7 +70,7 @@
                             <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
                                 <div class="col-auto mb-2">
                                     <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
-                                        {{minHoursToRead}}{{maxHoursToRead !== minHoursToRead ? ('-' + maxHoursToRead) : ''}} Hour{{minHoursToRead > 1 ? 's' : ''}}
+                                        {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
                                     </app-icon-and-title>
                                 </div>
                             </ng-container>
@@ -229,7 +229,7 @@
                                         <span>{{file.filePath}}</span>
                                         <div class="row g-0">
                                             <div class="col">
-                                                Pages: {{file.pages}}
+                                                Pages: {{file.pages | number:''}}
                                             </div>
                                             <div class="col" *ngIf="data.hasOwnProperty('created')">
                                                 Added: {{(data.created | date: 'short') || '-'}}

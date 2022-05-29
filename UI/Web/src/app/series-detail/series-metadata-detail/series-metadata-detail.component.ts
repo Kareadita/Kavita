@@ -29,8 +29,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
 
-  minHoursToRead: number = 1;
-  maxHoursToRead: number = 1;
+  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
   readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
 
   /**
@@ -71,14 +70,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     
     if (this.series !== null) {
       this.readerService.getTimeLeft(this.series.id).subscribe((timeLeft) => this.readingTimeLeft = timeLeft);
-
-      if (this.series.format === MangaFormat.EPUB && this.series.wordCount > 0) {
-        this.minHoursToRead = parseInt(Math.round(this.series.wordCount / MAX_WORDS_PER_HOUR) + '', 10) || 1;
-        this.maxHoursToRead = parseInt(Math.round(this.series.wordCount / MIN_WORDS_PER_HOUR) + '', 10) || 1;
-      } else if (this.series.format !== MangaFormat.EPUB) {
-        this.minHoursToRead = parseInt(Math.round((this.series.pages / MIN_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
-        this.maxHoursToRead = parseInt(Math.round((this.series.pages / MAX_PAGES_PER_MINUTE) / 60) + '', 10) || 1;
-      }
+      this.readerService.getTimeToRead(this.series.id).subscribe((time) => this.readingTime = time);
     }
   }
 
