@@ -164,27 +164,44 @@ namespace API.Services.Tasks.Scanner
             info.Series = MergeName(info);
 
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedSortSeries = Parser.Parser.Normalize(info.SeriesSort);
             var normalizedLocalizedSeries = Parser.Parser.Normalize(info.LocalizedSeries);
-            var existingKey = _scannedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && (ps.NormalizedName == normalizedSeries
-                                             || ps.NormalizedName == normalizedLocalizedSeries));
-            existingKey ??= new ParsedSeries()
-            {
-                Format = info.Format,
-                Name = info.Series,
-                NormalizedName = normalizedSeries
-            };
 
-            _scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
+            try
             {
-                oldValue ??= new List<ParserInfo>();
-                if (!oldValue.Contains(info))
+                var existingKey = _scannedSeries.Keys.SingleOrDefault(ps =>
+                    ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
+                                                 || ps.NormalizedName.Equals(normalizedLocalizedSeries)
+                                                 || ps.NormalizedName.Equals(normalizedSortSeries)));
+                existingKey ??= new ParsedSeries()
                 {
-                    oldValue.Add(info);
-                }
+                    Format = info.Format,
+                    Name = info.Series,
+                    NormalizedName = normalizedSeries
+                };
 
-                return oldValue;
-            });
+                _scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
+                {
+                    oldValue ??= new List<ParserInfo>();
+                    if (!oldValue.Contains(info))
+                    {
+                        oldValue.Add(info);
+                    }
+
+                    return oldValue;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "{SeriesName} matches against multiple series in the parsed series. This indicates a critical kavita issue. Key will be skipped", info.Series);
+                foreach (var seriesKey in _scannedSeries.Keys.Where(ps =>
+                             ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
+                                                          || ps.NormalizedName.Equals(normalizedLocalizedSeries)
+                                                          || ps.NormalizedName.Equals(normalizedSortSeries))))
+                {
+                    _logger.LogCritical("Matches: {SeriesName} matches on {SeriesKey}", info.Series, seriesKey.Name);
+                }
+            }
         }
 
         /// <summary>
@@ -198,14 +215,32 @@ namespace API.Services.Tasks.Scanner
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
             // We use FirstOrDefault because this was introduced late in development and users might have 2 series with both names
-            var existingName =
-                _scannedSeries.FirstOrDefault(p =>
-                        (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
-                         Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) && p.Key.Format == info.Format)
-                .Key;
-            if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
+            try
             {
-                return existingName.Name;
+                var existingName =
+                    _scannedSeries.SingleOrDefault(p =>
+                            (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                             Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                            p.Key.Format == info.Format)
+                        .Key;
+
+                if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
+                {
+                    return existingName.Name;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
+                var values = _scannedSeries.Where(p =>
+                    (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                     Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                    p.Key.Format == info.Format);
+                foreach (var pair in values)
+                {
+                    _logger.LogCritical("Duplicate Series in DB matches with {SeriesName}: {DuplicateName}", info.Series, pair.Key.Name);
+                }
+
             }
 
             return info.Series;

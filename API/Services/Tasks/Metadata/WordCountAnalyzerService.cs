@@ -17,8 +17,10 @@ namespace API.Services.Tasks.Metadata;
 
 public interface IWordCountAnalyzerService
 {
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibrary(int libraryId, bool forceUpdate = false);
-    Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = true);
 }
 
 /// <summary>
@@ -40,8 +42,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _cacheHelper = cacheHelper;
     }
 
-    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
@@ -113,7 +114,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
     }
 
-    public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
+    public async Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = true)
     {
         var sw = Stopwatch.StartNew();
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
@@ -126,7 +127,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, series.Name));
 
-        await ProcessSeries(series);
+        await ProcessSeries(series, forceUpdate);
 
         if (_unitOfWork.HasChanges())
         {
