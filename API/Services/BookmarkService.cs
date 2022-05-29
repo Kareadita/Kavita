@@ -19,6 +19,7 @@ public interface IBookmarkService
     Task<bool> BookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto, string imageToBookmark);
     Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto);
     Task<IEnumerable<string>> GetBookmarkFilesById(IEnumerable<int> bookmarkIds);
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     Task ConvertAllBookmarkToWebP();
 
 }
@@ -173,7 +174,6 @@ public class BookmarkService : IBookmarkService
     /// <summary>
     /// This is a long-running job that will convert all bookmarks into WebP. Do not invoke anyway except via Hangfire.
     /// </summary>
-    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task ConvertAllBookmarkToWebP()
     {
         var bookmarkDirectory =
