@@ -7,6 +7,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
 using API.SignalR;
@@ -28,6 +29,7 @@ public interface IReaderService
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
+    HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub, bool hasProgress = false);
 }
 
 public class ReaderService : IReaderService
@@ -495,5 +497,27 @@ public class ReaderService : IReaderService
         {
             MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }
+    }
+
+    public HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub, bool hasProgress = false)
+    {
+        if (isEpub)
+        {
+            return new HourEstimateRangeDto()
+            {
+                MinHours = Math.Max((int) Math.Round((wordCount / ReaderService.MinWordsPerHour)), 1),
+                MaxHours = Math.Max((int) Math.Round((wordCount / ReaderService.MaxWordsPerHour)), 1),
+                AvgHours = (int) Math.Round((wordCount / ReaderService.AvgWordsPerHour)),
+                HasProgress = hasProgress
+            };
+        }
+
+        return new HourEstimateRangeDto()
+        {
+            MinHours = Math.Max((int) Math.Round((pageCount / ReaderService.MinPagesPerMinute / 60F)), 1),
+            MaxHours = Math.Max((int) Math.Round((pageCount / ReaderService.MaxPagesPerMinute / 60F)), 1),
+            AvgHours = (int) Math.Round((pageCount / ReaderService.AvgPagesPerMinute / 60F)),
+            HasProgress = hasProgress
+        };
     }
 }
