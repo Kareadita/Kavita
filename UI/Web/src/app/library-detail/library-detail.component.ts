@@ -18,6 +18,7 @@ import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
+import { JumpKey } from '../_models/jumpbar/jump-key';
 
 @Component({
   selector: 'app-library-detail',
@@ -38,6 +39,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
   filterActiveCheck!: SeriesFilter;
+
+  jumpKeys: Array<JumpKey> = [];
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'Library', fragment: '', icon: 'fa-landmark'},
@@ -99,6 +102,11 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
       this.libraryName = names[this.libraryId];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
+    });
+
+    this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
+      console.log('JumpBar: ', barDetails);
+      this.jumpKeys = barDetails;
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
