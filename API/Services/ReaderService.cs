@@ -170,7 +170,7 @@ public class ReaderService : IReaderService
             var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
             if (progresses.Count > 1)
             {
-                user.Progresses = new List<AppUserProgress>()
+                user.Progresses = new List<AppUserProgress>
                 {
                     user.Progresses.First()
                 };
@@ -480,7 +480,7 @@ public class ReaderService : IReaderService
     /// <param name="chapterNumber"></param>
     public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.Number))
         {
             var chapters = volume.Chapters
@@ -492,7 +492,7 @@ public class ReaderService : IReaderService
 
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber && v.Number > 0))
         {
             MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
@@ -503,20 +503,20 @@ public class ReaderService : IReaderService
     {
         if (isEpub)
         {
-            return new HourEstimateRangeDto()
+            return new HourEstimateRangeDto
             {
-                MinHours = Math.Max((int) Math.Round((wordCount / ReaderService.MinWordsPerHour)), 1),
-                MaxHours = Math.Max((int) Math.Round((wordCount / ReaderService.MaxWordsPerHour)), 1),
-                AvgHours = (int) Math.Round((wordCount / ReaderService.AvgWordsPerHour)),
+                MinHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 1),
+                MaxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 1),
+                AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour)),
                 HasProgress = hasProgress
             };
         }
 
-        return new HourEstimateRangeDto()
+        return new HourEstimateRangeDto
         {
-            MinHours = Math.Max((int) Math.Round((pageCount / ReaderService.MinPagesPerMinute / 60F)), 1),
-            MaxHours = Math.Max((int) Math.Round((pageCount / ReaderService.MaxPagesPerMinute / 60F)), 1),
-            AvgHours = (int) Math.Round((pageCount / ReaderService.AvgPagesPerMinute / 60F)),
+            MinHours = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 1),
+            MaxHours = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 1),
+            AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F)),
             HasProgress = hasProgress
         };
     }
