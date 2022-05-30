@@ -503,19 +503,44 @@ public class ReaderService : IReaderService
     {
         if (isEpub)
         {
+            var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 1);
+            var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 1);
+            if (maxHours < minHours)
+            {
+                return new HourEstimateRangeDto
+                {
+                    MinHours = maxHours,
+                    MaxHours = minHours,
+                    AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour)),
+                    HasProgress = hasProgress
+                };
+            }
             return new HourEstimateRangeDto
             {
-                MinHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 1),
-                MaxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 1),
+                MinHours = minHours,
+                MaxHours = maxHours,
                 AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour)),
+                HasProgress = hasProgress
+            };
+        }
+
+        var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 1);
+        var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 1);
+        if (maxHoursPages < minHoursPages)
+        {
+            return new HourEstimateRangeDto
+            {
+                MinHours = maxHoursPages,
+                MaxHours = minHoursPages,
+                AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F)),
                 HasProgress = hasProgress
             };
         }
 
         return new HourEstimateRangeDto
         {
-            MinHours = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 1),
-            MaxHours = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 1),
+            MinHours = minHoursPages,
+            MaxHours = maxHoursPages,
             AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F)),
             HasProgress = hasProgress
         };
