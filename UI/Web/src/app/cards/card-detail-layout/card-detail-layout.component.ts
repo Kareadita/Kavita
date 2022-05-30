@@ -8,6 +8,7 @@ import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
@@ -62,7 +63,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   constructor(private seriesService: SeriesService, public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-              private renderer: Renderer2) {
+              private scrollService: ScrollService) {
     this.filter = this.seriesService.createSeriesFilter();
   }
 
@@ -146,14 +147,20 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
       if (this.jumpBarKeys[i].key === jumpKey.key) break;
       targetIndex += this.jumpBarKeys[i].size;
     }
-    console.log('scrolling to card that starts with ', jumpKey.key, + ' with index of ', targetIndex);
+    //console.log('scrolling to card that starts with ', jumpKey.key, + ' with index of ', targetIndex);
 
     // Basic implementation based on itemsPerPage being the same. 
-    var minIndex = this.pagination.currentPage * this.pagination.itemsPerPage;
+    //var minIndex = this.pagination.currentPage * this.pagination.itemsPerPage;
     var targetPage = Math.max(Math.ceil(targetIndex / this.pagination.itemsPerPage), 1);
-    console.log('We are on page ', this.pagination.currentPage, ' and our target page is ', targetPage);
+    //console.log('We are on page ', this.pagination.currentPage, ' and our target page is ', targetPage);
     if (targetPage === this.pagination.currentPage) {
       // Scroll to the element
+      const elem = this.document.querySelector(`div[id="jumpbar-index--${targetIndex}"`);
+      if (elem !== null) {
+        elem.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
       return;
     }
 
