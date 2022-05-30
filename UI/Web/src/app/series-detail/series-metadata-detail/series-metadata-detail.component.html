@@ -65,9 +65,10 @@
                     <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
                         {{series.wordCount | compactNumber}} Words
                     </app-icon-and-title>
-                </div>    
+                </div>
+                <div class="vr d-none d-lg-block m-2"></div>    
             </ng-container>
-            <div class="vr d-none d-lg-block m-2"></div>
+            
         </ng-container>
         <ng-template #showPages>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
@@ -75,6 +76,7 @@
                     {{series.pages | number:''}} Pages
                 </app-icon-and-title>
             </div>
+            <div class="vr d-none d-lg-block m-2"></div>
         </ng-template>    
         
         
