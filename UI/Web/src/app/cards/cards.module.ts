@@ -59,6 +59,9 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,
+    
+    //ScrollingModule,
+    //InfiniteScrollModule,
 
 
     NgbOffcanvasModule, // Series Detail, action of cards
@@ -68,6 +71,8 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     NgbProgressbarModule,
     NgxFileDropModule, // Cover Chooser
     PipeModule, // filter for BulkAddToCollectionComponent
+
+    
     
 
     SharedModule, // IconAndTitleComponent

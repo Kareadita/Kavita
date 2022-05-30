@@ -639,25 +639,7 @@ namespace API.Controllers
         [HttpGet("manual-read-time")]
         public ActionResult<HourEstimateRangeDto> GetManualReadTime(int wordCount, int pageCount, bool isEpub)
         {
-
-            if (isEpub)
-            {
-                return Ok(new HourEstimateRangeDto()
-                {
-                    MinHours = (int) Math.Round((wordCount / ReaderService.MinWordsPerHour)),
-                    MaxHours = (int) Math.Round((wordCount / ReaderService.MaxWordsPerHour)),
-                    AvgHours = (int) Math.Round((wordCount / ReaderService.AvgWordsPerHour)),
-                    HasProgress = false
-                });
-            }
-
-            return Ok(new HourEstimateRangeDto()
-            {
-                MinHours = (int) Math.Round((pageCount / ReaderService.MinPagesPerMinute / 60F)),
-                MaxHours = (int) Math.Round((pageCount / ReaderService.MaxPagesPerMinute / 60F)),
-                AvgHours = (int) Math.Round((pageCount / ReaderService.AvgPagesPerMinute / 60F)),
-                HasProgress = false
-            });
+            return Ok(_readerService.GetTimeEstimate(wordCount, pageCount, isEpub));
         }
 
         [HttpGet("read-time")]
@@ -667,24 +649,8 @@ namespace API.Controllers
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
 
             var progress = (await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId)).ToList();
-            if (series.Format == MangaFormat.Epub)
-            {
-                return Ok(new HourEstimateRangeDto()
-                {
-                    MinHours = (int) Math.Round((series.WordCount / ReaderService.MinWordsPerHour)),
-                    MaxHours = (int) Math.Round((series.WordCount / ReaderService.MaxWordsPerHour)),
-                    AvgHours = (int) Math.Round((series.WordCount / ReaderService.AvgWordsPerHour)),
-                    HasProgress = progress.Any()
-                });
-            }
-
-            return Ok(new HourEstimateRangeDto()
-            {
-                MinHours = (int) Math.Round((series.Pages / ReaderService.MinPagesPerMinute / 60F)),
-                MaxHours = (int) Math.Round((series.Pages / ReaderService.MaxPagesPerMinute / 60F)),
-                AvgHours = (int) Math.Round((series.Pages / ReaderService.AvgPagesPerMinute / 60F)),
-                HasProgress = progress.Any()
-            });
+            return Ok(_readerService.GetTimeEstimate(series.WordCount, series.Pages, series.Format == MangaFormat.Epub,
+                progress.Any()));
         }
 
 
@@ -709,24 +675,12 @@ namespace API.Controllers
                 // Word count
                 var progressCount = chapters.Sum(c => c.WordCount);
                 var wordsLeft = series.WordCount - progressCount;
-                return Ok(new HourEstimateRangeDto()
-                {
-                    MinHours = (int) Math.Round((wordsLeft / ReaderService.MinWordsPerHour)),
-                    MaxHours = (int) Math.Round((wordsLeft / ReaderService.MaxWordsPerHour)),
-                    AvgHours = (int) Math.Round((wordsLeft / ReaderService.AvgWordsPerHour)),
-                    HasProgress = progressCount > 0
-                });
+                return _readerService.GetTimeEstimate(wordsLeft, 0, true, progressCount > 0);
             }
 
             var progressPageCount = progress.Sum(p => p.PagesRead);
             var pagesLeft = series.Pages - progressPageCount;
-            return Ok(new HourEstimateRangeDto()
-            {
-                MinHours = (int) Math.Round((pagesLeft / ReaderService.MinPagesPerMinute / 60F)),
-                MaxHours = (int) Math.Round((pagesLeft / ReaderService.MaxPagesPerMinute / 60F)),
-                AvgHours = (int) Math.Round((pagesLeft / ReaderService.AvgPagesPerMinute / 60F)),
-                HasProgress = progressPageCount > 0
-            });
+            return _readerService.GetTimeEstimate(0, pagesLeft, false, progressPageCount > 0);
         }
 
     }

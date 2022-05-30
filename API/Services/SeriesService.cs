@@ -8,9 +8,9 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -98,7 +98,7 @@ public class SeriesService : ISeriesService
                 series.Metadata.SummaryLocked = true;
             }
 
-            if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata.Language)
+            if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata?.Language)
             {
                 series.Metadata.Language = updateSeriesMetadataDto.SeriesMetadata?.Language;
                 series.Metadata.LanguageLocked = true;
@@ -112,7 +112,7 @@ public class SeriesService : ISeriesService
             });
 
             series.Metadata.Genres ??= new List<Genre>();
-            UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata.Genres, series, allGenres, (genre) =>
+            UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, (genre) =>
             {
                 series.Metadata.Genres.Add(genre);
             }, () => series.Metadata.GenresLocked = true);
@@ -521,11 +521,11 @@ public class SeriesService : ISeriesService
     /// <summary>
     /// Should we show the given chapter on the UI. We only show non-specials and non-zero chapters.
     /// </summary>
-    /// <param name="c"></param>
+    /// <param name="chapter"></param>
     /// <returns></returns>
-    private static bool ShouldIncludeChapter(ChapterDto c)
+    private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !c.IsSpecial && !c.Number.Equals(Parser.Parser.DefaultChapter);
+        return !chapter.IsSpecial && !chapter.Number.Equals(Parser.Parser.DefaultChapter);
     }
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType)

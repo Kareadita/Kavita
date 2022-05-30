@@ -56,6 +56,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAllUsers();
 
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
+    Task<bool> HasAccessToLibrary(int libraryId, int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -236,6 +237,13 @@ public class UserRepository : IUserRepository
             .Where(p => p.Theme.Id == themeId)
             .AsSplitQuery()
             .ToListAsync();
+    }
+
+    public async Task<bool> HasAccessToLibrary(int libraryId, int userId)
+    {
+        return await _context.Library
+            .Include(l => l.AppUsers)
+            .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId));
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

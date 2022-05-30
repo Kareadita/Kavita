@@ -7,6 +7,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
 using API.SignalR;
@@ -28,6 +29,7 @@ public interface IReaderService
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
+    HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub, bool hasProgress = false);
 }
 
 public class ReaderService : IReaderService
@@ -168,7 +170,7 @@ public class ReaderService : IReaderService
             var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
             if (progresses.Count > 1)
             {
-                user.Progresses = new List<AppUserProgress>()
+                user.Progresses = new List<AppUserProgress>
                 {
                     user.Progresses.First()
                 };
@@ -478,7 +480,7 @@ public class ReaderService : IReaderService
     /// <param name="chapterNumber"></param>
     public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.Number))
         {
             var chapters = volume.Chapters
@@ -490,10 +492,57 @@ public class ReaderService : IReaderService
 
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber && v.Number > 0))
         {
             MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }
+    }
+
+    public HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub, bool hasProgress = false)
+    {
+        if (isEpub)
+        {
+            var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 1);
+            var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 1);
+            if (maxHours < minHours)
+            {
+                return new HourEstimateRangeDto
+                {
+                    MinHours = maxHours,
+                    MaxHours = minHours,
+                    AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour)),
+                    HasProgress = hasProgress
+                };
+            }
+            return new HourEstimateRangeDto
+            {
+                MinHours = minHours,
+                MaxHours = maxHours,
+                AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour)),
+                HasProgress = hasProgress
+            };
+        }
+
+        var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 1);
+        var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 1);
+        if (maxHoursPages < minHoursPages)
+        {
+            return new HourEstimateRangeDto
+            {
+                MinHours = maxHoursPages,
+                MaxHours = minHoursPages,
+                AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F)),
+                HasProgress = hasProgress
+            };
+        }
+
+        return new HourEstimateRangeDto
+        {
+            MinHours = minHoursPages,
+            MaxHours = maxHoursPages,
+            AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F)),
+            HasProgress = hasProgress
+        };
     }
 }

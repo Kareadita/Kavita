@@ -448,13 +448,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.attachIntersectionObserverElem(event.target);
 
     if (imagePage === this.pageNum) {
-      Promise.all(Array.from(document.querySelectorAll('img'))
+      Promise.all(Array.from(this.document.querySelectorAll('img'))
         .filter((img: any) => !img.complete)
         .map((img: any) => new Promise(resolve => { img.onload = img.onerror = resolve; })))
         .then(() => {
           this.debugLog('[Initialization] All images have loaded from initial prefetch, initFinished = true');
           this.debugLog('[Image Load] ! Loaded current page !', this.pageNum);
-          this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
+          this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
           // There needs to be a bit of time before we scroll
           if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) { 
             this.scrollToCurrentPage();
