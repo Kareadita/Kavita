@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.JumpBar;
 using API.DTOs.Search;
 using API.Entities;
 using API.Entities.Enums;
@@ -105,6 +106,16 @@ namespace API.Controllers
         {
             return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosAsync());
         }
+
+        [HttpGet("jump-bar")]
+        public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, userId)) return BadRequest("User does not have access to library");
+
+            return Ok(_unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
+        }
+
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("grant-access")]

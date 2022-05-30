@@ -1,7 +1,9 @@
-import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
-import { Subject } from 'rxjs';
+import { DOCUMENT } from '@angular/common';
+import { AfterViewInit, Component, ContentChild, EventEmitter, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { from, Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
+import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
@@ -15,12 +17,15 @@ const FILTER_PAG_REGEX = /[^0-9]/g;
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss']
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
+  
+  // Filter Code
+  @Input() filterOpen!: EventEmitter<boolean>;
   /**
    * Should filtering be shown on the page
    */
@@ -31,6 +36,9 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @Input() actions: ActionItem<any>[] = [];
   @Input() trackByIdentity!: (index: number, item: any) => string;
   @Input() filterSettings!: FilterSettings;
+
+  @Input() jumpBarKeys: Array<JumpKey> = [];
+
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
@@ -39,14 +47,12 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
   @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
 
 
-  // Filter Code
-  @Input() filterOpen!: EventEmitter<boolean>;
-
-
   filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
+
+  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: 0.01 });
 
 
   private onDestory: Subject<void> = new Subject();
@@ -55,7 +61,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     return Breakpoint;
   }
 
-  constructor(private seriesService: SeriesService, public utilityService: UtilityService) {
+  constructor(private seriesService: SeriesService, public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
+              private renderer: Renderer2) {
     this.filter = this.seriesService.createSeriesFilter();
   }
 
@@ -72,9 +79,26 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit() {
+
+    const parent = this.document.querySelector('.card-container');
+    if (parent == null) return;
+    console.log('card divs', this.document.querySelectorAll('div[id^="jumpbar-index--"]'));
+    console.log('cards: ', this.document.querySelectorAll('.card'));
+
+    Array.from(this.document.querySelectorAll('div')).forEach(elem => this.intersectionObserver.observe(elem));
+  }
+
   ngOnDestroy() {
+    this.intersectionObserver.disconnect();
     this.onDestory.next();
     this.onDestory.complete();
+  }
+
+  handleIntersection(entries: IntersectionObserverEntry[]) {
+    console.log('interception: ', entries.filter(e => e.target.hasAttribute('no-observe')));
+    
+
   }
 
   onPageChange(page: number) {
@@ -101,4 +125,44 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy {
     this.updateApplied++;
   }
 
+  // onScroll() {
+
+  // }
+
+  // onScrollDown() {
+  //   console.log('scrolled down');
+  // }
+  // onScrollUp() {
+  //   console.log('scrolled up');
+  // }
+
+  
+
+  scrollTo(jumpKey: JumpKey) {
+    // TODO: Figure out how to do this
+    
+    let targetIndex = 0;
+    for(var i = 0; i < this.jumpBarKeys.length; i++) {
+      if (this.jumpBarKeys[i].key === jumpKey.key) break;
+      targetIndex += this.jumpBarKeys[i].size;
+    }
+    console.log('scrolling to card that starts with ', jumpKey.key, + ' with index of ', targetIndex);
+
+    // Basic implementation based on itemsPerPage being the same. 
+    var minIndex = this.pagination.currentPage * this.pagination.itemsPerPage;
+    var targetPage = Math.max(Math.ceil(targetIndex / this.pagination.itemsPerPage), 1);
+    console.log('We are on page ', this.pagination.currentPage, ' and our target page is ', targetPage);
+    if (targetPage === this.pagination.currentPage) {
+      // Scroll to the element
+      return;
+    }
+
+    this.selectPageStr(targetPage + '');
+
+    // if (minIndex > targetIndex) {
+    //   // We need to scroll forward (potentially to another page)
+    // } else if (minIndex < targetIndex) {
+    //   // We need to scroll back (potentially to another page)
+    // }
+  }
 }

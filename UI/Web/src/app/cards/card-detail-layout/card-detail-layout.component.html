@@ -17,19 +17,32 @@
 
 <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
-<ng-container [ngTemplateOutlet]="cardTemplate"></ng-container>
+<div #jumpBar>
+    <div class="jump-bar d-flex justify-content-center">
+        <button *ngFor="let jumpKey of jumpBarKeys" class="btn btn-link" (click)="scrollTo(jumpKey)">
+            {{jumpKey.title}}
+        </button>
+    </div>
+    <ng-container [ngTemplateOutlet]="cardTemplate"></ng-container>
+    <div class="jump-bar d-flex justify-content-center">
+        <button *ngFor="let jumpKey of jumpBarKeys" class="btn btn-link" (click)="scrollTo(jumpKey)" no-observe>
+            {{jumpKey.title}}
+        </button>
+    </div>
+</div>
 
 <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
 
 <ng-template #cardTemplate>
-<div class="card-container row g-0 mt-3 mb-3">
-    <div class="card col-auto mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i">
-        <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+
+    <div class="card-container row g-0 mt-3 mb-3" >
+        <div class="card col-auto mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+        </div>
     </div>
-</div>
-<p *ngIf="items.length === 0 && !isLoading">
-    <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-</p>
+    <p *ngIf="items.length === 0 && !isLoading">
+        <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+    </p>
 </ng-template>
 
 <ng-template #paginationTemplate let-id="id">

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.JumpBar;
 using API.Entities;
 using API.Entities.Enums;
 using AutoMapper;
@@ -38,6 +40,7 @@ public interface ILibraryRepository
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds);
     Task<int> GetTotalFiles();
+    IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -121,6 +124,37 @@ public class LibraryRepository : ILibraryRepository
     public async Task<int> GetTotalFiles()
     {
         return await _context.MangaFile.CountAsync();
+    }
+
+    public IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId)
+    {
+        var seriesSortCharacters = _context.Series.Where(s => s.LibraryId == libraryId)
+            .Select(s => s.SortName.ToUpper())
+            .OrderBy(s => s)
+            .AsEnumerable()
+            .Select(s => s[0]);
+
+        // Map the title to the number of entities
+        var firstCharacterMap = new Dictionary<char, int>();
+        foreach (var sortChar in seriesSortCharacters)
+        {
+            var c = sortChar;
+            var isAlpha = char.IsLetter(sortChar);
+            if (!isAlpha) c = '#';
+            if (!firstCharacterMap.ContainsKey(c))
+            {
+                firstCharacterMap[c] = 0;
+            }
+
+            firstCharacterMap[c] += 1;
+        }
+
+        return firstCharacterMap.Keys.Select(k => new JumpKeyDto()
+        {
+            Key = k + string.Empty,
+            Size = firstCharacterMap[k],
+            Title = k + string.Empty
+        });
     }
 
     public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()
