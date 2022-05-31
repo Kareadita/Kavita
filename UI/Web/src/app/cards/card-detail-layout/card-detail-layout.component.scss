@@ -38,10 +38,11 @@
     font-size: 13px;
     overflow: hidden;
     padding: 0 10px;
+    align-items: center;
 
     .btn {
         text-decoration: none;
-        color: hsla(0,0%,100%,.45);
+        color: hsla(0,0%,100%,.7);
         height: 25px;
         text-align: center;
         -webkit-tap-highlight-color: transparent;
@@ -61,7 +62,7 @@
         user-select: none;
 
         &:hover {
-            color: hsla(0,0%,100%,.7);
+            color: var(--primary-color);
         }
     }
 }
