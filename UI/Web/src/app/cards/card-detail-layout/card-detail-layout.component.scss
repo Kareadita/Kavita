@@ -1,7 +1,7 @@
 .content-container {
     display: inline-flex;
     width: 100%;
-    height: calc(100vh - 172px);
+    height: calc(100vh - 152px);
 }
 
 .card-container {
@@ -17,6 +17,7 @@
     width: 100%;
     height: calc(100vh - 152px);
     overflow-y: auto;
+    overflow-x: hidden;
     
     &::-webkit-scrollbar {
         width: 14px;
