@@ -286,6 +286,46 @@ namespace API.Services.Tasks.Scanner
         }
 
         /// <summary>
+        /// This is a new version which will process series by folder groups.
+        /// </summary>
+        /// <param name="libraryType"></param>
+        /// <param name="folders"></param>
+        /// <param name="libraryName"></param>
+        /// <returns></returns>
+        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
+            foreach (var folderPath in folders)
+            {
+                try
+                {
+                    async void Action(string f)
+                    {
+                        try
+                        {
+                            ProcessFile(f, folderPath, libraryType);
+                            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName, ProgressEventType.Updated));
+                        }
+                        catch (FileNotFoundException exception)
+                        {
+                            _logger.LogError(exception, "The file {Filename} could not be found", f);
+                        }
+                    }
+
+                    _directoryService.TraverseTreeParallelForEach(folderPath, Action, Parser.Parser.SupportedExtensions, _logger);
+                }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath);
+                }
+            }
+
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
+
+            return SeriesWithInfos();
+        }
+
+        /// <summary>
         /// Returns any series where there were parsed infos
         /// </summary>
         /// <returns></returns>

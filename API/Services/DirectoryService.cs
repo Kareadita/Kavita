@@ -531,14 +531,12 @@ namespace API.Services
                }
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
-                  Console.WriteLine(e.Message);
-                  logger.LogError(e, "Unauthorized access on {Directory}", currentDir);
+                   logger.LogCritical(e, "Unauthorized access on {Directory}", currentDir);
                   continue;
                }
                // Thrown if another process has deleted the directory after we retrieved its name.
                catch (DirectoryNotFoundException e) {
-                  Console.WriteLine(e.Message);
-                  logger.LogError(e, "Directory not found on {Directory}", currentDir);
+                   logger.LogCritical(e, "Directory not found on {Directory}", currentDir);
                   continue;
                }
 
@@ -547,15 +545,15 @@ namespace API.Services
                      .ToArray();
                }
                catch (UnauthorizedAccessException e) {
-                  Console.WriteLine(e.Message);
+                   logger.LogCritical(e, "Unauthorized access on a file in {Directory}", currentDir);
                   continue;
                }
                catch (DirectoryNotFoundException e) {
-                  Console.WriteLine(e.Message);
+                   logger.LogCritical(e, "Directory not found on a file in {Directory}", currentDir);
                   continue;
                }
                catch (IOException e) {
-                  Console.WriteLine(e.Message);
+                   logger.LogCritical(e, "IO exception on a file in {Directory}", currentDir);
                   continue;
                }
 
@@ -566,19 +564,16 @@ namespace API.Services
                    foreach (var file in files) {
                      action(file);
                      fileCount++;
-                  }
+                   }
                }
                catch (AggregateException ae) {
                   ae.Handle((ex) => {
-                               if (ex is UnauthorizedAccessException) {
-                                  // Here we just output a message and go on.
-                                  Console.WriteLine(ex.Message);
-                                  _logger.LogError(ex, "Unauthorized access on file");
-                                  return true;
-                               }
-                               // Handle other exceptions here if necessary...
+                      if (ex is not UnauthorizedAccessException) return false;
+                      // Here we just output a message and go on.
+                      _logger.LogError(ex, "Unauthorized access on file");
+                      return true;
+                      // Handle other exceptions here if necessary...
 
-                               return false;
                   });
                }
 

@@ -272,25 +272,8 @@ public class ScannerService : IScannerService
 
     public async Task ScanLibrary(int libraryId)
     {
-        Library library;
-        try
-        {
-            library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
-        }
-        catch (Exception ex)
-        {
-            // This usually only fails if user is not authenticated.
-            _logger.LogError(ex, "[ScannerService] There was an issue fetching Library {LibraryId}", libraryId);
-            return;
-        }
-
-        if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
-        {
-            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-
-            return;
-        }
-
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
+        if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList())) return;
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 

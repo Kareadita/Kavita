@@ -50,6 +50,10 @@ public class Series : IEntityDate
     /// Sum of all Volume page counts
     /// </summary>
     public int Pages { get; set; }
+    /// <summary>
+    /// Highest path (that is under library root) that contains the series.
+    /// </summary>
+    public string FolderPath { get; set; }
 
     /// <summary>
     /// The type of all the files attached to this series
