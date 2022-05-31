@@ -18,6 +18,7 @@
     height: calc(100vh - 152px);
     overflow-y: auto;
     overflow-x: hidden;
+    align-items: start;
     
     &::-webkit-scrollbar {
         width: 14px;
