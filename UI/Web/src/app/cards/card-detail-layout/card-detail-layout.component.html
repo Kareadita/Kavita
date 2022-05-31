@@ -36,13 +36,7 @@
 </ng-template>
 
 <ng-template #paginationTemplate let-id="id">
-    <ng-container *ngIf="pagination && items.length > 0 && id == 'bottom' && pagination.totalPages > 1 ">
-        <div class="jump-bar d-flex justify-content-center">
-            <button *ngFor="let jumpKey of jumpBarKeys" class="btn btn-link" (click)="scrollTo(jumpKey)">
-                {{jumpKey.title}}
-            </button>
-        </div>
-    </ng-container>
+    <ng-container *ngIf="pagination && items.length > 0 && id == 'bottom' && pagination.totalPages > 1 " [ngTemplateOutlet]="jumpBar"></ng-container>
     <div class="d-flex justify-content-center mb-0" *ngIf="pagination && items.length > 0">
         <ngb-pagination
             *ngIf="pagination.totalPages > 1"
@@ -83,13 +77,7 @@
 
         </ngb-pagination>
     </div>
-    <ng-container *ngIf="pagination && items.length > 0 && id == 'top' && pagination.totalPages > 1">
-        <div class="jump-bar d-flex justify-content-center">
-            <button *ngFor="let jumpKey of jumpBarKeys" class="btn btn-link" (click)="scrollTo(jumpKey)">
-                {{jumpKey.title}}
-            </button>
-        </div>
-    </ng-container>
+    <ng-container *ngIf="pagination && items.length > 0 && id == 'top' && pagination.totalPages > 1" [ngTemplateOutlet]="jumpBar"></ng-container>
 </ng-template>
 
 <div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
@@ -97,3 +85,13 @@
         <span class="invisible">Loading...</span>
     </div>
 </div>
+
+<ng-template #jumpBar>
+    <div class="jump-bar d-flex justify-content-center">
+        <ng-container *ngFor="let jumpKey of jumpBarKeys; let i = index;">
+            <button class="btn btn-link {{i % 2 !== 0 ? 'd-none d-lg-flex' : 'd-none d-md-flex'}}" (click)="scrollTo(jumpKey)">
+                {{jumpKey.title}}
+            </button>
+        </ng-container>
+    </div>
+</ng-template>
