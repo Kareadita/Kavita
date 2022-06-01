@@ -1,7 +1,7 @@
 .content-container {
     display: inline-flex;
     width: 100%;
-    height: calc(100vh - 152px);
+    height: calc((var(--vh) *100) - 152px);
 }
 
 .card-container {
@@ -15,7 +15,7 @@
     grid-gap: 0.5rem;
     justify-content: space-around;
     width: 100%;
-    max-height: calc(100vh - 152px);
+    max-height: calc((var(--vh) *100) - 152px);
     overflow-y: auto;
     overflow-x: hidden;
     align-items: start;
