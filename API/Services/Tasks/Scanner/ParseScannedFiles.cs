@@ -150,6 +150,71 @@ namespace API.Services.Tasks.Scanner
             }
         }
 
+        private ParserInfo ProcessFile2(string path, string rootPath, LibraryType type)
+        {
+            var info = _readingItemService.Parse(path, rootPath, type);
+            if (info == null)
+            {
+                // If the file is an image and literally a cover image, skip processing.
+                if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
+                {
+                    _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
+                }
+                return null;
+            }
+
+
+            // This catches when original library type is Manga/Comic and when parsing with non
+            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
+            {
+                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
+                var info2 = _readingItemService.Parse(path, rootPath, type);
+                info.Merge(info2);
+            }
+
+            info.ComicInfo = _readingItemService.GetComicInfo(path);
+            if (info.ComicInfo != null)
+            {
+                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+                {
+                    info.Volumes = info.ComicInfo.Volume;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+                {
+                    info.Series = info.ComicInfo.Series.Trim();
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+                {
+                    info.Chapters = info.ComicInfo.Number;
+                }
+
+                // Patch is SeriesSort from ComicInfo
+                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+                {
+                    info.SeriesSort = info.ComicInfo.TitleSort.Trim();
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+                {
+                    info.IsSpecial = true;
+                    info.Chapters = Parser.Parser.DefaultChapter;
+                    info.Volumes = Parser.Parser.DefaultVolume;
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
+                {
+                    info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+                {
+                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
+                }
+            }
+
+            return info;
+        }
+
 
         /// <summary>
         /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
@@ -214,13 +279,13 @@ namespace API.Services.Tasks.Scanner
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
-            // We use FirstOrDefault because this was introduced late in development and users might have 2 series with both names
+
             try
             {
                 var existingName =
                     _scannedSeries.SingleOrDefault(p =>
-                            (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
-                             Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                            (Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedSeries) ||
+                             Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedLocalSeries)) &&
                             p.Key.Format == info.Format)
                         .Key;
 
@@ -295,24 +360,43 @@ namespace API.Services.Tasks.Scanner
         public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
+
             foreach (var folderPath in folders)
             {
+
                 try
                 {
-                    async void Action(string f)
+                    foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(folderPath))
                     {
-                        try
-                        {
-                            ProcessFile(f, folderPath, libraryType);
-                            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName, ProgressEventType.Updated));
-                        }
-                        catch (FileNotFoundException exception)
-                        {
-                            _logger.LogError(exception, "The file {Filename} could not be found", f);
-                        }
-                    }
+                        var files = new List<string>();
+                        _directoryService.TraverseTreeParallelForEach(directory, (string f) => {files.Add(f);}, Parser.Parser.SupportedExtensions, _logger);
 
-                    _directoryService.TraverseTreeParallelForEach(folderPath, Action, Parser.Parser.SupportedExtensions, _logger);
+                        // First check if there is an .ignore file and filter out found files (ideally we want to do this ahead of time)
+
+                        // Group into a series
+                        var infos = new List<ParserInfo>();
+                        foreach (var file in files)
+                        {
+                            try
+                            {
+                                var info = ProcessFile2(file, folderPath, libraryType);
+                                if (info != null) infos.Add(info);
+                                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(file, libraryName, ProgressEventType.Updated));
+                            }
+                            catch (FileNotFoundException exception)
+                            {
+                                _logger.LogError(exception, "The file {Filename} could not be found", file);
+                            }
+                        }
+
+                        var seriesNames = infos.Select(i => i.Series).ToList();
+                        var localizedNames = infos.Select(i => i.LocalizedSeries).ToList();
+                        if (seriesNames.All(s => s.Equals(seriesNames[0])))
+                        {
+
+                        }
+
+                    }
                 }
                 catch (ArgumentException ex)
                 {

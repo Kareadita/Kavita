@@ -9,6 +9,10 @@ namespace API.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        /// <summary>
+        /// Update this summary with a way it's used, else let's remove it.
+        /// </summary>
+        [Obsolete("This has never been coded for. Likely we can remove it.")]
         public string CoverImage { get; set; }
         public LibraryType Type { get; set; }
         public DateTime Created { get; set; }

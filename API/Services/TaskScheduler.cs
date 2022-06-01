@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
+using API.Services.Tasks.Scanner;
 using Hangfire;
 using Hangfire.Storage;
 using Microsoft.Extensions.Logging;
@@ -28,8 +29,7 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
-
-
+    void ScanSeriesByFolder(string folderPath);
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -45,6 +45,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IThemeService _themeService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
+    private readonly ILibraryWatcher _libraryWatcher;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     private static readonly Random Rnd = new Random();
@@ -53,7 +54,7 @@ public class TaskScheduler : ITaskScheduler
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService)
+        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, ILibraryWatcher libraryWatcher)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -66,6 +67,7 @@ public class TaskScheduler : ITaskScheduler
         _versionUpdaterService = versionUpdaterService;
         _themeService = themeService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+        _libraryWatcher = libraryWatcher;
     }
 
     public async Task ScheduleTasks()
@@ -98,6 +100,9 @@ public class TaskScheduler : ITaskScheduler
 
         RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
         RecurringJob.AddOrUpdate("cleanup-db", () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
+
+        // TODO: MOve this to a better place
+        await _libraryWatcher.StartWatchingLibraries();
     }
 
     #region StatsTasks
@@ -148,6 +153,11 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
+    public void ScanSeriesByFolder(string folderPath)
+    {
+        BackgroundJob.Enqueue(() => _scannerService.ScanSeriesFolder(folderPath));
+    }
+
     #endregion
 
     #region UpdateTasks
@@ -162,8 +172,8 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanLibrary(int libraryId)
     {
-        _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         // TODO: If a library scan is already queued up for libraryId, don't do anything
+        _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());

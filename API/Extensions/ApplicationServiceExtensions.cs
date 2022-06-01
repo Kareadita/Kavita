@@ -4,6 +4,7 @@ using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
+using API.Services.Tasks.Scanner;
 using API.SignalR;
 using API.SignalR.Presence;
 using Kavita.Common;
@@ -50,6 +51,7 @@ namespace API.Extensions
             services.AddScoped<IScannerService, ScannerService>();
             services.AddScoped<IMetadataService, MetadataService>();
             services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
+            services.AddScoped<ILibraryWatcher, LibraryWatcher>();
 
 
 

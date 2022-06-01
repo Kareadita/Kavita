@@ -497,6 +497,7 @@ namespace API.Services
        }
 
 
+
        /// <summary>
        /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
        /// up processing.

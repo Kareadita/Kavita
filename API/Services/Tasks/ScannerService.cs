@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Comparators;
@@ -37,6 +38,10 @@ public interface IScannerService
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int libraryId, int seriesId, CancellationToken token);
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    Task ScanSeriesFolder(string seriesFolder);
+
 }
 
 public class ScannerService : IScannerService
@@ -67,6 +72,120 @@ public class ScannerService : IScannerService
         _readingItemService = readingItemService;
         _cacheHelper = cacheHelper;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+    }
+
+    public async Task ScanSeriesFolder(string folder)
+    {
+        var sw = new Stopwatch();
+        var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
+        if (seriesId == 0) return;
+        var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
+        var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
+
+        var dirs = new List<string>() {folder};
+
+        if (!await CheckMounts(library.Name, new List<string>() {folder}))
+        {
+            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            return;
+        }
+
+        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+
+
+        _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
+        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, dirs);
+
+
+
+        // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
+        //RemoveParsedInfosNotForSeries(parsedSeries, series); // NOTE: I don't think this is needed with the new code
+
+        // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
+        if (parsedSeries.Count == 0)
+        {
+            var anyFilesExist =
+                (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id)).Any(m => File.Exists(m.FilePath));
+
+            if (!anyFilesExist)
+            {
+                try
+                {
+                    _unitOfWork.SeriesRepository.Remove(series);
+                    await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogCritical(ex, "There was an error during ScanSeries to delete the series");
+                    await _unitOfWork.RollbackAsync();
+                }
+
+            }
+            else
+            {
+                // We need to do an additional check for an edge case: If the scan ran and the files do not match the existing Series name, then it is very likely,
+                // the files have crap naming and if we don't correct, the series will get deleted due to the parser not being able to fallback onto folder parsing as the root
+                // is the series folder.
+
+                // NOTE: I think we should just throw an error to the user, rather than try to support bad naming convention.
+                _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention. Aborting scan");
+                await _unitOfWork.RollbackAsync();
+                return;
+
+                // var existingFolder = seriesDirs.Keys.FirstOrDefault(key => key.Contains(series.OriginalName));
+                // if (seriesDirs.Keys.Count == 1 && !string.IsNullOrEmpty(existingFolder))
+                // {
+                //     seriesDirs = new Dictionary<string, string>();
+                //     var path = Directory.GetParent(existingFolder)?.FullName;
+                //     if (!folderPaths.Contains(path) || !folderPaths.Any(p => p.Contains(path ?? string.Empty)))
+                //     {
+                //         _logger.LogCritical("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
+                //         await _eventHub.SendMessageAsync(MessageFactory.Error,
+                //             MessageFactory.ErrorEvent($"Scan of {series.Name} aborted", $"{series.OriginalName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library"));
+                //         return;
+                //     }
+                //     if (!string.IsNullOrEmpty(path))
+                //     {
+                //         seriesDirs[path] = string.Empty;
+                //     }
+                // }
+                //
+                // var (totalFiles2, scanElapsedTime2, parsedSeries2) = await ScanFiles(library, dirs);
+                // _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
+                // totalFiles += totalFiles2;
+                // scanElapsedTime += scanElapsedTime2;
+                // parsedSeries = parsedSeries2;
+                // RemoveParsedInfosNotForSeries(parsedSeries, series);
+            }
+        }
+
+        // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
+        if (parsedSeries.Count == 0) return;
+
+        // Merge any series together that might have different ParsedSeries but belong to another group of ParsedSeries
+        try
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
+            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library);
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+
+            await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
+            await RemoveAbandonedMetadataKeys();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "There was an error during ScanSeries to update the series");
+            await _unitOfWork.RollbackAsync();
+        }
+        // Tell UI that this series is done
+        await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
+            MessageFactory.ScanSeriesEvent(series.LibraryId, seriesId, series.Name));
+        await CleanupDbEntities();
+        BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
+        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(series.LibraryId, series.Id, false));
     }
 
     public async Task ScanSeries(int libraryId, int seriesId, CancellationToken token)

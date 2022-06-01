@@ -120,6 +120,7 @@ public interface ISeriesRepository
     Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams);
     Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
+    Task<int> GetSeriesIdByFolder(string folder);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1100,6 +1101,15 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => libraryIds.Contains(s.LibraryId))
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<int> GetSeriesIdByFolder(string folder)
+    {
+        var normalized = Parser.Parser.NormalizePath(folder);
+        var series = await _context.Series
+            .Where(s => s.FolderPath.Equals(normalized))
+            .SingleOrDefaultAsync();
+        return series?.Id ?? 0;
     }
 
 
