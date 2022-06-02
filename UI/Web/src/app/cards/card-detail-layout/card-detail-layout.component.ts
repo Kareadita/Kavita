@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, EventEmitter, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { AfterViewInit, Component, ContentChild, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { from, Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
@@ -38,7 +38,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   @Input() trackByIdentity!: (index: number, item: any) => string;
   @Input() filterSettings!: FilterSettings;
 
-  @Input() jumpBarKeys: Array<JumpKey> = [];
+
+  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels wide
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
@@ -65,6 +66,21 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   constructor(private seriesService: SeriesService, public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
               private scrollService: ScrollService) {
     this.filter = this.seriesService.createSeriesFilter();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  @HostListener('window:orientationchange', ['$event'])
+  resizeJumpBar() {
+    console.log('resizing jump bar');
+    //const breakpoint = this.utilityService.getActiveBreakpoint();
+    // if (window.innerWidth < 784) {
+    //   // We need to remove a few sections of keys 
+    //   const len = this.jumpBarKeys.length;
+    //   if (this.jumpBarKeys.length <= 8) return;
+    //   this.jumpBarKeys = this.jumpBarKeys.filter((item, index) => {
+    //     return index % 2 === 0;
+    //   });
+    // }
   }
 
   ngOnInit(): void {

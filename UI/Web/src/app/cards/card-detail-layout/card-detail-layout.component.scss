@@ -1,6 +1,59 @@
+.content-container {
+    display: inline-flex;
+    width: 100%;
+    height: calc((var(--vh) *100) - 152px);
+}
+
 .card-container {
+    display: inline-block;
+    width: 100%;
+}
+
+.grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, 158px);
     grid-gap: 0.5rem;
     justify-content: space-around;
+    width: 100%;
+    max-height: calc((var(--vh) *100) - 152px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: start;
+}
+
+.jump-bar {
+    display: flex;
+    flex-flow: column;
+    flex-shrink: 0;
+    font-size: 13px;
+    overflow: hidden;
+    padding: 0 10px;
+    align-items: center;
+    justify-content: space-around;
+
+    .btn {
+        text-decoration: none;
+        color: hsla(0,0%,100%,.7);
+        height: 25px;
+        text-align: center;
+        -webkit-tap-highlight-color: transparent;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        cursor: pointer;
+        line-height: inherit;
+        margin: 0;
+        outline: none;
+        padding: 0;
+        text-align: inherit;
+        text-decoration: none;
+        touch-action: manipulation;
+        transition: color .2s;
+        -webkit-user-select: none;
+        user-select: none;
+
+        &:hover {
+            color: var(--primary-color);
+        }
+    }
 }
