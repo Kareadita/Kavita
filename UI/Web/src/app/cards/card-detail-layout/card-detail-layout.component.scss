@@ -19,18 +19,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     align-items: start;
-    
-    &::-webkit-scrollbar {
-        width: 14px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-clip: padding-box;
-        background-color: var(--primary-color);
-        border: 3px solid transparent;
-        border-radius: 8px;
-        min-height: 50px;
-    }
 }
 
 .jump-bar {
