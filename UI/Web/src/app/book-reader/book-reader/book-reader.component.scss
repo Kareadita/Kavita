@@ -265,10 +265,10 @@ $action-bar-height: 38px;
 
 .right {
     position: absolute;
-    right: 0px; // with scrollbar: 17px
+    right: 0px;
     top: $action-bar-height;
-    width: 20%; // with scrollbar: 18%
-
+    width: 20%;
+    border: none !important;
     z-index: 2;
     cursor: pointer;
     background: transparent;
@@ -283,6 +283,7 @@ $action-bar-height: 38px;
     z-index: 2;
     cursor: pointer;
     background: transparent;
+    border: none !important;
 }
 
 .left {
@@ -291,7 +292,7 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 20%;
     background: transparent;
-
+    border: none !important;
     z-index: 2;
     cursor: pointer;
 }
