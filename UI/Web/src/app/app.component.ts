@@ -36,13 +36,11 @@ export class AppComponent implements OnInit {
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize(){
-    this.setDocHeight();
-  }
-
   @HostListener('window:orientationchange', ['$event'])
-  onOrientationChange() {
-    this.setDocHeight();
+  setDocHeight() {
+    // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
+    const vh = window.innerHeight * 0.01;
+    this.document.documentElement.style.setProperty('--vh', `${vh}px`);
   }
 
   ngOnInit(): void {
@@ -58,11 +56,5 @@ export class AppComponent implements OnInit {
       this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
       this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
     } 
-  }
-
-  setDocHeight() {
-    // Sets a CSS variable for the actual device viewport height. Needed for mobile dev.
-    let vh = window.innerHeight * 0.01;
-    this.document.documentElement.style.setProperty('--vh', `${vh}px`);
   }
 }
