@@ -81,6 +81,10 @@ export class CardDetailDrawerComponent implements OnInit {
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
   minHoursToRead: number = 1;
   maxHoursToRead: number = 1;
+  /**
+   * We use a separate variable because if this is a volume, we need a sum of all chapters
+   */
+  totalPages: number = 0;
   
   
 
@@ -123,13 +127,13 @@ export class CardDetailDrawerComponent implements OnInit {
 
       this.metadataService.getAgeRating(this.chapterMetadata.ageRating).subscribe(ageRating => this.ageRating = ageRating);
       
-      let totalPages = this.chapter.pages;
+      this.totalPages = this.chapter.pages;
       if (!this.isChapter) {
         // Need to account for multiple chapters if this is a volume
-        totalPages = this.utilityService.asVolume(this.data).chapters.map(c => c.pages).reduce((sum, d) => sum + d);
+        this.totalPages = this.utilityService.asVolume(this.data).chapters.map(c => c.pages).reduce((sum, d) => sum + d);
       }
 
-      this.readerService.getManualTimeToRead(this.chapterMetadata.wordCount, totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
+      this.readerService.getManualTimeToRead(this.chapterMetadata.wordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
     });
 
 

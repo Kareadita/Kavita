@@ -49,16 +49,16 @@
                         </div>
                         
                         <div class="row g-0 mt-4 mb-3">
-                            <ng-container *ngIf="chapter.pages">
+                            <ng-container *ngIf="totalPages > 0">
                                 <div class="col-auto mb-2">
                                     <app-icon-and-title label="Print Length" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
-                                        {{chapter.pages | number:''}} Pages
+                                        {{totalPages | number:''}} Pages
                                     </app-icon-and-title>
                                 </div>
                                 <div class="vr d-none d-lg-block m-2"></div>
                             </ng-container>
 
-                            <ng-container *ngIf="chapterMetadata !== undefined && chapterMetadata.releaseDate">
+                            <ng-container *ngIf="chapterMetadata !== undefined && chapterMetadata.releaseDate && (chapterMetadata.releaseDate | date: 'shortDate') !== '1/1/01'">
                                 <div class="col-auto mb-2">
                                     <app-icon-and-title label="Release Date" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release">
                                         {{chapterMetadata.releaseDate | date:'shortDate'}}

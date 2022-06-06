@@ -33,9 +33,11 @@
 
         <ng-container>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-empty" (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
-                    {{seriesMetadata.publicationStatus | publicationStatus}}
-                </app-icon-and-title>
+                <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
+                    <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}" (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
+                        {{pubStatus}}
+                    </app-icon-and-title>
+                </ng-container>
             </div>
             <div class="vr m-2 d-none d-lg-block"></div>
         </ng-container>

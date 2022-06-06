@@ -268,10 +268,12 @@ $action-bar-height: 38px;
     right: 0px;
     top: $action-bar-height;
     width: 20%;
-    border: none !important;
     z-index: 2;
     cursor: pointer;
     background: transparent;
+    border-color: transparent;
+    border: none !important;
+    opacity: 0;
 }
 
 // This class pushes the click area to the left a bit to let users click the scrollbar
@@ -283,7 +285,9 @@ $action-bar-height: 38px;
     z-index: 2;
     cursor: pointer;
     background: transparent;
+    border-color: transparent;
     border: none !important;
+    opacity: 0;
 }
 
 .left {
@@ -292,7 +296,9 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 20%;
     background: transparent;
+    border-color: transparent;
     border: none !important;
+    opacity: 0;
     z-index: 2;
     cursor: pointer;
 }
