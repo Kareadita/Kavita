@@ -265,6 +265,7 @@ export class CardDetailDrawerComponent implements OnInit {
     } else {
       this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
     }
+    this.close();
   }
 
 }
