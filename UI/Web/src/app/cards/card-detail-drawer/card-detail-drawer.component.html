@@ -94,6 +94,24 @@
                                     </div>
                                 </ng-container>
                             </ng-container>
+
+                            <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
+                                <div class="vr d-none d-lg-block m-2"></div>
+                                <div class="col-auto">
+                                    <app-icon-and-title label="Date Added" [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
+                                        {{chapter.created | date:'short' || '-'}}
+                                    </app-icon-and-title>
+                                </div>
+                            </ng-container>
+    
+                            <ng-container>
+                                <div class="vr d-none d-lg-block m-2"></div>
+                                <div class="col-auto">
+                                    <app-icon-and-title label="ID" [clickable]="false" fontClasses="fa-solid fa-fingerprint" title="ID">
+                                        {{data.id}}
+                                    </app-icon-and-title>
+                                </div>
+                            </ng-container>
                         </div>
 
                         
@@ -182,24 +200,6 @@
             <li [ngbNavItem]="tabs[TabID.Files]">
                 <a ngbNavLink>{{tabs[TabID.Files].title}}</a>
                 <ng-template ngbNavContent>
-                    <div class="row g-0 mb-3">
-                        <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
-                            <div class="col-auto">
-                                <app-icon-and-title label="Date Added" [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
-                                    Created: {{chapter.created | date:'short' || '-'}}
-                                </app-icon-and-title>
-                            </div>
-                        </ng-container>
-
-                        <ng-container>
-                            <div class="vr d-none d-lg-block m-2"></div>
-                            <div class="col-auto">
-                                <app-icon-and-title label="ID" [clickable]="false" fontClasses="fa-solid fa-fingerprint" title="ID">
-                                    ID: {{data.id}}
-                                </app-icon-and-title>
-                            </div>
-                        </ng-container>
-                    </div>
                     <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
                     <ul class="list-unstyled">
                         <li class="d-flex my-4" *ngFor="let chapter of chapters">
