@@ -109,7 +109,7 @@
                                 </ng-template>
                             </ngb-panel>
 
-                            <ngb-panel id="AccordionPanelID.BookReader" title="Book Reader">
+                            <ngb-panel [id]="AccordionPanelID.BookReader" title="Book Reader">
                                 <ng-template ngbPanelHeader>
                                     <h2 class="accordion-header">
                                         <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.BookReader)" aria-controls="collapseOne">
