@@ -130,6 +130,7 @@ $action-bar-height: 38px;
     overflow: auto;
     height: calc(var(--vh, 1vh) * 100);
     position: relative;
+    // This is completely invisible, everything else renders over it
 
     &.column-layout-1 {
         height: calc(var(--vh) * 100);
@@ -147,6 +148,8 @@ $action-bar-height: 38px;
     padding-top: $action-bar-height;
     position: relative;
 
+    background-color: green !important;
+
     &.column-layout-1 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
@@ -154,11 +157,17 @@ $action-bar-height: 38px;
     &.column-layout-2 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
+
+    &.immersive {
+        height: calc((var(--vh, 1vh) * 100));
+    }
 }
 
 .book-container {
     position: relative;
     height: 100%;
+
+    background-color: purple !important;
 
     &.column-layout-1 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
@@ -173,13 +182,18 @@ $action-bar-height: 38px;
     position: relative;
     padding: 20px 0;
     margin: 0px 0px;
+    background-color: red !important;
 
     &.column-layout-1 {
-        height: calc((var(--vh) * 100) - calc($action-bar-height * 2));
+        height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
     }
 
     &.column-layout-2 {
-        height: calc((var(--vh) * 100) - calc($action-bar-height * 2));
+        height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+    }
+
+    &.immersive {
+        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 
     a, :link {
@@ -203,6 +217,12 @@ $action-bar-height: 38px;
     box-shadow: var(--drawer-pagination-horizontal-rule);
 }
 
+.bottom-bar {
+    position: fixed;
+    width: 100%;
+    bottom: 0px;
+}
+
 
 
 // This is essentially fitting the text to height and when you press next you are scrolling over by page width
@@ -213,10 +233,6 @@ $action-bar-height: 38px;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
-
-        &.debug {
-            column-rule: 20px solid rebeccapurple;
-        }
     }
 
     
@@ -229,10 +245,6 @@ $action-bar-height: 38px;
         overflow: hidden;
         word-break: break-word;
         overflow-wrap: break-word;
-
-        &.debug {
-            column-rule: 20px solid rebeccapurple;
-        }
     }
 
     
@@ -275,12 +287,16 @@ $action-bar-height: 38px;
     right: 0px;
     top: $action-bar-height;
     width: 20%;
-    z-index: 2;
+    z-index: 3;
     cursor: pointer;
     background: transparent;
     border-color: transparent;
     border: none !important;
     opacity: 0;
+
+    &.immersive {
+        top: 0px;
+    }
 }
 
 // This class pushes the click area to the left a bit to let users click the scrollbar
@@ -289,12 +305,16 @@ $action-bar-height: 38px;
     right: 17px;
     top: $action-bar-height;
     width: 18%;
-    z-index: 2;
+    z-index: 3;
     cursor: pointer;
     background: transparent;
     border-color: transparent;
     border: none !important;
     opacity: 0;
+
+    &.immersive {
+        top: 0px;
+    }
 }
 
 .left {
@@ -306,15 +326,19 @@ $action-bar-height: 38px;
     border-color: transparent;
     border: none !important;
     opacity: 0;
-    z-index: 2;
+    z-index: 3;
     cursor: pointer;
+
+    &.immersive {
+        top: 0px;
+    }
 }
 
 
 
 .highlight {
-    background-color: rgba(65, 225, 100, 0.5) !important;
-    animation: fadein .5s both;
+  background-color: rgba(65, 225, 100, 0.5) !important;
+  animation: fadein .5s both;
 }
 .highlight-2 {
   background-color: rgba(65, 105, 225, 0.5) !important;
@@ -340,13 +364,13 @@ $action-bar-height: 38px;
         background-color: unset;
 
         &:hover, &:focus {
-            border-color: var(--br-actionbar-button-hover-border-color); // #545b62;
+            border-color: var(--br-actionbar-button-hover-border-color);
         }
     }
 
     span {
         background-color: unset;
-        color: var(--br-actionbar-button-text-color); // #6c757d;
+        color: var(--br-actionbar-button-text-color); 
     }
 
     i {

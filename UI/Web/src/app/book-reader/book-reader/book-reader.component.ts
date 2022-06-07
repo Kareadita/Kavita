@@ -352,7 +352,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ColumnHeight() {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       // Take the height after page loads, subtract the top/bottom bar
-      return this.windowHeight - (this.topOffset *2) + 'px';
+      return this.windowHeight  - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
     return 'unset';
   }
@@ -362,15 +362,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case BookPageLayoutMode.Default:
         return '';
       case BookPageLayoutMode.Column1:
-        return 'column-layout-1';
+        return 'column-layout-1' + (this.immersiveMode ? ' immersive' : '');
       case BookPageLayoutMode.Column2:
-        return 'column-layout-2';
+        return 'column-layout-2' + (this.immersiveMode ? ' immersive' : '');
     }
   }
 
   get PageHeightForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default) {
-      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - (this.topOffset * 2) + 'px';
+      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
     return this.ColumnHeight;
@@ -1220,6 +1220,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.immersiveMode && !this.drawerOpen) {
       this.actionBarVisible = false;
     }
+    console.log('Update Immersive Mode');
+    this.updateReadingSectionHeight();
+  }
+
+  updateReadingSectionHeight() {
+    setTimeout(() => {
+      console.log('setting height on ', this.readingSectionElemRef)
+      if (this.immersiveMode) {
+        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
+      } else {
+        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - 38px)', RendererStyleFlags2.Important);
+      }
+    });
   }
 
   // Table of Contents
