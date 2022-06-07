@@ -575,6 +575,8 @@ namespace API.Parser
 
         private static readonly char[] LeadingZeroesTrimChars = new[] { '0' };
 
+        private static readonly char[] SpacesAndSeparators = { '\0', '\t', '\r', ' ', '-', ','};
+
         public static MangaFormat ParseFormat(string filePath)
         {
             if (IsArchive(filePath)) return MangaFormat.Archive;
@@ -861,8 +863,6 @@ namespace API.Parser
 
             title = RemoveEditionTagHolders(title);
 
-            title = isComic ? RemoveComicSpecialTags(title) : RemoveMangaSpecialTags(title);
-
             if (isComic)
             {
                 title = RemoveComicSpecialTags(title);
@@ -873,17 +873,7 @@ namespace API.Parser
                 title = RemoveMangaSpecialTags(title);
             }
 
-
-            title = title.Replace("_", " ").Trim();
-            if (title.EndsWith("-") || title.EndsWith(","))
-            {
-                title = title.Substring(0, title.Length - 1);
-            }
-
-            if (title.StartsWith("-") || title.StartsWith(","))
-            {
-                title = title.Substring(1);
-            }
+            title = title.Trim(SpacesAndSeparators);
 
             title = EmptySpaceRegex.Replace(title, " ");
 

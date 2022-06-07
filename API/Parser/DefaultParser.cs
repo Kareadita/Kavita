@@ -27,7 +27,9 @@ public class DefaultParser
     /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
     public ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
     {
-        var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+        // format fileName to be more suitable for regex parsing by replacing
+        // underscores by spaces
+        var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath).Replace("_", " ");
         ParserInfo ret;
 
         if (Parser.IsEpub(filePath))
@@ -124,7 +126,7 @@ public class DefaultParser
       var fallbackFolders = _directoryService.GetFoldersTillRoot(rootPath, filePath).ToList();
         for (var i = 0; i < fallbackFolders.Count; i++)
         {
-            var folder = fallbackFolders[i];
+            var folder = fallbackFolders[i].Replace("_", " ");
             if (!string.IsNullOrEmpty(Parser.ParseMangaSpecial(folder))) continue;
 
             var parsedVolume = type is LibraryType.Manga ? Parser.ParseVolume(folder) : Parser.ParseComicVolume(folder);
