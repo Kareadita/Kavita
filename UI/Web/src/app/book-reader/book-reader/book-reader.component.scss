@@ -146,9 +146,10 @@ $action-bar-height: 38px;
     //overflow: auto;  // This will break progress reporting
     height: 100vh;
     padding-top: $action-bar-height;
+    padding-bottom: $action-bar-height;
     position: relative;
 
-    background-color: green !important;
+    //background-color: green !important;
 
     &.column-layout-1 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
@@ -160,6 +161,8 @@ $action-bar-height: 38px;
 
     &.immersive {
         height: calc((var(--vh, 1vh) * 100));
+        //padding-top: 0px;
+        //padding-bottom: 0px;
     }
 }
 
@@ -167,7 +170,7 @@ $action-bar-height: 38px;
     position: relative;
     height: 100%;
 
-    background-color: purple !important;
+    //background-color: purple !important;
 
     &.column-layout-1 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
@@ -182,7 +185,7 @@ $action-bar-height: 38px;
     position: relative;
     padding: 20px 0;
     margin: 0px 0px;
-    background-color: red !important;
+    //background-color: red !important;
 
     &.column-layout-1 {
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
@@ -261,7 +264,8 @@ $action-bar-height: 38px;
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width-container {
     width: auto;
-    max-height: calc((var(--vh)*100) - 116px) !important;
+    // * 4 is just for extra buffer which is needed based on testing.  --book-reader-content-max-height is set by us on calculation of columnHeight
+    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height * 4)), calc((var(--vh)*100) - ($action-bar-height * 4)) !important;
 }
 
 // This is applied to images in the backend
@@ -293,6 +297,8 @@ $action-bar-height: 38px;
     border-color: transparent;
     border: none !important;
     opacity: 0;
+    outline: none;
+    //background-color: aqua;
 
     &.immersive {
         top: 0px;
@@ -311,6 +317,8 @@ $action-bar-height: 38px;
     border-color: transparent;
     border: none !important;
     opacity: 0;
+    outline: none;
+    //background-color: aqua;
 
     &.immersive {
         top: 0px;
@@ -325,9 +333,11 @@ $action-bar-height: 38px;
     background: transparent;
     border-color: transparent;
     border: none !important;
-    opacity: 0;
     z-index: 3;
     cursor: pointer;
+    opacity: 0;
+    outline: none;
+    //background-color: aqua;
 
     &.immersive {
         top: 0px;

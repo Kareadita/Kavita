@@ -352,7 +352,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ColumnHeight() {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       // Take the height after page loads, subtract the top/bottom bar
-      return this.windowHeight  - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
+      const height = this.windowHeight  - (this.topOffset * 2);
+      this.document.documentElement.style.setProperty('--book-reader-content-max-height', `${height}px`);
+      return height + 'px';
     }
     return 'unset';
   }
@@ -362,9 +364,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case BookPageLayoutMode.Default:
         return '';
       case BookPageLayoutMode.Column1:
-        return 'column-layout-1' + (this.immersiveMode ? ' immersive' : '');
+        return 'column-layout-1';
       case BookPageLayoutMode.Column2:
-        return 'column-layout-2' + (this.immersiveMode ? ' immersive' : '');
+        return 'column-layout-2';
     }
   }
 
@@ -373,7 +375,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
-    return this.ColumnHeight;
+    //return this.ColumnHeight;
+    if (this.immersiveMode) return this.windowHeight + 'px';
+    return (this.windowHeight) - (this.topOffset * 2) + 'px';
   }
 
 
@@ -808,7 +812,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const images = this.readingSectionElemRef?.nativeElement.querySelectorAll('img') || [];
 
     if (this.layoutMode !== BookPageLayoutMode.Default) {
-      const height = this.ColumnHeight;
+      const height = (parseInt(this.ColumnHeight.replace('px', ''), 10) - (this.topOffset * 2)) + 'px';
       Array.from(images).forEach(img => {
         this.renderer.setStyle(img, 'max-height', height);
       });
@@ -1230,7 +1234,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.immersiveMode) {
         this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
       } else {
-        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - 38px)', RendererStyleFlags2.Important);
+        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
       }
     });
   }

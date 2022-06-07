@@ -72,7 +72,7 @@
         </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section {{ColumnLayout}}" [@isLoading]="isLoading ? true : false">
+    <div #readingSection class="reading-section {{ColumnLayout}}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading ? true : false">
         
         <ng-container *ngIf="clickToPaginate">
             <div class="left {{clickOverlayClass('left')}} no-observe" [ngClass]="{'immersive' : immersiveMode}"
@@ -84,9 +84,10 @@
                  tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
         </ng-container>
 
-        <div class="book-container {{ColumnLayout}}">
+        <div class="book-container" [ngClass]="{'immersive' : immersiveMode}"> <!--  {{ColumnLayout}}-->
 
-            <div #readingHtml class="book-content {{ColumnLayout}}" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}" [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
+            <div #readingHtml class="book-content {{ColumnLayout}}" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}" 
+                [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
                 [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
 
