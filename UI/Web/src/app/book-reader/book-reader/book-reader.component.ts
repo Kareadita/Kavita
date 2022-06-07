@@ -375,7 +375,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
-    //return this.ColumnHeight;
     if (this.immersiveMode) return this.windowHeight + 'px';
     return (this.windowHeight) - (this.topOffset * 2) + 'px';
   }
@@ -1213,6 +1212,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     setTimeout(() => {this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;});
+
+    // When I switch layout, I might need to resume the progress point. 
+    if (mode === BookPageLayoutMode.Default) {
+      const lastSelector = this.lastSeenScrollPartPath;
+      setTimeout(() => this.scrollTo(lastSelector));
+    }
   }
 
   updateReadingDirection(readingDirection: ReadingDirection) {
@@ -1224,7 +1229,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.immersiveMode && !this.drawerOpen) {
       this.actionBarVisible = false;
     }
-    console.log('Update Immersive Mode');
+
     this.updateReadingSectionHeight();
   }
 
