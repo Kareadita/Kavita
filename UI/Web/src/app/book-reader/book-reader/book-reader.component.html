@@ -91,7 +91,7 @@
                 [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
 
-            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();" class="bottom-bar">
+            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();" [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
                 <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
             </div>
         </div>
