@@ -73,12 +73,12 @@
                     <div class="card-container row g-0">
                         <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                             <app-card-item class="col-auto mt-2 mb-2" *ngIf="volume.number != 0" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
-                            [imageUrl]="imageService.getVolumeCoverImage(volume.id) + '&offset=' + coverImageOffset"
+                            [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
                             [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
                         </ng-container>
                         <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
                             <app-card-item class="col-auto mt-2 mb-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
-                            [imageUrl]="imageService.getChapterCoverImage(chapter.id) + '&offset=' + coverImageOffset"
+                            [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
                             [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, storyChapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
                         </ng-container>
                     </div>
@@ -90,7 +90,7 @@
                     <div class="card-container row g-0">
                         <ng-container *ngFor="let item of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                             <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
-                                  [imageUrl]="imageService.getVolumeCoverImage(item.id) + '&offset=' + coverImageOffset"
+                                  [imageUrl]="imageService.getVolumeCoverImage(item.id)"
                                   [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions" 
                                   (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" 
                                   [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true">
@@ -105,7 +105,7 @@
                     <div class="card-container row g-0">
                         <ng-container *ngFor="let item of chapters; let idx = index; trackBy: trackByChapterIdentity">
                             <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
-                            [imageUrl]="imageService.getChapterCoverImage(item.id) + '&offset=' + coverImageOffset"
+                            [imageUrl]="imageService.getChapterCoverImage(item.id)"
                             [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions" 
                             (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)"
                             [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
