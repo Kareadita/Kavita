@@ -65,7 +65,9 @@ label, select, .clickable {
 
 // Needed for fullscreen
 app-root {
-  background-color: inherit;
+  background-color: transparent;
+  scrollbar-width: 14px;
+  scrollbar-color: var(--primary-color-scrollbar);
 }
 
 ::-webkit-scrollbar {

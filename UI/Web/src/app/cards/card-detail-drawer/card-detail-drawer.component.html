@@ -43,24 +43,29 @@
                             <div class="d-none d-md-block col-md-2 col-lg-1">            
                                 <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
                             </div> 
-                            <div *ngIf="summary$ | async as summary" class="col-md-10 col-lg-11">
-                                <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
+                            <div class="col-md-10 col-lg-11">
+                                <ng-container *ngIf="summary$ | async as summary; else noSummary">
+                                    <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
+                                </ng-container>
+                                <ng-template #noSummary>
+                                    No Summary available.
+                                </ng-template>
                             </div>
                         </div>
                         
                         <div class="row g-0 mt-4 mb-3">
-                            <ng-container *ngIf="chapter.pages">
+                            <ng-container *ngIf="totalPages > 0">
                                 <div class="col-auto mb-2">
-                                    <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
-                                        {{chapter.pages | number:''}} Pages
+                                    <app-icon-and-title label="Print Length" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
+                                        {{totalPages | number:''}} Pages
                                     </app-icon-and-title>
                                 </div>
                                 <div class="vr d-none d-lg-block m-2"></div>
                             </ng-container>
 
-                            <ng-container *ngIf="chapterMetadata !== undefined && chapterMetadata.releaseDate">
+                            <ng-container *ngIf="chapterMetadata !== undefined && chapterMetadata.releaseDate && (chapterMetadata.releaseDate | date: 'shortDate') !== '1/1/01'">
                                 <div class="col-auto mb-2">
-                                    <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release">
+                                    <app-icon-and-title label="Release Date" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release">
                                         {{chapterMetadata.releaseDate | date:'shortDate'}}
                                     </app-icon-and-title>
                                 </div>
@@ -69,7 +74,7 @@
 
                             <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
                                 <div class="col-auto mb-2">
-                                    <app-icon-and-title [clickable]="false" fontClasses="fa-regular fa-clock">
+                                    <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
                                         {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
                                     </app-icon-and-title>
                                 </div>
@@ -78,7 +83,7 @@
                             <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0">
                                 <div class="vr d-none d-lg-block m-2"></div>
                                 <div class="col-auto mb-2">
-                                    <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-book-open">
+                                    <app-icon-and-title label="Word Count" [clickable]="false" fontClasses="fa-solid fa-book-open">
                                         {{chapterMetadata.wordCount | compactNumber}} Words
                                     </app-icon-and-title>
                                 </div>    
@@ -88,11 +93,29 @@
                                 <ng-container *ngIf="ageRating !== '' && ageRating !== 'Unknown'">
                                     <div class="vr d-none d-lg-block m-2"></div>
                                     <div class="col-auto">
-                                        <app-icon-and-title [clickable]="false" fontClasses="fas fa-eye" title="Age Rating">
+                                        <app-icon-and-title label="Age Rating" [clickable]="false" fontClasses="fas fa-eye" title="Age Rating">
                                             {{ageRating}}
                                         </app-icon-and-title>
                                     </div>
                                 </ng-container>
+                            </ng-container>
+
+                            <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
+                                <div class="vr d-none d-lg-block m-2"></div>
+                                <div class="col-auto">
+                                    <app-icon-and-title label="Date Added" [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
+                                        {{chapter.created | date:'short' || '-'}}
+                                    </app-icon-and-title>
+                                </div>
+                            </ng-container>
+    
+                            <ng-container>
+                                <div class="vr d-none d-lg-block m-2"></div>
+                                <div class="col-auto">
+                                    <app-icon-and-title label="ID" [clickable]="false" fontClasses="fa-solid fa-fingerprint" title="ID">
+                                        {{data.id}}
+                                    </app-icon-and-title>
+                                </div>
                             </ng-container>
                         </div>
 
@@ -182,24 +205,6 @@
             <li [ngbNavItem]="tabs[TabID.Files]">
                 <a ngbNavLink>{{tabs[TabID.Files].title}}</a>
                 <ng-template ngbNavContent>
-                    <div class="row g-0 mb-3">
-                        <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
-                            <div class="col-auto">
-                                <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
-                                    Created: {{chapter.created | date:'short' || '-'}}
-                                </app-icon-and-title>
-                            </div>
-                        </ng-container>
-
-                        <ng-container>
-                            <div class="vr d-none d-lg-block m-2"></div>
-                            <div class="col-auto">
-                                <app-icon-and-title [clickable]="false" fontClasses="fa-solid fa-fingerprint" title="ID">
-                                    ID: {{data.id}}
-                                </app-icon-and-title>
-                            </div>
-                        </ng-container>
-                    </div>
                     <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
                     <ul class="list-unstyled">
                         <li class="d-flex my-4" *ngFor="let chapter of chapters">

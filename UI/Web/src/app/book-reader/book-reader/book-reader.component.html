@@ -72,24 +72,26 @@
         </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section {{ColumnLayout}}" [@isLoading]="isLoading ? true : false">
+    <div #readingSection class="reading-section {{ColumnLayout}}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading ? true : false">
         
         <ng-container *ngIf="clickToPaginate">
-            <div class="left {{clickOverlayClass('left')}} no-observe" 
+            <div class="left {{clickOverlayClass('left')}} no-observe" [ngClass]="{'immersive' : immersiveMode}"
                 (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
                  tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
-            <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
+            <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"  
+                [ngClass]="{'immersive' : immersiveMode}"
                 (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
                  tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
         </ng-container>
 
-        <div class="book-container {{ColumnLayout}}">
+        <div class="book-container" [ngClass]="{'immersive' : immersiveMode}"> <!--  {{ColumnLayout}}-->
 
-            <div #readingHtml class="book-content {{ColumnLayout}}" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}"
+            <div #readingHtml class="book-content {{ColumnLayout}}" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}" 
+                [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
                 [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
 
-            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();">
+            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();" [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
                 <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
             </div>
         </div>

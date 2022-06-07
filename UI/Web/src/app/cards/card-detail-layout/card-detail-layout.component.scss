@@ -1,12 +1,23 @@
-.content-container {
-    display: inline-flex;
+.viewport-container {
+    display: flex;
+    flex-direction: row;
     width: 100%;
-    height: calc((var(--vh) *100) - 152px);
+    height: calc((var(--vh) *100) - 162px);
+    margin-bottom: 10px;
+}
+
+.content-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    margin-bottom: 10px;
 }
 
 .card-container {
     display: inline-block;
     width: 100%;
+    overflow-y: auto;
 }
 
 .grid {
@@ -15,10 +26,15 @@
     grid-gap: 0.5rem;
     justify-content: space-around;
     width: 100%;
-    max-height: calc((var(--vh) *100) - 152px);
     overflow-y: auto;
     overflow-x: hidden;
     align-items: start;
+}
+
+@media (max-width: 576px) {
+    .grid {
+        grid-gap: 0.3rem;
+    }
 }
 
 .jump-bar {

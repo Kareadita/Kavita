@@ -352,7 +352,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ColumnHeight() {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       // Take the height after page loads, subtract the top/bottom bar
-      return this.windowHeight - (this.topOffset *2) + 'px';
+      const height = this.windowHeight  - (this.topOffset * 2);
+      this.document.documentElement.style.setProperty('--book-reader-content-max-height', `${height}px`);
+      return height + 'px';
     }
     return 'unset';
   }
@@ -370,10 +372,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get PageHeightForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default) {
-      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - (this.topOffset * 2) + 'px';
+      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
-    return this.ColumnHeight;
+    if (this.immersiveMode) return this.windowHeight + 'px';
+    return (this.windowHeight) - (this.topOffset * 2) + 'px';
   }
 
 
@@ -808,7 +811,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const images = this.readingSectionElemRef?.nativeElement.querySelectorAll('img') || [];
 
     if (this.layoutMode !== BookPageLayoutMode.Default) {
-      const height = this.ColumnHeight;
+      const height = (parseInt(this.ColumnHeight.replace('px', ''), 10) - (this.topOffset * 2)) + 'px';
       Array.from(images).forEach(img => {
         this.renderer.setStyle(img, 'max-height', height);
       });
@@ -1209,6 +1212,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     setTimeout(() => {this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;});
+
+    // When I switch layout, I might need to resume the progress point. 
+    if (mode === BookPageLayoutMode.Default) {
+      const lastSelector = this.lastSeenScrollPartPath;
+      setTimeout(() => this.scrollTo(lastSelector));
+    }
   }
 
   updateReadingDirection(readingDirection: ReadingDirection) {
@@ -1220,6 +1229,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.immersiveMode && !this.drawerOpen) {
       this.actionBarVisible = false;
     }
+
+    this.updateReadingSectionHeight();
+  }
+
+  updateReadingSectionHeight() {
+    setTimeout(() => {
+      console.log('setting height on ', this.readingSectionElemRef)
+      if (this.immersiveMode) {
+        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
+      } else {
+        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
+      }
+    });
   }
 
   // Table of Contents

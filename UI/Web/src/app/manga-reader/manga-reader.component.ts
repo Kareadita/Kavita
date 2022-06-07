@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, takeUntil } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
@@ -10,7 +10,7 @@ import { NavService } from '../_services/nav.service';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
-import { BehaviorSubject, forkJoin, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { Breakpoint, KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
@@ -260,6 +260,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   backgroundColor: string = '#FFFFFF';
 
+  /**
+   * This is here as absolute layout requires us to calculate a negative right property for the right pagination when there is overflow. This is calculated on scroll.
+   */
+  rightPaginationOffset = 0;
+
   getPageUrl = (pageNum: number) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(this.chapterId, pageNum);
@@ -301,6 +306,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return this.WindowHeight;
     }
     return this.image?.nativeElement.height + 'px';
+  }
+
+  
+  get RightPaginationOffset() {
+    if (this.readerMode === ReaderMode.LeftRight && this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT) {
+      return (this.readingArea?.nativeElement?.scrollLeft || 0) * -1;
+    }
+    return 0;
   }
 
   get splitIconClass() {
@@ -368,8 +381,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.router.navigateByUrl('/libraries');
       return;
     }
-
-
 
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
@@ -449,12 +460,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    if (!this.canvas) {
-      return;
-    }
-    this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-    this.canvasImage.onload = () => this.renderPage();
+
+    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(20), takeUntil(this.onDestroy)).subscribe(evt => {
+      if (this.readerMode === ReaderMode.Webtoon) return;
+      if (this.readerMode === ReaderMode.LeftRight && this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT) {
+        this.rightPaginationOffset = (this.readingArea.nativeElement.scrollLeft) * -1;
+        return;
+      }
+      this.rightPaginationOffset = 0;
+    });
     this.getWindowDimensions();
+
+    if (this.canvas) {
+      this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
+      this.canvasImage.onload = () => this.renderPage();
+    }
+
+    
   }
 
   ngOnDestroy() {
@@ -562,7 +584,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       return;
-
     }
 
     forkJoin({

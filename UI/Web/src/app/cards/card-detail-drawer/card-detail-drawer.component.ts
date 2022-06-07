@@ -2,7 +2,9 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbActiveOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, of, take } from 'rxjs';
+import { finalize, Observable, of, take, takeWhile, tap } from 'rxjs';
+import { Download } from 'src/app/shared/_models/download';
+import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
@@ -18,7 +20,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
-import { MAX_PAGES_PER_MINUTE, MAX_WORDS_PER_HOUR, MIN_PAGES_PER_MINUTE, MIN_WORDS_PER_HOUR, ReaderService } from 'src/app/_services/reader.service';
+import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
@@ -81,6 +83,13 @@ export class CardDetailDrawerComponent implements OnInit {
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
   minHoursToRead: number = 1;
   maxHoursToRead: number = 1;
+  /**
+   * We use a separate variable because if this is a volume, we need a sum of all chapters
+   */
+  totalPages: number = 0;
+
+  download$: Observable<Download> | null = null;
+  downloadInProgress: boolean = false;
   
   
 
@@ -109,7 +118,7 @@ export class CardDetailDrawerComponent implements OnInit {
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, private router: Router, private libraryService: LibraryService,
     private seriesService: SeriesService, private readerService: ReaderService, public metadataService: MetadataService, 
-    public activeOffcanvas: NgbActiveOffcanvas) { }
+    public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService) { }
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.data);
@@ -123,13 +132,13 @@ export class CardDetailDrawerComponent implements OnInit {
 
       this.metadataService.getAgeRating(this.chapterMetadata.ageRating).subscribe(ageRating => this.ageRating = ageRating);
       
-      let totalPages = this.chapter.pages;
+      this.totalPages = this.chapter.pages;
       if (!this.isChapter) {
         // Need to account for multiple chapters if this is a volume
-        totalPages = this.utilityService.asVolume(this.data).chapters.map(c => c.pages).reduce((sum, d) => sum + d);
+        this.totalPages = this.utilityService.asVolume(this.data).chapters.map(c => c.pages).reduce((sum, d) => sum + d);
       }
 
-      this.readerService.getManualTimeToRead(this.chapterMetadata.wordCount, totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
+      this.readerService.getManualTimeToRead(this.chapterMetadata.wordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
     });
 
 
@@ -153,6 +162,7 @@ export class CardDetailDrawerComponent implements OnInit {
     });
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this)).filter(item => item.action !== Action.Edit);
+    this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false});
 
     if (this.isChapter) {
       this.chapters.push(this.data as Chapter);
@@ -245,22 +255,59 @@ export class CardDetailDrawerComponent implements OnInit {
         case(Action.AddToReadingList):
         this.actionService.addChapterToReadingList(chapter, this.seriesId);
         break;
+      case (Action.IncognitoRead):
+        this.readChapter(chapter, true);
+        break;
+      case (Action.Download):
+        this.download(chapter);
+        break;
+      case (Action.Read):
+        this.readChapter(chapter, false);
+        break;
       default:
         break;
     }
   }
 
-  readChapter(chapter: Chapter) {
+  readChapter(chapter: Chapter, incognito: boolean = false) {
     if (chapter.pages === 0) {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
     }
 
+    const params = this.readerService.getQueryParamsObject(incognito, false);
     if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'book', chapter.id]);
+      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'book', chapter.id], {queryParams: params});
     } else {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
+      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id], {queryParams: params});
     }
+    this.close();
+  }
+
+  download(chapter: Chapter) {
+    if (this.downloadInProgress === true) {
+      this.toastr.info('Download is already in progress. Please wait.');
+      return;
+    }
+    
+    this.downloadService.downloadChapterSize(chapter.id).pipe(take(1)).subscribe(async (size) => {
+      const wantToDownload = await this.downloadService.confirmSize(size, 'chapter');
+      console.log('want to download: ', wantToDownload);
+      if (!wantToDownload) { return; }
+      this.downloadInProgress = true;
+      this.download$ = this.downloadService.downloadChapter(chapter).pipe(
+        tap(val => {
+          console.log(val);
+        }),
+        takeWhile(val => {
+          return val.state != 'DONE';
+        }),
+        finalize(() => {
+          this.download$ = null;
+          this.downloadInProgress = false;
+        }));
+      this.download$.subscribe(() => {});
+    });
   }
 
 }

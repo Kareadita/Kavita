@@ -11,6 +11,7 @@ export class IconAndTitleComponent implements OnInit {
    */
   @Input() clickable: boolean = true;
   @Input() title: string = '';
+  @Input() label: string = '';
   /**
    * Font classes used to display font
    */

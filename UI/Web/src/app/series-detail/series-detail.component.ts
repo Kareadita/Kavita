@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
-import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { finalize, mergeMap, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -95,11 +95,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   seriesImage: string = '';
   downloadInProgress: boolean = false;
-
-  /**
-   * Tricks the cover images for volume/chapter cards to update after we update one of them
-   */
-  coverImageOffset: number = 0;
 
   /**
    * If an action is currently being done, don't let the user kick off another action
@@ -357,8 +352,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   loadSeries(seriesId: number) {
-    this.coverImageOffset = 0;
-
     this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
     this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
       this.readingLists = lists;
@@ -567,11 +560,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     drawerRef.componentInstance.parentName = this.series?.name;
     drawerRef.componentInstance.seriesId = this.series?.id;
     drawerRef.componentInstance.libraryId = this.series?.libraryId;
-    drawerRef.closed.subscribe((result: {coverImageUpdate: boolean}) => {
-      if (result.coverImageUpdate) {
-        this.coverImageOffset += 1;
-      }
-    });
   }
 
   openEditSeriesModal() {
