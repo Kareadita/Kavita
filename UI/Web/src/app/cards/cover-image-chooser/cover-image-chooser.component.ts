@@ -52,6 +52,10 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
 
   selectedIndex: number = 0;
+  /**
+   * Only applies for showApplyButton. Used to track which image is applied.
+   */
+  appliedIndex: number = 0;
   form!: FormGroup;
   files: NgxFileDropEntry[] = [];
 
@@ -96,6 +100,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   applyImage(index: number) {
     if (this.showApplyButton) {
       this.applyCover.emit(this.imageUrls[index]);
+      this.appliedIndex = index;
     }
   }
 
