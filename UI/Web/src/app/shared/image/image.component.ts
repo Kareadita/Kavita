@@ -66,7 +66,7 @@ export class ImageComponent implements OnChanges, OnDestroy {
       });
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(): void {
     if (this.width != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'width', this.width);
     }

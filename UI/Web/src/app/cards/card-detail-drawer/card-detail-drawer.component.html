@@ -187,18 +187,13 @@
             <li [ngbNavItem]="tabs[TabID.Cover]">
                 <a ngbNavLink>{{tabs[TabID.Cover].title}}</a>
                 <ng-template ngbNavContent>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="chapter.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
-                    <div class="row g-0">
-                        <button class="btn btn-primary flex-end mb-2" [disabled]="coverImageSaveLoading" (click)="saveCoverImage()">
-                            <ng-container *ngIf="coverImageSaveLoading; else notSaving">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually-hidden">Loading...</span>
-                            </ng-container>
-                            <ng-template #notSaving>
-                                Save
-                            </ng-template>
-                        </button>
-                    </div>
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls" 
+                        [showReset]="chapter.coverImageLocked"
+                        [showApplyButton]="true"
+                        (applyCover)="applyCoverImage($event)"
+                        (resetCover)="resetCoverImage()"
+                        >
+                    </app-cover-image-chooser>
                 </ng-template>
             </li>
 
