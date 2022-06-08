@@ -330,7 +330,7 @@ public class ReaderService : IReaderService
         {
             var chapterVolume = volumes.FirstOrDefault();
             if (chapterVolume?.Number != 0) return -1;
-            var firstChapter = chapterVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
+            var firstChapter = chapterVolume.Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparer);
             if (firstChapter == null) return -1;
             return firstChapter.Id;
         }
@@ -372,17 +372,16 @@ public class ReaderService : IReaderService
             if (volume.Number == currentVolume.Number - 1)
             {
                 if (currentVolume.Number - 1 == 0) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
-                var lastChapter = volume.Chapters
-                    .OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
+                var lastChapter = volume.Chapters.MaxBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
                 if (lastChapter == null) return -1;
                 return lastChapter.Id;
             }
         }
 
-        var lastVolume = volumes.OrderBy(v => v.Number).LastOrDefault();
+        var lastVolume = volumes.MaxBy(v => v.Number);
         if (currentVolume.Number == 0 && currentVolume.Number != lastVolume?.Number && lastVolume?.Chapters.Count > 1)
         {
-            var lastChapter = lastVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
+            var lastChapter = lastVolume.Chapters.MaxBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
             if (lastChapter == null) return -1;
             return lastChapter.Id;
         }

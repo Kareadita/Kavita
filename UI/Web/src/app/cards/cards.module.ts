@@ -24,6 +24,8 @@ import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module'
 import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-drawer.component';
 import { EntityTitleComponent } from './entity-title/entity-title.component';
+import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.component';
+import { ListItemComponent } from './list-item/list-item.component';
 
 
 
@@ -45,6 +47,8 @@ import { EntityTitleComponent } from './entity-title/entity-title.component';
     EditSeriesRelationComponent,
     CardDetailDrawerComponent,
     EntityTitleComponent,
+    EntityInfoCardsComponent,
+    ListItemComponent,
   ],
   imports: [
     CommonModule,
@@ -94,7 +98,10 @@ import { EntityTitleComponent } from './entity-title/entity-title.component';
     BulkOperationsComponent,
     ChapterMetadataDetailComponent,
     EditSeriesRelationComponent,
+
     EntityTitleComponent,
+    EntityInfoCardsComponent,
+    ListItemComponent,
 
     NgbOffcanvasModule,
 

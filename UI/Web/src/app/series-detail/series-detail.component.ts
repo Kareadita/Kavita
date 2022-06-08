@@ -131,7 +131,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     {value: 'Release', text: 'Release'},
     {value: 'Added', text: 'Added'},
   ];
-  renderMode: LayoutMode = LayoutMode.Cards;
+  renderMode: LayoutMode = LayoutMode.List;
 
   pageExtrasGroup = new FormGroup({
     'sortingOption': new FormControl(this.sortingOptions[0].value, []),

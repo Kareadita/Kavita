@@ -31,7 +31,6 @@ export class EntityTitleComponent implements OnInit {
     this.isChapter = this.utilityService.isChapter(this.entity);
 
     this.chapter = this.utilityService.isChapter(this.entity) ? (this.entity as Chapter) : (this.entity as Volume).chapters[0];
-    console.log('seriesName: ', this.seriesName);
   }
 
 }

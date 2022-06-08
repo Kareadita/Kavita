@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.Entities.Enums;
 
 namespace API.DTOs
@@ -62,5 +63,15 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>Metadata field</remarks>
         public string TitleName { get; set; }
+        /// <summary>
+        /// Summary of the Chapter
+        /// </summary>
+        /// <remarks>This is not set normally, only for Series Detail</remarks>
+        //public string Summary { get; set; }
+        /// <summary>
+        /// Estimated Time Range to read
+        /// </summary>
+        /// <remarks>This is not set normally, only for Series Detail</remarks>
+        public HourEstimateRangeDto TimeEstimate { get; set; }
     }
 }

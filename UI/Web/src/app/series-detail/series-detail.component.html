@@ -124,26 +124,17 @@
                         </div>
                     </ng-container>
                     <ng-template #storylineListLayout>
-
                             <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
-                                <div class="row g-0 mb-2" *ngIf="volume.number != 0">
-                                    <div class="col-md-1">
-                                        <app-image [imageUrl]="imageService.getVolumeCoverImage(volume.id)" height="230px" width="158px"></app-image>
-                                    </div>
-                                    <div class="col-md-11">
-                                        <div class="row g-0">
-                                            <h4 id="storyline-volume--{{idx}}"><app-entity-title [libraryType]="libraryType" [entity]="volume" [seriesName]="series.name"></app-entity-title></h4>
-                                            <span>{{series.name}}</span>
-                                            <p>Summary goes here if exists</p> <!-- TODO: Need to get Chapter as well -->
-                                            <div class="">
-                                                Info cards here
-
-                                                <button class="btn btn-icon" attr.aria-labelledby="storyline-volume--{{idx}}">Read</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
+                                <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)" 
+                                [seriesName]="series.name" [entity]="volume" *ngIf="volume.number != 0" 
+                                [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                                [pagesRead]="volume.pagesRead" [totalPages]="volume.pages"></app-list-item>
+                            </ng-container>
+                            <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
+                                <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)" 
+                                [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
+                                [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages"></app-list-item>
                             </ng-container>
                     </ng-template>
                 </ng-template>

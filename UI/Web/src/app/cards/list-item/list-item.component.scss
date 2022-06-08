@@ -1,0 +1,20 @@
+$image-height: 230px;
+$image-width: 160px;
+
+.download {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 25%;
+    right: 30%;
+}
+
+.progress-banner {
+    width: $image-width;
+    height: 5px;
+
+    .progress {
+        color: var(--card-progress-bar-color);
+        background-color: transparent;
+    }
+}
