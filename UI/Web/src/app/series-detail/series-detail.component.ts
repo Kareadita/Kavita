@@ -137,6 +137,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     'renderMode': new FormControl(this.renderMode, []),
   });
 
+  isAscendingSort: boolean = false;
+
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
       return;
@@ -241,7 +243,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
         if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
           this.loadSeries(this.seriesId);
-          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.seriesId)); // NOTE: Is this needed as cover update will update the image for us
         }
       }
     });
@@ -591,15 +592,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         });
         
         this.loadSeries(this.seriesId);
-        if (closeResult.coverImageUpdate) {
-          // Random triggers a load change without any problems with API
-          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.seriesId));
-        }
       }
     });
   }
 
   async promptToReview() {
+    // TODO: After a review has been set, we might just want to show an edit icon next to star rating which opens the review, instead of prompting each time.
     const shouldPrompt = this.isNullOrEmpty(this.series.userReview);
     const config = new ConfirmConfig();
     config.header = 'Confirm';
@@ -649,15 +647,15 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  formatChapterTitle(chapter: Chapter) {
-    return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
-  }
+  updateSortOrder() {
+    this.isAscendingSort = !this.isAscendingSort;
+    // if (this.filter.sortOptions === null) {
+    //   this.filter.sortOptions = {
+    //     isAscending: this.isAscendingSort,
+    //     sortField: SortField.SortName
+    //   }
+    // }
 
-  formatVolumeTitle(volume: Volume) {
-    if (this.libraryType === LibraryType.Book) {
-      return volume.name;
-    }
-
-    return 'Volume ' + volume.name;
+    // this.filter.sortOptions.isAscending = this.isAscendingSort;
   }
 }

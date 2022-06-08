@@ -16,20 +16,27 @@
           <div class="offcanvas-body">
             <form [formGroup]="pageExtrasGroup">
                 <div class="row g-0">
-                    <div class="col-md-4 col-sm-12 pe-2 mb-3">
-                        <label for="settings-book-reading-direction" class="form-label">Sort Order</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
-                        <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
-                        <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
+                    <div class="col-md-12 col-sm-12 pe-2 mb-3">
+                        <label for="settings-book-reading-direction" class="form-label">Sort Order</label>
+                        <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
+                            <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
+                            <ng-template #descSort>
+                                <i class="fa fa-arrow-down" title="Descending"></i>
+                            </ng-template>
+                        </button>
+
                         <select class="form-select" aria-describedby="settings-reading-direction-help" formControlName="sortingOption">
                             <option *ngFor="let opt of sortingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
                         </select>
                     </div>
-                    <div class="col-md-4 col-sm-12 pe-2 mb-3">
+                </div>
+                <div class="row g-0">
+                    <div class="col-md-12 col-sm-12 pe-2 mb-3">
                         <label id="immersivemode-label" class="form-label"></label>
                         <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input type="checkbox" role="switch" id="immersivemode" formControlName="renderMode" class="form-check-input" [value]="1" aria-labelledby="immersivemode-label">
-                                <label id="immersivemode" class="form-check-label">{{pageExtrasGroup.get('renderMode')?.value === 0 ? 'Card' : 'List'}} Layout</label>
+                                <label id="immersivemode" class="form-check-label">{{pageExtrasGroup.get('renderMode')?.value === 0 ? 'List' : 'Card'}} Layout</label>
                                 <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
                                 <ng-template #immersivemodeOptionTooltip>This will hide the menu behind a click on the reader document and turn tap to paginate on</ng-template>
                                 <span class="visually-hidden" id="settings-immersivemode-option-help">This will hide the menu behind a click on the reader document and turn tap to paginate on</span>
