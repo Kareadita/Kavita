@@ -480,13 +480,17 @@ public class SeriesService : ISeriesService
             processedVolumes = volumes.Where(v => v.Number > 0).ToList();
             processedVolumes.ForEach(v => v.Name = $"Volume {v.Name}");
         }
+        processedVolumes.ForEach(v =>
+        {
+            v.TimeEstimate = _readerService.GetTimeEstimate(v.Chapters.Sum(c => c.WordCount), v.Pages, v.Chapters.First().Files.First().Format == MangaFormat.Epub);
+        });
 
 
         var specials = new List<ChapterDto>();
         foreach (var chapter in chapters)
         {
             chapter.Title = FormatChapterTitle(chapter, libraryType);
-            //chapter.TimeEstimate = _readerService.GetTimeEstimate();
+            chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, chapter.Files.First().Format == MangaFormat.Epub);
             if (!chapter.IsSpecial) continue;
 
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;

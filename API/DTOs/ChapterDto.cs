@@ -67,11 +67,20 @@ namespace API.DTOs
         /// Summary of the Chapter
         /// </summary>
         /// <remarks>This is not set normally, only for Series Detail</remarks>
-        //public string Summary { get; set; }
+        public string Summary { get; set; }
         /// <summary>
         /// Estimated Time Range to read
         /// </summary>
         /// <remarks>This is not set normally, only for Series Detail</remarks>
         public HourEstimateRangeDto TimeEstimate { get; set; }
+        /// <summary>
+        /// Age Rating for the issue/chapter
+        /// </summary>
+        public AgeRatingDto AgeRating { get; set; }
+
+        /// <summary>
+        /// Total words in a Chapter (books only)
+        /// </summary>
+        public long WordCount { get; set; } = 0L;
     }
 }

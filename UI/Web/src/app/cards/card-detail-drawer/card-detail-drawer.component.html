@@ -20,7 +20,7 @@
                                 <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
                             </div> 
                             <div class="col-md-10 col-lg-11">
-                                <ng-container *ngIf="summary$ | async as summary; else noSummary">
+                                <ng-container *ngIf="summary.length > 0; else noSummary">
                                     <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
                                 </ng-container>
                                 <ng-template #noSummary>

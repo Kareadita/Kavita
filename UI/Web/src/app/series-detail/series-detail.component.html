@@ -32,14 +32,11 @@
                 </div>
                 <div class="row g-0">
                     <div class="col-md-12 col-sm-12 pe-2 mb-3">
-                        <label id="immersivemode-label" class="form-label"></label>
+                        <label id="list-layout-mode-label" class="form-label"></label>
                         <div class="mb-3">
                             <div class="form-check form-switch">
-                                <input type="checkbox" role="switch" id="immersivemode" formControlName="renderMode" class="form-check-input" [value]="1" aria-labelledby="immersivemode-label">
-                                <label id="immersivemode" class="form-check-label">{{pageExtrasGroup.get('renderMode')?.value === 0 ? 'List' : 'Card'}} Layout</label>
-                                <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
-                                <ng-template #immersivemodeOptionTooltip>This will hide the menu behind a click on the reader document and turn tap to paginate on</ng-template>
-                                <span class="visually-hidden" id="settings-immersivemode-option-help">This will hide the menu behind a click on the reader document and turn tap to paginate on</span>
+                                <input type="checkbox" role="switch" id="list-layout-mode" formControlName="renderMode" class="form-check-input" aria-labelledby="list-layout-mode-label">
+                                <label for="list-layout-mode" class="form-check-label">{{pageExtrasGroup.get('renderMode')?.value === LayoutMode.Cards ? 'List' : 'Card'}} Layout</label>
                             </div>
                         </div>
                     </div>

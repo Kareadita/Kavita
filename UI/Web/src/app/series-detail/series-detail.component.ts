@@ -258,7 +258,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.loadSeries(this.seriesId);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val) => {
-      this.renderMode = val;
+      this.renderMode = val ? LayoutMode.Cards : LayoutMode.List;
     })
 
   }

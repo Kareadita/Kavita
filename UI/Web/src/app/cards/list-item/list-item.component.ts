@@ -52,20 +52,22 @@ export class ListItemComponent implements OnInit {
 
   actionInProgress: boolean = false;
   summary$: Observable<string> = of('');
+  summary: string = '';
+  
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
 
-  constructor(private utilityService: UtilityService, private metadataService: MetadataService, private downloadService: DownloadService, private toastr: ToastrService) { }
+  constructor(private utilityService: UtilityService, private downloadService: DownloadService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 
     const isChapter = this.utilityService.isChapter(this.entity);
     if (isChapter) {
-      this.summary$ = this.metadataService.getChapterSummary(this.entity.id);
+      this.summary = this.utilityService.asChapter(this.entity).summary || '';
     } else {
-      this.summary$ = this.metadataService.getChapterSummary(this.utilityService.asVolume(this.entity).chapters[0].id);
+      this.summary = this.utilityService.asVolume(this.entity).chapters[0].summary || '';
     }
   }
 
