@@ -36,6 +36,7 @@ import { NavService } from '../_services/nav.service';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
+import { FormControl, FormGroup } from '@angular/forms';
 
 interface RelatedSeris {
   series: Series;
@@ -48,6 +49,11 @@ enum TabID {
   Storyline = 2,
   Volumes = 3,
   Chapters = 4
+}
+
+enum LayoutMode {
+  Cards = 0,
+  List = 1
 }
 
 @Component({
@@ -120,6 +126,17 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   relations: Array<RelatedSeris> = [];
 
+  sortingOptions: Array<{value: string, text: string}> = [
+    {value: 'Natural', text: 'Natural'},
+    {value: 'Release', text: 'Release'},
+  ];
+  renderMode: LayoutMode = LayoutMode.Cards;
+
+  pageExtrasGroup = new FormGroup({
+    'sortingOption': new FormControl(this.sortingOptions[0].value, []),
+    'renderMode': new FormControl(this.renderMode, []),
+  });
+
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
       return;
@@ -182,6 +199,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   get TabID(): typeof TabID {
     return TabID;
   }
+
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               private router: Router, public bulkSelectionService: BulkSelectionService,
