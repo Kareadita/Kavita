@@ -1,6 +1,9 @@
 <div class="row g-0 mb-2">
     <div class="col-md-1">
         <app-image [imageUrl]="imageUrl" [height]="imageHeight" [width]="imageWidth"></app-image>
+        <div class="progress-banner" *ngIf="pagesRead < totalPages && totalPages > 0 && pagesRead !== totalPages"> 
+            <p><ngb-progressbar type="primary" height="5px" [value]="pagesRead" [max]="totalPages"></ngb-progressbar></p>
+        </div>
         <!-- TODO: Robbie please help me align this on the image -->
         <span class="download" *ngIf="download$ | async as download">
           <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
@@ -16,8 +19,7 @@
                 <span>
                     <app-entity-title [libraryType]="libraryType" [entity]="entity" [seriesName]="seriesName"></app-entity-title>
                 </span>
-                <!-- Idea: show a pie chart here to show progress? -->
-                <button class="btn btn-icon float-end" (click)="read()">
+                <button class="btn btn-icon float-end" (click)="read.emit()">
                     <span>
                         <i class="fa fa-book me-1"></i>
                     </span>
@@ -26,7 +28,7 @@
             </h5>
             <h6>{{seriesName}}</h6>
             <div class="mt-2">
-                <ng-container *ngIf="summary.length > 0; else noSummary"> <!--summary$ | async as summary-->
+                <ng-container *ngIf="summary.length > 0; else noSummary">
                     <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
                 </ng-container>
                 <ng-template #noSummary>
@@ -36,8 +38,4 @@
             <app-entity-info-cards [entity]="entity"></app-entity-info-cards>
         </div>
     </div>
-    <!-- TODO: I need some sort of progress indicator-->
-    <div class="progress-banner" *ngIf="pagesRead < totalPages && totalPages > 0"> <!--  && pagesRead !== totalPages -->
-        <p><ngb-progressbar type="primary" height="5px" [value]="pagesRead" [max]="totalPages"></ngb-progressbar></p>
-      </div>
 </div>

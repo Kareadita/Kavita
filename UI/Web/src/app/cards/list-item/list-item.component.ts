@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { finalize, Observable, of, take, takeWhile } from 'rxjs';
 import { Download } from 'src/app/shared/_models/download';
@@ -8,7 +8,6 @@ import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
-import { MetadataService } from 'src/app/_services/metadata.service';
 
 @Component({
   selector: 'app-list-item',
@@ -49,6 +48,8 @@ export class ListItemComponent implements OnInit {
 
   @Input() pagesRead: number = 0;
   @Input() totalPages: number = 0;
+
+  @Output() read: EventEmitter<void> = new EventEmitter<void>();
 
   actionInProgress: boolean = false;
   summary$: Observable<string> = of('');
@@ -116,9 +117,4 @@ export class ListItemComponent implements OnInit {
       action.callback(action.action, this.entity);
     }
   }
-
-  read() {
-    this.performAction({action: Action.Read, callback: this.actions[0].callback, requiresAdmin: false, title: 'Read'});
-  }
-
 }
