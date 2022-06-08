@@ -1,32 +1,8 @@
 <div class="offcanvas-header">
     <h5 class="offcanvas-title">
-        <ng-container [ngSwitch]="libraryType">
-            <ng-container *ngSwitchCase="LibraryType.Comic">
-                <span class="modal-title" id="modal-basic-title">
-                    <ng-container *ngIf="chapter.titleName != ''; else fullComicTitle">
-                        {{chapter.titleName}}
-                    </ng-container>
-                    <ng-template #fullComicTitle>
-                        {{parentName}} - {{data.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + data.number : 'Special'}}
-                    </ng-template>
-                </span>
-            </ng-container>
-            <ng-container *ngSwitchCase="LibraryType.Manga">
-                <span class="modal-title" id="modal-basic-title">
-                    <ng-container *ngIf="chapter.titleName != ''; else fullMangaTitle">
-                        {{chapter.titleName}}
-                    </ng-container>
-                    <ng-template #fullMangaTitle>
-                        {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}}
-                    </ng-template>
-                </span>
-            </ng-container>
-            <ng-container *ngSwitchCase="LibraryType.Book">
-                <span class="modal-title" id="modal-basic-title">
-                    {{chapter.titleName}}
-                </span>
-            </ng-container>
-        </ng-container>
+        <span class="modal-title" id="modal-basic-title">
+            <app-entity-title [libraryType]="libraryType" [entity]="data" [seriesName]="parentName"></app-entity-title>
+        </span>
     </h5>
     <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()"></button>
 </div>

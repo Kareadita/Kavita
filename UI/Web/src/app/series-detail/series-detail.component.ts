@@ -127,8 +127,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   relations: Array<RelatedSeris> = [];
 
   sortingOptions: Array<{value: string, text: string}> = [
-    {value: 'Natural', text: 'Natural'},
+    {value: 'Storyline', text: 'Storyline'},
     {value: 'Release', text: 'Release'},
+    {value: 'Added', text: 'Added'},
   ];
   renderMode: LayoutMode = LayoutMode.Cards;
 
@@ -137,7 +138,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     'renderMode': new FormControl(this.renderMode, []),
   });
 
-  isAscendingSort: boolean = false;
+  isAscendingSort: boolean = false; // TODO: Get this from User preferences
 
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
@@ -186,20 +187,24 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   private onDestroy: Subject<void> = new Subject();
 
 
-  get LibraryType(): typeof LibraryType {
+  get LibraryType() {
     return LibraryType;
   }
 
-  get MangaFormat(): typeof MangaFormat {
+  get MangaFormat() {
     return MangaFormat;
   }
 
-  get TagBadgeCursor(): typeof TagBadgeCursor {
+  get TagBadgeCursor() {
     return TagBadgeCursor;
   }
 
-  get TabID(): typeof TabID {
+  get TabID() {
     return TabID;
+  }
+
+  get LayoutMode() {
+    return LayoutMode;
   }
 
 
@@ -251,6 +256,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.loadSeries(this.seriesId);
+
+    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val) => {
+      this.renderMode = val;
+    })
+
   }
 
   ngOnDestroy() {

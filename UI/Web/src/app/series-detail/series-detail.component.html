@@ -109,18 +109,43 @@
             <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
-                    <div class="card-container row g-0">
-                        <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
-                            <app-card-item class="col-auto mt-2 mb-2" *ngIf="volume.number != 0" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
-                            [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
-                            [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
-                        </ng-container>
-                        <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
-                            <app-card-item class="col-auto mt-2 mb-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
-                            [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                            [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, storyChapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
-                        </ng-container>
-                    </div>
+                    <ng-container *ngIf="renderMode === LayoutMode.Cards; else storylineListLayout">
+                        <div class="card-container row g-0">
+                            <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
+                                <app-card-item class="col-auto mt-2 mb-2" *ngIf="volume.number != 0" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
+                                [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
+                                [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
+                            </ng-container>
+                            <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
+                                <app-card-item class="col-auto mt-2 mb-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
+                                [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                                [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, storyChapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                    <ng-template #storylineListLayout>
+
+                            <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
+                                <div class="row g-0 mb-2" *ngIf="volume.number != 0">
+                                    <div class="col-md-1">
+                                        <app-image [imageUrl]="imageService.getVolumeCoverImage(volume.id)" height="230px" width="158px"></app-image>
+                                    </div>
+                                    <div class="col-md-11">
+                                        <div class="row g-0">
+                                            <h4 id="storyline-volume--{{idx}}"><app-entity-title [libraryType]="libraryType" [entity]="volume" [seriesName]="series.name"></app-entity-title></h4>
+                                            <span>{{series.name}}</span>
+                                            <p>Summary goes here if exists</p> <!-- TODO: Need to get Chapter as well -->
+                                            <div class="">
+                                                Info cards here
+
+                                                <button class="btn btn-icon" attr.aria-labelledby="storyline-volume--{{idx}}">Read</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </ng-container>
+                    </ng-template>
                 </ng-template>
             </li>
             <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">

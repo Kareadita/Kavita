@@ -23,6 +23,7 @@ import { FileInfoComponent } from './file-info/file-info.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-drawer.component';
+import { EntityTitleComponent } from './entity-title/entity-title.component';
 
 
 
@@ -43,6 +44,7 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     FileInfoComponent,
     EditSeriesRelationComponent,
     CardDetailDrawerComponent,
+    EntityTitleComponent,
   ],
   imports: [
     CommonModule,
@@ -92,8 +94,10 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     BulkOperationsComponent,
     ChapterMetadataDetailComponent,
     EditSeriesRelationComponent,
+    EntityTitleComponent,
 
-    NgbOffcanvasModule
+    NgbOffcanvasModule,
+
   ]
 })
 export class CardsModule { }
