@@ -62,14 +62,7 @@ export class CardDetailDrawerComponent implements OnInit {
   active = this.tabs[0];
 
   chapterMetadata!: ChapterMetadata;
-  ageRating!: string;
-
   summary: string = '';
-  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
-  /**
-   * We use a separate variable because if this is a volume, we need a sum of all chapters
-   */
-  totalPages: number = 0;
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
@@ -120,26 +113,6 @@ export class CardDetailDrawerComponent implements OnInit {
     } else {
       this.summary = this.utilityService.asVolume(this.data).chapters[0].summary || '';
     }
-
-    this.ageRating = this.chapter.ageRating.title;
-      
-    this.totalPages = this.chapter.pages;
-    if (!this.isChapter) {
-      this.totalPages = this.utilityService.asVolume(this.data).pages;
-    }
-
-    if (this.isChapter) {
-      if (this.chapter.timeEstimate) this.readingTime = this.chapter.timeEstimate;
-      else this.readerService.getManualTimeToRead(this.chapter.wordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
-    } else {
-      const est = this.utilityService.asVolume(this.data).timeEstimate;
-      if (est) this.readingTime = est;
-      else {
-        const totalWords = this.utilityService.asVolume(this.data).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
-        this.readerService.getManualTimeToRead(totalWords, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
-      }
-    }
-    
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {

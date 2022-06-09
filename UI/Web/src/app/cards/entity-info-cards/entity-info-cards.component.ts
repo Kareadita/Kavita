@@ -6,6 +6,7 @@ import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
 import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
+import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Volume } from 'src/app/_models/volume';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -40,6 +41,10 @@ export class EntityInfoCardsComponent implements OnInit {
     return MangaFormat;
   }
 
+  get AgeRating() {
+    return AgeRating;
+  }
+
   constructor(private utilityService: UtilityService, private seriesService: SeriesService, private metadataService: MetadataService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
@@ -52,8 +57,6 @@ export class EntityInfoCardsComponent implements OnInit {
         this.chapterMetadata = metadata;
       });
     }
-
-    this.ageRating = this.chapter.ageRating.title;
       
     this.totalPages = this.chapter.pages;
     if (!this.isChapter) {
@@ -71,7 +74,6 @@ export class EntityInfoCardsComponent implements OnInit {
           const totalWords = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
           this.readerService.getManualTimeToRead(totalWords, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
         }
-        
       }
   }
 

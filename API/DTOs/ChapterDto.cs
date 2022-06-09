@@ -76,7 +76,7 @@ namespace API.DTOs
         /// <summary>
         /// Age Rating for the issue/chapter
         /// </summary>
-        public AgeRatingDto AgeRating { get; set; }
+        public AgeRating AgeRating { get; set; }
 
         /// <summary>
         /// Total words in a Chapter (books only)

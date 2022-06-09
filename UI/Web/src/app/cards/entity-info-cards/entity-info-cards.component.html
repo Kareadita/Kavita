@@ -35,11 +35,11 @@
     </ng-container>
 
     <ng-container> <!--  *ngIf="chapterMetadata !== undefined" -->
-        <ng-container *ngIf="ageRating !== '' && ageRating !== 'Unknown'">
+        <ng-container *ngIf="chapter.ageRating !== AgeRating.Unknown">
             <div class="vr d-none d-lg-block m-2"></div>
             <div class="col-auto">
                 <app-icon-and-title label="Age Rating" [clickable]="false" fontClasses="fas fa-eye" title="Age Rating">
-                    {{ageRating}}
+                    {{chapter.ageRating | ageRating | async}}
                 </app-icon-and-title>
             </div>
         </ng-container>

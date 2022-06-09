@@ -19,14 +19,14 @@
                 <span>
                     <app-entity-title [libraryType]="libraryType" [entity]="entity" [seriesName]="seriesName"></app-entity-title>
                 </span>
-                <button class="btn btn-icon float-end" (click)="read.emit()">
+                <button class="btn btn-primary float-end" (click)="read.emit()">
                     <span>
-                        <i class="fa fa-book me-1"></i>
+                        <i class="fa fa-book me-1" aria-hidden="true"></i>
                     </span>
                     <span class="d-none d-sm-inline-block">Read</span>
                 </button>
             </h5>
-            <h6>{{seriesName}}</h6>
+            <!-- <h6 class="text-muted" style="font-size: 0.75rem">{{seriesName}}</h6> -->
             <div class="mt-2">
                 <ng-container *ngIf="summary.length > 0; else noSummary">
                     <app-read-more [text]="summary" [maxLength]="250"></app-read-more>

@@ -1,5 +1,6 @@
 import { HourEstimateRange } from './hour-estimate-range';
 import { MangaFile } from './manga-file';
+import { AgeRating } from './metadata/age-rating';
 import { AgeRatingDto } from './metadata/age-rating-dto';
 
 /**
@@ -33,7 +34,7 @@ export interface Chapter {
      * This is only available on the object when fetched for SeriesDetail
      */
     timeEstimate?: HourEstimateRange; 
-    ageRating: AgeRatingDto;
+    ageRating: AgeRating;
     releaseDate: string;
     wordCount: number;
 }

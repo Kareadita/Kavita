@@ -33,6 +33,7 @@ export class AppComponent implements OnInit {
           this.ngbModal.dismissAll();
         }
       });
+
   }
 
   @HostListener('window:resize', ['$event'])
