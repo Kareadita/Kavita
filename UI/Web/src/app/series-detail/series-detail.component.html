@@ -234,12 +234,14 @@
                     </div>
                 </ng-container>
                 <ng-template #specialListLayout>
-                    <ng-container *ngFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
-                        <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                        [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
-                        [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                        [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"></app-list-item>
-                    </ng-container>
+                    <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
+                        <ng-container *cdkVirtualFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
+                            <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                            [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
+                            [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                            [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"></app-list-item>
+                        </ng-container>
+                    </cdk-virtual-scroll-viewport>
                 </ng-template>
               </ng-template>
             </li>

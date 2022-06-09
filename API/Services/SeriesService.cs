@@ -499,6 +499,7 @@ public class SeriesService : ISeriesService
                 if (!chapter.IsSpecial)
                 {
                     chapters.Add(chapter);
+                    continue;
                 };
 
                 if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
