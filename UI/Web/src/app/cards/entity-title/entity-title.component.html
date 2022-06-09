@@ -5,7 +5,7 @@
         </ng-container>
         <ng-template #fullComicTitle>
             {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
-            {{entity.number != 0 ? (isChapter && includeVolume ? 'Volume ' + entity.number : '') : ''}}
+            <!-- {{entity.number != 0 ? (isChapter && includeVolume ? 'Volume ' + entity.number : '') : ''}} -->
             {{entity.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + entity.number : 'Special'}}
         </ng-template>
     </ng-container>
@@ -14,7 +14,9 @@
             {{chapter.titleName}}
         </ng-container>
         <ng-template #fullMangaTitle>
-            {{seriesName.length > 0 ? seriesName + ' - ' : ''}}{{entity.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + entity.number : 'Special'}}
+            {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
+            <!-- {{entity.number != 0 ? (isChapter && includeVolume ? 'Volume ' + entity.number : '') : ''}} How the hell can I do this? Chapter doesn't have the volume info -->
+            {{entity.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + entity.number : 'Special'}}
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Book">

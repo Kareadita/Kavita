@@ -39,6 +39,10 @@ export class ImageComponent implements OnChanges, OnDestroy {
    * Border Radius of the image. If not defined, will not be applied
    */
    @Input() borderRadius: string = '';
+   /**
+    * If the image component should respond to cover updates
+    */
+   @Input() processEvents: boolean = true;
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
 
@@ -46,24 +50,25 @@ export class ImageComponent implements OnChanges, OnDestroy {
 
   constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService) {
     this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
-        if (res.event === EVENTS.CoverUpdate) {
-          const updateEvent = res.payload as CoverUpdateEvent;
-          if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
-          const enityType = this.imageService.getEntityTypeFromUrl(this.imageUrl);
-          if (enityType === updateEvent.entityType) {
-            const tokens = this.imageUrl.split('?')[1].split('&');
+      if (!this.processEvents) return;
+      if (res.event === EVENTS.CoverUpdate) {
+        const updateEvent = res.payload as CoverUpdateEvent;
+        if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
+        const enityType = this.imageService.getEntityTypeFromUrl(this.imageUrl);
+        if (enityType === updateEvent.entityType) {
+          const tokens = this.imageUrl.split('?')[1].split('&');
 
-            //...seriesId=123&random=
-            let id = tokens[0].replace(enityType + 'Id=', '');
-            if (id.includes('&')) {
-              id = id.split('&')[0];
-            }
-            if (id === (updateEvent.id + '')) {
-              this.imageUrl = this.imageService.randomize(this.imageUrl);
-            }
+          //...seriesId=123&random=
+          let id = tokens[0].replace(enityType + 'Id=', '');
+          if (id.includes('&')) {
+            id = id.split('&')[0];
+          }
+          if (id === (updateEvent.id + '')) {
+            this.imageUrl = this.imageService.randomize(this.imageUrl);
           }
         }
-      });
+      }
+    });
   }
 
   ngOnChanges(): void {

@@ -25,6 +25,11 @@ export class EntityInfoCardsComponent implements OnInit {
    */
   @Input() includeMetadata: boolean = false;
 
+  /**
+   * Hide the Id field
+   */
+  @Input() hideID: boolean = false;
+
   isChapter = false;
   chapter!: Chapter;
 

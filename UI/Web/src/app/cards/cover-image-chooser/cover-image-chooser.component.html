@@ -51,7 +51,7 @@
         <div class="image-card col-auto" 
             *ngFor="let url of imageUrls; let idx = index;" tabindex="0" attr.aria-label="Image {{idx + 1}}" (click)="selectImage(idx)"
             [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
-            <app-image class="card-img-top" height="230px" width="158px" [imageUrl]="url"></app-image>
+            <app-image class="card-img-top" height="230px" width="158px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
             <ng-container *ngIf="showApplyButton">
                 <br>
                 <button class="btn btn-primary" style="width: 100%;" aria-label="Apply for uploaded image" 
