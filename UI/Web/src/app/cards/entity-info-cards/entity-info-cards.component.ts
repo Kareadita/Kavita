@@ -36,6 +36,7 @@ export class EntityInfoCardsComponent implements OnInit {
   chapterMetadata!: ChapterMetadata;
   ageRating!: string;
   totalPages: number = 0;
+  totalWordCount: number = 0;
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
 
   get LibraryType() {
@@ -62,12 +63,17 @@ export class EntityInfoCardsComponent implements OnInit {
         this.chapterMetadata = metadata;
       });
     }
-      
-    this.totalPages = this.chapter.pages;
-    if (!this.isChapter) {
-      this.totalPages = this.utilityService.asVolume(this.entity).pages;
-    }
-
+    
+  this.totalPages = this.chapter.pages;
+  if (!this.isChapter) {
+    this.totalPages = this.utilityService.asVolume(this.entity).pages;
+  }
+    
+  this.totalWordCount = this.chapter.wordCount;
+  if (!this.isChapter) {
+    this.totalWordCount = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
+  }
+    
       
       if (this.isChapter) {
         if (this.chapter.timeEstimate) this.readingTime = this.chapter.timeEstimate;
@@ -76,8 +82,7 @@ export class EntityInfoCardsComponent implements OnInit {
         const est = this.utilityService.asVolume(this.entity).timeEstimate;
         if (est) this.readingTime = est;
         else {
-          const totalWords = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
-          this.readerService.getManualTimeToRead(totalWords, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
+          this.readerService.getManualTimeToRead(this.totalWordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
         }
       }
   }

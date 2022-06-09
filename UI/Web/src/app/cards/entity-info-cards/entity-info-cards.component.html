@@ -25,11 +25,11 @@
         </div>
     </ng-container>
 
-    <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0">
+    <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && totalWordCount > 0">
         <div class="vr d-none d-lg-block m-2"></div>
         <div class="col-auto mb-2">
             <app-icon-and-title label="Word Count" [clickable]="false" fontClasses="fa-solid fa-book-open">
-                {{chapterMetadata.wordCount | compactNumber}} Words
+                {{totalWordCount | compactNumber}} Words
             </app-icon-and-title>
         </div>    
     </ng-container>
