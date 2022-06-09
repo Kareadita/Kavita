@@ -21,6 +21,10 @@ export class EntityTitleComponent implements OnInit {
    * When generating the title, should this prepend 'Volume number' before the Chapter wording
    */
   @Input() includeVolume: boolean = false;
+  /**
+   * When a titleName (aka a title) is avaliable on the entity, show it over Volume X Chapter Y
+   */
+  @Input() prioritizeTitleName: boolean = true;
 
   isChapter = false;
   chapter!: Chapter;

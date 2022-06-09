@@ -460,7 +460,7 @@ public class SeriesService : ISeriesService
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
             .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
-        var chapters = volumes.SelectMany(v => v.Chapters).ToList();
+        var chapters = new List<ChapterDto>(); // (volumes.SelectMany(v => v.Chapters).ToList());
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();

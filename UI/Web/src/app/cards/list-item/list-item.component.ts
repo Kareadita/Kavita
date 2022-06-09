@@ -56,6 +56,10 @@ export class ListItemComponent implements OnInit {
   * When generating the title, should this prepend 'Volume number' before the Chapter wording
   */
   @Input() includeVolume: boolean = false;
+  /**
+   * Show's the title if avaible on entity
+   */
+  @Input() showTitle: boolean = true;
 
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
 

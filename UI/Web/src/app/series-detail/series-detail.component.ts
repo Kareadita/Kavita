@@ -56,6 +56,12 @@ enum LayoutMode {
   List = 1
 }
 
+interface StoryLineItem {
+  chapter?: Chapter;
+  volume?: Volume;
+  isChapter: boolean;
+}
+
 @Component({
   selector: 'app-series-detail',
   templateUrl: './series-detail.component.html',
@@ -71,6 +77,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
   storyChapters: Chapter[] = [];
+  storylineItems: StoryLineItem[] = [];
   libraryId = 0;
   isAdmin = false;
   hasDownloadingRole = false;
@@ -116,6 +123,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
   trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+  trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
+    if (item.isChapter) {
+      return this.trackByChapterIdentity(index, item!.chapter!)
+    }
+    return this.trackByVolumeIdentity(index, item!.volume!);
+  };
 
   /**
    * Are there any related series
@@ -430,6 +443,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.chapters = detail.chapters;
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
+        this.storylineItems = [];
+        const v = this.volumes.map(v => {
+          return {volume: v, chapter: undefined, isChapter: false} as StoryLineItem;
+        });
+        this.storylineItems.push(...v);
+        const c = this.storyChapters.map(c => {
+          return {volume: undefined, chapter: c, isChapter: true} as StoryLineItem;
+        });
+        this.storylineItems.push(...c);
+
 
         this.updateSelectedTab();
         this.isLoading = false;
