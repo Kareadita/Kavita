@@ -559,9 +559,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
     }
-    // NOTE: When selecting a volume, we might want to ask the user which chapter they want or an "Automatic" option. For Volumes
-    // made up of lots of chapter files, it makes it more versitile. The modal can have pages read / pages with colored background
-    // to help the user make a good choice.
 
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {

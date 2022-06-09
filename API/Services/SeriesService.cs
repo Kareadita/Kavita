@@ -482,7 +482,8 @@ public class SeriesService : ISeriesService
         }
         processedVolumes.ForEach(v =>
         {
-            v.TimeEstimate = _readerService.GetTimeEstimate(v.Chapters.Sum(c => c.WordCount), v.Pages, v.Chapters.First().Files.First().Format == MangaFormat.Epub);
+            var isEpub = v.Chapters.First().Files.FirstOrDefault()?.Format == MangaFormat.Epub;
+            v.TimeEstimate = _readerService.GetTimeEstimate(v.Chapters.Sum(c => c.WordCount), v.Pages, isEpub);
         });
 
 
@@ -490,7 +491,8 @@ public class SeriesService : ISeriesService
         foreach (var chapter in chapters)
         {
             chapter.Title = FormatChapterTitle(chapter, libraryType);
-            chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, chapter.Files.First().Format == MangaFormat.Epub);
+            var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
+            chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
             if (!chapter.IsSpecial) continue;
 
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;

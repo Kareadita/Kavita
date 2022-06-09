@@ -405,7 +405,7 @@ public class ReaderService : IReaderService
          if (progress.Count == 0)
          {
              // I think i need a way to sort volumes last
-             return volumes.OrderBy(v => double.Parse(v.Number + ""), _chapterSortComparer).First().Chapters
+             return volumes.OrderBy(v => double.Parse(v.Number + string.Empty), _chapterSortComparer).First().Chapters
                  .OrderBy(c => float.Parse(c.Number)).First();
          }
 

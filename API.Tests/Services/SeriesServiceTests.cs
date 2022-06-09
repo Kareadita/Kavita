@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -21,6 +22,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.Extensions;
+using NSubstitute.ReceivedExtensions;
 using Xunit;
 using Xunit.Sdk;
 
@@ -52,8 +55,18 @@ public class SeriesServiceTests
         var mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, mapper, null);
 
+        var readerService = Substitute.For<IReaderService>();
+        readerService.Configure().GetTimeEstimate(default, default, default).ReturnsForAnyArgs(
+            new HourEstimateRangeDto()
+            {
+                AvgHours = 0,
+                HasProgress = false,
+                MaxHours = 1,
+                MinHours = 1
+            });
+
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(), readerService);
     }
     #region Setup
 
