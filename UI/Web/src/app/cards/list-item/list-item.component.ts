@@ -53,8 +53,8 @@ export class ListItemComponent implements OnInit {
   @Input() relation: RelationKind | undefined = undefined;
 
   /**
-   * When generating the title, should this prepend 'Volume number' before the Chapter wording
-   */
+  * When generating the title, should this prepend 'Volume number' before the Chapter wording
+  */
   @Input() includeVolume: boolean = false;
 
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
