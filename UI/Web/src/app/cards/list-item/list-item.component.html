@@ -18,6 +18,9 @@
                 <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="seriesName" iconClass="fa-ellipsis-v"></app-card-actionables>
                 <span>
                     <app-entity-title [libraryType]="libraryType" [entity]="entity" [seriesName]="seriesName"></app-entity-title>
+                    <ng-container *ngIf="relation !== undefined">
+                        {{relation | relationship}}
+                    </ng-container>
                 </span>
                 <button class="btn btn-primary float-end" (click)="read.emit()">
                     <span>
