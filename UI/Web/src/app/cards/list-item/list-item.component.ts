@@ -62,18 +62,24 @@ export class ListItemComponent implements OnInit {
   actionInProgress: boolean = false;
   summary$: Observable<string> = of('');
   summary: string = '';
+  isChapter: boolean = false;
   
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
+
+  get Title() {
+    if (this.isChapter) return (this.entity as Chapter).titleName;
+    return '';
+  }
 
 
   constructor(private utilityService: UtilityService, private downloadService: DownloadService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 
-    const isChapter = this.utilityService.isChapter(this.entity);
-    if (isChapter) {
+    this.isChapter = this.utilityService.isChapter(this.entity);
+    if (this.isChapter) {
       this.summary = this.utilityService.asChapter(this.entity).summary || '';
     } else {
       this.summary = this.utilityService.asVolume(this.entity).chapters[0].summary || '';
