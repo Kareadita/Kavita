@@ -10,6 +10,7 @@ import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { PipeModule } from '../pipe/pipe.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 
 
@@ -28,6 +29,8 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
     NgbNavModule,
     NgbRatingModule,
     NgbTooltipModule, // Series Detail, Extras Drawer
+
+    ScrollingModule,
 
     TypeaheadModule,
     PipeModule,
