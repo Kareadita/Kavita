@@ -488,18 +488,23 @@ public class SeriesService : ISeriesService
 
 
         var specials = new List<ChapterDto>();
-        foreach (var chapter in chapters)
+        foreach (var vol in volumes.Where(v => v.Number != 0))
         {
-            chapter.Title = FormatChapterTitle(chapter, libraryType);
-            var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
-            chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
-            //chapter.VolumeTitle = chapter.Vo $"Volume {v.Name}"
-            if (!chapter.IsSpecial) continue;
+            foreach (var chapter in vol.Chapters)
+            {
+                chapter.Title = FormatChapterTitle(chapter, libraryType);
+                var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
+                chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+                chapter.VolumeTitle = vol.Name;
+                if (!chapter.IsSpecial)
+                {
+                    chapters.Add(chapter);
+                };
 
-            if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
-            specials.Add(chapter);
+                if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+                specials.Add(chapter);
+            }
         }
-
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
         IEnumerable<ChapterDto> retChapters;

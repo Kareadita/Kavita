@@ -82,5 +82,11 @@ namespace API.DTOs
         /// Total words in a Chapter (books only)
         /// </summary>
         public long WordCount { get; set; } = 0L;
+
+        /// <summary>
+        /// Formatted Volume title ie) Volume 2.
+        /// </summary>
+        /// <remarks>Only available when fetched from Series Detail API</remarks>
+        public string VolumeTitle { get; set; }
     }
 }

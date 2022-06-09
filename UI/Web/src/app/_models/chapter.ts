@@ -37,4 +37,8 @@ export interface Chapter {
     ageRating: AgeRating;
     releaseDate: string;
     wordCount: number;
+    /**
+     * 'Volume number'. Only available for SeriesDetail
+     */
+    volumeTitle?: string;
 }

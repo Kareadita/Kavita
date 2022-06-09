@@ -185,7 +185,7 @@
                                 (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)"
                                 [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true">
                                     <ng-container title>
-                                        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name"></app-entity-title>
+                                        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name" [includeVolume]="true"></app-entity-title>
                                     </ng-container>
                             </app-card-item>
                             </ng-container>

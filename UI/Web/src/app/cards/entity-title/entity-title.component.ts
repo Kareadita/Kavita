@@ -24,6 +24,7 @@ export class EntityTitleComponent implements OnInit {
 
   isChapter = false;
   chapter!: Chapter;
+  volumeTitle: string = '';
 
   get LibraryType() {
     return LibraryType;
@@ -35,6 +36,9 @@ export class EntityTitleComponent implements OnInit {
     this.isChapter = this.utilityService.isChapter(this.entity);
 
     this.chapter = this.utilityService.isChapter(this.entity) ? (this.entity as Chapter) : (this.entity as Volume).chapters[0];
+    if (this.isChapter) {
+      this.volumeTitle = (this.entity as Chapter).volumeTitle || '';
+    }
   }
 
 }

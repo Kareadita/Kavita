@@ -21,5 +21,6 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>This is not set normally, only for Series Detail</remarks>
         public HourEstimateRangeDto TimeEstimate { get; set; }
+
     }
 }

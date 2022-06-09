@@ -71,7 +71,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   resizeJumpBar() {
-    console.log('resizing jump bar');
+    //console.log('resizing jump bar');
     //const breakpoint = this.utilityService.getActiveBreakpoint();
     // if (window.innerWidth < 784) {
     //   // We need to remove a few sections of keys 
@@ -111,7 +111,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   handleIntersection(entries: IntersectionObserverEntry[]) {
-    console.log('interception: ', entries.filter(e => e.target.hasAttribute('no-observe')));
+    //console.log('interception: ', entries.filter(e => e.target.hasAttribute('no-observe')));
     
 
   }
