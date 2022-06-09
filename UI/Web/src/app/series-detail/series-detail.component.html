@@ -125,13 +125,21 @@
                                 <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)" 
                                 [seriesName]="series.name" [entity]="volume" *ngIf="volume.number != 0" 
                                 [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)"></app-list-item>
+                                [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)">
+                                <ng-container title>
+                                    <app-entity-title [libraryType]="libraryType" [entity]="volume" [seriesName]="series.name"></app-entity-title>
+                                </ng-container>
+                            </app-list-item>
                             </ng-container>
                             <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
                                 <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)" 
                                 [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
                                 [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"></app-list-item>
+                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)">
+                                    <ng-container title>
+                                        <app-entity-title [libraryType]="libraryType" [entity]="chapter" [seriesName]="series.name"></app-entity-title>
+                                    </ng-container>
+                                </app-list-item>
                             </ng-container>
                     </ng-template>
                 </ng-template>
@@ -156,7 +164,11 @@
                             <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)" 
                             [seriesName]="series.name" [entity]="volume" *ngIf="volume.number != 0" 
                             [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                            [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)"></app-list-item>
+                            [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)">
+                                <ng-container title>
+                                    <app-entity-title [libraryType]="libraryType" [entity]="volume" [seriesName]="series.name"></app-entity-title>
+                                </ng-container>
+                        </app-list-item>
                         </ng-container>
                     </ng-template>
                 </ng-template>
@@ -171,7 +183,11 @@
                                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
                                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions" 
                                 (selection)="bulkSelectionService.handleCardSelection('chapter', idx, chapters.length, $event)"
-                                [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
+                                [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true">
+                                    <ng-container title>
+                                        <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name"></app-entity-title>
+                                    </ng-container>
+                            </app-card-item>
                             </ng-container>
                         </div>
                     </ng-container>
@@ -181,7 +197,11 @@
                             [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
                             [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                             [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)" 
-                            [includeVolume]="true"></app-list-item>
+                            [includeVolume]="true">
+                                <ng-container title>
+                                    <app-entity-title [libraryType]="libraryType" [entity]="chapter" [seriesName]="series.name" [includeVolume]="true"></app-entity-title>
+                                </ng-container>
+                        </app-list-item>
                         </ng-container>
                     </ng-template>
                 </ng-template>
@@ -196,7 +216,11 @@
                             [imageUrl]="imageService.getChapterCoverImage(item.id)"
                             [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
                             (selection)="bulkSelectionService.handleCardSelection('special', idx, chapters.length, $event)"
-                            [selected]="bulkSelectionService.isCardSelected('special', idx)" [allowSelection]="true"></app-card-item>
+                            [selected]="bulkSelectionService.isCardSelected('special', idx)" [allowSelection]="true">
+                                <ng-container title>
+                                    <app-entity-title [libraryType]="libraryType" [entity]="item" [seriesName]="series.name"></app-entity-title>
+                                </ng-container>
+                        </app-card-item>
                         </ng-container>
                     </div>
                 </ng-container>
