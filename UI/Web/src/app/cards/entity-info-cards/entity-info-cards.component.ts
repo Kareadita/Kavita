@@ -64,27 +64,30 @@ export class EntityInfoCardsComponent implements OnInit {
       });
     }
     
-  this.totalPages = this.chapter.pages;
-  if (!this.isChapter) {
-    this.totalPages = this.utilityService.asVolume(this.entity).pages;
-  }
-    
-  this.totalWordCount = this.chapter.wordCount;
-  if (!this.isChapter) {
-    this.totalWordCount = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
-  }
-    
+    this.totalPages = this.chapter.pages;
+    if (!this.isChapter) {
+      this.totalPages = this.utilityService.asVolume(this.entity).pages;
+    }
       
-      if (this.isChapter) {
-        if (this.chapter.timeEstimate) this.readingTime = this.chapter.timeEstimate;
-        else this.readerService.getManualTimeToRead(this.chapter.wordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
+    this.totalWordCount = this.chapter.wordCount;
+    if (!this.isChapter) {
+      this.totalWordCount = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
+    }
+      
+        
+    if (this.isChapter) {
+      if (this.chapter.timeEstimate) {
+        this.readingTime = this.chapter.timeEstimate;
       } else {
-        const est = this.utilityService.asVolume(this.entity).timeEstimate;
-        if (est) this.readingTime = est;
-        else {
-          this.readerService.getManualTimeToRead(this.totalWordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
-        }
+        this.readerService.getManualTimeToRead(this.chapter.wordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
       }
+    } else {
+      const est = this.utilityService.asVolume(this.entity).timeEstimate;
+      if (est) this.readingTime = est;
+      else {
+        this.readerService.getManualTimeToRead(this.totalWordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
+      }
+    }
   }
 
 }

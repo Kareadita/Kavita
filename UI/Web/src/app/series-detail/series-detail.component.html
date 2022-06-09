@@ -124,7 +124,6 @@
                     </ng-container>
                     <ng-template #storylineListLayout>
                         <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
-                            <!-- TODO: Figure out how to do this-->
                             <ng-container *cdkVirtualFor="let item of storylineItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                 <ng-container *ngIf="!item.isChapter; else chapterListItem">
                                     <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
