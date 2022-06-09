@@ -21,7 +21,7 @@ export class BulkOperationsComponent implements OnInit {
   ngOnInit(): void {
     const navBar = document.querySelector('.navbar');
     if (navBar) {
-      this.topOffset = Math.ceil(navBar.getBoundingClientRect().height);
+      this.topOffset = Math.ceil(navBar.getBoundingClientRect().height); // TODO: We can make this fixed 63px
     }
   }
 

@@ -100,8 +100,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
     const parent = this.document.querySelector('.card-container');
     if (parent == null) return;
-    console.log('card divs', this.document.querySelectorAll('div[id^="jumpbar-index--"]'));
-    console.log('cards: ', this.document.querySelectorAll('.card'));
 
     Array.from(this.document.querySelectorAll('div')).forEach(elem => this.intersectionObserver.observe(elem));
   }

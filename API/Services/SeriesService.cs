@@ -493,6 +493,7 @@ public class SeriesService : ISeriesService
             chapter.Title = FormatChapterTitle(chapter, libraryType);
             var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
             chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+            //chapter.VolumeTitle = chapter.Vo $"Volume {v.Name}"
             if (!chapter.IsSpecial) continue;
 
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;

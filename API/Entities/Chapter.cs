@@ -24,7 +24,7 @@ namespace API.Entities
         public DateTime Created { get; set; }
         public DateTime LastModified { get; set; }
         /// <summary>
-        /// Absolute path to the (managed) image file
+        /// Relative path to the (managed) image file representing the cover image
         /// </summary>
         /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
         public string CoverImage { get; set; }
