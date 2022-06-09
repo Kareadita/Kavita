@@ -17,6 +17,10 @@ export class EntityTitleComponent implements OnInit {
   @Input() libraryType: LibraryType = LibraryType.Manga;
   @Input() seriesName: string = '';
   @Input() entity!: Volume | Chapter;
+  /**
+   * When generating the title, should this prepend 'Volume number' before the Chapter wording
+   */
+  @Input() includeVolume: boolean = false;
 
   isChapter = false;
   chapter!: Chapter;

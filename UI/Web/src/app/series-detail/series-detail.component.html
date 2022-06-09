@@ -180,7 +180,7 @@
                             <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)" 
                             [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
                             [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                            [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"></app-list-item>
+                            [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)" [includeVolume]="true"></app-list-item>
                         </ng-container>
                     </ng-template>
                 </ng-template>

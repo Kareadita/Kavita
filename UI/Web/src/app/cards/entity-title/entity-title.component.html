@@ -4,7 +4,9 @@
             {{chapter.titleName}}
         </ng-container>
         <ng-template #fullComicTitle>
-            {{seriesName.length > 0 ? seriesName + ' - ' : ''}}{{entity.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + entity.number : 'Special'}}
+            {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
+            {{entity.number != 0 ? (isChapter && includeVolume ? 'Volume ' + entity.number : '') : ''}}
+            {{entity.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + entity.number : 'Special'}}
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Manga">

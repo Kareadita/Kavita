@@ -67,7 +67,7 @@ namespace API.DTOs
         /// Summary of the Chapter
         /// </summary>
         /// <remarks>This is not set normally, only for Series Detail</remarks>
-        public string Summary { get; set; }
+        public string Summary { get; init; }
         /// <summary>
         /// Estimated Time Range to read
         /// </summary>
@@ -76,7 +76,7 @@ namespace API.DTOs
         /// <summary>
         /// Age Rating for the issue/chapter
         /// </summary>
-        public AgeRating AgeRating { get; set; }
+        public AgeRating AgeRating { get; init; }
 
         /// <summary>
         /// Total words in a Chapter (books only)
