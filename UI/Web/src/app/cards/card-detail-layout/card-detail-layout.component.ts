@@ -57,9 +57,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
   updateApplied: number = 0;
 
-  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: 0.01 });
-
-
   private onDestory: Subject<void> = new Subject();
 
   get Breakpoint() {
@@ -87,7 +84,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   ngOnInit(): void {
-    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}_${item?.libraryId}`;
+    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`; // ${this.pagination?.currentPage}_
 
 
     if (this.filterSettings === undefined) {
@@ -106,17 +103,13 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
       filter(([y1, y2]) => (y2 < y1 && y2 < 140)),
       throttleTime(200)
     ).subscribe(() => {
+      if (this.pagination.currentPage === this.pagination.totalPages) return;
       this.ngZone.run(() => {
         console.log('Load more pages');
         this.pagination.currentPage = this.pagination.currentPage + 1;
         this.pageChange.emit(this.pagination);
       });
     });
-
-    // const parent = this.document.querySelector('.card-container');
-    // if (parent == null) return;
-
-    // Array.from(this.document.querySelectorAll('div')).forEach(elem => this.intersectionObserver.observe(elem));
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -124,16 +117,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   ngOnDestroy() {
-    this.intersectionObserver.disconnect();
     this.onDestory.next();
     this.onDestory.complete();
   }
 
-  handleIntersection(entries: IntersectionObserverEntry[]) {
-    //console.log('interception: ', entries.filter(e => e.target.hasAttribute('no-observe')));
-    
-
-  }
 
   onPageChange(page: number) {
     this.pageChange.emit(this.pagination);

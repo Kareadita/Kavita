@@ -28,11 +28,13 @@
 </div>
 <ng-template #cardTemplate>
 
-    <div class="grid row g-0" >
-        <div class="card col-auto mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
-            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+    <cdk-virtual-scroll-viewport #scroller appendOnly class="virtual-scroller" [itemSize]="itemSize">
+        <div class="grid row g-0" >
+            <div class="card col-auto mt-2 mb-2" *cdkVirtualFor="let item of items; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+            </div>
         </div>
-    </div>
+    </cdk-virtual-scroll-viewport>
     <p *ngIf="items.length === 0 && !isLoading">
         <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
     </p>

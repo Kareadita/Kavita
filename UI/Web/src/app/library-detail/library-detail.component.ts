@@ -188,7 +188,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
-      this.series = series.result;
+      //this.series = series.result; // Non-infinite scroll version
+      this.series = [...this.series, ...series.result];
       this.pagination = series.pagination;
       this.loadingSeries = false;
       window.scrollTo(0, 0);
@@ -204,5 +205,5 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }
