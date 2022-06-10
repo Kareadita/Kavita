@@ -33,12 +33,22 @@
                 <div class="row g-0">
                     <div class="col-md-12 col-sm-12 pe-2 mb-3">
                         <label id="list-layout-mode-label" class="form-label">Layout Mode</label>
-                        <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input type="checkbox" role="switch" id="list-layout-mode" formControlName="renderMode" class="form-check-input" aria-labelledby="list-layout-mode-label">
-                                <label for="list-layout-mode" class="form-check-label">{{pageExtrasGroup.get('renderMode')?.value === LayoutMode.Cards ? 'List' : 'Card'}} Layout</label>
-                            </div>
+                        <br/>
+                        <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
+                            <input type="radio" formControlName="renderMode" [value]="LayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="layout-mode-default">Card</label>
+                          
+                            <input type="radio" formControlName="renderMode" [value]="LayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
+                            <label class="btn btn-outline-primary" for="layout-mode-col1">List</label>
+                        
                         </div>
+                        <!-- <div class="mb-3" style="display: inline-flex;">
+                            <label for="list-layout-mode" class="form-check-label me-2">Card</label>
+                            <div class="form-check form-switch">
+                                <input type="checkbox" role="switch" id="list-layout-mode" formControlName="renderMode" class="form-check-input" aria-labelledby="list-layout-mode-label" (click)="toggleReaderMode()">
+                                <label for="list-layout-mode" class="form-check-label">List</label>
+                            </div>
+                        </div> -->
                     </div>
                 </div>
             </form>

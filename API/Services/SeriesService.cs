@@ -521,8 +521,6 @@ public class SeriesService : ISeriesService
             Chapters = retChapters,
             Volumes = processedVolumes,
             StorylineChapters = storylineChapters
-
-
         };
     }
 

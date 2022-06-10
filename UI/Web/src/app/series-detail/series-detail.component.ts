@@ -146,7 +146,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     {value: 'Release', text: 'Release'},
     {value: 'Added', text: 'Added'},
   ];
-  renderMode: LayoutMode = LayoutMode.List;
+  renderMode: LayoutMode = LayoutMode.Cards;
 
   pageExtrasGroup = new FormGroup({
     'sortingOption': new FormControl(this.sortingOptions[0].value, []),
@@ -272,10 +272,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.loadSeries(this.seriesId);
 
-    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val) => {
-      this.renderMode = val ? LayoutMode.Cards : LayoutMode.List;
-    })
-
+    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val: LayoutMode) => {
+      this.renderMode = val;
+    });
   }
 
   ngOnDestroy() {
