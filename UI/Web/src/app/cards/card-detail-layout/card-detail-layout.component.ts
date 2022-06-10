@@ -1,7 +1,7 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, EventEmitter, HostListener, Inject, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
-import { filter, from, map, pairwise, Subject, throttleTime } from 'rxjs';
+import { AfterViewInit, Component, ContentChild, EventEmitter, HostListener, Inject, Input, NgZone, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { filter, from, map, pairwise, Subject, tap, throttleTime } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -9,7 +9,6 @@ import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
@@ -19,7 +18,7 @@ const FILTER_PAG_REGEX = /[^0-9]/g;
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss']
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
@@ -63,8 +62,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     return Breakpoint;
   }
 
-  constructor(private seriesService: SeriesService, public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-              private scrollService: ScrollService, private ngZone: NgZone) {
+  constructor(private seriesService: SeriesService, public utilityService: UtilityService, 
+    @Inject(DOCUMENT) private document: Document, private ngZone: NgZone) {
     this.filter = this.seriesService.createSeriesFilter();
   }
 
@@ -100,20 +99,27 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     this.scroller.elementScrolled().pipe(
       map(() => this.scroller.measureScrollOffset('bottom')),
       pairwise(),
-      filter(([y1, y2]) => (y2 < y1 && y2 < 140)),
+      tap(([y1, y2]) => {
+        console.log('(', y1, ',', y2, ')')
+      }),
+      filter(([y1, y2]) => ((y2 < y1 && y2 < 140))), //  || (y2 >= y1 && y2 > 500)
       throttleTime(200)
-    ).subscribe(() => {
-      if (this.pagination.currentPage === this.pagination.totalPages) return;
+      ).subscribe(([y1, y2]) => {
+      const movingForward = y2 < y1;
+      //if (y2 > 140 && movingForward) return; // Don't process 
+      if (this.pagination.currentPage === this.pagination.totalPages || this.pagination.currentPage === 1 && !movingForward) return;
       this.ngZone.run(() => {
         console.log('Load more pages');
-        this.pagination.currentPage = this.pagination.currentPage + 1;
+
+        if (movingForward) {
+          this.pagination.currentPage = this.pagination.currentPage + 1;
+        } else {
+          this.pagination.currentPage = this.pagination.currentPage - 1;
+        }
+        
         this.pageChange.emit(this.pagination);
       });
     });
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    console.log('Items: ', this.items.length);
   }
 
   ngOnDestroy() {
@@ -173,6 +179,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
       return;
     }
 
+    // With infinite scroll, we can't just jump to a random place, because then our list of items would be out of sync. 
     this.selectPageStr(targetPage + '');
 
     // if (minIndex > targetIndex) {

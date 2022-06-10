@@ -21,7 +21,7 @@
             <ng-container [ngTemplateOutlet]="cardTemplate"></ng-container>
         </div>
 
-        <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
+        <!-- <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container> -->
     </div>
 
     <ng-container *ngIf="pagination && items.length > 0 && pagination.totalPages > 1" [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>

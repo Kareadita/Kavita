@@ -1,3 +1,4 @@
-<img #img class="lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
+<!-- <img #img class="lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageService.updateErroredImage($event)" 
-            aria-hidden="true">
+            aria-hidden="true"> -->
+<img #img [src]="imageUrl" aria-hidden="true">

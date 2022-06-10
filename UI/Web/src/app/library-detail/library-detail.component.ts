@@ -187,9 +187,15 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
+    const direction = 1;
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       //this.series = series.result; // Non-infinite scroll version
-      this.series = [...this.series, ...series.result];
+      if (direction === 1) {
+        this.series = [...this.series, ...series.result];
+      } else {
+        this.series = [...series.result, ...this.series];
+      }
+      
       this.pagination = series.pagination;
       this.loadingSeries = false;
       window.scrollTo(0, 0);
