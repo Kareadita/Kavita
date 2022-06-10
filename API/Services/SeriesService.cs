@@ -488,7 +488,7 @@ public class SeriesService : ISeriesService
 
 
         var specials = new List<ChapterDto>();
-        foreach (var vol in volumes.Where(v => v.Number != 0))
+        foreach (var vol in volumes)
         {
             foreach (var chapter in vol.Chapters)
             {
