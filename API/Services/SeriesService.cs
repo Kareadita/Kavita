@@ -461,8 +461,6 @@ public class SeriesService : ISeriesService
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
             .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
-        //var chapters = new List<ChapterDto>(); // (volumes.SelectMany(v => v.Chapters).ToList());
-
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
@@ -484,39 +482,17 @@ public class SeriesService : ISeriesService
         }
 
         var specials = new List<ChapterDto>();
-        var chapters = processedVolumes.SelectMany(v => v.Chapters.Select(c =>
+        var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            c.VolumeTitle = v.Name;
+            c.VolumeTitle = $"Volume {v.Name}";
             return c;
         })).ToList();
-        // foreach (var vol in volumes)
-        // {
-        //     foreach (var chapter in vol.Chapters)
-        //     {
-        //         //chapters.Add(chapter);
-        //         chapter.Title = FormatChapterTitle(chapter, libraryType);
-        //         var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
-        //         chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
-        //         chapter.VolumeTitle = vol.Name;
-        //         if (!chapter.IsSpecial)
-        //         {
-        //             //chapters.Add(chapter);
-        //             continue;
-        //         };
-        //
-        //         if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
-        //         specials.Add(chapter);
-        //     }
-        // }
+
 
         foreach (var chapter in chapters)
         {
             chapter.Title = FormatChapterTitle(chapter, libraryType);
-            if (!chapter.IsSpecial)
-            {
-                //chapters.Add(chapter);
-                continue;
-            };
+            if (!chapter.IsSpecial) continue;
 
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
             specials.Add(chapter);
