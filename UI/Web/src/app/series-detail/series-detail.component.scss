@@ -20,6 +20,7 @@
   max-height: calc(var(--vh)*100 - 170px);
 }
 
+// This is responsible for ensuring we scroll down and only tabs and companion bar is visible
 .main-container {
   height: calc(var(--vh)*100 - 117px);
   overflow-y: auto;

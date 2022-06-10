@@ -519,6 +519,16 @@ public class SeriesService : ISeriesService
                 .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
         }
 
+        var storylineChapters = volumes
+            .Where(v => v.Number == 0)
+            .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
+            .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
+            .ToList();
+        foreach (var chapter in storylineChapters)
+        {
+            var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
+            chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+        }
 
 
         return new SeriesDetailDto()
@@ -526,10 +536,8 @@ public class SeriesService : ISeriesService
             Specials = specials,
             Chapters = retChapters,
             Volumes = processedVolumes,
-            StorylineChapters = volumes
-                .Where(v => v.Number == 0)
-                .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-                .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
+            StorylineChapters = storylineChapters
+
 
         };
     }
