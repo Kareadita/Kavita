@@ -26,6 +26,7 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
 import { EntityTitleComponent } from './entity-title/entity-title.component';
 import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.component';
 import { ListItemComponent } from './list-item/list-item.component';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 
 
@@ -66,7 +67,7 @@ import { ListItemComponent } from './list-item/list-item.component';
     NgbCollapseModule,
     NgbRatingModule,
     
-    //ScrollingModule,
+    ScrollingModule,
     //InfiniteScrollModule,
 
 
@@ -104,6 +105,7 @@ import { ListItemComponent } from './list-item/list-item.component';
     ListItemComponent,
 
     NgbOffcanvasModule,
+    ScrollingModule, // TODO: Validate if this is ideal
 
   ]
 })

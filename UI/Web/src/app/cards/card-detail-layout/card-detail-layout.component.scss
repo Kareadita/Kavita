@@ -73,3 +73,9 @@
         }
     }
 }
+
+.virtual-scroller {
+  width: 100%;
+  height: calc(100vh - 64px); // 64 is a random number
+  //max-height: calc(var(--vh)*100 - 170px);
+}

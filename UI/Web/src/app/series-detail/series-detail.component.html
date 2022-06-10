@@ -8,6 +8,7 @@
     <ng-container subtitle *ngIf="series?.localizedName !== series?.name">
         <h6 class="subtitle-with-actionables" title="Localized Name">{{series?.localizedName}}</h6>
     </ng-container>
+
     <ng-template #extrasDrawer let-offcanvas>
         <div class="offcanvas-header">
             <h4 class="offcanvas-title" id="offcanvas-basic-title">Page Settings</h4>
@@ -42,18 +43,12 @@
                             <label class="btn btn-outline-primary" for="layout-mode-col1">List</label>
                         
                         </div>
-                        <!-- <div class="mb-3" style="display: inline-flex;">
-                            <label for="list-layout-mode" class="form-check-label me-2">Card</label>
-                            <div class="form-check form-switch">
-                                <input type="checkbox" role="switch" id="list-layout-mode" formControlName="renderMode" class="form-check-input" aria-labelledby="list-layout-mode-label" (click)="toggleReaderMode()">
-                                <label for="list-layout-mode" class="form-check-label">List</label>
-                            </div>
-                        </div> -->
                     </div>
                 </div>
             </form>
           </div>
     </ng-template>
+    
 </app-side-nav-companion-bar>
 
 

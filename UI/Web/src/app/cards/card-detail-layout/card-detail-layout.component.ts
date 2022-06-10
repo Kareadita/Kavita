@@ -1,6 +1,7 @@
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
-import { from, Subject } from 'rxjs';
+import { AfterViewInit, Component, ContentChild, EventEmitter, HostListener, Inject, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { filter, from, map, pairwise, Subject, throttleTime } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -18,7 +19,7 @@ const FILTER_PAG_REGEX = /[^0-9]/g;
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss']
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
@@ -47,7 +48,9 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
   @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
+  @ViewChild('scroller') scroller!: CdkVirtualScrollViewport;
 
+  itemSize: number = 5; // Idk what this actually does. Less results in more items rendering 
 
   filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
@@ -64,7 +67,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   constructor(private seriesService: SeriesService, public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-              private scrollService: ScrollService) {
+              private scrollService: ScrollService, private ngZone: NgZone) {
     this.filter = this.seriesService.createSeriesFilter();
   }
 
@@ -97,11 +100,27 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   ngAfterViewInit() {
+    this.scroller.elementScrolled().pipe(
+      map(() => this.scroller.measureScrollOffset('bottom')),
+      pairwise(),
+      filter(([y1, y2]) => (y2 < y1 && y2 < 140)),
+      throttleTime(200)
+    ).subscribe(() => {
+      this.ngZone.run(() => {
+        console.log('Load more pages');
+        this.pagination.currentPage = this.pagination.currentPage + 1;
+        this.pageChange.emit(this.pagination);
+      });
+    });
 
-    const parent = this.document.querySelector('.card-container');
-    if (parent == null) return;
+    // const parent = this.document.querySelector('.card-container');
+    // if (parent == null) return;
 
-    Array.from(this.document.querySelectorAll('div')).forEach(elem => this.intersectionObserver.observe(elem));
+    // Array.from(this.document.querySelectorAll('div')).forEach(elem => this.intersectionObserver.observe(elem));
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    console.log('Items: ', this.items.length);
   }
 
   ngOnDestroy() {
@@ -139,17 +158,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     this.applyFilter.emit(event);
     this.updateApplied++;
   }
-
-  // onScroll() {
-
-  // }
-
-  // onScrollDown() {
-  //   console.log('scrolled down');
-  // }
-  // onScrollUp() {
-  //   console.log('scrolled up');
-  // }
 
   
 
