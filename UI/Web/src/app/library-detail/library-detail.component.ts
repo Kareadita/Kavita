@@ -178,7 +178,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.loadPage();
   }
 
-  loadPage() {
+  handlePaginationChange(direction: 0 | 1) {
+    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
+    this.loadPage(direction);
+  }
+
+  loadPage(direction: 0 | 1 = 1) {
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
@@ -187,7 +192,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    const direction = 1;
+    //const direction = 1; // TODO: Figure out how to solve this
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       //this.series = series.result; // Non-infinite scroll version
       if (direction === 1) {

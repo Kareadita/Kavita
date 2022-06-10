@@ -43,6 +43,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
+  @Output() pageChangeWithDirection: EventEmitter<0 | 1> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
@@ -99,25 +100,33 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     this.scroller.elementScrolled().pipe(
       map(() => this.scroller.measureScrollOffset('bottom')),
       pairwise(),
-      tap(([y1, y2]) => {
-        console.log('(', y1, ',', y2, ')')
-      }),
-      filter(([y1, y2]) => ((y2 < y1 && y2 < 140))), //  || (y2 >= y1 && y2 > 500)
+      filter(([y1, y2]) => ((y2 < y1 && y2 < 140))), 
       throttleTime(200)
       ).subscribe(([y1, y2]) => {
       const movingForward = y2 < y1;
-      //if (y2 > 140 && movingForward) return; // Don't process 
       if (this.pagination.currentPage === this.pagination.totalPages || this.pagination.currentPage === 1 && !movingForward) return;
       this.ngZone.run(() => {
-        console.log('Load more pages');
+        console.log('Load next pages');
 
-        if (movingForward) {
-          this.pagination.currentPage = this.pagination.currentPage + 1;
-        } else {
-          this.pagination.currentPage = this.pagination.currentPage - 1;
-        }
-        
-        this.pageChange.emit(this.pagination);
+        this.pagination.currentPage = this.pagination.currentPage + 1;
+        this.pageChangeWithDirection.emit(1);
+        //this.pageChange.emit(this.pagination);
+      });
+    });
+
+    this.scroller.elementScrolled().pipe(
+      map(() => this.scroller.measureScrollOffset('top')),
+      pairwise(),
+      filter(([y1, y2]) => y2 >= y1 && y2 < 100), 
+      throttleTime(200)
+      ).subscribe(([y1, y2]) => {
+      if (this.pagination.currentPage === 1) return;
+      this.ngZone.run(() => {
+        console.log('Load prev pages');
+
+        this.pagination.currentPage = this.pagination.currentPage - 1;
+        this.pageChangeWithDirection.emit(0);
+        //this.pageChange.emit(this.pagination);
       });
     });
   }
@@ -181,6 +190,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
     // With infinite scroll, we can't just jump to a random place, because then our list of items would be out of sync. 
     this.selectPageStr(targetPage + '');
+    //this.pageChangeWithDirection.emit(1);
 
     // if (minIndex > targetIndex) {
     //   // We need to scroll forward (potentially to another page)
