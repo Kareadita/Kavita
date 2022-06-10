@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
-import { MAX_WORDS_PER_HOUR, MIN_WORDS_PER_HOUR, MIN_PAGES_PER_MINUTE, MAX_PAGES_PER_MINUTE, ReaderService } from 'src/app/_services/reader.service';
+import { ReaderService } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../shared/tag-badge/tag-badge.component';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
 import { UtilityService } from '../../shared/_services/utility.service';
@@ -20,6 +20,7 @@ import { MetadataService } from '../../_services/metadata.service';
 export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   @Input() seriesMetadata!: SeriesMetadata;
+  @Input() hasReadingProgress: boolean = false;
   /**
    * Reading lists with a connection to the Series
    */
@@ -29,8 +30,8 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
 
-  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
-  readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
+  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
+  readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
 
   /**
    * Html representation of Series Summary
@@ -70,7 +71,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     
     if (this.series !== null) {
       this.readerService.getTimeLeft(this.series.id).subscribe((timeLeft) => this.readingTimeLeft = timeLeft);
-      this.readerService.getTimeToRead(this.series.id).subscribe((time) => this.readingTime = time);
+      this.readingTime.minHours = this.series.minHoursToRead;
+      this.readingTime.maxHours = this.series.maxHoursToRead;
+      this.readingTime.avgHours = this.series.avgHoursToRead;
     }
   }
 

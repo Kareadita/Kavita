@@ -8,6 +8,7 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
@@ -460,7 +461,8 @@ public class SeriesService : ISeriesService
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
             .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
-        var chapters = new List<ChapterDto>(); // (volumes.SelectMany(v => v.Chapters).ToList());
+        //var chapters = new List<ChapterDto>(); // (volumes.SelectMany(v => v.Chapters).ToList());
+
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
@@ -480,31 +482,44 @@ public class SeriesService : ISeriesService
             processedVolumes = volumes.Where(v => v.Number > 0).ToList();
             processedVolumes.ForEach(v => v.Name = $"Volume {v.Name}");
         }
-        processedVolumes.ForEach(v =>
-        {
-            var isEpub = v.Chapters.First().Files.FirstOrDefault()?.Format == MangaFormat.Epub;
-            v.TimeEstimate = _readerService.GetTimeEstimate(v.Chapters.Sum(c => c.WordCount), v.Pages, isEpub);
-        });
-
 
         var specials = new List<ChapterDto>();
-        foreach (var vol in volumes)
+        var chapters = processedVolumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            foreach (var chapter in vol.Chapters)
-            {
-                chapter.Title = FormatChapterTitle(chapter, libraryType);
-                var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
-                chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
-                chapter.VolumeTitle = vol.Name;
-                if (!chapter.IsSpecial)
-                {
-                    chapters.Add(chapter);
-                    continue;
-                };
+            c.VolumeTitle = v.Name;
+            return c;
+        })).ToList();
+        // foreach (var vol in volumes)
+        // {
+        //     foreach (var chapter in vol.Chapters)
+        //     {
+        //         //chapters.Add(chapter);
+        //         chapter.Title = FormatChapterTitle(chapter, libraryType);
+        //         var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
+        //         chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+        //         chapter.VolumeTitle = vol.Name;
+        //         if (!chapter.IsSpecial)
+        //         {
+        //             //chapters.Add(chapter);
+        //             continue;
+        //         };
+        //
+        //         if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+        //         specials.Add(chapter);
+        //     }
+        // }
 
-                if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
-                specials.Add(chapter);
-            }
+        foreach (var chapter in chapters)
+        {
+            chapter.Title = FormatChapterTitle(chapter, libraryType);
+            if (!chapter.IsSpecial)
+            {
+                //chapters.Add(chapter);
+                continue;
+            };
+
+            if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
+            specials.Add(chapter);
         }
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
@@ -522,14 +537,7 @@ public class SeriesService : ISeriesService
         var storylineChapters = volumes
             .Where(v => v.Number == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
-            .ToList();
-        foreach (var chapter in storylineChapters)
-        {
-            var isEpub = chapter.Files.FirstOrDefault()?.Format == MangaFormat.Epub;
-            chapter.TimeEstimate = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
-        }
-
+            .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
 
         return new SeriesDetailDto()
         {

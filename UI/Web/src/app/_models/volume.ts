@@ -13,5 +13,8 @@ export interface Volume {
     /**
      * This is only available on the object when fetched for SeriesDetail
      */
-     timeEstimate?: HourEstimateRange; 
+    timeEstimate?: HourEstimateRange; 
+    minHoursToRead: number;
+    maxHoursToRead: number;
+    avgHoursToRead: number;
 }

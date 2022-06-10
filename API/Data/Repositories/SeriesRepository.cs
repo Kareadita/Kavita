@@ -68,7 +68,8 @@ public interface ISeriesRepository
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="userId"></param>
-    /// <param name="userParams"></param>
+    /// <param name="userParams">Pagination info</param>
+    /// <param name="filter">Filtering/Sorting to apply</param>
     /// <returns></returns>
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter);
     /// <summary>
@@ -978,6 +979,7 @@ public class SeriesRepository : ISeriesRepository
     /// <remarks>This provides 2 levels of pagination. Fetching the individual chapters only looks at 3000. Then when performing grouping
     /// in memory, we stop after 30 series. </remarks>
     /// <param name="userId">Used to ensure user has access to libraries</param>
+    /// <param name="pageSize">How many entities to return</param>
     /// <returns></returns>
     public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30)
     {

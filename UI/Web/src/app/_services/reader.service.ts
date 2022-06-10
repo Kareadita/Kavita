@@ -9,11 +9,6 @@ import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
 
-export const MAX_WORDS_PER_HOUR = 30_000;
-export const MIN_WORDS_PER_HOUR = 10_260;
-export const MAX_PAGES_PER_MINUTE = 2.75;
-export const MIN_PAGES_PER_MINUTE = 3.33;
-
 @Injectable({
   providedIn: 'root'
 })
@@ -131,14 +126,6 @@ export class ReaderService {
 
   getTimeLeft(seriesId: number) {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/time-left?seriesId=' + seriesId);
-  }
-
-  getTimeToRead(seriesId: number) {
-    return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/read-time?seriesId=' + seriesId);
-  }
-
-  getManualTimeToRead(wordCount: number, pageCount: number, isEpub: boolean) {
-    return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/manual-read-time?wordCount=' + wordCount + '&pageCount=' + pageCount + '&isEpub=' + isEpub);
   }
 
   /**

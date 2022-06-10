@@ -32,14 +32,16 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ICacheHelper _cacheHelper;
+    private readonly IReaderService _readerService;
 
     public WordCountAnalyzerService(ILogger<WordCountAnalyzerService> logger, IUnitOfWork unitOfWork, IEventHub eventHub,
-        ICacheHelper cacheHelper)
+        ICacheHelper cacheHelper, IReaderService readerService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _cacheHelper = cacheHelper;
+        _readerService = readerService;
     }
 
 
@@ -142,58 +144,78 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
     private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
-        if (series.Format != MangaFormat.Epub) return;
+        var isEpub = series.Format == MangaFormat.Epub;
 
-        long totalSum = 0;
-
-        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        foreach (var volume in series.Volumes)
         {
-            // This compares if it's changed since a file scan only
-            if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false,
-                    chapter.Files.FirstOrDefault()) && chapter.WordCount != 0)
-                continue;
-
-            long sum = 0;
-            var fileCounter = 1;
-            foreach (var file in chapter.Files.Select(file => file.FilePath))
+            foreach (var chapter in volume.Chapters)
             {
-                var pageCounter = 1;
-                try
+                // This compares if it's changed since a file scan only
+                if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate,
+                        chapter.Files.FirstOrDefault()) && chapter.WordCount != 0)
+                    continue;
+
+                if (series.Format == MangaFormat.Epub)
                 {
-                    using var book = await EpubReader.OpenBookAsync(file, BookService.BookReaderOptions);
-
-                    var totalPages = book.Content.Html.Values;
-                    foreach (var bookPage in totalPages)
+                    long sum = 0;
+                    var fileCounter = 1;
+                    foreach (var file in chapter.Files.Select(file => file.FilePath))
                     {
-                        var progress = Math.Max(0F,
-                            Math.Min(1F, (fileCounter * pageCounter) * 1F / (chapter.Files.Count * totalPages.Count)));
+                        var pageCounter = 1;
+                        try
+                        {
+                            using var book = await EpubReader.OpenBookAsync(file, BookService.BookReaderOptions);
 
-                        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                            MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress,
-                                ProgressEventType.Updated, useFileName ? file : series.Name));
-                        sum += await GetWordCountFromHtml(bookPage);
-                        pageCounter++;
+                            var totalPages = book.Content.Html.Values;
+                            foreach (var bookPage in totalPages)
+                            {
+                                var progress = Math.Max(0F,
+                                    Math.Min(1F, (fileCounter * pageCounter) * 1F / (chapter.Files.Count * totalPages.Count)));
+
+                                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                                    MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress,
+                                        ProgressEventType.Updated, useFileName ? file : series.Name));
+                                sum += await GetWordCountFromHtml(bookPage);
+                                pageCounter++;
+                            }
+
+                            fileCounter++;
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
+                            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                                MessageFactory.ErrorEvent("There was an issue counting words on an epub",
+                                    $"{series.Name} - {file}"));
+                            return;
+                        }
+
                     }
 
-                    fileCounter++;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "There was an error reading an epub file for word count, series skipped");
-                    await _eventHub.SendMessageAsync(MessageFactory.Error,
-                        MessageFactory.ErrorEvent("There was an issue counting words on an epub",
-                            $"{series.Name} - {file}"));
-                    return;
+                    chapter.WordCount = sum;
+                    series.WordCount += sum;
+                    volume.WordCount += sum;
                 }
 
+                var est = _readerService.GetTimeEstimate(chapter.WordCount, chapter.Pages, isEpub);
+                chapter.MinHoursToRead = est.MinHours;
+                chapter.MaxHoursToRead = est.MaxHours;
+                chapter.AvgHoursToRead = est.AvgHours;
+                _unitOfWork.ChapterRepository.Update(chapter);
             }
 
-            chapter.WordCount = sum;
-            _unitOfWork.ChapterRepository.Update(chapter);
-            totalSum += sum;
+            var volumeEst = _readerService.GetTimeEstimate(volume.WordCount, volume.Pages, isEpub);
+            volume.MinHoursToRead = volumeEst.MinHours;
+            volume.MaxHoursToRead = volumeEst.MaxHours;
+            volume.AvgHoursToRead = volumeEst.AvgHours;
+            _unitOfWork.VolumeRepository.Update(volume);
+
         }
 
-        series.WordCount = totalSum;
+        var seriesEstimate = _readerService.GetTimeEstimate(series.WordCount, series.Pages, isEpub);
+        series.MinHoursToRead = seriesEstimate.MinHours;
+        series.MaxHoursToRead = seriesEstimate.MaxHours;
+        series.AvgHoursToRead = seriesEstimate.AvgHours;
         _unitOfWork.SeriesRepository.Update(series);
     }
 

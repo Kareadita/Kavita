@@ -97,7 +97,7 @@
                 <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series?.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
             <div *ngIf="seriesMetadata" class="mt-2">
-                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"></app-series-metadata-detail>
+                <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series" [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
             </div>
         </div>
     </div>
@@ -109,7 +109,7 @@
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
                     <ng-container *ngIf="renderMode === LayoutMode.Cards; else storylineListLayout">
-                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
+                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
                             <div class="card-container row g-0">
                                 <ng-container *cdkVirtualFor="let item of storylineItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                     <ng-container *ngIf="!item.isChapter; else chapterCardItem">
@@ -124,20 +124,10 @@
                                     </ng-template>
                                 </ng-container>
                             </div>
-                            <!-- <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
-                                <app-card-item class="col-auto mt-2 mb-2" *ngIf="volume.number != 0" [entity]="volume" [title]="volume.name" (click)="openVolume(volume)"
-                                [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
-                                [read]="volume.pagesRead" [total]="volume.pages" [actions]="volumeActions" (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" [selected]="bulkSelectionService.isCardSelected('volume', idx)" [allowSelection]="true"></app-card-item>
-                            </ng-container>
-                            <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
-                                <app-card-item class="col-auto mt-2 mb-2" *ngIf="!chapter.isSpecial" [entity]="chapter" [title]="chapter.title" (click)="openChapter(chapter)"
-                                [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                                [read]="chapter.pagesRead" [total]="chapter.pages" [actions]="chapterActions" (selection)="bulkSelectionService.handleCardSelection('chapter', idx, storyChapters.length, $event)" [selected]="bulkSelectionService.isCardSelected('chapter', idx)" [allowSelection]="true"></app-card-item>
-                            </ng-container> -->
                     </cdk-virtual-scroll-viewport>
                     </ng-container>
                     <ng-template #storylineListLayout>
-                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
+                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
                             <ng-container *cdkVirtualFor="let item of storylineItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                 <ng-container *ngIf="!item.isChapter; else chapterListItem">
                                     <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
@@ -188,7 +178,7 @@
                 <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Volumes'}}</a>
                 <ng-template ngbNavContent>
                     <ng-container *ngIf="renderMode === LayoutMode.Cards; else volumeListLayout">
-                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
+                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
                             <div class="card-container row g-0">
                                 <ng-container *cdkVirtualFor="let item of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                                     <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
@@ -202,7 +192,7 @@
                         </cdk-virtual-scroll-viewport>
                     </ng-container>
                     <ng-template #volumeListLayout>
-                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
+                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
                             <ng-container *cdkVirtualFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
                                 <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
                                 [seriesName]="series.name" [entity]="volume" *ngIf="volume.number != 0"
@@ -236,7 +226,7 @@
                         </div>
                     </ng-container>
                     <ng-template #chapterListLayout>
-                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
+                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
                             <ng-container *cdkVirtualFor="let chapter of chapters; let idx = index; trackBy: trackByChapterIdentity">
                                 <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
                                 [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
@@ -268,7 +258,7 @@
                     </div>
                 </ng-container>
                 <ng-template #specialListLayout>
-                    <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" itemSize="1" autosize >
+                    <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
                         <ng-container *cdkVirtualFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
                             <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
                             [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"

@@ -60,7 +60,6 @@ public class SeriesServiceTests
             new HourEstimateRangeDto()
             {
                 AvgHours = 0,
-                HasProgress = false,
                 MaxHours = 1,
                 MinHours = 1
             });

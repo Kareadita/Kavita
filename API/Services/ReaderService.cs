@@ -29,7 +29,7 @@ public interface IReaderService
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
-    HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub, bool hasProgress = false);
+    HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
 }
 
 public class ReaderService : IReaderService
@@ -498,41 +498,38 @@ public class ReaderService : IReaderService
         }
     }
 
-    public HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub, bool hasProgress = false)
+    public HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub)
     {
         if (isEpub)
         {
-            var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 1);
-            var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 1);
+            var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 0);
+            var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 0);
             if (maxHours < minHours)
             {
                 return new HourEstimateRangeDto
                 {
                     MinHours = maxHours,
                     MaxHours = minHours,
-                    AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour)),
-                    HasProgress = hasProgress
+                    AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
                 };
             }
             return new HourEstimateRangeDto
             {
                 MinHours = minHours,
                 MaxHours = maxHours,
-                AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour)),
-                HasProgress = hasProgress
+                AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
             };
         }
 
-        var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 1);
-        var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 1);
+        var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 0);
+        var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 0);
         if (maxHoursPages < minHoursPages)
         {
             return new HourEstimateRangeDto
             {
                 MinHours = maxHoursPages,
                 MaxHours = minHoursPages,
-                AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F)),
-                HasProgress = hasProgress
+                AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
             };
         }
 
@@ -540,8 +537,7 @@ public class ReaderService : IReaderService
         {
             MinHours = minHoursPages,
             MaxHours = maxHoursPages,
-            AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F)),
-            HasProgress = hasProgress
+            AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
         };
     }
 }

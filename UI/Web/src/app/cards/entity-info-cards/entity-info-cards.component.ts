@@ -1,5 +1,4 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Observable, of } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
@@ -37,7 +36,7 @@ export class EntityInfoCardsComponent implements OnInit {
   ageRating!: string;
   totalPages: number = 0;
   totalWordCount: number = 0;
-  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
+  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
 
   get LibraryType() {
     return LibraryType;
@@ -73,20 +72,18 @@ export class EntityInfoCardsComponent implements OnInit {
     if (!this.isChapter) {
       this.totalWordCount = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
     }
+
       
         
     if (this.isChapter) {
-      if (this.chapter.timeEstimate) {
-        this.readingTime = this.chapter.timeEstimate;
-      } else {
-        this.readerService.getManualTimeToRead(this.chapter.wordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
-      }
+      this.readingTime.minHours = this.chapter.minHoursToRead;
+      this.readingTime.maxHours = this.chapter.maxHoursToRead;
+      this.readingTime.avgHours = this.chapter.avgHoursToRead;
     } else {
-      const est = this.utilityService.asVolume(this.entity).timeEstimate;
-      if (est) this.readingTime = est;
-      else {
-        this.readerService.getManualTimeToRead(this.totalWordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
-      }
+      const vol = this.utilityService.asVolume(this.entity);
+      this.readingTime.minHours = vol.minHoursToRead;
+      this.readingTime.maxHours = vol.maxHoursToRead;
+      this.readingTime.avgHours = vol.avgHoursToRead;
     }
   }
 

@@ -114,6 +114,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   actionInProgress: boolean = false;
 
+  itemSize: number = 10; // when 10 done, 16 loads
+
   /**
    * Track by function for Volume to tell when to refresh card data
    */
