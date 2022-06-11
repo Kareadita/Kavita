@@ -188,7 +188,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             new Regex(
-                @"(?<Series>.*) (\b|_|-)(v|ch\.?|c|s)\d+",
+                @"^(?<Series>(?!Vol).*) (\b|_|-)(v|ch\.?|c|s)\d+",
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
@@ -471,7 +471,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)(?<!Vol)(?<!Vol.)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
+                @"^(?!Vol)(?<Series>.+?)(?<!Vol)(?<!Vol.)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?<Part>b)?(?:\s\(\d{4}\))?(\b|_|-)",
                 MatchOptions, RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
