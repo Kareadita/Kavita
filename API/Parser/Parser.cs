@@ -537,7 +537,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra(?:(\sChapter)?[^\S])|Art Collection|Side( |_)Stories|Bonus)",
+                @"\b(?<Special>Specials?|One[- ]?Shot|One\-Shot|Omake|Extra(?:(\sChapter)?)(?=\s)|Art Collection|Side Stories|Bonus)\b",
                 MatchOptions, RegexTimeout),
         };
 
@@ -545,7 +545,7 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Specials?|OneShot|One\-Shot|\d.+?(\W|_|-)Annual|Annual(\W|_|-)\d.+?|Extra(?:(\sChapter)?[^\S])|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
+                @"\b(?<Special>Specials?|One[- ]?Shot|\d.+?(\W|-)Annual|Annual(\W|-)\d.+?|Extra(?:\sChapter)?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|TPB|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side\sStories|Bonus|Hors[- ]S[eé]rie|T?HS)\b",
                 MatchOptions, RegexTimeout),
         };
 
@@ -553,13 +553,13 @@ namespace API.Parser
         {
             // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
             new Regex(
-                @"(?<Special>Bd(\s|_|-)Fr)",
+                @"\b(?<Special>Bd(\s|-)Fr)\b",
                 MatchOptions, RegexTimeout),
         };
 
         // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
         private static readonly Regex SpecialMarkerRegex = new Regex(
-            @"(?<Special>SP\d+)",
+            @"\b(?<Special>SP\d+)\b",
                 MatchOptions, RegexTimeout
         );
 
