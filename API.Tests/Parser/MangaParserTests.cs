@@ -8,6 +8,10 @@ namespace API.Tests.Parser
     {
         private readonly ITestOutputHelper _testOutputHelper;
 
+        private string replaceUnderscores(string filename) {
+            return filename.Replace("_", " ");
+        }
+
         public MangaParserTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
@@ -182,6 +186,7 @@ namespace API.Tests.Parser
         [InlineData("(一般コミック) [奥浩哉] いぬやしき 第09巻", "いぬやしき")]
         public void ParseSeriesTest(string filename, string expected)
         {
+            filename = replaceUnderscores(filename);
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
         }
 
@@ -260,6 +265,7 @@ namespace API.Tests.Parser
         [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
         public void ParseChaptersTest(string filename, string expected)
         {
+            filename = replaceUnderscores(filename);
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
         }
 
@@ -295,7 +301,8 @@ namespace API.Tests.Parser
         [InlineData("The League of Extra-ordinary Gentlemen", false)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
-            Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
+            input = replaceUnderscores(input);
+            Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(replaceUnderscores(input))));
         }
 
         [Theory]

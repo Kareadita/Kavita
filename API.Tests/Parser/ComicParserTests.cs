@@ -13,6 +13,10 @@ namespace API.Tests.Parser
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly DefaultParser _defaultParser;
 
+        private string replaceUnderscores(string filename) {
+            return filename.Replace("_", " ");
+        }
+
         public ComicParserTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
@@ -79,6 +83,7 @@ namespace API.Tests.Parser
         [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
+            filename = replaceUnderscores(filename);
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
         }
 
@@ -126,6 +131,7 @@ namespace API.Tests.Parser
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
+            filename = replaceUnderscores(filename);
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
         }
 
@@ -190,6 +196,7 @@ namespace API.Tests.Parser
         [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
+            input = replaceUnderscores(input);
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
         }
     }
