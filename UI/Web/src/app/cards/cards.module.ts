@@ -70,7 +70,6 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     NgbRatingModule,
     
     ScrollingModule,
-    //InfiniteScrollModule,
     VirtualScrollerModule,
 
 
@@ -110,7 +109,7 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     NgbOffcanvasModule,
 
     ScrollingModule, // TODO: Validate if this is ideal
-    
+    VirtualScrollerModule,
 
   ]
 })

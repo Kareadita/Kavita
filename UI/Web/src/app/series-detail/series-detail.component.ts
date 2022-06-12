@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -38,6 +38,7 @@ import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
 import { FormControl, FormGroup } from '@angular/forms';
 import { PageLayoutMode } from '../_models/page-layout-mode';
+import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 
 interface RelatedSeris {
   series: Series;
@@ -64,6 +65,8 @@ interface StoryLineItem {
   styleUrls: ['./series-detail.component.scss']
 })
 export class SeriesDetailComponent implements OnInit, OnDestroy {
+
+  @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
   /**
    * Series Id. Set at load before UI renders
