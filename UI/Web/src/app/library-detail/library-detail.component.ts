@@ -111,7 +111,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
-    this.pagination.itemsPerPage = 10000; // TODO: Validate what pagination setting is ideal
+    this.pagination.itemsPerPage = 0; // TODO: Validate what pagination setting is ideal
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
     // Setup filterActiveCheck to check filter against
