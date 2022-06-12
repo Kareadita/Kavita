@@ -27,6 +27,8 @@ import { EntityTitleComponent } from './entity-title/entity-title.component';
 import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.component';
 import { ListItemComponent } from './list-item/list-item.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+
 
 
 
@@ -69,6 +71,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     
     ScrollingModule,
     //InfiniteScrollModule,
+    VirtualScrollerModule,
 
 
     NgbOffcanvasModule, // Series Detail, action of cards
@@ -105,7 +108,9 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
     ListItemComponent,
 
     NgbOffcanvasModule,
+
     ScrollingModule, // TODO: Validate if this is ideal
+    
 
   ]
 })

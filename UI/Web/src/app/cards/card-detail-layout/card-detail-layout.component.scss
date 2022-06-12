@@ -74,8 +74,11 @@
     }
 }
 
-.virtual-scroller {
+.virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(100vh - 64px); // 64 is a random number
+  //height: calc(100vh - 160px); // 64 is a random number, 523 for me. 
+  //height: calc(var(--vh) * 100 - 160px);
+  height: calc(100vh - 85px);
+  //background-color: red;
   //max-height: calc(var(--vh)*100 - 170px);
 }

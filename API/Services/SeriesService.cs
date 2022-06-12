@@ -34,15 +34,13 @@ public class SeriesService : ISeriesService
     private readonly IEventHub _eventHub;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SeriesService> _logger;
-    private readonly IReaderService _readerService;
 
-    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler, ILogger<SeriesService> logger, IReaderService readerService)
+    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler, ILogger<SeriesService> logger)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
-        _readerService = readerService;
     }
 
     /// <summary>

@@ -55,17 +55,8 @@ public class SeriesServiceTests
         var mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, mapper, null);
 
-        var readerService = Substitute.For<IReaderService>();
-        readerService.Configure().GetTimeEstimate(default, default, default).ReturnsForAnyArgs(
-            new HourEstimateRangeDto()
-            {
-                AvgHours = 0,
-                MaxHours = 1,
-                MinHours = 1
-            });
-
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(), readerService);
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
     }
     #region Setup
 
@@ -756,7 +747,7 @@ public class SeriesServiceTests
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "New Genre".SentenceCase()));
+        Assert.True(series.Metadata.Genres.Select(g1 => g1.Title).All(g2 => g2 == "New Genre".SentenceCase()));
         Assert.False(series.Metadata.GenresLocked); // GenreLocked is false unless the UI Explicitly says it should be locked
     }
 

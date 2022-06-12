@@ -13,7 +13,7 @@
     </div>
 </div>
 <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
-<div class="viewport-container">
+<div class="viewport-container" #scrollingBlock>
     <div class="content-container">
         <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
@@ -24,17 +24,29 @@
         <!-- <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container> -->
     </div>
 
-    <ng-container *ngIf="pagination && items.length > 0 && pagination.totalPages > 1" [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
+    <!--  *ngIf="pagination && items.length > 0 && pagination.totalPages > 1" -->
+    <ng-container  [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
 </div>
 <ng-template #cardTemplate>
-
-    <cdk-virtual-scroll-viewport #scroller appendOnly class="virtual-scroller" [itemSize]="itemSize">
+ <!-- appendOnly-->
+    <!-- <cdk-virtual-scroll-viewport #scroller class="virtual-scroller" [itemSize]="itemSize" orientation="vertical"> 
         <div class="grid row g-0" >
             <div class="card col-auto mt-2 mb-2" *cdkVirtualFor="let item of items; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
                 <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
             </div>
         </div>
-    </cdk-virtual-scroll-viewport>
+    </cdk-virtual-scroll-viewport> -->
+
+    <!-- Works, but scrolling is wierd with images-->
+    <virtual-scroller #scroll [items]="items" (vsEnd)="fetchMore($event)" [bufferAmount]="1">
+        <div class="grid row g-0" #container>
+            <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+            </div>
+        </div>
+    </virtual-scroller>
+
+    
     <p *ngIf="items.length === 0 && !isLoading">
         <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
     </p>

@@ -89,7 +89,7 @@ namespace API.DTOs
         /// Formatted Volume title ie) Volume 2.
         /// </summary>
         /// <remarks>Only available when fetched from Series Detail API</remarks>
-        public string VolumeTitle { get; set; }
+        public string VolumeTitle { get; set; } = string.Empty;
         /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
         public int MinHoursToRead { get; set; }
         /// <inheritdoc cref="IHasReadTimeEstimate.MaxHoursToRead"/>

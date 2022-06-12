@@ -229,8 +229,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         if (textNodes == null) return 0;
 
         return textNodes
-            .Select(node => node.InnerText)
-            .Select(text => text.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .Select(node => node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
             .Select(words => words.Count())
             .Where(wordCount => wordCount > 0)

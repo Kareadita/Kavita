@@ -105,12 +105,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
 
     this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
-      console.log('JumpBar: ', barDetails);
+      //console.log('JumpBar: ', barDetails);
       this.jumpKeys = barDetails;
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+    this.pagination.itemsPerPage = 10000; // TODO: Validate what pagination setting is ideal
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
     // Setup filterActiveCheck to check filter against
@@ -192,13 +193,17 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    //const direction = 1; // TODO: Figure out how to solve this
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
       //this.series = series.result; // Non-infinite scroll version
-      if (direction === 1) {
-        this.series = [...this.series, ...series.result];
+      if (this.series.length === 0) {
+        this.series = series.result;
       } else {
-        this.series = [...series.result, ...this.series];
+        if (direction === 1) {
+          //this.series = [...this.series, ...series.result];
+          this.series.concat(series.result);
+        } else {
+          this.series = [...series.result, ...this.series];
+        }
       }
       
       this.pagination = series.pagination;
