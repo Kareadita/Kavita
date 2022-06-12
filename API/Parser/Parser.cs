@@ -453,17 +453,17 @@ namespace API.Parser
 
         private static readonly Regex[] MangaChapterRegex = new[]
         {
-            // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
+            // Historys Strongest Disciple Kenichi v11 c90-98.zip, ...c90.5-100.5
             new Regex(
-                @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+                @"\b(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
                 MatchOptions, RegexTimeout),
-            // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
+            // [Suihei Kiki] Kasumi Otoko no Ko [Taruby] v1.1.zip
             new Regex(
                 @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 MatchOptions, RegexTimeout),
             // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (Rare case, if causes issue remove)
             new Regex(
-                @"^(?<Series>.*)(?: |_)#(?<Chapter>\d+)",
+                @"^(?<Series>.*)\s#(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // Green Worldz - Chapter 027, Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 11-10
             new Regex(
@@ -471,27 +471,27 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)(?<!Vol)(?<!Vol.)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?<Part>b)?(?:\s\(\d{4}\))?(\b|_|-)",
+                @"^(?!Vol)(?<Series>.+?)(?<!Vol)(?<!Vol.)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?<Part>b)?(?:\s\(\d{4}\))?\b",
                 MatchOptions, RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
                 @"(?<Series>.*)\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 MatchOptions, RegexTimeout),
-            // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
+            // Beelzebub 01 [Noodles].zip, Beelzebub 153b RHS.zip
             new Regex(
-                @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(\s|_|\[|\()",
+                @"^((?!v|vo|vol|Volume).)*\s(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(\s|\[|\()",
                 MatchOptions, RegexTimeout),
-            // Yumekui-Merry_DKThias_Chapter21.zip
+            // Yumekui-Merry DKThias Chapter21.zip
             new Regex(
                 @"Chapter(?<Chapter>\d+(-\d+)?)", //(?:.\d+|-\d+)?
                 MatchOptions, RegexTimeout),
-            // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
+            // [Hidoi] Amaenaideyo MS vol01 chp02.rar
             new Regex(
-                @"(?<Series>.*)(\s|_)(vol\d+)?(\s|_)Chp\.? ?(?<Chapter>\d+)",
+                @"(?<Series>.*)\s(vol\d+)?\sChp\.? ?(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // Vol 1 Chapter 2
             new Regex(
-              @"(?<Volume>((vol|volume|v))?(\s|_)?\.?\d+)(\s|_)(Chp|Chapter)\.?(\s|_)?(?<Chapter>\d+)",
+              @"(?<Volume>((vol|volume|v))?\s?\.?\d+)\s(Chp|Chapter)\.?\s?(?<Chapter>\d+)",
               MatchOptions, RegexTimeout),
             // Chinese Chapter: 第n话 -> Chapter n, 【TFO汉化&Petit汉化】迷你偶像漫画第25话
             new Regex(
@@ -509,11 +509,11 @@ namespace API.Parser
         private static readonly Regex[] MangaEditionRegex = {
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
             new Regex(
-                @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
+                @"\b(?<Edition>Omnibus(( |_)?Edition)?)\b",
                 MatchOptions, RegexTimeout),
             // To Love Ru v01 Uncensored (Ch.001-007)
             new Regex(
-                @"(\b|_)(?<Edition>Uncensored)(\b|_)",
+                @"\b(?<Edition>Uncensored)\b",
                 MatchOptions, RegexTimeout),
         };
 
