@@ -124,6 +124,7 @@ export class ReaderService {
     return this.httpClient.get<Chapter>(this.baseUrl + 'reader/continue-point?seriesId=' + seriesId);
   }
 
+  // TODO: Cache this information
   getTimeLeft(seriesId: number) {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/time-left?seriesId=' + seriesId);
   }

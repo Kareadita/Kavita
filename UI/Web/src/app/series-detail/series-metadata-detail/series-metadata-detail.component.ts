@@ -84,6 +84,10 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     this.isCollapsed = !this.isCollapsed;
   }
 
+  handleGoTo(event: {queryParamName: FilterQueryParam, filter: any}) {
+    this.goTo(event.queryParamName, event.filter);
+  }
+
   goTo(queryParamName: FilterQueryParam, filter: any) {
     let params: any = {};
     params[queryParamName] = filter;

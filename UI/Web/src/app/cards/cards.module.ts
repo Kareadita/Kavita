@@ -28,6 +28,7 @@ import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.
 import { ListItemComponent } from './list-item/list-item.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
 
 
 
@@ -52,6 +53,7 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     EntityTitleComponent,
     EntityInfoCardsComponent,
     ListItemComponent,
+    SeriesInfoCardsComponent,
   ],
   imports: [
     CommonModule,
@@ -69,7 +71,7 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     NgbCollapseModule,
     NgbRatingModule,
     
-    ScrollingModule,
+    //ScrollingModule,
     VirtualScrollerModule,
 
 
@@ -108,8 +110,10 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 
     NgbOffcanvasModule,
 
-    ScrollingModule, // TODO: Validate if this is ideal
+    //ScrollingModule, // TODO: Validate if this is ideal
     VirtualScrollerModule,
+    SeriesInfoCardsComponent
+
 
   ]
 })
