@@ -52,7 +52,7 @@
 </app-side-nav-companion-bar>
 
 
-<div class="main-container container-fluid pt-2" *ngIf="series !== undefined">
+<div class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-3 info-container">
         <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
             <app-image maxWidth="300px" [imageUrl]="seriesImage"></app-image>
@@ -113,7 +113,7 @@
             <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
-                    <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1">
+                    <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock">
                         <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
                             <div class="card-container row g-0" #container>
                                 <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
@@ -161,7 +161,7 @@
             <li [ngbNavItem]="TabID.Volumes" *ngIf="volumes.length > 0">
                 <a ngbNavLink>{{libraryType === LibraryType.Book ? 'Books': 'Volumes'}}</a>
                 <ng-template ngbNavContent>
-                    <virtual-scroller #scroll [items]="volumes">
+                    <virtual-scroller #scroll [items]="volumes"  [parentScroll]="scrollingBlock">
                         <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">
                                 <div class="card-container row g-0" #container>
                                     <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
@@ -194,7 +194,7 @@
             <li [ngbNavItem]="TabID.Chapters" *ngIf="chapters.length > 0">
                 <a ngbNavLink>{{utilityService.formatChapterName(libraryType) + 's'}}</a>
                 <ng-template ngbNavContent>
-                    <virtual-scroller #scroll [items]="chapters">
+                    <virtual-scroller #scroll [items]="chapters"  [parentScroll]="scrollingBlock">
                         <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else chapterListLayout">
                                 <div class="card-container row g-0" #container>
                                     <div *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
@@ -230,7 +230,7 @@
             <li [ngbNavItem]="TabID.Specials" *ngIf="hasSpecials">
               <a ngbNavLink>Specials</a>
               <ng-template ngbNavContent>
-                <virtual-scroller #scroll [items]="specials">
+                <virtual-scroller #scroll [items]="specials"  [parentScroll]="scrollingBlock">
                     <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else specialListLayout">
                         <div class="card-container row g-0" #container>
                             <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
@@ -262,7 +262,7 @@
             <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
                 <a ngbNavLink>Related</a>
                 <ng-template ngbNavContent>
-                    <virtual-scroller #scroll [items]="relations">
+                    <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock">
                         <div class="card-container row g-0" #container>
                             <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentiy">
                                 <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
