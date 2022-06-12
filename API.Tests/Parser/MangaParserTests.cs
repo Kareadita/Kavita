@@ -79,6 +79,7 @@ namespace API.Tests.Parser
         [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
         public void ParseVolumeTest(string filename, string expected)
         {
+            filename = replaceUnderscores(filename);
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
         }
 

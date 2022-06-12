@@ -70,37 +70,25 @@ namespace API.Parser
 
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
-            // Dance in the Vampire Bund v16-17
+            // vol_001-1.cbz for MangaPy default naming convention
             new Regex(
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d+)( |_)",
+                @"^(vol\s)(?<Volume>\d+(\.\d)?)-\d+$",
                 MatchOptions, RegexTimeout),
             // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
-            new Regex(
-                @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
-                MatchOptions, RegexTimeout),
-            // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
-            new Regex(
-                @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
-                MatchOptions, RegexTimeout),
             // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
-            new Regex(
-                @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
-                MatchOptions, RegexTimeout),
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
-            new Regex(
-                @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
-                MatchOptions, RegexTimeout),
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
-                @"(volume )(?<Volume>\d+(\.\d)?)",
+                @"(?<Series>.*?)\b(vol\.?|volume)\s?(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)\b",
+                MatchOptions, RegexTimeout),
+            // Historys Strongest Disciple Kenichi_v11_c90-98.zip
+            // Dance in the Vampire Bund v16-17
+            new Regex(
+                @"(?<Series>.*?)\b(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
                 MatchOptions, RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
-                @"(?<Series>.*)(\b|_|)(S(?<Volume>\d+))",
-                MatchOptions, RegexTimeout),
-            // vol_001-1.cbz for MangaPy default naming convention
-            new Regex(
-                @"(vol_)(?<Volume>\d+(\.\d)?)",
+                @"(?<Series>.*)\bS(?<Volume>\d+)\b",
                 MatchOptions, RegexTimeout),
             // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
             new Regex(
