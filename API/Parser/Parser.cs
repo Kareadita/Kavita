@@ -201,11 +201,11 @@ namespace API.Parser
         {
             // Tintin - T22 Vol 714 pour Sydney
             new Regex(
-                @"(?<Series>.+?)\s?(\b|_|-)\s?((vol|tome|t)\.?)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.+?)\s?(\b|-)\s?(vol|tome|t)\.?\d",
                 MatchOptions, RegexTimeout),
             // Invincible Vol 01 Family matters (2005) (Digital)
             new Regex(
-                @"(?<Series>.+?)(\b|_)((vol|tome|t)\.?)(\s|_)(?<Volume>\d+(-\d+)?)",
+                @"(?<Series>.+?)\b(vol|tome|t)\.?\s\d",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -213,7 +213,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // 04 - Asterix the Gladiator (1964) (Digital-Empire) (WebP by Doc MaKS)
             new Regex(
-            @"^(?<Volume>\d+)\s(-\s|_)(?<Series>.*(\d{4})?)( |_)(\(|\d+)",
+            @"^(?<Volume>\d+)\s(-\s)(?<Series>.*(\d{4})?) (\(|\d)",
                 MatchOptions, RegexTimeout),
             // 01 Spider-Man & Wolverine 01.cbr
             new Regex(
@@ -221,47 +221,47 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Batman & Wildcat (1 of 3)
             new Regex(
-            @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Volume>\d+) of \d+)",
+            @"(?<Series>.*(\d{4})?) \((?<Volume>\d+) of \d+\)",
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
             new Regex(
-                @"^(?<Series>.+?)(?: |_|-)(v|t)\d+",
+                @"^(?<Series>.+?)( |-)(v|t)\d",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
-                @"^(?<Series>.+?)(?: |_)c(hapter) \d+",
+                @"^(?<Series>.+?) chapter \d+",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics issue #25
             new Regex(
-                @"^(?<Series>.+?)(?: |_)i(ssue) #\d+",
+                @"^(?<Series>.+?) issue #\d",
                 MatchOptions, RegexTimeout),
             // Batman Wayne Family Adventures - Ep. 001 - Moving In
             new Regex(
-                @"^(?<Series>.+?)(\s|_|-)(?:Ep\.?)(\s|_|-)+\d+",
+                @"^(?<Series>.+?)(\s|-)Ep\.?(\s|-)+\d",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"^(?<Series>.+?)Vol\.?\s?#?(?:\d+)",
+                @"^(?<Series>.+?)Vol\.?\s?#?\d",
                 MatchOptions, RegexTimeout),
             // Batman & Robin the Teen Wonder #0
             new Regex(
-                @"^(?<Series>.*)(?: |_)#\d+",
+                @"^(?<Series>.*) #\d",
                 MatchOptions, RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.+?)(?: \d+)",
+                @"^(?<Series>.+?) \d",
                 MatchOptions, RegexTimeout),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             new Regex(
-                @"^(?<Series>.+?)(?: |_)(?<Chapter>\d+)",
+                @"^(?<Series>.+?) \d",
                 MatchOptions, RegexTimeout),
             // The First Asterix Frieze (WebP by Doc MaKS)
             new Regex(
-                @"^(?<Series>.*)(?: |_)(?!\(\d{4}|\d{4}-\d{2}\))\(",
+                @"^(?<Series>.*) (?!\(\d{4}|\d{4}-\d{2}\))\(",
                 MatchOptions, RegexTimeout),
             // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+?)-(chapter-)?(?<Chapter>\d+)",
+                @"^(?<Series>.+?)-(chapter-)?\d",
                 MatchOptions, RegexTimeout),
             // MUST BE LAST: Batman & Daredevil - King of New York
             new Regex(
@@ -273,11 +273,11 @@ namespace API.Parser
         {
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.*)(?: |_)(t|v)(?<Volume>\d+)",
+                @"^(?<Series>.*) (t|v)(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"^(?<Series>.+?)(?:\s|_)(v|vol|tome|t)\.?(\s|_)?(?<Volume>\d+)",
+                @"^(?<Series>.+?)\s(v|vol|tome|t)\.?\s?(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
             // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
             new Regex(
@@ -301,11 +301,11 @@ namespace API.Parser
         {
             // Batman & Wildcat (1 of 3)
             new Regex(
-                @"(?<Series>.*(\d{4})?)( |_)(?:\((?<Chapter>\d+) of \d+)",
+                @"(?<Series>.*(\d{4})?) \((?<Chapter>\d+) of \d+\)",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 04 (of 6) (1999)
             new Regex(
-                @"(?<Series>.+?)(?<Chapter>\d+)(\s|_|-)?\(of",
+                @"(?<Series>.+?)(?<Chapter>\d+)(\s|-)?\(of",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -313,19 +313,19 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             new Regex(
-                @"^(?<Series>.+?)(?: |_)v(?<Volume>\d+)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)",
+                @"^(?<Series>.+?) v(?<Volume>\d+) (c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)",
                 MatchOptions, RegexTimeout),
             // Batman & Robin the Teen Wonder #0
             new Regex(
-                @"^(?<Series>.+?)(?:\s|_)#(?<Chapter>\d+)",
+                @"^(?<Series>.+?)\s#(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // Batman 2016 - Chapter 01, Batman 2016 - Issue 01, Batman 2016 - Issue #01
             new Regex(
-                @"^(?<Series>.+?)((c(hapter)?)|issue)(_|\s)#?(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+                @"^(?<Series>.+?)((c(hapter)?)|issue)\s#?(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
                 MatchOptions, RegexTimeout),
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             new Regex(
-                @"^(?<Series>.+?)(?:\s|_)(c? ?(chapter)?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+                @"^(?<Series>.+?)\s(c? ?(chapter)?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
                 MatchOptions, RegexTimeout),
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
@@ -339,15 +339,15 @@ namespace API.Parser
 
             // Saga 001 (2012) (Digital) (Empire-Zone)
             new Regex(
-                @"(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)\s\(\d{4}",
+                @"(?<Series>.+?) (c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)\s\(\d{4}",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)( |_)c(hapter)( |_)(?<Chapter>\d*)",
+                @"^(?!Vol)(?<Series>.+?) chapter (?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics issue #25
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)( |_)i(ssue)( |_) #(?<Chapter>\d*)",
+                @"^(?!Vol)(?<Series>.+?) issue #(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
