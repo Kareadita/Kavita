@@ -8,7 +8,7 @@
             <ng-container *ngIf="includeVolume && volumeTitle != ''">
                 {{entity.number != 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
             </ng-container>
-            {{entity.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + entity.number : 'Special'}}
+            {{entity.number != 0 ? (isChapter ? 'Issue #' + entity.number : volumeTitle) : 'Special'}}
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Manga">
@@ -20,7 +20,7 @@
             <ng-container *ngIf="includeVolume && volumeTitle != ''">
                 {{entity.number != 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
             </ng-container>
-            {{entity.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + entity.number : 'Special'}}
+            {{entity.number != 0 ? (isChapter ? 'Chapter '  + entity.number : volumeTitle) : 'Special'}}
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Book">

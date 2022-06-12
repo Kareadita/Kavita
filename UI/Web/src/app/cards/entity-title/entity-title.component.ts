@@ -29,10 +29,13 @@ export class EntityTitleComponent implements OnInit {
   isChapter = false;
   chapter!: Chapter;
   volumeTitle: string = '';
+  volume: Volume | undefined = undefined;
 
   get LibraryType() {
     return LibraryType;
   }
+
+  
 
   constructor(private utilityService: UtilityService) { }
 
@@ -42,6 +45,10 @@ export class EntityTitleComponent implements OnInit {
     this.chapter = this.utilityService.isChapter(this.entity) ? (this.entity as Chapter) : (this.entity as Volume).chapters[0];
     if (this.isChapter) {
       this.volumeTitle = (this.entity as Chapter).volumeTitle || '';
+    } else {
+      this.volume = this.utilityService.asVolume(this.entity);
+      console.log('volume name: ', this.volume.name);
+      this.volumeTitle = this.utilityService.asVolume(this.entity).name;
     }
   }
 
