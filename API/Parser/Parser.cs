@@ -124,59 +124,44 @@ namespace API.Parser
         {
             // Grand Blue Dreaming - SP02
             new Regex(
-                @"(?<Series>.*)(\b|_|-|\s)(?:sp)\d",
+                @"(?<Series>.*)(\b|-|\s)(?:sp)\d",
                 MatchOptions, RegexTimeout),
-            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar, Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz
+            // Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz
             new Regex(
-                @"^(?<Series>.*)( |_)Vol\.?(\d+|tbd)",
+                @"^(?<Series>.*) Vol\.?tbd\b",
                 MatchOptions, RegexTimeout),
+            // [SugoiSugoi] NEEDLESS Vol.2 - Disk The Informant 5 [ENG].rar
             // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex),
             // The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake
-            new Regex(
-                @"(?<Series>.+?)(\s|_|-)+(?:Vol(ume|\.)?(\s|_|-)+\d+)(\s|_|-)+(?:(Ch|Chapter|Ch)\.?)(\s|_|-)+(?<Chapter>\d+)",
-                MatchOptions,
-                RegexTimeout),
-            // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
-            new Regex(
-                @"(?<Series>.*)(\b|_)v(?<Volume>\d+-?\d*)(\s|_|-)",
-                MatchOptions,
-                RegexTimeout),
-            // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
-            new Regex(
-                @"(?<Series>.*)( - )(?:v|vo|c|chapters)\d",
-                MatchOptions, RegexTimeout),
-            // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
-            new Regex(
-                @"(?<Series>.*)(?:, Chapter )(?<Chapter>\d+)",
-                MatchOptions, RegexTimeout),
-            // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz, My Charms Are Wasted on Kuroiwa Medaka - Ch. 37.5 - Volume Extras
-            new Regex(
-                @"(?<Series>.+?)(\s|_|-)(?!Vol)(\s|_|-)((?:Chapter)|(?:Ch\.))(\s|_|-)(?<Chapter>\d+)",
-                MatchOptions, RegexTimeout),
-            // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
-            new Regex(
-                @"(?<Series>.*) (\b|_|-)(vol)\.?(\s|-|_)?\d+",
-                MatchOptions, RegexTimeout),
+            // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
             // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
-            new Regex(
-                @"(?<Series>.*) (\b|_|-)(vol)(ume)",
-                MatchOptions,
-                RegexTimeout),
+            // Tonikaku Kawaii Vol-1 (Ch 01-08)
+            // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
+            // Ichiban Ushiro no Daimaou v04 ch34 [VISCANS].zip, VanDread-v01-c01.zip
+            // Ichinensei ni Nacchattara v01 ch01 [Taruby] v1.1.zip must be before [Suihei Kiki] Kasumi Otoko no Ko [Taruby] v1.1.zip
+            // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
+            // [Suihei Kiki] Kasumi Otoko no Ko [Taruby] v1.1.zip
+            // Kedouin Makoto - Corpse Party Musume, Chapter 19 [Dametrans].zip
+            // Please Go Home, Akutsu-San! - Chapter 038.5 - Volume Announcement.cbz, My Charms Are Wasted on Kuroiwa Medaka - Ch. 37.5 - Volume Extras
             //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
-            new Regex(
-                @"(?<Series>.*)(\bc\d+\b)",
-                MatchOptions, RegexTimeout),
             //Tonikaku Cawaii [Volume 11], Darling in the FranXX - Volume 01.cbz
-            new Regex(
-                @"(?<Series>.*)(?: _|-|\[|\()\s?vol(ume)?",
-                MatchOptions, RegexTimeout),
             // Momo The Blood Taker - Chapter 027 Violent Emotion.cbz, Grand Blue Dreaming - SP02 Extra (2019) (Digital) (danke-Empire).cbz
+            // Historys Strongest Disciple Kenichi v11 c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
+            // Noblesse - Episode 429 (74 Pages).7z
+            // Fullmetal Alchemist chapters 101-108
+            // Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1
+            // Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01
+            // Fullmetal Alchemist chapters 101-108.cbz
+            // Baketeriya ch01-05.zip
+            // Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1
+            // Magi - Ch.252-005.cbz
+            // Baketeriya ch01-05.zip
+            // Kodoja #001 (March 2016)
+            // [BAA] Darker than Black c1
             new Regex(
-                @"^(?<Series>(?!Vol).+?)(?:(ch(apter|\.)(\b|_|-|\s))|sp)\d",
-                MatchOptions, RegexTimeout),
-            // Historys Strongest Disciple Kenichi_v11_c90-98.zip, Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
-            new Regex(
-                @"^(?<Series>(?!Vol).*) (\b|_|-)(v|ch\.?|c|s)\d+",
+                @"^(?!Vol)(?<Series>.+?)[\s-\[](v|vo|vol\.?|volume|episode|c|chp?.?|chapter|chapters|s|#)[-\s]?\d",
+                //@"^(?!Vol)(?<Series>.*)( |-)(?<!-)(episode|chapter|chp?.?|chapters) ?\d",
+                //@"^(?<Series>.+?)[\s-\[](vol\.?|volume)[-\s]?\d",
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
@@ -186,9 +171,9 @@ namespace API.Parser
             new Regex(
                 @"(?<Series>.*) (-)?(?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
                 MatchOptions, RegexTimeout),
-            // Noblesse - Episode 429 (74 Pages).7z
+            // It's Witching Time! 001 (Digital) (Anonymous1234)
             new Regex(
-                @"(?<Series>.*)(\s|_)(?:Episode|Ep\.?)(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                @"(?<Series>.+?)(\s|-)+?\d+(\s|-)\(",
                 MatchOptions, RegexTimeout),
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
             new Regex(
@@ -196,73 +181,15 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Tonikaku Kawaii (Ch 59-67) (Ongoing)
             new Regex(
-                @"(?<Series>.*)(\s|_)\((c\s|ch\s|chapter\s)",
-                MatchOptions, RegexTimeout),
-            // Fullmetal Alchemist chapters 101-108
-            new Regex(
-                @"(?<Series>.+?)(\s|_|\-)+?chapters(\s|_|\-)+?\d+(\s|_|\-)+?",
-                MatchOptions, RegexTimeout),
-            // It's Witching Time! 001 (Digital) (Anonymous1234)
-            new Regex(
-                @"(?<Series>.+?)(\s|_|\-)+?\d+(\s|_|\-)\(",
-                MatchOptions, RegexTimeout),
-            //Ichinensei_ni_Nacchattara_v01_ch01_[Taruby]_v1.1.zip must be before [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
-            // due to duplicate version identifiers in file.
-            new Regex(
-                @"(?<Series>.*)(v|s)\d+(-\d+)?(_|\s)",
-                MatchOptions, RegexTimeout),
-            //[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
-            new Regex(
-                @"(?<Series>.*)(v|s)\d+(-\d+)?",
-                MatchOptions, RegexTimeout),
-            // Black Bullet (This is very loose, keep towards bottom)
-            new Regex(
-                @"(?<Series>.*)(_)(v|vo|c|volume)( |_)\d+",
-                MatchOptions, RegexTimeout),
-            // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
-            new Regex(
-                @"(?<Series>.*)( |_)(vol\d+)?( |_)(?:Chp\.? ?\d+)",
-                MatchOptions, RegexTimeout),
-            // Mahoutsukai to Deshi no Futekisetsu na Kankei Chp. 1
-            new Regex(
-                @"(?<Series>.*)( |_)(?:Chp.? ?\d+)",
-                MatchOptions, RegexTimeout),
-            // Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Chapter 01
-            new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_)Chapter( |_)(\d+)",
-                MatchOptions, RegexTimeout),
-
-            // Fullmetal Alchemist chapters 101-108.cbz
-            new Regex(
-                @"^(?!vol)(?<Series>.*)( |_)(chapters( |_)?)\d+-?\d*",
-                MatchOptions, RegexTimeout),
-            // Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1
-            new Regex(
-                @"^(?!Vol\.?)(?<Series>.*)( |_|-)(?<!-)(episode|chapter|(ch\.?) ?)\d+-?\d*",
-                MatchOptions, RegexTimeout),
-            // Baketeriya ch01-05.zip
-            new Regex(
-                @"^(?!Vol)(?<Series>.*)ch\d+-?\d?",
-                MatchOptions, RegexTimeout),
-            // Magi - Ch.252-005.cbz
-            new Regex(
-                @"(?<Series>.*)( ?- ?)Ch\.\d+-?\d*",
+                @"(?<Series>.*)\s\((c\s|ch\s|chapter\s)",
                 MatchOptions, RegexTimeout),
             // [BAA]_Darker_than_Black_Omake-1.zip
             new Regex(
-                @"^(?!Vol)(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
+                @"^(?!Vol)(?<Series>.*)(-)\d", // This catches a lot of stuff ^(?!Vol)(?<Series>.*) (\d+)
                 MatchOptions, RegexTimeout),
-            // Kodoja #001 (March 2016)
+            // Akiiro Bousou Biyori - 01.jpg, Beelzebub 172 RHS.zip, Cynthia the Mission 29.rar, A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)
             new Regex(
-                @"(?<Series>.*)(\s|_|-)#",
-                MatchOptions, RegexTimeout),
-            // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar, A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)
-            new Regex(
-                @"^(?!Vol\.?)(?!Chapter)(?<Series>.+?)(\s|_|-)(?<!-)(ch|chapter)?\.?\d+-?\d*",
-                MatchOptions, RegexTimeout),
-            // [BAA]_Darker_than_Black_c1 (This is very greedy, make sure it's close to last)
-            new Regex(
-                @"^(?!Vol)(?<Series>.*)( |_|-)(ch?)\d+",
+                @"^(?!Vol\.?)(?!Chapter)(?<Series>.+?)(\s|-)(?<!-)\d",
                 MatchOptions, RegexTimeout),
             // Japanese Volume: n巻 -> Volume n
             new Regex(
