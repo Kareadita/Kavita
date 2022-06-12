@@ -266,6 +266,50 @@ public class SeriesServiceTests
     }
 
     [Fact]
+    public async Task SeriesDetail_ShouldReturnCorrectNaming_VolumeTitle()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.NotEmpty(detail.Chapters);
+        // volume 2 has a 0 chapter aka a single chapter that is represented as a volume. We don't show in Chapters area
+        Assert.Equal(3, detail.Chapters.Count());
+
+        Assert.NotEmpty(detail.Volumes);
+        Assert.Equal(2, detail.Volumes.Count());
+
+        Assert.Equal(detail.Chapters.First().VolumeTitle, string.Empty); // loose leaf chapter
+        Assert.Equal(detail.Chapters.Last().VolumeTitle, "Volume 3"); // volume based chapter
+    }
+
+    [Fact]
     public async Task SeriesDetail_ShouldReturnChaptersOnly_WhenBookLibrary()
     {
         await ResetDb();

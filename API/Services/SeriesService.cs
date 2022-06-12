@@ -485,7 +485,7 @@ public class SeriesService : ISeriesService
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
             if (v.Number == 0) return c;
-            c.VolumeTitle = $"Volume {v.Name}"; // BUG: This can send Volume 0 when it shouldn't
+            c.VolumeTitle = v.Name;
             return c;
         })).ToList();
 
