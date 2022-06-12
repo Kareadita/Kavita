@@ -240,6 +240,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.isAdmin = this.accountService.hasAdminRole(user);
         this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
         this.renderMode = user.preferences.globalPageLayoutMode;
+        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
       }
     });
   }

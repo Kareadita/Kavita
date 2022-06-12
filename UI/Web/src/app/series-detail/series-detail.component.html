@@ -113,10 +113,10 @@
             <li [ngbNavItem]="TabID.Storyline" *ngIf="libraryType !== LibraryType.Book && (volumes.length > 0 || chapters.length > 0)">
                 <a ngbNavLink>Storyline</a>
                 <ng-template ngbNavContent>
-                    <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
-                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
-                            <div class="card-container row g-0">
-                                <ng-container *cdkVirtualFor="let item of storylineItems; let idx = index; trackBy: trackByStoryLineIdentity">
+                    <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1">
+                        <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
+                            <div class="card-container row g-0" #container>
+                                <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                     <ng-container *ngIf="!item.isChapter; else chapterCardItem">
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number != 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"
                                         [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
@@ -129,34 +129,32 @@
                                     </ng-template>
                                 </ng-container>
                             </div>
-                    </cdk-virtual-scroll-viewport>
-                    </ng-container>
-                    <ng-template #storylineListLayout>
-                        <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
-                            <ng-container *cdkVirtualFor="let item of storylineItems; let idx = index; trackBy: trackByStoryLineIdentity">
-                                <ng-container *ngIf="!item.isChapter; else chapterListItem">
-                                    <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
-                                        [seriesName]="series.name" [entity]="item.volume" *ngIf="item.volume.number != 0"
-                                        [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                        [pagesRead]="item.volume.pagesRead" [totalPages]="item.volume.pages" (read)="openVolume(item.volume)">
-                                        <ng-container title>
-                                            <app-entity-title [libraryType]="libraryType" [entity]="item.volume" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-                                        </ng-container>
-                                    </app-list-item>
-                                </ng-container>
-                                <ng-template #chapterListItem>
-                                    <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)"
-                                        [seriesName]="series.name" [entity]="item.chapter" *ngIf="!item.chapter.isSpecial"
-                                        [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                        [pagesRead]="item.chapter.pagesRead" [totalPages]="item.chapter.pages" (read)="openChapter(item.chapter)">
+                        </ng-container>
+                        <ng-template #storylineListLayout>
+                                <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
+                                    <ng-container *ngIf="!item.isChapter; else chapterListItem">
+                                        <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
+                                            [seriesName]="series.name" [entity]="item.volume" *ngIf="item.volume.number != 0"
+                                            [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                                            [pagesRead]="item.volume.pagesRead" [totalPages]="item.volume.pages" (read)="openVolume(item.volume)">
                                             <ng-container title>
-                                                <app-entity-title [libraryType]="libraryType" [entity]="item.chapter" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+                                                <app-entity-title [libraryType]="libraryType" [entity]="item.volume" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
                                             </ng-container>
                                         </app-list-item>
-                                </ng-template>
-                            </ng-container>
-                        </cdk-virtual-scroll-viewport>
-                    </ng-template>
+                                    </ng-container>
+                                    <ng-template #chapterListItem>
+                                        <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)"
+                                            [seriesName]="series.name" [entity]="item.chapter" *ngIf="!item.chapter.isSpecial"
+                                            [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
+                                            [pagesRead]="item.chapter.pagesRead" [totalPages]="item.chapter.pages" (read)="openChapter(item.chapter)">
+                                                <ng-container title>
+                                                    <app-entity-title [libraryType]="libraryType" [entity]="item.chapter" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
+                                                </ng-container>
+                                            </app-list-item>
+                                    </ng-template>
+                                </ng-container>
+                        </ng-template>
+                    </virtual-scroller>
                 </ng-template>
             </li>
 
@@ -166,7 +164,7 @@
                     <virtual-scroller #scroll [items]="volumes">
                         <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else volumeListLayout">
                                 <div class="card-container row g-0" #container>
-                                    <ng-container *cdkVirtualFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
+                                    <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
                                         <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.name" (click)="openVolume(item)"
                                             [imageUrl]="imageService.getVolumeCoverImage(item.id)"
                                             [read]="item.pagesRead" [total]="item.pages" [actions]="volumeActions"
@@ -177,7 +175,7 @@
                                 </div>
                         </ng-container>
                         <ng-template #volumeListLayout>
-                                <ng-container *cdkVirtualFor="let volume of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
+                                <ng-container *ngFor="let volume of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
                                     <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
                                     [seriesName]="series.name" [entity]="volume" *ngIf="volume.number != 0"
                                     [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
