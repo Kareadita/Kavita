@@ -1,7 +1,7 @@
 <ng-container [ngSwitch]="libraryType">
     <ng-container *ngSwitchCase="LibraryType.Comic">
-        <ng-container *ngIf="chapter.titleName != '' && prioritizeTitleName; else fullComicTitle">
-            {{chapter.titleName}}
+        <ng-container *ngIf="titleName != '' && prioritizeTitleName; else fullComicTitle">
+            {{titleName}}
         </ng-container>
         <ng-template #fullComicTitle>
             {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
@@ -12,8 +12,8 @@
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Manga">
-        <ng-container *ngIf="chapter.titleName != '' && prioritizeTitleName; else fullMangaTitle">
-            {{chapter.titleName}}
+        <ng-container *ngIf="titleName != '' && prioritizeTitleName; else fullMangaTitle">
+            {{titleName}}
         </ng-container>
         <ng-template #fullMangaTitle>
             {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
@@ -24,6 +24,6 @@
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Book">
-        {{chapter.titleName}}
+        {{titleName}}
     </ng-container>
 </ng-container>

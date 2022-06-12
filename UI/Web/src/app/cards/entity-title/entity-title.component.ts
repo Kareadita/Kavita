@@ -28,8 +28,8 @@ export class EntityTitleComponent implements OnInit {
 
   isChapter = false;
   chapter!: Chapter;
+  titleName: string = '';
   volumeTitle: string = '';
-  volume: Volume | undefined = undefined;
 
   get LibraryType() {
     return LibraryType;
@@ -42,14 +42,16 @@ export class EntityTitleComponent implements OnInit {
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.entity);
 
-    this.chapter = this.utilityService.isChapter(this.entity) ? (this.entity as Chapter) : (this.entity as Volume).chapters[0];
     if (this.isChapter) {
-      this.volumeTitle = (this.entity as Chapter).volumeTitle || '';
+      const c = (this.entity as Chapter);
+      this.volumeTitle = c.volumeTitle || '';
+      this.titleName = c.titleName || '';
     } else {
-      this.volume = this.utilityService.asVolume(this.entity);
-      console.log('volume name: ', this.volume.name);
-      this.volumeTitle = this.utilityService.asVolume(this.entity).name;
+      const v = this.utilityService.asVolume(this.entity);
+      this.volumeTitle = v.name || '';
+      this.titleName = v.chapters[0].titleName || '';
     }
+    
   }
 
 }

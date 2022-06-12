@@ -155,26 +155,6 @@
                                         </app-list-item>
                                 </ng-template>
                             </ng-container>
-                            <!-- <ng-container *ngFor="let volume of volumes; let idx = index; trackBy: trackByVolumeIdentity">
-                                <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
-                                [seriesName]="series.name" [entity]="volume" *ngIf="volume.number != 0"
-                                [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)">
-                                <ng-container title>
-                                    <app-entity-title [libraryType]="libraryType" [entity]="volume" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-                                </ng-container>
-                            </app-list-item>
-                            </ng-container>
-                            <ng-container *ngFor="let chapter of storyChapters; let idx = index; trackBy: trackByChapterIdentity">
-                                <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                                [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
-                                [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)">
-                                    <ng-container title>
-                                        <app-entity-title [libraryType]="libraryType" [entity]="chapter" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
-                                    </ng-container>
-                                </app-list-item>
-                            </ng-container> -->
                         </cdk-virtual-scroll-viewport>
                     </ng-template>
                 </ng-template>
@@ -266,11 +246,11 @@
                     <cdk-virtual-scroll-viewport appendOnly class="virtual-scroller" [itemSize]="itemSize" autosize >
                         <ng-container *cdkVirtualFor="let chapter of specials; let idx = index; trackBy: trackByChapterIdentity">
                             <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
-                            [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
+                            [seriesName]="series.name" [entity]="chapter"
                             [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                             [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)">
                             <ng-container title>
-                                <app-entity-title [libraryType]="libraryType" [entity]="chapter" [seriesName]="series.name" [prioritizeTitleName]="true"></app-entity-title>
+                                {{chapter.title || chapter.range}}
                             </ng-container>
                         </app-list-item>
                         </ng-container>

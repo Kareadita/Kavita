@@ -46,6 +46,7 @@ export class ListItemComponent implements OnInit {
    * Size of the Image Width Defaults to 158px.
    */
   @Input() imageWidth: string = '158px';
+  @Input() seriesLink: string = '';
 
   @Input() pagesRead: number = 0;
   @Input() totalPages: number = 0;
