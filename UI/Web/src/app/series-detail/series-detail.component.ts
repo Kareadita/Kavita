@@ -37,6 +37,7 @@ import { RelatedSeries } from '../_models/series-detail/related-series';
 import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
 import { FormControl, FormGroup } from '@angular/forms';
+import { PageLayoutMode } from '../_models/page-layout-mode';
 
 interface RelatedSeris {
   series: Series;
@@ -49,11 +50,6 @@ enum TabID {
   Storyline = 2,
   Volumes = 3,
   Chapters = 4
-}
-
-enum LayoutMode {
-  Cards = 0,
-  List = 1
 }
 
 interface StoryLineItem {
@@ -146,7 +142,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     {value: 'Release', text: 'Release'},
     {value: 'Added', text: 'Added'},
   ];
-  renderMode: LayoutMode = LayoutMode.Cards;
+  renderMode: PageLayoutMode = PageLayoutMode.Cards;
 
   pageExtrasGroup = new FormGroup({
     'sortingOption': new FormControl(this.sortingOptions[0].value, []),
@@ -218,8 +214,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     return TabID;
   }
 
-  get LayoutMode() {
-    return LayoutMode;
+  get PageLayoutMode() {
+    return PageLayoutMode;
   }
 
 
@@ -240,6 +236,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
         this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
+        this.renderMode = user.preferences.globalPageLayoutMode;
       }
     });
   }
@@ -272,7 +269,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.loadSeries(this.seriesId);
 
-    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val: LayoutMode) => {
+    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val: PageLayoutMode) => {
       this.renderMode = val;
     });
   }

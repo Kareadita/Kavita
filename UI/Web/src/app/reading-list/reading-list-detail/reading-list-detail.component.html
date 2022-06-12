@@ -52,7 +52,7 @@
 
     <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
         <ng-template #draggableItem let-item let-position="idx">
-            <div class="d-flex" style="width: 100%;">
+          <div class="d-flex" style="width: 100%;">
                 <app-image width="74px" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
                 <div class="flex-grow-1">
                   <h5 class="mt-0 mb-1" id="item.id--{{position}}">{{formatTitle(item)}}&nbsp;
