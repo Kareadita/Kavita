@@ -484,7 +484,8 @@ public class SeriesService : ISeriesService
         var specials = new List<ChapterDto>();
         var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
         {
-            c.VolumeTitle = $"Volume {v.Name}";
+            if (v.Number == 0) return c;
+            c.VolumeTitle = $"Volume {v.Name}"; // BUG: This can send Volume 0 when it shouldn't
             return c;
         })).ToList();
 
