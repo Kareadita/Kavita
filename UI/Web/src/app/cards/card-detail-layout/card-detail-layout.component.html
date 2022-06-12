@@ -58,10 +58,9 @@
         </div>
     </virtual-scroller>
 
-    
-    <p *ngIf="items.length === 0 && !isLoading">
-        <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-    </p>
+    <div class="mx-auto" *ngIf="items.length === 0 && !isLoading" style="width: 200px;">
+        <p><ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container></p>
+    </div>
 </ng-template>
 
 <ng-template #paginationTemplate let-id="id">

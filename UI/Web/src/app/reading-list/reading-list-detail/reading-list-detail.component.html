@@ -45,10 +45,10 @@
       </div>
     </div>
 
-
-    <div *ngIf="items.length === 0">
+    <div class="mx-auto" *ngIf="items.length === 0" style="width: 200px;">
       Nothing added
-    </div>    
+    </div>
+
 
     <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
         <ng-template #draggableItem let-item let-position="idx">
