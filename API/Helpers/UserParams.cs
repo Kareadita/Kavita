@@ -2,9 +2,9 @@
 {
     public class UserParams
     {
-        private const int MaxPageSize = int.MaxValue; // TODO: Validate if we need this
-        public int PageNumber { get; set; } = 1;
-        private int _pageSize = 30;
+        private const int MaxPageSize = int.MaxValue;
+        public int PageNumber { get; init; } = 1;
+        private readonly int _pageSize = 30;
 
         /// <summary>
         /// If set to 0, will set as MaxInt

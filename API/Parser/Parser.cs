@@ -573,15 +573,13 @@ namespace API.Parser
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(filePath);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Edition"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Edition"].Success && match.Groups["Edition"].Value != string.Empty)
-                    {
-                        var edition = match.Groups["Edition"].Value.Replace("{", "").Replace("}", "")
-                            .Replace("[", "").Replace("]", "").Replace("(", "").Replace(")", "");
-
-                        return edition;
-                    }
+                    return group.Value
+                        .Replace("{", "").Replace("}", "")
+                        .Replace("[", "").Replace("]", "")
+                        .Replace("(", "").Replace(")", "");
                 }
             }
 
@@ -596,15 +594,8 @@ namespace API.Parser
         public static bool HasSpecialMarker(string filePath)
         {
             var matches = SpecialMarkerRegex.Matches(filePath);
-            foreach (Match match in matches)
-            {
-                if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return matches.Select(match => match.Groups["Special"])
+                .Any(group => group.Success && group != Match.Empty);
         }
 
         public static string ParseMangaSpecial(string filePath)
@@ -612,12 +603,10 @@ namespace API.Parser
             foreach (var regex in MangaSpecialRegex)
             {
                 var matches = regex.Matches(filePath);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Special"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
-                    {
-                        return match.Groups["Special"].Value;
-                    }
+                    return group.Value;
                 }
             }
 
@@ -629,12 +618,10 @@ namespace API.Parser
             foreach (var regex in ComicSpecialRegex)
             {
                 var matches = regex.Matches(filePath);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Special"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
-                    {
-                        return match.Groups["Special"].Value;
-                    }
+                    return group.Value;
                 }
             }
 
@@ -646,12 +633,10 @@ namespace API.Parser
             foreach (var regex in MangaSeriesRegex)
             {
                 var matches = regex.Matches(filename);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Series"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
-                    {
-                        return CleanTitle(match.Groups["Series"].Value);
-                    }
+                    return CleanTitle(group.Value);
                 }
             }
 
@@ -662,12 +647,10 @@ namespace API.Parser
             foreach (var regex in ComicSeriesRegex)
             {
                 var matches = regex.Matches(filename);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Series"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
-                    {
-                        return CleanTitle(match.Groups["Series"].Value, true);
-                    }
+                    return CleanTitle(group.Value, true);
                 }
             }
 
@@ -697,12 +680,12 @@ namespace API.Parser
             foreach (var regex in ComicVolumeRegex)
             {
                 var matches = regex.Matches(filename);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups))
                 {
-                    if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
+                    if (!group["Volume"].Success || group["Volume"] == Match.Empty) continue;
 
-                    var value = match.Groups["Volume"].Value;
-                    var hasPart = match.Groups["Part"].Success;
+                    var value = group["Volume"].Value;
+                    var hasPart = group["Part"].Success;
                     return FormatValue(value, hasPart);
                 }
             }
@@ -808,12 +791,9 @@ namespace API.Parser
             foreach (var regex in MangaSpecialRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty).Trim();
-                    }
+                    title = title.Replace(match.Value, string.Empty).Trim();
                 }
             }
 
@@ -825,12 +805,9 @@ namespace API.Parser
             foreach (var regex in EuropeanComicRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty).Trim();
-                    }
+                    title = title.Replace(match.Value, string.Empty).Trim();
                 }
             }
 
@@ -842,12 +819,9 @@ namespace API.Parser
             foreach (var regex in ComicSpecialRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty).Trim();
-                    }
+                    title = title.Replace(match.Value, string.Empty).Trim();
                 }
             }
 
@@ -905,12 +879,9 @@ namespace API.Parser
             foreach (var regex in ReleaseGroupRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty);
-                    }
+                    title = title.Replace(match.Value, string.Empty);
                 }
             }
 

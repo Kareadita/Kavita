@@ -108,9 +108,7 @@ public interface ISeriesRepository
     Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
-    Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds); // TODO: Move to LibraryRepository
-    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);  // TODO: Move to LibraryRepository
-    IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);  // TODO: Move to LibraryRepository
+
     Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
@@ -923,54 +921,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    public async Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds)
-    {
-        return await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Select(s => s.Metadata.AgeRating)
-            .Distinct()
-            .Select(s => new AgeRatingDto()
-            {
-                Value = s,
-                Title = s.ToDescription()
-            })
-            .ToListAsync();
-    }
 
-    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds)
-    {
-        var ret = await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Select(s => s.Metadata.Language)
-            .AsNoTracking()
-            .Distinct()
-            .ToListAsync();
-
-        return ret
-            .Where(s => !string.IsNullOrEmpty(s))
-            .Select(s => new LanguageDto()
-            {
-                Title = CultureInfo.GetCultureInfo(s).DisplayName,
-                IsoCode = s
-            })
-            .OrderBy(s => s.Title)
-            .ToList();
-    }
-
-    public IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
-    {
-        return  _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Select(s => s.Metadata.PublicationStatus)
-            .Distinct()
-            .AsEnumerable()
-            .Select(s => new PublicationStatusDto()
-            {
-                Value = s,
-                Title = s.ToDescription()
-            })
-            .OrderBy(s => s.Title);
-    }
 
 
     /// <summary>
@@ -1236,7 +1187,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    private async Task<IEnumerable<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId, int maxRecords = 3000)
+    private async Task<IEnumerable<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId)
     {
         var libraries = await _context.AppUser
             .Where(u => u.Id == userId)

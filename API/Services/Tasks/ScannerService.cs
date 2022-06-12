@@ -772,7 +772,6 @@ public class ScannerService : IScannerService
                     case PersonRole.Translator:
                         if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
                         break;
-                    case PersonRole.Other:
                     default:
                         series.Metadata.People.Remove(person);
                         break;

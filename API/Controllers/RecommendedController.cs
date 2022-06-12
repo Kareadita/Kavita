@@ -76,6 +76,7 @@ public class RecommendedController : BaseApiController
     /// Chooses a random genre and shows series that are in that without reading progress
     /// </summary>
     /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="genreId">Genre Id</param>
     /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("more-in")]

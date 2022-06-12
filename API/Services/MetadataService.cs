@@ -35,7 +35,7 @@ public interface IMetadataService
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
-    Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true);
 }
 
 public class MetadataService : IMetadataService
@@ -276,7 +276,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
-    public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true)
+    public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate)
     {
         var sw = Stopwatch.StartNew();
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);

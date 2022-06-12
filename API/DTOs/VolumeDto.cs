@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using API.DTOs.Reader;
 using API.Entities.Interfaces;
 
 namespace API.DTOs
@@ -17,13 +16,6 @@ namespace API.DTOs
         public DateTime Created { get; set; }
         public int SeriesId { get; set; }
         public ICollection<ChapterDto> Chapters { get; set; }
-        /// <summary>
-        /// Estimated Time Range to read
-        /// </summary>
-        /// <remarks>This is not set normally, only for Series Detail</remarks>
-        [Obsolete]
-        public HourEstimateRangeDto TimeEstimate { get; set; }
-
         /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
         public int MinHoursToRead { get; set; }
         /// <inheritdoc cref="IHasReadTimeEstimate.MaxHoursToRead"/>

@@ -27,14 +27,9 @@ export interface Chapter {
      */
     titleName: string;
     /** 
-     * 
+     * Summary for the chapter
      */
     summary?: string;
-    /**
-     * This is only available on the object when fetched for SeriesDetail
-     */
-    //timeEstimate?: HourEstimateRange; 
-
     minHoursToRead: number;
     maxHoursToRead: number;
     avgHoursToRead: number;

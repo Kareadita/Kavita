@@ -724,7 +724,7 @@ namespace API.Services
                     FileSystem.Path.Join(directoryName, "test.txt"),
                     string.Empty);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ClearAndDeleteDirectory(directoryName);
                 return false;

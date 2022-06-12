@@ -45,11 +45,6 @@ public class BackupService : IBackupService
         _config = config;
         _eventHub = eventHub;
 
-        // var maxRollingFiles = config.GetMaxRollingFiles();
-        // var loggingSection = config.GetLoggingFileName();
-        // var files = GetLogFiles(maxRollingFiles, loggingSection);
-
-
         _backupFiles = new List<string>()
         {
             "appsettings.json",
@@ -59,11 +54,6 @@ public class BackupService : IBackupService
             "kavita.db-shm", // This wont always be there
             "kavita.db-wal" // This wont always be there
         };
-
-        // foreach (var file in files.Select(f => (_directoryService.FileSystem.FileInfo.FromFileName(f)).Name))
-        // {
-        //     _backupFiles.Add(file);
-        // }
     }
 
     public IEnumerable<string> GetLogFiles(int maxRollingFiles, string logFileName)
