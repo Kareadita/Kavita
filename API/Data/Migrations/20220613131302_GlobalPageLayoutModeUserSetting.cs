@@ -4,17 +4,12 @@
 
 namespace API.Data.Migrations
 {
-    public partial class BookReaderLayoutModeRename : Migration
+    public partial class GlobalPageLayoutModeUserSetting : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "PageLayoutMode",
-                table: "AppUserPreferences",
-                newName: "GlobalPageLayoutMode");
-
             migrationBuilder.AddColumn<int>(
-                name: "BookReaderLayoutMode",
+                name: "GlobalPageLayoutMode",
                 table: "AppUserPreferences",
                 type: "INTEGER",
                 nullable: false,
@@ -24,13 +19,8 @@ namespace API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "BookReaderLayoutMode",
-                table: "AppUserPreferences");
-
-            migrationBuilder.RenameColumn(
                 name: "GlobalPageLayoutMode",
-                table: "AppUserPreferences",
-                newName: "PageLayoutMode");
+                table: "AppUserPreferences");
         }
     }
 }

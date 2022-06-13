@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220612213537_BookReaderLayoutModeRename")]
-    partial class BookReaderLayoutModeRename
+    [Migration("20220613131302_GlobalPageLayoutModeUserSetting")]
+    partial class GlobalPageLayoutModeUserSetting
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -202,7 +202,9 @@ namespace API.Data.Migrations
                         .HasDefaultValue("Dark");
 
                     b.Property<int>("GlobalPageLayoutMode")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
 
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
