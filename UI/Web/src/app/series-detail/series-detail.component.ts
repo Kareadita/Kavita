@@ -244,6 +244,22 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+	onScroll(): void {
+		const tabs = document.querySelector('.nav-tabs') as HTMLElement | null;
+		const main = document.querySelector('.main-container') as HTMLElement | null;
+		const content = document.querySelector('.tab-content') as HTMLElement | null;
+		let mainOffset = main!.offsetTop;
+		let tabOffset = tabs!.offsetTop;
+		let contentOffset = content!.offsetTop;
+		let mainScrollPos = main!.scrollTop;
+		
+		if (!document.querySelector('.nav-tabs.fixed') && (tabOffset - mainOffset) <= mainScrollPos) {
+			tabs!.classList.add("fixed");
+		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (contentOffset - mainOffset)) {
+			tabs!.classList.remove("fixed");
+		}
+	}
+
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
