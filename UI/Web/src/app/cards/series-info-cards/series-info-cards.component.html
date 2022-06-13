@@ -1,13 +1,15 @@
 <div class="row g-0 mb-4 mt-3">
-    <ng-container *ngIf="seriesMetadata.ageRating">
-        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-            <app-icon-and-title label="Age Rating" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
-                {{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
-    </ng-container>
-    <ng-container *ngIf="series">
+
+    <ng-container *ngIf="seriesMetadata">
+        <ng-container *ngIf="seriesMetadata.ageRating">
+            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
+                <app-icon-and-title label="Age Rating" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
+                    {{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+
         <ng-container *ngIf="seriesMetadata.releaseYear > 0">
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
                 <app-icon-and-title label="Release Year" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
@@ -25,18 +27,20 @@
             </div>
             <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
+    </ng-container>
 
-        <ng-container>
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
-                    <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}" (click)="handleGoTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
-                        {{pubStatus}}
-                    </app-icon-and-title>
-                </ng-container>
-            </div>
-            <div class="vr m-2 d-none d-lg-block"></div>
-        </ng-container>
+    <ng-container>
+        <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+            <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
+                <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}" (click)="handleGoTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
+                    {{pubStatus}}
+                </app-icon-and-title>
+            </ng-container>
+        </div>
+        <div class="vr m-2 d-none d-lg-block"></div>
+    </ng-container>
 
+    <ng-container *ngIf="series">
         <ng-container>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Format" [clickable]="true" [fontClasses]="'fa ' + utilityService.mangaFormatIcon(series.format)" (click)="handleGoTo(FilterQueryParam.Format, series.format)" title="Format">
@@ -87,7 +91,7 @@
         </ng-container>
 
         
-        <ng-container *ngIf="hasReadingProgress && readingTimeLeft &&  readingTimeLeft.avgHours !== 0 ">
+        <ng-container *ngIf="hasReadingProgress && showReadingTimeLeft && readingTimeLeft &&  readingTimeLeft.avgHours !== 0 ">
             <div class="vr d-none d-lg-block m-2"></div>
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Read Left" [clickable]="false" fontClasses="fa-solid fa-clock">

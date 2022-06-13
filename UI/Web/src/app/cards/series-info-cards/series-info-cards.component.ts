@@ -19,6 +19,10 @@ export class SeriesInfoCardsComponent implements OnInit {
   @Input() seriesMetadata!: SeriesMetadata;
   @Input() hasReadingProgress: boolean = false;
   @Input() readingTimeLeft: HourEstimateRange | undefined;
+  /**
+   * If this should make an API call to request readingTimeLeft
+   */
+  @Input() showReadingTimeLeft: boolean = true;
   @Output() goTo: EventEmitter<{queryParamName: FilterQueryParam, filter: any}> = new EventEmitter();
 
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
@@ -35,7 +39,7 @@ export class SeriesInfoCardsComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.series !== null) {
-      this.readerService.getTimeLeft(this.series.id).subscribe((timeLeft) => this.readingTimeLeft = timeLeft);
+      if (this.showReadingTimeLeft) this.readerService.getTimeLeft(this.series.id).subscribe((timeLeft) => this.readingTimeLeft = timeLeft);
       this.readingTime.minHours = this.series.minHoursToRead;
       this.readingTime.maxHours = this.series.maxHoursToRead;
       this.readingTime.avgHours = this.series.avgHoursToRead;
