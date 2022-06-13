@@ -180,7 +180,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
     }
 
-    public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate)
+    public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
     {
         _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));

@@ -296,8 +296,8 @@ public class SeriesServiceTests
         Assert.NotEmpty(detail.Volumes);
         Assert.Equal(2, detail.Volumes.Count());
 
-        Assert.Equal(detail.Chapters.First().VolumeTitle, string.Empty); // loose leaf chapter
-        Assert.Equal(detail.Chapters.Last().VolumeTitle, "Volume 3"); // volume based chapter
+        Assert.Equal(string.Empty, detail.Chapters.First().VolumeTitle); // loose leaf chapter
+        Assert.Equal("Volume 3", detail.Chapters.Last().VolumeTitle); // volume based chapter
     }
 
     [Fact]

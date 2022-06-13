@@ -276,7 +276,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
-    public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate)
+    public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true)
     {
         var sw = Stopwatch.StartNew();
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
