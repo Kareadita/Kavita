@@ -200,12 +200,11 @@ namespace API.Parser
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
             // Tintin - T22 Vol 714 pour Sydney
-            new Regex(
-                @"(?<Series>.+?)\s?(\b|-)\s?(vol|tome|t)\.?\d",
-                MatchOptions, RegexTimeout),
             // Invincible Vol 01 Family matters (2005) (Digital)
+            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
+            // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"(?<Series>.+?)\b(vol|tome|t)\.?\s\d",
+                @"^(?<Series>.+?)[-\s](t|v|(t.|tome|v\.|vol\.?|volume)\s?)(?<Volume>\d+)\b",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -223,45 +222,25 @@ namespace API.Parser
             new Regex(
             @"(?<Series>.*(\d{4})?) \((?<Volume>\d+) of \d+\)",
                 MatchOptions, RegexTimeout),
-            // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
-            new Regex(
-                @"^(?<Series>.+?)( |-)(v|t)\d",
-                MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
-            new Regex(
-                @"^(?<Series>.+?) chapter \d+",
-                MatchOptions, RegexTimeout),
             // Amazing Man Comics issue #25
+            // Batman & Robin the Teen Wonder #0
+            // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+?) issue #\d",
+                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s#?|#)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
             // Batman Wayne Family Adventures - Ep. 001 - Moving In
             new Regex(
                 @"^(?<Series>.+?)(\s|-)Ep\.?(\s|-)+\d",
                 MatchOptions, RegexTimeout),
-            // Batgirl Vol.2000 #57 (December, 2004)
-            new Regex(
-                @"^(?<Series>.+?)Vol\.?\s?#?\d",
-                MatchOptions, RegexTimeout),
-            // Batman & Robin the Teen Wonder #0
-            new Regex(
-                @"^(?<Series>.*) #\d",
-                MatchOptions, RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
-            new Regex(
-                @"^(?<Series>.+?) \d",
-                MatchOptions, RegexTimeout),
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             new Regex(
-                @"^(?<Series>.+?) \d",
+                @"^(?<Series>.+?)[-\s](?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
             // The First Asterix Frieze (WebP by Doc MaKS)
             new Regex(
                 @"^(?<Series>.*) (?!\(\d{4}|\d{4}-\d{2}\))\(",
-                MatchOptions, RegexTimeout),
-            // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
-            new Regex(
-                @"^(?<Series>.+?)-(chapter-)?\d",
                 MatchOptions, RegexTimeout),
             // MUST BE LAST: Batman & Daredevil - King of New York
             new Regex(
@@ -314,15 +293,15 @@ namespace API.Parser
             // Amazing Man Comics issue #25
             // Batman 2016 - Chapter 01, Batman 2016 - Issue 01,
             // Amazing Man Comics chapter 25
+            // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+?)[-\s](c|chapter\s|issue\s#?|#)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
+                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s#?|#)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
             // Batman & Catwoman - Trail of the Gun 01
             // Batman & Grendel (1996) 01 - Devil's Bones
             // Saga 001 (2012) (Digital) (Empire-Zone)
-            // spawn-123, spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
                 @"^(?<Series>.+?)[-\s](?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
