@@ -30,8 +30,8 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
 
-  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
-  readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
+  // readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
+  // readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
 
   /**
    * Html representation of Series Summary
@@ -67,13 +67,6 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
-    }
-    
-    if (this.series !== null) {
-      this.readerService.getTimeLeft(this.series.id).subscribe((timeLeft) => this.readingTimeLeft = timeLeft);
-      this.readingTime.minHours = this.series.minHoursToRead;
-      this.readingTime.maxHours = this.series.maxHoursToRead;
-      this.readingTime.avgHours = this.series.avgHoursToRead;
     }
   }
 
