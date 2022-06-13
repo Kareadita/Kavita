@@ -249,7 +249,7 @@ namespace API.Services
 
         /// <summary>
         /// Given an archive stream, will assess whether directory needs to be flattened so that the extracted archive files are directly
-        /// under extract path and not nested in subfolders. See <see cref="DirectoryInfoExtensions"/> Flatten method.
+        /// under extract path and not nested in subfolders. See <see cref="DirectoryService"/> Flatten method.
         /// </summary>
         /// <param name="archive">An opened archive stream</param>
         /// <returns></returns>

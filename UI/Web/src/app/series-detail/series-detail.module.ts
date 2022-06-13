@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeriesDetailRoutingModule } from './series-detail-routing.module';
-import { NgbCollapseModule, NgbNavModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbCollapseModule, NgbNavModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SeriesDetailComponent } from './series-detail.component';
 import { SeriesMetadataDetailComponent } from './series-metadata-detail/series-metadata-detail.component';
 import { ReviewSeriesModalComponent } from './review-series-modal/review-series-modal.component';
@@ -17,7 +17,7 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
   declarations: [
     SeriesDetailComponent,
     ReviewSeriesModalComponent,
-    SeriesMetadataDetailComponent
+    SeriesMetadataDetailComponent,
   ],
   imports: [
     CommonModule,
@@ -26,6 +26,7 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
     NgbCollapseModule, // Series Metadata
     NgbNavModule,
     NgbRatingModule,
+    NgbTooltipModule, // Series Detail, Extras Drawer
 
     TypeaheadModule,
     PipeModule,

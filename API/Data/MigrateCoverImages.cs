@@ -148,7 +148,7 @@ namespace API.Data
             var volumes = await context.Volume.Include(v => v.Chapters).ToListAsync();
             foreach (var volume in volumes)
             {
-                var firstChapter = volume.Chapters.OrderBy(x => double.Parse(x.Number), ChapterSortComparerForInChapterSorting).FirstOrDefault();
+                var firstChapter = volume.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerForInChapterSorting);
                 if (firstChapter == null) continue;
                 if (directoryService.FileSystem.File.Exists(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory,
                     $"{ImageService.GetChapterFormat(firstChapter.Id, firstChapter.VolumeId)}.png")))

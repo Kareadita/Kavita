@@ -1,12 +1,11 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject } from 'rxjs';
-import { finalize, mergeMap, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { CardDetailsModalComponent } from '../cards/_modals/card-details-modal/card-details-modal.component';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from '../shared/confirm.service';
@@ -36,6 +35,9 @@ import { NavService } from '../_services/nav.service';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
+import { FormControl, FormGroup } from '@angular/forms';
+import { PageLayoutMode } from '../_models/page-layout-mode';
+import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 
 interface RelatedSeris {
   series: Series;
@@ -50,12 +52,20 @@ enum TabID {
   Chapters = 4
 }
 
+interface StoryLineItem {
+  chapter?: Chapter;
+  volume?: Volume;
+  isChapter: boolean;
+}
+
 @Component({
   selector: 'app-series-detail',
   templateUrl: './series-detail.component.html',
   styleUrls: ['./series-detail.component.scss']
 })
 export class SeriesDetailComponent implements OnInit, OnDestroy {
+
+  @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
   /**
    * Series Id. Set at load before UI renders
@@ -65,6 +75,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   volumes: Volume[] = [];
   chapters: Chapter[] = [];
   storyChapters: Chapter[] = [];
+  storylineItems: StoryLineItem[] = [];
   libraryId = 0;
   isAdmin = false;
   hasDownloadingRole = false;
@@ -101,6 +112,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   actionInProgress: boolean = false;
 
+  itemSize: number = 10; // when 10 done, 16 loads
+
   /**
    * Track by function for Volume to tell when to refresh card data
    */
@@ -110,6 +123,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
   trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+  trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
+    if (item.isChapter) {
+      return this.trackByChapterIdentity(index, item!.chapter!)
+    }
+    return this.trackByVolumeIdentity(index, item!.volume!);
+  };
 
   /**
    * Are there any related series
@@ -119,6 +138,20 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
    * Related Series. Sorted by backend
    */
   relations: Array<RelatedSeris> = [];
+
+  sortingOptions: Array<{value: string, text: string}> = [
+    {value: 'Storyline', text: 'Storyline'},
+    {value: 'Release', text: 'Release'},
+    {value: 'Added', text: 'Added'},
+  ];
+  renderMode: PageLayoutMode = PageLayoutMode.Cards;
+
+  pageExtrasGroup = new FormGroup({
+    'sortingOption': new FormControl(this.sortingOptions[0].value, []),
+    'renderMode': new FormControl(this.renderMode, []),
+  });
+
+  isAscendingSort: boolean = false; // TODO: Get this from User preferences
 
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
@@ -167,21 +200,26 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   private onDestroy: Subject<void> = new Subject();
 
 
-  get LibraryType(): typeof LibraryType {
+  get LibraryType() {
     return LibraryType;
   }
 
-  get MangaFormat(): typeof MangaFormat {
+  get MangaFormat() {
     return MangaFormat;
   }
 
-  get TagBadgeCursor(): typeof TagBadgeCursor {
+  get TagBadgeCursor() {
     return TagBadgeCursor;
   }
 
-  get TabID(): typeof TabID {
+  get TabID() {
     return TabID;
   }
+
+  get PageLayoutMode() {
+    return PageLayoutMode;
+  }
+
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               private router: Router, public bulkSelectionService: BulkSelectionService,
@@ -200,9 +238,27 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
         this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
+        this.renderMode = user.preferences.globalPageLayoutMode;
+        this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
       }
     });
   }
+
+	onScroll(): void {
+		const tabs = document.querySelector('.nav-tabs') as HTMLElement | null;
+		const main = document.querySelector('.main-container') as HTMLElement | null;
+		const content = document.querySelector('.tab-content') as HTMLElement | null;
+		let mainOffset = main!.offsetTop;
+		let tabOffset = tabs!.offsetTop;
+		let contentOffset = content!.offsetTop;
+		let mainScrollPos = main!.scrollTop;
+		
+		if (!document.querySelector('.nav-tabs.fixed') && (tabOffset - mainOffset) <= mainScrollPos) {
+			tabs!.classList.add("fixed");
+		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (contentOffset - mainOffset)) {
+			tabs!.classList.remove("fixed");
+		}
+	}
 
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
@@ -223,7 +279,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         const seriesCoverUpdatedEvent = event.payload as ScanSeriesEvent;
         if (seriesCoverUpdatedEvent.seriesId === this.seriesId) {
           this.loadSeries(this.seriesId);
-          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.seriesId)); // NOTE: Is this needed as cover update will update the image for us
         }
       }
     });
@@ -232,6 +287,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.loadSeries(this.seriesId);
+
+    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val: PageLayoutMode) => {
+      this.renderMode = val;
+    });
   }
 
   ngOnDestroy() {
@@ -289,6 +348,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         break;
       case (Action.AnalyzeFiles):
         this.actionService.analyzeFilesForSeries(series, () => this.actionInProgress = false);
+        break;
+      case (Action.Download):
+        if (this.downloadInProgress) return;
+        this.downloadSeries();
         break;
       default:
         break;
@@ -358,12 +421,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
     this.setContinuePoint();
 
-    forkJoin([
-      this.libraryService.getLibraryType(this.libraryId),
-      this.seriesService.getSeries(seriesId)
-    ]).subscribe(results => {
-      this.libraryType = results[0];
-      this.series = results[1];
+    forkJoin({
+      libType: this.libraryService.getLibraryType(this.libraryId),
+      series: this.seriesService.getSeries(seriesId)
+    }).subscribe(results => {
+      this.libraryType = results.libType;
+      console.log('library type: ', this.libraryType);
+      this.series = results.series;
 
       this.createHTML();
 
@@ -371,6 +435,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
               .filter(action => action.action !== Action.Edit);
+      this.seriesActions.push({action: Action.Download, callback: this.seriesActions[0].callback, requiresAdmin: false, title: 'Download'});
+
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
@@ -401,6 +467,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.chapters = detail.chapters;
         this.volumes = detail.volumes;
         this.storyChapters = detail.storylineChapters;
+        this.storylineItems = [];
+        const v = this.volumes.map(v => {
+          return {volume: v, chapter: undefined, isChapter: false} as StoryLineItem;
+        });
+        this.storylineItems.push(...v);
+        const c = this.storyChapters.map(c => {
+          return {volume: undefined, chapter: c, isChapter: true} as StoryLineItem;
+        });
+        this.storylineItems.push(...c);
+
 
         this.updateSelectedTab();
         this.isLoading = false;
@@ -530,9 +606,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;
     }
-    // NOTE: When selecting a volume, we might want to ask the user which chapter they want or an "Automatic" option. For Volumes
-    // made up of lots of chapter files, it makes it more versitile. The modal can have pages read / pages with colored background
-    // to help the user make a good choice.
 
     // If user has progress on the volume, load them where they left off
     if (volume.pagesRead < volume.pages && volume.pagesRead > 0) {
@@ -573,15 +646,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         });
         
         this.loadSeries(this.seriesId);
-        if (closeResult.coverImageUpdate) {
-          // Random triggers a load change without any problems with API
-          this.seriesImage = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.seriesId));
-        }
       }
     });
   }
 
   async promptToReview() {
+    // TODO: After a review has been set, we might just want to show an edit icon next to star rating which opens the review, instead of prompting each time.
     const shouldPrompt = this.isNullOrEmpty(this.series.userReview);
     const config = new ConfirmConfig();
     config.header = 'Confirm';
@@ -631,15 +701,15 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  formatChapterTitle(chapter: Chapter) {
-    return this.utilityService.formatChapterName(this.libraryType, true, true) + chapter.range;
-  }
+  updateSortOrder() {
+    this.isAscendingSort = !this.isAscendingSort;
+    // if (this.filter.sortOptions === null) {
+    //   this.filter.sortOptions = {
+    //     isAscending: this.isAscendingSort,
+    //     sortField: SortField.SortName
+    //   }
+    // }
 
-  formatVolumeTitle(volume: Volume) {
-    if (this.libraryType === LibraryType.Book) {
-      return volume.name;
-    }
-
-    return 'Volume ' + volume.name;
+    // this.filter.sortOptions.isAscending = this.isAscendingSort;
   }
 }

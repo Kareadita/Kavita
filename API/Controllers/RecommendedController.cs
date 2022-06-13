@@ -22,6 +22,7 @@ public class RecommendedController : BaseApiController
     /// Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.
     /// </summary>
     /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("quick-reads")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams userParams)
@@ -57,6 +58,7 @@ public class RecommendedController : BaseApiController
     /// Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.
     /// </summary>
     /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("highly-rated")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams userParams)
@@ -74,6 +76,8 @@ public class RecommendedController : BaseApiController
     /// Chooses a random genre and shows series that are in that without reading progress
     /// </summary>
     /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="genreId">Genre Id</param>
+    /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("more-in")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams userParams)
@@ -92,6 +96,7 @@ public class RecommendedController : BaseApiController
     /// Series that are fully read by the user in no particular order
     /// </summary>
     /// <param name="libraryId">Library to restrict series to</param>
+    /// <param name="userParams">Pagination</param>
     /// <returns></returns>
     [HttpGet("rediscover")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams userParams)

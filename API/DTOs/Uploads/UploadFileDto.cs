@@ -7,7 +7,7 @@
         /// </summary>
         public int Id { get; set; }
         /// <summary>
-        /// Url of the file to download from (can be null)
+        /// Base Url encoding of the file to upload from (can be null)
         /// </summary>
         public string Url { get; set; }
     }

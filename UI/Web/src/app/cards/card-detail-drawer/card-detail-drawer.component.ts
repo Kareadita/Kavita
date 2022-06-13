@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbActiveOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, Observable, of, take, takeWhile, tap } from 'rxjs';
+import { finalize, Observable, of, take, takeWhile } from 'rxjs';
 import { Download } from 'src/app/shared/_models/download';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
@@ -50,21 +50,6 @@ export class CardDetailDrawerComponent implements OnInit {
   isChapter = false;
   chapters: Chapter[] = [];
 
-  
-  /**
-   * If a cover image update occured. 
-   */
-  coverImageUpdate: boolean = false; 
-  coverImageIndex: number = 0;
-  /**
-   * Url of the selected cover
-   */
-  selectedCover: string = '';
-  coverImageLocked: boolean = false;
-  /**
-   * When the API is doing work
-   */
-  coverImageSaveLoading: boolean = false;
   imageUrls: Array<string> = [];
 
 
@@ -77,16 +62,7 @@ export class CardDetailDrawerComponent implements OnInit {
   active = this.tabs[0];
 
   chapterMetadata!: ChapterMetadata;
-  ageRating!: string;
-
-  summary$: Observable<string> = of('');
-  readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1, hasProgress: false};
-  minHoursToRead: number = 1;
-  maxHoursToRead: number = 1;
-  /**
-   * We use a separate variable because if this is a volume, we need a sum of all chapters
-   */
-  totalPages: number = 0;
+  summary: string = '';
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
@@ -129,25 +105,14 @@ export class CardDetailDrawerComponent implements OnInit {
 
     this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
       this.chapterMetadata = metadata;
-
-      this.metadataService.getAgeRating(this.chapterMetadata.ageRating).subscribe(ageRating => this.ageRating = ageRating);
-      
-      this.totalPages = this.chapter.pages;
-      if (!this.isChapter) {
-        // Need to account for multiple chapters if this is a volume
-        this.totalPages = this.utilityService.asVolume(this.data).chapters.map(c => c.pages).reduce((sum, d) => sum + d);
-      }
-
-      this.readerService.getManualTimeToRead(this.chapterMetadata.wordCount, this.totalPages, this.chapter.files[0].format === MangaFormat.EPUB).subscribe((time) => this.readingTime = time);
     });
 
 
     if (this.isChapter) {
-      this.summary$ = this.metadataService.getChapterSummary(this.data.id);
+      this.summary = this.utilityService.asChapter(this.data).summary || '';
     } else {
-      this.summary$ = this.metadataService.getChapterSummary(this.utilityService.asVolume(this.data).chapters[0].id);
+      this.summary = this.utilityService.asVolume(this.data).chapters[0].summary || '';
     }
-    
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -180,7 +145,7 @@ export class CardDetailDrawerComponent implements OnInit {
   }
 
   close() {
-    this.activeOffcanvas.close({coverImageUpdate: this.coverImageUpdate});
+    this.activeOffcanvas.close();
   }
 
   formatChapterNumber(chapter: Chapter) {
@@ -196,36 +161,14 @@ export class CardDetailDrawerComponent implements OnInit {
     }
   }
 
-  updateSelectedIndex(index: number) {
-    this.coverImageIndex = index;
+  applyCoverImage(coverUrl: string) {
+    this.uploadService.updateChapterCoverImage(this.chapter.id, coverUrl).subscribe(() => {});
   }
 
-  updateSelectedImage(url: string) {
-    this.selectedCover = url;
-  }
-
-  handleReset() {
-    this.coverImageLocked = false;
-  }
-
-  saveCoverImage() {
-    this.coverImageSaveLoading = true;
-    const selectedIndex = this.coverImageIndex || 0;
-    if (selectedIndex > 0) {
-      this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover).subscribe(() => {
-        if (this.coverImageIndex > 0) {
-          this.chapter.coverImageLocked = true;
-          this.coverImageUpdate = true;
-        }
-        this.coverImageSaveLoading = false;
-      }, err => this.coverImageSaveLoading = false);
-    } else if (this.coverImageLocked === false) {
-      this.uploadService.resetChapterCoverLock(this.chapter.id).subscribe(() => {
-        this.toastr.info('Cover image reset');
-        this.coverImageSaveLoading = false;
-        this.coverImageUpdate = true;
-      });
-    }
+  resetCoverImage() {
+    this.uploadService.resetChapterCoverLock(this.chapter.id).subscribe(() => {
+      this.toastr.info('A job has been enqueued to regenerate the cover image');
+    });
   }
 
   markChapterAsRead(chapter: Chapter) {
@@ -292,13 +235,10 @@ export class CardDetailDrawerComponent implements OnInit {
     
     this.downloadService.downloadChapterSize(chapter.id).pipe(take(1)).subscribe(async (size) => {
       const wantToDownload = await this.downloadService.confirmSize(size, 'chapter');
-      console.log('want to download: ', wantToDownload);
       if (!wantToDownload) { return; }
+
       this.downloadInProgress = true;
       this.download$ = this.downloadService.downloadChapter(chapter).pipe(
-        tap(val => {
-          console.log(val);
-        }),
         takeWhile(val => {
           return val.state != 'DONE';
         }),

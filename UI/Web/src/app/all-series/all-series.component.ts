@@ -131,5 +131,5 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     this.loadPage();
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }

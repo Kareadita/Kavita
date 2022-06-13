@@ -628,32 +628,6 @@ namespace API.Controllers
             return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
         }
 
-
-        /// <summary>
-        /// Given word count, page count, and if the entity is an epub file, this will return the read time.
-        /// </summary>
-        /// <param name="wordCount"></param>
-        /// <param name="pageCount"></param>
-        /// <param name="isEpub"></param>
-        /// <returns>Will always assume no progress as it's not privy</returns>
-        [HttpGet("manual-read-time")]
-        public ActionResult<HourEstimateRangeDto> GetManualReadTime(int wordCount, int pageCount, bool isEpub)
-        {
-            return Ok(_readerService.GetTimeEstimate(wordCount, pageCount, isEpub));
-        }
-
-        [HttpGet("read-time")]
-        public async Task<ActionResult<HourEstimateRangeDto>> GetReadTime(int seriesId)
-        {
-            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-
-            var progress = (await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId)).ToList();
-            return Ok(_readerService.GetTimeEstimate(series.WordCount, series.Pages, series.Format == MangaFormat.Epub,
-                progress.Any()));
-        }
-
-
         /// <summary>
         /// For the current user, returns an estimate on how long it would take to finish reading the series.
         /// </summary>
@@ -675,12 +649,12 @@ namespace API.Controllers
                 // Word count
                 var progressCount = chapters.Sum(c => c.WordCount);
                 var wordsLeft = series.WordCount - progressCount;
-                return _readerService.GetTimeEstimate(wordsLeft, 0, true, progressCount > 0);
+                return _readerService.GetTimeEstimate(wordsLeft, 0, true);
             }
 
             var progressPageCount = progress.Sum(p => p.PagesRead);
             var pagesLeft = series.Pages - progressPageCount;
-            return _readerService.GetTimeEstimate(0, pagesLeft, false, progressPageCount > 0);
+            return _readerService.GetTimeEstimate(0, pagesLeft, false);
         }
 
     }

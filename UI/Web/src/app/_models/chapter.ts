@@ -1,4 +1,7 @@
+import { HourEstimateRange } from './hour-estimate-range';
 import { MangaFile } from './manga-file';
+import { AgeRating } from './metadata/age-rating';
+import { AgeRatingDto } from './metadata/age-rating-dto';
 
 /**
  * Chapter table object. This does not have metadata on it, use ChapterMetadata which is the same Chapter but with those fields.
@@ -23,4 +26,19 @@ export interface Chapter {
      * Actual name of the Chapter if populated in underlying metadata
      */
     titleName: string;
+    /** 
+     * Summary for the chapter
+     */
+    summary?: string;
+    minHoursToRead: number;
+    maxHoursToRead: number;
+    avgHoursToRead: number;
+
+    ageRating: AgeRating;
+    releaseDate: string;
+    wordCount: number;
+    /**
+     * 'Volume number'. Only available for SeriesDetail
+     */
+    volumeTitle?: string;
 }

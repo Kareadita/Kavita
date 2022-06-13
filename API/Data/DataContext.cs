@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.Enums.UserPreferences;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
 using Microsoft.AspNetCore.Identity;
@@ -78,10 +79,14 @@ namespace API.Data
             builder.Entity<AppUserPreferences>()
                 .Property(b => b.BackgroundColor)
                 .HasDefaultValue("#000000");
+
+            builder.Entity<AppUserPreferences>()
+                .Property(b => b.GlobalPageLayoutMode)
+                .HasDefaultValue(PageLayoutMode.Cards);
         }
 
 
-        static void OnEntityTracked(object sender, EntityTrackedEventArgs e)
+        private static void OnEntityTracked(object sender, EntityTrackedEventArgs e)
         {
             if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
             {
@@ -91,7 +96,7 @@ namespace API.Data
 
         }
 
-        static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
+        private static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
         {
             if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
                 entity.LastModified = DateTime.Now;

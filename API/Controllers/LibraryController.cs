@@ -181,7 +181,7 @@ namespace API.Controllers
         [HttpPost("analyze")]
         public ActionResult Analyze(int libraryId)
         {
-            _taskScheduler.AnalyzeFilesForLibrary(libraryId);
+            _taskScheduler.AnalyzeFilesForLibrary(libraryId, true);
             return Ok();
         }
 

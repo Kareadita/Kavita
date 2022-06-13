@@ -83,7 +83,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.LibraryRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
         }
 
         return Ok(Enum.GetValues<AgeRating>().Select(t => new AgeRatingDto()
@@ -104,7 +104,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
-            return Ok(_unitOfWork.SeriesRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
+            return Ok(_unitOfWork.LibraryRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
         }
 
         return Ok(Enum.GetValues<PublicationStatus>().Select(t => new PublicationStatusDto()
@@ -125,7 +125,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetAllLanguagesForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
         }
 
         var englishTag = CultureInfo.GetCultureInfo("en");
