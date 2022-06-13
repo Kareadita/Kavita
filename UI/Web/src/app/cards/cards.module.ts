@@ -26,7 +26,6 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
 import { EntityTitleComponent } from './entity-title/entity-title.component';
 import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.component';
 import { ListItemComponent } from './list-item/list-item.component';
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
 
@@ -71,7 +70,6 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
     NgbCollapseModule,
     NgbRatingModule,
     
-    //ScrollingModule,
     VirtualScrollerModule,
 
 
@@ -110,7 +108,6 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
 
     NgbOffcanvasModule,
 
-    //ScrollingModule, // TODO: Validate if this is ideal
     VirtualScrollerModule,
     SeriesInfoCardsComponent
 
