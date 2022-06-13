@@ -1,6 +1,6 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, EventEmitter, HostListener, Inject, Input, NgZone, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { IPageInfo, VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { filter, from, map, pairwise, Subject, tap, throttleTime } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
@@ -14,13 +14,14 @@ import { SeriesService } from 'src/app/_services/series.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
 const SCROLL_BREAKPOINT = 300;
+const keySize = 24;
 
 @Component({
   selector: 'app-card-detail-layout',
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss']
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
@@ -44,6 +45,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
 
   @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels wide
+  jumpBarKeysToRender: Array<JumpKey> = []; // Original
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
@@ -52,6 +54,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
   @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
+  @ViewChild('.jump-bar') jumpBar!: ElementRef<HTMLDivElement>;
   @ViewChild('scroller') scroller!: CdkVirtualScrollViewport;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
@@ -77,23 +80,78 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   resizeJumpBar() {
-    //console.log('resizing jump bar');
-    //const breakpoint = this.utilityService.getActiveBreakpoint();
-    // if (window.innerWidth < 784) {
-    //   // We need to remove a few sections of keys 
-    //   const len = this.jumpBarKeys.length;
-    //   if (this.jumpBarKeys.length <= 8) return;
-    //   this.jumpBarKeys = this.jumpBarKeys.filter((item, index) => {
-    //     return index % 2 === 0;
-    //   });
-    // }
+    // TODO: Debounce this
+    
+    const fullSize = (this.jumpBarKeys.length * keySize) - 20;
+    const currentSize = (this.document.querySelector('.jump-bar')?.getBoundingClientRect().height || fullSize + 20)  - 20;
+    if (currentSize >= fullSize) {
+      return;
+    }
+
+    const targetNumberOfKeys = parseInt(Math.round(currentSize / keySize) + '', 10);
+    const removeCount = this.jumpBarKeys.length - targetNumberOfKeys - 3;
+    if (removeCount <= 0) return;
+
+
+    this.jumpBarKeysToRender = [];
+    
+
+    const midPoint = this.jumpBarKeys.length / 2;
+    this.jumpBarKeysToRender.push(this.jumpBarKeys[0]);
+    this.removeFirstPartOfJumpBar(midPoint, removeCount / 2);
+    this.jumpBarKeysToRender.push(this.jumpBarKeys[midPoint]);
+    this.removeSecondPartOfJumpBar(midPoint, removeCount / 2);
+    this.jumpBarKeysToRender.push(this.jumpBarKeys[this.jumpBarKeys.length - 1]);
+
+    //console.log('End product: ', this.jumpBarKeysToRender);
+    // console.log('End key size: ', this.jumpBarKeysToRender.length);
+  }
+
+  removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
+    const removedIndexes: Array<number> = [];
+    for(let removal = 0; removal < numberOfRemovals; removal++) {
+      let min = 100000000;
+      let minIndex = -1;
+      for(let i = midPoint + 1; i < this.jumpBarKeys.length - 2; i++) {
+        if (this.jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
+          min = this.jumpBarKeys[i].size;
+          minIndex = i;
+        }
+      }
+      removedIndexes.push(minIndex);
+    }
+    // console.log('second: removing ', removedIndexes);
+    for(let i = midPoint + 1; i < this.jumpBarKeys.length - 2; i++) {
+      if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
+    }
+  }
+
+  removeFirstPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
+    const removedIndexes: Array<number> = [];
+    for(let removal = 0; removal < numberOfRemovals; removal++) {
+      let min = 100000000;
+      let minIndex = -1;
+      for(let i = 1; i < midPoint; i++) {
+        if (this.jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
+          min = this.jumpBarKeys[i].size;
+          minIndex = i;
+        }
+      }
+      removedIndexes.push(minIndex);
+    }
+
+    // console.log('first: removing ', removedIndexes);
+    for(let i = 1; i < midPoint; i++) {
+      if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
+    }
   }
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      console.log('Trackby not set, defaulting');
       this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`; // ${this.pagination?.currentPage}_
     }
+
+    
     
 
 
@@ -106,7 +164,12 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     }
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    this.jumpBarKeysToRender = [...this.jumpBarKeys];
+  }
+
   ngAfterViewInit() {
+    this.resizeJumpBar();
     // this.scroller.elementScrolled().pipe(
     //   map(() => this.scroller.measureScrollOffset('bottom')),
     //   pairwise(),
