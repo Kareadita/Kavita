@@ -421,12 +421,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
     this.setContinuePoint();
 
-    forkJoin([
-      this.libraryService.getLibraryType(this.libraryId),
-      this.seriesService.getSeries(seriesId)
-    ]).subscribe(results => {
-      this.libraryType = results[0];
-      this.series = results[1];
+    forkJoin({
+      libType: this.libraryService.getLibraryType(this.libraryId),
+      series: this.seriesService.getSeries(seriesId)
+    }).subscribe(results => {
+      this.libraryType = results.libType;
+      console.log('library type: ', this.libraryType);
+      this.series = results.series;
 
       this.createHTML();
 
