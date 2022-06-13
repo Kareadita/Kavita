@@ -3,7 +3,7 @@
     Admin Dashboard
   </h2>
 </app-side-nav-companion-bar>
-<div class="container-fluid">
+<div class="container-fluid g-0">
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
       <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
         <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
