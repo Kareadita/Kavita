@@ -333,6 +333,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       case (Action.AnalyzeFiles):
         this.actionService.analyzeFilesForSeries(series, () => this.actionInProgress = false);
         break;
+      case (Action.Download):
+        if (this.downloadInProgress) return;
+        this.downloadSeries();
+        break;
       default:
         break;
     }
@@ -414,6 +418,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
               .filter(action => action.action !== Action.Edit);
+      this.seriesActions.push({action: Action.Download, callback: this.seriesActions[0].callback, requiresAdmin: false, title: 'Download'});
+
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
