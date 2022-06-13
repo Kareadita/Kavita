@@ -1,10 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { asyncScheduler, throttleTime } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
-import { download } from '../shared/_models/download';
-import { DEBOUNCE_TIME } from '../shared/_services/download.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { HourEstimateRange } from '../_models/hour-estimate-range';
@@ -46,15 +43,7 @@ export class ReaderService {
   }
 
   downloadPdf(chapterId: number) {
-    return this.httpClient.get(this.baseUrl + 'reader/pdf?chapterId=' + chapterId, 
-                      {observe: 'events', responseType: 'blob', reportProgress: true}
-          ).pipe(
-              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
-              download((blob, filename) => {
-                return blob;
-              }
-            )
-          );
+    return this.baseUrl + 'reader/pdf?chapterId=' + chapterId;
   }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {

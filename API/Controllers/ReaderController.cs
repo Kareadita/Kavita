@@ -11,7 +11,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
-using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
@@ -48,11 +47,13 @@ namespace API.Controllers
         /// <summary>
         /// Returns the PDF for the chapterId.
         /// </summary>
+        /// <param name="apiKey">API Key for user to validate they have access</param>
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("pdf")]
         public async Task<ActionResult> GetPdf(int chapterId)
         {
+
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
 
@@ -61,8 +62,8 @@ namespace API.Controllers
                 var path = _cacheService.GetCachedFile(chapter);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
 
-                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
-                return PhysicalFile(path, "application/pdf", Path.GetFileName(path));
+                Response.AddCacheHeader(path, TimeSpan.FromMinutes(60).Seconds);
+                return PhysicalFile(path, "application/pdf", Path.GetFileName(path), true);
             }
             catch (Exception)
             {

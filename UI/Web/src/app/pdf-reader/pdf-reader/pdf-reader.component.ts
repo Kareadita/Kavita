@@ -63,7 +63,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-    private seriesService: SeriesService, private readerService: ReaderService,
+    private seriesService: SeriesService, public readerService: ReaderService,
     private renderer: Renderer2, private navService: NavService, private toastr: ToastrService,
     private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
     private utilityService: UtilityService, private libraryService: LibraryService,
@@ -111,11 +111,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.readingListId = parseInt(readingListId, 10);
     }
 
-    this.readerService.downloadPdf(this.chapterId).pipe(filter(val => {
-      return val.state === 'DONE';
-    })).subscribe(download => {
-      this.pdfFile = download;
-    });
+
+
+    // this.readerService.downloadPdf(this.chapterId).pipe(filter(val => {
+    //   return val.state === 'DONE';
+    // })).subscribe(download => {
+    //   this.pdfFile = download;
+    // });
 
 
     this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {

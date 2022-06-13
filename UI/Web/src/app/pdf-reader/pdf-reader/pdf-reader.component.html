@@ -1,7 +1,7 @@
-<ng-container *ngIf="pdfFile && pdfFile.content != null">
+<ng-container>
     <ngx-extended-pdf-viewer
         #pdfViewer
-        [src]="pdfFile.content"
+        [src]="readerService.downloadPdf(this.chapterId)"
         height="100vh"
         [(page)]="currentPage"
         [textLayer]="true" 
@@ -15,7 +15,7 @@
         [(zoom)]="zoomSetting"
         [showSecondaryToolbarButton]="true"
 
-        [filenameForDownload]="pdfFile.filename"
+        
 
         (pageChange)="onPageChange($event)"
         (pdfDownloaded)="onDownload($event)"
