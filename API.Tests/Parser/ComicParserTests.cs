@@ -125,6 +125,7 @@ namespace API.Tests.Parser
         [InlineData("Batgirl T2000 #57", "2000")]
         [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         [InlineData("Conquistador_Tome_2", "2")]
+        [InlineData("Conquistador_-Tome_2", "2")]
         [InlineData("Max_l_explorateur-_Tome_0", "0")]
         [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
         [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "0")]
