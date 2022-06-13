@@ -276,11 +276,7 @@ export class CardDetailDrawerComponent implements OnInit {
     }
 
     const params = this.readerService.getQueryParamsObject(incognito, false);
-    if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'book', chapter.id], {queryParams: params});
-    } else {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id], {queryParams: params});
-    }
+    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: params});
     this.close();
   }
 

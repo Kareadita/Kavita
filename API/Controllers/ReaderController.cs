@@ -46,6 +46,32 @@ namespace API.Controllers
         }
 
         /// <summary>
+        /// Returns the PDF for the chapterId.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
+        [HttpGet("pdf")]
+        public async Task<ActionResult> GetPdf(int chapterId)
+        {
+            var chapter = await _cacheService.Ensure(chapterId);
+            if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
+
+            try
+            {
+                var path = _cacheService.GetCachedFile(chapter);
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
+
+                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
+                return PhysicalFile(path, "application/pdf", Path.GetFileName(path));
+            }
+            catch (Exception)
+            {
+                _cacheService.CleanupChapters(new []{ chapterId });
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Returns an image for a given chapter. Side effect: This will cache the chapter images for reading.
         /// </summary>
         /// <param name="chapterId"></param>

@@ -209,7 +209,7 @@ namespace API.Controllers
         public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
         {
             var chapter = await _cacheService.Ensure(chapterId);
-            var path = _cacheService.GetCachedEpubFile(chapter.Id, chapter);
+            var path = _cacheService.GetCachedFile(chapter);
 
             using var book = await EpubReader.OpenBookAsync(path, BookService.BookReaderOptions);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);

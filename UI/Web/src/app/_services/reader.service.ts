@@ -5,6 +5,7 @@ import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { HourEstimateRange } from '../_models/hour-estimate-range';
+import { MangaFormat } from '../_models/manga-format';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
@@ -25,6 +26,18 @@ export class ReaderService {
   private originalBodyColor!: string;
 
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+
+  getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
+    if (format === undefined) format = MangaFormat.ARCHIVE;
+
+    if (format === MangaFormat.EPUB) {
+      return ['library', libraryId, 'series', seriesId, 'book', chapterId];
+    } else if (format === MangaFormat.PDF) {
+      return ['library', libraryId, 'series', seriesId, 'pdf', chapterId];
+    } else {
+      return ['library', libraryId, 'series', seriesId, 'manga', chapterId];
+    }
+  }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
     return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page});
