@@ -1,13 +1,49 @@
-<ng-container *ngIf="pdfFile != null">
+<ng-container *ngIf="pdfFile && pdfFile.content != null">
     <ngx-extended-pdf-viewer
-        [src]="pdfFile"
+        #pdfViewer
+        [src]="pdfFile.content"
         height="100vh"
         [(page)]="currentPage"
         [textLayer]="true" 
         [useBrowserLocale]="false"
         [showHandToolButton]="true"
+        [showOpenFileButton]="false"
+        [showPrintButton]="false"
+        [showBookmarkButton]="false"
+        [showRotateButton]="false"
+        [showPropertiesButton]="false"
+        [(zoom)]="zoomSetting"
+        [showSecondaryToolbarButton]="true"
+
+        [filenameForDownload]="pdfFile.filename"
+
         (pageChange)="onPageChange($event)"
         (pdfDownloaded)="onDownload($event)"
     > 
     </ngx-extended-pdf-viewer>
+    <!-- <ng-template #multiToolbar>
+        <div class="header">
+          <button mat-icon-button id="zoomIn">
+            <mat-icon>zoom_in</mat-icon>
+          </button>
+          <button mat-icon-button id="zoomOut">
+            <mat-icon>zoom_out</mat-icon>
+          </button>
+          <button mat-icon-button>
+            <mat-icon>fullscreen</mat-icon>
+          </button>
+      
+          <button mat-icon-button id="primaryPageRotateCw">
+            <mat-icon>replay</mat-icon>
+          </button>
+      
+          <div class="flex-spacer"></div>
+          <button mat-icon-button id="print">
+            <mat-icon>print</mat-icon>
+          </button>
+          <button mat-icon-button id="download">
+            <mat-icon>download</mat-icon>
+          </button>
+        </div>
+      </ng-template> -->
 </ng-container>

@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { filter, Subject, take, takeWhile } from 'rxjs';
 import { BookService } from 'src/app/book-reader/book.service';
+import { Download } from 'src/app/shared/_models/download';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -31,7 +32,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   chapter!: Chapter;
   user!: User;
 
-  pdfFile: Blob | null = null;
+  pdfFile: Download | undefined = undefined;
 
   /**
    * Reading List id. Defaults to -1.
@@ -56,6 +57,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    * Total pages
    */
   maxPages: number = 1;
+
+  zoomSetting: string | number = 'auto';
 
   private readonly onDestroy = new Subject<void>();
 
@@ -111,7 +114,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.readerService.downloadPdf(this.chapterId).pipe(filter(val => {
       return val.state === 'DONE';
     })).subscribe(download => {
-      this.pdfFile = download.content;
+      this.pdfFile = download;
     });
 
 
