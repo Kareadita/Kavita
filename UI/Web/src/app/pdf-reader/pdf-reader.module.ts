@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PdfReaderComponent } from './pdf-reader/pdf-reader.component';
 import { PdfReaderRoutingModule } from './pdf-reader.router.module';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 
@@ -14,6 +15,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
     CommonModule,
     PdfReaderRoutingModule,
     NgxExtendedPdfViewerModule,
+    NgbTooltipModule
   ]
 })
 export class PdfReaderModule { }

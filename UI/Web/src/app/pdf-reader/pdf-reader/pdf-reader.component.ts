@@ -1,17 +1,12 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, Inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { Location } from '@angular/common';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { filter, Subject, take, takeWhile } from 'rxjs';
+import { Subject, take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/book.service';
-import { Download } from 'src/app/shared/_models/download';
-import { DownloadService } from 'src/app/shared/_services/download.service';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
-import { LibraryService } from 'src/app/_services/library.service';
 import { MemberService } from 'src/app/_services/member.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { CHAPTER_ID_DOESNT_EXIST, ReaderService } from 'src/app/_services/reader.service';
@@ -31,8 +26,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   chapterId!: number;
   chapter!: Chapter;
   user!: User;
-
-  pdfFile: Download | undefined = undefined;
 
   /**
    * Reading List id. Defaults to -1.
@@ -57,25 +50,33 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    * Total pages
    */
   maxPages: number = 1;
+  bookTitle: string = '';
 
   zoomSetting: string | number = 'auto';
+
+  theme: 'dark' | 'light' | 'custom' = 'dark';
+  themeMap: {[key:string]: string} = {
+    'dark': ' #292929',
+    'custom': '',
+    'light': ''
+  }
+  backgroundColor: string = this.themeMap[this.theme];
+
+  isLoading: boolean = false;
 
   private readonly onDestroy = new Subject<void>();
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, public readerService: ReaderService,
-    private renderer: Renderer2, private navService: NavService, private toastr: ToastrService,
-    private domSanitizer: DomSanitizer, private bookService: BookService, private memberService: MemberService,
-    private utilityService: UtilityService, private libraryService: LibraryService,
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService, private downloadSerivce: DownloadService) {
+    private navService: NavService, private toastr: ToastrService,
+    private bookService: BookService, private memberService: MemberService,
+    private themeService: ThemeService, private location: Location) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
   }
 
   ngOnDestroy(): void {
-    //this.themeService.clearBookTheme();
-
     this.themeService.currentTheme$.pipe(take(1)).subscribe(theme => {
       this.themeService.setTheme(theme.name);
     });
@@ -98,7 +99,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       return;
     }
 
-
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
@@ -110,14 +110,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.readingListMode = true;
       this.readingListId = parseInt(readingListId, 10);
     }
-
-
-
-    // this.readerService.downloadPdf(this.chapterId).pipe(filter(val => {
-    //   return val.state === 'DONE';
-    // })).subscribe(download => {
-    //   this.pdfFile = download;
-    // });
 
 
     this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
@@ -137,10 +129,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   init() {
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
       this.volumeId = info.volumeId;
+      this.bookTitle = info.bookTitle;
+      console.log('bookTitle: ', this.bookTitle)
     });
 
     this.readerService.getProgress(this.chapterId).subscribe(progress => {
-      console.log('current page: ', progress.pageNum)
       this.currentPage = progress.pageNum || 1;
     });
 
@@ -151,24 +144,31 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
         this.currentPage = this.maxPages - 1;
         this.saveProgress();
       }
-    })
+    });
 
-    
   }
+
+  turnOffIncognito() {}
+  toggleDrawer() {}
 
   onPageChange(pageNumber: number) {
     
     this.saveProgress();
   }
 
-  onDownload(evt: any) {
-    console.log('on download: ', evt);
-  }
 
   saveProgress() {
     if (this.incognitoMode) return;
     console.log('saving progress', this.currentPage);
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.currentPage).subscribe(() => {});
+  }
+
+  closeReader() {
+    if (this.readingListMode) {
+      this.router.navigateByUrl('lists/' + this.readingListId);
+    } else {
+      this.location.back();
+    }
   }
 
 }

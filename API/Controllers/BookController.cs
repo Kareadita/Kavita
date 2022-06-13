@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -37,11 +38,34 @@ namespace API.Controllers
         {
             var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
             var bookTitle = string.Empty;
-            if (dto.SeriesFormat == MangaFormat.Epub)
+            switch (dto.SeriesFormat)
             {
-                var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
-                using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.BookReaderOptions);
-                bookTitle = book.Title;
+                case MangaFormat.Epub:
+                {
+                    var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+                    using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.BookReaderOptions);
+                    bookTitle = book.Title;
+                    break;
+                }
+                case MangaFormat.Pdf:
+                {
+                    var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+                    if (string.IsNullOrEmpty(bookTitle))
+                    {
+                        // Override with filename
+                        bookTitle = Path.GetFileNameWithoutExtension(mangaFile.FilePath);
+                    }
+
+                    break;
+                }
+                case MangaFormat.Image:
+                    break;
+                case MangaFormat.Archive:
+                    break;
+                case MangaFormat.Unknown:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             return Ok(new BookInfoDto()

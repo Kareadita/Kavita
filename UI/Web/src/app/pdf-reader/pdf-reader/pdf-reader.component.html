@@ -14,36 +14,52 @@
         [showPropertiesButton]="false"
         [(zoom)]="zoomSetting"
         [showSecondaryToolbarButton]="true"
+        [theme]="theme"
+        [backgroundColor]="backgroundColor"
 
-        
+        [customToolbar]="multiToolbar"
 
         (pageChange)="onPageChange($event)"
-        (pdfDownloaded)="onDownload($event)"
     > 
     </ngx-extended-pdf-viewer>
-    <!-- <ng-template #multiToolbar>
-        <div class="header">
-          <button mat-icon-button id="zoomIn">
-            <mat-icon>zoom_in</mat-icon>
-          </button>
-          <button mat-icon-button id="zoomOut">
-            <mat-icon>zoom_out</mat-icon>
-          </button>
-          <button mat-icon-button>
-            <mat-icon>fullscreen</mat-icon>
-          </button>
-      
-          <button mat-icon-button id="primaryPageRotateCw">
-            <mat-icon>replay</mat-icon>
-          </button>
-      
-          <div class="flex-spacer"></div>
-          <button mat-icon-button id="print">
-            <mat-icon>print</mat-icon>
-          </button>
-          <button mat-icon-button id="download">
-            <mat-icon>download</mat-icon>
-          </button>
+    <ng-template #multiToolbar>
+
+
+        <div class="action-bar row g-0 justify-content-between">
+            <!-- <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" id="download">
+                <i class="fa fa-download" aria-hidden="true"></i>
+                <span class="visually-hidden">Download file</span>
+            </button> -->
+            <div class="col-2 col-xs-1">
+                <pdf-download></pdf-download>
+            </div>
+            
+            <!-- <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back">
+                <i class="fa fa-reply" aria-hidden="true"></i>
+            </button> -->
+            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()">
+                <i class="fa fa-bars" aria-hidden="true"></i></button>
+            <div class="book-title col-2 d-none d-sm-block">
+                <ng-container *ngIf="isLoading; else showTitle">
+                    <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
+                        <span class="visually-hidden">Loading book...</span>
+                    </div>
+                </ng-container>
+                <ng-template #showTitle>
+                    <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode</span>)</span>
+                    <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>
+                </ng-template>
+            </div>
+            <div class="col-2 col-xs-1">
+                <pdf-find-button></pdf-find-button>
+            </div>
+            <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+            <!-- <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
+                [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
+                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
+                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
+            </button> -->
         </div>
-      </ng-template> -->
+
+      </ng-template>
 </ng-container>
