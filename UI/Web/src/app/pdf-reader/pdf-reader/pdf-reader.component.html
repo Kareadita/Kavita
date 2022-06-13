@@ -1,0 +1,13 @@
+<ng-container *ngIf="pdfFile != null">
+    <ngx-extended-pdf-viewer
+        [src]="pdfFile"
+        height="100vh"
+        [(page)]="currentPage"
+        [textLayer]="true" 
+        [useBrowserLocale]="false"
+        [showHandToolButton]="true"
+        (pageChange)="onPageChange($event)"
+        (pdfDownloaded)="onDownload($event)"
+    > 
+    </ngx-extended-pdf-viewer>
+</ng-container>

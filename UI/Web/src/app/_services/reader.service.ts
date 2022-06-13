@@ -1,7 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { asyncScheduler, throttleTime } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
+import { download } from '../shared/_models/download';
+import { DEBOUNCE_TIME } from '../shared/_services/download.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { HourEstimateRange } from '../_models/hour-estimate-range';
@@ -14,6 +17,9 @@ export const MAX_WORDS_PER_HOUR = 30_000;
 export const MIN_WORDS_PER_HOUR = 10_260;
 export const MAX_PAGES_PER_MINUTE = 2.75;
 export const MIN_PAGES_PER_MINUTE = 3.33;
+
+export const CHAPTER_ID_DOESNT_EXIST = -1;
+export const CHAPTER_ID_NOT_FETCHED = -2;
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +43,18 @@ export class ReaderService {
     } else {
       return ['library', libraryId, 'series', seriesId, 'manga', chapterId];
     }
+  }
+
+  downloadPdf(chapterId: number) {
+    return this.httpClient.get(this.baseUrl + 'reader/pdf?chapterId=' + chapterId, 
+                      {observe: 'events', responseType: 'blob', reportProgress: true}
+          ).pipe(
+              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+              download((blob, filename) => {
+                return blob;
+              }
+            )
+          );
   }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {

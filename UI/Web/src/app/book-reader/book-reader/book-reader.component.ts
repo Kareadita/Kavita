@@ -7,7 +7,7 @@ import { catchError, debounceTime, take, takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
-import { ReaderService } from 'src/app/_services/reader.service';
+import { CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BookService } from '../book.service';
@@ -40,8 +40,6 @@ interface HistoryPoint {
 }
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
-const CHAPTER_ID_NOT_FETCHED = -2;
-const CHAPTER_ID_DOESNT_EXIST = -1;
 
 /**
  * Styles that should be applied on the top level book-content tag
