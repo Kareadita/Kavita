@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
@@ -7,8 +8,6 @@ import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Volume } from 'src/app/_models/volume';
-import { MetadataService } from 'src/app/_services/metadata.service';
-import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
@@ -16,7 +15,7 @@ import { SeriesService } from 'src/app/_services/series.service';
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss']
 })
-export class EntityInfoCardsComponent implements OnInit {
+export class EntityInfoCardsComponent implements OnInit, OnDestroy {
 
   @Input() entity!: Volume | Chapter;
   /**
@@ -38,6 +37,8 @@ export class EntityInfoCardsComponent implements OnInit {
   totalWordCount: number = 0;
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
 
+  private readonly onDestroy: Subject<void> = new Subject();
+
   get LibraryType() {
     return LibraryType;
   }
@@ -50,7 +51,7 @@ export class EntityInfoCardsComponent implements OnInit {
     return AgeRating;
   }
 
-  constructor(private utilityService: UtilityService, private seriesService: SeriesService, private metadataService: MetadataService, private readerService: ReaderService) { }
+  constructor(private utilityService: UtilityService, private seriesService: SeriesService) {}
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.entity);
@@ -85,6 +86,11 @@ export class EntityInfoCardsComponent implements OnInit {
       this.readingTime.maxHours = vol.maxHoursToRead;
       this.readingTime.avgHours = vol.avgHoursToRead;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
 }

@@ -31,13 +31,15 @@ export class EntityTitleComponent implements OnInit {
   titleName: string = '';
   volumeTitle: string = '';
 
+
   get LibraryType() {
     return LibraryType;
   }
 
   
 
-  constructor(private utilityService: UtilityService) { }
+  constructor(private utilityService: UtilityService) {
+  }
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.entity);
@@ -51,7 +53,5 @@ export class EntityTitleComponent implements OnInit {
       this.volumeTitle = v.name || '';
       this.titleName = v.chapters[0].titleName || '';
     }
-    
   }
-
 }
