@@ -1,6 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PageViewModeType } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/book.service';
@@ -54,7 +55,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   zoomSetting: string | number = 'auto';
 
-  theme: 'dark' | 'light' | 'custom' = 'dark';
+  theme: 'dark' | 'light' | 'custom' = 'light';
   themeMap: {[key:string]: string} = {
     'dark': ' #292929',
     'custom': '',
@@ -63,6 +64,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   backgroundColor: string = this.themeMap[this.theme];
 
   isLoading: boolean = false;
+
+  //bookMode: PageViewModeType = 'multiple';
 
   private readonly onDestroy = new Subject<void>();
 

@@ -15,30 +15,41 @@
         [(zoom)]="zoomSetting"
         [showSecondaryToolbarButton]="true"
         [theme]="theme"
+        [formTheme]="theme"
         [backgroundColor]="backgroundColor"
+        
 
         [customToolbar]="multiToolbar"
 
         (pageChange)="onPageChange($event)"
     > 
+    
     </ngx-extended-pdf-viewer>
+    <!-- [pageViewMode]="bookMode"-->
     <ng-template #multiToolbar>
+        <!-- THis is their code Robbie. We want to emulate theirs withours below. -->
+        <pdf-toolbar [showRotateButton]="false" [showOpenFileButton]="false"  [showPrintButton]="false" [showSecondaryToolbarButton]="true">
 
+        </pdf-toolbar>
 
         <div class="action-bar row g-0 justify-content-between">
-            <!-- <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" id="download">
-                <i class="fa fa-download" aria-hidden="true"></i>
-                <span class="visually-hidden">Download file</span>
-            </button> -->
-            <div class="col-2 col-xs-1">
-                <pdf-download></pdf-download>
+            <div class="left-side col-4">
+                <div class="row g-0 justify-content-between">
+                    <div class="col-2 col-xs-1">
+                        <pdf-toggle-sidebar></pdf-toggle-sidebar>
+                    </div>
+                    <div class="col-2 col-xs-1">
+                        <pdf-find-button></pdf-find-button>
+                    </div>
+                    <div class="col-2 col-xs-1">
+                        <pdf-paging-area></pdf-paging-area>
+                    </div>
+                </div>
+                
             </div>
             
-            <!-- <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back">
-                <i class="fa fa-reply" aria-hidden="true"></i>
-            </button> -->
-            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()">
-                <i class="fa fa-bars" aria-hidden="true"></i></button>
+        
+
             <div class="book-title col-2 d-none d-sm-block">
                 <ng-container *ngIf="isLoading; else showTitle">
                     <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
@@ -50,15 +61,32 @@
                     <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>
                 </ng-template>
             </div>
-            <div class="col-2 col-xs-1">
-                <pdf-find-button></pdf-find-button>
+
+            <div class="right-side col-6">
+                <div class="col-2 col-xs-1">
+                    <pdf-hand-tool></pdf-hand-tool>
+                </div>
+    
+                <div class="col-2 col-xs-1">
+                    <pdf-select-tool></pdf-select-tool>
+                </div>
+    
+                <div class="col-2 col-xs-1">
+                    <pdf-presentation-mode></pdf-presentation-mode>
+                </div>
+    
+                <div class="col-2 col-xs-1">
+                    <button class="btn btn-icon col-2 col-xs-1" (click)="closeReader()">
+                        <i class="fa fa-times-circle" aria-hidden="true"></i>
+                        <span class="visually-hidden">Close Reader</span>
+                    </button>
+                </div>
+    
+                <div class="col-2 col-xs-1">
+                    <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
+                </div>
             </div>
-            <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
-            <!-- <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
-                [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
-                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
-            </button> -->
+
         </div>
 
       </ng-template>
