@@ -261,6 +261,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 		}
 	}
 
+	getHeight(): string {
+		const main = document.querySelector('.main-container') as HTMLElement | null;
+		let mainOffset = main!.offsetTop;
+		return 'calc(var(--vh)*100 - '+mainOffset+'px)';
+	}
+
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
     const libraryId = this.route.snapshot.paramMap.get('libraryId');

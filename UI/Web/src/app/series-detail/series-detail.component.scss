@@ -23,7 +23,7 @@
 
 // This is responsible for ensuring we scroll down and only tabs and companion bar is visible
 .main-container {
-  height: calc(var(--vh)*100 - 117px);
+  // Height set dynamically by series-detail.component.ts getHeight();
   overflow-y: auto;
 }
 
