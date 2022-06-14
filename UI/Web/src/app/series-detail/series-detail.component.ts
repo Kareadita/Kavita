@@ -255,6 +255,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 		
 		if (!document.querySelector('.nav-tabs.fixed') && (tabOffset - mainOffset) <= mainScrollPos) {
 			tabs!.classList.add("fixed");
+			tabs!.style.top = mainOffset+'px';
 		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (contentOffset - mainOffset)) {
 			tabs!.classList.remove("fixed");
 		}
