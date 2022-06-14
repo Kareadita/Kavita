@@ -80,31 +80,26 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   resizeJumpBar() {
-    // TODO: Debounce this
-    
-    const fullSize = (this.jumpBarKeys.length * keySize) - 20;
-    const currentSize = (this.document.querySelector('.jump-bar')?.getBoundingClientRect().height || fullSize + 20)  - 20;
+    const fullSize = (this.jumpBarKeys.length * keySize);
+    const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
     if (currentSize >= fullSize) {
       return;
     }
 
-    const targetNumberOfKeys = parseInt(Math.round(currentSize / keySize) + '', 10);
+    const targetNumberOfKeys = parseInt(Math.floor(currentSize / keySize) + '', 10);
     const removeCount = this.jumpBarKeys.length - targetNumberOfKeys - 3;
     if (removeCount <= 0) return;
 
 
     this.jumpBarKeysToRender = [];
     
-
+    const removalTimes = Math.ceil(removeCount / 2);
     const midPoint = this.jumpBarKeys.length / 2;
     this.jumpBarKeysToRender.push(this.jumpBarKeys[0]);
-    this.removeFirstPartOfJumpBar(midPoint, removeCount / 2);
+    this.removeFirstPartOfJumpBar(midPoint, removalTimes);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[midPoint]);
-    this.removeSecondPartOfJumpBar(midPoint, removeCount / 2);
+    this.removeSecondPartOfJumpBar(midPoint, removalTimes);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[this.jumpBarKeys.length - 1]);
-
-    //console.log('End product: ', this.jumpBarKeysToRender);
-    // console.log('End key size: ', this.jumpBarKeysToRender.length);
   }
 
   removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
@@ -120,7 +115,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
       }
       removedIndexes.push(minIndex);
     }
-    // console.log('second: removing ', removedIndexes);
     for(let i = midPoint + 1; i < this.jumpBarKeys.length - 2; i++) {
       if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
     }
@@ -140,7 +134,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
       removedIndexes.push(minIndex);
     }
 
-    // console.log('first: removing ', removedIndexes);
     for(let i = 1; i < midPoint; i++) {
       if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
     }
@@ -150,9 +143,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     if (this.trackByIdentity === undefined) {
       this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`; // ${this.pagination?.currentPage}_
     }
-
-    
-    
 
 
     if (this.filterSettings === undefined) {
@@ -166,10 +156,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
   ngOnChanges(changes: SimpleChanges): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
+    this.resizeJumpBar();
   }
 
   ngAfterViewInit() {
-    this.resizeJumpBar();
     // this.scroller.elementScrolled().pipe(
     //   map(() => this.scroller.measureScrollOffset('bottom')),
     //   pairwise(),
