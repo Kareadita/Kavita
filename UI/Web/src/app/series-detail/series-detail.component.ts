@@ -247,20 +247,19 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 	onScroll(): void {
 		const tabs = document.querySelector('.nav-tabs') as HTMLElement | null;
 		const main = document.querySelector('.main-container') as HTMLElement | null;
-		const content = document.querySelector('.tab-content') as HTMLElement | null;
-		let mainOffset = main!.offsetTop;
-		let tabOffset = tabs!.offsetTop;
-		let contentOffset = content!.offsetTop;
-		let mainScrollPos = main!.scrollTop;
-    let tabsWidth = tabs!.clientWidth;
+    const info = document.querySelector('.info-container') as HTMLElement | null;
+		const mainOffset = main!.offsetTop;
+		const mainScrollPos = main!.scrollTop;
+    const tabsWidth = tabs!.clientWidth;
+    const infoHeight = info!.offsetHeight;
     const companion = document.querySelector('.companion-bar-inner') as HTMLElement | null;
     const navbar = document.querySelector('.navbar') as HTMLElement | null;
-    let companionHeight = companion!.offsetHeight;
-		let navbarHeight = navbar!.offsetHeight;
-    let totalHeight = companionHeight + navbarHeight + 20;
+    const companionHeight = companion!.offsetHeight;
+		const navbarHeight = navbar!.offsetHeight;
+    const totalHeight = companionHeight + navbarHeight + 20;
     const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
 		
-		if (!document.querySelector('.nav-tabs.fixed') && (tabOffset - mainOffset) <= mainScrollPos) {
+		if (!document.querySelector('.nav-tabs.fixed') && (infoHeight) <= mainScrollPos) {
 			tabs!.classList.add("fixed");
       tabs!.style.width = tabsWidth+'px';
       if (vw < 780) {
@@ -268,7 +267,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       } else {
         tabs!.style.top = totalHeight+'px';
       }
-		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (contentOffset - mainOffset)) {
+		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (infoHeight)) {
 			tabs!.classList.remove("fixed");
 		}
 	}
@@ -280,10 +279,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
     const companion = document.querySelector('.companion-bar-inner') as HTMLElement | null;
     const navbar = document.querySelector('.navbar') as HTMLElement | null;
-    let companionHeight = companion!.offsetHeight;
-		let navbarHeight = navbar!.offsetHeight;
-    let totalHeight = companionHeight + navbarHeight + 20;
-		const mainOffset = this.scrollingBlock.nativeElement.offsetTop;
+    const companionHeight = companion!.offsetHeight;
+		const navbarHeight = navbar!.offsetHeight;
+    const totalHeight = companionHeight + navbarHeight + 21;
 		return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
 	}
 
