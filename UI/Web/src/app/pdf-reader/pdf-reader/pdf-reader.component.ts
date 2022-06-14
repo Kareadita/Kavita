@@ -56,11 +56,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   zoomSetting: string | number = 'auto';
 
   theme: 'dark' | 'light' = 'light';
-  themeMap: {[key:string]: string} = {
-    'dark': ' #292929',
-    'light': '#f9f9f9'
+  themeMap: {[key:string]: {background: string, font: string}} = {
+    'dark': {'background': '#292929', 'font': '#FFF'},
+    'light': {'background': '#f9f9f9', 'font': '#5a5a5a'}
   }
-  backgroundColor: string = this.themeMap[this.theme];
+  backgroundColor: string = this.themeMap[this.theme].background;
+  fontColor: string = this.themeMap[this.theme].font;
 
   isLoading: boolean = false;
 
@@ -158,7 +159,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     } else {
       this.theme = 'dark';
     }
-    this.backgroundColor = this.themeMap[this.theme];
+    this.backgroundColor = this.themeMap[this.theme].background;
+    this.fontColor = this.themeMap[this.theme].font;
   }
 
   onPageChange(pageNumber: number) {
