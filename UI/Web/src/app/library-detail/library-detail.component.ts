@@ -105,12 +105,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
 
     this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
-      console.log('JumpBar: ', barDetails);
+      //console.log('JumpBar: ', barDetails);
       this.jumpKeys = barDetails;
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+    this.pagination.itemsPerPage = 0; // TODO: Validate what pagination setting is ideal
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
     // Setup filterActiveCheck to check filter against
@@ -178,7 +179,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.loadPage();
   }
 
-  loadPage() {
+  handlePaginationChange(direction: 0 | 1) {
+    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
+    this.loadPage(direction);
+  }
+
+  loadPage(direction: 0 | 1 = 1) {
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
@@ -188,7 +194,18 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
-      this.series = series.result;
+      //this.series = series.result; // Non-infinite scroll version
+      if (this.series.length === 0) {
+        this.series = series.result;
+      } else {
+        if (direction === 1) {
+          //this.series = [...this.series, ...series.result];
+          this.series.concat(series.result);
+        } else {
+          this.series = [...series.result, ...this.series];
+        }
+      }
+      
       this.pagination = series.pagination;
       this.loadingSeries = false;
       window.scrollTo(0, 0);
@@ -204,5 +221,5 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }

@@ -10,11 +10,6 @@ import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
 
-export const MAX_WORDS_PER_HOUR = 30_000;
-export const MIN_WORDS_PER_HOUR = 10_260;
-export const MAX_PAGES_PER_MINUTE = 2.75;
-export const MIN_PAGES_PER_MINUTE = 3.33;
-
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
 
@@ -76,7 +71,7 @@ export class ReaderService {
 
   /**
    * Used exclusively for reading multiple bookmarks from a series
-   * @param seriesId 
+   * @param seriesId
    */
   getBookmarkInfo(seriesId: number) {
     return this.httpClient.get<BookmarkInfo>(this.baseUrl + 'reader/bookmark-info?seriesId=' + seriesId);
@@ -125,7 +120,7 @@ export class ReaderService {
   markVolumeUnread(seriesId: number, volumeId: number) {
     return this.httpClient.post(this.baseUrl + 'reader/mark-volume-unread', {seriesId, volumeId});
   }
-  
+
 
   getNextChapter(seriesId: number, volumeId: number, currentChapterId: number, readingListId: number = -1) {
     if (readingListId > 0) {
@@ -149,16 +144,9 @@ export class ReaderService {
     return this.httpClient.get<Chapter>(this.baseUrl + 'reader/continue-point?seriesId=' + seriesId);
   }
 
+  // TODO: Cache this information
   getTimeLeft(seriesId: number) {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/time-left?seriesId=' + seriesId);
-  }
-
-  getTimeToRead(seriesId: number) {
-    return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/read-time?seriesId=' + seriesId);
-  }
-
-  getManualTimeToRead(wordCount: number, pageCount: number, isEpub: boolean) {
-    return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/manual-read-time?wordCount=' + wordCount + '&pageCount=' + pageCount + '&isEpub=' + isEpub);
   }
 
   /**
@@ -182,7 +170,7 @@ export class ReaderService {
   /**
    * Parses out the page number from a Image src url
    * @param imageSrc Src attribute of Image
-   * @returns 
+   * @returns
    */
   imageUrlToPageNum(imageSrc: string) {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
@@ -224,7 +212,7 @@ export class ReaderService {
   }
 
   enterFullscreen(el: Element, callback?: VoidFunction) {
-    if (!document.fullscreenElement) { 
+    if (!document.fullscreenElement) {
       if (el.requestFullscreen) {
         el.requestFullscreen().then(() => {
           if (callback) {
@@ -246,7 +234,7 @@ export class ReaderService {
   }
 
   /**
-   * 
+   *
    * @returns If document is in fullscreen mode
    */
   checkFullscreenMode() {

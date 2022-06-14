@@ -23,6 +23,12 @@ import { FileInfoComponent } from './file-info/file-info.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-drawer.component';
+import { EntityTitleComponent } from './entity-title/entity-title.component';
+import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.component';
+import { ListItemComponent } from './list-item/list-item.component';
+import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
+
 
 
 
@@ -43,6 +49,10 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     FileInfoComponent,
     EditSeriesRelationComponent,
     CardDetailDrawerComponent,
+    EntityTitleComponent,
+    EntityInfoCardsComponent,
+    ListItemComponent,
+    SeriesInfoCardsComponent,
   ],
   imports: [
     CommonModule,
@@ -60,8 +70,7 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     NgbCollapseModule,
     NgbRatingModule,
     
-    //ScrollingModule,
-    //InfiniteScrollModule,
+    VirtualScrollerModule,
 
 
     NgbOffcanvasModule, // Series Detail, action of cards
@@ -93,7 +102,16 @@ import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-draw
     ChapterMetadataDetailComponent,
     EditSeriesRelationComponent,
 
-    NgbOffcanvasModule
+    EntityTitleComponent,
+    EntityInfoCardsComponent,
+    ListItemComponent,
+
+    NgbOffcanvasModule,
+
+    VirtualScrollerModule,
+    SeriesInfoCardsComponent
+
+
   ]
 })
 export class CardsModule { }

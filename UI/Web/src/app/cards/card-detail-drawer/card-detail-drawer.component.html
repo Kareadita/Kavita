@@ -1,32 +1,8 @@
 <div class="offcanvas-header">
     <h5 class="offcanvas-title">
-        <ng-container [ngSwitch]="libraryType">
-            <ng-container *ngSwitchCase="LibraryType.Comic">
-                <span class="modal-title" id="modal-basic-title">
-                    <ng-container *ngIf="chapter.titleName != ''; else fullComicTitle">
-                        {{chapter.titleName}}
-                    </ng-container>
-                    <ng-template #fullComicTitle>
-                        {{parentName}} - {{data.number != 0 ? (isChapter ? 'Chapter ' : 'Volume ') + data.number : 'Special'}}
-                    </ng-template>
-                </span>
-            </ng-container>
-            <ng-container *ngSwitchCase="LibraryType.Manga">
-                <span class="modal-title" id="modal-basic-title">
-                    <ng-container *ngIf="chapter.titleName != ''; else fullMangaTitle">
-                        {{chapter.titleName}}
-                    </ng-container>
-                    <ng-template #fullMangaTitle>
-                        {{parentName}} - {{data.number != 0 ? (isChapter ? 'Issue #' : 'Volume ') + data.number : 'Special'}}
-                    </ng-template>
-                </span>
-            </ng-container>
-            <ng-container *ngSwitchCase="LibraryType.Book">
-                <span class="modal-title" id="modal-basic-title">
-                    {{chapter.titleName}}
-                </span>
-            </ng-container>
-        </ng-container>
+        <span class="modal-title" id="modal-basic-title">
+            <app-entity-title [libraryType]="libraryType" [entity]="data" [seriesName]="parentName"></app-entity-title>
+        </span>
     </h5>
     <button type="button" class="btn-close text-reset" aria-label="Close" (click)="activeOffcanvas.dismiss()"></button>
 </div>
@@ -44,7 +20,7 @@
                                 <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
                             </div> 
                             <div class="col-md-10 col-lg-11">
-                                <ng-container *ngIf="summary$ | async as summary; else noSummary">
+                                <ng-container *ngIf="summary.length > 0; else noSummary">
                                     <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
                                 </ng-container>
                                 <ng-template #noSummary>
@@ -53,73 +29,8 @@
                             </div>
                         </div>
                         
-                        <div class="row g-0 mt-4 mb-3">
-                            <ng-container *ngIf="totalPages > 0">
-                                <div class="col-auto mb-2">
-                                    <app-icon-and-title label="Print Length" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
-                                        {{totalPages | number:''}} Pages
-                                    </app-icon-and-title>
-                                </div>
-                                <div class="vr d-none d-lg-block m-2"></div>
-                            </ng-container>
+                        <app-entity-info-cards [entity]="data"></app-entity-info-cards>
 
-                            <ng-container *ngIf="chapterMetadata !== undefined && chapterMetadata.releaseDate && (chapterMetadata.releaseDate | date: 'shortDate') !== '1/1/01'">
-                                <div class="col-auto mb-2">
-                                    <app-icon-and-title label="Release Date" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release">
-                                        {{chapterMetadata.releaseDate | date:'shortDate'}}
-                                    </app-icon-and-title>
-                                </div>
-                                <div class="vr d-none d-lg-block m-2"></div>
-                            </ng-container>
-
-                            <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
-                                <div class="col-auto mb-2">
-                                    <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                                        {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
-                                    </app-icon-and-title>
-                                </div>
-                            </ng-container>
-                    
-                            <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && chapterMetadata !== undefined && chapterMetadata.wordCount > 0">
-                                <div class="vr d-none d-lg-block m-2"></div>
-                                <div class="col-auto mb-2">
-                                    <app-icon-and-title label="Word Count" [clickable]="false" fontClasses="fa-solid fa-book-open">
-                                        {{chapterMetadata.wordCount | compactNumber}} Words
-                                    </app-icon-and-title>
-                                </div>    
-                            </ng-container>
-
-                            <ng-container *ngIf="chapterMetadata !== undefined">
-                                <ng-container *ngIf="ageRating !== '' && ageRating !== 'Unknown'">
-                                    <div class="vr d-none d-lg-block m-2"></div>
-                                    <div class="col-auto">
-                                        <app-icon-and-title label="Age Rating" [clickable]="false" fontClasses="fas fa-eye" title="Age Rating">
-                                            {{ageRating}}
-                                        </app-icon-and-title>
-                                    </div>
-                                </ng-container>
-                            </ng-container>
-
-                            <ng-container *ngIf="chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
-                                <div class="vr d-none d-lg-block m-2"></div>
-                                <div class="col-auto">
-                                    <app-icon-and-title label="Date Added" [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
-                                        {{chapter.created | date:'short' || '-'}}
-                                    </app-icon-and-title>
-                                </div>
-                            </ng-container>
-    
-                            <ng-container>
-                                <div class="vr d-none d-lg-block m-2"></div>
-                                <div class="col-auto">
-                                    <app-icon-and-title label="ID" [clickable]="false" fontClasses="fa-solid fa-fingerprint" title="ID">
-                                        {{data.id}}
-                                    </app-icon-and-title>
-                                </div>
-                            </ng-container>
-                        </div>
-
-                        
 
                         <!-- 2 rows to show some tags-->
                         <ng-container *ngIf="chapterMetadata !== undefined">
@@ -187,18 +98,13 @@
             <li [ngbNavItem]="tabs[TabID.Cover]">
                 <a ngbNavLink>{{tabs[TabID.Cover].title}}</a>
                 <ng-template ngbNavContent>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="chapter.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
-                    <div class="row g-0">
-                        <button class="btn btn-primary flex-end mb-2" [disabled]="coverImageSaveLoading" (click)="saveCoverImage()">
-                            <ng-container *ngIf="coverImageSaveLoading; else notSaving">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually-hidden">Loading...</span>
-                            </ng-container>
-                            <ng-template #notSaving>
-                                Save
-                            </ng-template>
-                        </button>
-                    </div>
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls" 
+                        [showReset]="chapter.coverImageLocked"
+                        [showApplyButton]="true"
+                        (applyCover)="applyCoverImage($event)"
+                        (resetCover)="resetCoverImage()"
+                        >
+                    </app-cover-image-chooser>
                 </ng-template>
             </li>
 

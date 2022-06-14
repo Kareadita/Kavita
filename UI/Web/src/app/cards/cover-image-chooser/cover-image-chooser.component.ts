@@ -9,12 +9,27 @@ import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import { DOCUMENT } from '@angular/common';
 
+export type SelectCoverFunction = (selectedCover: string) => void;
+
 @Component({
   selector: 'app-cover-image-chooser',
   templateUrl: './cover-image-chooser.component.html',
   styleUrls: ['./cover-image-chooser.component.scss']
 })
 export class CoverImageChooserComponent implements OnInit, OnDestroy {
+
+  /**
+   * If buttons show under images to allow immediate selection of cover images.
+   */
+  @Input() showApplyButton: boolean = false;
+  /**
+   * When a cover image is selected, this will be called with a base url representation of the file.
+   */
+  @Output() applyCover: EventEmitter<string> = new EventEmitter<string>();
+  /**
+   * When a cover image is reset, this will be called.
+   */
+  @Output() resetCover: EventEmitter<void> = new EventEmitter<void>();
 
   @Input() imageUrls: Array<string> = [];
   @Output() imageUrlsChange: EventEmitter<Array<string>> = new EventEmitter<Array<string>>();
@@ -37,6 +52,10 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
 
   selectedIndex: number = 0;
+  /**
+   * Only applies for showApplyButton. Used to track which image is applied.
+   */
+  appliedIndex: number = 0;
   form!: FormGroup;
   files: NgxFileDropEntry[] = [];
 
@@ -76,6 +95,19 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     this.selectedIndex = index;
     this.imageSelected.emit(this.selectedIndex);
     this.selectedBase64Url.emit(this.imageUrls[this.selectedIndex]);
+  }
+
+  applyImage(index: number) {
+    if (this.showApplyButton) {
+      this.applyCover.emit(this.imageUrls[index]);
+      this.appliedIndex = index;
+    }
+  }
+
+  resetImage() {
+    if (this.showApplyButton) {
+      this.resetCover.emit();
+    }
   }
 
   loadImage() {

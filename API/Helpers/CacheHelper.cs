@@ -32,6 +32,7 @@ public class CacheHelper : ICacheHelper
     /// <remarks>If a cover image is locked but the underlying file has been deleted, this will allow regenerating. </remarks>
     /// <param name="coverPath">This should just be the filename, no path information</param>
     /// <param name="firstFile"></param>
+    /// <param name="chapterCreated">When the chapter was created (Not Used)</param>
     /// <param name="forceUpdate">If the user has told us to force the refresh</param>
     /// <param name="isCoverLocked">If cover has been locked by user. This will force false</param>
     /// <returns></returns>

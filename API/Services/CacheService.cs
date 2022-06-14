@@ -32,7 +32,7 @@ namespace API.Services
         string GetCachedFile(Chapter chapter);
         public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
         Task<int> CacheBookmarkForSeries(int userId, int seriesId);
-        void CleanupBookmarkCache(int bookmarkDtoSeriesId);
+        void CleanupBookmarkCache(int seriesId);
     }
     public class CacheService : ICacheService
     {

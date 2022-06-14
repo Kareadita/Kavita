@@ -22,7 +22,7 @@ export class MetadataService {
   private ageRatingTypes: {[key: number]: string} | undefined = undefined;
   private validLanguages: Array<Language> = [];
 
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+  constructor(private httpClient: HttpClient) { }
 
   getAgeRating(ageRating: AgeRating) {
     if (this.ageRatingTypes != undefined && this.ageRatingTypes.hasOwnProperty(ageRating)) {

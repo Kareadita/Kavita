@@ -2,108 +2,7 @@
     <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
 </div>
 
-<!-- This first row will have random information about the series-->
-<div class="row g-0 mb-4 mt-3">
-     <ng-container *ngIf="seriesMetadata.ageRating">
-        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-            <app-icon-and-title label="Age Rating" [clickable]="true" fontClasses="fas fa-eye" (click)="goTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
-                {{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
-    </ng-container>
-    <ng-container *ngIf="series">
-        <ng-container *ngIf="seriesMetadata.releaseYear > 0">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-                <app-icon-and-title label="Release Year" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
-                    {{seriesMetadata.releaseYear}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
 
-        <ng-container *ngIf="seriesMetadata.language !== null">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-                <app-icon-and-title label="Language" [clickable]="true" fontClasses="fas fa-language" (click)="goTo(FilterQueryParam.Languages, seriesMetadata.language)" title="Language">
-                    {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
-
-        <ng-container>
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
-                    <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}" (click)="goTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
-                        {{pubStatus}}
-                    </app-icon-and-title>
-                </ng-container>
-            </div>
-            <div class="vr m-2 d-none d-lg-block"></div>
-        </ng-container>
-
-        <ng-container>
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Format" [clickable]="true" [fontClasses]="'fa ' + utilityService.mangaFormatIcon(series.format)" (click)="goTo(FilterQueryParam.Format, series.format)" title="Format">
-                    {{utilityService.mangaFormat(series.format)}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
-
-        <ng-container *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'">
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Last Read" [clickable]="false" fontClasses="fa-regular fa-clock" title="Last Read">
-                    {{series.latestReadDate | date:'shortDate'}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
-        
-
-        <ng-container *ngIf="series.format === MangaFormat.EPUB; else showPages">
-            <ng-container *ngIf="series.wordCount > 0">
-                <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                    <app-icon-and-title label="Word Count" [clickable]="false" fontClasses="fa-solid fa-book-open">
-                        {{series.wordCount | compactNumber}} Words
-                    </app-icon-and-title>
-                </div>
-                <div class="vr d-none d-lg-block m-2"></div>    
-            </ng-container>
-            
-        </ng-container>
-        <ng-template #showPages>
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Print Length" [clickable]="false" fontClasses="fa-regular fa-file-lines">
-                    {{series.pages | number:''}} Pages
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-template>    
-        
-        
-
-        <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                    {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
-                </app-icon-and-title>
-            </div>
-        </ng-container>
-
-
-        <ng-container *ngIf="readingTimeLeft.hasProgress && readingTimeLeft.avgHours !== 0 ">
-            <div class="vr d-none d-lg-block m-2"></div>
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Read Left" [clickable]="false" fontClasses="fa-solid fa-clock">
-                    ~{{readingTimeLeft.avgHours}} Hour{{readingTimeLeft.avgHours > 1 ? 's' : ''}} Left
-                </app-icon-and-title>
-            </div>
-        </ng-container>
-
-        
-    </ng-container>
-</div>
 
 <div class="row g-0" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
     <div class="col-md-4">
@@ -301,3 +200,6 @@
             See {{isCollapsed ? 'More' : 'Less'}}
     </a>
 </div>
+
+<!-- This first row will have random information about the series-->
+<app-series-info-cards [series]="series" [seriesMetadata]="seriesMetadata" (goTo)="handleGoTo($event)" [hasReadingProgress]="hasReadingProgress"></app-series-info-cards>

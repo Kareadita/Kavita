@@ -7,8 +7,8 @@
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageService.errorImage"></app-image>
       </ng-container>
       
-      <div class="progress-banner" *ngIf="read < total && total > 0 && read !== total">
-        <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
+      <div class="progress-banner">
+        <p *ngIf="read < total && total > 0 && read !== total"><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
 
         <span class="download" *ngIf="download$ | async as download">
           <app-circular-loader [currentValue]="download.progress"></app-circular-loader>

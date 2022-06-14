@@ -28,6 +28,8 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   clearingSeries: {[id: number]: boolean} = {};
   actions: ActionItem<Series>[] = [];
 
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
+
   private onDestroy: Subject<void> = new Subject<void>();
   
   constructor(private readerService: ReaderService, private seriesService: SeriesService, 

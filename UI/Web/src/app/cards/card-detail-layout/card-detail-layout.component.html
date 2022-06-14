@@ -13,29 +13,39 @@
     </div>
 </div>
 <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
-<div class="viewport-container">
+<div class="viewport-container" #scrollingBlock>
     <div class="content-container">
-        <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'top' }"></ng-container>
 
         <div class="card-container mt-2 mb-2">
-            <ng-container [ngTemplateOutlet]="cardTemplate"></ng-container>
+            <virtual-scroller #scroll [items]="items" (vsEnd)="fetchMore($event)" [bufferAmount]="1">
+                <div class="grid row g-0" #container>
+                    <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+                        <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+                    </div>
+                </div>
+            </virtual-scroller>
+        
+            
+            <p *ngIf="items.length === 0 && !isLoading">
+                <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+            </p>
         </div>
-
-        <ng-container [ngTemplateOutlet]="paginationTemplate" [ngTemplateOutletContext]="{ id: 'bottom' }"></ng-container>
     </div>
 
-    <ng-container *ngIf="pagination && items.length > 0 && pagination.totalPages > 1" [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
+    <ng-container  [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
 </div>
 <ng-template #cardTemplate>
-
-    <div class="grid row g-0" >
-        <div class="card col-auto mt-2 mb-2" *ngFor="let item of items; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
-            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+    <virtual-scroller #scroll [items]="items" [bufferAmount]="1">
+        <div class="grid row g-0" #container>
+            <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+            </div>
         </div>
+    </virtual-scroller>
+
+    <div class="mx-auto" *ngIf="items.length === 0 && !isLoading" style="width: 200px;">
+        <p><ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container></p>
     </div>
-    <p *ngIf="items.length === 0 && !isLoading">
-        <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-    </p>
 </ng-template>
 
 <ng-template #paginationTemplate let-id="id">
@@ -93,8 +103,8 @@
 
 <ng-template #jumpBar>
     <div class="jump-bar">
-        <ng-container *ngFor="let jumpKey of jumpBarKeys; let i = index;">
-            <button class="btn btn-link {{i % 2 !== 0 ? 'd-lg-flex' : 'd-md-flex'}}" (click)="scrollTo(jumpKey)">
+        <ng-container *ngFor="let jumpKey of jumpBarKeysToRender; let i = index;">
+            <button class="btn btn-link" (click)="scrollTo(jumpKey)">
                 {{jumpKey.title}}
             </button>
         </ng-container>

@@ -6,7 +6,7 @@ using API.Entities.Metadata;
 
 namespace API.Entities;
 
-public class Series : IEntityDate
+public class Series : IEntityDate, IHasReadTimeEstimate
 {
     public int Id { get; set; }
     /// <summary>
@@ -66,9 +66,14 @@ public class Series : IEntityDate
     public DateTime LastChapterAdded { get; set; }
 
     /// <summary>
-    /// Total words in a Series (books only)
+    /// Total Word count of all chapters in this chapter.
     /// </summary>
+    /// <remarks>Word Count is only available from EPUB files</remarks>
     public long WordCount { get; set; }
+
+    public int MinHoursToRead { get; set; }
+    public int MaxHoursToRead { get; set; }
+    public int AvgHoursToRead { get; set; }
 
     public SeriesMetadata Metadata { get; set; }
 
@@ -87,5 +92,4 @@ public class Series : IEntityDate
     public List<Volume> Volumes { get; set; }
     public Library Library { get; set; }
     public int LibraryId { get; set; }
-
 }
