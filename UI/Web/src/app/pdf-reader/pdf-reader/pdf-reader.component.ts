@@ -55,11 +55,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   zoomSetting: string | number = 'auto';
 
-  theme: 'dark' | 'light' | 'custom' = 'light';
+  theme: 'dark' | 'light' = 'light';
   themeMap: {[key:string]: string} = {
     'dark': ' #292929',
-    'custom': '',
-    'light': ''
+    'light': '#f9f9f9'
   }
   backgroundColor: string = this.themeMap[this.theme];
 
@@ -72,8 +71,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
     private seriesService: SeriesService, public readerService: ReaderService,
     private navService: NavService, private toastr: ToastrService,
-    private bookService: BookService, private memberService: MemberService,
-    private themeService: ThemeService, private location: Location) {
+    private bookService: BookService, private themeService: ThemeService, private location: Location) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
@@ -114,13 +112,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       this.readingListId = parseInt(readingListId, 10);
     }
 
-
-    this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
-      if (!hasProgress) {
-        this.toastr.info('You can modify book settings, save those settings for all books, and view table of contents from the drawer.');
-      }
-    });
-
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
@@ -133,7 +124,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
       this.volumeId = info.volumeId;
       this.bookTitle = info.bookTitle;
-      console.log('bookTitle: ', this.bookTitle)
     });
 
     this.readerService.getProgress(this.chapterId).subscribe(progress => {
@@ -151,11 +141,27 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   }
 
-  turnOffIncognito() {}
-  toggleDrawer() {}
+  /**
+   * Turns off Incognito mode. This can only happen once if the user clicks the icon. This will modify URL state
+   */
+   turnOffIncognito() {
+    this.incognitoMode = false;
+    const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
+    window.history.replaceState({}, '', newRoute);
+    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.saveProgress();
+  }
+
+  toggleTheme() {
+    if (this.theme === 'dark') {
+      this.theme = 'light';
+    } else {
+      this.theme = 'dark';
+    }
+    this.backgroundColor = this.themeMap[this.theme];
+  }
 
   onPageChange(pageNumber: number) {
-    
     this.saveProgress();
   }
 

@@ -74,6 +74,13 @@
                 <div class="col-2 col-xs-1">
                     <pdf-presentation-mode></pdf-presentation-mode>
                 </div>
+
+                <div class="col-2 col-xs-1">
+                    <button (click)="toggleTheme()" class="btn btn-icon">
+                        <i class="fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" aria-hidden="true"></i>
+                        <span class="visually-hidden">{{this.theme === 'light' ? 'Light Theme' : 'Dark Theme'}}</span>
+                    </button>
+                </div>
     
                 <div class="col-2 col-xs-1">
                     <button class="btn btn-icon col-2 col-xs-1" (click)="closeReader()">
