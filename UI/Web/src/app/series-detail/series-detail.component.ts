@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -66,6 +66,8 @@ interface StoryLineItem {
 export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
+
+	@ViewChild('scrollingBlock') scrollingBlock:ElementRef<HTMLDivElement> | undefined;
 
   /**
    * Series Id. Set at load before UI renders
@@ -261,9 +263,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 		}
 	}
 
+
+
 	getHeight(): string {
-		const main = document.querySelector('.main-container') as HTMLElement | null;
-		let mainOffset = main!.offsetTop;
+		if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)'
+		const mainOffset = this.scrollingBlock?.nativeElement.offsetTop;
 		return 'calc(var(--vh)*100 - '+mainOffset+'px)';
 	}
 
