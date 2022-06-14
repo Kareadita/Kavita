@@ -64,7 +64,7 @@ namespace API.Parser
         /// <summary>
         /// Recognizes the Special token only
         /// </summary>
-        private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
+        private static readonly Regex SpecialTokenRegex = new Regex(@"(SP|HS)\d+",
             MatchOptions, RegexTimeout);
 
 
@@ -430,7 +430,7 @@ namespace API.Parser
 
         // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
         private static readonly Regex SpecialMarkerRegex = new Regex(
-            @"\b(?<Special>SP\d+)\b",
+            @"\b(?<Special>(SP|HS)\d+)\b",
                 MatchOptions, RegexTimeout
         );
 

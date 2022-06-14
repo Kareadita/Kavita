@@ -62,6 +62,7 @@ namespace API.Tests.Parser
         [InlineData("[Suihei Kiki] Kasumi Otoko no Ko [Taruby] v1.1", false, "Kasumi Otoko no Ko v1.1")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
         [InlineData("Something - Full Color Edition", false, "Something - Full Color Edition")]
+        [InlineData("Sillage HS Premières armes", true, "Sillage Premières armes")]
         public void CleanTitleTest(string input, bool isComic, string expected)
         {
             Assert.Equal(expected, CleanTitle(input, isComic));
