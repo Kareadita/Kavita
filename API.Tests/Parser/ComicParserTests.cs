@@ -179,6 +179,8 @@ namespace API.Tests.Parser
         [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "1")]
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "0")]
         [InlineData("Métal Hurlant-n°31", "31")]
+        [InlineData("Darkyears-copterminator-issue02", "2")]
+
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

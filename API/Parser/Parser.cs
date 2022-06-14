@@ -227,8 +227,9 @@ namespace API.Parser
             // Batman & Robin the Teen Wonder #0
             // spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             // Métal Hurlant-n°31
+            // Darkyears-copterminator-issue02
             new Regex(
-                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s#?|#|(n°|n.)[-/s]?)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
+                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s?#?|#|(n°|n.)[-/s]?)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
             // Batman Wayne Family Adventures - Ep. 001 - Moving In
             new Regex(
@@ -297,8 +298,9 @@ namespace API.Parser
             // Amazing Man Comics chapter 25
             // spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             // Métal Hurlant-n°31
+            // Darkyears-copterminator-issue02
             new Regex(
-                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s#?|#|(n°|n.)[-/s]?)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
+                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s?#?|#|(n°|n.)[-/s]?)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
