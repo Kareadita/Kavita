@@ -246,40 +246,44 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   onScroll(): void {
-    const tabs = document.querySelector('.nav-tabs') as HTMLElement | null;
-    const main = document.querySelector('.main-container') as HTMLElement | null;
-    const info = document.querySelector('.info-container') as HTMLElement | null;
-    const mainOffset = main!.offsetTop;
-    const mainScrollPos = main!.scrollTop;
-    const tabsWidth = tabs!.clientWidth;
-    const infoHeight = info!.offsetHeight + 16; //16px for margin
-    const navbar = document.querySelector('.navbar') as HTMLElement | null;
+    const main = document.querySelector('.main-container') as HTMLElement;
+    if (main === null) return;
+
+    const info = document.querySelector('.info-container') as HTMLElement;
+    const navbar = document.querySelector('.navbar') as HTMLElement;
+    const mainScrollPos = main.scrollTop;
+    const infoHeight = info.offsetHeight + 16; //16px for margin
     const companionHeight = this.companionBar!.nativeElement.offsetHeight;
-    const navbarHeight = navbar!.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 20;
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
-    
+    const navbarHeight = navbar.offsetHeight;
+    const tabs = document.querySelector('.nav-tabs') as HTMLElement;
+
     if (!document.querySelector('.nav-tabs.fixed') && (infoHeight) <= mainScrollPos) {
-      tabs!.classList.add("fixed");
-      tabs!.style.width = tabsWidth+'px';
+      const mainOffset = main.offsetTop; //For mobile tab placement calc
+      const totalHeight = companionHeight + navbarHeight + 20; //For desktop tab placement calc
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const tabsWidth = tabs.clientWidth;
+      tabs.classList.add("fixed");
+      tabs.style.width = tabsWidth+'px'; //Stretch tab width across section
       if (vw < 780) {
         //Use different offset for mobile
-        tabs!.style.top = mainOffset+'px';
+        tabs.style.top = mainOffset+'px';
       } else {
-        tabs!.style.top = totalHeight+'px';
+        tabs.style.top = totalHeight+'px';
       }
     } else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (infoHeight)) {
-      tabs!.classList.remove("fixed");
-      tabs!.style.width = 100+'%';
+      tabs.classList.remove("fixed");
+      tabs.style.width = 100+'%'; //set tab width back
     }
   }
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
-    const navbar = document.querySelector('.navbar') as HTMLElement | null;
+    const navbar = document.querySelector('.navbar') as HTMLElement;
+    if (navbar === null) return 'calc(var(--vh)*100)';
+    
     const companionHeight = this.companionBar!.nativeElement.offsetHeight;
-    const navbarHeight = navbar!.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 21;
+    const navbarHeight = navbar.offsetHeight;
+    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
 		return 'calc(var(--vh)*100 - '+totalHeight+'px)';
   }
 
