@@ -65,6 +65,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = false;
 
+  /**
+   * This can't be updated dynamically: 
+   * https://github.com/stephanrauh/ngx-extended-pdf-viewer/issues/1415
+   */
   bookMode: PageViewModeType = 'multiple';
 
   private readonly onDestroy = new Subject<void>();
@@ -169,7 +173,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     } else {
       this.bookMode = 'book';
     }
-    console.log('bookMode: ', this.bookMode)
   }
 
   saveProgress() {
