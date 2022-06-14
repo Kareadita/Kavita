@@ -65,7 +65,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   isLoading: boolean = false;
 
-  //bookMode: PageViewModeType = 'multiple';
+  bookMode: PageViewModeType = 'multiple';
 
   private readonly onDestroy = new Subject<void>();
 
@@ -163,14 +163,17 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.fontColor = this.themeMap[this.theme].font;
   }
 
-  onPageChange(pageNumber: number) {
-    this.saveProgress();
+  toggleBookPageMode() {
+    if (this.bookMode === 'book') {
+      this.bookMode = 'multiple';
+    } else {
+      this.bookMode = 'book';
+    }
+    console.log('bookMode: ', this.bookMode)
   }
-
 
   saveProgress() {
     if (this.incognitoMode) return;
-    console.log('saving progress', this.currentPage);
     this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.currentPage).subscribe(() => {});
   }
 
