@@ -65,7 +65,8 @@ interface StoryLineItem {
 })
 export class SeriesDetailComponent implements OnInit, OnDestroy {
 
-	@ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
+  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
+  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
   /**
    * Series Id. Set at load before UI renders
@@ -244,46 +245,43 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-	onScroll(): void {
-		const tabs = document.querySelector('.nav-tabs') as HTMLElement | null;
-		const main = document.querySelector('.main-container') as HTMLElement | null;
+  onScroll(): void {
+    const tabs = document.querySelector('.nav-tabs') as HTMLElement | null;
+    const main = document.querySelector('.main-container') as HTMLElement | null;
     const info = document.querySelector('.info-container') as HTMLElement | null;
-		const mainOffset = main!.offsetTop;
-		const mainScrollPos = main!.scrollTop;
+    const mainOffset = main!.offsetTop;
+    const mainScrollPos = main!.scrollTop;
     const tabsWidth = tabs!.clientWidth;
-    const infoHeight = info!.offsetHeight;
-    const companion = document.querySelector('.companion-bar-inner') as HTMLElement | null;
+    const infoHeight = info!.offsetHeight + 16; //16px for margin
     const navbar = document.querySelector('.navbar') as HTMLElement | null;
-    const companionHeight = companion!.offsetHeight;
-		const navbarHeight = navbar!.offsetHeight;
+    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const navbarHeight = navbar!.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 20;
     const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
-		
-		if (!document.querySelector('.nav-tabs.fixed') && (infoHeight) <= mainScrollPos) {
-			tabs!.classList.add("fixed");
+    
+    if (!document.querySelector('.nav-tabs.fixed') && (infoHeight) <= mainScrollPos) {
+      tabs!.classList.add("fixed");
       tabs!.style.width = tabsWidth+'px';
       if (vw < 780) {
+        //Use different offset for mobile
         tabs!.style.top = mainOffset+'px';
       } else {
         tabs!.style.top = totalHeight+'px';
       }
-		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (infoHeight)) {
-			tabs!.classList.remove("fixed");
-		}
-	}
+    } else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (infoHeight)) {
+      tabs!.classList.remove("fixed");
+      tabs!.style.width = 100+'%';
+    }
+  }
 
-
-
-	get ScrollingBlockHeight() {
-		if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
-
-    const companion = document.querySelector('.companion-bar-inner') as HTMLElement | null;
+  get ScrollingBlockHeight() {
+    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = document.querySelector('.navbar') as HTMLElement | null;
-    const companionHeight = companion!.offsetHeight;
-		const navbarHeight = navbar!.offsetHeight;
+    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const navbarHeight = navbar!.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21;
-		return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
-	}
+		return 'calc(var(--vh)*100 - '+totalHeight+'px)';
+  }
 
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
