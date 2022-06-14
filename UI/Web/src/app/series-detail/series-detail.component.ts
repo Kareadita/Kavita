@@ -65,9 +65,7 @@ interface StoryLineItem {
 })
 export class SeriesDetailComponent implements OnInit, OnDestroy {
 
-  @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
-
-	@ViewChild('scrollingBlock') scrollingBlock:ElementRef<HTMLDivElement> | undefined;
+	@ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
 
   /**
    * Series Id. Set at load before UI renders
@@ -265,10 +263,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 
 
-	getHeight(): string {
-		if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)'
-		const mainOffset = this.scrollingBlock?.nativeElement.offsetTop;
-		return 'calc(var(--vh)*100 - '+mainOffset+'px)';
+	get ScrollingBlockHeight() {
+		if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+		const mainOffset = this.scrollingBlock.nativeElement.offsetTop;
+		return 'calc(var(--vh)*100 - ' + mainOffset + 'px)';
 	}
 
   ngOnInit(): void {
