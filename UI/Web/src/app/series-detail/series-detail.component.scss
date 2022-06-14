@@ -25,6 +25,7 @@
 .main-container {
   // Height set dynamically by series-detail.component.ts getHeight();
   overflow-y: auto;
+  position: relative;
 }
 
 .nav-tabs.fixed {

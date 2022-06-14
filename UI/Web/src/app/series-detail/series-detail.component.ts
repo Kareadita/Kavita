@@ -252,10 +252,22 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 		let tabOffset = tabs!.offsetTop;
 		let contentOffset = content!.offsetTop;
 		let mainScrollPos = main!.scrollTop;
+    let tabsWidth = tabs!.clientWidth;
+    const companion = document.querySelector('.companion-bar-inner') as HTMLElement | null;
+    const navbar = document.querySelector('.navbar') as HTMLElement | null;
+    let companionHeight = companion!.offsetHeight;
+		let navbarHeight = navbar!.offsetHeight;
+    let totalHeight = companionHeight + navbarHeight + 20;
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
 		
 		if (!document.querySelector('.nav-tabs.fixed') && (tabOffset - mainOffset) <= mainScrollPos) {
 			tabs!.classList.add("fixed");
-			tabs!.style.top = mainOffset+'px';
+      tabs!.style.width = tabsWidth+'px';
+      if (vw < 780) {
+        tabs!.style.top = mainOffset+'px';
+      } else {
+        tabs!.style.top = totalHeight+'px';
+      }
 		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (contentOffset - mainOffset)) {
 			tabs!.classList.remove("fixed");
 		}
@@ -265,8 +277,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
 	get ScrollingBlockHeight() {
 		if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+
+    const companion = document.querySelector('.companion-bar-inner') as HTMLElement | null;
+    const navbar = document.querySelector('.navbar') as HTMLElement | null;
+    let companionHeight = companion!.offsetHeight;
+		let navbarHeight = navbar!.offsetHeight;
+    let totalHeight = companionHeight + navbarHeight + 20;
 		const mainOffset = this.scrollingBlock.nativeElement.offsetTop;
-		return 'calc(var(--vh)*100 - ' + mainOffset + 'px)';
+		return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
 	}
 
   ngOnInit(): void {
