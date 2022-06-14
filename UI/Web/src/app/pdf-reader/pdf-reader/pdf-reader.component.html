@@ -11,46 +11,51 @@
         [showPrintButton]="false"
         [showBookmarkButton]="false"
         [showRotateButton]="false"
+        [showDownloadButton]="false"
         [showPropertiesButton]="false"
         [(zoom)]="zoomSetting"
         [showSecondaryToolbarButton]="true"
         [theme]="theme"
         [formTheme]="theme"
         [backgroundColor]="backgroundColor"
-        
-
         [customToolbar]="multiToolbar"
+        
 
         (pageChange)="onPageChange($event)"
     > 
     
     </ngx-extended-pdf-viewer>
+    <!--  -->
     <!-- [pageViewMode]="bookMode"-->
     <ng-template #multiToolbar>
         <!-- THis is their code Robbie. We want to emulate theirs withours below. -->
-        <pdf-toolbar [showRotateButton]="false" [showOpenFileButton]="false"  [showPrintButton]="false" [showSecondaryToolbarButton]="true">
+        <!-- <pdf-toolbar [showRotateButton]="false" [showOpenFileButton]="false"  [showPrintButton]="false" [showSecondaryToolbarButton]="true">
 
-        </pdf-toolbar>
+        </pdf-toolbar> -->
 
-        <div class="action-bar row g-0 justify-content-between">
-            <div class="left-side col-4">
-                <div class="row g-0 justify-content-between">
+        <div class="" style="min-height: 36px" id="toolbarViewer"> <!--action-bar row g-0 justify-content-between-->
+            <div class="" id="toolbarViewerLeft">
+                <pdf-toggle-sidebar></pdf-toggle-sidebar>
+                    <pdf-find-button></pdf-find-button>
+                    <pdf-paging-area></pdf-paging-area>
+                <!-- <div class="row g-0 justify-content-between">
+                    
                     <div class="col-2 col-xs-1">
-                        <pdf-toggle-sidebar></pdf-toggle-sidebar>
+                        
                     </div>
                     <div class="col-2 col-xs-1">
-                        <pdf-find-button></pdf-find-button>
+                        
                     </div>
                     <div class="col-2 col-xs-1">
-                        <pdf-paging-area></pdf-paging-area>
-                    </div>
-                </div>
+                        
+                    </div> 
+                </div>-->
                 
             </div>
             
         
 
-            <div class="book-title col-2 d-none d-sm-block">
+            <div class="book-title mx-auto d-none d-sm-block">
                 <ng-container *ngIf="isLoading; else showTitle">
                     <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
                         <span class="visually-hidden">Loading book...</span>
@@ -62,37 +67,32 @@
                 </ng-template>
             </div>
 
-            <div class="right-side col-6">
-                <div class="col-2 col-xs-1">
-                    <pdf-hand-tool></pdf-hand-tool>
-                </div>
+            <div  id="toolbarViewerRight"> <!--class="right-side col-6"-->
+                <pdf-hand-tool></pdf-hand-tool>
     
-                <div class="col-2 col-xs-1">
-                    <pdf-select-tool></pdf-select-tool>
-                </div>
+                <pdf-select-tool></pdf-select-tool>
     
-                <div class="col-2 col-xs-1">
-                    <pdf-presentation-mode></pdf-presentation-mode>
-                </div>
+                <pdf-presentation-mode></pdf-presentation-mode>
 
-                <div class="col-2 col-xs-1">
-                    <button (click)="toggleTheme()" class="btn btn-icon">
-                        <i class="fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" aria-hidden="true"></i>
-                        <span class="visually-hidden">{{this.theme === 'light' ? 'Light Theme' : 'Dark Theme'}}</span>
-                    </button>
-                </div>
+                <button (click)="toggleTheme()" class="btn btn-icon">
+                    <i class="fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" aria-hidden="true"></i>
+                    <span class="visually-hidden">{{this.theme === 'light' ? 'Light Theme' : 'Dark Theme'}}</span>
+                </button>
+
     
-                <div class="col-2 col-xs-1">
-                    <button class="btn btn-icon col-2 col-xs-1" (click)="closeReader()">
-                        <i class="fa fa-times-circle" aria-hidden="true"></i>
-                        <span class="visually-hidden">Close Reader</span>
-                    </button>
-                </div>
+                <button class="btn btn-icon col-2 col-xs-1" (click)="closeReader()">
+                    <i class="fa fa-times-circle" aria-hidden="true"></i>
+                    <span class="visually-hidden">Close Reader</span>
+                </button>
     
+                <div class="verticalToolbarSeparator hiddenSmallView"></div>
                 <div class="col-2 col-xs-1">
-                    <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
+                    
                 </div>
+                <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
             </div>
+
+            <pdf-zoom-toolbar ></pdf-zoom-toolbar>
 
         </div>
 
