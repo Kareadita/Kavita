@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Renderer2 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -232,7 +232,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
               private readingListService: ReadingListService, public navService: NavService,
-              private offcanvasService: NgbOffcanvas
+              private offcanvasService: NgbOffcanvas, private renderer: Renderer2
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -272,7 +272,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       }
     } else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (infoHeight)) {
       tabs.classList.remove("fixed");
-      tabs.style.width = 100+'%'; //set tab width back
+      this.renderer.setStyle(tabs, 'width', '100%'); //set tab width back
     }
   }
 
@@ -280,11 +280,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
     const navbar = document.querySelector('.navbar') as HTMLElement;
     if (navbar === null) return 'calc(var(--vh)*100)';
-    
+
     const companionHeight = this.companionBar!.nativeElement.offsetHeight;
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
-		return 'calc(var(--vh)*100 - '+totalHeight+'px)';
+    return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
   ngOnInit(): void {
