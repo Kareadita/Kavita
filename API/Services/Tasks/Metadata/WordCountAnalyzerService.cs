@@ -55,7 +55,6 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
         var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
         var stopwatch = Stopwatch.StartNew();
-        var totalTime = 0L;
         _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -64,7 +63,6 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
             if (chunkInfo.TotalChunks == 0) continue;
-            totalTime += stopwatch.ElapsedMilliseconds;
             stopwatch.Restart();
 
             _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
