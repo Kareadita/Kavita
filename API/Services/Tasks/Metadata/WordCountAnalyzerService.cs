@@ -150,20 +150,23 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
             foreach (var chapter in volume.Chapters)
             {
                 // This compares if it's changed since a file scan only
-                if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate,
-                        chapter.Files.FirstOrDefault()) && chapter.WordCount != 0)
+                var firstFile = chapter.Files.FirstOrDefault();
+                if (firstFile == null) return;
+                if (!_cacheHelper.HasFileChangedSinceLastScan(firstFile.LastFileAnalysis, forceUpdate,
+                        firstFile))
                     continue;
 
                 if (series.Format == MangaFormat.Epub)
                 {
                     long sum = 0;
                     var fileCounter = 1;
-                    foreach (var file in chapter.Files.Select(file => file.FilePath))
+                    foreach (var file in chapter.Files)
                     {
+                        var filePath = file.FilePath;
                         var pageCounter = 1;
                         try
                         {
-                            using var book = await EpubReader.OpenBookAsync(file, BookService.BookReaderOptions);
+                            using var book = await EpubReader.OpenBookAsync(filePath, BookService.BookReaderOptions);
 
                             var totalPages = book.Content.Html.Values;
                             foreach (var bookPage in totalPages)
@@ -173,7 +176,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
                                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                                     MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress,
-                                        ProgressEventType.Updated, useFileName ? file : series.Name));
+                                        ProgressEventType.Updated, useFileName ? filePath : series.Name));
                                 sum += await GetWordCountFromHtml(bookPage);
                                 pageCounter++;
                             }
@@ -189,6 +192,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                             return;
                         }
 
+                        file.LastFileAnalysis = DateTime.Now;
+                        _unitOfWork.MangaFileRepository.Update(file);
                     }
 
                     chapter.WordCount = sum;
