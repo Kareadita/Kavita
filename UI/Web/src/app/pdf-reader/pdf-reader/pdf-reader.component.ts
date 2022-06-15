@@ -57,7 +57,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   theme: 'dark' | 'light' = 'light';
   themeMap: {[key:string]: {background: string, font: string}} = {
-    'dark': {'background': '#292929', 'font': '#FFF'},
+    'dark': {'background': '#292929', 'font': '#d9d9d9'},
     'light': {'background': '#f9f9f9', 'font': '#5a5a5a'}
   }
   backgroundColor: string = this.themeMap[this.theme].background;
