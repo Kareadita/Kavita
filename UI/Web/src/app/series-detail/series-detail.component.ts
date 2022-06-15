@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Renderer2, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Renderer2, AfterViewInit, Inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -37,6 +37,7 @@ import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
 import { FormControl, FormGroup } from '@angular/forms';
 import { PageLayoutMode } from '../_models/page-layout-mode';
+import { DOCUMENT } from '@angular/common';
 
 interface RelatedSeris {
   series: Series;
@@ -220,6 +221,17 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     return PageLayoutMode;
   }
 
+  get ScrollingBlockHeight() {
+    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    const navbar = this.document.querySelector('.navbar') as HTMLElement;
+    if (navbar === null) return 'calc(var(--vh)*100)';
+
+    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const navbarHeight = navbar.offsetHeight;
+    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
+    return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
+  }
+
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               private router: Router, public bulkSelectionService: BulkSelectionService,
@@ -231,7 +243,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
               private readingListService: ReadingListService, public navService: NavService,
-              private offcanvasService: NgbOffcanvas, private renderer: Renderer2
+              private offcanvasService: NgbOffcanvas, private renderer: Renderer2,
+              @Inject(DOCUMENT) private document: Document
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -244,65 +257,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {
-    this.initScroll();
-  }
-
-  initScroll() {
-    if (this.scrollingBlock === undefined || this.scrollingBlock.nativeElement === undefined) {
-      setTimeout(() => {this.initScroll()}, 10);
-      return;
-    }
-    fromEvent(this.scrollingBlock.nativeElement, 'scroll').pipe(
-      debounceTime(200),
-      takeUntil(this.onDestroy))
-    .subscribe(() => {
-      this.onScroll();
-      
-  });
-  }
-
-  onScroll(): void {
-    const main = document.querySelector('.main-container') as HTMLElement;
-    if (main === null) return;
-
-    const info = document.querySelector('.info-container') as HTMLElement;
-    const navbar = document.querySelector('.navbar') as HTMLElement;
-    const mainScrollPos = main.scrollTop;
-    const infoHeight = info.offsetHeight + 16; //16px for margin
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
-    const navbarHeight = navbar.offsetHeight;
-    const tabs = document.querySelector('.nav-tabs') as HTMLElement;
-
-    if (!document.querySelector('.nav-tabs.fixed') && (infoHeight) <= mainScrollPos) {
-      const mainOffset = main.offsetTop; //For mobile tab placement calc
-      const totalHeight = companionHeight + navbarHeight + 20; //For desktop tab placement calc
-      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-      const tabsWidth = tabs.clientWidth;
-      tabs.classList.add("fixed");
-      tabs.style.width = tabsWidth+'px'; //Stretch tab width across section
-      if (vw < 780) {
-        //Use different offset for mobile
-        tabs.style.top = mainOffset+'px';
-      } else {
-        tabs.style.top = totalHeight+'px';
-      }
-    } else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (infoHeight)) {
-      tabs.classList.remove("fixed");
-      this.renderer.setStyle(tabs, 'width', '100%'); //set tab width back
-    }
-  }
-
-  get ScrollingBlockHeight() {
-    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
-    const navbar = document.querySelector('.navbar') as HTMLElement;
-    if (navbar === null) return 'calc(var(--vh)*100)';
-
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
-    const navbarHeight = navbar.offsetHeight;
-    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
-    return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
-  }
 
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
@@ -342,6 +296,23 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onDestroy.complete();
   }
 
+  ngAfterViewInit(): void {
+    this.initScroll();
+  }
+
+  initScroll() {
+    if (this.scrollingBlock === undefined || this.scrollingBlock.nativeElement === undefined) {
+      setTimeout(() => {this.initScroll()}, 10);
+      return;
+    }
+    fromEvent(this.scrollingBlock.nativeElement, 'scroll').pipe(
+      debounceTime(100),
+      takeUntil(this.onDestroy))
+    .subscribe(() => {
+      this.onScroll();
+    });
+  }
+
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
     if (event.key === KEY_CODES.SHIFT) {
@@ -353,6 +324,46 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   handleKeyUp(event: KeyboardEvent) {
     if (event.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
+    }
+  }
+
+  onScroll(): void {
+    // const main = this.document.querySelector('.main-container') as HTMLElement;
+    // if (main === null) return;
+
+    if (this.scrollingBlock === undefined || this.scrollingBlock.nativeElement === undefined) return;
+
+    const info = this.document.querySelector('.info-container') as HTMLElement;
+    const navbar = this.document.querySelector('.navbar') as HTMLElement;
+    const mainScrollPos = this.scrollingBlock.nativeElement.scrollTop;
+    const infoHeight = info.offsetHeight + 16; //16px for margin
+    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const navbarHeight = navbar.offsetHeight;
+    const tabs = this.document.querySelector('.nav-tabs') as HTMLElement;
+
+    const hasFixedClass = tabs.classList.contains('fixed');
+    console.log('Has Fixed State: ', hasFixedClass);
+
+    if (!hasFixedClass && infoHeight <= mainScrollPos) {
+      const mainOffset = this.scrollingBlock.nativeElement.offsetTop; //For mobile tab placement calc
+      const totalHeight = companionHeight + navbarHeight + 20; //For desktop tab placement calc
+      const vw = Math.max(this.document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const tabsWidth = tabs.clientWidth;
+      
+      this.renderer.addClass(tabs, 'fixed');
+      this.renderer.setStyle(tabs, 'width', tabsWidth + 'px'); //Stretch tab width across section
+      if (vw < 780) {
+        //Use different offset for mobile
+        this.renderer.setStyle(tabs, 'top', mainOffset + 'px');
+        console.log('Setting mainOffset');
+      } else {
+        this.renderer.setStyle(tabs, 'top', totalHeight + 'px');
+        console.log('Setting totalHeight');
+      }
+    } else if (hasFixedClass && mainScrollPos <= infoHeight) {
+      this.renderer.removeClass(tabs, 'fixed');
+      this.renderer.setStyle(tabs, 'width', '100%'); //set tab width back
+      console.log('Removing fixed class');
     }
   }
 
@@ -470,7 +481,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
-      console.log('library type: ', this.libraryType);
       this.series = results.series;
 
       this.createHTML();
