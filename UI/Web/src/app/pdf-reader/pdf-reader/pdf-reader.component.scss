@@ -1,0 +1,12 @@
+.toolbar-icon {
+    font-size: 19px;
+}
+
+.book-title {
+    margin: 8px 0 4px !important;   
+}
+
+// Override since it's not coming from library
+::ng-deep #presentationMode {
+    margin: 3px 0 4px !important;
+}
