@@ -19,6 +19,7 @@ import { NavService } from '../_services/nav.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
 import { JumpKey } from '../_models/jumpbar/jump-key';
+import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 
 @Component({
   selector: 'app-library-detail',
@@ -123,10 +124,15 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
-      if (event.event !== EVENTS.SeriesAdded) return;
-      const seriesAdded = event.payload as SeriesAddedEvent;
-      if (seriesAdded.libraryId !== this.libraryId) return;
-      this.loadPage();
+      if (event.event === EVENTS.SeriesAdded) {
+        const seriesAdded = event.payload as SeriesAddedEvent;
+        if (seriesAdded.libraryId !== this.libraryId) return;
+        this.loadPage();
+      } else if (event.event === EVENTS.SeriesRemoved) {
+        const seriesRemoved = event.payload as SeriesRemovedEvent;
+        if (seriesRemoved.libraryId !== this.libraryId) return;
+        this.loadPage();
+      }
     });
   }
 
