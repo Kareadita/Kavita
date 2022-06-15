@@ -197,6 +197,17 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
         };
 
+        //private const string seriesExpr = @"(?<Series>.+?)";
+        private const string seriesExpr = $@"(?<Series>{balanced})";
+        private const string volumeExpr = @"(?<Volume>\d+([-.]\d+)?)";
+        private const string chapterExpr = @"(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)";
+        private const string balancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))+?(?(open)(?!))";
+        private const string balancedBrackets = @"(?:[^\[\]]|(?<openbracket>\[)|(?<closebracket>-<openbracket>\]))+?(?(openbracket)(?!))";
+        // non greedy matching of a string where parenthesis and brackets are balanced
+        private const string balanced = @"(?:[^()\[\]]|(?<open>\()|(?<-open>\))|(?<openbracket>\[)|(?<-openbracket>\]))+?(?(openbracket)(?!))(?(open)(?!))";
+        private const string volumePrefixes = @"(t|v|(t.|tome|v\.|vol\.?|volume)\s?)";
+        private const string chapterPrefixes = @"(c|chapter[-\s]+|issue\s?#?|#|(n°|n\.|Ep\.?)[-\s]*)";
+
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
             // Tintin - T22 Vol 714 pour Sydney
@@ -204,7 +215,7 @@ namespace API.Parser
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"^(?<Series>.+?)[-\s](t|v|(t.|tome|v\.|vol\.?|volume)\s?)(?<Volume>\d+)\b",
+                $@"^{seriesExpr}[-\s]{volumePrefixes}{volumeExpr}\b",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -228,18 +239,15 @@ namespace API.Parser
             // spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
             // Métal Hurlant-n°31
             // Darkyears-copterminator-issue02
-            new Regex(
-                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s?#?|#|(n°|n.)[-/s]?)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
-                MatchOptions, RegexTimeout),
             // Batman Wayne Family Adventures - Ep. 001 - Moving In
             new Regex(
-                @"^(?<Series>.+?)(\s|-)Ep\.?(\s|-)+\d",
+                $@"^{seriesExpr}[-\s]+{chapterPrefixes}{chapterExpr}\b",
                 MatchOptions, RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
             // spawn-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+?)[-\s](?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
+                $@"^{seriesExpr}[-\s]+{chapterExpr}\b",
                 MatchOptions, RegexTimeout),
             // The First Asterix Frieze (WebP by Doc MaKS)
             new Regex(
@@ -256,7 +264,7 @@ namespace API.Parser
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                @"^(?<Series>.+?)[-\s](t|v|(t.|tome|v\.|vol\.?|volume)\s?)(?<Volume>\d+)\b",
+                $@"^{seriesExpr}[-\s]{volumePrefixes}{volumeExpr}\b",
                 MatchOptions, RegexTimeout),
             // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
             new Regex(
@@ -300,7 +308,7 @@ namespace API.Parser
             // Métal Hurlant-n°31
             // Darkyears-copterminator-issue02
             new Regex(
-                @"^(?<Series>.+?)[-\s](c|chapter[-\s]|issue\s?#?|#|(n°|n.)[-/s]?)(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
+                $@"^(?<Series>.+?)[-\s]+{chapterPrefixes}{chapterExpr}\b",
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
@@ -309,7 +317,8 @@ namespace API.Parser
             // Saga 001 (2012) (Digital) (Empire-Zone)
             // spawn-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                @"^(?<Series>.+?)[-\s](?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
+                $@"^{balanced}[-\s]+(?<!{volumePrefixes}(\d+[-\.])?){chapterExpr}\b",
+                //@"^(?<Series>.+?)[-\s](?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
 
         };
@@ -392,6 +401,10 @@ namespace API.Parser
 
         private static readonly Regex[] CleanupRegex =
         {
+            // Anything in parenthesis
+            new Regex(
+                $@"\({balancedParen}\)",
+                MatchOptions, RegexTimeout),
             // (), {}, []
             new Regex(
                 @"(?<Cleanup>(\{\}|\[\]|\(\)))",
@@ -399,10 +412,6 @@ namespace API.Parser
             // (Complete)
             new Regex(
                 @"(?<Cleanup>(\{Complete\}|\[Complete\]|\(Complete\)))",
-                MatchOptions, RegexTimeout),
-            // Anything in parenthesis
-            new Regex(
-                @"\(.*\)",
                 MatchOptions, RegexTimeout),
         };
 
