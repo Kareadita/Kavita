@@ -486,7 +486,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
-          // if there is scroll room and on original, then don't paginate
           //if (!this.checkIfPaginationAllowed()) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
         } else if (event.key === KEY_CODES.LEFT_ARROW) {
@@ -525,12 +524,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // if there is scroll room and on original, then don't paginate
   checkIfPaginationAllowed() {
+    // This is not used atm due to the complexity it adds with keyboard. 
     if (this.readingArea === undefined || this.readingArea.nativeElement === undefined) return true;
 
     const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
-    const totalScrollWidth = scrollLeft < parseInt(this.WindowWidth.replace('px', ''), 10);
-    console.log('scrollLeft: ', scrollLeft);
+    const totalScrollWidth = this.readingArea?.nativeElement?.scrollWidth;
+    // need to also check if there is scrolll needed
+
     if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < totalScrollWidth) {
       return false;
     }
