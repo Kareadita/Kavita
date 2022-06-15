@@ -136,25 +136,25 @@ namespace API.Services
                     extraPath = file.Id + string.Empty;
                 }
 
-                if (file.Format == MangaFormat.Archive)
+                switch (file.Format)
                 {
-                    _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
-                }
-                else if (file.Format == MangaFormat.Pdf)
-                {
-                    _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
-                }
-                else if (file.Format == MangaFormat.Epub)
-                {
-                    removeNonImages = false;
-                    if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
+                    case MangaFormat.Archive:
+                        _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
+                        break;
+                    case MangaFormat.Epub:
+                    case MangaFormat.Pdf:
                     {
-                        _logger.LogError("{Archive} does not exist on disk", files[0].FilePath);
-                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
-                    }
+                        removeNonImages = false;
+                        if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
+                        {
+                            _logger.LogError("{File} does not exist on disk", files[0].FilePath);
+                            throw new KavitaException($"{files[0].FilePath} does not exist on disk");
+                        }
 
-                    _directoryService.ExistOrCreate(extractPath);
-                    _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                        _directoryService.ExistOrCreate(extractPath);
+                        _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                        break;
+                    }
                 }
             }
 
