@@ -301,15 +301,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ImageHeight() {
     // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
-    if (this.isCoverImage() || this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH) {
+    if (this.isCoverImage() || this.FittingOption === FITTING_OPTION.WIDTH) {
       return this.WindowHeight;
     }
     return this.image?.nativeElement.height + 'px';
   }
-
   
   get RightPaginationOffset() {
-    if (this.readerMode === ReaderMode.LeftRight && this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT) {
+    if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
       return (this.readingArea?.nativeElement?.scrollLeft || 0) * -1;
     }
     return 0;
@@ -360,6 +359,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return FITTING_OPTION;
   }
 
+  get FittingOption() {
+    return this.generalSettingsForm.get('fittingOption')?.value;
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService,
@@ -374,7 +377,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
-
     if (libraryId === null || seriesId === null || chapterId === null) {
       this.router.navigateByUrl('/libraries');
       return;
@@ -392,89 +394,80 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingListId = parseInt(readingListId, 10);
     }
 
-
     this.continuousChaptersStack.push(this.chapterId);
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.readingDirection = this.user.preferences.readingDirection;
-        this.scalingOption = this.user.preferences.scalingOption;
-        this.pageSplitOption = this.user.preferences.pageSplitOption;
-        this.autoCloseMenu = this.user.preferences.autoCloseMenu;
-        this.readerMode = this.user.preferences.readerMode;
-        this.layoutMode = this.user.preferences.layoutMode || LayoutMode.Single;
-        this.backgroundColor = this.user.preferences.backgroundColor || '#000000';
-        this.readerService.setOverrideStyles(this.backgroundColor);
-
-
-        this.generalSettingsForm = this.formBuilder.group({
-          autoCloseMenu: this.autoCloseMenu,
-          pageSplitOption: this.pageSplitOption,
-          fittingOption: this.translateScalingOption(this.scalingOption),
-          layoutMode: this.layoutMode
-        });
-
-        this.updateForm();
-
-        this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          this.layoutMode = parseInt(val, 10);
-
-          if (this.layoutMode === LayoutMode.Single) {
-            this.generalSettingsForm.get('pageSplitOption')?.enable();
-
-          } else {
-            this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.FitSplit);
-            this.generalSettingsForm.get('pageSplitOption')?.disable();
-
-            this.canvasImage2 = this.cachedImages.peek();
-          }
-        });
-
-
-        this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
-          this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
-          const needsSplitting = this.isCoverImage();
-          // If we need to split on a menu change, then we need to re-render.
-          if (needsSplitting) {
-            this.loadPage();
-          }
-        });
-
-        this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
-          if (!progress) {
-            this.toggleMenu();
-            this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
-          }
-        });
-      } else {
-        // If no user, we can't render
+      if (!user) {
         this.router.navigateByUrl('/login');
+        return;
       }
-    });
 
+      this.user = user;
+      this.readingDirection = this.user.preferences.readingDirection;
+      this.scalingOption = this.user.preferences.scalingOption;
+      this.pageSplitOption = this.user.preferences.pageSplitOption;
+      this.autoCloseMenu = this.user.preferences.autoCloseMenu;
+      this.readerMode = this.user.preferences.readerMode;
+      this.layoutMode = this.user.preferences.layoutMode || LayoutMode.Single;
+      this.backgroundColor = this.user.preferences.backgroundColor || '#000000';
+      this.readerService.setOverrideStyles(this.backgroundColor);
+
+      this.generalSettingsForm = this.formBuilder.group({
+        autoCloseMenu: this.autoCloseMenu,
+        pageSplitOption: this.pageSplitOption,
+        fittingOption: this.translateScalingOption(this.scalingOption),
+        layoutMode: this.layoutMode
+      });
+
+      this.updateForm();
+
+      this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.layoutMode = parseInt(val, 10);
+
+        if (this.layoutMode === LayoutMode.Single) {
+          this.generalSettingsForm.get('pageSplitOption')?.enable();
+        } else {
+          this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.FitSplit);
+          this.generalSettingsForm.get('pageSplitOption')?.disable();
+          this.canvasImage2 = this.cachedImages.peek();
+        }
+      });
+
+
+      this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
+        this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
+        const needsSplitting = this.isCoverImage();
+        // If we need to split on a menu change, then we need to re-render.
+        if (needsSplitting) {
+          this.loadPage();
+        }
+      });
+
+      this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
+        if (!progress) {
+          this.toggleMenu();
+          this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
+        }
+      });
+    });
 
     this.init();
   }
 
   ngAfterViewInit() {
-
     fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(20), takeUntil(this.onDestroy)).subscribe(evt => {
       if (this.readerMode === ReaderMode.Webtoon) return;
-      if (this.readerMode === ReaderMode.LeftRight && this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.HEIGHT) {
+      if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
         this.rightPaginationOffset = (this.readingArea.nativeElement.scrollLeft) * -1;
         return;
       }
       this.rightPaginationOffset = 0;
     });
-    this.getWindowDimensions();
 
     if (this.canvas) {
       this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
       this.canvasImage.onload = () => this.renderPage();
     }
-
-    
   }
 
   ngOnDestroy() {
@@ -493,6 +486,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
+
+          const formControl = this.generalSettingsForm.get('fittingOption');
+          // if there is scroll room and on original, then don't paginate
+          const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
+          console.log('scrollLeft: ', scrollLeft);
+          //if (formControl === FITTING_OPTION.ORIGINAL && )
           this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
         } else if (event.key === KEY_CODES.LEFT_ARROW) {
           this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
@@ -1086,7 +1085,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               || document.body.clientHeight;
 
       const needsSplitting = this.isCoverImage();
-      let newScale = this.generalSettingsForm.get('fittingOption')?.value;
+      let newScale = this.FittingOption;
       const widthRatio = windowWidth / (this.canvasImage.width / (needsSplitting ? 2 : 1));
       const heightRatio = windowHeight / (this.canvasImage.height);
 
@@ -1390,16 +1389,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.bookmarkMode) {
       this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
-  }
-
-  getWindowDimensions() {
-    const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-    const windowHeight = window.innerHeight
-                  || document.documentElement.clientHeight
-                  || document.body.clientHeight;
-    return [windowWidth, windowHeight];
   }
 
   openShortcutModal() {

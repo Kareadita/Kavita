@@ -47,6 +47,7 @@ namespace API.Services
         /// </summary>
         /// <param name="fileFilePath"></param>
         /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
+        [Obsolete("This method of reading is no longer supported. Please use native pdf reader")]
         void ExtractPdfImages(string fileFilePath, string targetDirectory);
 
         Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
