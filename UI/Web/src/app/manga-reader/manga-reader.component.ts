@@ -486,14 +486,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
-
-          const formControl = this.generalSettingsForm.get('fittingOption');
           // if there is scroll room and on original, then don't paginate
-          const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
-          console.log('scrollLeft: ', scrollLeft);
-          //if (formControl === FITTING_OPTION.ORIGINAL && )
+          //if (!this.checkIfPaginationAllowed()) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
         } else if (event.key === KEY_CODES.LEFT_ARROW) {
+          //if (!this.checkIfPaginationAllowed()) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
         }
         break;
@@ -526,6 +523,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.F) {
       this.toggleFullscreen()
     }
+  }
+
+  checkIfPaginationAllowed() {
+    if (this.readingArea === undefined || this.readingArea.nativeElement === undefined) return true;
+
+    const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
+    const totalScrollWidth = scrollLeft < parseInt(this.WindowWidth.replace('px', ''), 10);
+    console.log('scrollLeft: ', scrollLeft);
+    if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < totalScrollWidth) {
+      return false;
+    }
+    return true;
   }
 
   clickOverlayClass(side: 'right' | 'left') {
@@ -1069,7 +1078,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Reset scroll on non HEIGHT Fits
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-      this.document.body.scroll(0, 0)
+      this.readingArea.nativeElement.scroll(0,0);
     }
 
 
