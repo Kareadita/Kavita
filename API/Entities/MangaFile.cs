@@ -25,6 +25,10 @@ namespace API.Entities
         /// </summary>
         /// <remarks>This gets updated anytime the file is scanned</remarks>
         public DateTime LastModified { get; set; }
+        /// <summary>
+        /// Last time file analysis ran on this file
+        /// </summary>
+        public DateTime LastFileAnalysis { get; set; }
 
 
         // Relationship Mapping

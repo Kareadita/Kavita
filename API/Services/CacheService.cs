@@ -29,7 +29,7 @@ namespace API.Services
         void CleanupBookmarks(IEnumerable<int> seriesIds);
         string GetCachedPagePath(Chapter chapter, int page);
         string GetCachedBookmarkPagePath(int seriesId, int page);
-        string GetCachedEpubFile(int chapterId, Chapter chapter);
+        string GetCachedFile(Chapter chapter);
         public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
         Task<int> CacheBookmarkForSeries(int userId, int seriesId);
         void CleanupBookmarkCache(int seriesId);
@@ -73,14 +73,13 @@ namespace API.Services
         }
 
         /// <summary>
-        /// Returns the full path to the cached epub file. If the file does not exist, will fallback to the original.
+        /// Returns the full path to the cached file. If the file does not exist, will fallback to the original.
         /// </summary>
-        /// <param name="chapterId"></param>
         /// <param name="chapter"></param>
         /// <returns></returns>
-        public string GetCachedEpubFile(int chapterId, Chapter chapter)
+        public string GetCachedFile(Chapter chapter)
         {
-            var extractPath = GetCachePath(chapterId);
+            var extractPath = GetCachePath(chapter.Id);
             var path = Path.Join(extractPath, _directoryService.FileSystem.Path.GetFileName(chapter.Files.First().FilePath));
             if (!(_directoryService.FileSystem.FileInfo.FromFileName(path).Exists))
             {
@@ -88,6 +87,7 @@ namespace API.Services
             }
             return path;
         }
+
 
         /// <summary>
         /// Caches the files for the given chapter to CacheDirectory
@@ -136,25 +136,25 @@ namespace API.Services
                     extraPath = file.Id + string.Empty;
                 }
 
-                if (file.Format == MangaFormat.Archive)
+                switch (file.Format)
                 {
-                    _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
-                }
-                else if (file.Format == MangaFormat.Pdf)
-                {
-                    _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
-                }
-                else if (file.Format == MangaFormat.Epub)
-                {
-                    removeNonImages = false;
-                    if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
+                    case MangaFormat.Archive:
+                        _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
+                        break;
+                    case MangaFormat.Epub:
+                    case MangaFormat.Pdf:
                     {
-                        _logger.LogError("{Archive} does not exist on disk", files[0].FilePath);
-                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
-                    }
+                        removeNonImages = false;
+                        if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
+                        {
+                            _logger.LogError("{File} does not exist on disk", files[0].FilePath);
+                            throw new KavitaException($"{files[0].FilePath} does not exist on disk");
+                        }
 
-                    _directoryService.ExistOrCreate(extractPath);
-                    _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                        _directoryService.ExistOrCreate(extractPath);
+                        _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
+                        break;
+                    }
                 }
             }
 

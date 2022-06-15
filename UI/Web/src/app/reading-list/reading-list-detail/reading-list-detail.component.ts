@@ -118,7 +118,7 @@ export class ReadingListDetailComponent implements OnInit {
       reader = 'book;'
     }
     const params = this.readerService.getQueryParamsObject(false, true, this.readingList.id);
-    this.router.navigate(['library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], {queryParams: params});
+    this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
 
   handleReadingListActionCallback(action: Action, readingList: ReadingList) {
@@ -194,10 +194,6 @@ export class ReadingListDetailComponent implements OnInit {
       break;
     }
 
-    if (currentlyReadingChapter.seriesFormat === MangaFormat.EPUB) {
-      this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'book', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
-    } else {
-      this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'manga', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
-    }
+    this.router.navigate(this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat), {queryParams: {readingListId: this.readingList.id}});
   }
 }

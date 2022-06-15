@@ -602,12 +602,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
     }
-
-    if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'book', chapter.id], {queryParams: {incognitoMode}});
-    } else {
-      this.router.navigate(['library', this.libraryId, 'series', this.series?.id, 'manga', chapter.id], {queryParams: {incognitoMode}});
-    }
+    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: {incognitoMode}});
   }
 
   openVolume(volume: Volume) {
