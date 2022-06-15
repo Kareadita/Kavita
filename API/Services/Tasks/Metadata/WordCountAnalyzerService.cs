@@ -145,9 +145,10 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
         var isEpub = series.Format == MangaFormat.Epub;
-
+        series.WordCount = 0;
         foreach (var volume in series.Volumes)
         {
+            volume.WordCount = 0;
             foreach (var chapter in volume.Chapters)
             {
                 // This compares if it's changed since a file scan only
