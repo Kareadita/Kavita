@@ -1,9 +1,9 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Renderer2 } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Renderer2, AfterViewInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin, fromEvent, Subject, debounceTime } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -37,7 +37,6 @@ import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
 import { FormControl, FormGroup } from '@angular/forms';
 import { PageLayoutMode } from '../_models/page-layout-mode';
-import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 
 interface RelatedSeris {
   series: Series;
@@ -63,7 +62,7 @@ interface StoryLineItem {
   templateUrl: './series-detail.component.html',
   styleUrls: ['./series-detail.component.scss']
 })
-export class SeriesDetailComponent implements OnInit, OnDestroy {
+export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -243,6 +242,24 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
       }
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.initScroll();
+  }
+
+  initScroll() {
+    if (this.scrollingBlock === undefined || this.scrollingBlock.nativeElement === undefined) {
+      setTimeout(() => {this.initScroll()}, 10);
+      return;
+    }
+    fromEvent(this.scrollingBlock.nativeElement, 'scroll').pipe(
+      debounceTime(200),
+      takeUntil(this.onDestroy))
+    .subscribe(() => {
+      this.onScroll();
+      
+  });
   }
 
   onScroll(): void {

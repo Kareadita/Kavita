@@ -54,7 +54,7 @@
 </app-side-nav-companion-bar>
 </div>
 
-<div (scroll)="onScroll()" [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
+<div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-3 info-container">
         <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
             <app-image maxWidth="300px" [imageUrl]="seriesImage"></app-image>
