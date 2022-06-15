@@ -47,7 +47,10 @@
                          title="Previous Page" aria-hidden="true"></i>
                     </div>
                 </div>
-                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')" [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'), 'left': (readerMode === ReaderMode.LeftRight && (this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.ORIGINAL) ? ImageWidth: 'inherit'), 'right': rightPaginationOffset + 'px'}">
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')" 
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'), 
+                                'left': 'inherit', 
+                                'right': rightPaginationOffset + 'px'}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
                          title="Next Page" aria-hidden="true"></i>
