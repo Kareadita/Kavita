@@ -16,16 +16,16 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  //height: 10000px;
   height: calc(100vh - 85px);
   max-height: calc(var(--vh)*100 - 170px);
 }
 
 // This is responsible for ensuring we scroll down and only tabs and companion bar is visible
 .main-container {
-  // Height set dynamically by series-detail.component.ts getHeight();
+  // Height set dynamically by getHeight()
   overflow-y: auto;
   position: relative;
+  overscroll-behavior-y: none;
 }
 
 .nav-tabs.fixed {
