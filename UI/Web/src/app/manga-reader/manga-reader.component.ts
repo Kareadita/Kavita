@@ -27,7 +27,6 @@ import { LibraryType } from '../_models/library';
 import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
-import { SeriesService } from '../_services/series.service';
 
 const PREFETCH_PAGES = 8;
 
@@ -284,7 +283,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return (this.layoutMode === LayoutMode.DoubleReversed) && !this.isCoverImage();
   }
 
-  get isCurrentPageBookmarked() {
+  get CurrentPageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
   }
 
@@ -316,7 +315,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return 0;
   }
 
-  get splitIconClass() {
+  get SplitIconClass() {
     if (this.isSplitLeftToRight()) {
       return 'left-side';
     } else if (this.isNoSplit()) {
@@ -325,7 +324,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'right-side';
   }
 
-  get readerModeIcon() {
+  get ReaderModeIcon() {
     switch(this.readerMode) {
       case ReaderMode.LeftRight:
         return 'fa-exchange-alt';
@@ -366,8 +365,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
               public utilityService: UtilityService, private renderer: Renderer2, 
-              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
-              private seriesService: SeriesService) {
+              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
   }
@@ -831,7 +829,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isNoSplit() {
     const splitValue = parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10);
-    return  splitValue === PageSplitOption.NoSplit || splitValue === PageSplitOption.FitSplit;
+    return splitValue === PageSplitOption.NoSplit || splitValue === PageSplitOption.FitSplit;
   }
 
   updateSplitPage() {
@@ -1340,7 +1338,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   bookmarkPage() {
     const pageNum = this.pageNum;
 
-    if (this.isCurrentPageBookmarked) {
+    if (this.CurrentPageBookmarked) {
       let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
       if (this.layoutMode === LayoutMode.Double) apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       forkJoin(apis).pipe(take(1)).subscribe(() => {

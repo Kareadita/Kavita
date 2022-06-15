@@ -21,7 +21,11 @@
                 <!-- {{this.pageNum}} -->
                 <!-- {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)"> - {{PageNumber + 1}}</ng-container> -->
 
-                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="isCurrentPageBookmarked" title="{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()"><i class="{{isCurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i><span class="visually-hidden">{{isCurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span></button>
+                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked" 
+                        title="{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()">
+                    <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
+                    <span class="visually-hidden">{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span>
+                </button>
             </div>
         </div>
     </div>
@@ -118,7 +122,7 @@
             </div>
             <div class="col">
                 <button class="btn btn-icon" title="Reading Mode" (click)="toggleReaderMode();resetMenuCloseTimer();">
-                    <i class="fa {{readerModeIcon}}" aria-hidden="true"></i>
+                    <i class="fa {{ReaderModeIcon}}" aria-hidden="true"></i>
                     <span class="visually-hidden">Reading Mode</span>
                 </button>
             </div>
@@ -141,7 +145,7 @@
                     <div class="col-md-6 col-sm-12">
                         <label for="page-splitting" class="form-label">Image Splitting</label>&nbsp;
                         <div class="split fa fa-image">
-                            <div class="{{splitIconClass}}"></div>
+                            <div class="{{SplitIconClass}}"></div>
                         </div>
                         <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
                             <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
