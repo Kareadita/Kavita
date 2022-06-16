@@ -3,13 +3,34 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body">
-    <div class="mb-3">
+    <!-- <div class="mb-3">
         <label for="filter" class="form-label">Filter</label>
         <div class="input-group">
             <input id="filter" autocomplete="off" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
             <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="filterQuery = '';">Clear</button>
         </div>
+    </div> -->
+
+
+    <div class="mb-3">
+        <label for="filter" class="form-label">Path</label>
+        <div class="input-group">
+            <input
+                id="typeahead-focus"
+                type="text"
+                class="form-control"
+                [(ngModel)]="path"
+                [ngbTypeahead]="search"
+                (focus)="focus$.next($any($event).target.value)"
+                (click)="click$.next($any($event).target.value)"
+                #instance="ngbTypeahead"
+                placeholder="Start typing or select path"
+                />
+        </div>
     </div>
+
+
+
     <nav aria-label="directory breadcrumb">
         <ol class="breadcrumb" *ngIf="routeStack.peek() !== undefined; else noBreadcrumb">
         <li class="breadcrumb-item {{route === routeStack.peek() ? 'active' : ''}}" *ngFor="let route of routeStack.items; let index = index">
@@ -36,9 +57,9 @@
         </div>
     </ul>
     <ul class="list-group scrollable">
-        <button *ngFor="let folder of folders | filter: filterFolder" class="list-group-item list-group-item-action" (click)="selectNode(folder)">
-            <span>{{getStem(folder)}}</span>
-            <button type="button" class="btn btn-primary float-end" (click)="shareFolder(folder, $event)">Share</button>
+        <button *ngFor="let folder of folders" class="list-group-item list-group-item-action" (click)="selectNode(folder.name)">
+            <span>{{folder.name}}</span>
+            <button type="button" class="btn btn-primary float-end" (click)="shareFolder(folder.fullPath, $event)">Share</button>
         </button>
         <div class="list-group-item text-center" *ngIf="folders.length === 0">
             There are no folders here
@@ -48,4 +69,5 @@
 <div class="modal-footer">
     <a class="btn btn-icon" *ngIf="helpUrl.length > 0" href="{{helpUrl}}" target="_blank">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="share()">Share</button>
 </div>
