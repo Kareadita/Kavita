@@ -27,10 +27,3 @@
   position: relative;
   overscroll-behavior-y: none;
 }
-
-.nav-tabs.fixed {
-  position: fixed;
-  z-index: 100;
-  background-color: var(--bs-body-bg);
-  width: 100%;
-}

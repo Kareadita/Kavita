@@ -232,7 +232,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               private router: Router, public bulkSelectionService: BulkSelectionService,
               private modalService: NgbModal, public readerService: ReaderService,
@@ -305,12 +304,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       setTimeout(() => {this.initScroll()}, 10);
       return;
     }
-    fromEvent(this.scrollingBlock.nativeElement, 'scroll').pipe(
-      debounceTime(100),
-      takeUntil(this.onDestroy))
-    .subscribe(() => {
-      this.onScroll();
-    });
   }
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -324,46 +317,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   handleKeyUp(event: KeyboardEvent) {
     if (event.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
-    }
-  }
-
-  onScroll(): void {
-    // const main = this.document.querySelector('.main-container') as HTMLElement;
-    // if (main === null) return;
-
-    if (this.scrollingBlock === undefined || this.scrollingBlock.nativeElement === undefined) return;
-
-    const info = this.document.querySelector('.info-container') as HTMLElement;
-    const navbar = this.document.querySelector('.navbar') as HTMLElement;
-    const mainScrollPos = this.scrollingBlock.nativeElement.scrollTop;
-    const infoHeight = info.offsetHeight + 16; //16px for margin
-    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
-    const navbarHeight = navbar.offsetHeight;
-    const tabs = this.document.querySelector('.nav-tabs') as HTMLElement;
-
-    const hasFixedClass = tabs.classList.contains('fixed');
-    console.log('Has Fixed State: ', hasFixedClass);
-
-    if (!hasFixedClass && infoHeight <= mainScrollPos) {
-      const mainOffset = this.scrollingBlock.nativeElement.offsetTop; //For mobile tab placement calc
-      const totalHeight = companionHeight + navbarHeight + 20; //For desktop tab placement calc
-      const vw = Math.max(this.document.documentElement.clientWidth || 0, window.innerWidth || 0);
-      const tabsWidth = tabs.clientWidth;
-      
-      this.renderer.addClass(tabs, 'fixed');
-      this.renderer.setStyle(tabs, 'width', tabsWidth + 'px'); //Stretch tab width across section
-      if (vw < 780) {
-        //Use different offset for mobile
-        this.renderer.setStyle(tabs, 'top', mainOffset + 'px');
-        console.log('Setting mainOffset');
-      } else {
-        this.renderer.setStyle(tabs, 'top', totalHeight + 'px');
-        console.log('Setting totalHeight');
-      }
-    } else if (hasFixedClass && mainScrollPos <= infoHeight) {
-      this.renderer.removeClass(tabs, 'fixed');
-      this.renderer.setStyle(tabs, 'width', '100%'); //set tab width back
-      console.log('Removing fixed class');
     }
   }
 
