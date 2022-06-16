@@ -40,5 +40,9 @@ namespace API.DTOs.Settings
         public string InstallVersion { get; set; }
 
         public bool ConvertBookmarkToWebP { get; set; }
+        /// <summary>
+        /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
+        /// </summary>
+        public bool EnableSwaggerUi { get; set; }
     }
 }

@@ -3,8 +3,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { EmailTestResult, SettingsService } from '../settings.service';
+import { SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
 
@@ -21,7 +20,7 @@ export class ManageSettingsComponent implements OnInit {
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, private confirmService: ConfirmService,
+  constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private modalService: NgbModal) { }
 
   ngOnInit(): void {
@@ -43,6 +42,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
+      this.settingsForm.addControl('enableSwaggerUi', new FormControl(this.serverSettings.enableSwaggerUi, [Validators.required]));
     });
   }
 
@@ -57,6 +57,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds);
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
+    this.settingsForm.get('enableSwaggerUi')?.setValue(this.serverSettings.enableSwaggerUi);
   }
 
   async saveSettings() {
@@ -92,29 +93,4 @@ export class ManageSettingsComponent implements OnInit {
       }
     });
   }
-
-  // resetEmailServiceUrl() {
-  //   this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
-  //     this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
-  //     this.resetForm();
-  //     this.toastr.success('Email Service Reset');
-  //   }, (err: any) => {
-  //     console.error('error: ', err);
-  //   });
-  // }
-
-  // testEmailServiceUrl() {
-  //   this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (result: EmailTestResult) => {
-  //     if (result.successful) {
-  //       this.toastr.success('Email Service Url validated');
-  //     } else {
-  //       this.toastr.error('Email Service Url did not respond. ' + result.errorMessage);
-  //     }
-      
-  //   }, (err: any) => {
-  //     console.error('error: ', err);
-  //   });
-    
-  // }
-
 }

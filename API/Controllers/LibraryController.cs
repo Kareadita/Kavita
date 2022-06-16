@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.JumpBar;
 using API.DTOs.Search;
+using API.DTOs.System;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -89,11 +90,15 @@ namespace API.Controllers
         /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("list")]
-        public ActionResult<IEnumerable<string>> GetDirectories(string path)
+        public ActionResult<IEnumerable<DirectoryDto>> GetDirectories(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
-                return Ok(Directory.GetLogicalDrives());
+                return Ok(Directory.GetLogicalDrives().Select(d => new DirectoryDto()
+                {
+                    Name = d,
+                    FullPath = d
+                }));
             }
 
             if (!Directory.Exists(path)) return BadRequest("This is not a valid path");
