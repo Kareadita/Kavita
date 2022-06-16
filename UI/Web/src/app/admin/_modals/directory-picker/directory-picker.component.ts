@@ -96,20 +96,27 @@ export class DirectoryPickerComponent implements OnInit {
     }
   }
 
+  updateTable() {
+    console.log('path changed: ', this.path);
+    this.loadChildren(this.path);
+  }
+
   filterFolder = (folder: string) => {
     return folder.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
-  selectNode(folderPath: string) {
-    // this.currentRoot = folderName;
-    // this.routeStack.push(folderName);
+  selectNode(folder: DirectoryDto) {
+    this.currentRoot = folder.name;
+    this.routeStack.push(folder.name);
     // const fullPath = this.routeStack.items.join('/');
     // this.loadChildren(fullPath); 
-    //this.text$.emit(folderPath);
-    this.click$.next(folderPath); // trigger a search
+    this.path = folder.fullPath;
+    this.loadChildren(this.path);
   }
 
   goBack() {
+
+
     this.routeStack.pop();
     const stackPeek = this.routeStack.peek();
     if (stackPeek !== undefined) {
@@ -173,6 +180,7 @@ export class DirectoryPickerComponent implements OnInit {
     }
     
     const fullPath = this.routeStack.items.join('/');
+    this.path = fullPath;
     this.loadChildren(fullPath);
   }
 }
