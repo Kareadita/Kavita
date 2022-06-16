@@ -8,11 +8,13 @@ import { SharedModule } from '../shared/shared.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { InfiniteScrollerComponent } from './infinite-scroller/infinite-scroller.component';
 import { ReaderSharedModule } from '../reader-shared/reader-shared.module';
+import { FullscreenIconPipe } from './fullscreen-icon.pipe';
 
 @NgModule({
   declarations: [
     MangaReaderComponent,
-    InfiniteScrollerComponent
+    InfiniteScrollerComponent,
+    FullscreenIconPipe
   ],
   imports: [
     CommonModule,

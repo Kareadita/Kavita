@@ -55,7 +55,6 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
         var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
         var stopwatch = Stopwatch.StartNew();
-        var totalTime = 0L;
         _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -64,7 +63,6 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
             if (chunkInfo.TotalChunks == 0) continue;
-            totalTime += stopwatch.ElapsedMilliseconds;
             stopwatch.Restart();
 
             _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
@@ -145,26 +143,30 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
         var isEpub = series.Format == MangaFormat.Epub;
-
+        series.WordCount = 0;
         foreach (var volume in series.Volumes)
         {
+            volume.WordCount = 0;
             foreach (var chapter in volume.Chapters)
             {
                 // This compares if it's changed since a file scan only
-                if (!_cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate,
-                        chapter.Files.FirstOrDefault()) && chapter.WordCount != 0)
+                var firstFile = chapter.Files.FirstOrDefault();
+                if (firstFile == null) return;
+                if (!_cacheHelper.HasFileChangedSinceLastScan(firstFile.LastFileAnalysis, forceUpdate,
+                        firstFile))
                     continue;
 
                 if (series.Format == MangaFormat.Epub)
                 {
                     long sum = 0;
                     var fileCounter = 1;
-                    foreach (var file in chapter.Files.Select(file => file.FilePath))
+                    foreach (var file in chapter.Files)
                     {
+                        var filePath = file.FilePath;
                         var pageCounter = 1;
                         try
                         {
-                            using var book = await EpubReader.OpenBookAsync(file, BookService.BookReaderOptions);
+                            using var book = await EpubReader.OpenBookAsync(filePath, BookService.BookReaderOptions);
 
                             var totalPages = book.Content.Html.Values;
                             foreach (var bookPage in totalPages)
@@ -174,7 +176,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
                                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                                     MessageFactory.WordCountAnalyzerProgressEvent(series.LibraryId, progress,
-                                        ProgressEventType.Updated, useFileName ? file : series.Name));
+                                        ProgressEventType.Updated, useFileName ? filePath : series.Name));
                                 sum += await GetWordCountFromHtml(bookPage);
                                 pageCounter++;
                             }
@@ -190,6 +192,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                             return;
                         }
 
+                        file.LastFileAnalysis = DateTime.Now;
+                        _unitOfWork.MangaFileRepository.Update(file);
                     }
 
                     chapter.WordCount = sum;

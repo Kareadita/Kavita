@@ -14,6 +14,7 @@ public interface ICacheHelper
     bool CoverImageExists(string path);
 
     bool HasFileNotChangedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile firstFile);
+    bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile firstFile);
 
 }
 
@@ -60,6 +61,25 @@ public class CacheHelper : ICacheHelper
                (!forceUpdate &&
                 !(_fileService.HasFileBeenModifiedSince(firstFile.FilePath, chapter.Created)
                   || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)));
+    }
+
+    /// <summary>
+    /// Has the file been modified since last scan or is user forcing an update
+    /// </summary>
+    /// <param name="lastScan"></param>
+    /// <param name="forceUpdate"></param>
+    /// <param name="firstFile"></param>
+    /// <returns></returns>
+    public bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile firstFile)
+    {
+        if (firstFile == null) return false;
+        if (forceUpdate) return true;
+        return _fileService.HasFileBeenModifiedSince(firstFile.FilePath, lastScan)
+               || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified);
+        // return firstFile != null &&
+        //        (!forceUpdate &&
+        //         !(_fileService.HasFileBeenModifiedSince(firstFile.FilePath, lastScan)
+        //           || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)));
     }
 
     /// <summary>
