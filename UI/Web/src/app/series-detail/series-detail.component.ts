@@ -1,9 +1,9 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Renderer2, AfterViewInit, Inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin, fromEvent, Subject, debounceTime } from 'rxjs';
 import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -37,7 +37,7 @@ import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
 import { FormControl, FormGroup } from '@angular/forms';
 import { PageLayoutMode } from '../_models/page-layout-mode';
-import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
+import { DOCUMENT } from '@angular/common';
 
 interface RelatedSeris {
   series: Series;
@@ -63,9 +63,10 @@ interface StoryLineItem {
   templateUrl: './series-detail.component.html',
   styleUrls: ['./series-detail.component.scss']
 })
-export class SeriesDetailComponent implements OnInit, OnDestroy {
+export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
 
-	@ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
+  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
+  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
   /**
    * Series Id. Set at load before UI renders
@@ -220,6 +221,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     return PageLayoutMode;
   }
 
+  get ScrollingBlockHeight() {
+    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    const navbar = this.document.querySelector('.navbar') as HTMLElement;
+    if (navbar === null) return 'calc(var(--vh)*100)';
+
+    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const navbarHeight = navbar.offsetHeight;
+    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
+    return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
+  }
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
               private router: Router, public bulkSelectionService: BulkSelectionService,
@@ -231,7 +242,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
               private readingListService: ReadingListService, public navService: NavService,
-              private offcanvasService: NgbOffcanvas
+              private offcanvasService: NgbOffcanvas, private renderer: Renderer2,
+              @Inject(DOCUMENT) private document: Document
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -244,30 +256,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-	onScroll(): void {
-		const tabs = document.querySelector('.nav-tabs') as HTMLElement | null;
-		const main = document.querySelector('.main-container') as HTMLElement | null;
-		const content = document.querySelector('.tab-content') as HTMLElement | null;
-		let mainOffset = main!.offsetTop;
-		let tabOffset = tabs!.offsetTop;
-		let contentOffset = content!.offsetTop;
-		let mainScrollPos = main!.scrollTop;
-		
-		if (!document.querySelector('.nav-tabs.fixed') && (tabOffset - mainOffset) <= mainScrollPos) {
-			tabs!.classList.add("fixed");
-			tabs!.style.top = mainOffset+'px';
-		} else if (document.querySelector('.nav-tabs.fixed') && mainScrollPos <= (contentOffset - mainOffset)) {
-			tabs!.classList.remove("fixed");
-		}
-	}
-
-
-
-	get ScrollingBlockHeight() {
-		if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
-		const mainOffset = this.scrollingBlock.nativeElement.offsetTop;
-		return 'calc(var(--vh)*100 - ' + mainOffset + 'px)';
-	}
 
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('seriesId');
@@ -305,6 +293,17 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  ngAfterViewInit(): void {
+    this.initScroll();
+  }
+
+  initScroll() {
+    if (this.scrollingBlock === undefined || this.scrollingBlock.nativeElement === undefined) {
+      setTimeout(() => {this.initScroll()}, 10);
+      return;
+    }
   }
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -435,7 +434,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
-      console.log('library type: ', this.libraryType);
       this.series = results.series;
 
       this.createHTML();
