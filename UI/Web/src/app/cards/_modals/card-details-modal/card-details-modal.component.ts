@@ -222,10 +222,6 @@ export class CardDetailsModalComponent implements OnInit {
       return;
     }
 
-    if (chapter.files.length > 0 && chapter.files[0].format === MangaFormat.EPUB) {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'book', chapter.id]);
-    } else {
-      this.router.navigate(['library', this.libraryId, 'series', this.seriesId, 'manga', chapter.id]);
-    }
+    this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, this.chapter.id, chapter.files[0].format));
   }
 }

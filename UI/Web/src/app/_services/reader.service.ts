@@ -5,9 +5,13 @@ import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { HourEstimateRange } from '../_models/hour-estimate-range';
+import { MangaFormat } from '../_models/manga-format';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
+
+export const CHAPTER_ID_DOESNT_EXIST = -1;
+export const CHAPTER_ID_NOT_FETCHED = -2;
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +24,22 @@ export class ReaderService {
   private originalBodyColor!: string;
 
   constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+
+  getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
+    if (format === undefined) format = MangaFormat.ARCHIVE;
+
+    if (format === MangaFormat.EPUB) {
+      return ['library', libraryId, 'series', seriesId, 'book', chapterId];
+    } else if (format === MangaFormat.PDF) {
+      return ['library', libraryId, 'series', seriesId, 'pdf', chapterId];
+    } else {
+      return ['library', libraryId, 'series', seriesId, 'manga', chapterId];
+    }
+  }
+
+  downloadPdf(chapterId: number) {
+    return this.baseUrl + 'reader/pdf?chapterId=' + chapterId;
+  }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
     return this.httpClient.post(this.baseUrl + 'reader/bookmark', {seriesId, volumeId, chapterId, page});
@@ -51,7 +71,7 @@ export class ReaderService {
 
   /**
    * Used exclusively for reading multiple bookmarks from a series
-   * @param seriesId 
+   * @param seriesId
    */
   getBookmarkInfo(seriesId: number) {
     return this.httpClient.get<BookmarkInfo>(this.baseUrl + 'reader/bookmark-info?seriesId=' + seriesId);
@@ -100,7 +120,7 @@ export class ReaderService {
   markVolumeUnread(seriesId: number, volumeId: number) {
     return this.httpClient.post(this.baseUrl + 'reader/mark-volume-unread', {seriesId, volumeId});
   }
-  
+
 
   getNextChapter(seriesId: number, volumeId: number, currentChapterId: number, readingListId: number = -1) {
     if (readingListId > 0) {
@@ -150,7 +170,7 @@ export class ReaderService {
   /**
    * Parses out the page number from a Image src url
    * @param imageSrc Src attribute of Image
-   * @returns 
+   * @returns
    */
   imageUrlToPageNum(imageSrc: string) {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
@@ -192,7 +212,7 @@ export class ReaderService {
   }
 
   enterFullscreen(el: Element, callback?: VoidFunction) {
-    if (!document.fullscreenElement) { 
+    if (!document.fullscreenElement) {
       if (el.requestFullscreen) {
         el.requestFullscreen().then(() => {
           if (callback) {
@@ -214,7 +234,7 @@ export class ReaderService {
   }
 
   /**
-   * 
+   *
    * @returns If document is in fullscreen mode
    */
   checkFullscreenMode() {
