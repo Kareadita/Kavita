@@ -1,7 +1,7 @@
 <div class="list-item-container d-flex flex-row g-0 mb-2 p-2">
     <div class="pe-2">
         <app-image [imageUrl]="imageUrl" [height]="imageHeight" [width]="imageWidth"></app-image>
-
+        <div class="not-read-badge" *ngIf="pagesRead === 0 && totalPages > 0"></div>
         <span class="download" *ngIf="download$ | async as download">
             <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
             <span class="visually-hidden" role="status">
