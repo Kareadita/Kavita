@@ -206,6 +206,12 @@ namespace API.Controllers
                     }
                 }
 
+                if (setting.Key == ServerSettingKey.EnableSwaggerUi && updateSettingsDto.EnableSwaggerUi + string.Empty != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.EnableSwaggerUi + string.Empty;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
                 if (setting.Key == ServerSettingKey.EmailServiceUrl && updateSettingsDto.EmailServiceUrl + string.Empty != setting.Value)
                 {
                     setting.Value = string.IsNullOrEmpty(updateSettingsDto.EmailServiceUrl) ? EmailService.DefaultApiUrl : updateSettingsDto.EmailServiceUrl;
