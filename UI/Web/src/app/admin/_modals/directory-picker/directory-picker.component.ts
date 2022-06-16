@@ -29,7 +29,6 @@ export class DirectoryPickerComponent implements OnInit {
   currentRoot = '';
   folders: DirectoryDto[] = [];
   routeStack: Stack<string> = new Stack<string>();
-  filterQuery: string = '';
 
 
   path: string = '';
@@ -39,16 +38,6 @@ export class DirectoryPickerComponent implements OnInit {
   searching: boolean = false;
   searchFailed: boolean = false;
 
-  // search: OperatorFunction<string, readonly string[]> = (text$: Observable<string>) => {
-    // const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
-    // const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
-    // const inputFocus$ = this.focus$;
-
-  //   return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$).pipe(
-  //     map(term => (term === '' ? this.libraryService.listDirectories(this.path)
-  //       : this.libraryService.listDirectories(this.path)))
-  //   );
-  // }
 
   search: OperatorFunction<string, readonly string[]> = (text$: Observable<string>) => {
     const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
@@ -97,26 +86,18 @@ export class DirectoryPickerComponent implements OnInit {
   }
 
   updateTable() {
-    console.log('path changed: ', this.path);
     this.loadChildren(this.path);
   }
 
-  filterFolder = (folder: string) => {
-    return folder.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
-  }
 
   selectNode(folder: DirectoryDto) {
     this.currentRoot = folder.name;
     this.routeStack.push(folder.name);
-    // const fullPath = this.routeStack.items.join('/');
-    // this.loadChildren(fullPath); 
     this.path = folder.fullPath;
     this.loadChildren(this.path);
   }
 
   goBack() {
-
-
     this.routeStack.pop();
     const stackPeek = this.routeStack.peek();
     if (stackPeek !== undefined) {
@@ -131,7 +112,6 @@ export class DirectoryPickerComponent implements OnInit {
 
   loadChildren(path: string) {
     this.libraryService.listDirectories(path).subscribe(folders => {
-      this.filterQuery = '';
       this.folders = folders;
     }, err => {
       // If there was an error, pop off last directory added to stack
@@ -142,12 +122,6 @@ export class DirectoryPickerComponent implements OnInit {
   shareFolder(fullPath: string, event: any) {
     event.preventDefault();
     event.stopPropagation();
-
-    // let fullPath = folderName;
-    // if (this.routeStack.items.length > 0) {
-    //   const pathJoin = this.routeStack.items.join('/');
-    //   fullPath = pathJoin + ((pathJoin.endsWith('/') || pathJoin.endsWith('\\')) ? '' : '/') + folderName;
-    // }
 
     this.modal.close({success: true, folderPath: fullPath});
   }
