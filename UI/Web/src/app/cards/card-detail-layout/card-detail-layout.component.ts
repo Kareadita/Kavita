@@ -1,8 +1,8 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { IPageInfo, VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
-import { filter, from, map, pairwise, Subject, tap, throttleTime } from 'rxjs';
+import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -13,7 +13,6 @@ import { ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 const FILTER_PAG_REGEX = /[^0-9]/g;
-const SCROLL_BREAKPOINT = 300;
 const keySize = 24;
 
 @Component({
@@ -26,8 +25,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
   @Input() items: any[] = [];
-  // ?! we need to have chunks to render in, because if we scroll down, then up, then down, we don't want to trigger a duplicate call
-  @Input() paginatedItems: PaginatedResult<any> | undefined; 
   @Input() pagination!: Pagination;
   
   // Filter Code
@@ -73,7 +70,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   constructor(private seriesService: SeriesService, public utilityService: UtilityService, 
-    @Inject(DOCUMENT) private document: Document, private ngZone: NgZone) {
+    @Inject(DOCUMENT) private document: Document) {
     this.filter = this.seriesService.createSeriesFilter();
   }
 
@@ -239,8 +236,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   }
 
   scrollTo(jumpKey: JumpKey) {
-    // TODO: Figure out how to do this
-    
     let targetIndex = 0;
     for(var i = 0; i < this.jumpBarKeys.length; i++) {
       if (this.jumpBarKeys[i].key === jumpKey.key) break;
@@ -254,29 +249,29 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
     // Basic implementation based on itemsPerPage being the same. 
     //var minIndex = this.pagination.currentPage * this.pagination.itemsPerPage;
-    var targetPage = Math.max(Math.ceil(targetIndex / this.pagination.itemsPerPage), 1);
-    //console.log('We are on page ', this.pagination.currentPage, ' and our target page is ', targetPage);
-    if (targetPage === this.pagination.currentPage) {
-      // Scroll to the element
-      const elem = this.document.querySelector(`div[id="jumpbar-index--${targetIndex}"`);
-      if (elem !== null) {
+    // var targetPage = Math.max(Math.ceil(targetIndex / this.pagination.itemsPerPage), 1);
+    // //console.log('We are on page ', this.pagination.currentPage, ' and our target page is ', targetPage);
+    // if (targetPage === this.pagination.currentPage) {
+    //   // Scroll to the element
+    //   const elem = this.document.querySelector(`div[id="jumpbar-index--${targetIndex}"`);
+    //   if (elem !== null) {
         
-        this.virtualScroller.scrollToIndex(targetIndex);
-        // elem.scrollIntoView({
-        //   behavior: 'smooth'
-        // });
-      }
-      return;
-    }
-
-    // With infinite scroll, we can't just jump to a random place, because then our list of items would be out of sync. 
-    this.selectPageStr(targetPage + '');
-    //this.pageChangeWithDirection.emit(1);
-
-    // if (minIndex > targetIndex) {
-    //   // We need to scroll forward (potentially to another page)
-    // } else if (minIndex < targetIndex) {
-    //   // We need to scroll back (potentially to another page)
+    //     this.virtualScroller.scrollToIndex(targetIndex);
+    //     // elem.scrollIntoView({
+    //     //   behavior: 'smooth'
+    //     // });
+    //   }
+    //   return;
     // }
+
+    // // With infinite scroll, we can't just jump to a random place, because then our list of items would be out of sync. 
+    // this.selectPageStr(targetPage + '');
+    // //this.pageChangeWithDirection.emit(1);
+
+    // // if (minIndex > targetIndex) {
+    // //   // We need to scroll forward (potentially to another page)
+    // // } else if (minIndex < targetIndex) {
+    // //   // We need to scroll back (potentially to another page)
+    // // }
   }
 }
