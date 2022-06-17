@@ -94,7 +94,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     this.jumpBarKeysToRender = [];
     
     const removalTimes = Math.ceil(removeCount / 2);
-    const midPoint = this.jumpBarKeys.length / 2;
+    const midPoint = Math.floor(this.jumpBarKeys.length / 2);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[0]);
     this.removeFirstPartOfJumpBar(midPoint, removalTimes);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[midPoint]);
