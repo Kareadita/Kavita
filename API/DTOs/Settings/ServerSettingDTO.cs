@@ -44,5 +44,11 @@ namespace API.DTOs.Settings
         /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
         /// </summary>
         public bool EnableSwaggerUi { get; set; }
+
+        /// <summary>
+        /// The amount of Backups before cleanup
+        /// </summary>
+        /// <remarks>Value should be between 1 and 30</remarks>
+        public int TotalBackups { get; set; } = 30;
     }
 }

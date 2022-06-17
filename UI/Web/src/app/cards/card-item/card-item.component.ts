@@ -112,6 +112,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
    * Handles touch events for selection on mobile devices to ensure you aren't touch scrolling
    */
   prevOffset: number = 0;
+  selectionInProgress: boolean = false;
 
   private user: User | undefined;
 
@@ -179,6 +180,12 @@ export class CardItemComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
+  @HostListener('touchmove', ['$event'])
+  onTouchMove(event: TouchEvent) {
+    if (!this.allowSelection) return;
+
+    this.selectionInProgress = false;
+  }
 
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
@@ -186,6 +193,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     this.prevTouchTime = event.timeStamp;
     this.prevOffset = this.scrollService.scrollPosition;
+    this.selectionInProgress = true;
   }
 
   @HostListener('touchend', ['$event'])
@@ -194,12 +202,13 @@ export class CardItemComponent implements OnInit, OnDestroy {
     const delta = event.timeStamp - this.prevTouchTime;
     const verticalOffset = this.scrollService.scrollPosition;
 
-    if (delta >= 300 && delta <= 1000 && (verticalOffset === this.prevOffset)) {
+    if (delta >= 300 && delta <= 1000 && (verticalOffset === this.prevOffset) && this.selectionInProgress) {
       this.handleSelection();
       event.stopPropagation();
       event.preventDefault();
     }
     this.prevTouchTime = 0;
+    this.selectionInProgress = false;
   }
 
 
