@@ -30,7 +30,12 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/assets",
-              "src/site.webmanifest"
+              "src/site.webmanifest",
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-extended-pdf-viewer/assets/",
+                "output": "/assets/"
+              }
             ],
             "sourceMap": {
               "hidden": false,

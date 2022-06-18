@@ -19,6 +19,9 @@ public static class MigrateBookmarks
     /// </summary>
     /// <remarks>Bookmark directory is configurable. This will always use the default bookmark directory.</remarks>
     /// <param name="directoryService"></param>
+    /// <param name="unitOfWork"></param>
+    /// <param name="logger"></param>
+    /// <param name="cacheService"></param>
     /// <returns></returns>
     public static async Task Migrate(IDirectoryService directoryService, IUnitOfWork unitOfWork,
         ILogger<Program> logger, ICacheService cacheService)

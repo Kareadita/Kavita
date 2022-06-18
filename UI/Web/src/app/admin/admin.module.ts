@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminRoutingModule } from './admin-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { NgbDropdownModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { LibraryEditorModalComponent } from './_modals/library-editor-modal/library-editor-modal.component';
@@ -53,11 +53,12 @@ import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tas
     FormsModule,
     NgbNavModule,
     NgbTooltipModule,
+    NgbTypeaheadModule, // Directory Picker
     NgbDropdownModule,
     SharedModule,
     PipeModule,
     SidenavModule,
-    UserSettingsModule // API-key componet
+    UserSettingsModule, // API-key componet
   ],
   providers: []
 })

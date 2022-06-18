@@ -67,6 +67,10 @@ export enum EVENTS {
     * When bulk bookmarks are being converted
     */
    ConvertBookmarksProgress = 'ConvertBookmarksProgress',
+   /**
+    * When files are being scanned to calculate word count
+    */
+   WordCountAnalyzerProgress = 'WordCountAnalyzerProgress'
 }
 
 export interface Message<T> {
@@ -151,6 +155,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.ConvertBookmarksProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.ConvertBookmarksProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.WordCountAnalyzerProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.WordCountAnalyzerProgress,
         payload: resp.body
       });
     });

@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
+using API.DTOs.Filtering;
+using API.DTOs.JumpBar;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -38,6 +43,10 @@ public interface ILibraryRepository
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds);
     Task<int> GetTotalFiles();
+    IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
+    Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
+    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
+    IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -121,6 +130,37 @@ public class LibraryRepository : ILibraryRepository
     public async Task<int> GetTotalFiles()
     {
         return await _context.MangaFile.CountAsync();
+    }
+
+    public IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId)
+    {
+        var seriesSortCharacters = _context.Series.Where(s => s.LibraryId == libraryId)
+            .Select(s => s.SortName.ToUpper())
+            .OrderBy(s => s)
+            .AsEnumerable()
+            .Select(s => s[0]);
+
+        // Map the title to the number of entities
+        var firstCharacterMap = new Dictionary<char, int>();
+        foreach (var sortChar in seriesSortCharacters)
+        {
+            var c = sortChar;
+            var isAlpha = char.IsLetter(sortChar);
+            if (!isAlpha) c = '#';
+            if (!firstCharacterMap.ContainsKey(c))
+            {
+                firstCharacterMap[c] = 0;
+            }
+
+            firstCharacterMap[c] += 1;
+        }
+
+        return firstCharacterMap.Keys.Select(k => new JumpKeyDto()
+        {
+            Key = k + string.Empty,
+            Size = firstCharacterMap[k],
+            Title = k + string.Empty
+        });
     }
 
     public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()
@@ -221,6 +261,56 @@ public class LibraryRepository : ILibraryRepository
             .AsNoTracking()
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+
+    public async Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds)
+    {
+        return await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.AgeRating)
+            .Distinct()
+            .Select(s => new AgeRatingDto()
+            {
+                Value = s,
+                Title = s.ToDescription()
+            })
+            .ToListAsync();
+    }
+
+    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds)
+    {
+        var ret = await _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.Language)
+            .AsNoTracking()
+            .Distinct()
+            .ToListAsync();
+
+        return ret
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(s => new LanguageDto()
+            {
+                Title = CultureInfo.GetCultureInfo(s).DisplayName,
+                IsoCode = s
+            })
+            .OrderBy(s => s.Title)
+            .ToList();
+    }
+
+    public IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
+    {
+        return  _context.Series
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.PublicationStatus)
+            .Distinct()
+            .AsEnumerable()
+            .Select(s => new PublicationStatusDto()
+            {
+                Value = s,
+                Title = s.ToDescription()
+            })
+            .OrderBy(s => s.Title);
     }
 
 

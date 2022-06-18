@@ -279,8 +279,8 @@ namespace API.Tests.Services
                     }
                 }
             };
-            cs.GetCachedEpubFile(1, c);
-            Assert.Same($"{DataDirectory}1.epub", cs.GetCachedEpubFile(1, c));
+            cs.GetCachedFile(c);
+            Assert.Same($"{DataDirectory}1.epub", cs.GetCachedFile(c));
         }
 
         #endregion

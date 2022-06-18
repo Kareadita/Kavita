@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { BookService } from 'src/app/book-reader/book.service';
-import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes } from 'src/app/_models/preferences/preferences';
+import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes, pageLayoutModes } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,7 +15,8 @@ import { forkJoin, Observable, of, Subject } from 'rxjs';
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
-  BookReader = 'book-reader'
+  BookReader = 'book-reader',
+  GlobalSettings = 'global-settings'
 }
 
 @Component({
@@ -32,6 +33,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   layoutModes = layoutModes;
   bookLayoutModes = bookLayoutModes;
   bookColorThemes = bookColorThemes;
+  pageLayoutModes = pageLayoutModes;
 
   settingsForm: FormGroup = new FormGroup({});
   passwordChangeForm: FormGroup = new FormGroup({});
@@ -120,6 +122,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
+      this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
     });
 
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
@@ -165,6 +168,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
     this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
+    this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
   }
 
   resetPasswordForm() {
@@ -184,7 +188,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
-      backgroundColor: modelSettings.backgroundColor, // this.user.preferences.backgroundColor,
+      backgroundColor: modelSettings.backgroundColor,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
@@ -194,7 +198,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),
       bookReaderThemeName: modelSettings.bookReaderThemeName,
       theme: modelSettings.theme,
-      bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode
+      bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode,
+      globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
     };
 
     this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

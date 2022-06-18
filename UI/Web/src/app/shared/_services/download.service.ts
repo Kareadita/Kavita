@@ -12,7 +12,7 @@ import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { catchError, throttleTime } from 'rxjs/operators';
 
-const DEBOUNCE_TIME = 100;
+export const DEBOUNCE_TIME = 100;
 
 @Injectable({
   providedIn: 'root'
@@ -60,7 +60,7 @@ export class DownloadService {
   downloadChapter(chapter: Chapter) {
     return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => { //NOTE: DO I need debounceTime since I have throttleTime()?
+            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
               this.save(blob, filename)
             }));
   }

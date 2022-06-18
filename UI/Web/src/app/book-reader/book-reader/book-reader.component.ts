@@ -3,11 +3,11 @@ import {DOCUMENT, Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of, Subject } from 'rxjs';
-import { catchError, debounceTime, take, takeUntil, tap } from 'rxjs/operators';
+import { catchError, debounceTime, take, takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
-import { ReaderService } from 'src/app/_services/reader.service';
+import { CHAPTER_ID_DOESNT_EXIST, CHAPTER_ID_NOT_FETCHED, ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BookService } from '../book.service';
@@ -27,7 +27,6 @@ import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
-import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 
 
 enum TabID {
@@ -41,8 +40,6 @@ interface HistoryPoint {
 }
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
-const CHAPTER_ID_NOT_FETCHED = -2;
-const CHAPTER_ID_DOESNT_EXIST = -1;
 
 /**
  * Styles that should be applied on the top level book-content tag
@@ -353,7 +350,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ColumnHeight() {
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       // Take the height after page loads, subtract the top/bottom bar
-      return this.windowHeight - (this.topOffset *2) + 'px';
+      const height = this.windowHeight  - (this.topOffset * 2);
+      this.document.documentElement.style.setProperty('--book-reader-content-max-height', `${height}px`);
+      return height + 'px';
     }
     return 'unset';
   }
@@ -371,10 +370,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get PageHeightForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default) {
-      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - (this.topOffset * 2) + 'px';
+      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
-    return this.ColumnHeight;
+    if (this.immersiveMode) return this.windowHeight + 'px';
+    return (this.windowHeight) - (this.topOffset * 2) + 'px';
   }
 
 
@@ -513,7 +513,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.readingListMode && info.seriesFormat !== MangaFormat.EPUB) {
         // Redirect to the manga reader.
         const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
-        this.router.navigate(['library', info.libraryId, 'series', info.seriesId, 'manga', this.chapterId], {queryParams: params});
+        this.router.navigate(this.readerService.getNavigationArray(info.libraryId, info.seriesId, this.chapterId, info.seriesFormat), {queryParams: params});
         return;
       }
 
@@ -809,7 +809,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const images = this.readingSectionElemRef?.nativeElement.querySelectorAll('img') || [];
 
     if (this.layoutMode !== BookPageLayoutMode.Default) {
-      const height = this.ColumnHeight;
+      const height = (parseInt(this.ColumnHeight.replace('px', ''), 10) - (this.topOffset * 2)) + 'px';
       Array.from(images).forEach(img => {
         this.renderer.setStyle(img, 'max-height', height);
       });
@@ -1210,6 +1210,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     setTimeout(() => {this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;});
+
+    // When I switch layout, I might need to resume the progress point. 
+    if (mode === BookPageLayoutMode.Default) {
+      const lastSelector = this.lastSeenScrollPartPath;
+      setTimeout(() => this.scrollTo(lastSelector));
+    }
   }
 
   updateReadingDirection(readingDirection: ReadingDirection) {
@@ -1221,6 +1227,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.immersiveMode && !this.drawerOpen) {
       this.actionBarVisible = false;
     }
+
+    this.updateReadingSectionHeight();
+  }
+
+  updateReadingSectionHeight() {
+    setTimeout(() => {
+      console.log('setting height on ', this.readingSectionElemRef)
+      if (this.immersiveMode) {
+        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
+      } else {
+        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
+      }
+    });
   }
 
   // Table of Contents

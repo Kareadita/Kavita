@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { take, takeUntil } from 'rxjs/operators';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
@@ -10,7 +10,7 @@ import { NavService } from '../_services/nav.service';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
-import { BehaviorSubject, forkJoin, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { Breakpoint, KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { CircularArray } from '../shared/data-structures/circular-array';
@@ -27,7 +27,6 @@ import { LibraryType } from '../_models/library';
 import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
-import { SeriesService } from '../_services/series.service';
 
 const PREFETCH_PAGES = 8;
 
@@ -260,6 +259,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   backgroundColor: string = '#FFFFFF';
 
+  /**
+   * This is here as absolute layout requires us to calculate a negative right property for the right pagination when there is overflow. This is calculated on scroll.
+   */
+  rightPaginationOffset = 0;
+
   getPageUrl = (pageNum: number) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(this.chapterId, pageNum);
@@ -279,7 +283,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return (this.layoutMode === LayoutMode.DoubleReversed) && !this.isCoverImage();
   }
 
-  get isCurrentPageBookmarked() {
+  get CurrentPageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
   }
 
@@ -297,13 +301,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ImageHeight() {
     // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
-    if (this.isCoverImage() || this.generalSettingsForm.get('fittingOption')?.value === FITTING_OPTION.WIDTH) {
+    if (this.isCoverImage() || this.FittingOption === FITTING_OPTION.WIDTH) {
       return this.WindowHeight;
     }
     return this.image?.nativeElement.height + 'px';
   }
+  
+  get RightPaginationOffset() {
+    if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
+      return (this.readingArea?.nativeElement?.scrollLeft || 0) * -1;
+    }
+    return 0;
+  }
 
-  get splitIconClass() {
+  get SplitIconClass() {
     if (this.isSplitLeftToRight()) {
       return 'left-side';
     } else if (this.isNoSplit()) {
@@ -312,7 +323,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'right-side';
   }
 
-  get readerModeIcon() {
+  get ReaderModeIcon() {
     switch(this.readerMode) {
       case ReaderMode.LeftRight:
         return 'fa-exchange-alt';
@@ -348,13 +359,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return FITTING_OPTION;
   }
 
+  get FittingOption() {
+    return this.generalSettingsForm.get('fittingOption')?.value;
+  }
+
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
               public utilityService: UtilityService, private renderer: Renderer2, 
-              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
-              private seriesService: SeriesService) {
+              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
   }
@@ -363,13 +377,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const libraryId = this.route.snapshot.paramMap.get('libraryId');
     const seriesId = this.route.snapshot.paramMap.get('seriesId');
     const chapterId = this.route.snapshot.paramMap.get('chapterId');
-
     if (libraryId === null || seriesId === null || chapterId === null) {
       this.router.navigateByUrl('/libraries');
       return;
     }
-
-
 
     this.libraryId = parseInt(libraryId, 10);
     this.seriesId = parseInt(seriesId, 10);
@@ -383,78 +394,80 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingListId = parseInt(readingListId, 10);
     }
 
-
     this.continuousChaptersStack.push(this.chapterId);
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.readingDirection = this.user.preferences.readingDirection;
-        this.scalingOption = this.user.preferences.scalingOption;
-        this.pageSplitOption = this.user.preferences.pageSplitOption;
-        this.autoCloseMenu = this.user.preferences.autoCloseMenu;
-        this.readerMode = this.user.preferences.readerMode;
-        this.layoutMode = this.user.preferences.layoutMode || LayoutMode.Single;
-        this.backgroundColor = this.user.preferences.backgroundColor || '#000000';
-        this.readerService.setOverrideStyles(this.backgroundColor);
-
-
-        this.generalSettingsForm = this.formBuilder.group({
-          autoCloseMenu: this.autoCloseMenu,
-          pageSplitOption: this.pageSplitOption,
-          fittingOption: this.translateScalingOption(this.scalingOption),
-          layoutMode: this.layoutMode
-        });
-
-        this.updateForm();
-
-        this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-          this.layoutMode = parseInt(val, 10);
-
-          if (this.layoutMode === LayoutMode.Single) {
-            this.generalSettingsForm.get('pageSplitOption')?.enable();
-
-          } else {
-            this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.FitSplit);
-            this.generalSettingsForm.get('pageSplitOption')?.disable();
-
-            this.canvasImage2 = this.cachedImages.peek();
-          }
-        });
-
-
-        this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
-          this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
-          const needsSplitting = this.isCoverImage();
-          // If we need to split on a menu change, then we need to re-render.
-          if (needsSplitting) {
-            this.loadPage();
-          }
-        });
-
-        this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
-          if (!progress) {
-            this.toggleMenu();
-            this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
-          }
-        });
-      } else {
-        // If no user, we can't render
+      if (!user) {
         this.router.navigateByUrl('/login');
+        return;
       }
-    });
 
+      this.user = user;
+      this.readingDirection = this.user.preferences.readingDirection;
+      this.scalingOption = this.user.preferences.scalingOption;
+      this.pageSplitOption = this.user.preferences.pageSplitOption;
+      this.autoCloseMenu = this.user.preferences.autoCloseMenu;
+      this.readerMode = this.user.preferences.readerMode;
+      this.layoutMode = this.user.preferences.layoutMode || LayoutMode.Single;
+      this.backgroundColor = this.user.preferences.backgroundColor || '#000000';
+      this.readerService.setOverrideStyles(this.backgroundColor);
+
+      this.generalSettingsForm = this.formBuilder.group({
+        autoCloseMenu: this.autoCloseMenu,
+        pageSplitOption: this.pageSplitOption,
+        fittingOption: this.translateScalingOption(this.scalingOption),
+        layoutMode: this.layoutMode
+      });
+
+      this.updateForm();
+
+      this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.layoutMode = parseInt(val, 10);
+
+        if (this.layoutMode === LayoutMode.Single) {
+          this.generalSettingsForm.get('pageSplitOption')?.enable();
+        } else {
+          this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.FitSplit);
+          this.generalSettingsForm.get('pageSplitOption')?.disable();
+          this.canvasImage2 = this.cachedImages.peek();
+        }
+      });
+
+
+      this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
+        this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
+        const needsSplitting = this.isCoverImage();
+        // If we need to split on a menu change, then we need to re-render.
+        if (needsSplitting) {
+          this.loadPage();
+        }
+      });
+
+      this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
+        if (!progress) {
+          this.toggleMenu();
+          this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
+        }
+      });
+    });
 
     this.init();
   }
 
   ngAfterViewInit() {
-    if (!this.canvas) {
-      return;
+    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(20), takeUntil(this.onDestroy)).subscribe(evt => {
+      if (this.readerMode === ReaderMode.Webtoon) return;
+      if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
+        this.rightPaginationOffset = (this.readingArea.nativeElement.scrollLeft) * -1;
+        return;
+      }
+      this.rightPaginationOffset = 0;
+    });
+
+    if (this.canvas) {
+      this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
+      this.canvasImage.onload = () => this.renderPage();
     }
-    this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-    this.canvasImage.onload = () => this.renderPage();
-    this.getWindowDimensions();
   }
 
   ngOnDestroy() {
@@ -473,8 +486,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
+          //if (!this.checkIfPaginationAllowed()) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
         } else if (event.key === KEY_CODES.LEFT_ARROW) {
+          //if (!this.checkIfPaginationAllowed()) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
         }
         break;
@@ -507,6 +522,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.F) {
       this.toggleFullscreen()
     }
+  }
+
+  // if there is scroll room and on original, then don't paginate
+  checkIfPaginationAllowed() {
+    // This is not used atm due to the complexity it adds with keyboard. 
+    if (this.readingArea === undefined || this.readingArea.nativeElement === undefined) return true;
+
+    const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
+    const totalScrollWidth = this.readingArea?.nativeElement?.scrollWidth;
+    // need to also check if there is scrolll needed
+
+    if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < totalScrollWidth) {
+      return false;
+    }
+    return true;
   }
 
   clickOverlayClass(side: 'right' | 'left') {
@@ -562,7 +592,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       return;
-
     }
 
     forkJoin({
@@ -572,10 +601,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }).pipe(take(1)).subscribe(results => {
 
 
-      if (this.readingListMode && results.chapterInfo.seriesFormat === MangaFormat.EPUB) {
+      if (this.readingListMode && (results.chapterInfo.seriesFormat === MangaFormat.EPUB || results.chapterInfo.seriesFormat === MangaFormat.PDF)) {
         // Redirect to the book reader.
         const params = this.readerService.getQueryParamsObject(this.incognitoMode, this.readingListMode, this.readingListId);
-        this.router.navigate(['library', results.chapterInfo.libraryId, 'series', results.chapterInfo.seriesId, 'book', this.chapterId], {queryParams: params});
+        this.router.navigate(this.readerService.getNavigationArray(results.chapterInfo.libraryId, results.chapterInfo.seriesId, this.chapterId, results.chapterInfo.seriesFormat), {queryParams: params});
         return;
       }
 
@@ -810,7 +839,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isNoSplit() {
     const splitValue = parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10);
-    return  splitValue === PageSplitOption.NoSplit || splitValue === PageSplitOption.FitSplit;
+    return splitValue === PageSplitOption.NoSplit || splitValue === PageSplitOption.FitSplit;
   }
 
   updateSplitPage() {
@@ -1051,7 +1080,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Reset scroll on non HEIGHT Fits
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-      this.document.body.scroll(0, 0)
+      this.readingArea.nativeElement.scroll(0,0);
     }
 
 
@@ -1067,7 +1096,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               || document.body.clientHeight;
 
       const needsSplitting = this.isCoverImage();
-      let newScale = this.generalSettingsForm.get('fittingOption')?.value;
+      let newScale = this.FittingOption;
       const widthRatio = windowWidth / (this.canvasImage.width / (needsSplitting ? 2 : 1));
       const heightRatio = windowHeight / (this.canvasImage.height);
 
@@ -1319,7 +1348,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   bookmarkPage() {
     const pageNum = this.pageNum;
 
-    if (this.isCurrentPageBookmarked) {
+    if (this.CurrentPageBookmarked) {
       let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
       if (this.layoutMode === LayoutMode.Double) apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       forkJoin(apis).pipe(take(1)).subscribe(() => {
@@ -1371,16 +1400,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.bookmarkMode) {
       this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
-  }
-
-  getWindowDimensions() {
-    const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-    const windowHeight = window.innerHeight
-                  || document.documentElement.clientHeight
-                  || document.body.clientHeight;
-    return [windowWidth, windowHeight];
   }
 
   openShortcutModal() {

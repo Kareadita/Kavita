@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using API.Entities.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities
 {
-    public class Volume : IEntityDate
+    public class Volume : IEntityDate, IHasReadTimeEstimate
     {
         public int Id { get; set; }
         /// <summary>
@@ -25,12 +24,23 @@ namespace API.Entities
         /// </summary>
         /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
         public string CoverImage { get; set; }
+        /// <summary>
+        /// Total pages of all chapters in this volume
+        /// </summary>
         public int Pages { get; set; }
-
+        /// <summary>
+        /// Total Word count of all chapters in this volume.
+        /// </summary>
+        /// <remarks>Word Count is only available from EPUB files</remarks>
+        public long WordCount { get; set; }
+        public int MinHoursToRead { get; set; }
+        public int MaxHoursToRead { get; set; }
+        public int AvgHoursToRead { get; set; }
 
 
         // Relationships
         public Series Series { get; set; }
         public int SeriesId { get; set; }
+
     }
 }

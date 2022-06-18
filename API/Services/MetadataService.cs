@@ -27,13 +27,15 @@ public interface IMetadataService
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="forceUpdate"></param>
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task RefreshMetadata(int libraryId, bool forceUpdate = false);
     /// <summary>
     /// Performs a forced refresh of metadata just for a series and it's nested entities
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
-    Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = false);
+    Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true);
 }
 
 public class MetadataService : IMetadataService
@@ -196,8 +198,6 @@ public class MetadataService : IMetadataService
     /// <remarks>This can be heavy on memory first run</remarks>
     /// <param name="libraryId"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    [DisableConcurrentExecution(timeoutInSeconds: 360)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);

@@ -604,6 +604,7 @@ public class OpdsController : BaseApiController
     /// <summary>
     /// Downloads a file
     /// </summary>
+    /// <param name="apiKey">User's API Key</param>
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
     /// <param name="chapterId"></param>

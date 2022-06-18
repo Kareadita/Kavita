@@ -14,6 +14,7 @@ public interface ICacheHelper
     bool CoverImageExists(string path);
 
     bool HasFileNotChangedSinceCreationOrLastScan(IEntityDate chapter, bool forceUpdate, MangaFile firstFile);
+    bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile firstFile);
 
 }
 
@@ -32,6 +33,7 @@ public class CacheHelper : ICacheHelper
     /// <remarks>If a cover image is locked but the underlying file has been deleted, this will allow regenerating. </remarks>
     /// <param name="coverPath">This should just be the filename, no path information</param>
     /// <param name="firstFile"></param>
+    /// <param name="chapterCreated">When the chapter was created (Not Used)</param>
     /// <param name="forceUpdate">If the user has told us to force the refresh</param>
     /// <param name="isCoverLocked">If cover has been locked by user. This will force false</param>
     /// <returns></returns>
@@ -59,6 +61,25 @@ public class CacheHelper : ICacheHelper
                (!forceUpdate &&
                 !(_fileService.HasFileBeenModifiedSince(firstFile.FilePath, chapter.Created)
                   || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)));
+    }
+
+    /// <summary>
+    /// Has the file been modified since last scan or is user forcing an update
+    /// </summary>
+    /// <param name="lastScan"></param>
+    /// <param name="forceUpdate"></param>
+    /// <param name="firstFile"></param>
+    /// <returns></returns>
+    public bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile firstFile)
+    {
+        if (firstFile == null) return false;
+        if (forceUpdate) return true;
+        return _fileService.HasFileBeenModifiedSince(firstFile.FilePath, lastScan)
+               || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified);
+        // return firstFile != null &&
+        //        (!forceUpdate &&
+        //         !(_fileService.HasFileBeenModifiedSince(firstFile.FilePath, lastScan)
+        //           || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)));
     }
 
     /// <summary>

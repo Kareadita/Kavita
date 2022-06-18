@@ -338,11 +338,13 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       return a.isoCode == b.isoCode;
     }
 
-    if (this.metadata.language) {
-      const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
-      if (l !== undefined) {
-        this.languageSettings.savedData = l;
-      }
+    if (this.metadata.language === undefined || this.metadata.language === null || this.metadata.language === '') {
+      this.metadata.language = 'en';
+    }
+
+    const l = this.validLanguages.find(l => l.isoCode === this.metadata.language);
+    if (l !== undefined) {
+      this.languageSettings.savedData = l;
     }
     return of(true);
   }
@@ -428,6 +430,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       model.nameLocked = this.series.nameLocked;
       model.sortNameLocked = this.series.sortNameLocked;
       model.localizedNameLocked = this.series.localizedNameLocked;
+      model.language = this.metadata.language;
       apis.push(this.seriesService.updateSeries(model));
     }
 
@@ -459,8 +462,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.metadata.genres = genres;
   }
 
-  updateLanguage(language: Language) {
-    this.metadata.language = language.isoCode;
+  updateLanguage(language: Array<Language>) {
+    if (language.length === 0) {
+      this.metadata.language = '';
+      return;
+    }
+    this.metadata.language = language[0].isoCode;
   }
 
   updatePerson(persons: Person[], role: PersonRole) {
