@@ -20,6 +20,7 @@ img {
 .reading-area {
   position: relative;
   overflow: auto;
+  text-align: center;
   //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
 }
 
@@ -167,6 +168,7 @@ img {
     top: 0;
     overflow: hidden;
     border: 2px solid #ccc;
+    vertical-align: sub;
 
     &::before {
         margin-left: 30%;

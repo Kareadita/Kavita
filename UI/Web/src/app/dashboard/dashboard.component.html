@@ -20,7 +20,7 @@
 <app-carousel-reel [items]="recentlyUpdatedSeries" title="Recently Updated Series" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
         <app-card-item [entity]="item" [title]="item.seriesName" [suppressLibraryLink]="libraryId !== 0" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
-        [supressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
+        [suppressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
     </ng-template>
 </app-carousel-reel>
 

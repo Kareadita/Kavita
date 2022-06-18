@@ -12,7 +12,7 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
+import { IndexUpdateEvent, ItemRemoveEvent } from '../draggable-ordered-list/draggable-ordered-list.component';
 import { LibraryService } from '../../_services/library.service';
 import { forkJoin } from 'rxjs';
 import { ReaderService } from 'src/app/_services/reader.service';

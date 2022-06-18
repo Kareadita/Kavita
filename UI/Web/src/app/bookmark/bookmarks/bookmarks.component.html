@@ -12,7 +12,7 @@
     >
     <ng-template #cardItem let-item let-position="idx">
         <app-card-item [entity]="item" (reload)="loadBookmarks()" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
-        [supressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true" 
+        [suppressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true" 
         [actions]="actions"
         [selected]="bulkSelectionService.isCardSelected('bookmark', position)" (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
         ></app-card-item>

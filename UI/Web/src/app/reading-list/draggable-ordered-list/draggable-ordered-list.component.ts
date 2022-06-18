@@ -13,9 +13,9 @@ export interface ItemRemoveEvent {
 }
 
 @Component({
-  selector: 'app-dragable-ordered-list',
-  templateUrl: './dragable-ordered-list.component.html',
-  styleUrls: ['./dragable-ordered-list.component.scss']
+  selector: 'app-draggable-ordered-list',
+  templateUrl: './draggable-ordered-list.component.html',
+  styleUrls: ['./draggable-ordered-list.component.scss']
 })
 export class DragableOrderedListComponent implements OnInit {
 
