@@ -1,17 +1,17 @@
 :root .bg-dark {
     --color-scheme: dark;
     --primary-color: #4ac694;
-    --primary-color-dark-shade: #3b9e76;
-    --primary-color-darker-shade: #338a67;
-    --primary-color-darkest-shade: #25624a;
-    --error-color: #bd362f;
+    --primary-color-dark-shade: #3B9E76;
+    --primary-color-darker-shade: #338A67;
+    --primary-color-darkest-shade: #25624A;
+    --error-color: #BD362F;
     --bs-body-bg: #343a40;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
 
     /* Navbar */
-    --navbar-bg-color: #222;
+    --navbar-bg-color: black;
     --navbar-text-color: white;
     --navbar-fa-icon-color: white;
     --navbar-btn-hover-outline-color: rgba(255, 255, 255, 1);
@@ -20,8 +20,7 @@
     --input-bg-color: #343a40;
     --input-bg-readonly-color: #434648;
     --input-focused-border-color: #ccc;
-    --input-text-color: #aaa;
-    --input-focused-text-color: #333;
+    --input-text-color: #fff;
     --input-placeholder-color: #aeaeae;
     --input-border-color: #ccc;
     --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
@@ -65,7 +64,6 @@
     --nav-link-bg-color: var(--primary-color);
     --nav-link-active-text-color: white;
     --nav-link-text-color: white;
-    --nav-link-hover-text-color: rgb(225, 225, 225);
 
     /* Header */
     --nav-header-text-color: white;
@@ -73,9 +71,9 @@
 
     /* Toasts */
     --toast-success-bg-color: rgba(59, 158, 118, 0.9);
-    --toast-error-bg-color: #bd362f;
-    --toast-info-bg-color: #2f96b4;
-    --toast-warning-bg-color: #f89406;
+    --toast-error-bg-color: #BD362F;
+    --toast-info-bg-color: #2F96B4;
+    --toast-warning-bg-color: #F89406;
 
     /* Checkboxes/Switch */
     --checkbox-checked-bg-color: var(--primary-color);
@@ -92,10 +90,10 @@
     --tagbadge-filled-bg-color: var(--primary-color);
 
     /* Side Nav */
-    --side-nav-bg-color: rgba(0, 0, 0, 0.2);
-    --side-nav-mobile-bg-color: rgb(25, 26, 28);
+    --side-nav-bg-color: rgba(0,0,0,0.2);
+    --side-nav-mobile-bg-color: rgb(25,26,28);
     --side-nav-openclose-transition: 0.15s ease-in-out;
-    --side-nav-box-shadow: rgba(0, 0, 0, 0.5);
+    --side-nav-box-shadow: rgba(0,0,0,0.5);
     --side-nav-mobile-box-shadow: 3px 0em 5px 10em rgb(0 0 0 / 50%);
     --side-nav-hover-text-color: white;
     --side-nav-hover-bg-color: black;
@@ -109,13 +107,12 @@
     --side-nav-closed-bg-color: transparent;
     --side-nav-item-active-color: var(--primary-color);
     --side-nav-item-active-text-color: white;
-    --side-nav-active-bg-color: rgba(0, 0, 0, 0.5);
-    --side-nav-overlay-color: rgba(0, 0, 0, 0.5);
+    --side-nav-active-bg-color: rgba(0,0,0,0.5);
+    --side-nav-overlay-color: rgba(0,0,0,0.5);
+
 
     /* List items */
-    --list-group-item-text-color: var(
-        --body-text-color
-    ); /*rgba(74, 198, 148, 0.9)*/
+    --list-group-item-text-color: var(--body-text-color); /*rgba(74, 198, 148, 0.9)*/
     --list-group-item-bg-color: #343a40;
     --list-group-item-border-color: rgba(239, 239, 239, 0.125);
     --list-group-hover-text-color: white;
@@ -141,16 +138,7 @@
     --pagination-link-hover-color: var(--primary-color);
 
     /* Progress Bar */
-    --progress-striped-animated-color: linear-gradient(
-        45deg,
-        rgba(74, 198, 148, 0.75) 25%,
-        rgba(51, 138, 103, 0.75) 25%,
-        rgba(51, 138, 103, 0.75) 50%,
-        rgba(74, 198, 148, 0.75) 50%,
-        rgba(74, 198, 148, 0.75) 75%,
-        rgba(51, 138, 103, 0.75) 75%,
-        rgba(51, 138, 103, 0.75)
-    );
+    --progress-striped-animated-color: linear-gradient(45deg, rgba(74,198,148, 0.75) 25%, rgba(51, 138, 103, 0.75) 25%, rgba(51, 138, 103, 0.75) 50%, rgba(74,198,148, 0.75) 50%, rgba(74,198,148, 0.75) 75%, rgba(51, 138, 103, 0.75) 75%, rgba(51, 138, 103, 0.75));
     --progress-bg-color: var(--nav-header-bg-color);
     --progress-bar-color: var(--primary-color-dark-shade);
 
@@ -159,7 +147,7 @@
     --dropdown-item-hover-bg-color: var(--primary-color-dark-shade);
     --dropdown-item-text-color: var(--navbar-text-color);
     --dropdown-item-bg-color: var(--navbar-bg-color);
-    --dropdown-overlay-color: rgba(0, 0, 0, 0.5);
+    --dropdown-overlay-color: rgba(0,0,0,0.5);
 
     /* Accordion */
     --accordion-header-text-color: rgba(74, 198, 148, 0.9);
@@ -195,7 +183,7 @@
     --brand-font-family: "Spartan", sans-serif;
 
     /* Card */
-    --card-bg-color: rgba(22, 27, 34, 0.5);
+    --card-bg-color: rgba(22,27,34,0.5);
     --card-text-color: var(--body-text-color);
     --card-border-width: 0 1px 1px 1px;
     --card-border-style: solid;
@@ -211,7 +199,7 @@
 
     /* Manga Reader */
     --manga-reader-overlay-filter: blur(10px);
-    --manga-reader-overlay-bg-color: rgba(0, 0, 0, 0.5);
+    --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
     --manga-reader-overlay-text-color: white;
     --manga-reader-bg-color: black;
     --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);

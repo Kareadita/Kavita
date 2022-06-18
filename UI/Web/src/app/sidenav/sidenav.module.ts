@@ -31,4 +31,4 @@ import { RouterModule } from '@angular/router';
     SideNavComponent
   ]
 })
-export class SideNavModule { }
+export class SidenavModule { }

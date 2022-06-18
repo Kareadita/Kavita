@@ -13,18 +13,22 @@ export interface KeyboardShortcut {
 }
 
 @Component({
-  selector: 'app-shortcuts-modal',
-  templateUrl: './shortcuts-modal.component.html',
-  styleUrls: ['./shortcuts-modal.component.scss'],
+  selector: 'app-shorcuts-modal',
+  templateUrl: './shorcuts-modal.component.html',
+  styleUrls: ['./shorcuts-modal.component.scss']
 })
-export class ShortcutsModalComponent implements OnInit {
+export class ShorcutsModalComponent implements OnInit {
+
   @Input() shortcuts: Array<KeyboardShortcut> = [];
 
-  constructor(public modal: NgbActiveModal) {}
+  constructor(public modal: NgbActiveModal) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+  }
+
 
   close() {
     this.modal.close();
   }
+
 }

@@ -1,11 +1,20 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ShortcutsModalComponent } from './_modals/shortcuts-modal/shortcuts-modal.component';
+import { ShorcutsModalComponent } from './_modals/shorcuts-modal/shorcuts-modal.component';
 import { NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 
+
+
 @NgModule({
-  declarations: [ShortcutsModalComponent],
-  imports: [CommonModule, NgbModalModule],
-  exports: [ShortcutsModalComponent],
+  declarations: [
+    ShorcutsModalComponent
+  ],
+  imports: [
+    CommonModule,
+    NgbModalModule
+  ],
+  exports: [
+    ShorcutsModalComponent
+  ]
 })
-export class ReaderSharedModule {}
+export class ReaderSharedModule { }

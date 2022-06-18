@@ -6,23 +6,19 @@ import { map, take } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AdminGuard implements CanActivate {
-  constructor(
-    private accountService: AccountService,
-    private toastr: ToastrService
-  ) {}
+  constructor(private accountService: AccountService, private toastr: ToastrService) {}
 
   canActivate(): Observable<boolean> {
-    // this automatically subs due to being router guard
-    return this.accountService.currentUser$.pipe(
-      take(1),
+    // this automaticallys subs due to being router guard
+    return this.accountService.currentUser$.pipe(take(1),
       map((user) => {
         if (user && this.accountService.hasAdminRole(user)) {
           return true;
         }
-
+        
         this.toastr.error('You are not authorized to view this page.');
         return false;
       })

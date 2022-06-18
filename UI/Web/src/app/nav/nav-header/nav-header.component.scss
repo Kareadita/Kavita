@@ -1,14 +1,10 @@
-.btn:focus,
-.btn:hover {
-    box-shadow: 0 0 0 0.2rem var(--navbar-btn-hover-outline-color);
-    border-radius: 2rem;
+
+.btn:focus, .btn:hover {
+    box-shadow: 0 0 0 0.1rem var(--navbar-btn-hover-outline-color);
 }
 
 .navbar {
     background-color: var(--navbar-bg-color);
-    border-radius: 0.5rem;
-    margin: 0.5rem 0.75rem 0 0.75rem;
-    box-shadow: 4px 4px 2px 2px #111d;
 
     .side-nav-toggle {
         cursor: pointer;
@@ -21,7 +17,7 @@
 }
 
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width: 650px) {
+@media only screen and (max-width:650px) {
     .navbar-nav {
         width: 0;
     }
@@ -35,7 +31,7 @@
 .not-xs-only {
     display: inherit;
 }
-@media only screen and (max-width: 300px) {
+@media only screen and (max-width:300px) {
     .xs-only {
         display: inherit;
     }
@@ -48,10 +44,6 @@
     position: unset;
 }
 
-.brand {
-    margin: 0 0.5rem;
-}
-
 .navbar-brand {
     font-family: var(--brand-font-family);
     font-weight: bold;
@@ -62,7 +54,7 @@
     }
 
     .logo {
-        max-height: 2rem;
+        max-height: 28px;
         vertical-align: top;
     }
 
@@ -73,7 +65,7 @@
 
 .focus-visible:focus {
     visibility: visible;
-    color: var(--nav-header-text-color);
+    color:  var(--nav-header-text-color);
 }
 
 .ng-autocomplete {
@@ -81,7 +73,7 @@
 }
 
 .primary-text {
-    color: var(--nav-header-text-color);
+    color:  var(--nav-header-text-color);
     border: none;
 }
 

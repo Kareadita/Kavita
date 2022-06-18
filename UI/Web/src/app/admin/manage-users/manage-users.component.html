@@ -39,7 +39,7 @@
             <div>
                 <h4>
                     <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.username)"></i>
-                    <span id="member-name--{{idx}}">{{member.username}} </span>
+                    <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
                     <span *ngIf="member.username === loggedInUsername">
                         <i class="fas fa-star" aria-hidden="true"></i>
                         <span class="visually-hidden">(You)</span>

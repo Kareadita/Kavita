@@ -2,7 +2,7 @@
     
     <button type="button" class="btn btn-icon {{activeEvents > 0 ? 'colored' : ''}}" 
         [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
-        <i aria-hidden="true" class="fa fa-bolt-lightning nav"></i>
+        <i aria-hidden="true" class="fa fa-wave-square nav"></i>
     </button>
 
     <ng-template #popContent>
@@ -25,7 +25,7 @@
                 <li class="list-group-item dark-menu-item">
                     <div>
                         <div class="h6 mb-1">Scanning Books</div>
-                        <div class="accent-text mb-1">Book path and title</div>
+                        <div class="accent-text mb-1">E:\\Books\\Demon King Daimaou\\Demon King Daimaou - Volume 11.epub</div>
                         <div class="progress-container row g-0 align-items-center">
                             <div class="col-2">{{prettyPrintProgress(0.1)}}%</div>
                             <div class="col-10 progress" style="height: 5px;">

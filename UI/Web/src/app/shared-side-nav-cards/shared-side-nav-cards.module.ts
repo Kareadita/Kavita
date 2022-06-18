@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardsModule } from '../cards/cards.module';
-import { SideNavModule } from '../sidenav/sidenav.module';
+import { SidenavModule } from '../sidenav/sidenav.module';
 
 
 /**
@@ -13,11 +13,11 @@ import { SideNavModule } from '../sidenav/sidenav.module';
     CommonModule,
 
     CardsModule,
-    SideNavModule,
+    SidenavModule,
   ],
   exports: [
     CardsModule,
-    SideNavModule
+    SidenavModule
   ]
 })
 export class SharedSideNavCardsModule { }
