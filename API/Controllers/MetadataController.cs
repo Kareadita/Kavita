@@ -83,7 +83,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.LibraryRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
         }
 
         return Ok(Enum.GetValues<AgeRating>().Select(t => new AgeRatingDto()
@@ -104,7 +104,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
-            return Ok(_unitOfWork.SeriesRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
+            return Ok(_unitOfWork.LibraryRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
         }
 
         return Ok(Enum.GetValues<PublicationStatus>().Select(t => new PublicationStatusDto()
@@ -125,7 +125,7 @@ public class MetadataController : BaseApiController
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
-            return Ok(await _unitOfWork.SeriesRepository.GetAllLanguagesForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
         }
 
         var englishTag = CultureInfo.GetCultureInfo("en");
@@ -148,5 +148,19 @@ public class MetadataController : BaseApiController
                 Title = c.DisplayName,
                 IsoCode = c.IetfLanguageTag
             }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
+    }
+
+    /// <summary>
+    /// Returns summary for the chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("chapter-summary")]
+    public async Task<ActionResult<string>> GetChapterSummary(int chapterId)
+    {
+        if (chapterId <= 0) return BadRequest("Chapter does not exist");
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        if (chapter == null) return BadRequest("Chapter does not exist");
+        return Ok(chapter.Summary);
     }
 }

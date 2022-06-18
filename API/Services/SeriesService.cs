@@ -8,9 +8,10 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -98,7 +99,7 @@ public class SeriesService : ISeriesService
                 series.Metadata.SummaryLocked = true;
             }
 
-            if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata.Language)
+            if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata?.Language)
             {
                 series.Metadata.Language = updateSeriesMetadataDto.SeriesMetadata?.Language;
                 series.Metadata.LanguageLocked = true;
@@ -112,7 +113,7 @@ public class SeriesService : ISeriesService
             });
 
             series.Metadata.Genres ??= new List<Genre>();
-            UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata.Genres, series, allGenres, (genre) =>
+            UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, (genre) =>
             {
                 series.Metadata.Genres.Add(genre);
             }, () => series.Metadata.GenresLocked = true);
@@ -458,7 +459,6 @@ public class SeriesService : ISeriesService
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
             .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
-        var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
@@ -479,8 +479,15 @@ public class SeriesService : ISeriesService
             processedVolumes.ForEach(v => v.Name = $"Volume {v.Name}");
         }
 
-
         var specials = new List<ChapterDto>();
+        var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
+        {
+            if (v.Number == 0) return c;
+            c.VolumeTitle = v.Name;
+            return c;
+        })).ToList();
+
+
         foreach (var chapter in chapters)
         {
             chapter.Title = FormatChapterTitle(chapter, libraryType);
@@ -489,7 +496,6 @@ public class SeriesService : ISeriesService
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
             specials.Add(chapter);
         }
-
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
         IEnumerable<ChapterDto> retChapters;
@@ -503,29 +509,28 @@ public class SeriesService : ISeriesService
                 .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
         }
 
-
+        var storylineChapters = volumes
+            .Where(v => v.Number == 0)
+            .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
+            .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
 
         return new SeriesDetailDto()
         {
             Specials = specials,
             Chapters = retChapters,
             Volumes = processedVolumes,
-            StorylineChapters = volumes
-                .Where(v => v.Number == 0)
-                .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-                .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
-
+            StorylineChapters = storylineChapters
         };
     }
 
     /// <summary>
     /// Should we show the given chapter on the UI. We only show non-specials and non-zero chapters.
     /// </summary>
-    /// <param name="c"></param>
+    /// <param name="chapter"></param>
     /// <returns></returns>
-    private static bool ShouldIncludeChapter(ChapterDto c)
+    private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !c.IsSpecial && !c.Number.Equals(Parser.Parser.DefaultChapter);
+        return !chapter.IsSpecial && !chapter.Number.Equals(Parser.Parser.DefaultChapter);
     }
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType)

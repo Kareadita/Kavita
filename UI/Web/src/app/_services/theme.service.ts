@@ -1,13 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {
-  Inject,
-  Injectable,
-  OnDestroy,
-  Renderer2,
-  RendererFactory2,
-  SecurityContext,
-} from '@angular/core';
+import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { map, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -16,12 +9,14 @@ import { NotificationProgressEvent } from '../_models/events/notification-progre
 import { SiteTheme, ThemeProvider } from '../_models/preferences/site-theme';
 import { EVENTS, MessageHubService } from './message-hub.service';
 
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ThemeService implements OnDestroy {
-  public defaultTheme: string = 'kavita';
-  public defaultBookTheme: string = 'dark';
+
+  public defaultTheme: string = 'dark';
+  public defaultBookTheme: string = 'Dark';
 
   private currentThemeSource = new ReplaySubject<SiteTheme>(1);
   public currentTheme$ = this.currentThemeSource.asObservable();
@@ -38,30 +33,23 @@ export class ThemeService implements OnDestroy {
   private renderer: Renderer2;
   private baseUrl = environment.apiUrl;
 
-  constructor(
-    rendererFactory: RendererFactory2,
-    @Inject(DOCUMENT) private document: Document,
-    private httpClient: HttpClient,
-    messageHub: MessageHubService,
-    private domSanitizer: DomSanitizer,
-    private confirmService: ConfirmService
-  ) {
+
+  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient,
+  messageHub: MessageHubService, private domSantizer: DomSanitizer, private confirmService: ConfirmService) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     this.getThemes();
 
-    messageHub.messages$
-      .pipe(takeUntil(this.onDestroy))
-      .subscribe((message) => {
-        if (message.event !== EVENTS.NotificationProgress) return;
-        const notificationEvent = message.payload as NotificationProgressEvent;
-        if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
+    messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
 
-        if (notificationEvent.eventType === 'ended') {
-          if (notificationEvent.name === EVENTS.SiteThemeProgress)
-            this.getThemes().subscribe(() => {});
-        }
-      });
+      if (message.event !== EVENTS.NotificationProgress) return;
+      const notificationEvent = (message.payload as NotificationProgressEvent);
+      if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
+
+      if (notificationEvent.eventType === 'ended') {
+        if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe(() => {});
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -70,15 +58,11 @@ export class ThemeService implements OnDestroy {
   }
 
   getColorScheme() {
-    return getComputedStyle(this.document.body)
-      .getPropertyValue('--color-scheme')
-      .trim();
+    return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
   }
 
   getCssVariable(variable: string) {
-    return getComputedStyle(this.document.body)
-      .getPropertyValue(variable)
-      .trim();
+    return getComputedStyle(this.document.body).getPropertyValue(variable).trim();
   }
 
   isDarkTheme() {
@@ -86,13 +70,11 @@ export class ThemeService implements OnDestroy {
   }
 
   getThemes() {
-    return this.httpClient.get<SiteTheme[]>(this.baseUrl + 'theme').pipe(
-      map((themes) => {
-        this.themeCache = themes;
-        this.themesSource.next(themes);
-        return themes;
-      })
-    );
+    return this.httpClient.get<SiteTheme[]>(this.baseUrl + 'theme').pipe(map(themes => {
+      this.themeCache = themes;
+      this.themesSource.next(themes);
+      return themes;
+    }));
   }
 
   /**
@@ -103,14 +85,10 @@ export class ThemeService implements OnDestroy {
   }
 
   setDefault(themeId: number) {
-    return this.httpClient
-      .post(this.baseUrl + 'theme/update-default', { themeId: themeId })
-      .pipe(
-        map(() => {
-          // Refresh the cache when a default state is changed
-          this.getThemes().subscribe(() => {});
-        })
-      );
+    return this.httpClient.post(this.baseUrl + 'theme/update-default', {themeId: themeId}).pipe(map(() => {
+      // Refresh the cache when a default state is changed
+      this.getThemes().subscribe(() => {});
+    }));
   }
 
   scan() {
@@ -130,31 +108,22 @@ export class ThemeService implements OnDestroy {
     this.unsetBookThemes();
   }
 
+
   /**
    * Sets the theme as active. Will inject a style tag into document to load a custom theme and apply the selector to the body
    * @param themeName
    */
-  setTheme(themeName: string) {
-    const theme = this.themeCache.find(
-      (t) => t.name.toLowerCase() === themeName.toLowerCase()
-    );
+   setTheme(themeName: string) {
+    const theme = this.themeCache.find(t => t.name.toLowerCase() === themeName.toLowerCase());
     if (theme) {
       this.unsetThemes();
-      this.renderer.addClass(
-        this.document.querySelector('body'),
-        theme.selector
-      );
+      this.renderer.addClass(this.document.querySelector('body'), theme.selector);
 
-      if (
-        theme.provider === ThemeProvider.User &&
-        !this.hasThemeInHead(theme.name)
-      ) {
+      if (theme.provider === ThemeProvider.User && !this.hasThemeInHead(theme.name)) {
         // We need to load the styles into the browser
         this.fetchThemeContent(theme.id).subscribe(async (content) => {
           if (content === null) {
-            await this.confirmService.alert(
-              'There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.'
-            );
+            await this.confirmService.alert('There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.');
             this.setTheme('dark');
             return;
           }
@@ -170,7 +139,7 @@ export class ThemeService implements OnDestroy {
       }
     } else {
       // Only time themes isn't already loaded is on first load
-      this.getThemes().subscribe((themes) => {
+      this.getThemes().subscribe(themes => {
         this.setTheme(themeName);
       });
     }
@@ -178,35 +147,23 @@ export class ThemeService implements OnDestroy {
 
   private hasThemeInHead(themeName: string) {
     const id = 'theme-' + themeName.toLowerCase();
-    return (
-      Array.from(this.document.head.children).filter(
-        (el) => el.tagName === 'STYLE' && el.id.toLowerCase() === id
-      ).length > 0
-    );
+    return Array.from(this.document.head.children).filter(el => el.tagName === 'STYLE' && el.id.toLowerCase() === id).length > 0;
   }
 
   private fetchThemeContent(themeId: number) {
     // TODO: Refactor {responseType: 'text' as 'json'} into a type so i don't have to retype it
-    return this.httpClient
-      .get<string>(this.baseUrl + 'theme/download-content?themeId=' + themeId, {
-        responseType: 'text' as 'json',
-      })
-      .pipe(
-        map((encodedCss) => {
-          return this.domSanitizer.sanitize(SecurityContext.STYLE, encodedCss);
-        })
-      );
+    return this.httpClient.get<string>(this.baseUrl + 'theme/download-content?themeId=' + themeId, {responseType: 'text' as 'json'}).pipe(map(encodedCss => {
+      return this.domSantizer.sanitize(SecurityContext.STYLE, encodedCss);
+    }));
   }
 
   private unsetThemes() {
-    this.themeCache.forEach((theme) =>
-      this.document.body.classList.remove(theme.selector)
-    );
+    this.themeCache.forEach(theme => this.document.body.classList.remove(theme.selector));
   }
 
   private unsetBookThemes() {
-    Array.from(this.document.body.classList)
-      .filter((cls) => cls.startsWith('brtheme-'))
-      .forEach((c) => this.document.body.classList.remove(c));
+    Array.from(this.document.body.classList).filter(cls => cls.startsWith('brtheme-')).forEach(c => this.document.body.classList.remove(c));
   }
+
+
 }

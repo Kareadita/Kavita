@@ -7,10 +7,6 @@
         /// </summary>
         Other = 1,
         /// <summary>
-        /// Artist
-        /// </summary>
-        //Artist = 2,
-        /// <summary>
         /// Author or Writer
         /// </summary>
         Writer = 3,

@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
+import { NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { Subject, takeUntil } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -18,6 +19,10 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
    * If the page should show a filter
    */
   @Input() hasFilter: boolean = false;
+  /**
+   * If the page should show an extra section button
+   */
+  @Input() hasExtras: boolean = false;
 
   /**
    * Is the input open by default
@@ -29,18 +34,18 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
    */
   @Input() filterActive: boolean = false;
 
-  /**
-   * Should be passed through from Filter component.
-   */
-  //@Input() filterDisabled: EventEmitter<boolean> = new EventEmitter();
+  @Input() extraDrawer!: TemplateRef<any>; 
+
 
   @Output() filterOpen: EventEmitter<boolean> = new EventEmitter();
 
   isFilterOpen = false;
+  isExtrasOpen = false;
 
   private onDestroy: Subject<void> = new Subject();
 
-  constructor(private navService: NavService, private utilityService: UtilityService, public toggleService: ToggleService) {
+  constructor(private navService: NavService, private utilityService: UtilityService, public toggleService: ToggleService, 
+    private offcanvasService: NgbOffcanvas) {
   }
 
   ngOnInit(): void {
@@ -63,6 +68,15 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
   toggleFilter() {
     this.isFilterOpen = !this.isFilterOpen;
     this.filterOpen.emit(this.isFilterOpen);
+  }
+
+  openExtrasDrawer() {
+    if (this.extraDrawer === undefined) return;
+
+    this.isExtrasOpen = true;
+    const drawerRef = this.offcanvasService.open(this.extraDrawer, {position: 'end', scroll: true});
+    drawerRef.closed.subscribe(() => this.isExtrasOpen = false);
+    drawerRef.dismissed.subscribe(() => this.isExtrasOpen = false);
   }
 
 }

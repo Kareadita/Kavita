@@ -7,6 +7,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
 using API.SignalR;
@@ -28,6 +29,7 @@ public interface IReaderService
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
+    HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
 }
 
 public class ReaderService : IReaderService
@@ -37,6 +39,14 @@ public class ReaderService : IReaderService
     private readonly IEventHub _eventHub;
     private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
+
+    public const float MinWordsPerHour = 10260F;
+    public const float MaxWordsPerHour = 30000F;
+    public const float AvgWordsPerHour = (MaxWordsPerHour + MinWordsPerHour) / 2F;
+    public const float MinPagesPerMinute = 3.33F;
+    public const float MaxPagesPerMinute = 2.75F;
+    public const float AvgPagesPerMinute = (MaxPagesPerMinute + MinPagesPerMinute) / 2F;
+
 
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub)
     {
@@ -160,7 +170,7 @@ public class ReaderService : IReaderService
             var progresses = user.Progresses.Where(x => x.ChapterId == chapter.Id && x.AppUserId == user.Id).ToList();
             if (progresses.Count > 1)
             {
-                user.Progresses = new List<AppUserProgress>()
+                user.Progresses = new List<AppUserProgress>
                 {
                     user.Progresses.First()
                 };
@@ -320,7 +330,7 @@ public class ReaderService : IReaderService
         {
             var chapterVolume = volumes.FirstOrDefault();
             if (chapterVolume?.Number != 0) return -1;
-            var firstChapter = chapterVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).FirstOrDefault();
+            var firstChapter = chapterVolume.Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparer);
             if (firstChapter == null) return -1;
             return firstChapter.Id;
         }
@@ -362,17 +372,16 @@ public class ReaderService : IReaderService
             if (volume.Number == currentVolume.Number - 1)
             {
                 if (currentVolume.Number - 1 == 0) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
-                var lastChapter = volume.Chapters
-                    .OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
+                var lastChapter = volume.Chapters.MaxBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
                 if (lastChapter == null) return -1;
                 return lastChapter.Id;
             }
         }
 
-        var lastVolume = volumes.OrderBy(v => v.Number).LastOrDefault();
+        var lastVolume = volumes.MaxBy(v => v.Number);
         if (currentVolume.Number == 0 && currentVolume.Number != lastVolume?.Number && lastVolume?.Chapters.Count > 1)
         {
-            var lastChapter = lastVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).LastOrDefault();
+            var lastChapter = lastVolume.Chapters.MaxBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
             if (lastChapter == null) return -1;
             return lastChapter.Id;
         }
@@ -396,7 +405,7 @@ public class ReaderService : IReaderService
          if (progress.Count == 0)
          {
              // I think i need a way to sort volumes last
-             return volumes.OrderBy(v => double.Parse(v.Number + ""), _chapterSortComparer).First().Chapters
+             return volumes.OrderBy(v => double.Parse(v.Number + string.Empty), _chapterSortComparer).First().Chapters
                  .OrderBy(c => float.Parse(c.Number)).First();
          }
 
@@ -470,7 +479,7 @@ public class ReaderService : IReaderService
     /// <param name="chapterNumber"></param>
     public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.Number))
         {
             var chapters = volume.Chapters
@@ -482,10 +491,53 @@ public class ReaderService : IReaderService
 
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
-        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int>() { seriesId }, true);
+        var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber && v.Number > 0))
         {
             MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }
+    }
+
+    public HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub)
+    {
+        if (isEpub)
+        {
+            var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 0);
+            var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 0);
+            if (maxHours < minHours)
+            {
+                return new HourEstimateRangeDto
+                {
+                    MinHours = maxHours,
+                    MaxHours = minHours,
+                    AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
+                };
+            }
+            return new HourEstimateRangeDto
+            {
+                MinHours = minHours,
+                MaxHours = maxHours,
+                AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
+            };
+        }
+
+        var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 0);
+        var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 0);
+        if (maxHoursPages < minHoursPages)
+        {
+            return new HourEstimateRangeDto
+            {
+                MinHours = maxHoursPages,
+                MaxHours = minHoursPages,
+                AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
+            };
+        }
+
+        return new HourEstimateRangeDto
+        {
+            MinHours = minHoursPages,
+            MaxHours = maxHoursPages,
+            AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
+        };
     }
 }

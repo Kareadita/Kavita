@@ -8,9 +8,9 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
-using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +42,34 @@ namespace API.Controllers
             _readerService = readerService;
             _bookmarkService = bookmarkService;
             _eventHub = eventHub;
+        }
+
+        /// <summary>
+        /// Returns the PDF for the chapterId.
+        /// </summary>
+        /// <param name="apiKey">API Key for user to validate they have access</param>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
+        [HttpGet("pdf")]
+        public async Task<ActionResult> GetPdf(int chapterId)
+        {
+
+            var chapter = await _cacheService.Ensure(chapterId);
+            if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
+
+            try
+            {
+                var path = _cacheService.GetCachedFile(chapter);
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
+
+                Response.AddCacheHeader(path, TimeSpan.FromMinutes(60).Seconds);
+                return PhysicalFile(path, "application/pdf", Path.GetFileName(path), true);
+            }
+            catch (Exception)
+            {
+                _cacheService.CleanupChapters(new []{ chapterId });
+                throw;
+            }
         }
 
         /// <summary>
@@ -625,6 +653,35 @@ namespace API.Controllers
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return await _readerService.GetPrevChapterIdAsync(seriesId, volumeId, currentChapterId, userId);
+        }
+
+        /// <summary>
+        /// For the current user, returns an estimate on how long it would take to finish reading the series.
+        /// </summary>
+        /// <remarks>For Epubs, this does not check words inside a chapter due to overhead so may not work in all cases.</remarks>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        [HttpGet("time-left")]
+        public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+
+            // Get all sum of all chapters with progress that is complete then subtract from series. Multiply by modifiers
+            var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId);
+            if (series.Format == MangaFormat.Epub)
+            {
+                var chapters =
+                    await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(progress.Select(p => p.ChapterId).ToList());
+                // Word count
+                var progressCount = chapters.Sum(c => c.WordCount);
+                var wordsLeft = series.WordCount - progressCount;
+                return _readerService.GetTimeEstimate(wordsLeft, 0, true);
+            }
+
+            var progressPageCount = progress.Sum(p => p.PagesRead);
+            var pagesLeft = series.Pages - progressPageCount;
+            return _readerService.GetTimeEstimate(0, pagesLeft, false);
         }
 
     }

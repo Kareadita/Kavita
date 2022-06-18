@@ -1,6 +1,6 @@
 <div class="carousel-container" *ngIf="items.length > 0 ">
     <div>
-        <h3 style="display: inline-block;">
+        <h3>
             <a href="javascript:void(0)" (click)="sectionClicked($event)" class="section-title" [ngClass]="{'non-selectable': !clickableTitle}">{{title}}</a>
         </h3>
         <div class="float-end" *ngIf="swiper">

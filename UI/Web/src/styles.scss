@@ -1,17 +1,17 @@
-@use "../node_modules/swiper/swiper.scss" as swiper;
+@use '../node_modules/swiper/swiper.scss' as swiper;
 
 // Import themes which define the css variables we use to customize the app
-@import "./theme/themes/kavita";
-@import "./theme/themes/light";
-@import "./theme/themes/dark";
-@import "./theme/themes/e-ink";
+@import './theme/themes/light';
+@import './theme/themes/dark';
+@import './theme/themes/e-ink';
 
 // Import colors for overrides of bootstrap theme
-@import "./theme/toastr";
-@import "./theme/variables";
+@import './theme/toastr';
+@import './theme/variables';
 
 // Bootstrap must be after _colors since we define the colors there
-@import "~bootstrap/scss/bootstrap";
+@import '~bootstrap/scss/bootstrap';
+
 
 // Import all the customized theme overrides
 @import './theme/components/input';
@@ -36,74 +36,48 @@
 @import './theme/components/progress';
 @import './theme/components/sidenav';
 @import './theme/components/carousel';
+@import './theme/components/offcanvas';
 
-@import "./theme/utilities/utilities";
-@import "./theme/utilities/animations";
-@import "./theme/utilities/global";
 
-@import "./theme/utilities/utilities";
-@import "./theme/utilities/animations";
-@import "./theme/utilities/global";
+@import './theme/utilities/utilities';
+@import './theme/utilities/animations';
+@import './theme/utilities/global';
+
 
 // Global Styles
 @font-face {
-    font-family: "EBGaramond";
-    src: url("assets/fonts/EBGaramond/EBGaramond-VariableFont_wght.ttf")
-        format("truetype");
+  font-family: "EBGarmond";
+  src: url("assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-    font-family: "Spartan";
-    src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
+  font-family: "Spartan";
+  src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
 }
 
-@font-face {
-    font-family: "FiraSans";
-    src: url("assets/fonts/Fira_Sans/FiraSans-Regular.ttf");
+label, select, .clickable {
+  cursor: pointer;
 }
 
-@font-face {
-    font-family: "FiraSans-Medium";
-    src: url("assets/fonts/Fira_Sans/FiraSans-Medium.ttf");
-}
-
-@font-face {
-    font-family: "Lato";
-    src: url("assets/fonts/Lato/Lato-Regular.ttf");
-}
-
-@font-face {
-    font-family: "Oswald";
-    src: url("assets/fonts/Oswald/Oswald-VariableFont_wght.ttf");
-}
-
-@font-face {
-    font-family: "RocknRollOne";
-    src: url("assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf");
-}
-
-label,
-select,
-.clickable {
-    cursor: pointer;
-}
-
-.form-check-input[disabled] ~ .form-check-label,
-.form-check-input:disabled ~ .form-check-label {
-    cursor: default;
+.form-check-input[disabled] ~ .form-check-label, .form-check-input:disabled ~ .form-check-label {
+  cursor: default;
 }
 
 // Needed for fullscreen
 app-root {
-    background-color: inherit;
+  background-color: transparent;
+  scrollbar-width: 14px;
+  scrollbar-color: var(--primary-color-scrollbar);
 }
 
-.form-switch {
-    font-size: 0.75rem;
-    padding-top: 0.6rem;
-    float: right;
+::-webkit-scrollbar {
+  width: 14px;
 }
 
-.col {
-    text-align: center;
+::-webkit-scrollbar-thumb {
+  background-clip: padding-box;
+  background-color: var(--primary-color-scrollbar);
+  border: 3px solid transparent;
+  border-radius: 8px;
+  min-height: 50px;
 }

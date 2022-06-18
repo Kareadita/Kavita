@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -21,6 +22,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.Extensions;
+using NSubstitute.ReceivedExtensions;
 using Xunit;
 using Xunit.Sdk;
 
@@ -251,6 +254,50 @@ public class SeriesServiceTests
 
         Assert.NotEmpty(detail.Volumes);
         Assert.Equal(2, detail.Volumes.Count());
+    }
+
+    [Fact]
+    public async Task SeriesDetail_ShouldReturnCorrectNaming_VolumeTitle()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var detail = await _seriesService.GetSeriesDetail(1, 1);
+        Assert.NotEmpty(detail.Chapters);
+        // volume 2 has a 0 chapter aka a single chapter that is represented as a volume. We don't show in Chapters area
+        Assert.Equal(3, detail.Chapters.Count());
+
+        Assert.NotEmpty(detail.Volumes);
+        Assert.Equal(2, detail.Volumes.Count());
+
+        Assert.Equal(string.Empty, detail.Chapters.First().VolumeTitle); // loose leaf chapter
+        Assert.Equal("Volume 3", detail.Chapters.Last().VolumeTitle); // volume based chapter
     }
 
     [Fact]
@@ -700,7 +747,7 @@ public class SeriesServiceTests
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "New Genre".SentenceCase()));
+        Assert.True(series.Metadata.Genres.Select(g1 => g1.Title).All(g2 => g2 == "New Genre".SentenceCase()));
         Assert.False(series.Metadata.GenresLocked); // GenreLocked is false unless the UI Explicitly says it should be locked
     }
 

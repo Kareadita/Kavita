@@ -5,29 +5,20 @@
     <h6 subtitle>{{series?.length}} Series</h6>
 </app-side-nav-companion-bar>
 <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-<app-card-detail-layout [isLoading]="loadingBookmarks"
-                        [items]="series">
-    <ng-template #cardItem
-                 let-item
-                 let-position="idx">
-        <app-card-item [entity]="item"
-                       (reload)="loadBookmarks()"
-                       [title]="item.name"
-                       [imageUrl]="imageService.getSeriesCoverImage(item.id)"
-                       [suppressArchiveWarning]="true"
-                       (clicked)="viewBookmarks(item)"
-                       [count]="seriesIds[item.id]"
-                       [allowSelection]="true"
-                       [actions]="actions"
-                       [selected]="bulkSelectionService.isCardSelected('bookmark', position)"
-                       (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)">
-        </app-card-item>
+<app-card-detail-layout 
+    [isLoading]="loadingBookmarks"
+    [items]="series"
+    [trackByIdentity]="trackByIdentity"
+    >
+    <ng-template #cardItem let-item let-position="idx">
+        <app-card-item [entity]="item" (reload)="loadBookmarks()" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
+        [supressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true" 
+        [actions]="actions"
+        [selected]="bulkSelectionService.isCardSelected('bookmark', position)" (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
+        ></app-card-item>
     </ng-template>
 
     <ng-template #noData>
-        There are no bookmarks. Try creating <a
-           href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/bookmarks"
-           target="_blank">one&nbsp;<i class="fa fa-external-link-alt"
-               aria-hidden="true"></i></a>.
+        There are no bookmarks. Try creating <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/bookmarks" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a>.
     </ng-template>
 </app-card-detail-layout>

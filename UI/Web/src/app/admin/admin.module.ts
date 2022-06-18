@@ -2,11 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminRoutingModule } from './admin-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import {
-  NgbDropdownModule,
-  NgbNavModule,
-  NgbTooltipModule,
-} from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { LibraryEditorModalComponent } from './_modals/library-editor-modal/library-editor-modal.component';
@@ -23,10 +19,13 @@ import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
 import { UserSettingsModule } from '../user-settings/user-settings.module';
-import { SideNavModule } from '../sidenav/sidenav.module';
+import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageMediaSettingsComponent } from './manage-media-settings/manage-media-settings.component';
 import { ManageEmailSettingsComponent } from './manage-email-settings/manage-email-settings.component';
 import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tasks-settings.component';
+
+
+
 
 @NgModule({
   declarations: [
@@ -54,12 +53,13 @@ import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tas
     FormsModule,
     NgbNavModule,
     NgbTooltipModule,
+    NgbTypeaheadModule, // Directory Picker
     NgbDropdownModule,
     SharedModule,
     PipeModule,
-    SideNavModule,
-    UserSettingsModule, // API-key component
+    SidenavModule,
+    UserSettingsModule, // API-key componet
   ],
-  providers: [],
+  providers: []
 })
-export class AdminModule {}
+export class AdminModule { }

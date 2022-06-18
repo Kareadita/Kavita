@@ -8,18 +8,11 @@ import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
-import {
-  Action,
-  ActionFactoryService,
-  ActionItem,
-} from 'src/app/_services/action-factory.service';
+import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import {
-  IndexUpdateEvent,
-  ItemRemoveEvent,
-} from '../draggable-ordered-list/draggable-ordered-list.component';
+import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
 import { LibraryService } from '../../_services/library.service';
 import { forkJoin } from 'rxjs';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -27,7 +20,7 @@ import { ReaderService } from 'src/app/_services/reader.service';
 @Component({
   selector: 'app-reading-list-detail',
   templateUrl: './reading-list-detail.component.html',
-  styleUrls: ['./reading-list-detail.component.scss'],
+  styleUrls: ['./reading-list-detail.component.scss']
 })
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];
@@ -44,7 +37,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   readingListSummary: string = '';
 
-  libraryTypes: { [key: number]: LibraryType } = {};
+  libraryTypes: {[key: number]: LibraryType} = {};
 
   readingListImage: string = '';
 
@@ -52,20 +45,10 @@ export class ReadingListDetailComponent implements OnInit {
     return MangaFormat;
   }
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private readingListService: ReadingListService,
-    private actionService: ActionService,
-    private actionFactoryService: ActionFactoryService,
-    public utilityService: UtilityService,
-    public imageService: ImageService,
-    private accountService: AccountService,
-    private toastr: ToastrService,
-    private confirmService: ConfirmService,
-    private libraryService: LibraryService,
-    private readerService: ReaderService
-  ) {}
+  constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
+    private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, 
+    private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -77,50 +60,38 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.listId = parseInt(listId, 10);
 
-    this.readingListImage = this.imageService.randomize(
-      this.imageService.getReadingListCoverImage(this.listId)
-    );
+    this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
-    this.libraryService.getLibraries().subscribe((libs) => {});
+    this.libraryService.getLibraries().subscribe(libs => {
+      
+    });
 
     forkJoin([
-      this.libraryService.getLibraries(),
-      this.readingListService.getReadingList(this.listId),
-    ]).subscribe((results) => {
+      this.libraryService.getLibraries(), 
+      this.readingListService.getReadingList(this.listId)
+    ]).subscribe(results => {
       const libraries = results[0];
       const readingList = results[1];
 
-      libraries.forEach((lib) => {
+      libraries.forEach(lib => {
         this.libraryTypes[lib.id] = lib.type;
       });
 
       if (readingList == null) {
         // The list doesn't exist
-        this.toastr.error("This list doesn't exist.");
+        this.toastr.error('This list doesn\'t exist.');
         this.router.navigateByUrl('library');
         return;
       }
       this.readingList = readingList;
-      this.readingListSummary = (
-        this.readingList.summary === null ? '' : this.readingList.summary
-      ).replace(/\n/g, '<br>');
+      this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
 
-      this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+      this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
           this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
-
-          this.actions = this.actionFactoryService
-            .getReadingListActions(
-              this.handleReadingListActionCallback.bind(this)
-            )
-            .filter((action) =>
-              this.readingListService.actionListFilter(
-                action,
-                readingList,
-                this.isAdmin
-              )
-            );
+          
+          this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
         }
       });
     });
@@ -129,7 +100,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   getListItems() {
     this.isLoading = true;
-    this.readingListService.getListItems(this.listId).subscribe((items) => {
+    this.readingListService.getListItems(this.listId).subscribe(items => {
       this.items = items;
       this.isLoading = false;
     });
@@ -144,53 +115,29 @@ export class ReadingListDetailComponent implements OnInit {
   readChapter(item: ReadingListItem) {
     let reader = 'manga';
     if (item.seriesFormat === MangaFormat.EPUB) {
-      reader = 'book;';
+      reader = 'book;'
     }
-    const params = this.readerService.getQueryParamsObject(
-      false,
-      true,
-      this.readingList.id
-    );
-    this.router.navigate(
-      [
-        'library',
-        item.libraryId,
-        'series',
-        item.seriesId,
-        'book',
-        item.chapterId,
-      ],
-      { queryParams: params }
-    );
+    const params = this.readerService.getQueryParamsObject(false, true, this.readingList.id);
+    this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
 
   handleReadingListActionCallback(action: Action, readingList: ReadingList) {
-    switch (action) {
+    switch(action) {
       case Action.Delete:
         this.deleteList(readingList);
         break;
       case Action.Edit:
-        this.actionService.editReadingList(
-          readingList,
-          (readingList: ReadingList) => {
-            // Reload information around list
-            this.readingList = readingList;
-            this.readingListSummary = (
-              this.readingList.summary === null ? '' : this.readingList.summary
-            ).replace(/\n/g, '<br>');
-          }
-        );
+        this.actionService.editReadingList(readingList, (readingList: ReadingList) => {
+          // Reload information around list
+          this.readingList = readingList;
+          this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
+        });
         break;
     }
   }
 
   async deleteList(readingList: ReadingList) {
-    if (
-      !(await this.confirmService.confirm(
-        'Are you sure you want to delete the reading list? This cannot be undone.'
-      ))
-    )
-      return;
+    if (!await this.confirmService.confirm('Are you sure you want to delete the reading list? This cannot be undone.')) return;
 
     this.readingListService.delete(readingList.id).subscribe(() => {
       this.toastr.success('Reading list deleted');
@@ -204,9 +151,7 @@ export class ReadingListDetailComponent implements OnInit {
     }
 
     if (item.seriesFormat === MangaFormat.EPUB) {
-      return (
-        'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber)
-      );
+      return 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
     }
 
     let chapterNum = item.chapterNumber;
@@ -214,48 +159,29 @@ export class ReadingListDetailComponent implements OnInit {
       chapterNum = this.utilityService.cleanSpecialTitle(item.chapterNumber);
     }
 
-    return (
-      this.utilityService.formatChapterName(
-        this.libraryTypes[item.libraryId],
-        true,
-        true
-      ) + chapterNum
-    );
+    return this.utilityService.formatChapterName(this.libraryTypes[item.libraryId], true, true) + chapterNum;
   }
 
   orderUpdated(event: IndexUpdateEvent) {
-    this.readingListService
-      .updatePosition(
-        this.readingList.id,
-        event.item.id,
-        event.fromPosition,
-        event.toPosition
-      )
-      .subscribe(() => {
-        /* No Operation */
-      });
+    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => { /* No Operation */ });
   }
 
   itemRemoved(event: ItemRemoveEvent) {
-    this.readingListService
-      .deleteItem(this.readingList.id, event.item.id)
-      .subscribe(() => {
-        this.items.splice(event.position, 1);
-        this.toastr.success('Item removed');
-      });
+    this.readingListService.deleteItem(this.readingList.id, event.item.id).subscribe(() => {
+      this.items.splice(event.position, 1);
+      this.toastr.success('Item removed');
+    });
   }
 
   removeRead() {
     this.isLoading = true;
-    this.readingListService
-      .removeRead(this.readingList.id)
-      .subscribe((resp) => {
-        if (resp === 'Nothing to remove') {
-          this.toastr.info(resp);
-          return;
-        }
-        this.getListItems();
-      });
+    this.readingListService.removeRead(this.readingList.id).subscribe((resp) => {
+      if (resp === 'Nothing to remove') {
+        this.toastr.info(resp);
+        return;
+      }
+      this.getListItems();
+    });
   }
 
   read() {
@@ -268,30 +194,6 @@ export class ReadingListDetailComponent implements OnInit {
       break;
     }
 
-    if (currentlyReadingChapter.seriesFormat === MangaFormat.EPUB) {
-      this.router.navigate(
-        [
-          'library',
-          currentlyReadingChapter.libraryId,
-          'series',
-          currentlyReadingChapter.seriesId,
-          'book',
-          currentlyReadingChapter.chapterId,
-        ],
-        { queryParams: { readingListId: this.readingList.id } }
-      );
-    } else {
-      this.router.navigate(
-        [
-          'library',
-          currentlyReadingChapter.libraryId,
-          'series',
-          currentlyReadingChapter.seriesId,
-          'manga',
-          currentlyReadingChapter.chapterId,
-        ],
-        { queryParams: { readingListId: this.readingList.id } }
-      );
-    }
+    this.router.navigate(this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat), {queryParams: {readingListId: this.readingList.id}});
   }
 }

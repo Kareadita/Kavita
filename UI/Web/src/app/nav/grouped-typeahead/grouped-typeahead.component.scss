@@ -2,16 +2,18 @@ form {
     max-height: 38px;
 }
 
+
 .search-result img {
     width: 100% !important;
 }
 
 .btn-close {
-    padding: 0.5rem;
+    margin-top: 8px;
     font-size: 0.8rem;
     position: absolute;
     right: 5px;
 }
+
 
 .typeahead-input {
     border: 1px solid transparent;
@@ -26,10 +28,9 @@ form {
     cursor: text;
     background-color: var(--input-bg-color);
     color: var(--body-text-color);
-    min-height: 2rem;
-    max-width: 50vw;
+    min-height: 38px;
     transition-property: all;
-    transition-duration: 0.5s;
+    transition-duration: 0.3s;
     display: block;
 
     .search {
@@ -37,9 +38,10 @@ form {
         position: relative;
     }
 
+
     input {
         outline: 0 !important;
-        border-radius: 0.3rem;
+        border-radius: .28571429rem;
         padding: 0px !important;
         min-height: 0px !important;
         max-width: 100% !important;
@@ -69,18 +71,22 @@ form {
         width: 99%;
         border-color: var(--input-focused-border-color);
     }
+
 }
 
+
+
 /* small devices (phones, 650px and down) */
-@media only screen and (max-width: 650px) {
+@media only screen and (max-width:650px) {
     input {
-        width: 100%;
+        width: 100%
     }
 
     input:focus-visible {
         width: 100% !important;
     }
 }
+
 
 .section-header {
     color: var(--body-text-color);
@@ -93,21 +99,20 @@ form {
 
 .dropdown {
     width: 100vw;
-    height: 100vh; //header offset
+    height: calc(100vh - 56px); //header offset
     background: var(--dropdown-overlay-color);
     position: fixed;
     justify-content: center;
     left: 0;
-    top: 0;
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 0px;
+    margin-top: 9px;
 }
 
 .list-group {
     max-width: 600px;
-    z-index: 1000;
+    z-index:1000;
     overflow-y: auto;
     overflow-x: hidden;
     display: block;
@@ -130,6 +135,7 @@ form {
     padding: 5px 10px;
 }
 
+
 li {
     list-style: none;
     border-radius: 0px !important;
@@ -139,6 +145,7 @@ li {
 ul ul {
     border-radius: 0px !important;
 }
+
 
 .spinner-border {
     position: absolute;

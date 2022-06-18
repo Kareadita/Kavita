@@ -22,7 +22,7 @@ export class MetadataService {
   private ageRatingTypes: {[key: number]: string} | undefined = undefined;
   private validLanguages: Array<Language> = [];
 
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+  constructor(private httpClient: HttpClient) { }
 
   getAgeRating(ageRating: AgeRating) {
     if (this.ageRatingTypes != undefined && this.ageRatingTypes.hasOwnProperty(ageRating)) {
@@ -96,5 +96,9 @@ export class MetadataService {
       method += '?libraryIds=' + libraries.join(',');
     }
     return this.httpClient.get<Array<Person>>(this.baseUrl + method);
+  }
+
+  getChapterSummary(chapterId: number) {
+    return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, {responseType: 'text' as 'json'});
   }
 }

@@ -16,7 +16,7 @@ namespace API.Parser
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
         public const string BookFileExtensions = @"\.epub|\.pdf";
-        public const string MacOsMetadataFileStartsWith = @"._\";
+        public const string MacOsMetadataFileStartsWith = @"._";
 
         public const string SupportedExtensions =
             ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
@@ -109,6 +109,26 @@ namespace API.Parser
             // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
             new Regex(
                 @"(卷|册)(?<Volume>\d+)",
+                MatchOptions, RegexTimeout),
+            // Korean Volume: 제n권 -> Volume n, n권  -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
+            new Regex(
+                @"제?(?<Volume>\d+)권",
+                MatchOptions, RegexTimeout),
+            // Korean Season: 시즌n -> Season n,
+            new Regex(
+                @"시즌(?<Volume>\d+\-?\d+)",
+                MatchOptions, RegexTimeout),
+            // Korean Season: 시즌n -> Season n, n시즌 -> season n
+            new Regex(
+                @"(?<Volume>\d+(\-|~)?\d+?)시즌",
+                MatchOptions, RegexTimeout),
+            // Korean Season: 시즌n -> Season n, n시즌 -> season n
+            new Regex(
+                @"시즌(?<Volume>\d+(\-|~)?\d+?)",
+                MatchOptions, RegexTimeout),
+            // Japanese Volume: n巻 -> Volume n
+            new Regex(
+                @"(?<Volume>\d+(?:(\-)\d+)?)巻",
                 MatchOptions, RegexTimeout),
         };
 
@@ -340,6 +360,22 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.+?)(?:\s|_)(v|vol|tome|t)\.?(\s|_)?(?<Volume>\d+)",
                 MatchOptions, RegexTimeout),
+            // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
+            new Regex(
+                @"第(?<Volume>\d+)(卷|册)",
+                MatchOptions, RegexTimeout),
+            // Chinese Volume: 卷n -> Volume n, 册n -> Volume n
+            new Regex(
+                @"(卷|册)(?<Volume>\d+)",
+                MatchOptions, RegexTimeout),
+            // Korean Volume: 제n권 -> Volume n, n권  -> Volume n, 63권#200.zip
+            new Regex(
+                @"제?(?<Volume>\d+)권",
+                MatchOptions, RegexTimeout),
+            // Japanese Volume: n巻 -> Volume n
+            new Regex(
+                @"(?<Volume>\d+(?:(\-)\d+)?)巻",
+                MatchOptions, RegexTimeout),
         };
 
         private static readonly Regex[] ComicChapterRegex = new[]
@@ -398,11 +434,7 @@ namespace API.Parser
             new Regex(
                 @"^(?<Series>.+?)-(chapter-)?(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
-            // Cyberpunk 2077 - Your Voice 01
-            // new Regex(
-            //     @"^(?<Series>.+?\s?-\s?(?:.+?))(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)$",
-            //     MatchOptions,
-            // RegexTimeout),
+
         };
 
         private static readonly Regex[] ReleaseGroupRegex = new[]
@@ -461,7 +493,14 @@ namespace API.Parser
             new Regex(
                 @"第(?<Chapter>\d+)话",
                 MatchOptions, RegexTimeout),
-
+            // Korean Chapter: 제n화 -> Chapter n, 가디언즈 오브 갤럭시 죽음의 보석.E0008.7화#44
+            new Regex(
+                @"제?(?<Chapter>\d+\.?\d+)(화|장)",
+                MatchOptions, RegexTimeout),
+            // Korean Chapter: 第10話 -> Chapter n, [ハレム]ナナとカオル ～高校生のSMごっこ～　第1話
+            new Regex(
+                @"第?(?<Chapter>\d+(?:.\d+|-\d+)?)話",
+                MatchOptions, RegexTimeout),
         };
         private static readonly Regex[] MangaEditionRegex = {
             // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
@@ -525,10 +564,12 @@ namespace API.Parser
                 MatchOptions, RegexTimeout
         );
 
-        private static readonly ImmutableArray<string> FormatTagSpecialKeyowrds = ImmutableArray.Create(
+        private static readonly ImmutableArray<string> FormatTagSpecialKeywords = ImmutableArray.Create(
             "Special", "Reference", "Director's Cut", "Box Set", "Box-Set", "Annual", "Anthology", "Epilogue",
             "One Shot", "One-Shot", "Prologue", "TPB", "Trade Paper Back", "Omnibus", "Compendium", "Absolute", "Graphic Novel",
             "GN", "FCBD");
+
+        private static readonly char[] LeadingZeroesTrimChars = new[] { '0' };
 
         public static MangaFormat ParseFormat(string filePath)
         {
@@ -544,15 +585,13 @@ namespace API.Parser
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(filePath);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Edition"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Edition"].Success && match.Groups["Edition"].Value != string.Empty)
-                    {
-                        var edition = match.Groups["Edition"].Value.Replace("{", "").Replace("}", "")
-                            .Replace("[", "").Replace("]", "").Replace("(", "").Replace(")", "");
-
-                        return edition;
-                    }
+                    return group.Value
+                        .Replace("{", "").Replace("}", "")
+                        .Replace("[", "").Replace("]", "")
+                        .Replace("(", "").Replace(")", "");
                 }
             }
 
@@ -567,15 +606,8 @@ namespace API.Parser
         public static bool HasSpecialMarker(string filePath)
         {
             var matches = SpecialMarkerRegex.Matches(filePath);
-            foreach (Match match in matches)
-            {
-                if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return matches.Select(match => match.Groups["Special"])
+                .Any(group => group.Success && group != Match.Empty);
         }
 
         public static string ParseMangaSpecial(string filePath)
@@ -583,12 +615,10 @@ namespace API.Parser
             foreach (var regex in MangaSpecialRegex)
             {
                 var matches = regex.Matches(filePath);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Special"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
-                    {
-                        return match.Groups["Special"].Value;
-                    }
+                    return group.Value;
                 }
             }
 
@@ -600,12 +630,10 @@ namespace API.Parser
             foreach (var regex in ComicSpecialRegex)
             {
                 var matches = regex.Matches(filePath);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Special"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Special"].Success && match.Groups["Special"].Value != string.Empty)
-                    {
-                        return match.Groups["Special"].Value;
-                    }
+                    return group.Value;
                 }
             }
 
@@ -617,12 +645,10 @@ namespace API.Parser
             foreach (var regex in MangaSeriesRegex)
             {
                 var matches = regex.Matches(filename);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Series"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
-                    {
-                        return CleanTitle(match.Groups["Series"].Value);
-                    }
+                    return CleanTitle(group.Value);
                 }
             }
 
@@ -633,12 +659,10 @@ namespace API.Parser
             foreach (var regex in ComicSeriesRegex)
             {
                 var matches = regex.Matches(filename);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups["Series"])
+                             .Where(group => group.Success && group != Match.Empty))
                 {
-                    if (match.Groups["Series"].Success && match.Groups["Series"].Value != string.Empty)
-                    {
-                        return CleanTitle(match.Groups["Series"].Value, true);
-                    }
+                    return CleanTitle(group.Value, true);
                 }
             }
 
@@ -668,12 +692,12 @@ namespace API.Parser
             foreach (var regex in ComicVolumeRegex)
             {
                 var matches = regex.Matches(filename);
-                foreach (Match match in matches)
+                foreach (var group in matches.Select(match => match.Groups))
                 {
-                    if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
+                    if (!group["Volume"].Success || group["Volume"] == Match.Empty) continue;
 
-                    var value = match.Groups["Volume"].Value;
-                    var hasPart = match.Groups["Part"].Success;
+                    var value = group["Volume"].Value;
+                    var hasPart = group["Part"].Success;
                     return FormatValue(value, hasPart);
                 }
             }
@@ -779,12 +803,9 @@ namespace API.Parser
             foreach (var regex in MangaSpecialRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty).Trim();
-                    }
+                    title = title.Replace(match.Value, string.Empty).Trim();
                 }
             }
 
@@ -796,12 +817,9 @@ namespace API.Parser
             foreach (var regex in EuropeanComicRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty).Trim();
-                    }
+                    title = title.Replace(match.Value, string.Empty).Trim();
                 }
             }
 
@@ -813,12 +831,9 @@ namespace API.Parser
             foreach (var regex in ComicSpecialRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty).Trim();
-                    }
+                    title = title.Replace(match.Value, string.Empty).Trim();
                 }
             }
 
@@ -876,12 +891,9 @@ namespace API.Parser
             foreach (var regex in ReleaseGroupRegex)
             {
                 var matches = regex.Matches(title);
-                foreach (Match match in matches)
+                foreach (var match in matches.Where(m => m.Success))
                 {
-                    if (match.Success)
-                    {
-                        title = title.Replace(match.Value, string.Empty);
-                    }
+                    title = title.Replace(match.Value, string.Empty);
                 }
             }
 
@@ -916,8 +928,8 @@ namespace API.Parser
 
         public static string RemoveLeadingZeroes(string title)
         {
-            var ret = title.TrimStart(new[] { '0' });
-            return ret == string.Empty ? "0" : ret;
+            var ret = title.TrimStart(LeadingZeroesTrimChars);
+            return string.IsNullOrEmpty(ret) ? "0" : ret;
         }
 
         public static bool IsArchive(string filePath)
@@ -1060,7 +1072,7 @@ namespace API.Parser
         /// <returns></returns>
         public static bool HasComicInfoSpecial(string comicInfoFormat)
         {
-            return FormatTagSpecialKeyowrds.Contains(comicInfoFormat);
+            return FormatTagSpecialKeywords.Contains(comicInfoFormat);
         }
     }
 }

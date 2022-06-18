@@ -1,13 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  Inject,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-} from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
@@ -27,7 +19,7 @@ import { BookWhiteTheme } from '../_models/book-white-theme';
  */
 export interface PageStyle {
   'font-family': string;
-  'font-size': string;
+  'font-size': string; 
   'line-height': string;
   'margin-left': string;
   'margin-right': string;
@@ -41,7 +33,7 @@ export const bookColorThemes = [
     isDefault: true,
     provider: ThemeProvider.System,
     selector: 'brtheme-dark',
-    content: BookDarkTheme,
+    content: BookDarkTheme
   },
   {
     name: 'Black',
@@ -50,7 +42,7 @@ export const bookColorThemes = [
     isDefault: false,
     provider: ThemeProvider.System,
     selector: 'brtheme-black',
-    content: BookBlackTheme,
+    content: BookBlackTheme
   },
   {
     name: 'White',
@@ -59,7 +51,7 @@ export const bookColorThemes = [
     isDefault: false,
     provider: ThemeProvider.System,
     selector: 'brtheme-white',
-    content: BookWhiteTheme,
+    content: BookWhiteTheme
   },
 ];
 
@@ -68,7 +60,7 @@ const mobileBreakpointMarginOverride = 700;
 @Component({
   selector: 'app-reader-settings',
   templateUrl: './reader-settings.component.html',
-  styleUrls: ['./reader-settings.component.scss'],
+  styleUrls: ['./reader-settings.component.scss']
 })
 export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
@@ -86,8 +78,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * Outputs when a layout mode is updated
    */
-  @Output() layoutModeUpdate: EventEmitter<BookPageLayoutMode> =
-    new EventEmitter();
+  @Output() layoutModeUpdate: EventEmitter<BookPageLayoutMode> = new EventEmitter();
   /**
    * Outputs when fullscreen is toggled
    */
@@ -95,13 +86,12 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * Outputs when reading direction is changed
    */
-  @Output() readingDirection: EventEmitter<ReadingDirection> =
-    new EventEmitter();
+  @Output() readingDirection: EventEmitter<ReadingDirection> = new EventEmitter();
   /**
    * Outputs when immersive mode is changed
    */
   @Output() immersiveMode: EventEmitter<boolean> = new EventEmitter();
-
+  
   user!: User;
   /**
    * List of all font families user can select from
@@ -126,9 +116,11 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
    */
   themes: Array<BookTheme> = bookColorThemes;
 
+
   private onDestroy: Subject<void> = new Subject();
 
-  get BookPageLayoutMode(): typeof BookPageLayoutMode {
+
+  get BookPageLayoutMode(): typeof BookPageLayoutMode  {
     return BookPageLayoutMode;
   }
 
@@ -136,153 +128,93 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     return ReadingDirection;
   }
 
-  constructor(
-    private bookService: BookService,
-    private accountService: AccountService,
-    @Inject(DOCUMENT) private document: Document,
-    private themeService: ThemeService
-  ) {}
+
+
+  constructor(private bookService: BookService, private accountService: AccountService, 
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
 
   ngOnInit(): void {
+    
     this.fontFamilies = this.bookService.getFontFamilies();
-    this.fontOptions = this.fontFamilies.map((f) => f.title);
+    this.fontOptions = this.fontFamilies.map(f => f.title);
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.user = user;
-
+        
         if (this.user.preferences.bookReaderFontFamily === undefined) {
           this.user.preferences.bookReaderFontFamily = 'default';
         }
-        if (
-          this.user.preferences.bookReaderFontSize === undefined ||
-          this.user.preferences.bookReaderFontSize < 50
-        ) {
+        if (this.user.preferences.bookReaderFontSize === undefined || this.user.preferences.bookReaderFontSize < 50) {
           this.user.preferences.bookReaderFontSize = 100;
         }
-        if (
-          this.user.preferences.bookReaderLineSpacing === undefined ||
-          this.user.preferences.bookReaderLineSpacing < 100
-        ) {
+        if (this.user.preferences.bookReaderLineSpacing === undefined || this.user.preferences.bookReaderLineSpacing < 100) {
           this.user.preferences.bookReaderLineSpacing = 100;
         }
         if (this.user.preferences.bookReaderMargin === undefined) {
           this.user.preferences.bookReaderMargin = 0;
         }
         if (this.user.preferences.bookReaderReadingDirection === undefined) {
-          this.user.preferences.bookReaderReadingDirection =
-            ReadingDirection.LeftToRight;
+          this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
         }
-        this.readingDirectionModel =
-          this.user.preferences.bookReaderReadingDirection;
+        this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
+        
+        
+        this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
+        this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(fontName => {
+          const familyName = this.fontFamilies.filter(f => f.title === fontName)[0].family;
+          if (familyName === 'default') {
+            this.pageStyles['font-family'] = 'inherit';
+          } else {
+            this.pageStyles['font-family'] = "'" + familyName + "'";
+          }
 
-        this.settingsForm.addControl(
-          'bookReaderFontFamily',
-          new FormControl(this.user.preferences.bookReaderFontFamily, [])
-        );
-        this.settingsForm
-          .get('bookReaderFontFamily')!
-          .valueChanges.pipe(takeUntil(this.onDestroy))
-          .subscribe((fontName) => {
-            const familyName = this.fontFamilies.filter(
-              (f) => f.title === fontName
-            )[0].family;
-            if (familyName === 'default') {
-              this.pageStyles['font-family'] = 'inherit';
-            } else {
-              this.pageStyles['font-family'] = "'" + familyName + "'";
-            }
+          this.styleUpdate.emit(this.pageStyles);
+        });
+        
+        this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
+        this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.pageStyles['font-size'] = value + '%';
+          this.styleUpdate.emit(this.pageStyles);
+        });
 
-            this.styleUpdate.emit(this.pageStyles);
-          });
+        this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
+        this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.clickToPaginateChanged.emit(value);
+        });
 
-        this.settingsForm.addControl(
-          'bookReaderFontSize',
-          new FormControl(this.user.preferences.bookReaderFontSize, [])
-        );
-        this.settingsForm
-          .get('bookReaderFontSize')
-          ?.valueChanges.pipe(takeUntil(this.onDestroy))
-          .subscribe((value) => {
-            this.pageStyles['font-size'] = value + '%';
-            this.styleUpdate.emit(this.pageStyles);
-          });
+        this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
+        this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.pageStyles['line-height'] = value + '%';
+          this.styleUpdate.emit(this.pageStyles);
+        });
 
-        this.settingsForm.addControl(
-          'bookReaderTapToPaginate',
-          new FormControl(this.user.preferences.bookReaderTapToPaginate, [])
-        );
-        this.settingsForm
-          .get('bookReaderTapToPaginate')
-          ?.valueChanges.pipe(takeUntil(this.onDestroy))
-          .subscribe((value) => {
-            this.clickToPaginateChanged.emit(value);
-          });
+        this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
+        this.settingsForm.get('bookReaderMargin')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+          this.pageStyles['margin-left'] = value + '%';
+          this.pageStyles['margin-right'] = value + '%';
+          this.styleUpdate.emit(this.pageStyles);
+        });
 
-        this.settingsForm.addControl(
-          'bookReaderLineSpacing',
-          new FormControl(this.user.preferences.bookReaderLineSpacing, [])
-        );
-        this.settingsForm
-          .get('bookReaderLineSpacing')
-          ?.valueChanges.pipe(takeUntil(this.onDestroy))
-          .subscribe((value) => {
-            this.pageStyles['line-height'] = value + '%';
-            this.styleUpdate.emit(this.pageStyles);
-          });
+        this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
+        this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
+          this.layoutModeUpdate.emit(layoutMode);
+        });
 
-        this.settingsForm.addControl(
-          'bookReaderMargin',
-          new FormControl(this.user.preferences.bookReaderMargin, [])
-        );
-        this.settingsForm
-          .get('bookReaderMargin')
-          ?.valueChanges.pipe(takeUntil(this.onDestroy))
-          .subscribe((value) => {
-            this.pageStyles['margin-left'] = value + '%';
-            this.pageStyles['margin-right'] = value + '%';
-            this.styleUpdate.emit(this.pageStyles);
-          });
+        this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user.preferences.bookReaderImmersiveMode, []));
+        this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((immersiveMode: boolean) => {
+          if (immersiveMode) {
+            this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
+          }
+          this.immersiveMode.emit(immersiveMode);
+        });
+        
 
-        this.settingsForm.addControl(
-          'layoutMode',
-          new FormControl(
-            this.user.preferences.bookReaderLayoutMode ||
-              BookPageLayoutMode.Default,
-            []
-          )
-        );
-        this.settingsForm
-          .get('layoutMode')
-          ?.valueChanges.pipe(takeUntil(this.onDestroy))
-          .subscribe((layoutMode: BookPageLayoutMode) => {
-            this.layoutModeUpdate.emit(layoutMode);
-          });
-
-        this.settingsForm.addControl(
-          'bookReaderImmersiveMode',
-          new FormControl(this.user.preferences.bookReaderImmersiveMode, [])
-        );
-        this.settingsForm
-          .get('bookReaderImmersiveMode')
-          ?.valueChanges.pipe(takeUntil(this.onDestroy))
-          .subscribe((immersiveMode: boolean) => {
-            if (immersiveMode) {
-              this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
-            }
-            this.immersiveMode.emit(immersiveMode);
-          });
-
-        this.setTheme(
-          this.user.preferences.bookReaderThemeName ||
-            this.themeService.defaultBookTheme
-        );
+        this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
 
         // Emit first time so book reader gets the setting
         this.readingDirection.emit(this.readingDirectionModel);
-        this.clickToPaginateChanged.emit(
-          this.user.preferences.bookReaderTapToPaginate
-        );
+        this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate); 
         this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
         this.immersiveMode.emit(this.user.preferences.bookReaderImmersiveMode);
 
@@ -290,6 +222,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       } else {
         this.resetSettings();
       }
+
+      
     });
   }
 
@@ -298,38 +232,26 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
+
   resetSettings() {
     if (this.user) {
-      this.setPageStyles(
-        this.user.preferences.bookReaderFontFamily,
-        this.user.preferences.bookReaderFontSize + '%',
-        this.user.preferences.bookReaderMargin + '%',
-        this.user.preferences.bookReaderLineSpacing + '%'
-      );
+      this.setPageStyles(this.user.preferences.bookReaderFontFamily, this.user.preferences.bookReaderFontSize + '%', this.user.preferences.bookReaderMargin + '%', this.user.preferences.bookReaderLineSpacing + '%');
     } else {
       this.setPageStyles();
     }
-
-    this.settingsForm
-      .get('bookReaderFontFamily')
-      ?.setValue(this.user.preferences.bookReaderFontFamily);
+    
+    this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
     this.styleUpdate.emit(this.pageStyles);
   }
 
   /**
    * Internal method to be used by resetSettings. Pass items in with quantifiers
    */
-  setPageStyles(
-    fontFamily?: string,
-    fontSize?: string,
-    margin?: string,
-    lineHeight?: string,
-    colorTheme?: string
-  ) {
-    const windowWidth =
-      window.innerWidth ||
-      this.document.documentElement.clientWidth ||
-      this.document.body.clientWidth;
+  setPageStyles(fontFamily?: string, fontSize?: string, margin?: string, lineHeight?: string, colorTheme?: string) {
+    const windowWidth = window.innerWidth
+      || this.document.documentElement.clientWidth
+      || this.document.body.clientWidth;
+      
 
     let defaultMargin = '15%';
     if (windowWidth <= mobileBreakpointMarginOverride) {
@@ -338,15 +260,15 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.pageStyles = {
       'font-family': fontFamily || this.pageStyles['font-family'] || 'default',
       'font-size': fontSize || this.pageStyles['font-size'] || '100%',
-      'margin-left': margin || this.pageStyles['margin-left'] || defaultMargin,
-      'margin-right':
-        margin || this.pageStyles['margin-right'] || defaultMargin,
-      'line-height': lineHeight || this.pageStyles['line-height'] || '100%',
+      'margin-left': margin || this.pageStyles['margin-left']  || defaultMargin,
+      'margin-right': margin || this.pageStyles['margin-right']  || defaultMargin,
+      'line-height': lineHeight || this.pageStyles['line-height'] || '100%'
     };
+
   }
 
   setTheme(themeName: string) {
-    const theme = this.themes.find((t) => t.name === themeName);
+    const theme = this.themes.find(t => t.name === themeName);
     this.activeTheme = theme;
     this.colorThemeUpdate.emit(theme);
   }

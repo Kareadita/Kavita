@@ -28,8 +28,14 @@ public interface IScannerService
     /// cover images if forceUpdate is true.
     /// </summary>
     /// <param name="libraryId">Library to scan against</param>
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibrary(int libraryId);
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibraries();
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int libraryId, int seriesId, CancellationToken token);
 }
 
@@ -63,8 +69,6 @@ public class ScannerService : IScannerService
         _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
-    [DisableConcurrentExecution(timeoutInSeconds: 360)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanSeries(int libraryId, int seriesId, CancellationToken token)
     {
         var sw = new Stopwatch();
@@ -247,8 +251,6 @@ public class ScannerService : IScannerService
     }
 
 
-    [DisableConcurrentExecution(timeoutInSeconds: 360)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries()
     {
         _logger.LogInformation("Starting Scan of All Libraries");
@@ -267,8 +269,7 @@ public class ScannerService : IScannerService
     /// ie) all entities will be rechecked for new cover images and comicInfo.xml changes
     /// </summary>
     /// <param name="libraryId"></param>
-    [DisableConcurrentExecution(360)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+
     public async Task ScanLibrary(int libraryId)
     {
         Library library;
@@ -473,6 +474,7 @@ public class ScannerService : IScannerService
                 foreach (var series in duplicateSeries)
                 {
                     _logger.LogCritical("[ScannerService] Duplicate Series Found: {Key} maps with {Series}", key.Name, series.OriginalName);
+
                 }
 
                 continue;
@@ -773,7 +775,6 @@ public class ScannerService : IScannerService
                     case PersonRole.Translator:
                         if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
                         break;
-                    case PersonRole.Other:
                     default:
                         series.Metadata.People.Remove(person);
                         break;

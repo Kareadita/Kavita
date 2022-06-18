@@ -17,6 +17,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
 using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -67,7 +68,8 @@ public interface ISeriesRepository
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="userId"></param>
-    /// <param name="userParams"></param>
+    /// <param name="userParams">Pagination info</param>
+    /// <param name="filter">Filtering/Sorting to apply</param>
     /// <returns></returns>
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter);
     /// <summary>
@@ -106,13 +108,12 @@ public interface ISeriesRepository
     Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
-    Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds); // TODO: Move to LibraryRepository
-    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);  // TODO: Move to LibraryRepository
-    IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);  // TODO: Move to LibraryRepository
-    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 100);
+
+    Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
     Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams);
+    Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams);
@@ -920,54 +921,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    public async Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds)
-    {
-        return await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Select(s => s.Metadata.AgeRating)
-            .Distinct()
-            .Select(s => new AgeRatingDto()
-            {
-                Value = s,
-                Title = s.ToDescription()
-            })
-            .ToListAsync();
-    }
 
-    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds)
-    {
-        var ret = await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Select(s => s.Metadata.Language)
-            .AsNoTracking()
-            .Distinct()
-            .ToListAsync();
-
-        return ret
-            .Where(s => !string.IsNullOrEmpty(s))
-            .Select(s => new LanguageDto()
-            {
-                Title = CultureInfo.GetCultureInfo(s).DisplayName,
-                IsoCode = s
-            })
-            .OrderBy(s => s.Title)
-            .ToList();
-    }
-
-    public IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)
-    {
-        return  _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Select(s => s.Metadata.PublicationStatus)
-            .Distinct()
-            .AsEnumerable()
-            .Select(s => new PublicationStatusDto()
-            {
-                Value = s,
-                Title = s.ToDescription()
-            })
-            .OrderBy(s => s.Title);
-    }
 
 
     /// <summary>
@@ -976,8 +930,9 @@ public class SeriesRepository : ISeriesRepository
     /// <remarks>This provides 2 levels of pagination. Fetching the individual chapters only looks at 3000. Then when performing grouping
     /// in memory, we stop after 30 series. </remarks>
     /// <param name="userId">Used to ensure user has access to libraries</param>
+    /// <param name="pageSize">How many entities to return</param>
     /// <returns></returns>
-    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 100)
+    public async Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30)
     {
         var seriesMap = new Dictionary<string, GroupedSeriesDto>();
          var index = 0;
@@ -1131,9 +1086,36 @@ public class SeriesRepository : ISeriesRepository
 
 
         var query = _context.Series
-            .Where(s => s.Pages < 2000 && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
-                        usersSeriesIds.Contains(s.Id))
+            .Where(s => (
+                (s.Pages / ReaderService.AvgPagesPerMinute / 60 < 10 && s.Format != MangaFormat.Epub)
+                || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub))
+                    && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
+                         usersSeriesIds.Contains(s.Id))
             .Where(s => s.Metadata.PublicationStatus != PublicationStatus.OnGoing)
+            .AsSplitQuery()
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
+
+
+        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams)
+    {
+        var libraryIds = GetLibraryIdsForUser(userId, libraryId);
+        var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
+        var distinctSeriesIdsWithProgress = _context.AppUserProgresses
+            .Where(s => usersSeriesIds.Contains(s.SeriesId))
+            .Select(p => p.SeriesId)
+            .Distinct();
+
+
+        var query = _context.Series
+            .Where(s => (
+                            (s.Pages / ReaderService.AvgPagesPerMinute / 60 < 10 && s.Format != MangaFormat.Epub)
+                             || (s.WordCount * ReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub))
+                        && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
+                        usersSeriesIds.Contains(s.Id))
+            .Where(s => s.Metadata.PublicationStatus == PublicationStatus.OnGoing)
             .AsSplitQuery()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
 
@@ -1205,7 +1187,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    private async Task<IEnumerable<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId, int maxRecords = 300)
+    private async Task<IEnumerable<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId)
     {
         var libraries = await _context.AppUser
             .Where(u => u.Id == userId)

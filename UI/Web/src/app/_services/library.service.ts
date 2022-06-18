@@ -3,8 +3,10 @@ import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { JumpKey } from '../_models/jumpbar/jump-key';
 import { Library, LibraryType } from '../_models/library';
 import { SearchResultGroup } from '../_models/search/search-result-group';
+import { DirectoryDto } from '../_models/system/directory-dto';
 
 
 @Injectable({
@@ -55,7 +57,11 @@ export class LibraryService {
       query = '?path=' + encodeURIComponent(rootPath);
     }
 
-    return this.httpClient.get<string[]>(this.baseUrl + 'library/list' + query);
+    return this.httpClient.get<DirectoryDto[]>(this.baseUrl + 'library/list' + query);
+  }
+
+  getJumpBar(libraryId: number) {
+    return this.httpClient.get<JumpKey[]>(this.baseUrl + 'library/jump-bar?libraryId=' + libraryId);
   }
 
   getLibraries() {

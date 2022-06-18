@@ -9,6 +9,7 @@ import { RelationshipPipe } from './relationship.pipe';
 import { DefaultValuePipe } from './default-value.pipe';
 import { CompactNumberPipe } from './compact-number.pipe';
 import { LanguageNamePipe } from './language-name.pipe';
+import { AgeRatingPipe } from './age-rating.pipe';
 
 
 
@@ -22,7 +23,8 @@ import { LanguageNamePipe } from './language-name.pipe';
     RelationshipPipe,
     DefaultValuePipe,
     CompactNumberPipe,
-    LanguageNamePipe
+    LanguageNamePipe,
+    AgeRatingPipe
   ],
   imports: [
     CommonModule,
@@ -36,7 +38,8 @@ import { LanguageNamePipe } from './language-name.pipe';
     RelationshipPipe,
     DefaultValuePipe,
     CompactNumberPipe,
-    LanguageNamePipe
+    LanguageNamePipe,
+    AgeRatingPipe
   ]
 })
 export class PipeModule { }

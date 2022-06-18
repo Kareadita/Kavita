@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs;
+namespace API.DTOs.SeriesDetail;
 
 /// <summary>
 /// This is a special DTO for a UI page in Kavita. This performs sorting and grouping and returns exactly what UI requires for layout.

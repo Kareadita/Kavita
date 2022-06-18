@@ -110,15 +110,13 @@ public class ReadingItemService : IReadingItemService
     {
         switch (format)
         {
-            case MangaFormat.Pdf:
-                _bookService.ExtractPdfImages(fileFilePath, targetDirectory);
-                break;
             case MangaFormat.Archive:
                 _archiveService.ExtractArchive(fileFilePath, targetDirectory);
                 break;
             case MangaFormat.Image:
                 _imageService.ExtractImages(fileFilePath, targetDirectory, imageCount);
                 break;
+            case MangaFormat.Pdf:
             case MangaFormat.Unknown:
             case MangaFormat.Epub:
                 break;

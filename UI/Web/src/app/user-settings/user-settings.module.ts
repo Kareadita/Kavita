@@ -1,11 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
-import {
-  NgbAccordionModule,
-  NgbNavModule,
-  NgbTooltipModule,
-} from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
@@ -13,7 +9,9 @@ import { PipeModule } from '../pipe/pipe.module';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { ColorPickerModule } from 'ngx-color-picker';
-import { SideNavModule } from '../sidenav/sidenav.module';
+import { SidenavModule } from '../sidenav/sidenav.module';
+
+
 
 @NgModule({
   declarations: [
@@ -30,13 +28,16 @@ import { SideNavModule } from '../sidenav/sidenav.module';
     NgbNavModule,
     NgbTooltipModule,
 
-    ColorPickerModule, // User preferences background color
-
+    ColorPickerModule, // User prefernces background color
+    
     PipeModule,
-    SideNavModule,
+    SidenavModule,
 
     UserSettingsRoutingModule,
   ],
-  exports: [SiteThemeProviderPipe, ApiKeyComponent],
+  exports: [
+    SiteThemeProviderPipe,
+    ApiKeyComponent
+  ]
 })
-export class UserSettingsModule {}
+export class UserSettingsModule { }

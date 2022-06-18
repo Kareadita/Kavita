@@ -176,13 +176,23 @@ namespace API
 
             app.UseMiddleware<ExceptionMiddleware>();
 
+            Task.Run(async () =>
+            {
+                var allowSwaggerUi = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync())
+                    .EnableSwaggerUi;
+
+                if (env.IsDevelopment() || allowSwaggerUi)
+                {
+                    app.UseSwagger();
+                    app.UseSwaggerUI(c =>
+                    {
+                        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+                    });
+                }
+            });
+
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
-                });
                 app.UseHangfireDashboard();
             }
 

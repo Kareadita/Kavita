@@ -19,6 +19,7 @@ import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 import { BulkSelectionService } from '../bulk-selection.service';
 
 @Component({
@@ -129,7 +130,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
   constructor(public imageService: ImageService, private libraryService: LibraryService, 
     public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
-    private messageHub: MessageHubService, private accountService: AccountService) {}
+    private messageHub: MessageHubService, private accountService: AccountService, private scrollService: ScrollService) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -182,28 +183,18 @@ export class CardItemComponent implements OnInit, OnDestroy {
   @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
     if (!this.allowSelection) return;
-    const verticalOffset = (window.pageYOffset 
-      || document.documentElement.scrollTop 
-      || document.body.scrollTop || 0);
 
     this.prevTouchTime = event.timeStamp;
-    this.prevOffset = verticalOffset;
+    this.prevOffset = this.scrollService.scrollPosition;
   }
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent) {
     if (!this.allowSelection) return;
     const delta = event.timeStamp - this.prevTouchTime;
-    const verticalOffset = (window.pageYOffset 
-      || document.documentElement.scrollTop 
-      || document.body.scrollTop || 0);
+    const verticalOffset = this.scrollService.scrollPosition;
 
-    if (verticalOffset != this.prevOffset) {
-      this.prevTouchTime = 0;
-      return;
-    }
-
-    if (delta >= 300 && delta <= 1000) {
+    if (delta >= 300 && delta <= 1000 && (verticalOffset === this.prevOffset)) {
       this.handleSelection();
       event.stopPropagation();
       event.preventDefault();

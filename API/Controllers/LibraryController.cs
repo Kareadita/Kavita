@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.JumpBar;
 using API.DTOs.Search;
+using API.DTOs.System;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -88,11 +90,15 @@ namespace API.Controllers
         /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("list")]
-        public ActionResult<IEnumerable<string>> GetDirectories(string path)
+        public ActionResult<IEnumerable<DirectoryDto>> GetDirectories(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
-                return Ok(Directory.GetLogicalDrives());
+                return Ok(Directory.GetLogicalDrives().Select(d => new DirectoryDto()
+                {
+                    Name = d,
+                    FullPath = d
+                }));
             }
 
             if (!Directory.Exists(path)) return BadRequest("This is not a valid path");
@@ -105,6 +111,16 @@ namespace API.Controllers
         {
             return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosAsync());
         }
+
+        [HttpGet("jump-bar")]
+        public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+            if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, userId)) return BadRequest("User does not have access to library");
+
+            return Ok(_unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
+        }
+
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("grant-access")]
@@ -170,7 +186,7 @@ namespace API.Controllers
         [HttpPost("analyze")]
         public ActionResult Analyze(int libraryId)
         {
-            _taskScheduler.AnalyzeFilesForLibrary(libraryId);
+            _taskScheduler.AnalyzeFilesForLibrary(libraryId, true);
             return Ok();
         }
 

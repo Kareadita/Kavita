@@ -72,7 +72,8 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: any) {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
-      this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
+      //this.imageUrl = this.imageService.randomize(this.imageService.getSeriesCoverImage(this.data.id));
+      this.imageUrl = this.imageService.getSeriesCoverImage(this.data.id); // TODO: Do I need to do this since image now handles updates? 
     }
   }
 

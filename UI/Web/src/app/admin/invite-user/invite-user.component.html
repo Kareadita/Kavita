@@ -1,38 +1,21 @@
 <div class="modal-header">
-    <h4 class="modal-title"
-        id="modal-basic-title">Invite User</h4>
-    <button type="button"
-            class="btn-close"
-            aria-label="Close"
-            (click)="close()">
-
+    <h4 class="modal-title" id="modal-basic-title">Invite User</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+    
     </button>
 </div>
 <div class="modal-body">
     <p>
-        Invite a user to your server. Enter their email in and we will send them an email to create an account. If you
-        do not want to use our email service, you can <a href="https://wiki.kavitareader.com/en/guides/misc/email"
-           target="_blank"
-           rel="noopener noreferrer">host your own</a>
-        email service or use a fake email (Forgot User will not work). A link will be presented regardless and can be
-        used to setup the email account manually.
+        Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can <a href="https://wiki.kavitareader.com/en/guides/misc/email" target="_blank" rel="noopener noreferrer">host your own</a> 
+        email service or use a fake email (Forgot User will not work). A link will be presented regardless and can be used to setup the email account manually.
     </p>
 
-    <form [formGroup]="inviteForm"
-          *ngIf="emailLink === ''">
+    <form [formGroup]="inviteForm" *ngIf="emailLink === ''">
         <div class="row g-0">
-            <div class="mb-3"
-                 style="width:100%">
-                <label for="email"
-                       class="form-label">Email</label>
-                <input class="form-control"
-                       type="email"
-                       id="email"
-                       formControlName="email"
-                       required>
-                <div id="inviteForm-validations"
-                     class="invalid-feedback"
-                     *ngIf="inviteForm.dirty || inviteForm.touched">
+            <div class="mb-3" style="width:100%">
+                <label for="email" class="form-label">Email</label>
+                <input class="form-control" type="email" id="email" formControlName="email" required>
+                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
                     <div *ngIf="email?.errors?.required">
                         This field is required
                     </div>
@@ -42,8 +25,7 @@
 
         <div class="row g-0">
             <div class="col-md-6">
-                <app-role-selector (selected)="updateRoleSelection($event)"
-                                   [allowAdmin]="true"></app-role-selector>
+                <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
             </div>
 
             <div class="col-md-6">
@@ -54,18 +36,11 @@
 
     <ng-container *ngIf="emailLink !== ''">
         <h4>User invited</h4>
-        <p>You can use the following link below to setup the account for your user or use the copy button. You may need
-            to log out before using the link to register a new user.
-            If your server is externally accessible, an email will have been sent to the user and the links can be used
-            by them to finish setting up their account.
+        <p>You can use the following link below to setup the account for your user or use the copy button. You may need to log out before using the link to register a new user.
+            If your server is externally accessible, an email will have been sent to the user and the links can be used by them to finish setting up their account.
         </p>
-        <a class="email-link"
-           href="{{emailLink}}"
-           target="_blank">Setup user's account</a>
-        <app-api-key title="Invite Url"
-                     tooltipText="Copy this and paste in a new tab. You may need to log out."
-                     [showRefresh]="false"
-                     [transform]="makeLink"></app-api-key>
+        <a class="email-link" href="{{emailLink}}" target="_blank">Setup user's account</a>
+        <app-api-key title="Invite Url" tooltipText="Copy this and paste in a new tab. You may need to log out." [showRefresh]="false" [transform]="makeLink"></app-api-key>
     </ng-container>
 
 </div>
@@ -74,19 +49,11 @@
         <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" role="switch">
         <label for="stat-collection" class="form-check-label">Send Data</label>
     </div> -->
-    <button type="button"
-            class="btn btn-secondary"
-            (click)="close()">
+    <button type="button" class="btn btn-secondary" (click)="close()">
         Cancel
     </button>
-    <button type="button"
-            class="btn btn-primary"
-            (click)="invite()"
-            [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
-        <span *ngIf="isSending"
-              class="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"></span>
+    <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
+        <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         <span>{{isSending ? 'Inviting...' : 'Invite'}}</span>
     </button>
 </div>
