@@ -42,7 +42,7 @@ img {
 
     &.full-height {
       height: 100vh;
-      display: grid;
+      display: inline-block;
     }
 
     &.original {
@@ -150,12 +150,12 @@ img {
 }
 
 .fit-to-height-double-offset {
-  position: absolute;
+  // position: absolute;
   height: 100vh;
   object-fit: scale-down;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, 0%);
+  // transform: translate(-50%, 0%);
   max-width: 100%;
 }
 

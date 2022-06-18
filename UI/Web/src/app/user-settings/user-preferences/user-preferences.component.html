@@ -90,7 +90,7 @@
                                     </div>
 
                                     <div class="row g-0">
-                                        <div class="col-md-6 col-sm-12 pe-2 mb-2" *ngIf="false">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2" *ngIf="true">
                                             <label for="settings-layoutmode-option" class="form-label">Layout Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
                                             <ng-template #layoutModeTooltip>Render a single image to the screen to two side-by-side images</ng-template>
                                             <span class="visually-hidden" id="settings-layoutmode-option-help"><ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container></span>
@@ -183,8 +183,8 @@
 
                                     <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                         <label for="settings-fontfamily-option" class="form-label">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
-                                        <ng-template #fontFamilyOptionTooltip>Font familty to load up. Default will load the book's default font</ng-template>
-                                        <span class="visually-hidden" id="settings-fontfamily-option-help">Font familty to load up. Default will load the book's default font</span>
+                                        <ng-template #fontFamilyOptionTooltip>Font family to load up. Default will load the book's default font</ng-template>
+                                        <span class="visually-hidden" id="settings-fontfamily-option-help">Font family to load up. Default will load the book's default font</span>
                                         <select class="form-select" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
                                             <option *ngFor="let opt of fontFamilies" [value]="opt">{{opt | titlecase}}</option>
                                         </select>

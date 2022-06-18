@@ -43,7 +43,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
 
-  obserableHandles: Array<any> = [];
+  observableHandles: Array<any> = [];
   fontFamilies: Array<string> = [];
 
   tabs: Array<{title: string, fragment: string}> = [
@@ -128,7 +128,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
     this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
 
-    this.obserableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
+    this.observableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
       const values = this.passwordChangeForm.value;
       this.passwordsMatch = values.password === values.confirmPassword;
     }));
@@ -141,7 +141,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.obserableHandles.forEach(o => o.unsubscribe());
+    this.observableHandles.forEach(o => o.unsubscribe());
     this.onDestroy.next();
     this.onDestroy.complete();
   }
@@ -202,7 +202,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
     };
 
-    this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+    this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
@@ -216,7 +216,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     const model = this.passwordChangeForm.value;
     this.resetPasswordErrors = [];
-    this.obserableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword).subscribe(() => {
+    this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword).subscribe(() => {
       this.toastr.success('Password has been updated');
       this.resetPasswordForm();
     }, err => {
