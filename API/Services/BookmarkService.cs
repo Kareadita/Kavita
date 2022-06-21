@@ -174,6 +174,7 @@ public class BookmarkService : IBookmarkService
     /// <summary>
     /// This is a long-running job that will convert all bookmarks into WebP. Do not invoke anyway except via Hangfire.
     /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task ConvertAllBookmarkToWebP()
     {
         var bookmarkDirectory =
