@@ -1,4 +1,5 @@
-﻿using API.Services;
+﻿using System.Collections.Generic;
+using API.Services;
 
 namespace API.DTOs.Settings
 {

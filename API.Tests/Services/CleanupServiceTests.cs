@@ -6,8 +6,11 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
+using API.Helpers.Converters;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
@@ -48,7 +51,10 @@ public class CleanupServiceTests
         _context = new DataContext(contextOptions);
         Task.Run(SeedDb).GetAwaiter().GetResult();
 
-        _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
+        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
+        var mapper = config.CreateMapper();
+
+        _unitOfWork = new UnitOfWork(_context, mapper, null);
     }
 
     #region Setup
