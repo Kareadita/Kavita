@@ -62,8 +62,10 @@
                       <span *ngIf="item.pagesRead === item.pagesTotal">READ</span>
                     </span>
                   </h5>
-                  <i class="fa {{utilityService.mangaFormatIcon(item.seriesFormat)}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(item.seriesFormat)}}"></i>
-                  <span class="visually-hidden">{{utilityService.mangaFormat(item.seriesFormat)}}</span>&nbsp;
+                  <ng-container *ngIf="item.seriesFormat | mangaFormat as formatString">
+                    <i class="fa {{item.seriesFormat | mangaFormatIcon}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{formatString}}"></i>
+                    <span class="visually-hidden">{{formatString}}</span>&nbsp;
+                  </ng-container>
 
                   <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
                   <span *ngIf="item.promoted">
