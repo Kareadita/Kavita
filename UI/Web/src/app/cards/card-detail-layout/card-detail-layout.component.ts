@@ -1,24 +1,24 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
-import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
+import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
-const FILTER_PAG_REGEX = /[^0-9]/g;
 const keySize = 24;
 
 @Component({
   selector: 'app-card-detail-layout',
   templateUrl: './card-detail-layout.component.html',
-  styleUrls: ['./card-detail-layout.component.scss']
+  styleUrls: ['./card-detail-layout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
@@ -26,6 +26,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   @Input() isLoading: boolean = false;
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
+  /**
+   * Parent scroll for virtualize pagination
+   */
+  @Input() parentScroll!: Element | Window;
   
   // Filter Code
   @Input() filterOpen!: EventEmitter<boolean>;
@@ -45,8 +49,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   jumpBarKeysToRender: Array<JumpKey> = []; // Original
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
-  @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
-  @Output() pageChangeWithDirection: EventEmitter<0 | 1> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
@@ -55,8 +57,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   @ViewChild('scroller') scroller!: CdkVirtualScrollViewport;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
-
-  itemSize: number = 100; // Idk what this actually does. Less results in more items rendering, 5 works well with pagination. 230 is technically what a card is height wise
 
   filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
@@ -70,8 +70,9 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   constructor(private seriesService: SeriesService, public utilityService: UtilityService, 
-    @Inject(DOCUMENT) private document: Document) {
+    @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef) {
     this.filter = this.seriesService.createSeriesFilter();
+    this.changeDetectionRef.markForCheck();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -80,6 +81,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     const fullSize = (this.jumpBarKeys.length * keySize);
     const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
     if (currentSize >= fullSize) {
+      this.jumpBarKeysToRender = [...this.jumpBarKeys];
+      this.changeDetectionRef.markForCheck();
       return;
     }
 
@@ -97,6 +100,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.jumpBarKeysToRender.push(this.jumpBarKeys[midPoint]);
     this.removeSecondPartOfJumpBar(midPoint, removalTimes);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[this.jumpBarKeys.length - 1]);
+    this.changeDetectionRef.markForCheck();
   }
 
   removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
@@ -138,16 +142,18 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`; // ${this.pagination?.currentPage}_
+      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`; 
     }
 
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
+      this.changeDetectionRef.markForCheck();
     }
 
     if (this.pagination === undefined) {
-      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1}
+      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
+      this.changeDetectionRef.markForCheck();
     }
   }
 
@@ -162,20 +168,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.onDestory.complete();
   }
 
-
-  onPageChange(page: number) {
-    this.pageChange.emit(this.pagination);
-  }
-
-  selectPageStr(page: string) {
-    this.pagination.currentPage = parseInt(page, 10) || 1;
-    this.onPageChange(this.pagination.currentPage);
-  }
-
-  formatInput(input: HTMLInputElement) {
-    input.value = input.value.replace(FILTER_PAG_REGEX, '');
-  }
-
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action.action, undefined);
@@ -185,6 +177,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   applyMetadataFilter(event: FilterEvent) {
     this.applyFilter.emit(event);
     this.updateApplied++;
+    this.changeDetectionRef.markForCheck();
   }
 
 
@@ -196,6 +189,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     this.virtualScroller.scrollToIndex(targetIndex, true, undefined, 1000);
+    this.changeDetectionRef.markForCheck();
     return;
   }
 }

@@ -106,7 +106,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
 
     this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
-      //console.log('JumpBar: ', barDetails);
       this.jumpKeys = barDetails;
     });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
@@ -199,7 +198,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       
       // For Pagination
@@ -220,10 +219,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
-    this.loadPage();
-  }
+  // onPageChange(pagination: Pagination) {
+  //   this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
+  //   this.loadPage();
+  // }
 
   seriesClicked(series: Series) {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);

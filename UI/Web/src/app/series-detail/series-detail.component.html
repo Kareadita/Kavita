@@ -123,7 +123,7 @@
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number != 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"
                                         [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
                                         [read]="item.volume.pagesRead" [total]="item.volume.pages" [actions]="volumeActions" 
-                                        (selection)="bulkSelectionService.handleCardSelection('volume', idx, volumes.length, $event)" 
+                                        (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)" 
                                         [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>
                                     </ng-container>
                                     <ng-template #chapterCardItem>

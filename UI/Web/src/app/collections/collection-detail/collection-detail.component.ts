@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -44,6 +44,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   filterActive: boolean = false;
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+
+  @ViewChild('scrollingBlock') scrollingBlock!: ElementRef<any>;
   
 
   private onDestory: Subject<void> = new Subject<void>();
@@ -157,14 +159,14 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, undefined);
-    this.loadPage();
-  }
+  // onPageChange(pagination: Pagination) {
+  //   this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, undefined);
+  //   this.loadPage();
+  // }
 
   loadPage() {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    this.seriesService.getAllSeries(this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.seriesPagination = series.pagination;
       this.isLoading = false;

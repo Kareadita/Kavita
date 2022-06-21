@@ -196,4 +196,5 @@ export class UtilityService {
                   || document.body.clientHeight;
     return [windowWidth, windowHeight];
   }
+
 }
