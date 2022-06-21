@@ -220,10 +220,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
     this.clicked.emit(this.title);
   }
 
-  isNullOrEmpty(val: string) {
-    return val === null || val === undefined || val === '';
-  }
-
   preventClick(event: any) {
     event.stopPropagation();
     event.preventDefault();
