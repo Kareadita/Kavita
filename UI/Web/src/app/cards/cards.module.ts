@@ -75,7 +75,7 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
 
     NgbOffcanvasModule, // Series Detail, action of cards
     NgbNavModule, //Series Detail
-    NgbPaginationModule, // CardDetailLayoutComponent (TODO: Remove this)
+    NgbPaginationModule, // EditCollectionTagsComponent 
     NgbDropdownModule,
     NgbProgressbarModule,
     NgxFileDropModule, // Cover Chooser
