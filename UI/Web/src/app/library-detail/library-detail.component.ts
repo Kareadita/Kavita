@@ -111,7 +111,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
-    this.pagination.itemsPerPage = 0; // TODO: Validate what pagination setting is ideal
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
     // Setup filterActiveCheck to check filter against
@@ -184,12 +183,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.loadPage();
   }
 
-  handlePaginationChange(direction: 0 | 1) {
-    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
-    this.loadPage(direction);
-  }
-
-  loadPage(direction: 0 | 1 = 1) {
+  loadPage() {
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
@@ -199,30 +193,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
-      this.series = series.result;
-      
-      // For Pagination
-      // if (this.series.length === 0) {
-      //   this.series = series.result;
-      // } else {
-      //   if (direction === 1) {
-      //     //this.series = [...this.series, ...series.result];
-      //     this.series.concat(series.result);
-      //   } else {
-      //     this.series = [...series.result, ...this.series];
-      //   }
-      // }
-      
+      this.series = series.result; 
       this.pagination = series.pagination;
       this.loadingSeries = false;
       window.scrollTo(0, 0);
     });
   }
-
-  // onPageChange(pagination: Pagination) {
-  //   this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
-  //   this.loadPage();
-  // }
 
   seriesClicked(series: Series) {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
