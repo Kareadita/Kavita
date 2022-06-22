@@ -17,3 +17,9 @@ $breadcrumb-divider: quote(">");
 .table {
     background-color: lightgrey;
 }
+
+.disabled {
+    color: lightgrey !important;
+    cursor: not-allowed !important;
+    background-color: var(--error-color);
+}
