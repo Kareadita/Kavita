@@ -1,57 +1,57 @@
 <div #companionBar>
-<app-side-nav-companion-bar *ngIf="series !== undefined" [hasExtras]="true" [extraDrawer]="extrasDrawer">
-        <ng-container title>
-            <h2 style="margin-bottom: 0px">
-                <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
-                <span>{{series?.name}}</span>
-            </h2>
-        </ng-container>
-        <ng-container subtitle *ngIf="series?.localizedName !== series?.name">
-            <h6 class="subtitle-with-actionables" title="Localized Name">{{series?.localizedName}}</h6>
-        </ng-container>
+    <app-side-nav-companion-bar *ngIf="series !== undefined" [hasExtras]="true" [extraDrawer]="extrasDrawer">
+            <ng-container title>
+                <h2 style="margin-bottom: 0px">
+                    <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+                    <span>{{series?.name}}</span>
+                </h2>
+            </ng-container>
+            <ng-container subtitle *ngIf="series?.localizedName !== series?.name">
+                <h6 class="subtitle-with-actionables" title="Localized Name">{{series?.localizedName}}</h6>
+            </ng-container>
 
-        <ng-template #extrasDrawer let-offcanvas>
-            <div class="offcanvas-header">
-                <h4 class="offcanvas-title" id="offcanvas-basic-title">Page Settings</h4>
-                <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss()"></button>
-            </div>
-            <div class="offcanvas-body">
-                <form [formGroup]="pageExtrasGroup">
-                    <!-- <div class="row g-0">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-3">
-                            <label for="settings-book-reading-direction" class="form-label">Sort Order</label>
-                            <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
-                                <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
-                                <ng-template #descSort>
-                                    <i class="fa fa-arrow-down" title="Descending"></i>
-                                </ng-template>
-                            </button>
+            <ng-template #extrasDrawer let-offcanvas>
+                <div class="offcanvas-header">
+                    <h4 class="offcanvas-title" id="offcanvas-basic-title">Page Settings</h4>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss()"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <form [formGroup]="pageExtrasGroup">
+                        <!-- <div class="row g-0">
+                            <div class="col-md-12 col-sm-12 pe-2 mb-3">
+                                <label for="settings-book-reading-direction" class="form-label">Sort Order</label>
+                                <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
+                                    <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
+                                    <ng-template #descSort>
+                                        <i class="fa fa-arrow-down" title="Descending"></i>
+                                    </ng-template>
+                                </button>
 
-                            <select class="form-select" aria-describedby="settings-reading-direction-help" formControlName="sortingOption">
-                                <option *ngFor="let opt of sortingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
-                            </select>
-                        </div>
-                    </div> -->
-                    <div class="row g-0">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-3">
-                            <label id="list-layout-mode-label" class="form-label">Layout Mode</label>
-                            <br/>
-                            <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
-                                <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
-                                <label class="btn btn-outline-primary" for="layout-mode-default">Card</label>
-                            
-                                <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
-                                <label class="btn btn-outline-primary" for="layout-mode-col1">List</label>
-                            
+                                <select class="form-select" aria-describedby="settings-reading-direction-help" formControlName="sortingOption">
+                                    <option *ngFor="let opt of sortingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                </select>
+                            </div>
+                        </div> -->
+                        <div class="row g-0">
+                            <div class="col-md-12 col-sm-12 pe-2 mb-3">
+                                <label id="list-layout-mode-label" class="form-label">Layout Mode</label>
+                                <br/>
+                                <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
+                                    <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="layout-mode-default">Card</label>
+                                
+                                    <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="layout-mode-col1">List</label>
+                                
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-        </ng-template>
+                    </form>
+                </div>
+            </ng-template>
 
-    
-</app-side-nav-companion-bar>
+        
+    </app-side-nav-companion-bar>
 </div>
 
 <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
@@ -117,7 +117,7 @@
                 <ng-template ngbNavContent>
                     <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock">
                         <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
-                            <div class="card-container row g-0" #container>
+                            <div class="card-container row g-0">
                                 <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                     <ng-container *ngIf="!item.isChapter; else chapterCardItem">
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number != 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"

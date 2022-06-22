@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Renderer2, AfterViewInit, Inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, AfterViewInit, Inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -246,8 +246,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
               private readingListService: ReadingListService, public navService: NavService,
-              private offcanvasService: NgbOffcanvas, private renderer: Renderer2,
-              @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef
+              private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document, 
+              private changeDetectionRef: ChangeDetectorRef
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
