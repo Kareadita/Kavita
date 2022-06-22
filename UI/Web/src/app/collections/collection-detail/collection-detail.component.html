@@ -22,16 +22,15 @@
     <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
     <app-card-detail-layout
-    header="Series"
-    [isLoading]="isLoading"
-    [items]="series"
-    [pagination]="seriesPagination"
-    [filterSettings]="filterSettings"
-    [filterOpen]="filterOpen"
-    [parentScroll]="scrollingBlock"
-    [jumpBarKeys]="jumpbarKeys"
-    (applyFilter)="updateFilter($event)"
-    >
+        header="Series"
+        [isLoading]="isLoading"
+        [items]="series"
+        [pagination]="seriesPagination"
+        [filterSettings]="filterSettings"
+        [filterOpen]="filterOpen"
+        [parentScroll]="scrollingBlock"
+        [jumpBarKeys]="jumpbarKeys"
+        (applyFilter)="updateFilter($event)">
         <ng-template #cardItem let-item let-position="idx">
             <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
             (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
