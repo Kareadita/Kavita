@@ -138,7 +138,8 @@ namespace API.Helpers
 
             CreateMap<RegisterDto, AppUser>();
 
-
+            CreateMap<IList<ServerSetting>, ServerSettingDto>()
+                .ConvertUsing<ServerSettingConverter>();
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();

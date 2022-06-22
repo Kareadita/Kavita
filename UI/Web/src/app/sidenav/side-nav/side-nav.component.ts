@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
-import { filter, map, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { filter, map, take, takeUntil } from 'rxjs/operators';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../shared/_services/utility.service';
-import { Library } from '../../_models/library';
+import { Library, LibraryType } from '../../_models/library';
 import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../../_services/action-factory.service';
@@ -96,6 +96,16 @@ export class SideNavComponent implements OnInit, OnDestroy {
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
       action.callback(action.action, library);
+    }
+  }
+
+  getLibraryTypeIcon(format: LibraryType) {
+    switch (format) {
+      case LibraryType.Book:
+        return 'fa-book';
+      case LibraryType.Comic:
+      case LibraryType.Manga:
+        return 'fa-book-open';
     }
   }
 

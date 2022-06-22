@@ -60,7 +60,7 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.listId = parseInt(listId, 10);
 
-    this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
+    //this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     this.libraryService.getLibraries().subscribe(libs => {
       
@@ -146,6 +146,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   formatTitle(item: ReadingListItem) {
+    // TODO: Use new app-entity-title component instead
     if (item.chapterNumber === '0') {
       return 'Volume ' + item.volumeNumber;
     }

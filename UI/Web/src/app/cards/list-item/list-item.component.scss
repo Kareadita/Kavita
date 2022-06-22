@@ -1,5 +1,6 @@
 $image-height: 230px;
 $image-width: 160px;
+$triangle-size: 30px;
 
 .download {
     width: 80px;
@@ -19,8 +20,18 @@ $image-width: 160px;
 }
 
 .list-item-container {
-    background: rgb(0,0,0);
-    background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
+    background: var(--card-list-item-bg-color);
     border-radius: 5px;
     position: relative;
+}
+
+.not-read-badge {
+    position: absolute;
+    top: 8px;
+    left: 108px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 $triangle-size $triangle-size 0;
+    border-color: transparent var(--primary-color) transparent transparent;
 }
