@@ -114,9 +114,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadOnDeck() {
-    let api = this.seriesService.getOnDeck();
+    let api = this.seriesService.getOnDeck(0, 1, 30);
     if (this.libraryId > 0) {
-      api = this.seriesService.getOnDeck(this.libraryId);
+      api = this.seriesService.getOnDeck(this.libraryId, 1, 30);
     }
     api.pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
@@ -124,9 +124,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   loadRecentlyAddedSeries() {
-    let api = this.seriesService.getRecentlyAdded();
+    let api = this.seriesService.getRecentlyAdded(0, 1, 30);
     if (this.libraryId > 0) {
-      api = this.seriesService.getRecentlyAdded(this.libraryId);
+      api = this.seriesService.getRecentlyAdded(this.libraryId, 1, 30);
     }
     api.pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.recentlyAddedSeries = updatedSeries.result;
