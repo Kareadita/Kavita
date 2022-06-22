@@ -117,7 +117,7 @@
                 <ng-template ngbNavContent>
                     <virtual-scroller #scroll [items]="storylineItems" [bufferAmount]="1" [parentScroll]="scrollingBlock">
                         <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else storylineListLayout">
-                            <div class="card-container row g-0">
+                            <div class="card-container row g-0" #container>
                                 <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                     <ng-container *ngIf="!item.isChapter; else chapterCardItem">
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number != 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"
