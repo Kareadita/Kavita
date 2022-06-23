@@ -1197,7 +1197,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   isWideImage(elem?: HTMLImageElement) {
     if (elem) {
       elem.onload = () => {
-      return elem.width > elem.height;
+        return elem.width > elem.height;
       }
     }
     const element = elem || this.canvasImage;
