@@ -21,6 +21,11 @@ public class TachiyomiController : BaseApiController
         _readerService = readerService;
     }
 
+    /// <summary>
+    /// Given the series Id, this should return the latest chapter that has been fully read.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     [HttpGet("latest-chapter")]
     public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
     {
