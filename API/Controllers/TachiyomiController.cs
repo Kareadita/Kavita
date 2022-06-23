@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -10,6 +13,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+/// <summary>
+/// All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any
+/// other purposes.
+/// </summary>
 public class TachiyomiController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -36,7 +43,27 @@ public class TachiyomiController : BaseApiController
         var prevChapterId =
             await _readerService.GetPrevChapterIdAsync(seriesId, currentChapter.VolumeId, currentChapter.Id, userId);
 
-        if (prevChapterId == -1) return null;
+        // If prevChapterId is -1, this means either nothing is read or everything is read.
+        if (prevChapterId == -1)
+        {
+            var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+            var userHasProgress =
+                userWithProgress.Progresses.Any(x => x.SeriesId == seriesId);
+
+            // If the user doesn't have progress, then return null, which the extension will catch as 204 (no content) and report nothing as read
+            if (!userHasProgress) return null;
+
+            // Else return the max chapter to Tachiyomi so it can consider everything read
+            var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).ToImmutableList();
+            var looseLeafChapterVolume = volumes.FirstOrDefault(v => v.Number == 0);
+            if (looseLeafChapterVolume == null)
+            {
+                return Ok($"{volumes.Last().Number * 100f}");
+            }
+
+            var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
+            return Ok(lastChapter.Number);
+        }
 
         var prevChapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId);
 
@@ -56,8 +83,9 @@ public class TachiyomiController : BaseApiController
 
         switch (chapterNumber)
         {
-            // Tachiyomi sends chapter 0.0f when there's no chapters read.
-            // Due to the encoding for volumes this marks all chapters in volume 0 (loose chapters) as read so we ignore it
+            // When Tachiyomi sync's progress, if there is no current progress in Tachiyomi, 0.0f is sent.
+            // Due to the encoding for volumes, this marks all chapters in volume 0 (loose chapters) as read.
+            // Hence we catch and return early, so we ignore the request.
             case 0.0f:
                 return true;
             case < 1.0f:
