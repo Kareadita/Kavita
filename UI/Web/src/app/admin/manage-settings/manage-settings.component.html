@@ -29,7 +29,7 @@
             </div>
 
             <div class="col-md-4 col-sm-12 pe-2">
-                <label for="backup-tasks" class="form-label">Backup Tasks</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="backupTasksTooltip" role="button" tabindex="0"></i>
+                <label for="backup-tasks" class="form-label">Days of Backups</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="backupTasksTooltip" role="button" tabindex="0"></i>
                 <ng-template #backupTasksTooltip>The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
                 <span class="visually-hidden" id="backup-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
                 <input id="backup-tasks" aria-describedby="backup-tasks-help" class="form-control" formControlName="totalBackups" type="number" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
@@ -67,7 +67,7 @@
 
         <div class="mb-3">
             <label for="swagger-ui" class="form-label" aria-describedby="swaggerui-info">Expose Swagger UI</label>
-            <p class="accent" id="swaggerui-info">Allows Swagger UI to be exposed via swagger/ on your server. Authentication is not required, but a valid JWT token is. Requires a restart to take effect.</p>
+            <p class="accent" id="swaggerui-info">Allows Swagger UI to be exposed via swagger/ on your server. Authentication is not required, but a valid JWT token is. Requires a restart to take effect. Swagger is hosted on yourip:5000/swagger</p>
             <div class="form-check form-switch">
                 <input id="swagger-ui" type="checkbox" class="form-check-input" formControlName="enableSwaggerUi" role="switch">
                 <label for="swagger-ui" class="form-check-label">Enable Swagger UI</label>

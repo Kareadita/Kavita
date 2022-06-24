@@ -33,6 +33,12 @@ namespace API.Controllers
             _cacheService = cacheService;
         }
 
+        /// <summary>
+        /// Retrieves information for the PDF and Epub reader
+        /// </summary>
+        /// <remarks>This only applies to Epub or PDF files</remarks>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("{chapterId}/book-info")]
         public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
         {
@@ -64,8 +70,6 @@ namespace API.Controllers
                     break;
                 case MangaFormat.Unknown:
                     break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
 
             return Ok(new BookInfoDto()
@@ -83,6 +87,12 @@ namespace API.Controllers
             });
         }
 
+        /// <summary>
+        /// This is an entry point to fetch resources from within an epub chapter/book.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
         [HttpGet("{chapterId}/book-resources")]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
@@ -102,7 +112,7 @@ namespace API.Controllers
 
         /// <summary>
         /// This will return a list of mappings from ID -> page num. ID will be the xhtml key and page num will be the reading order
-        /// this is used to rewrite anchors in the book text so that we always load properly in FE
+        /// this is used to rewrite anchors in the book text so that we always load properly in our reader.
         /// </summary>
         /// <remarks>This is essentially building the table of contents</remarks>
         /// <param name="chapterId"></param>
@@ -229,6 +239,13 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// This returns a single page within the epub book. All html will be rewritten to be scoped within our reader,
+        /// all css is scoped, etc.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         [HttpGet("{chapterId}/book-page")]
         public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
         {

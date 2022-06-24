@@ -14,6 +14,10 @@ namespace API.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// Checks if an admin exists on the system. This is essentially a check to validate if the system has been setup.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("exists")]
         public async Task<ActionResult<bool>> AdminExists()
         {

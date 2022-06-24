@@ -18,6 +18,9 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// All APIs related to downloading entities from the system. Requires Download Role or Admin Role.
+    /// </summary>
     [Authorize(Policy="RequireDownloadRole")]
     public class DownloadController : BaseApiController
     {
@@ -42,6 +45,11 @@ namespace API.Controllers
             _bookmarkService = bookmarkService;
         }
 
+        /// <summary>
+        /// For a given volume, return the size in bytes
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
         [HttpGet("volume-size")]
         public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
         {
@@ -49,6 +57,11 @@ namespace API.Controllers
             return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
+        /// <summary>
+        /// For a given chapter, return the size in bytes
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("chapter-size")]
         public async Task<ActionResult<long>> GetChapterSize(int chapterId)
         {
@@ -56,6 +69,11 @@ namespace API.Controllers
             return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
+        /// <summary>
+        /// For a series, return the size in bytes
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("series-size")]
         public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
         {
@@ -64,7 +82,11 @@ namespace API.Controllers
         }
 
 
-
+        /// <summary>
+        /// Downloads all chapters within a volume.
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
         [Authorize(Policy="RequireDownloadRole")]
         [HttpGet("volume")]
         public async Task<ActionResult> DownloadVolume(int volumeId)
