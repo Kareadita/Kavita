@@ -66,8 +66,6 @@ public class TachiyomiController : BaseApiController
                 {
                     Number = $"{int.Parse(volumeChapter.Number) * 100f}"
                 });
-                // volumeChapter.Number = $"{int.Parse(volumeChapter.Number) * 100f}";
-                // return Ok();
             }
 
             var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
