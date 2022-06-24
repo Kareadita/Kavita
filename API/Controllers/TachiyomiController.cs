@@ -35,7 +35,7 @@ public class TachiyomiController : BaseApiController
     /// Given the series Id, this should return the latest chapter that has been fully read.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <returns></returns>
+    /// <returns>ChapterDTO of latest chapter. Only Chapter number is used by consuming app. All other fields may be missing.</returns>
     [HttpGet("latest-chapter")]
     public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
     {
@@ -61,7 +61,13 @@ public class TachiyomiController : BaseApiController
             var looseLeafChapterVolume = volumes.FirstOrDefault(v => v.Number == 0);
             if (looseLeafChapterVolume == null)
             {
-                return Ok(_mapper.Map<ChapterDto>(volumes.Last().Chapters.First()));
+                var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.First());
+                return Ok(new ChapterDto()
+                {
+                    Number = $"{int.Parse(volumeChapter.Number) * 100f}"
+                });
+                // volumeChapter.Number = $"{int.Parse(volumeChapter.Number) * 100f}";
+                // return Ok();
             }
 
             var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
