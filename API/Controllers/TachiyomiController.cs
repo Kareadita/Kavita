@@ -61,7 +61,7 @@ public class TachiyomiController : BaseApiController
             var looseLeafChapterVolume = volumes.FirstOrDefault(v => v.Number == 0);
             if (looseLeafChapterVolume == null)
             {
-                var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.First());
+                var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparerZeroFirst()).Last());
                 return Ok(new ChapterDto()
                 {
                     Number = $"{int.Parse(volumeChapter.Number) * 100f}"
