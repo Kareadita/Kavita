@@ -64,12 +64,16 @@ public class TachiyomiController : BaseApiController
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparerZeroFirst()).Last());
                 return Ok(new ChapterDto()
                 {
-                    Number = $"{int.Parse(volumeChapter.Number) * 100f}"
+                    Number = $"{int.Parse(volumeChapter.Number) / 100f}"
                 });
             }
 
             var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
-            return Ok(_mapper.Map<ChapterDto>(lastChapter));
+            return Ok(new ChapterDto()
+            {
+                Number = $"{int.Parse(lastChapter.Number) / 100f}"
+            });
+            //return Ok(_mapper.Map<ChapterDto>(lastChapter));
         }
 
         var prevChapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId);
