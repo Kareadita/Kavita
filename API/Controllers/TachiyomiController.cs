@@ -9,6 +9,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -21,11 +22,13 @@ public class TachiyomiController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReaderService _readerService;
+    private readonly IMapper _mapper;
 
-    public TachiyomiController(IUnitOfWork unitOfWork, IReaderService readerService)
+    public TachiyomiController(IUnitOfWork unitOfWork, IReaderService readerService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _readerService = readerService;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -58,11 +61,11 @@ public class TachiyomiController : BaseApiController
             var looseLeafChapterVolume = volumes.FirstOrDefault(v => v.Number == 0);
             if (looseLeafChapterVolume == null)
             {
-                return Ok(volumes.Last().Chapters.First());
+                return Ok(_mapper.Map<ChapterDto>(volumes.Last().Chapters.First()));
             }
 
             var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
-            return Ok(lastChapter.Number);
+            return Ok(_mapper.Map<ChapterDto>(lastChapter));
         }
 
         var prevChapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId);
