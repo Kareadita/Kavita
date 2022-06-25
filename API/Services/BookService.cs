@@ -585,7 +585,7 @@ namespace API.Services
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex) )
+                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex))
                     {
                         if (string.IsNullOrEmpty(specialName))
                         {
