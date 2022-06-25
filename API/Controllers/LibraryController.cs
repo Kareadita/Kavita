@@ -239,6 +239,12 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing Library with new name, folders, and/or type.
+        /// </summary>
+        /// <remarks>Any folder or type change will invoke a scan.</remarks>
+        /// <param name="libraryForUserDto"></param>
+        /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("update")]
         public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
@@ -250,10 +256,13 @@ namespace API.Controllers
             library.Name = libraryForUserDto.Name;
             library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
 
+            var typeUpdate = library.Type != libraryForUserDto.Type;
+            library.Type = libraryForUserDto.Type;
+
             _unitOfWork.LibraryRepository.Update(library);
 
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
-            if (originalFolders.Count != libraryForUserDto.Folders.Count())
+            if (originalFolders.Count != libraryForUserDto.Folders.Count() || typeUpdate)
             {
                 _taskScheduler.ScanLibrary(library.Id);
             }

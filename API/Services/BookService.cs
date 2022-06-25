@@ -585,8 +585,7 @@ namespace API.Services
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex) &&
-                        (!string.IsNullOrEmpty(specialName) || groupPosition.Equals("series") || groupPosition.Equals("set")))
+                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex))
                     {
                         if (string.IsNullOrEmpty(specialName))
                         {
@@ -606,7 +605,7 @@ namespace API.Services
                         };
 
                         // Don't set titleSort if the book belongs to a group
-                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex))
+                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex) && (groupPosition.Equals("series") || groupPosition.Equals("set")))
                         {
                             info.SeriesSort = titleSort;
                         }

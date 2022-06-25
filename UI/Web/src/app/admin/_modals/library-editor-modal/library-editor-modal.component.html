@@ -19,7 +19,7 @@
             <label for="library-type" class="form-label">Type</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
             <ng-template #typeTooltip>Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but fall back to embedded data.</ng-template>
             <span class="visually-hidden" id="library-type-help">Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but fall back to embedded data.</span>
-            <select class="form-select" id="library-type" formControlName="type" [attr.disabled]="this.library" aria-describedby="library-type-help">
+            <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help"> <!-- [attr.disabled]="this.library" -->
                 <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
             </select>
         </div>

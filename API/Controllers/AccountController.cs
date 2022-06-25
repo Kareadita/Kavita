@@ -207,6 +207,11 @@ namespace API.Controllers
             return dto;
         }
 
+        /// <summary>
+        /// Refreshes the user's JWT token
+        /// </summary>
+        /// <param name="tokenRequestDto"></param>
+        /// <returns></returns>
         [HttpPost("refresh-token")]
         public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
         {
