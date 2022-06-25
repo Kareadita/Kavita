@@ -69,15 +69,22 @@ public class TachiyomiController : BaseApiController
             }
 
             var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
-            return Ok(new ChapterDto()
-            {
-                Number = $"{int.Parse(lastChapter.Number) / 100f}"
-            });
-            //return Ok(_mapper.Map<ChapterDto>(lastChapter));
+            return Ok(_mapper.Map<ChapterDto>(lastChapter));
         }
 
+        // There is progress, we now need to figure out the highest volume or chapter and return that.
         var prevChapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId);
+        var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
+        if (volumeWithProgress.Number != 0)
+        {
+            // The progress is on a volume, encode it as a fake chapterDTO
+            return Ok(new ChapterDto()
+            {
+                Number = $"{volumeWithProgress.Number / 100f}"
+            });
+        }
 
+        // Progress is just on a chapter, return as is
         return Ok(prevChapter);
     }
 
