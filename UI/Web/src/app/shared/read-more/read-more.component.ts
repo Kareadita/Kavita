@@ -9,6 +9,10 @@ export class ReadMoreComponent implements OnChanges {
 
   @Input() text!: string;
   @Input() maxLength: number = 250;
+  /**
+   * If the field is collapsed and blur true, text will not be readable
+   */
+  @Input() blur: boolean = false;
   currentText!: string;
   hideToggle: boolean = true;
 
