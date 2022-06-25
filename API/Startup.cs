@@ -241,9 +241,6 @@ namespace API
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
 
-
-
-
             app.Use(async (context, next) =>
             {
                 context.Response.GetTypedHeaders().CacheControl =
