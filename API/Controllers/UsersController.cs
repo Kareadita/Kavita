@@ -96,9 +96,7 @@ namespace API.Controllers
             existingPreferences.BookReaderImmersiveMode = preferencesDto.BookReaderImmersiveMode;
             existingPreferences.GlobalPageLayoutMode = preferencesDto.GlobalPageLayoutMode;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
-
-            // TODO: Remove this code - this overrides layout mode to be single until the mode is released
-            existingPreferences.LayoutMode = LayoutMode.Single;
+            existingPreferences.LayoutMode = preferencesDto.LayoutMode;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 
