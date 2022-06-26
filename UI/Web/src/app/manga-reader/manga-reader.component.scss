@@ -112,6 +112,9 @@ img {
   margin: 0 auto;
   max-height: calc(var(--vh)*100);
   vertical-align: top;
+    &.wide {
+      height: 100vh;
+  }
 }
 
 .original {

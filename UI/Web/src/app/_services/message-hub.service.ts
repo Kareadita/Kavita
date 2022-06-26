@@ -203,7 +203,7 @@ export class MessageHubService {
     });
 
     this.hubConnection.on(EVENTS.UserUpdate, resp => {
-      console.log('got UserUpdate', resp);
+      //console.log('got UserUpdate', resp);
       this.messagesSource.next({
         event: EVENTS.UserUpdate,
         payload: resp.body as UserUpdateEvent

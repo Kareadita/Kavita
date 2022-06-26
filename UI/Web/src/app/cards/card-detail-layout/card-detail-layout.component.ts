@@ -226,7 +226,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   fetchMore(event: IPageInfo) {
     if (event.endIndex !== this.items.length - 1) return;
     if (event.startIndex < 0) return;
-    console.log('Requesting next page ', (this.pagination.currentPage + 1), 'of data', event);
+    //console.log('Requesting next page ', (this.pagination.currentPage + 1), 'of data', event);
     this.loading = true;
 
     // this.pagination.currentPage = this.pagination.currentPage + 1;
