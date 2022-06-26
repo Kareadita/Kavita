@@ -3,14 +3,6 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body">
-    <!-- <div class="mb-3">
-        <label for="filter" class="form-label">Filter</label>
-        <div class="input-group">
-            <input id="filter" autocomplete="off" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
-            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="filterQuery = '';">Clear</button>
-        </div>
-    </div> -->
-
 
     <div class="mb-3">
         <label for="filter" class="form-label">Path</label>
@@ -46,7 +38,7 @@
     <table class="table table-striped scrollable">
         <thead>
             <tr>
-                <th scope="col">Type</th>
+                <th scope="col" style="width: 40px;">Type</th>
                 <th scope="col">Name</th>
             </tr>
         </thead>
@@ -55,7 +47,7 @@
                 <td><i class="fa-solid fa-arrow-turn-up" aria-hidden="true"></i></td>
                 <td>...</td>
             </tr>
-            <tr *ngFor="let folder of folders; let idx = index;" (click)="selectNode(folder)">
+            <tr *ngFor="let folder of folders; let idx = index;" (click)="selectNode(folder)" style="cursor: pointer;" [ngClass]="{'disabled': folder.disabled}">
                 <td><i class="fa-regular fa-folder" aria-hidden="true"></i></td>
                 <td id="folder--{{idx}}">
                     {{folder.name}}

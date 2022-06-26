@@ -753,6 +753,7 @@ public class SeriesRepository : ISeriesRepository
                 SortField.CreatedDate => query.OrderBy(s => s.Created),
                 SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
+                SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
                 _ => query
             };
         }
@@ -764,6 +765,7 @@ public class SeriesRepository : ISeriesRepository
                 SortField.CreatedDate => query.OrderByDescending(s => s.Created),
                 SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
+                SortField.TimeToRead => query.OrderByDescending(s => s.AvgHoursToRead),
                 _ => query
             };
         }

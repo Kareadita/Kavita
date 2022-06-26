@@ -27,8 +27,6 @@
                         [filterOpen]="filterOpen"
                         [jumpBarKeys]="jumpKeys"
                         (applyFilter)="updateFilter($event)"
-                        (pageChange)="onPageChange($event)"
-                        (pageChangeWithDirection)="handlePaginationChange($event)"
                         >
                         <ng-template #cardItem let-item let-position="idx">
                             <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()" 

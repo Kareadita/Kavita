@@ -7,11 +7,13 @@ import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
+import { JumpKey } from '../_models/jumpbar/jump-key';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
+import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -31,6 +33,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActiveCheck!: SeriesFilter;
   filterActive: boolean = false;
+  jumpbarKeys: Array<JumpKey> = [];
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -73,7 +76,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     private titleService: Title, private actionService: ActionService, 
     public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
     private utilityService: UtilityService, private route: ActivatedRoute, 
-    private filterUtilityService: FilterUtilitiesService) {
+    private filterUtilityService: FilterUtilitiesService, private libraryService: LibraryService) {
     
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - All Series');
@@ -108,6 +111,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
       this.bulkSelectionService.isShiftDown = false;
     }
   }
+  
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
@@ -118,17 +122,34 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
 
   loadPage() {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    this.seriesService.getAllSeries(this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
+      const keys: {[key: string]: number} = {};
+      series.result.forEach(s => {
+        let ch = s.name.charAt(0);
+        if (/\d|\#|!|%|@|\(|\)|\^|\*/g.test(ch)) {
+          ch = '#';
+        }
+        if (!keys.hasOwnProperty(ch)) {
+          keys[ch] = 0;
+        }
+        keys[ch] += 1;
+      });
+      this.jumpbarKeys = Object.keys(keys).map(k => {
+        return {
+          key: k,
+          size: keys[k],
+          title: k.toUpperCase()
+        }
+      }).sort((a, b) => {
+        if (a.key < b.key) return -1;
+        if (a.key > b.key) return 1;
+        return 0;
+      });
       this.pagination = series.pagination;
       this.loadingSeries = false;
       window.scrollTo(0, 0);
     });
-  }
-
-  onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
-    this.loadPage();
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;

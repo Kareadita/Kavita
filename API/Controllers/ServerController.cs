@@ -118,7 +118,7 @@ namespace API.Controllers
             try
             {
                 var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files, "logs");
-                return File(fileBytes, "application/zip", Path.GetFileName(zipPath));
+                return File(fileBytes, "application/zip", Path.GetFileName(zipPath), true);
             }
             catch (KavitaException ex)
             {

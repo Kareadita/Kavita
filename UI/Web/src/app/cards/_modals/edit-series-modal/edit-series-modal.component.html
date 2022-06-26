@@ -341,7 +341,7 @@
                     <h4>Information</h4>
                     <div class="row g-0 mb-2">
                         <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | sentenceCase}}</div>
-                        <div class="col-md-6">Format: <app-tag-badge>{{utilityService.mangaFormat(series.format)}}</app-tag-badge></div>
+                        <div class="col-md-6">Format: <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
                     </div>
                     <div class="row g-0 mb-2">
                         <div class="col-md-6" >Created: {{series.created | date:'shortDate'}}</div>

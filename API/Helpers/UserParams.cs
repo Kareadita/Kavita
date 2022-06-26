@@ -4,7 +4,7 @@
     {
         private const int MaxPageSize = int.MaxValue;
         public int PageNumber { get; init; } = 1;
-        private readonly int _pageSize = 30;
+        private readonly int _pageSize = MaxPageSize;
 
         /// <summary>
         /// If set to 0, will set as MaxInt
