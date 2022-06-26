@@ -947,15 +947,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         !this.isLastImage()
         ? 2 : 1);
     }
-    // console.log('-----------------------------------------');
-    // console.log('Calculating pageAmount:');
-    // console.log('current: ' + this.canvasImage.src);
-    // console.log('previous: ' + this.canvasImagePrev.src);
-    // console.log('next: ' + this.canvasImageNext.src);
-    // console.log('double: ' + this.canvasImage2.src);
-    // console.log('-----------------------------------------');
-    // console.log('Render next page with pageAmount ' + pageAmount);
-    // console.log('-----------------------------------------');
 
     if ((this.pageNum + pageAmount >= this.maxPages && notInSplit) || this.isLoading) {
 
@@ -1003,16 +994,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         !this.isWideImage(this.canvasImageNext)
         ? 2 : 1);
     }
-
-    // console.log('-----------------------------------------');
-    // console.log('Calculating pageAmount:');
-    // console.log('current: ' + this.canvasImage.src);
-    // console.log('previous: ' + this.canvasImagePrev.src);
-    // console.log('next: ' + this.canvasImageNext.src);
-    // console.log('double: ' + this.canvasImage2.src);
-    // console.log('-----------------------------------------');
-    // console.log('Render previous page with pageAmount ' + pageAmount);
-    // console.log('-----------------------------------------');
 
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
       if (this.isLoading) { return; }
@@ -1254,12 +1235,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderPage();
     this.prefetch();
     this.isLoading = false;
-    // console.log('At loadPage:');
-    // console.log('current: ' + this.canvasImage.src);
-    // console.log('previous: ' + this.canvasImagePrev.src);
-    // console.log('next: ' + this.canvasImageNext.src);
-    // console.log('double: ' + this.canvasImage2.src);
-    // console.log('-----------------------------------------');
   }
 
   setReadingDirection() {
