@@ -95,6 +95,7 @@ namespace API.Controllers
             existingPreferences.BookReaderLayoutMode = preferencesDto.BookReaderLayoutMode;
             existingPreferences.BookReaderImmersiveMode = preferencesDto.BookReaderImmersiveMode;
             existingPreferences.GlobalPageLayoutMode = preferencesDto.GlobalPageLayoutMode;
+            existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
             existingPreferences.LayoutMode = preferencesDto.LayoutMode;
 

@@ -92,8 +92,9 @@ export class AccountService implements OnDestroy {
       this.themeService.setTheme(this.themeService.defaultTheme);
     }
 
-    this.currentUserSource.next(user);
     this.currentUser = user;
+    this.currentUserSource.next(user);
+    
     if (this.currentUser !== undefined) {
       this.startRefreshTokenTimer();
     } else {

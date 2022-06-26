@@ -123,6 +123,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
       this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
+      this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
     });
 
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
@@ -169,6 +170,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
     this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
     this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
+    this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
   }
 
   resetPasswordForm() {
@@ -200,6 +202,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       theme: modelSettings.theme,
       bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode,
       globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
+      blurUnreadSummaries: modelSettings.blurUnreadSummaries,
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

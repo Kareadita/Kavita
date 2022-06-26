@@ -38,6 +38,7 @@ import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-deta
 import { FormControl, FormGroup } from '@angular/forms';
 import { PageLayoutMode } from '../_models/page-layout-mode';
 import { DOCUMENT } from '@angular/common';
+import { User } from '../_models/user';
 
 interface RelatedSeris {
   series: Series;
@@ -154,6 +155,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   });
 
   isAscendingSort: boolean = false; // TODO: Get this from User preferences
+  user: User | undefined;
 
   bulkActionCallback = (action: Action, data: any) => {
     if (this.series === undefined) {
@@ -252,6 +254,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
+        this.user = user;
         this.isAdmin = this.accountService.hasAdminRole(user);
         this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
         this.renderMode = user.preferences.globalPageLayoutMode;

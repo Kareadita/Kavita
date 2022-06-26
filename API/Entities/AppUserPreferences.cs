@@ -93,6 +93,11 @@ namespace API.Entities
         /// </summary>
         /// <remarks>Defaults to Cards</remarks>
         public PageLayoutMode GlobalPageLayoutMode { get; set; } = PageLayoutMode.Cards;
+        /// <summary>
+        /// UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already
+        /// </summary>
+        /// <remarks>Defaults to false</remarks>
+        public bool BlurUnreadSummaries { get; set; } = false;
 
         public AppUser AppUser { get; set; }
         public int AppUserId { get; set; }

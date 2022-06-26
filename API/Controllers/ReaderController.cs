@@ -191,6 +191,11 @@ namespace API.Controllers
         }
 
 
+        /// <summary>
+        /// Marks a Series as read. All volumes and chapters will be marked as read during this process.
+        /// </summary>
+        /// <param name="markReadDto"></param>
+        /// <returns></returns>
         [HttpPost("mark-read")]
         public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
         {
@@ -204,7 +209,7 @@ namespace API.Controllers
 
 
         /// <summary>
-        /// Marks a Series as Unread (progress)
+        /// Marks a Series as Unread. All volumes and chapters will be marked as unread during this process.
         /// </summary>
         /// <param name="markReadDto"></param>
         /// <returns></returns>

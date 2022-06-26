@@ -96,7 +96,7 @@
                 </div>
                 <div class="col-auto ms-2">
                     <ngb-rating class="rating-star" [(rate)]="series!.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
-                    <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="top" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
+                    <button *ngIf="series?.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="bottom" ngbTooltip="Edit Review" attr.aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
                 </div>
             </div>
             <div class="row g-0">
@@ -142,7 +142,8 @@
                                         <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
                                             [seriesName]="series.name" [entity]="item.volume" *ngIf="item.volume.number != 0"
                                             [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                            [pagesRead]="item.volume.pagesRead" [totalPages]="item.volume.pages" (read)="openVolume(item.volume)">
+                                            [pagesRead]="item.volume.pagesRead" [totalPages]="item.volume.pages" (read)="openVolume(item.volume)"
+                                            [blur]="user?.preferences?.blurUnreadSummaries || false">
                                             <ng-container title>
                                                 <app-entity-title [libraryType]="libraryType" [entity]="item.volume" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
                                             </ng-container>
@@ -152,7 +153,8 @@
                                         <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)"
                                             [seriesName]="series.name" [entity]="item.chapter" *ngIf="!item.chapter.isSpecial"
                                             [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                            [pagesRead]="item.chapter.pagesRead" [totalPages]="item.chapter.pages" (read)="openChapter(item.chapter)">
+                                            [pagesRead]="item.chapter.pagesRead" [totalPages]="item.chapter.pages" (read)="openChapter(item.chapter)"
+                                            [blur]="user?.preferences?.blurUnreadSummaries || false">
                                                 <ng-container title>
                                                     <app-entity-title [libraryType]="libraryType" [entity]="item.chapter" [seriesName]="series.name" [prioritizeTitleName]="false"></app-entity-title>
                                                 </ng-container>
@@ -185,7 +187,8 @@
                                     <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
                                     [seriesName]="series.name" [entity]="volume" *ngIf="volume.number != 0"
                                     [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                    [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)">
+                                    [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)"
+                                    [blur]="user?.preferences?.blurUnreadSummaries || false">
                                         <ng-container title>
                                             <app-entity-title [libraryType]="libraryType" [entity]="volume" [seriesName]="series.name"></app-entity-title>
                                         </ng-container>
@@ -222,7 +225,7 @@
                                     [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
                                     [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                     [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"
-                                    [includeVolume]="true">
+                                    [includeVolume]="true" [blur]="user?.preferences?.blurUnreadSummaries || false">
                                         <ng-container title>
                                             <app-entity-title [libraryType]="libraryType" [entity]="chapter" [seriesName]="series.name" [includeVolume]="true"  [prioritizeTitleName]="false"></app-entity-title>
                                         </ng-container>
@@ -254,7 +257,8 @@
                                 <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
                                 [seriesName]="series.name" [entity]="chapter"
                                 [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
-                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)">
+                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"
+                                [blur]="user?.preferences?.blurUnreadSummaries || false">
                                     <ng-container title>
                                         {{chapter.title || chapter.range}}
                                     </ng-container>
@@ -287,4 +291,3 @@
         </div>
     </div>
 </div>
-

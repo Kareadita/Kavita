@@ -1,6 +1,4 @@
-// .read-more-link {
-//     font-weight: bold;
-//     text-decoration: none;
-//     cursor: pointer;
-//     color: var(--body-text-color) !important;
-// }
+.blur-text {
+  color: transparent;
+  text-shadow: 0 0 5px var(--body-text-color);
+}
