@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DragableOrderedListComponent } from './draggable-ordered-list/draggable-ordered-list.component';
+import { DraggableOrderedListComponent } from './draggable-ordered-list/draggable-ordered-list.component';
 import { ReadingListDetailComponent } from './reading-list-detail/reading-list-detail.component';
 import { ReadingListRoutingModule } from './reading-list-routing.module';
 import {DragDropModule} from '@angular/cdk/drag-drop';
@@ -17,7 +17,7 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
 
 @NgModule({
   declarations: [
-    DragableOrderedListComponent,
+    DraggableOrderedListComponent,
     ReadingListDetailComponent,
     AddToListModalComponent,
     ReadingListsComponent,
