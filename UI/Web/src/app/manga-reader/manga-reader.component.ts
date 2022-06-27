@@ -308,6 +308,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:orientationchange', ['$event'])
   onResize() {
     if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) return;
+    if (window.innerWidth > window.innerHeight) return;
     this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
     this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
   }
