@@ -287,8 +287,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return (
       this.layoutMode !== LayoutMode.Single &&
       !this.isCoverImage() &&
-      !this.isWideImage(this.canvasImage) &&
-      !this.isWideImage(this.canvasImageNext)
+
+      !this.isWideImage(this.canvasImage) && 
+      !this.isWideImage(this.canvasImageNext) &&
+      window.innerWidth > window.innerHeight // Don't render double if orientation is portrait, mostly mobile
       );
   }
 
@@ -297,8 +299,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.layoutMode === LayoutMode.DoubleReversed &&
       !this.isCoverImage() &&
       !this.isWideImage(this.canvasImage) &&
-      !this.isWideImage(this.canvasImagePrev)
+      !this.isWideImage(this.canvasImageNext) &&
+      window.innerWidth > window.innerHeight // Don't render double reversed if orientation is portrait, mostly mobile
       );
+  }
+
+  @HostListener('window:resize', ['$event'])
+  @HostListener('window:orientationchange', ['$event'])
+  onResize() {
+    if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) return;
+    if (window.innerWidth > window.innerHeight) return;
+    this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
+    this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
   }
 
   get CurrentPageBookmarked() {
@@ -440,12 +452,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.updateForm();
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-        const changeOccured = parseInt(val, 10) !== this.layoutMode;
+
+        const changeOccurred = parseInt(val, 10) !== this.layoutMode;
         this.layoutMode = parseInt(val, 10);
 
         if (this.layoutMode === LayoutMode.Single) {
           this.generalSettingsForm.get('pageSplitOption')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
+
+        // Set default behaviour for reading manga?
+        // } else if (this.layoutMode === LayoutMode.DoubleReversed) {
+        //   this.readingDirection = ReadingDirection.RightToLeft;
+
         } else {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
           this.generalSettingsForm.get('pageSplitOption')?.disable();
@@ -454,11 +472,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         // Re-render the current page when we switch layouts
-        if (changeOccured) {
+        if (changeOccurred) {
           this.loadPage();
         }
       });
-
 
       this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
@@ -1124,7 +1141,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const needsSplitting = this.isWideImage();
     this.updateSplitPage();
 
-
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
@@ -1141,7 +1157,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
       this.readingArea.nativeElement.scroll(0,0);
     }
-
 
     this.isLoading = false;
   }
