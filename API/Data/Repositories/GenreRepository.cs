@@ -18,6 +18,7 @@ public interface IGenreRepository
     Task<IList<GenreTagDto>> GetAllGenreDtosAsync();
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
     Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(IList<int> libraryIds);
+    Task<int> GetCountAsync();
 }
 
 public class GenreRepository : IGenreRepository
@@ -70,6 +71,11 @@ public class GenreRepository : IGenreRepository
             .OrderBy(p => p.Title)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<int> GetCountAsync()
+    {
+        return await _context.Genre.CountAsync();
     }
 
     public async Task<IList<Genre>> GetAllGenresAsync()

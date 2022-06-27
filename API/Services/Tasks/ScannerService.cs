@@ -191,6 +191,7 @@ public class ScannerService : IScannerService
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, series.Id, false));
     }
 
     private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
