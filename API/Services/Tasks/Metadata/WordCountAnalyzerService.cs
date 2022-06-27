@@ -18,7 +18,7 @@ namespace API.Services.Tasks.Metadata;
 public interface IWordCountAnalyzerService
 {
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = 2, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibrary(int libraryId, bool forceUpdate = false);
     Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = true);
 }
@@ -46,7 +46,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
 
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = 2, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();

@@ -16,6 +16,7 @@ public interface IPersonRepository
     Task<IList<Person>> GetAllPeople();
     Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false);
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds);
+    Task<int> GetCountAsync();
 }
 
 public class PersonRepository : IPersonRepository
@@ -70,6 +71,11 @@ public class PersonRepository : IPersonRepository
             .AsNoTracking()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<int> GetCountAsync()
+    {
+        return await _context.Person.CountAsync();
     }
 
 
