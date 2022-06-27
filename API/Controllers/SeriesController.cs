@@ -273,7 +273,7 @@ namespace API.Controllers
         [HttpPost("analyze")]
         public ActionResult AnalyzeSeries(RefreshSeriesDto refreshSeriesDto)
         {
-            _taskScheduler.AnalyzeFilesForSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            _taskScheduler.AnalyzeFilesForSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
             return Ok();
         }
 
