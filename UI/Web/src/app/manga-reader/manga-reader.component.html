@@ -18,8 +18,6 @@
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
-                <!-- {{this.pageNum}} -->
-                {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)"> - {{PageNumber + 1}}</ng-container>
 
                 <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                         title="{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()">
@@ -163,7 +161,7 @@
                 </div>
 
                 <div class="row mb-2">
-                    <div class="col-md-6 col-sm-12" *ngIf="true">
+                    <div class="col-md-6 col-sm-12">
                         <label for="layout-mode" class="form-label">Layout Mode</label>
                         <select class="form-control" id="page-fitting" formControlName="layoutMode">
                             <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>

@@ -459,11 +459,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.layoutMode === LayoutMode.Single) {
           this.generalSettingsForm.get('pageSplitOption')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
-
-        // Set default behaviour for reading manga?
-        // } else if (this.layoutMode === LayoutMode.DoubleReversed) {
-        //   this.readingDirection = ReadingDirection.RightToLeft;
-
         } else {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
           this.generalSettingsForm.get('pageSplitOption')?.disable();
