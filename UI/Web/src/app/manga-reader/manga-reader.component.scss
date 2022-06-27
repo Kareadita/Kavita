@@ -20,6 +20,7 @@ img {
 .reading-area {
   position: relative;
   overflow: auto;
+  text-align: center;
   //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
 }
 
@@ -41,7 +42,7 @@ img {
 
     &.full-height {
       height: 100vh;
-      display: grid;
+      display: inline-block;
     }
 
     &.original {
@@ -111,6 +112,9 @@ img {
   margin: 0 auto;
   max-height: calc(var(--vh)*100);
   vertical-align: top;
+    &.wide {
+      height: 100vh;
+  }
 }
 
 .original {
@@ -149,12 +153,12 @@ img {
 }
 
 .fit-to-height-double-offset {
-  position: absolute;
+  // position: absolute;
   height: 100vh;
   object-fit: scale-down;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, 0%);
+  // transform: translate(-50%, 0%);
   max-width: 100%;
 }
 
@@ -167,6 +171,7 @@ img {
     top: 0;
     overflow: hidden;
     border: 2px solid #ccc;
+    vertical-align: sub;
 
     &::before {
         margin-left: 30%;

@@ -24,7 +24,7 @@ import { layoutModes, pageSplitOptions, scalingOptions } from '../_models/prefer
 import { ReaderMode } from '../_models/preferences/reader-mode';
 import { MangaFormat } from '../_models/manga-format';
 import { LibraryType } from '../_models/library';
-import { ShorcutsModalComponent } from '../reader-shared/_modals/shorcuts-modal/shorcuts-modal.component';
+import { ShortcutsModalComponent } from '../reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
 
@@ -124,9 +124,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   canvasImage = new Image();
   /**
-   * Used soley for LayoutMode.Double rendering. Will always hold the next image in buffer.
+   * Used solely for LayoutMode.Double rendering. Will always hold the next image in buffer.
    */
   canvasImage2 = new Image();
+  /**
+   *    *    * Used solely for LayoutMode.Double rendering. Will always hold the previous image in buffer.
+   */
+  canvasImagePrev = new Image();
+  /**
+   *    *    * Used solely for LayoutMode.Double rendering. Will always hold the next image in buffer.
+   */
+  canvasImageNext = new Image();
   /**
    * Dictates if we use render with canvas or with image. This is only for Splitting.
    */
@@ -144,16 +152,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   continuousChaptersStack: Stack<number> = new Stack();
 
   /**
-   * An event emiter when a page change occurs. Used soley by the webtoon reader.
+   * An event emitter when a page change occurs. Used solely by the webtoon reader.
    */
    goToPageEvent!: BehaviorSubject<number>;
 
    /**
-   * An event emiter when a bookmark on a page change occurs. Used soley by the webtoon reader.
+   * An event emitter when a bookmark on a page change occurs. Used solely by the webtoon reader.
    */
    showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
    /**
-   * An event emiter when fullscreen mode is toggled. Used soley by the webtoon reader.
+   * An event emitter when fullscreen mode is toggled. Used solely by the webtoon reader.
    */
    fullscreenEvent: ReplaySubject<boolean> = new ReplaySubject<boolean>();
   /**
@@ -207,11 +215,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   showClickOverlay: boolean = false;
   /**
-   * Next Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
   nextChapterId: number = CHAPTER_ID_NOT_FETCHED;
   /**
-   * Previous Chapter Id. This is not garunteed to be a valid ChapterId. Prefetched on page load (non-blocking).
+   * Previous Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
   prevChapterId: number = CHAPTER_ID_NOT_FETCHED;
   /**
@@ -276,11 +284,33 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ShouldRenderDoublePage() {
-    return this.layoutMode !== LayoutMode.Single && !this.isCoverImage();
+    return (
+      this.layoutMode !== LayoutMode.Single &&
+      !this.isCoverImage() &&
+
+      !this.isWideImage(this.canvasImage) && 
+      !this.isWideImage(this.canvasImageNext) &&
+      window.innerWidth > window.innerHeight // Don't render double if orientation is portrait, mostly mobile
+      );
   }
 
   get ShouldRenderReverseDouble() {
-    return (this.layoutMode === LayoutMode.DoubleReversed) && !this.isCoverImage();
+    return (
+      this.layoutMode === LayoutMode.DoubleReversed &&
+      !this.isCoverImage() &&
+      !this.isWideImage(this.canvasImage) &&
+      !this.isWideImage(this.canvasImageNext) &&
+      window.innerWidth > window.innerHeight // Don't render double reversed if orientation is portrait, mostly mobile
+      );
+  }
+
+  @HostListener('window:resize', ['$event'])
+  @HostListener('window:orientationchange', ['$event'])
+  onResize() {
+    if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) return;
+    if (window.innerWidth > window.innerHeight) return;
+    this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
+    this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
   }
 
   get CurrentPageBookmarked() {
@@ -306,7 +336,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     return this.image?.nativeElement.height + 'px';
   }
-  
+
   get RightPaginationOffset() {
     if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
       return (this.readingArea?.nativeElement?.scrollLeft || 0) * -1;
@@ -367,7 +397,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               public readerService: ReaderService, private location: Location,
               private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
-              public utilityService: UtilityService, private renderer: Renderer2, 
+              public utilityService: UtilityService, private renderer: Renderer2,
               @Inject(DOCUMENT) private document: Document, private modalService: NgbModal) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
@@ -422,21 +452,29 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.updateForm();
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+
+        const changeOccurred = parseInt(val, 10) !== this.layoutMode;
         this.layoutMode = parseInt(val, 10);
 
         if (this.layoutMode === LayoutMode.Single) {
           this.generalSettingsForm.get('pageSplitOption')?.enable();
+          this.generalSettingsForm.get('fittingOption')?.enable();
         } else {
-          this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.FitSplit);
+          this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
           this.generalSettingsForm.get('pageSplitOption')?.disable();
-          this.canvasImage2 = this.cachedImages.peek();
+          this.generalSettingsForm.get('fittingOption')?.setValue(this.translateScalingOption(ScalingOption.FitToHeight));
+          this.generalSettingsForm.get('fittingOption')?.disable();
+        }
+
+        // Re-render the current page when we switch layouts
+        if (changeOccurred) {
+          this.loadPage();
         }
       });
 
-
       this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
-        const needsSplitting = this.isCoverImage();
+        const needsSplitting = this.isWideImage();
         // If we need to split on a menu change, then we need to re-render.
         if (needsSplitting) {
           this.loadPage();
@@ -526,12 +564,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // if there is scroll room and on original, then don't paginate
   checkIfPaginationAllowed() {
-    // This is not used atm due to the complexity it adds with keyboard. 
+    // This is not used atm due to the complexity it adds with keyboard.
     if (this.readingArea === undefined || this.readingArea.nativeElement === undefined) return true;
 
     const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
     const totalScrollWidth = this.readingArea?.nativeElement?.scrollWidth;
-    // need to also check if there is scrolll needed
+    // need to also check if there is scroll needed
 
     if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < totalScrollWidth) {
       return false;
@@ -580,12 +618,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.inSetup = false;
         this.prevChapterDisabled = true;
         this.nextChapterDisabled = true;
-  
+
         const images = [];
         for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
           images.push(new Image());
         }
-  
+
         this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
 
         this.render();
@@ -743,23 +781,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     val =  formControl?.value;
 
-    if (this.isCoverImage() && this.layoutMode == LayoutMode.Single && val !== FITTING_OPTION.WIDTH && this.shouldRenderAsFitSplit()) {
+    if (
+      this.isWideImage() &&
+      this.layoutMode === LayoutMode.Single &&
+      val !== FITTING_OPTION.WIDTH &&
+      this.shouldRenderAsFitSplit()
+      ) {
       // Rewriting to fit to width for this cover image
       return FITTING_OPTION.WIDTH;
+    }
+
+    if (this.isWideImage() && this.layoutMode !== LayoutMode.Single) {
+      return val + ' wide double';
     }
 
     if (this.isCoverImage() && this.layoutMode !== LayoutMode.Single) {
       return val + ' cover double';
     }
-
-    // Code from feature/manga-reader. Validate which fix is better
-    // if (this.layoutMode !== LayoutMode.Single) {
-    //   val =  val + (this.isCoverImage() ? 'cover' : '') + 'double';
-    // } else if (this.isCoverImage() && this.shouldRenderAsFitSplit()) {
-    //   // JOE: If we are Fit to Screen, we should use fitting as width just for cover images
-    //   // Rewriting to fit to width for this cover image
-    //   val = FITTING_OPTION.WIDTH;
-    // }
 
     return val;
   }
@@ -843,7 +881,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateSplitPage() {
-    const needsSplitting = this.isCoverImage();
+    const needsSplitting = this.isWideImage();
     if (!needsSplitting || this.isNoSplit()) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return;
@@ -903,9 +941,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
-    let pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage()) ? 2 : 1;
-    if (this.pageNum < 1) {
-      pageAmount = 1;
+    let pageAmount = 1;
+    if (this.layoutMode === LayoutMode.Double) {
+      pageAmount = (
+        !this.isCoverImage() &&
+        !this.isWideImage() &&
+        !this.isWideImage(this.canvasImageNext) &&
+        !this.isSecondLastImage() &&
+        !this.isLastImage()
+        ? 2 : 1);
+    }
+    if (this.layoutMode === LayoutMode.DoubleReversed) {
+      pageAmount = (
+        !this.isCoverImage(this.pageNum - 1) &&
+        !this.isWideImage(this.canvasImagePrev) &&
+        !this.isSecondLastImage() &&
+        !this.isLastImage()
+        ? 2 : 1);
     }
 
     if ((this.pageNum + pageAmount >= this.maxPages && notInSplit) || this.isLoading) {
@@ -922,7 +974,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(this.pageNum + pageAmount);
 
       if (this.readerMode !== ReaderMode.Webtoon) {
-        this.canvasImage = this.cachedImages.next();
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
       }
     }
 
@@ -939,12 +991,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
 
-    // If the prev page before we change current page is a cover image, we actually are skipping a page
-    //console.log('Page ', this.PageNumber, ' is cover image: ', this.isCoverImage(this.cachedImages.prev()))
-    //console.log('Page ', this.pageNum, ' is cover image: ', this.isCoverImage())
-    const pageAmount = (this.layoutMode !== LayoutMode.Single && !this.isCoverImage(this.cachedImages.prev())) ? 2: 1; 
-    // BUG: isCoverImage works on canvasImage, where we need to know if the previous image is a cover image or not. 
-    //console.log('pageAmt: ', pageAmount);
+    let pageAmount = 1;
+    if (this.layoutMode === LayoutMode.Double) {
+      pageAmount = (
+        !this.isCoverImage() &&
+        !this.isWideImage(this.canvasImagePrev)
+        ? 2 : 1);
+    }
+    if (this.layoutMode === LayoutMode.DoubleReversed) {
+      pageAmount = (
+        !this.isCoverImage() &&
+        !this.isCoverImage(this.pageNum - 1) &&
+        !this.isWideImage() &&
+        !this.isWideImage(this.canvasImageNext)
+        ? 2 : 1);
+    }
+
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
       if (this.isLoading) { return; }
 
@@ -956,7 +1018,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum - pageAmount);
-      this.canvasImage = this.cachedImages.prev();
+      if (this.readerMode !== ReaderMode.Webtoon) {
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
+      }
     }
 
     if (this.readerMode !== ReaderMode.Webtoon) {
@@ -1056,15 +1120,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   renderPage() {
-    if (!this.ctx || !this.canvas) { return; }
+    const pageSplit = this.generalSettingsForm.get('pageSplitOption')?.value;
+    if (!this.ctx || !this.canvas || pageSplit !== PageSplitOption.FitSplit || pageSplit !== PageSplitOption.NoSplit) {
+      if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+        this.readingArea.nativeElement.scroll(0,0);
+      }
+      this.isLoading = false;
+      return;
+    }
 
     this.canvasImage.onload = null;
 
     this.setCanvasSize();
 
-    const needsSplitting = this.isCoverImage();
+    const needsSplitting = this.isWideImage();
     this.updateSplitPage();
-
 
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
@@ -1083,7 +1153,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.readingArea.nativeElement.scroll(0,0);
     }
 
-
     this.isLoading = false;
   }
 
@@ -1095,7 +1164,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               || document.documentElement.clientHeight
               || document.body.clientHeight;
 
-      const needsSplitting = this.isCoverImage();
+      const needsSplitting = this.isWideImage();
       let newScale = this.FittingOption;
       const widthRatio = windowWidth / (this.canvasImage.width / (needsSplitting ? 2 : 1));
       const heightRatio = windowHeight / (this.canvasImage.height);
@@ -1112,12 +1181,27 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
   }
 
-  isCoverImage(elem?: HTMLImageElement) {
-    if (elem) return elem.width > elem.height;
+  isCoverImage(pageNumber = this.pageNum) {
+    return pageNumber === 0;
+  }
+
+  isWideImage(elem?: HTMLImageElement) {
+    if (elem) {
+      elem.onload = () => {
+        return elem.width > elem.height;
+      }
+    }
     const element = elem || this.canvasImage;
     return element.width > element.height;
   }
 
+  isSecondLastImage() {
+    return this.maxPages - 1 - this.pageNum === 1;
+  }
+
+  isLastImage() {
+    return this.maxPages - 1 === this.pageNum;
+  }
 
   shouldRenderAsFitSplit() {
     // Some pages aren't cover images but might need fit split renderings
@@ -1138,8 +1222,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       if (offsetIndex < this.maxPages - 1) {
-        // if (this.bookmarkMode) item.src = this.readerService.getBookmarkPageUrl(this.seriesId, offsetIndex);
-        // else item.src = this.readerService.getPageUrl(this.chapterId, offsetIndex);
         item.src = this.getPageUrl(offsetIndex);
         index += 1;
       }
@@ -1148,28 +1230,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
-  
-
   loadPage() {
     this.isLoading = true;
+    this.canvasImage2.src = '';
+    this.canvasImage.src = this.getPageUrl(this.pageNum);
 
-    this.canvasImage = this.cachedImages.current();
-
-    if (this.readerService.imageUrlToPageNum(this.canvasImage.src) !== this.pageNum || this.canvasImage.src === '' || !this.canvasImage.complete) {
-      if (this.layoutMode === LayoutMode.Single) {
-        //this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
-      } else {
-        // this.canvasImage.src = this.readerService.getPageUrl(this.chapterId, this.pageNum);
-        // this.canvasImage2.src = this.readerService.getPageUrl(this.chapterId, this.pageNum + 1); // TODO: I need to handle last page correctly
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
-        this.canvasImage2.src = this.getPageUrl(this.pageNum + 1); // TODO: I need to handle last page correctly
+    if (this.layoutMode !== LayoutMode.Single) {
+      this.canvasImagePrev.src = this.getPageUrl(this.pageNum + (this.layoutMode !== LayoutMode.DoubleReversed ? - 1 : + 1));
+      this.canvasImageNext.src = this.getPageUrl(this.pageNum + (this.layoutMode !== LayoutMode.DoubleReversed ? + 1 : - 1));
+      if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
+          this.canvasImage2.src = this.canvasImageNext.src;
       }
-      this.canvasImage.onload = () => this.renderPage();
-
-    } else {
-      this.renderPage();
     }
+    this.renderPage();
     this.prefetch();
     this.isLoading = false;
   }
@@ -1214,7 +1287,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
-    this.pageNum = Math.max(pageNum, 0);
+    this.pageNum = Math.max(Math.min(pageNum, this.maxPages - 1), 0);
 
     if (this.pageNum >= this.maxPages - 10) {
       // Tell server to cache the next chapter
@@ -1324,16 +1397,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if ( this.readerMode === ReaderMode.Webtoon) {
       this.generalSettingsForm.get('pageSplitOption')?.disable()
       this.generalSettingsForm.get('fittingOption')?.disable()
-      this.generalSettingsForm.get('pageSplitOption')?.disable();
       this.generalSettingsForm.get('layoutMode')?.disable();
     } else {
       this.generalSettingsForm.get('fittingOption')?.enable()
       this.generalSettingsForm.get('pageSplitOption')?.enable();
       this.generalSettingsForm.get('layoutMode')?.enable();
-      this.generalSettingsForm.get('pageSplitOption')?.enable()
 
       if (this.layoutMode !== LayoutMode.Single) {
         this.generalSettingsForm.get('pageSplitOption')?.disable();
+        this.generalSettingsForm.get('fittingOption')?.disable();
       }
     }
   }
@@ -1403,7 +1475,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openShortcutModal() {
-    let ref = this.modalService.open(ShorcutsModalComponent, { scrollable: true, size: 'md' });
+    let ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
     ref.componentInstance.shortcuts = [
       {key: '⇽', description: 'Move to previous page'},
       {key: '⇾', description: 'Move to next page'},

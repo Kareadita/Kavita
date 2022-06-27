@@ -30,7 +30,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
    * Parent scroll for virtualize pagination
    */
   @Input() parentScroll!: Element | Window;
-  
+
   // Filter Code
   @Input() filterOpen!: EventEmitter<boolean>;
   /**
@@ -69,7 +69,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     return Breakpoint;
   }
 
-  constructor(private seriesService: SeriesService, public utilityService: UtilityService, 
+  constructor(private seriesService: SeriesService, public utilityService: UtilityService,
     @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef) {
     this.filter = this.seriesService.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
@@ -92,7 +92,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
 
     this.jumpBarKeysToRender = [];
-    
+
     const removalTimes = Math.ceil(removeCount / 2);
     const midPoint = Math.floor(this.jumpBarKeys.length / 2);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[0]);
@@ -142,7 +142,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`; 
+      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
 
 

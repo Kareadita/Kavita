@@ -49,11 +49,11 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * Pages Read
    */
-  @Input() read = 0; 
+  @Input() read = 0;
   /**
    * Total Pages
    */
-  @Input() total = 0; 
+  @Input() total = 0;
   /**
    * Supress library link
    */
@@ -63,7 +63,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Input() entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem;
   /**
-   * If the entity is selected or not. 
+   * If the entity is selected or not.
    */
   @Input() selected: boolean = false;
   /**
@@ -71,15 +71,15 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Input() allowSelection: boolean = false;
   /**
-   * This will supress the cannot read archive warning when total pages is 0
+   * This will suppress the cannot read archive warning when total pages is 0
    */
-  @Input() supressArchiveWarning: boolean = false;
+  @Input() suppressArchiveWarning: boolean = false;
   /**
     * The number of updates/items within the card. If less than 2, will not be shown.
     */
   @Input() count: number = 0;
   /**
-   * Additional information to show on the overlay area. Will always render. 
+   * Additional information to show on the overlay area. Will always render.
    */
   @Input() overlayInformation: string = '';
   /**
@@ -93,14 +93,14 @@ export class CardItemComponent implements OnInit, OnDestroy {
   /**
    * Library name item belongs to
    */
-  libraryName: string | undefined = undefined; 
-  libraryId: number | undefined = undefined; 
+  libraryName: string | undefined = undefined;
+  libraryId: number | undefined = undefined;
   /**
    * Format of the entity (only applies to Series)
    */
   format: MangaFormat = MangaFormat.UNKNOWN;
   chapterTitle: string = '';
-  
+
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
@@ -121,7 +121,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     if (this.chapterTitle === '' || this.chapterTitle === null) return this.title;
     return this.chapterTitle;
   }
-  
+
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -129,14 +129,14 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private libraryService: LibraryService, 
+  constructor(public imageService: ImageService, private libraryService: LibraryService,
     public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
     private messageHub: MessageHubService, private accountService: AccountService, private scrollService: ScrollService, private changeDetectionRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
-      this.supressArchiveWarning = true;
+      this.suppressArchiveWarning = true;
       this.changeDetectionRef.markForCheck();
     }
 
@@ -167,13 +167,13 @@ export class CardItemComponent implements OnInit, OnDestroy {
       this.user = user;
     });
 
-    this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate), 
+    this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
     map(evt => evt.payload as UserProgressUpdateEvent), takeUntil(this.onDestroy)).subscribe(updateEvent => {
       if (this.user === undefined || this.user.username !== updateEvent.username) return;
       if (this.utilityService.isChapter(this.entity) && updateEvent.chapterId !== this.entity.id) return;
       if (this.utilityService.isVolume(this.entity) && updateEvent.volumeId !== this.entity.id) return;
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
-      
+
       this.read = updateEvent.pagesRead;
       this.changeDetectionRef.markForCheck();
     });
@@ -231,7 +231,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
         this.toastr.info('Download is already in progress. Please wait.');
         return;
       }
-      
+
       if (this.utilityService.isVolume(this.entity)) {
         const volume = this.utilityService.asVolume(this.entity);
         this.downloadService.downloadVolumeSize(volume.id).pipe(take(1)).subscribe(async (size) => {

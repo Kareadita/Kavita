@@ -32,7 +32,7 @@ export enum EVENTS {
    */
   DownloadProgress = 'DownloadProgress',
   /**
-   * A generic progress event 
+   * A generic progress event
    */
   NotificationProgress = 'NotificationProgress',
   /**
@@ -107,15 +107,15 @@ export class MessageHubService {
 
   /**
    * Tests that an event is of the type passed
-   * @param event 
-   * @param eventType 
-   * @returns 
+   * @param event
+   * @param eventType
+   * @returns
    */
   public isEventType(event: Message<any>, eventType: EVENTS) {
     if (event.event == EVENTS.NotificationProgress) {
       const notification = event.payload as NotificationProgressEvent;
       return notification.eventType.toLowerCase() == eventType.toLowerCase();
-    } 
+    }
     return event.event === eventType;
   }
 

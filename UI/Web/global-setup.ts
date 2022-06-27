@@ -8,7 +8,7 @@ async function globalSetup(config: FullConfig) {
         'password': 'P4ssword'
     }
     });
-    console.log(token.json());
+    //console.log(token.json());
     // Save signed-in state to 'storageState.json'.
     //await requestContext.storageState({ path: 'adminStorageState.json' });
     await requestContext.dispose();

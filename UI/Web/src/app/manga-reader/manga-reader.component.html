@@ -18,10 +18,8 @@
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
-                <!-- {{this.pageNum}} -->
-                <!-- {{readerService.imageUrlToPageNum(canvasImage.src)}}<ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)"> - {{PageNumber + 1}}</ng-container> -->
 
-                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked" 
+                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                         title="{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()">
                     <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
                     <span class="visually-hidden">{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span>
@@ -51,9 +49,9 @@
                          title="Previous Page" aria-hidden="true"></i>
                     </div>
                 </div>
-                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')" 
-                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'), 
-                                'left': 'inherit', 
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'),
+                                'left': 'inherit',
                                 'right': rightPaginationOffset + 'px'}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
@@ -70,8 +68,8 @@
                 <img #image [src]="canvasImage.src" id="image-1"
                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
-                <ng-container *ngIf="ShouldRenderDoublePage && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
-                    <img [src]="getPageUrl(PageNumber + 1)" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
+                <ng-container *ngIf="(ShouldRenderDoublePage || ShouldRenderReverseDouble) && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
+                    <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
                 </ng-container>
             </div>
 
@@ -163,7 +161,7 @@
                 </div>
 
                 <div class="row mb-2">
-                    <div class="col-md-6 col-sm-12" *ngIf="false">
+                    <div class="col-md-6 col-sm-12">
                         <label for="layout-mode" class="form-label">Layout Mode</label>
                         <select class="form-control" id="page-fitting" formControlName="layoutMode">
                             <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>

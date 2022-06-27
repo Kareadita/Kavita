@@ -97,9 +97,7 @@ namespace API.Controllers
             existingPreferences.GlobalPageLayoutMode = preferencesDto.GlobalPageLayoutMode;
             existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
-
-            // TODO: Remove this code - this overrides layout mode to be single until the mode is released
-            existingPreferences.LayoutMode = LayoutMode.Single;
+            existingPreferences.LayoutMode = preferencesDto.LayoutMode;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

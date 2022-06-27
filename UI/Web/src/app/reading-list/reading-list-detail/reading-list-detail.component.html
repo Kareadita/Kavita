@@ -51,7 +51,7 @@
     </div>
 
     <!-- TODO: This needs virtualization -->
-    <app-dragable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
         <ng-template #draggableItem let-item let-position="idx">
           <div class="d-flex" style="width: 100%;">
                 <app-image width="74px" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
@@ -78,6 +78,6 @@
                   <a href="javascript:void(0);" (click)="readChapter(item)">Read</a>
                 </div>
               </div>
-        </ng-template> 
-    </app-dragable-ordered-list>
+        </ng-template>
+    </app-draggable-ordered-list>
 </div>
