@@ -62,6 +62,10 @@ export class ListItemComponent implements OnInit {
    * Show's the title if avaible on entity
    */
   @Input() showTitle: boolean = true;
+  /**
+   * Blur the summary for the list item
+   */
+  @Input() blur: boolean = false;
 
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
 

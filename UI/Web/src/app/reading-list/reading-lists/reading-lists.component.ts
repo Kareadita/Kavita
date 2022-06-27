@@ -77,7 +77,7 @@ export class ReadingListsComponent implements OnInit {
     }
     this.loadingLists = true;
 
-    this.readingListService.getReadingLists(true, this.pagination?.currentPage, this.pagination?.itemsPerPage).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
+    this.readingListService.getReadingLists(true).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists = readingLists.result;
       this.pagination = readingLists.pagination;
       this.loadingLists = false;

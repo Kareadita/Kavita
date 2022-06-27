@@ -412,7 +412,6 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user (throw exception, let middleware inform user)
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 
@@ -476,7 +475,8 @@ namespace API.Services
             catch (Exception e)
             {
                 _logger.LogWarning(e, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
-                return;
+                throw new KavitaException(
+                    $"There was an error when extracting {archivePath}. Check the file exists, has read permissions or the server OS can support all path characters.");
             }
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }

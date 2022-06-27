@@ -35,7 +35,8 @@ export class AccountService implements OnDestroy {
   constructor(private httpClient: HttpClient, private router: Router, 
     private messageHub: MessageHubService, private themeService: ThemeService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate), 
-        map(evt => evt.payload as UserUpdateEvent),  
+        map(evt => evt.payload as UserUpdateEvent),
+        filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),  
         switchMap(() => this.refreshToken()))
         .subscribe(() => {});
     }
@@ -91,8 +92,9 @@ export class AccountService implements OnDestroy {
       this.themeService.setTheme(this.themeService.defaultTheme);
     }
 
-    this.currentUserSource.next(user);
     this.currentUser = user;
+    this.currentUserSource.next(user);
+    
     if (this.currentUser !== undefined) {
       this.startRefreshTokenTimer();
     } else {

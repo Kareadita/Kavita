@@ -1,35 +1,36 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
-import { IPageInfo, VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
-import { filter, from, map, pairwise, Subject, tap, throttleTime } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
+import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
-import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
+import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
-const FILTER_PAG_REGEX = /[^0-9]/g;
-const SCROLL_BREAKPOINT = 300;
 const keySize = 24;
 
 @Component({
   selector: 'app-card-detail-layout',
   templateUrl: './card-detail-layout.component.html',
-  styleUrls: ['./card-detail-layout.component.scss']
+  styleUrls: ['./card-detail-layout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit, OnChanges {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
   @Input() items: any[] = [];
-  // ?! we need to have chunks to render in, because if we scroll down, then up, then down, we don't want to trigger a duplicate call
-  @Input() paginatedItems: PaginatedResult<any> | undefined; 
   @Input() pagination!: Pagination;
-  
+  /**
+   * Parent scroll for virtualize pagination
+   */
+  @Input() parentScroll!: Element | Window;
+
   // Filter Code
   @Input() filterOpen!: EventEmitter<boolean>;
   /**
@@ -48,8 +49,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   jumpBarKeysToRender: Array<JumpKey> = []; // Original
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
-  @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
-  @Output() pageChangeWithDirection: EventEmitter<0 | 1> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
@@ -58,8 +57,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   @ViewChild('scroller') scroller!: CdkVirtualScrollViewport;
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
-
-  itemSize: number = 100; // Idk what this actually does. Less results in more items rendering, 5 works well with pagination. 230 is technically what a card is height wise
 
   filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
@@ -72,9 +69,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     return Breakpoint;
   }
 
-  constructor(private seriesService: SeriesService, public utilityService: UtilityService, 
-    @Inject(DOCUMENT) private document: Document, private ngZone: NgZone) {
+  constructor(private seriesService: SeriesService, public utilityService: UtilityService,
+    @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef) {
     this.filter = this.seriesService.createSeriesFilter();
+    this.changeDetectionRef.markForCheck();
   }
 
   @HostListener('window:resize', ['$event'])
@@ -83,6 +81,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     const fullSize = (this.jumpBarKeys.length * keySize);
     const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
     if (currentSize >= fullSize) {
+      this.jumpBarKeysToRender = [...this.jumpBarKeys];
+      this.changeDetectionRef.markForCheck();
       return;
     }
 
@@ -92,14 +92,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
 
     this.jumpBarKeysToRender = [];
-    
+
     const removalTimes = Math.ceil(removeCount / 2);
-    const midPoint = this.jumpBarKeys.length / 2;
+    const midPoint = Math.floor(this.jumpBarKeys.length / 2);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[0]);
     this.removeFirstPartOfJumpBar(midPoint, removalTimes);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[midPoint]);
     this.removeSecondPartOfJumpBar(midPoint, removalTimes);
     this.jumpBarKeysToRender.push(this.jumpBarKeys[this.jumpBarKeys.length - 1]);
+    this.changeDetectionRef.markForCheck();
   }
 
   removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
@@ -141,16 +142,18 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`; // ${this.pagination?.currentPage}_
+      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
 
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
+      this.changeDetectionRef.markForCheck();
     }
 
     if (this.pagination === undefined) {
-      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1}
+      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
+      this.changeDetectionRef.markForCheck();
     }
   }
 
@@ -159,56 +162,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     this.resizeJumpBar();
   }
 
-  ngAfterViewInit() {
-    // this.scroller.elementScrolled().pipe(
-    //   map(() => this.scroller.measureScrollOffset('bottom')),
-    //   pairwise(),
-    //   filter(([y1, y2]) => ((y2 < y1 && y2 < SCROLL_BREAKPOINT))),  // 140
-    //   throttleTime(200)
-    //   ).subscribe(([y1, y2]) => {
-    //   const movingForward = y2 < y1;
-    //   if (this.pagination.currentPage === this.pagination.totalPages || this.pagination.currentPage === 1 && !movingForward) return;
-    //   this.ngZone.run(() => {
-    //     console.log('Load next pages');
-
-    //     this.pagination.currentPage = this.pagination.currentPage + 1;
-    //     this.pageChangeWithDirection.emit(1);
-    //   });
-    // });
-
-    // this.scroller.elementScrolled().pipe(
-    //   map(() => this.scroller.measureScrollOffset('top')),
-    //   pairwise(),
-    //   filter(([y1, y2]) => y2 >= y1 && y2 < SCROLL_BREAKPOINT), 
-    //   throttleTime(200)
-    //   ).subscribe(([y1, y2]) => {
-    //   if (this.pagination.currentPage === 1) return;
-    //   this.ngZone.run(() => {
-    //     console.log('Load prev pages');
-
-    //     this.pagination.currentPage = this.pagination.currentPage - 1;
-    //     this.pageChangeWithDirection.emit(0);
-    //   });
-    // });
-  }
 
   ngOnDestroy() {
     this.onDestory.next();
     this.onDestory.complete();
-  }
-
-
-  onPageChange(page: number) {
-    this.pageChange.emit(this.pagination);
-  }
-
-  selectPageStr(page: string) {
-    this.pagination.currentPage = parseInt(page, 10) || 1;
-    this.onPageChange(this.pagination.currentPage);
-  }
-
-  formatInput(input: HTMLInputElement) {
-    input.value = input.value.replace(FILTER_PAG_REGEX, '');
   }
 
   performAction(action: ActionItem<any>) {
@@ -220,63 +177,19 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   applyMetadataFilter(event: FilterEvent) {
     this.applyFilter.emit(event);
     this.updateApplied++;
+    this.changeDetectionRef.markForCheck();
   }
 
-  loading: boolean = false;
-  fetchMore(event: IPageInfo) {
-    if (event.endIndex !== this.items.length - 1) return;
-    if (event.startIndex < 0) return;
-    //console.log('Requesting next page ', (this.pagination.currentPage + 1), 'of data', event);
-    this.loading = true;
-
-    // this.pagination.currentPage = this.pagination.currentPage + 1;
-    // this.pageChangeWithDirection.emit(1);
-
-    // this.fetchNextChunk(this.items.length, 10).then(chunk => {
-    //     this.items = this.items.concat(chunk);
-    //     this.loading = false;
-    // }, () => this.loading = false);
-  }
 
   scrollTo(jumpKey: JumpKey) {
-    // TODO: Figure out how to do this
-    
     let targetIndex = 0;
     for(var i = 0; i < this.jumpBarKeys.length; i++) {
       if (this.jumpBarKeys[i].key === jumpKey.key) break;
       targetIndex += this.jumpBarKeys[i].size;
     }
-    //console.log('scrolling to card that starts with ', jumpKey.key, + ' with index of ', targetIndex);
 
-    // Infinite scroll
     this.virtualScroller.scrollToIndex(targetIndex, true, undefined, 1000);
+    this.changeDetectionRef.markForCheck();
     return;
-
-    // Basic implementation based on itemsPerPage being the same. 
-    //var minIndex = this.pagination.currentPage * this.pagination.itemsPerPage;
-    var targetPage = Math.max(Math.ceil(targetIndex / this.pagination.itemsPerPage), 1);
-    //console.log('We are on page ', this.pagination.currentPage, ' and our target page is ', targetPage);
-    if (targetPage === this.pagination.currentPage) {
-      // Scroll to the element
-      const elem = this.document.querySelector(`div[id="jumpbar-index--${targetIndex}"`);
-      if (elem !== null) {
-        
-        this.virtualScroller.scrollToIndex(targetIndex);
-        // elem.scrollIntoView({
-        //   behavior: 'smooth'
-        // });
-      }
-      return;
-    }
-
-    // With infinite scroll, we can't just jump to a random place, because then our list of items would be out of sync. 
-    this.selectPageStr(targetPage + '');
-    //this.pageChangeWithDirection.emit(1);
-
-    // if (minIndex > targetIndex) {
-    //   // We need to scroll forward (potentially to another page)
-    // } else if (minIndex < targetIndex) {
-    //   // We need to scroll back (potentially to another page)
-    // }
   }
 }

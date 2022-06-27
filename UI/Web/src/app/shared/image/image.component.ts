@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CoverUpdateEvent } from 'src/app/_models/events/cover-update-event';
@@ -11,7 +11,8 @@ import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service
 @Component({
   selector: 'app-image',
   templateUrl: './image.component.html',
-  styleUrls: ['./image.component.scss']
+  styleUrls: ['./image.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ImageComponent implements OnChanges, OnDestroy {
 
@@ -48,7 +49,7 @@ export class ImageComponent implements OnChanges, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService) {
+  constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService, private changeDetectionRef: ChangeDetectorRef) {
     this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
       if (!this.processEvents) return;
       if (res.event === EVENTS.CoverUpdate) {
@@ -65,6 +66,7 @@ export class ImageComponent implements OnChanges, OnDestroy {
           }
           if (id === (updateEvent.id + '')) {
             this.imageUrl = this.imageService.randomize(this.imageUrl);
+            this.changeDetectionRef.markForCheck();
           }
         }
       }

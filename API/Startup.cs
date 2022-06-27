@@ -60,17 +60,16 @@ namespace API
             services.AddIdentityServices(_config);
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kavita API", Version = "v1" });
-
-                c.SwaggerDoc("Kavita API", new OpenApiInfo()
+                c.SwaggerDoc("v1", new OpenApiInfo()
                 {
                     Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
                     Title = "Kavita API",
                     Version = "v1",
                 });
 
+
                 var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
-                c.IncludeXmlComments(filePath);
+                c.IncludeXmlComments(filePath, true);
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
                     In = ParameterLocation.Header,
                     Description = "Please insert JWT with Bearer into field",
@@ -96,6 +95,19 @@ namespace API
                     Description = "Local Server",
                     Url = "http://localhost:5000/",
                 });
+
+                c.AddServer(new OpenApiServer()
+                {
+                    Url = "https://demo.kavitareader.com/",
+                    Description = "Kavita Demo"
+                });
+
+                c.AddServer(new OpenApiServer()
+                {
+                    Url = "http://" + GetLocalIpAddress() + ":5000/",
+                    Description = "Local IP"
+                });
+
             });
             services.AddResponseCompression(options =>
             {
@@ -228,9 +240,6 @@ namespace API
             {
                 ContentTypeProvider = new FileExtensionContentTypeProvider()
             });
-
-
-
 
             app.Use(async (context, next) =>
             {

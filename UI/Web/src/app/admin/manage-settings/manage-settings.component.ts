@@ -43,6 +43,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
       this.settingsForm.addControl('enableSwaggerUi', new FormControl(this.serverSettings.enableSwaggerUi, [Validators.required]));
+      this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
     });
   }
 
@@ -58,6 +59,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
     this.settingsForm.get('enableSwaggerUi')?.setValue(this.serverSettings.enableSwaggerUi);
+    this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups);
   }
 
   async saveSettings() {

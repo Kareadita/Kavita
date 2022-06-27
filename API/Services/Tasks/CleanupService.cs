@@ -147,11 +147,11 @@ namespace API.Services.Tasks
         }
 
         /// <summary>
-        /// Removes Database backups older than 30 days. If all backups are older than 30 days, the latest is kept.
+        /// Removes Database backups older than configured total backups. If all backups are older than total backups days, only the latest is kept.
         /// </summary>
         public async Task CleanupBackups()
         {
-            const int dayThreshold = 30; // TODO: We can make this a config option
+            var dayThreshold = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalBackups;
             _logger.LogInformation("Beginning cleanup of Database backups at {Time}", DateTime.Now);
             var backupDirectory =
                 (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BackupDirectory)).Value;

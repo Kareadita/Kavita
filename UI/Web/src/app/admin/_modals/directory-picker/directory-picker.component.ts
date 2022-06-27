@@ -91,6 +91,7 @@ export class DirectoryPickerComponent implements OnInit {
 
 
   selectNode(folder: DirectoryDto) {
+    if (folder.disabled) return;
     this.currentRoot = folder.name;
     this.routeStack.push(folder.name);
     this.path = folder.fullPath;
@@ -116,6 +117,10 @@ export class DirectoryPickerComponent implements OnInit {
     }, err => {
       // If there was an error, pop off last directory added to stack
       this.routeStack.pop();
+      const item = this.folders.find(f => f.fullPath === path);
+      if (item) {
+        item.disabled = true;
+      }
     });
   }
 

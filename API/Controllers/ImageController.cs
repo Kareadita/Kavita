@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     /// <summary>
-    /// Responsible for servicing up images stored in the DB
+    /// Responsible for servicing up images stored in Kavita for entities
     /// </summary>
     public class ImageController : BaseApiController
     {

@@ -54,9 +54,6 @@ namespace API.Controllers
         public async Task<ActionResult<ServerSettingDto>> GetSettings()
         {
             var settingsDto = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            // TODO: Is this needed as it gets updated in the DB on startup
-            settingsDto.Port = Configuration.Port;
-            settingsDto.LoggingLevel = Configuration.LogLevel;
             return Ok(settingsDto);
         }
 
@@ -209,6 +206,16 @@ namespace API.Controllers
                 if (setting.Key == ServerSettingKey.EnableSwaggerUi && updateSettingsDto.EnableSwaggerUi + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.EnableSwaggerUi + string.Empty;
+                    _unitOfWork.SettingsRepository.Update(setting);
+                }
+
+                if (setting.Key == ServerSettingKey.TotalBackups && updateSettingsDto.TotalBackups + string.Empty != setting.Value)
+                {
+                    if (updateSettingsDto.TotalBackups > 30 || updateSettingsDto.TotalBackups < 1)
+                    {
+                        return BadRequest("Total Backups must be between 1 and 30");
+                    }
+                    setting.Value = updateSettingsDto.TotalBackups + string.Empty;
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 

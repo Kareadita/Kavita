@@ -11,4 +11,5 @@ export interface ServerSettings {
     emailServiceUrl: string;
     convertBookmarkToWebP: boolean;
     enableSwaggerUi: boolean;
+    totalBackups: number;
 }

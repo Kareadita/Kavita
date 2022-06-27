@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { CollectionTag } from 'src/app/_models/collection-tag';
+import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
@@ -19,6 +20,7 @@ export class AllCollectionsComponent implements OnInit {
   isLoading: boolean = true;
   collections: CollectionTag[] = [];
   collectionTagActions: ActionItem<CollectionTag>[] = [];
+  jumpbarKeys: Array<JumpKey> = [];
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
@@ -44,7 +46,31 @@ export class AllCollectionsComponent implements OnInit {
     this.collectionService.allTags().subscribe(tags => {
       this.collections = tags;
       this.isLoading = false;
+
+      const keys: {[key: string]: number} = {};
+      tags.forEach(s => {
+        let ch = s.title.charAt(0);
+        if (/\d|\#|!|%|@|\(|\)|\^|\*/g.test(ch)) {
+          ch = '#';
+        }
+        if (!keys.hasOwnProperty(ch)) {
+          keys[ch] = 0;
+        }
+        keys[ch] += 1;
+      });
+      this.jumpbarKeys = Object.keys(keys).map(k => {
+        return {
+          key: k,
+          size: keys[k],
+          title: k.toUpperCase()
+        }
+      }).sort((a, b) => {
+        if (a.key < b.key) return -1;
+        if (a.key > b.key) return 1;
+        return 0;
+      });
     });
+    
   }
 
   handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
