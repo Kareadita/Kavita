@@ -2,13 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbActiveOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, Observable, of, take, takeWhile } from 'rxjs';
+import { finalize, Observable, take, takeWhile } from 'rxjs';
 import { Download } from 'src/app/shared/_models/download';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
-import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -51,6 +50,10 @@ export class CardDetailDrawerComponent implements OnInit {
   chapters: Chapter[] = [];
 
   imageUrls: Array<string> = [];
+  /**
+   * Cover image for the entity
+   */
+  coverImageUrl!: string;
 
 
   actions: ActionItem<any>[] = [];
@@ -100,6 +103,11 @@ export class CardDetailDrawerComponent implements OnInit {
     this.isChapter = this.utilityService.isChapter(this.data);
 
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
+    if (this.isChapter) {
+      this.coverImageUrl = this.imageService.getChapterCoverImage(this.data.id);
+    } else {
+      this.coverImageUrl = this.imageService.getVolumeCoverImage(this.data.id);
+    }
 
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
 

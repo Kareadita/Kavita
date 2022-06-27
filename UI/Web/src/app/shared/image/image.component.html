@@ -1,5 +1,3 @@
 <img #img class="lazyload" [src]="imageService.placeholderImage" [attr.data-src]="imageUrl" 
             (error)="imageService.updateErroredImage($event)" 
             aria-hidden="true">
-<!-- TODO: Need to think about how to not lazyload but also handle broken images-->
-<!-- <img #img [src]="imageUrl" aria-hidden="true"> -->
