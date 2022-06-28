@@ -85,13 +85,16 @@
         <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                    {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
+                    <ng-container *ngIf="readingTime.maxHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
+                    <ng-template #normalReadTime>
+                        {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
+                    </ng-template>
                 </app-icon-and-title>
             </div>
         </ng-container>
 
         
-        <ng-container *ngIf="hasReadingProgress && showReadingTimeLeft && readingTimeLeft &&  readingTimeLeft.avgHours !== 0 ">
+        <ng-container *ngIf="hasReadingProgress && showReadingTimeLeft && readingTimeLeft && readingTimeLeft.avgHours !== 0">
             <div class="vr d-none d-lg-block m-2"></div>
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Read Left" [clickable]="false" fontClasses="fa-solid fa-clock">
