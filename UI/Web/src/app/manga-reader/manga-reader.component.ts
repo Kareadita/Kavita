@@ -114,8 +114,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isLoading = true;
 
+  /**
+   * A temp variable to allow us to update isLoose. 
+   */
   pageAmount = 0;
-
+  /**
+   * For double page layout, if only one page will be rendered.
+   */
   isLoose = false;
 
   @ViewChild('reader') reader!: ElementRef;
@@ -132,15 +137,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   canvasImage2 = new Image();
   /**
-   *    *    * Used solely for LayoutMode.Double rendering. Will always hold the previous image in buffer.
+   * Used solely for LayoutMode.Double rendering. Will always hold the previous image in buffer.
    */
   canvasImagePrev = new Image();
   /**
-   *    *    * Used solely for LayoutMode.Double rendering. Will always hold the next image in buffer.
+   * Used solely for LayoutMode.Double rendering. Will always hold the next image in buffer.
    */
   canvasImageNext = new Image();
   /**
-   *    *    * Used solely for LayoutMode.DoubleReverse rendering. Will always hold the image after next in buffer.
+   * Used solely for LayoutMode.DoubleReverse rendering. Will always hold the image after next in buffer.
    */
    canvasImageNextDouble = new Image();
   /**
