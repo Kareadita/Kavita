@@ -68,7 +68,7 @@
                 <img #image [src]="canvasImage.src" id="image-1"
                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
-                <ng-container *ngIf="(ShouldRenderDoublePage || ShouldRenderReverseDouble) && (this.pageNum + 1 <= maxPages - 1 && this.pageNum > 0)">
+                <ng-container *ngIf="(ShouldRenderDoublePage || ShouldRenderReverseDouble) && (this.pageNum <= maxPages - 1 && this.pageNum > 0)">
                     <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
                 </ng-container>
             </div>
