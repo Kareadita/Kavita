@@ -1342,7 +1342,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const page = this.readerService.imageUrlToPageNum(image.src);
     if (page < 0) return;
     image.onload = null;
-    if (!this.pageDimensionHistory.hasOwnProperty(page)) this.pageDimensionHistory[page] = {pageNumber: page, isWide: this.isWideImage(image)};
+    //if (!this.pageDimensionHistory.hasOwnProperty(page)) this.pageDimensionHistory[page] = {pageNumber: page, isWide: this.isWideImage(image)};
   }
 
   loadPage() {
