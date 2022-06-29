@@ -172,6 +172,7 @@ img {
     overflow: hidden;
     border: 2px solid #ccc;
     vertical-align: sub;
+    display: inline-block;
 
     &::before {
         margin-left: 30%;
@@ -201,7 +202,17 @@ img {
     // For layout only
 
   }
-  
+
+  .split-double {
+    height: 20px;
+    display: inline-block;
+    font-size: .7em;
+
+    .right {
+      left: -7px;
+    }
+  }
+
   ::ng-deep {
     .custom-slider .ngx-slider .ngx-slider-bar {
       background: #e9ffe2;
