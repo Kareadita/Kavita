@@ -37,16 +37,6 @@ const ANIMATION_SPEED = 200;
 const OVERLAY_AUTO_CLOSE_TIME = 3000;
 const CLICK_OVERLAY_TIMEOUT = 3000;
 
-interface PageInfo {
-  /**
-   * The page number 
-   */
-  pageNumber: number;
-  /**
-   * If It's a wide image or not
-   */
-  isWide: boolean;
-}
 
 
 @Component({
@@ -311,11 +301,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * This is here as absolute layout requires us to calculate a negative right property for the right pagination when there is overflow. This is calculated on scroll.
    */
   rightPaginationOffset = 0;
-
-  /**
-   * As we load images from the backend, keep track of some information about them to make it easy to for the double layout renderers.
-   */
-  pageDimensionHistory: {[keyof: number]: PageInfo}= {};
 
   getPageUrl = (pageNum: number) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
@@ -1329,7 +1314,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
       if (offsetIndex < this.maxPages - 1) {
-        item.onload = () => this.calculatePageInfo(item);
         item.src = this.getPageUrl(offsetIndex);
         index += 1;
       }
@@ -1338,12 +1322,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
-  calculatePageInfo(image: HTMLImageElement) {
-    const page = this.readerService.imageUrlToPageNum(image.src);
-    if (page < 0) return;
-    image.onload = null;
-    //if (!this.pageDimensionHistory.hasOwnProperty(page)) this.pageDimensionHistory[page] = {pageNumber: page, isWide: this.isWideImage(image)};
-  }
 
   loadPage() {
     this.isLoading = true;
@@ -1351,7 +1329,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImageAheadBy2.src = '';
 
     this.isLoose = (this.pageAmount === 1 ? true : false);
-    this.canvasImage.onload = () => this.calculatePageInfo(this.canvasImage);
     this.canvasImage.src = this.getPageUrl(this.pageNum);
 
     if (this.layoutMode !== LayoutMode.Single) {
@@ -1364,13 +1341,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.pageNum - 2 >= 0) {
         this.canvasImageBehindBy2.src = this.getPageUrl(this.pageNum - 2 || 0);
       }      
-      
-
-      this.canvasImagePrev.onload = () => this.calculatePageInfo(this.canvasImagePrev);
-      this.canvasImageNext.onload = () => this.calculatePageInfo(this.canvasImageNext);
-      this.canvasImageAheadBy2.onload = () => this.calculatePageInfo(this.canvasImageAheadBy2);
-
-
+    
       if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
         if (this.layoutMode === LayoutMode.Double) {
           this.canvasImage2.src = this.canvasImageNext.src;
