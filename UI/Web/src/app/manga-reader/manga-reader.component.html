@@ -13,6 +13,9 @@
                 </div>
             </div>
 
+            {{readerService.imageUrlToPageNum(this.canvasImage.src)}}
+            {{readerService.imageUrlToPageNum(this.canvasImage2.src)}}
+
             <div style="margin-left: auto; padding-right: 3%;">
                 <button class="btn btn-icon btn-small" title="Shortcuts" (click)="openShortcutModal()">
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
@@ -72,8 +75,9 @@
                 <!-- <ng-container *ngIf="(ShouldRenderDoublePage || ShouldRenderReverseDouble) && (this.pageNum <= maxPages - 1 && !isCoverImage())">
                     <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}} {{ShouldRenderReverseDouble ? 'reverse' : ''}}">
                 </ng-container> -->
+
                 <ng-container *ngIf="(this.canvasImage2.src !== '') && (this.pageNum <= maxPages - 1 && !isCoverImage())">
-                    <img [src]="canvasImage2.src" id="image-2"  class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}} -->
+                    <img [src]="canvasImage2.src" id="image-2" class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}} -->
                 </ng-container>
             </div>
 
