@@ -330,25 +330,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @remarks This will always fail if the window's width is greater than the height
    */
   get ShouldRenderDoublePage() {
+    // window.innerWidth > window.innerHeight // Don't render double if orientation is portrait, mostly mobile
     return (
       this.layoutMode === LayoutMode.Double &&
       !this.isCoverImage() &&
       !this.isWideImage(this.canvasImage) && 
-      !this.isWideImage(this.canvasImageNext) &&
-      window.innerWidth > window.innerHeight // Don't render double if orientation is portrait, mostly mobile
+      !this.isWideImage(this.canvasImageNext)
       );
   }
 
   get ShouldRenderReverseDouble() {
     // NOTE: I'm not going to care about window.innerWidth > window.innerHeight since a higher level handler will manage
+    // window.innerWidth > window.innerHeight // Don't render double reversed if orientation is portrait, mostly mobile
     return (
       this.layoutMode === LayoutMode.DoubleReversed &&
       !this.isCoverImage() &&
       !this.isCoverImage(this.pageNum - 1) &&
       !this.isWideImage(this.canvasImage) &&
       !this.isWideImage(this.canvasImageNext) &&
-      !this.isLoose &&
-      window.innerWidth > window.innerHeight // Don't render double reversed if orientation is portrait, mostly mobile
+      !this.isLoose
       );
   }
 
@@ -1321,6 +1321,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   calculatePageInfo(image: HTMLImageElement) {
     const page = this.readerService.imageUrlToPageNum(image.src);
+    if (page < 0) return;
+    image.onload = null;
     if (!this.pageDimensionHistory.hasOwnProperty(page)) this.pageDimensionHistory[page] = {pageNumber: page, isWide: this.isWideImage(image)};
   }
 
@@ -1328,6 +1330,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.canvasImage2.src = '';
     this.isLoose = (this.pageAmount === 1 ? true : false);
+    this.canvasImage.onload = () => this.calculatePageInfo(this.canvasImage);
     this.canvasImage.src = this.getPageUrl(this.pageNum);
 
     if (this.layoutMode !== LayoutMode.Single) {
@@ -1339,6 +1342,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.canvasImageNext.src = this.getPageUrl(this.pageNum + (isDouble ? + 1 : - 1));
 
       this.canvasImageAheadBy2.src = this.getPageUrl(this.pageNum + 2);
+
+      this.canvasImagePrev.onload = () => this.calculatePageInfo(this.canvasImagePrev);
+      this.canvasImageNext.onload = () => this.calculatePageInfo(this.canvasImageNext);
+      this.canvasImageAheadBy2.onload = () => this.calculatePageInfo(this.canvasImageAheadBy2);
+
 
       if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
           this.canvasImage2.src = this.canvasImageNext.src;
