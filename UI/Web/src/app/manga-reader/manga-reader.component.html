@@ -162,7 +162,22 @@
 
                 <div class="row mb-2">
                     <div class="col-md-6 col-sm-12">
-                        <label for="layout-mode" class="form-label">Layout Mode</label>
+                        <label for="layout-mode" class="form-label">Layout Mode</label>&nbsp;
+                        <div class="split fa fa-image">
+                            <ng-container [ngSwitch]="layoutMode">
+                                <ng-container *ngSwitchCase="LayoutMode.Single">
+                                    <div class="fa fa-image"></div>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="LayoutMode.Double">
+                                    <div class="fa fa-image">
+                                        <div class="{{LayoutModeIconClass}}"></div> 
+                                    </div>
+                                    <div class="fa fa-image"></div>
+                                </ng-container>
+                                <ng-container *ngSwitchCase="LayoutMode.DoubleReversed"></ng-container>
+                                <!-- <div class="{{LayoutModeIconClass}}"></div> -->
+                            </ng-container>
+                        </div>
                         <select class="form-control" id="page-fitting" formControlName="layoutMode">
                             <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
                         </select>
