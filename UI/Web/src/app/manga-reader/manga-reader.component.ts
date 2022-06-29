@@ -1010,10 +1010,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
-    console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-      console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
-      console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
-      console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
+    // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+    // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
+    // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
+    // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
 
 
     let pageAmount = 1;
@@ -1070,10 +1070,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let pageAmount = 1;
     if (this.layoutMode === LayoutMode.Double) {
       // Current is current and next is current + 1 (current is the page we are paging from)
-      console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-      console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
-      console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
-      console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage - 1 on double
+      // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+      // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
+      // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
+      // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage - 1 on double
 
       pageAmount = (
         !this.isCoverImage() &&
@@ -1081,13 +1081,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         ? 2 : 1);
     }
     if (this.layoutMode === LayoutMode.DoubleReversed) {
-      //?! BUG: This can sometimes skip images if current image is wide and prev is not. 
-
       // Current is current - 1 and next is current -2 (current is the page we are paging from)
-      console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-      console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
-      console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
-      console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage + 1 on double reversed
+      // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+      // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
+      // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
+      // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage + 1 on double reversed
       pageAmount = (
         !this.isCoverImage() &&
         !this.isCoverImage(this.pageNum - 1) &&
@@ -1095,8 +1093,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         !this.isWideImage(this.canvasImageNext)
         ? 2 : 1);
     }
-
-    console.log('Page amount: ', pageAmount);
 
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
       if (this.isLoading) { return; }
@@ -1291,6 +1287,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       elem.onload = () => {
         return elem.width > elem.height;
       }
+      if (elem.src === '') return false;
     }
     const element = elem || this.canvasImage;
     return element.width > element.height;
@@ -1351,24 +1348,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPage() {
     this.isLoading = true;
     this.canvasImage2.src = '';
+    this.canvasImageAheadBy2.src = '';
+
     this.isLoose = (this.pageAmount === 1 ? true : false);
     this.canvasImage.onload = () => this.calculatePageInfo(this.canvasImage);
     this.canvasImage.src = this.getPageUrl(this.pageNum);
 
     if (this.layoutMode !== LayoutMode.Single) {
-      const isDouble = this.layoutMode !== LayoutMode.DoubleReversed;
-
-      // If double, prev = pageNumb - 1, if reversed, prev = pageNum + 1
-      this.canvasImagePrev.src = this.getPageUrl(this.pageNum + (isDouble ? - 1 : + 1)); 
-      // If double, next = pageNumb + 1, if reversed, next = pageNum - 1
-      this.canvasImageNext.src = this.getPageUrl(this.pageNum + (isDouble ? + 1 : - 1));
-
-      // Joe's overrides to try to streamline the logic
-      this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1);
+      this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()
       this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
 
-      this.canvasImageAheadBy2.src = this.getPageUrl(this.pageNum + 2);
-      this.canvasImageBehindBy2.src = this.getPageUrl(this.pageNum - 2 || 0);
+      if (this.pageNum + 2 < this.maxPages - 1) {
+        this.canvasImageAheadBy2.src = this.getPageUrl(this.pageNum + 2);
+      }
+      if (this.pageNum - 2 >= 0) {
+        this.canvasImageBehindBy2.src = this.getPageUrl(this.pageNum - 2 || 0);
+      }      
+      
 
       this.canvasImagePrev.onload = () => this.calculatePageInfo(this.canvasImagePrev);
       this.canvasImageNext.onload = () => this.calculatePageInfo(this.canvasImageNext);
@@ -1383,15 +1379,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
-      console.log('======================================================');
-      console.log('Page History: ', this.pageDimensionHistory);
-      console.log('Current Page: ', this.pageNum);
-      console.log('CanvasImage page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
-      console.log('CanvasImage2 page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
-      console.log('Canvas Image Next:', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-      console.log('Canvas Image Next Ahead by 2:', this.readerService.imageUrlToPageNum(this.canvasImageAheadBy2.src));
-      console.log('Canvas Image Prev:', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
-      console.log('======================================================');
+      // console.log('======================================================');
+      // console.log('Page History: ', this.pageDimensionHistory);
+      // console.log('Current Page: ', this.pageNum);
+      // console.log('CanvasImage page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
+      // console.log('CanvasImage2 page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
+      // console.log('Canvas Image Next:', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+      // console.log('Canvas Image Next Ahead by 2:', this.readerService.imageUrlToPageNum(this.canvasImageAheadBy2.src));
+      // console.log('Canvas Image Prev:', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
+      // console.log('======================================================');
     }
     this.renderPage();
     this.prefetch();
