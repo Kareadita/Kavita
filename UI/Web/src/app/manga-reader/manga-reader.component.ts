@@ -373,8 +373,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ImageHeight() {
-    // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
-    if (this.isCoverImage() || this.FittingOption === FITTING_OPTION.WIDTH) {
+    // If we are a wide image and implied fit to screen, then we need to take screen height rather than image height
+    if (this.isWideImage() || this.FittingOption === FITTING_OPTION.WIDTH) {
       return this.WindowHeight;
     }
     return this.image?.nativeElement.height + 'px';
@@ -995,12 +995,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
-    // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-    // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
-    // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
-    // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
-
-
     let pageAmount = 1;
     if (this.layoutMode === LayoutMode.Double) {
       pageAmount = (
@@ -1012,7 +1006,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         ? 2 : 1);
     } else if (this.layoutMode === LayoutMode.DoubleReversed) {
       pageAmount = (
-        //!this.isCoverImage(this.pageNum - 1) && // 
         !this.isWideImage(this.canvasImageNext) && 
         !this.isWideImage(this.canvasImageAheadBy2) && // Remember we are doing this logic before we've hit the next page, so we need this
         !this.isSecondLastImage() &&
@@ -1054,23 +1047,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let pageAmount = 1;
     if (this.layoutMode === LayoutMode.Double) {
-      // Current is current and next is current + 1 (current is the page we are paging from)
-      // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-      // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
-      // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
-      // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage - 1 on double
-
       pageAmount = (
         !this.isCoverImage() &&
         !this.isWideImage(this.canvasImagePrev)
         ? 2 : 1);
     }
     if (this.layoutMode === LayoutMode.DoubleReversed) {
-      // Current is current - 1 and next is current -2 (current is the page we are paging from)
-      // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-      // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
-      // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
-      // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage + 1 on double reversed
       pageAmount = (
         !this.isCoverImage() &&
         !this.isCoverImage(this.pageNum - 1) &&
@@ -1318,8 +1300,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
-
-    //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
 
@@ -1349,16 +1329,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.canvasImage2.src = this.canvasImagePrev.src;
         }
       }
-
-      // console.log('======================================================');
-      // console.log('Page History: ', this.pageDimensionHistory);
-      // console.log('Current Page: ', this.pageNum);
-      // console.log('CanvasImage page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
-      // console.log('CanvasImage2 page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
-      // console.log('Canvas Image Next:', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
-      // console.log('Canvas Image Next Ahead by 2:', this.readerService.imageUrlToPageNum(this.canvasImageAheadBy2.src));
-      // console.log('Canvas Image Prev:', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
-      // console.log('======================================================');
     }
     this.renderPage();
     this.prefetch();

@@ -219,11 +219,11 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
         }
 
+        if (series.WordCount == 0 && series.WordCount != 0) series.WordCount = existingWordCount; // Restore original word count if the file hasn't changed
         var seriesEstimate = _readerService.GetTimeEstimate(series.WordCount, series.Pages, isEpub);
         series.MinHoursToRead = seriesEstimate.MinHours;
         series.MaxHoursToRead = seriesEstimate.MaxHours;
         series.AvgHoursToRead = seriesEstimate.AvgHours;
-        if (series.WordCount == 0) series.WordCount = existingWordCount; // Restore original word count if the file hasn't changed
         _unitOfWork.SeriesRepository.Update(series);
     }
 

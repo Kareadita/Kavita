@@ -13,9 +13,6 @@
                 </div>
             </div>
 
-            {{readerService.imageUrlToPageNum(this.canvasImage.src)}}
-            {{readerService.imageUrlToPageNum(this.canvasImage2.src)}}
-
             <div style="margin-left: auto; padding-right: 3%;">
                 <button class="btn btn-icon btn-small" title="Shortcuts" (click)="openShortcutModal()">
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
@@ -46,7 +43,8 @@
 
             <div class="pagination-area">
                 <!-- Pagination controls and screen hints-->
-                <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%')}">
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" 
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%')}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                          title="Previous Page" aria-hidden="true"></i>
