@@ -373,7 +373,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ImageHeight() {
-    // If we are a cover image and implied fit to screen, then we need to take screen height rather than image height
+    // If we are a wide image and implied fit to screen, then we need to take screen height rather than image height
     if (this.isWideImage() || this.FittingOption === FITTING_OPTION.WIDTH) {
       return this.WindowHeight;
     }
