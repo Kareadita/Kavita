@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SeriesCardComponent } from './series-card/series-card.component';
-import { LibraryCardComponent } from './library-card/library-card.component';
 import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-chooser.component';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
@@ -36,7 +35,6 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
   declarations: [
     CardItemComponent,
     SeriesCardComponent,
-    LibraryCardComponent,
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
@@ -89,9 +87,7 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
   exports: [
     CardItemComponent,
     SeriesCardComponent,
-    LibraryCardComponent,
     SeriesCardComponent,
-    LibraryCardComponent,
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
