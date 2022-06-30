@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Component, ContentChildren, ElementRef, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NavigationStart, Router } from '@angular/router';
+import { fromEvent, Subject } from 'rxjs';
+import { debounceTime, filter, takeUntil } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -51,12 +51,34 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService,
     private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
-    private scrollService: ScrollService, private seriesService: SeriesService) { }
+    private scrollService: ScrollService, private seriesService: SeriesService,) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // setTimeout(() => this.setupScrollChecker(), 1000);
+    // // TODO: on router change, reset the scroll check 
+
+    // this.router.events
+    //   .pipe(filter(event => event instanceof NavigationStart))
+    //   .subscribe((event) => {
+    //     setTimeout(() => this.setupScrollChecker(), 1000);
+    //   });
+  }
+
+  // setupScrollChecker() {
+  //   const viewportScroller = this.document.querySelector('.viewport-container');
+  //   console.log('viewport container', viewportScroller);
+
+  //   if (viewportScroller) {
+  //     fromEvent(viewportScroller, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded());
+  //   } else {
+  //     fromEvent(this.document.body, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded());
+  //   }
+  // }
 
   @HostListener('body:scroll', [])
   checkBackToTopNeeded() {
+    // TODO: This somehow needs to hook into the scrolling for virtual scroll
+    
     const offset = this.scrollService.scrollPosition;
     if (offset > 100) {
       this.backToTopNeeded = true;

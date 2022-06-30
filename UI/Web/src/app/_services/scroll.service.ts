@@ -24,18 +24,18 @@ export class ScrollService {
   }
 
   get scrollPosition() {
-    return (window.pageYOffset 
-      || document.documentElement.scrollTop 
+    return (window.pageYOffset
+      || document.documentElement.scrollTop
       || document.body.scrollTop || 0);
   }
 
   scrollTo(top: number, el: Element | Window = window) {
     el.scroll({
       top: top,
-      behavior: 'smooth' 
+      behavior: 'smooth'
     });
   }
-  
+
   scrollToX(left: number, el: Element | Window = window) {
     el.scroll({
       left: left,
