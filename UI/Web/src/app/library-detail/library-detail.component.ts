@@ -18,6 +18,8 @@ import { SeriesService } from '../_services/series.service';
 import { NavService } from '../_services/nav.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
+import { JumpKey } from '../_models/jumpbar/jump-key';
+import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 
 @Component({
   selector: 'app-library-detail',
@@ -38,6 +40,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
   filterActiveCheck!: SeriesFilter;
+
+  jumpKeys: Array<JumpKey> = [];
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'Library', fragment: '', icon: 'fa-landmark'},
@@ -100,6 +104,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       this.libraryName = names[this.libraryId];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
     });
+
+    this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
+      this.jumpKeys = barDetails;
+    });
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
@@ -114,10 +122,15 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
-      if (event.event !== EVENTS.SeriesAdded) return;
-      const seriesAdded = event.payload as SeriesAddedEvent;
-      if (seriesAdded.libraryId !== this.libraryId) return;
-      this.loadPage();
+      if (event.event === EVENTS.SeriesAdded) {
+        const seriesAdded = event.payload as SeriesAddedEvent;
+        if (seriesAdded.libraryId !== this.libraryId) return;
+        this.loadPage();
+      } else if (event.event === EVENTS.SeriesRemoved) {
+        const seriesRemoved = event.payload as SeriesRemovedEvent;
+        if (seriesRemoved.libraryId !== this.libraryId) return;
+        this.loadPage();
+      }
     });
   }
 
@@ -179,22 +192,17 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
-      this.series = series.result;
+    this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+      this.series = series.result; 
       this.pagination = series.pagination;
       this.loadingSeries = false;
       window.scrollTo(0, 0);
     });
   }
 
-  onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
-    this.loadPage();
-  }
-
   seriesClicked(series: Series) {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }

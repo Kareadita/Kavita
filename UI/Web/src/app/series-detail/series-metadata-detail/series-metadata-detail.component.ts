@@ -1,5 +1,7 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
+import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
+import { ReaderService } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../shared/tag-badge/tag-badge.component';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
 import { UtilityService } from '../../shared/_services/utility.service';
@@ -9,6 +11,7 @@ import { Series } from '../../_models/series';
 import { SeriesMetadata } from '../../_models/series-metadata';
 import { MetadataService } from '../../_services/metadata.service';
 
+
 @Component({
   selector: 'app-series-metadata-detail',
   templateUrl: './series-metadata-detail.component.html',
@@ -17,6 +20,7 @@ import { MetadataService } from '../../_services/metadata.service';
 export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   @Input() seriesMetadata!: SeriesMetadata;
+  @Input() hasReadingProgress: boolean = false;
   /**
    * Reading lists with a connection to the Series
    */
@@ -25,6 +29,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
+
+  // readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
+  // readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
 
   /**
    * Html representation of Series Summary
@@ -43,7 +50,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return FilterQueryParam;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService, private router: Router) { }
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService, private router: Router, public readerService: ReaderService) {
+    
+  }
   
   ngOnChanges(changes: SimpleChanges): void {
     this.hasExtendedProperites = this.seriesMetadata.colorists.length > 0 || 
@@ -59,7 +68,6 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
     }
-    
   }
 
   ngOnInit(): void {
@@ -67,6 +75,10 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   toggleView() {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  handleGoTo(event: {queryParamName: FilterQueryParam, filter: any}) {
+    this.goTo(event.queryParamName, event.filter);
   }
 
   goTo(queryParamName: FilterQueryParam, filter: any) {

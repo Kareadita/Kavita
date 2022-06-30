@@ -66,6 +66,11 @@
     border-radius: 60px;
 }
 
+.colored-error {
+    background-color: var(--error-color) !important;
+    border-radius: 60px;
+}
+
 .update-available {
     cursor: pointer;
     

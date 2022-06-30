@@ -1,9 +1,12 @@
 <ng-container *ngIf="isAdmin">
     
-    <button type="button" class="btn btn-icon {{activeEvents > 0 ? 'colored' : ''}}" 
-        [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
-        <i aria-hidden="true" class="fa fa-wave-square nav"></i>
-    </button>
+    <ng-container *ngIf="errors$ | async as errors">
+        <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0, 'colored-error': errors.length > 0}" 
+            [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
+            <i aria-hidden="true" class="fa fa-wave-square nav"></i>
+        </button>
+    </ng-container>
+    
 
     <ng-template #popContent>
         <ul class="list-group list-group-flush dark-menu">

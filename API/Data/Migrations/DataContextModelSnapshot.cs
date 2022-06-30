@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.6");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -170,6 +170,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("#000000");
 
+                    b.Property<bool>("BlurUnreadSummaries")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("BookReaderFontFamily")
                         .HasColumnType("TEXT");
 
@@ -177,6 +180,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("BookReaderImmersiveMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BookReaderLayoutMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("BookReaderLineSpacing")
@@ -196,10 +202,12 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("Dark");
 
-                    b.Property<int>("LayoutMode")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("GlobalPageLayoutMode")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0);
 
-                    b.Property<int>("PageLayoutMode")
+                    b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
@@ -320,6 +328,9 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AvgHoursToRead")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Count")
                         .HasColumnType("INTEGER");
 
@@ -340,6 +351,12 @@ namespace API.Data.Migrations
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("MaxHoursToRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MinHoursToRead")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Number")
                         .HasColumnType("TEXT");
@@ -366,6 +383,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("VolumeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("WordCount")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -498,6 +518,9 @@ namespace API.Data.Migrations
 
                     b.Property<int>("Format")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastFileAnalysis")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
@@ -729,6 +752,9 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AvgHoursToRead")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
@@ -756,6 +782,12 @@ namespace API.Data.Migrations
                     b.Property<bool>("LocalizedNameLocked")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("MaxHoursToRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MinHoursToRead")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
@@ -775,6 +807,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("SortNameLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("WordCount")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -862,6 +897,9 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AvgHoursToRead")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
@@ -870,6 +908,12 @@ namespace API.Data.Migrations
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("MaxHoursToRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MinHoursToRead")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -881,6 +925,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("WordCount")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

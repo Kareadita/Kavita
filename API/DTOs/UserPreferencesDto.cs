@@ -1,6 +1,7 @@
 ﻿using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.UserPreferences;
 
 namespace API.DTOs
 {
@@ -82,5 +83,15 @@ namespace API.DTOs
         /// </summary>
         /// <remarks>Defaults to false</remarks>
         public bool BookReaderImmersiveMode { get; set; } = false;
+        /// <summary>
+        /// Global Site Option: If the UI should layout items as Cards or List items
+        /// </summary>
+        /// <remarks>Defaults to Cards</remarks>
+        public PageLayoutMode GlobalPageLayoutMode { get; set; } = PageLayoutMode.Cards;
+        /// <summary>
+        /// UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already
+        /// </summary>
+        /// <remarks>Defaults to false</remarks>
+        public bool BlurUnreadSummaries { get; set; } = false;
     }
 }

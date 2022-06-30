@@ -20,8 +20,9 @@ export class MetadataService {
   baseUrl = environment.apiUrl;
 
   private ageRatingTypes: {[key: number]: string} | undefined = undefined;
+  private validLanguages: Array<Language> = [];
 
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+  constructor(private httpClient: HttpClient) { }
 
   getAgeRating(ageRating: AgeRating) {
     if (this.ageRatingTypes != undefined && this.ageRatingTypes.hasOwnProperty(ageRating)) {
@@ -81,7 +82,12 @@ export class MetadataService {
    * All the potential language tags there can be
    */
   getAllValidLanguages() {
-    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages');
+    if (this.validLanguages != undefined && this.validLanguages.length > 0) {
+      return of(this.validLanguages);
+    }
+    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages').pipe(map(l => this.validLanguages = l));
+
+    //return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages').pipe();
   }
 
   getAllPeople(libraries?: Array<number>) {
@@ -90,5 +96,9 @@ export class MetadataService {
       method += '?libraryIds=' + libraries.join(',');
     }
     return this.httpClient.get<Array<Person>>(this.baseUrl + method);
+  }
+
+  getChapterSummary(chapterId: number) {
+    return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, {responseType: 'text' as 'json'});
   }
 }

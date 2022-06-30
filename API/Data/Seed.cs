@@ -100,6 +100,9 @@ namespace API.Data
                 new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
                 new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
                 new() {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
+                new() {Key = ServerSettingKey.ConvertBookmarkToWebP, Value = "false"},
+                new() {Key = ServerSettingKey.EnableSwaggerUi, Value = "false"},
+                new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
             }.ToArray());
 
             foreach (var defaultSetting in DefaultSettings)

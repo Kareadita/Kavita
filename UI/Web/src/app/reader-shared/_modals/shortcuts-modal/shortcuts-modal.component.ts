@@ -13,11 +13,11 @@ export interface KeyboardShortcut {
 }
 
 @Component({
-  selector: 'app-shorcuts-modal',
-  templateUrl: './shorcuts-modal.component.html',
-  styleUrls: ['./shorcuts-modal.component.scss']
+  selector: 'app-shortcuts-modal',
+  templateUrl: './shortcuts-modal.component.html',
+  styleUrls: ['./shortcuts-modal.component.scss']
 })
-export class ShorcutsModalComponent implements OnInit {
+export class ShortcutsModalComponent implements OnInit {
 
   @Input() shortcuts: Array<KeyboardShortcut> = [];
 

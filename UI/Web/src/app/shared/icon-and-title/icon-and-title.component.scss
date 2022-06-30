@@ -1,0 +1,21 @@
+.icon-and-title {
+    flex-direction: column;
+    min-width: 60px;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+}
+
+.text {
+    padding-top: 5px;
+    text-align: center;
+}
+
+.label {
+    padding-bottom: 5px;
+    text-align: center;
+    font-weight: bold;
+}

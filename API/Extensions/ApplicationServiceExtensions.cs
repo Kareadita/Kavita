@@ -3,6 +3,7 @@ using API.Data;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
+using API.Services.Tasks.Metadata;
 using API.SignalR;
 using API.SignalR.Presence;
 using Kavita.Common;
@@ -20,15 +21,18 @@ namespace API.Extensions
         public static void AddApplicationServices(this IServiceCollection services, IConfiguration config, IWebHostEnvironment env)
         {
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
-            services.AddScoped<IStatsService, StatsService>();
-            services.AddScoped<ITaskScheduler, TaskScheduler>();
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IDirectoryService, DirectoryService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IFileSystem, FileSystem>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<ICacheHelper, CacheHelper>();
+
+            services.AddScoped<IStatsService, StatsService>();
+            services.AddScoped<ITaskScheduler, TaskScheduler>();
             services.AddScoped<ICacheService, CacheService>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IScannerService, ScannerService>();
             services.AddScoped<IArchiveService, ArchiveService>();
-            services.AddScoped<IMetadataService, MetadataService>();
             services.AddScoped<IBackupService, BackupService>();
             services.AddScoped<ICleanupService, CleanupService>();
             services.AddScoped<IBookService, BookService>();
@@ -43,10 +47,11 @@ namespace API.Extensions
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<ISeriesService, SeriesService>();
 
+            services.AddScoped<IScannerService, ScannerService>();
+            services.AddScoped<IMetadataService, MetadataService>();
+            services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
 
-            services.AddScoped<IFileSystem, FileSystem>();
-            services.AddScoped<IFileService, FileService>();
-            services.AddScoped<ICacheHelper, CacheHelper>();
+
 
             services.AddScoped<IPresenceTracker, PresenceTracker>();
             services.AddScoped<IEventHub, EventHub>();
@@ -57,7 +62,7 @@ namespace API.Extensions
         }
 
         private static void AddSqLite(this IServiceCollection services, IConfiguration config,
-            IWebHostEnvironment env)
+            IHostEnvironment env)
         {
             services.AddDbContext<DataContext>(options =>
             {

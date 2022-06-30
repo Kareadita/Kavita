@@ -17,6 +17,7 @@ import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { BadgeExpanderComponent } from './badge-expander/badge-expander.component';
 import { ImageComponent } from './image/image.component';
 import { PipeModule } from '../pipe/pipe.module';
+import { IconAndTitleComponent } from './icon-and-title/icon-and-title.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { PipeModule } from '../pipe/pipe.module';
     PersonBadgeComponent,
     BadgeExpanderComponent,
     ImageComponent,
+    IconAndTitleComponent,
   ],
   imports: [
     CommonModule,
@@ -55,6 +57,8 @@ import { PipeModule } from '../pipe/pipe.module';
 
     PersonBadgeComponent,  // Used Series Detail
     BadgeExpanderComponent, // Used Series Detail/Metadata
+
+    IconAndTitleComponent // Used in Series Detail/Metadata
     
   ],
 })

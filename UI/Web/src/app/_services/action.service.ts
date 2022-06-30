@@ -2,7 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { finalize, take, takeWhile } from 'rxjs/operators';
 import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
@@ -64,6 +64,7 @@ export class ActionService implements OnDestroy {
     });
   }
 
+
   /**
    * Request a refresh of Metadata for a given Library
    * @param library Partial Library, must have id and name populated
@@ -84,6 +85,32 @@ export class ActionService implements OnDestroy {
 
     this.libraryService.refreshMetadata(library?.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + library.name);
+      if (callback) {
+        callback(library);
+      }
+    });
+  }
+
+  /**
+   * Request an analysis of files for a given Library (currently just word count)
+   * @param library Partial Library, must have id and name populated
+   * @param callback Optional callback to perform actions after API completes
+   * @returns 
+   */
+   async analyzeFiles(library: Partial<Library>, callback?: LibraryActionCallback) {
+    if (!library.hasOwnProperty('id') || library.id === undefined) {
+      return;
+    }
+
+    if (!await this.confirmService.alert('This is a long running process. Please give it the time to complete before invoking again.')) {
+      if (callback) {
+        callback(library);
+      }
+      return;
+    }
+
+    this.libraryService.analyze(library?.id).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info('Library file analysis queued for ' + library.name);
       if (callback) {
         callback(library);
       }
@@ -121,12 +148,26 @@ export class ActionService implements OnDestroy {
   }
 
   /**
-   * Start a file scan for a Series (currently just does the library not the series directly)
+   * Start a file scan for a Series
    * @param series Series, must have libraryId and name populated
    * @param callback Optional callback to perform actions after API completes
    */
   scanSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
+      this.toastr.info('Scan queued for ' + series.name);
+      if (callback) {
+        callback(series);
+      }
+    });
+  }
+
+  /**
+   * Start a file scan for analyze files for a Series
+   * @param series Series, must have libraryId and name populated
+   * @param callback Optional callback to perform actions after API completes
+   */
+  analyzeFilesForSeries(series: Series, callback?: SeriesActionCallback) {
+    this.seriesService.analyzeFiles(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + series.name);
       if (callback) {
         callback(series);
@@ -486,5 +527,4 @@ export class ActionService implements OnDestroy {
       }
     });
   }
-
 }

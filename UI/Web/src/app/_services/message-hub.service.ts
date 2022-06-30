@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 import { LibraryModifiedEvent } from '../_models/events/library-modified-event';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
 import { ThemeProgressEvent } from '../_models/events/theme-progress-event';
+import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { User } from '../_models/user';
 
 export enum EVENTS {
@@ -31,7 +32,7 @@ export enum EVENTS {
    */
   DownloadProgress = 'DownloadProgress',
   /**
-   * A generic progress event 
+   * A generic progress event
    */
   NotificationProgress = 'NotificationProgress',
   /**
@@ -58,6 +59,18 @@ export enum EVENTS {
     * A user updates an entities read progress
     */
    UserProgressUpdate = 'UserProgressUpdate',
+   /**
+    * A user updates account or preferences
+    */
+   UserUpdate = 'UserUpdate',
+   /**
+    * When bulk bookmarks are being converted
+    */
+   ConvertBookmarksProgress = 'ConvertBookmarksProgress',
+   /**
+    * When files are being scanned to calculate word count
+    */
+   WordCountAnalyzerProgress = 'WordCountAnalyzerProgress'
 }
 
 export interface Message<T> {
@@ -94,15 +107,15 @@ export class MessageHubService {
 
   /**
    * Tests that an event is of the type passed
-   * @param event 
-   * @param eventType 
-   * @returns 
+   * @param event
+   * @param eventType
+   * @returns
    */
   public isEventType(event: Message<any>, eventType: EVENTS) {
     if (event.event == EVENTS.NotificationProgress) {
       const notification = event.payload as NotificationProgressEvent;
       return notification.eventType.toLowerCase() == eventType.toLowerCase();
-    } 
+    }
     return event.event === eventType;
   }
 
@@ -135,6 +148,20 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.ScanLibraryProgress, resp => {
       this.messagesSource.next({
         event: EVENTS.ScanLibraryProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.ConvertBookmarksProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ConvertBookmarksProgress,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.WordCountAnalyzerProgress, resp => {
+      this.messagesSource.next({
+        event: EVENTS.WordCountAnalyzerProgress,
         payload: resp.body
       });
     });
@@ -172,6 +199,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.UserProgressUpdate,
         payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.UserUpdate, resp => {
+      this.messagesSource.next({
+        event: EVENTS.UserUpdate,
+        payload: resp.body as UserUpdateEvent
       });
     });
 

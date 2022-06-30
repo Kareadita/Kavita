@@ -12,7 +12,7 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { IndexUpdateEvent, ItemRemoveEvent } from '../dragable-ordered-list/dragable-ordered-list.component';
+import { IndexUpdateEvent, ItemRemoveEvent } from '../draggable-ordered-list/draggable-ordered-list.component';
 import { LibraryService } from '../../_services/library.service';
 import { forkJoin } from 'rxjs';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -60,7 +60,7 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.listId = parseInt(listId, 10);
 
-    this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
+    //this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     this.libraryService.getLibraries().subscribe(libs => {
       
@@ -118,7 +118,7 @@ export class ReadingListDetailComponent implements OnInit {
       reader = 'book;'
     }
     const params = this.readerService.getQueryParamsObject(false, true, this.readingList.id);
-    this.router.navigate(['library', item.libraryId, 'series', item.seriesId, 'book', item.chapterId], {queryParams: params});
+    this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
 
   handleReadingListActionCallback(action: Action, readingList: ReadingList) {
@@ -146,6 +146,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   formatTitle(item: ReadingListItem) {
+    // TODO: Use new app-entity-title component instead
     if (item.chapterNumber === '0') {
       return 'Volume ' + item.volumeNumber;
     }
@@ -194,10 +195,6 @@ export class ReadingListDetailComponent implements OnInit {
       break;
     }
 
-    if (currentlyReadingChapter.seriesFormat === MangaFormat.EPUB) {
-      this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'book', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
-    } else {
-      this.router.navigate(['library', currentlyReadingChapter.libraryId, 'series', currentlyReadingChapter.seriesId, 'manga', currentlyReadingChapter.chapterId], {queryParams: {readingListId: this.readingList.id}});
-    }
+    this.router.navigate(this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat), {queryParams: {readingListId: this.readingList.id}});
   }
 }

@@ -5,7 +5,7 @@ import { LibraryCardComponent } from './library-card/library-card.component';
 import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-chooser.component';
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
-import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule, NgbOffcanvasModule } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxFileDropModule } from 'ngx-file-drop';
@@ -22,6 +22,13 @@ import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapte
 import { FileInfoComponent } from './file-info/file-info.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
+import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-drawer.component';
+import { EntityTitleComponent } from './entity-title/entity-title.component';
+import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.component';
+import { ListItemComponent } from './list-item/list-item.component';
+import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
+
 
 
 
@@ -41,6 +48,11 @@ import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-
     ChapterMetadataDetailComponent,
     FileInfoComponent,
     EditSeriesRelationComponent,
+    CardDetailDrawerComponent,
+    EntityTitleComponent,
+    EntityInfoCardsComponent,
+    ListItemComponent,
+    SeriesInfoCardsComponent,
   ],
   imports: [
     CommonModule,
@@ -57,15 +69,22 @@ import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,
+    
+    VirtualScrollerModule,
 
 
-
+    NgbOffcanvasModule, // Series Detail, action of cards
     NgbNavModule, //Series Detail
-    NgbPaginationModule, // CardDetailLayoutComponent
+    NgbPaginationModule, // EditCollectionTagsComponent 
     NgbDropdownModule,
     NgbProgressbarModule,
     NgxFileDropModule, // Cover Chooser
-    PipeModule // filter for BulkAddToCollectionComponent
+    PipeModule, // filter for BulkAddToCollectionComponent
+
+    
+    
+
+    SharedModule, // IconAndTitleComponent
   ],
   exports: [
     CardItemComponent,
@@ -81,7 +100,18 @@ import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-
     CardDetailsModalComponent,
     BulkOperationsComponent,
     ChapterMetadataDetailComponent,
-    EditSeriesRelationComponent
+    EditSeriesRelationComponent,
+
+    EntityTitleComponent,
+    EntityInfoCardsComponent,
+    ListItemComponent,
+
+    NgbOffcanvasModule,
+
+    VirtualScrollerModule,
+    SeriesInfoCardsComponent
+
+
   ]
 })
 export class CardsModule { }

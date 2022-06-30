@@ -12,9 +12,11 @@ using API.DTOs.Account;
 using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.UserPreferences;
 using API.Errors;
 using API.Extensions;
 using API.Services;
+using API.SignalR;
 using AutoMapper;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -40,13 +42,16 @@ namespace API.Controllers
         private readonly IAccountService _accountService;
         private readonly IEmailService _emailService;
         private readonly IHostEnvironment _environment;
+        private readonly IEventHub _eventHub;
 
         /// <inheritdoc />
         public AccountController(UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService, IUnitOfWork unitOfWork,
             ILogger<AccountController> logger,
-            IMapper mapper, IAccountService accountService, IEmailService emailService, IHostEnvironment environment)
+            IMapper mapper, IAccountService accountService,
+            IEmailService emailService, IHostEnvironment environment,
+            IEventHub eventHub)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -57,6 +62,7 @@ namespace API.Controllers
             _accountService = accountService;
             _emailService = emailService;
             _environment = environment;
+            _eventHub = eventHub;
         }
 
         /// <summary>
@@ -201,6 +207,11 @@ namespace API.Controllers
             return dto;
         }
 
+        /// <summary>
+        /// Refreshes the user's JWT token
+        /// </summary>
+        /// <param name="tokenRequestDto"></param>
+        /// <returns></returns>
         [HttpPost("refresh-token")]
         public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
         {
@@ -289,6 +300,7 @@ namespace API.Controllers
             {
                 dto.Roles.Add(PolicyConstants.PlebRole);
             }
+
             if (existingRoles.Except(dto.Roles).Any() || dto.Roles.Except(existingRoles).Any())
             {
                 var roles = dto.Roles;
@@ -326,9 +338,9 @@ namespace API.Controllers
                 lib.AppUsers.Add(user);
             }
 
-            if (!_unitOfWork.HasChanges()) return Ok();
-            if (await _unitOfWork.CommitAsync())
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
             {
+                await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
                 return Ok();
             }
 
@@ -646,22 +658,13 @@ namespace API.Controllers
             try
             {
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                //if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
+
                 user.Email = dto.Email;
                 if (!await ConfirmEmailToken(token, user)) return BadRequest("There was a critical error during migration");
                 _unitOfWork.UserRepository.Update(user);
 
                 await _unitOfWork.CommitAsync();
 
-                //var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-migration-email", user.Email);
-                // _logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", dto.Username, emailLink);
-                // // Always send an email, even if the user can't click it just to get them conformable with the system
-                // await _emailService.SendMigrationEmail(new EmailMigrationDto()
-                // {
-                //     EmailAddress = dto.Email,
-                //     Username = user.UserName,
-                //     ServerConfirmationLink = emailLink
-                // });
                 return Ok();
             }
             catch (Exception ex)

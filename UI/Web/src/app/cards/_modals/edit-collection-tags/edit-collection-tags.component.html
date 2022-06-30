@@ -7,8 +7,8 @@
 </div>
 <div class="modal-body  {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
-            <li [ngbNavItem]="tabs[0]">
-            <a ngbNavLink>{{tabs[0]}}</a>
+            <li [ngbNavItem]="tabs[TabID.General].id">
+            <a ngbNavLink>{{tabs[TabID.General].title}}</a>
             <ng-template ngbNavContent>
                 <p>
                     This tag is currently {{tag?.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
@@ -49,8 +49,8 @@
                 </div>
             </ng-template>
             </li>
-            <li [ngbNavItem]="tabs[1]">
-                <a ngbNavLink>{{tabs[1]}}</a>
+            <li [ngbNavItem]="tabs[TabID.CoverImage].id">
+                <a ngbNavLink>{{tabs[TabID.CoverImage].title}}</a>
                 <ng-template ngbNavContent>
                     <p class="alert alert-primary" role="alert">
                         Upload and choose a new cover image. Press Save to upload and override the cover.

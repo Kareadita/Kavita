@@ -1,18 +1,3 @@
-<!-- <div class="circular">
-    <div class="inner"></div>
-    <div class="number">
-       <span class="visually-hidden">{{currentValue}}%</span>
-      <i class="fa fa-angle-double-down" style="font-size: 36px;" aria-hidden="true"></i>
-    </div>
-    <div class="circle">
-       <div class="bar left" #left>
-          <div class="progress"></div>
-       </div>
-       <div class="bar right" #right>
-          <div class="progress"></div>
-       </div>
-     </div>
-  </div> -->
 <ng-container *ngIf="currentValue > 0">
    
 <div class="number">
@@ -28,11 +13,11 @@
       [backgroundPadding]="0"
       outerStrokeLinecap="butt"
       [outerStrokeColor]="'#4ac694'"
-      [innerStrokeColor]="'transparent'"
+      [innerStrokeColor]="innerStrokeColor"
       titleFontSize= "24"
       unitsFontSize= "24"
       [showSubtitle] = "false"
-      [animation]="true"
+      [animation]="animation"
       [animationDuration]="300"
       [startFromZero]="false"
       [responsive]="true"

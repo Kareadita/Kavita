@@ -16,6 +16,11 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
 
+enum TabID {
+  General = 0,
+  CoverImage = 1,
+}
+
 @Component({
   selector: 'app-edit-collection-tags',
   templateUrl: './edit-collection-tags.component.html',
@@ -32,8 +37,8 @@ export class EditCollectionTagsComponent implements OnInit {
   selectAll: boolean = true;
   libraryNames!: any;
   collectionTagForm!: FormGroup;
-  tabs = ['General', 'Cover Image'];
-  active = this.tabs[0];
+  tabs = [{title: 'General', id: TabID.General}, {title: 'Cover Image', id: TabID.CoverImage}];
+  active = TabID.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
 
@@ -43,6 +48,10 @@ export class EditCollectionTagsComponent implements OnInit {
 
   get Breakpoint() {
     return Breakpoint;
+  }
+
+  get TabID() {
+    return TabID;
   }
 
   constructor(public modal: NgbActiveModal, private seriesService: SeriesService, 

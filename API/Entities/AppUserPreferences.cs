@@ -1,4 +1,5 @@
 ﻿using API.Entities.Enums;
+using API.Entities.Enums.UserPreferences;
 
 namespace API.Entities
 {
@@ -81,13 +82,22 @@ namespace API.Entities
         /// 2 column is fit to height, 2 columns
         /// </summary>
         /// <remarks>Defaults to Default</remarks>
-        public BookPageLayoutMode PageLayoutMode { get; set; } = BookPageLayoutMode.Default;
+        public BookPageLayoutMode BookReaderLayoutMode { get; set; } = BookPageLayoutMode.Default;
         /// <summary>
         /// Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this.
         /// </summary>
         /// <remarks>Defaults to false</remarks>
         public bool BookReaderImmersiveMode { get; set; } = false;
-
+        /// <summary>
+        /// Global Site Option: If the UI should layout items as Cards or List items
+        /// </summary>
+        /// <remarks>Defaults to Cards</remarks>
+        public PageLayoutMode GlobalPageLayoutMode { get; set; } = PageLayoutMode.Cards;
+        /// <summary>
+        /// UI Site Global Setting: If unread summaries should be blurred until expanded or unless user has read it already
+        /// </summary>
+        /// <remarks>Defaults to false</remarks>
+        public bool BlurUnreadSummaries { get; set; } = false;
 
         public AppUser AppUser { get; set; }
         public int AppUserId { get; set; }

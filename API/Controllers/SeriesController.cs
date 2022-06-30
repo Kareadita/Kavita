@@ -269,6 +269,14 @@ namespace API.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpPost("analyze")]
+        public ActionResult AnalyzeSeries(RefreshSeriesDto refreshSeriesDto)
+        {
+            _taskScheduler.AnalyzeFilesForSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
+            return Ok();
+        }
+
         [HttpGet("metadata")]
         public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
         {
@@ -385,6 +393,8 @@ namespace API.Controllers
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId));
         }
+
+
 
         [Authorize(Policy="RequireAdminRole")]
         [HttpPost("update-related")]

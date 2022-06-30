@@ -1,12 +1,10 @@
 import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot } from '@angular/router';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PaginatedResult } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { SeriesFilter, SortField } from 'src/app/_models/series-filter';
 import { Volume } from 'src/app/_models/volume';
 
 export enum KEY_CODES {
@@ -96,47 +94,6 @@ export class UtilityService {
     if (input === null || filter === null) return false;
     const reg = /[_\.\-]/gi;
     return input.toUpperCase().replace(reg, '').includes(filter.toUpperCase().replace(reg, ''));
-  }
-
-
-  mangaFormat(format: MangaFormat): string {
-    switch (format) {
-      case MangaFormat.EPUB:
-        return 'EPUB';
-      case MangaFormat.ARCHIVE:
-        return 'Archive';
-      case MangaFormat.IMAGE:
-        return 'Image';
-      case MangaFormat.PDF:
-        return 'PDF';
-      case MangaFormat.UNKNOWN:
-        return 'Unknown';
-    }
-  }
-
-  mangaFormatIcon(format: MangaFormat): string {
-    switch (format) {
-      case MangaFormat.EPUB:
-        return 'fa-book';
-      case MangaFormat.ARCHIVE:
-        return 'fa-file-archive';
-      case MangaFormat.IMAGE:
-        return 'fa-image';
-      case MangaFormat.PDF:
-        return 'fa-file-pdf';
-      case MangaFormat.UNKNOWN:
-        return 'fa-question';
-    }
-  }
-
-  getLibraryTypeIcon(format: LibraryType) {
-    switch (format) {
-      case LibraryType.Book:
-        return 'fa-book';
-      case LibraryType.Comic:
-      case LibraryType.Manga:
-        return 'fa-book-open';
-    }
   }
 
   isVolume(d: any) {
@@ -229,4 +186,15 @@ export class UtilityService {
 
     return paginatedVariable;
   }
+
+  getWindowDimensions() {
+    const windowWidth = window.innerWidth
+                  || document.documentElement.clientWidth
+                  || document.body.clientWidth;
+    const windowHeight = window.innerHeight
+                  || document.documentElement.clientHeight
+                  || document.body.clientHeight;
+    return [windowWidth, windowHeight];
+  }
+
 }

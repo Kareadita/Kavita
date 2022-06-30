@@ -1,9 +1,10 @@
 ﻿using System;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 
 namespace API.DTOs
 {
-    public class SeriesDto
+    public class SeriesDto : IHasReadTimeEstimate
     {
         public int Id { get; init; }
         public string Name { get; init; }
@@ -40,8 +41,18 @@ namespace API.DTOs
         public bool NameLocked { get; set; }
         public bool SortNameLocked { get; set; }
         public bool LocalizedNameLocked { get; set; }
+        /// <summary>
+        /// Total number of words for the series. Only applies to epubs.
+        /// </summary>
+        public long WordCount { get; set; }
 
         public int LibraryId { get; set; }
         public string LibraryName { get; set; }
+        /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
+        public int MinHoursToRead { get; set; }
+        /// <inheritdoc cref="IHasReadTimeEstimate.MaxHoursToRead"/>
+        public int MaxHoursToRead { get; set; }
+        /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
+        public int AvgHoursToRead { get; set; }
     }
 }

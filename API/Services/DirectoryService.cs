@@ -6,6 +6,8 @@ using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.DTOs.System;
+using API.Entities.Enums;
 using API.Extensions;
 using Microsoft.Extensions.Logging;
 
@@ -29,7 +31,7 @@ namespace API.Services
         /// </summary>
         /// <param name="rootPath">Absolute path of directory to scan.</param>
         /// <returns>List of folder names</returns>
-        IEnumerable<string> ListDirectory(string rootPath);
+        IEnumerable<DirectoryDto> ListDirectory(string rootPath);
         Task<byte[]> ReadFileAsync(string path);
         bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "");
         bool Exists(string directory);
@@ -434,14 +436,18 @@ namespace API.Services
        /// </summary>
        /// <param name="rootPath"></param>
        /// <returns></returns>
-       public IEnumerable<string> ListDirectory(string rootPath)
+       public IEnumerable<DirectoryDto> ListDirectory(string rootPath)
         {
-            if (!FileSystem.Directory.Exists(rootPath)) return ImmutableList<string>.Empty;
+            if (!FileSystem.Directory.Exists(rootPath)) return ImmutableList<DirectoryDto>.Empty;
 
             var di = FileSystem.DirectoryInfo.FromDirectoryName(rootPath);
             var dirs = di.GetDirectories()
                 .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
-                .Select(d => d.Name).ToImmutableList();
+                .Select(d => new DirectoryDto()
+                {
+                    Name = d.Name,
+                    FullPath = d.FullName,
+                }).ToImmutableList();
 
             return dirs;
         }
@@ -724,7 +730,7 @@ namespace API.Services
                     FileSystem.Path.Join(directoryName, "test.txt"),
                     string.Empty);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 ClearAndDeleteDirectory(directoryName);
                 return false;

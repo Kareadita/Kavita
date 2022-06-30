@@ -73,6 +73,7 @@ namespace API.SignalR
         /// A type of event that has progress (determinate or indeterminate).
         /// The underlying event will have a name to give details on how to handle.
         /// </summary>
+        /// <remarks>This is not an Event Name, it is used as the method only</remarks>
         public const string NotificationProgress = "NotificationProgress";
         /// <summary>
         /// Event sent out when Scan Loop is parsing a file
@@ -94,6 +95,18 @@ namespace API.SignalR
         /// A user's progress was modified
         /// </summary>
         public const string UserProgressUpdate = "UserProgressUpdate";
+        /// <summary>
+        /// A user's account or preferences were updated and UI needs to refresh to stay in sync
+        /// </summary>
+        public const string UserUpdate = "UserUpdate";
+        /// <summary>
+        /// When bulk bookmarks are being converted
+        /// </summary>
+        private const string ConvertBookmarksProgress = "ConvertBookmarksProgress";
+        /// <summary>
+        /// When files are being scanned to calculate word count
+        /// </summary>
+        private const string WordCountAnalyzerProgress = "WordCountAnalyzerProgress";
 
 
 
@@ -136,6 +149,25 @@ namespace API.SignalR
                     SeriesId = seriesId,
                     SeriesName = seriesName,
                     LibraryId = libraryId
+                }
+            };
+        }
+
+
+        public static SignalRMessage WordCountAnalyzerProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
+        {
+            return new SignalRMessage()
+            {
+                Name = WordCountAnalyzerProgress,
+                Title = "Analyzing Word count",
+                SubTitle = subtitle,
+                EventType = eventType,
+                Progress = ProgressType.Determinate,
+                Body = new
+                {
+                    LibraryId = libraryId,
+                    Progress = progress,
+                    EventTime = DateTime.Now
                 }
             };
         }
@@ -384,6 +416,38 @@ namespace API.SignalR
                 Body = new
                 {
                     ThemeName = themeName,
+                }
+            };
+        }
+
+        public static SignalRMessage UserUpdateEvent(int userId, string userName)
+        {
+            return new SignalRMessage()
+            {
+                Name = UserUpdate,
+                Title = "User Update",
+                Progress = ProgressType.None,
+                Body = new
+                {
+                    UserId = userId,
+                    UserName = userName
+                }
+            };
+        }
+
+        public static SignalRMessage ConvertBookmarksProgressEvent(float progress, string eventType)
+        {
+            return new SignalRMessage()
+            {
+                Name = ConvertBookmarksProgress,
+                Title = "Converting Bookmarks to WebP",
+                SubTitle = string.Empty,
+                EventType = eventType,
+                Progress = ProgressType.Determinate,
+                Body = new
+                {
+                    Progress = progress,
+                    EventTime = DateTime.Now
                 }
             };
         }

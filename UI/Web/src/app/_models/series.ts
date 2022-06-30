@@ -48,4 +48,11 @@ export interface Series {
      * DateTime representing last time a chapter was added to the Series
      */
     lastChapterAdded: string;
+    /**
+     * Number of words in the series
+     */
+    wordCount: number;
+    minHoursToRead: number;
+    maxHoursToRead: number;
+    avgHoursToRead: number;
 }

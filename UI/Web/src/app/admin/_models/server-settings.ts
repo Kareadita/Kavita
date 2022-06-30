@@ -9,4 +9,7 @@ export interface ServerSettings {
     baseUrl: string;
     bookmarksDirectory: string;
     emailServiceUrl: string;
+    convertBookmarkToWebP: boolean;
+    enableSwaggerUi: boolean;
+    totalBackups: number;
 }

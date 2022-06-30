@@ -46,5 +46,6 @@
             "bold": false,
             "italic": false
         }
-    ]
+    ],
+    "diffEditor.wordWrap": "off"
 }

@@ -8,6 +8,7 @@
     --bs-body-bg: #343a40;
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
+    --primary-color-scrollbar: rgba(74,198,148,0.75);
 
     /* Navbar */
     --navbar-bg-color: black;
@@ -232,5 +233,8 @@
     /* Bulk Selection */
     --bulk-selection-text-color: var(--navbar-text-color);
     --bulk-selection-highlight-text-color: var(--primary-color);
+
+    /* List Card Item */
+    --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
 
   }

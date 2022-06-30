@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -32,16 +33,43 @@ namespace API.Controllers
             _cacheService = cacheService;
         }
 
+        /// <summary>
+        /// Retrieves information for the PDF and Epub reader
+        /// </summary>
+        /// <remarks>This only applies to Epub or PDF files</remarks>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("{chapterId}/book-info")]
         public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
         {
             var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
             var bookTitle = string.Empty;
-            if (dto.SeriesFormat == MangaFormat.Epub)
+            switch (dto.SeriesFormat)
             {
-                var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
-                using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.BookReaderOptions);
-                bookTitle = book.Title;
+                case MangaFormat.Epub:
+                {
+                    var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+                    using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.BookReaderOptions);
+                    bookTitle = book.Title;
+                    break;
+                }
+                case MangaFormat.Pdf:
+                {
+                    var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+                    if (string.IsNullOrEmpty(bookTitle))
+                    {
+                        // Override with filename
+                        bookTitle = Path.GetFileNameWithoutExtension(mangaFile.FilePath);
+                    }
+
+                    break;
+                }
+                case MangaFormat.Image:
+                    break;
+                case MangaFormat.Archive:
+                    break;
+                case MangaFormat.Unknown:
+                    break;
             }
 
             return Ok(new BookInfoDto()
@@ -59,6 +87,12 @@ namespace API.Controllers
             });
         }
 
+        /// <summary>
+        /// This is an entry point to fetch resources from within an epub chapter/book.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
         [HttpGet("{chapterId}/book-resources")]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
@@ -78,7 +112,7 @@ namespace API.Controllers
 
         /// <summary>
         /// This will return a list of mappings from ID -> page num. ID will be the xhtml key and page num will be the reading order
-        /// this is used to rewrite anchors in the book text so that we always load properly in FE
+        /// this is used to rewrite anchors in the book text so that we always load properly in our reader.
         /// </summary>
         /// <remarks>This is essentially building the table of contents</remarks>
         /// <param name="chapterId"></param>
@@ -205,11 +239,18 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// This returns a single page within the epub book. All html will be rewritten to be scoped within our reader,
+        /// all css is scoped, etc.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         [HttpGet("{chapterId}/book-page")]
         public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
         {
             var chapter = await _cacheService.Ensure(chapterId);
-            var path = _cacheService.GetCachedEpubFile(chapter.Id, chapter);
+            var path = _cacheService.GetCachedFile(chapter);
 
             using var book = await EpubReader.OpenBookAsync(path, BookService.BookReaderOptions);
             var mappings = await _bookService.CreateKeyToPageMappingAsync(book);

@@ -1,14 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
 import { Router } from '@angular/router';
-import { MessageHubService } from './message-hub.service';
+import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
+import { UserUpdateEvent } from '../_models/events/user-update-event';
 
 @Injectable({
   providedIn: 'root'
@@ -32,7 +33,13 @@ export class AccountService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(private httpClient: HttpClient, private router: Router, 
-    private messageHub: MessageHubService, private themeService: ThemeService) {}
+    private messageHub: MessageHubService, private themeService: ThemeService) {
+      messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate), 
+        map(evt => evt.payload as UserUpdateEvent),
+        filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),  
+        switchMap(() => this.refreshToken()))
+        .subscribe(() => {});
+    }
   
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -85,8 +92,9 @@ export class AccountService implements OnDestroy {
       this.themeService.setTheme(this.themeService.defaultTheme);
     }
 
-    this.currentUserSource.next(user);
     this.currentUser = user;
+    this.currentUserSource.next(user);
+    
     if (this.currentUser !== undefined) {
       this.startRefreshTokenTimer();
     } else {
@@ -211,6 +219,7 @@ export class AccountService implements OnDestroy {
 
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
+    //console.log('refreshing token and updating user account');
 
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token', {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {
@@ -218,8 +227,7 @@ export class AccountService implements OnDestroy {
         this.currentUser.refreshToken = user.refreshToken;
       }
       
-      this.currentUserSource.next(this.currentUser);
-      this.startRefreshTokenTimer();
+      this.setCurrentUser(this.currentUser);
       return user;
     }));
   }

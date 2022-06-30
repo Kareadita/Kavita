@@ -66,6 +66,13 @@ namespace API.Tests.Parser
         [InlineData("Hentai Ouji to Warawanai Neko. - Vol. 06 Ch. 034.5", "6")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03 Ch. 023.5 - Volume 3 Extras.cbz", "3")]
         [InlineData("The 100 Girlfriends Who Really, Really, Really, Really, Really Love You - Vol. 03.5 Ch. 023.5 - Volume 3 Extras.cbz", "3.5")]
+        [InlineData("幽游白书完全版 第03卷 天下", "3")]
+        [InlineData("阿衰online 第1册", "1")]
+        [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画卷2第25话", "2")]
+        [InlineData("63권#200", "63")]
+        [InlineData("시즌34삽화2", "34")]
+        [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1巻", "1")]
+        [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
         public void ParseVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
@@ -246,6 +253,9 @@ namespace API.Tests.Parser
         [InlineData("Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", "0")]
         [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
         [InlineData("Samurai Jack Vol. 01 - The threads of Time", "0")]
+        [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
+        [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
+        [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
         public void ParseChaptersTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
