@@ -9,6 +9,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.SignalR;
 using Kavita.Common;
@@ -30,6 +31,7 @@ public interface IReaderService
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
+    string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false);
 }
 
 public class ReaderService : IReaderService
@@ -547,5 +549,30 @@ public class ReaderService : IReaderService
             MaxHours = maxHoursPages,
             AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
         };
+    }
+
+    /// <summary>
+    /// Formats a Chapter name based on the library it's in
+    /// </summary>
+    /// <param name="libraryType"></param>
+    /// <param name="includeHash">For comics only, includes a # which is used for numbering on cards</param>
+    /// <param name="includeSpace">Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.</param>
+    /// <returns></returns>
+    public string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false)
+    {
+        switch(libraryType)
+        {
+            case LibraryType.Manga:
+                return "Chapter" + (includeSpace ? " " : string.Empty);
+            case LibraryType.Comic:
+                if (includeHash) {
+                    return "Issue #";
+                }
+                return "Issue" + (includeSpace ? " " : string.Empty);
+            case LibraryType.Book:
+                return "Book" + (includeSpace ? " " : string.Empty);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);
+        }
     }
 }

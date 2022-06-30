@@ -2092,4 +2092,40 @@ public class ReaderServiceTests
     }
 
     #endregion
+
+    #region FormatChapterName
+
+    [Fact]
+    public void FormatChapterName_Manga_Chapter()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Manga, false, false);
+        Assert.Equal("Chapter", actual);
+    }
+
+    [Fact]
+    public void FormatChapterName_Book_Chapter_WithTitle()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Book, false, false);
+        Assert.Equal("Book", actual);
+    }
+
+    [Fact]
+    public void FormatChapterName_Comic()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Comic, false, false);
+        Assert.Equal("Issue", actual);
+    }
+
+    [Fact]
+    public void FormatChapterName_Comic_WithHash()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Comic, true, true);
+        Assert.Equal("Issue #", actual);
+    }
+
+    #endregion
 }

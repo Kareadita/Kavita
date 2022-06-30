@@ -159,10 +159,31 @@ namespace API.Controllers
                 LibraryId = dto.LibraryId,
                 IsSpecial = dto.IsSpecial,
                 Pages = dto.Pages,
-                ChapterTitle = dto.ChapterTitle ?? string.Empty
+                ChapterTitle = dto.ChapterTitle ?? string.Empty,
+                Subtitle = string.Empty,
+                Title = dto.SeriesName
             };
 
+            if (info.ChapterTitle is {Length: > 0}) {
+                info.Title += " - " + info.ChapterTitle;
+            }
 
+            if (info.IsSpecial && dto.VolumeNumber.Equals(Parser.Parser.DefaultVolume))
+            {
+                info.Subtitle = info.FileName;
+            } else if (!info.IsSpecial && info.VolumeNumber.Equals(Parser.Parser.DefaultVolume))
+            {
+                info.Subtitle = _readerService.FormatChapterName(info.LibraryType, true, true) + info.ChapterNumber;
+            }
+            else
+            {
+                info.Subtitle = "Volume " + info.VolumeNumber;
+                if (!info.ChapterNumber.Equals(Parser.Parser.DefaultChapter))
+                {
+                    info.Subtitle += " " + _readerService.FormatChapterName(info.LibraryType, true, true) +
+                                     info.ChapterNumber;
+                }
+            }
 
             return Ok(info);
         }

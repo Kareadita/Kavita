@@ -57,7 +57,7 @@ export class SeriesInfoCardsComponent implements OnInit, OnDestroy {
             this.getReadingTimeLeft();
           });
         });
-      }
+  }
 
   ngOnInit(): void {
     if (this.series !== null) {

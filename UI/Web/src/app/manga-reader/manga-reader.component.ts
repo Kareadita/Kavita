@@ -718,7 +718,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pageOptions = newOptions;
 
       this.libraryType = results.chapterInfo.libraryType;
-      this.updateTitle(results.chapterInfo, this.libraryType);
+      this.title = results.chapterInfo.title;
+      this.subtitle = results.chapterInfo.subtitle;
 
       this.inSetup = false;
 
@@ -774,27 +775,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.location.back();
     }
-  }
-
-  updateTitle(chapterInfo: ChapterInfo, type: LibraryType) {
-      this.title = chapterInfo.seriesName;
-      if (chapterInfo.chapterTitle != null && chapterInfo.chapterTitle.length > 0) {
-        this.title += ' - ' + chapterInfo.chapterTitle;
-      }
-
-      // TODO: Move this to the backend
-      this.subtitle = '';
-      if (chapterInfo.isSpecial && chapterInfo.volumeNumber === '0') {
-        this.subtitle = chapterInfo.fileName;
-      } else if (!chapterInfo.isSpecial && chapterInfo.volumeNumber === '0') {
-        this.subtitle = this.utilityService.formatChapterName(type, true, true) + chapterInfo.chapterNumber;
-      } else {
-        this.subtitle = 'Volume ' + chapterInfo.volumeNumber;
-
-        if (chapterInfo.chapterNumber !== '0') {
-          this.subtitle += ' ' + this.utilityService.formatChapterName(type, true, true) + chapterInfo.chapterNumber;
-        }
-      }
   }
 
   translateScalingOption(option: ScalingOption) {

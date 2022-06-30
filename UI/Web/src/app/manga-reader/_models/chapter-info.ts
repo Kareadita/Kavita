@@ -14,4 +14,6 @@ export interface ChapterInfo {
     isSpecial: boolean;
     volumeId: number;
     pages: number;
+    subtitle: string;
+    title: string;
 }
