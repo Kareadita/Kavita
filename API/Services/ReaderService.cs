@@ -20,8 +20,8 @@ public interface IReaderService
 {
     Task MarkSeriesAsRead(AppUser user, int seriesId);
     Task MarkSeriesAsUnread(AppUser user, int seriesId);
-    void MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
-    void MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
+    Task MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
+    Task MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
     Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
     Task<int> CapPageToChapter(int chapterId, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
@@ -71,7 +71,7 @@ public class ReaderService : IReaderService
         user.Progresses ??= new List<AppUserProgress>();
         foreach (var volume in volumes)
         {
-            MarkChaptersAsRead(user, seriesId, volume.Chapters);
+            await MarkChaptersAsRead(user, seriesId, volume.Chapters);
         }
 
         _unitOfWork.UserRepository.Update(user);
@@ -88,7 +88,7 @@ public class ReaderService : IReaderService
         user.Progresses ??= new List<AppUserProgress>();
         foreach (var volume in volumes)
         {
-            MarkChaptersAsUnread(user, seriesId, volume.Chapters);
+            await MarkChaptersAsUnread(user, seriesId, volume.Chapters);
         }
 
         _unitOfWork.UserRepository.Update(user);
@@ -100,7 +100,7 @@ public class ReaderService : IReaderService
     /// <param name="user"></param>
     /// <param name="seriesId"></param>
     /// <param name="chapters"></param>
-    public void MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
+    public async Task MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
     {
         foreach (var chapter in chapters)
         {
@@ -115,12 +115,17 @@ public class ReaderService : IReaderService
                     SeriesId = seriesId,
                     ChapterId = chapter.Id
                 });
+                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
             }
             else
             {
                 userProgress.PagesRead = chapter.Pages;
                 userProgress.SeriesId = seriesId;
                 userProgress.VolumeId = chapter.VolumeId;
+
+                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, chapter.Pages));
             }
         }
     }
@@ -131,7 +136,7 @@ public class ReaderService : IReaderService
     /// <param name="user"></param>
     /// <param name="seriesId"></param>
     /// <param name="chapters"></param>
-    public void MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
+    public async Task MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
     {
         foreach (var chapter in chapters)
         {
@@ -142,6 +147,9 @@ public class ReaderService : IReaderService
             userProgress.PagesRead = 0;
             userProgress.SeriesId = seriesId;
             userProgress.VolumeId = chapter.VolumeId;
+
+            await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
         }
     }
 
@@ -485,7 +493,7 @@ public class ReaderService : IReaderService
             var chapters = volume.Chapters
                 .OrderBy(c => float.Parse(c.Number))
                 .Where(c => !c.IsSpecial && Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber);
-            MarkChaptersAsRead(user, volume.SeriesId, chapters);
+            await MarkChaptersAsRead(user, volume.SeriesId, chapters);
         }
     }
 
@@ -494,7 +502,7 @@ public class ReaderService : IReaderService
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
         foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber && v.Number > 0))
         {
-            MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
+            await MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }
     }
 
