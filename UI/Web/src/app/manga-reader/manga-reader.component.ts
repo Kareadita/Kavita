@@ -38,6 +38,7 @@ const OVERLAY_AUTO_CLOSE_TIME = 3000;
 const CLICK_OVERLAY_TIMEOUT = 3000;
 
 
+
 @Component({
   selector: 'app-manga-reader',
   templateUrl: './manga-reader.component.html',
@@ -66,6 +67,14 @@ const CLICK_OVERLAY_TIMEOUT = 3000;
   ]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
+
+
+  @ViewChild('reader') reader!: ElementRef;
+  @ViewChild('readingArea') readingArea!: ElementRef;
+  @ViewChild('content') canvas: ElementRef | undefined;
+  @ViewChild('image') image!: ElementRef;
+
+
   libraryId!: number;
   seriesId!: number;
   volumeId!: number;
@@ -123,33 +132,41 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   isLoose = false;
 
-  @ViewChild('reader') reader!: ElementRef;
-  @ViewChild('readingArea') readingArea!: ElementRef;
-  @ViewChild('content') canvas: ElementRef | undefined;
-  @ViewChild('image') image!: ElementRef;
+
   private ctx!: CanvasRenderingContext2D;
   /**
-   * Used to render a page on the canvas or in the image tag. This Image element is prefetched by the cachedImages buffer
+   * Used to render a page on the canvas or in the image tag. This Image element is prefetched by the cachedImages buffer.
+   * @remarks Used for rendering to screen.
    */
   canvasImage = new Image();
   /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the next image in buffer.
+   * Used solely for LayoutMode.Double rendering. 
+   * @remarks Used for rendering to screen.
    */
   canvasImage2 = new Image();
   /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the previous image in buffer.
+   * Used solely for LayoutMode.Double rendering. Will always hold the previous image to canvasImage
+   * @see canvasImage
    */
   canvasImagePrev = new Image();
   /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the next image in buffer.
+   * Used solely for LayoutMode.Double rendering. Will always hold the next image to canvasImage
+   * @see canvasImage
    */
   canvasImageNext = new Image();
   /**
-   * Used solely for LayoutMode.DoubleReverse rendering. Will always hold the image after next in buffer.
+   * Responsible to hold current page + 2. Used to know if we should render 
+   * @remarks Used solely for LayoutMode.DoubleReverse rendering. 
    */
-   canvasImageNextDouble = new Image();
+   canvasImageAheadBy2 = new Image();
+   /**
+   * Responsible to hold current page -2 2. Used to know if we should render 
+   * @remarks Used solely for LayoutMode.DoubleReverse rendering. 
+   */
+   canvasImageBehindBy2 = new Image();
   /**
-   * Dictates if we use render with canvas or with image. This is only for Splitting.
+   * Dictates if we use render with canvas or with image. 
+   * @remarks This is only for Splitting.
    */
   renderWithCanvas: boolean = false;
 
@@ -296,25 +313,32 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
   }
 
+  /**
+   * Determines if we should render a double page.
+   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image 
+   * and the next page is not a wide image (as only non-wides should be shown next to each other).
+   * @remarks This will always fail if the window's width is greater than the height
+   */
   get ShouldRenderDoublePage() {
+    // window.innerWidth > window.innerHeight // Don't render double if orientation is portrait, mostly mobile
     return (
       this.layoutMode === LayoutMode.Double &&
       !this.isCoverImage() &&
       !this.isWideImage(this.canvasImage) && 
-      !this.isWideImage(this.canvasImageNext) &&
-      window.innerWidth > window.innerHeight // Don't render double if orientation is portrait, mostly mobile
+      !this.isWideImage(this.canvasImageNext)
       );
   }
 
   get ShouldRenderReverseDouble() {
+    // NOTE: I'm not going to care about window.innerWidth > window.innerHeight since a higher level handler will manage
+    // window.innerWidth > window.innerHeight // Don't render double reversed if orientation is portrait, mostly mobile
     return (
       this.layoutMode === LayoutMode.DoubleReversed &&
       !this.isCoverImage() &&
       !this.isCoverImage(this.pageNum - 1) &&
       !this.isWideImage(this.canvasImage) &&
       !this.isWideImage(this.canvasImageNext) &&
-      !this.isLoose &&
-      window.innerWidth > window.innerHeight // Don't render double reversed if orientation is portrait, mostly mobile
+      !this.isLoose
       );
   }
 
@@ -370,6 +394,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return 'none';
     }
     return 'right-side';
+  }
+
+  get LayoutModeIconClass() {
+    switch (this.layoutMode) {
+      case LayoutMode.Single:
+        return 'none';
+      case LayoutMode.Double:
+        return 'double';
+      case LayoutMode.DoubleReversed:
+        return 'double-reversed';
+    }
   }
 
   get ReaderModeIcon() {
@@ -960,6 +995,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
 
+    // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+    // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
+    // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
+    // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
+
+
     let pageAmount = 1;
     if (this.layoutMode === LayoutMode.Double) {
       pageAmount = (
@@ -969,12 +1010,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         !this.isSecondLastImage() &&
         !this.isLastImage()
         ? 2 : 1);
-    }
-    if (this.layoutMode === LayoutMode.DoubleReversed) {
+    } else if (this.layoutMode === LayoutMode.DoubleReversed) {
       pageAmount = (
-        !this.isCoverImage(this.pageNum - 1) &&
-        !this.isWideImage(this.canvasImagePrev) &&
-        !this.isWideImage(this.canvasImageNextDouble) &&
+        //!this.isCoverImage(this.pageNum - 1) && // 
+        !this.isWideImage(this.canvasImageNext) && 
+        !this.isWideImage(this.canvasImageAheadBy2) && // Remember we are doing this logic before we've hit the next page, so we need this
         !this.isSecondLastImage() &&
         !this.isLastImage()
         ? 2 : 1);
@@ -1014,16 +1054,27 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let pageAmount = 1;
     if (this.layoutMode === LayoutMode.Double) {
+      // Current is current and next is current + 1 (current is the page we are paging from)
+      // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+      // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
+      // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
+      // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage - 1 on double
+
       pageAmount = (
         !this.isCoverImage() &&
         !this.isWideImage(this.canvasImagePrev)
         ? 2 : 1);
     }
     if (this.layoutMode === LayoutMode.DoubleReversed) {
+      // Current is current - 1 and next is current -2 (current is the page we are paging from)
+      // console.log('Current, Next: ', this.readerService.imageUrlToPageNum(this.canvasImage.src), ',', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+      // console.log('Is canvasImage wide: ', this.isWideImage(this.canvasImage));
+      // console.log('Is canvasImage next wide: ', this.isWideImage(this.canvasImageNext));
+      // console.log('PRev: ', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src)); // Prev is actually currentPage + 1 on double reversed
       pageAmount = (
         !this.isCoverImage() &&
         !this.isCoverImage(this.pageNum - 1) &&
-        !this.isWideImage(this.canvasImage) &&
+        !this.isWideImage(this.canvasImage) && // JOE: At this point, these aren't yet set to the new values
         !this.isWideImage(this.canvasImageNext)
         ? 2 : 1);
     }
@@ -1202,24 +1253,41 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
   }
 
+  /**
+   * If pagenumber is 0 aka first page, which on double page rendering should always render as a single. 
+   * 
+   * @param pageNumber Defaults to current page number
+   * @returns 
+   */
   isCoverImage(pageNumber = this.pageNum) {
     return pageNumber === 0;
   }
 
+  /**
+   * If the image's width is greater than it's height
+   * @param elem Optional Image
+   */
   isWideImage(elem?: HTMLImageElement) {
     if (elem) {
       elem.onload = () => {
         return elem.width > elem.height;
       }
+      if (elem.src === '') return false;
     }
     const element = elem || this.canvasImage;
     return element.width > element.height;
   }
 
+  /**
+   * If the current page is second to last image
+   */
   isSecondLastImage() {
     return this.maxPages - 1 - this.pageNum === 1;
   }
 
+  /**
+   * If the current image is last image
+   */
   isLastImage() {
     return this.maxPages - 1 === this.pageNum;
   }
@@ -1230,7 +1298,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return true;
   }
 
-
+  /**
+   * Maintains a circular array of images (that are requested from backend) around the user's current page. This allows for quick loading (seemless to user)
+   * and also maintains page info (wide image, etc) due to onload event.
+   */
   prefetch() {
     let index = 1;
 
@@ -1251,19 +1322,43 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //console.log('cachedImages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src) + ': ' + img.complete));
   }
 
+
   loadPage() {
     this.isLoading = true;
     this.canvasImage2.src = '';
+    this.canvasImageAheadBy2.src = '';
+
     this.isLoose = (this.pageAmount === 1 ? true : false);
     this.canvasImage.src = this.getPageUrl(this.pageNum);
 
     if (this.layoutMode !== LayoutMode.Single) {
-      this.canvasImagePrev.src = this.getPageUrl(this.pageNum + (this.layoutMode !== LayoutMode.DoubleReversed ? - 1 : + 1));
-      this.canvasImageNext.src = this.getPageUrl(this.pageNum + (this.layoutMode !== LayoutMode.DoubleReversed ? + 1 : - 1));
-      this.canvasImageNextDouble.src = this.getPageUrl(this.pageNum + 2);
-      if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
-          this.canvasImage2.src = this.canvasImageNext.src;
+      this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()
+      this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
+
+      if (this.pageNum + 2 < this.maxPages - 1) {
+        this.canvasImageAheadBy2.src = this.getPageUrl(this.pageNum + 2);
       }
+      if (this.pageNum - 2 >= 0) {
+        this.canvasImageBehindBy2.src = this.getPageUrl(this.pageNum - 2 || 0);
+      }      
+    
+      if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
+        if (this.layoutMode === LayoutMode.Double) {
+          this.canvasImage2.src = this.canvasImageNext.src;
+        } else {
+          this.canvasImage2.src = this.canvasImagePrev.src;
+        }
+      }
+
+      // console.log('======================================================');
+      // console.log('Page History: ', this.pageDimensionHistory);
+      // console.log('Current Page: ', this.pageNum);
+      // console.log('CanvasImage page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
+      // console.log('CanvasImage2 page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
+      // console.log('Canvas Image Next:', this.readerService.imageUrlToPageNum(this.canvasImageNext.src));
+      // console.log('Canvas Image Next Ahead by 2:', this.readerService.imageUrlToPageNum(this.canvasImageAheadBy2.src));
+      // console.log('Canvas Image Prev:', this.readerService.imageUrlToPageNum(this.canvasImagePrev.src));
+      // console.log('======================================================');
     }
     this.renderPage();
     this.prefetch();

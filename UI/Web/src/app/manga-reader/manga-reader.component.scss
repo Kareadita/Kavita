@@ -57,9 +57,14 @@ img {
   }
 
   &.reverse {
-    flex-direction: row-reverse;
     overflow: unset;
-    justify-content: flex-end;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+
+    img {
+      margin: unset;
+    }
   }
   
   #image-2 {
@@ -172,6 +177,7 @@ img {
     overflow: hidden;
     border: 2px solid #ccc;
     vertical-align: sub;
+    display: inline-block;
 
     &::before {
         margin-left: 30%;
@@ -197,8 +203,21 @@ img {
     .none {
         background-color: rgba(255, 255, 255, 0.5);
     }
+
+    // For layout only
+
   }
-  
+
+  .split-double {
+    height: 20px;
+    display: inline-block;
+    font-size: .7em;
+
+    .right {
+      left: -7px;
+    }
+  }
+
   ::ng-deep {
     .custom-slider .ngx-slider .ngx-slider-bar {
       background: #e9ffe2;
