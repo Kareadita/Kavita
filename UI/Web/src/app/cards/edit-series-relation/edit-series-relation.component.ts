@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -22,7 +22,7 @@ interface RelationControl {
   styleUrls: ['./edit-series-relation.component.scss'],
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class EditSeriesRelationComponent implements OnInit, OnDestroy {
+export class EditSeriesRelationComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() series!: Series;
   /**
@@ -62,6 +62,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
         this.setupRelationRows(relations.doujinshis, RelationKind.Doujinshi);
         this.setupRelationRows(relations.contains, RelationKind.Contains);
         this.setupRelationRows(relations.parent, RelationKind.Parent);
+        this.cdRef.detectChanges();
     });
 
     this.libraryService.getLibraryNames().subscribe(names => {
@@ -70,6 +71,10 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     });
 
     this.save.pipe(takeUntil(this.onDestroy)).subscribe(() => this.saveState());
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy(): void {
@@ -88,11 +93,17 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     }).forEach(async p => {
       this.relations.push(await p);
     });
-
   }
 
   async addNewRelation() {
     this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []), typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation))});
+
+    // Focus on the new typeahead
+    setTimeout(() => {
+      const typeahead = document.querySelector(`#relation--${this.relations.length - 1} .typeahead-input input`) as HTMLInputElement;
+      if (typeahead) typeahead.focus();
+    }, 10);
+
     this.cdRef.markForCheck();
   }
 
@@ -105,6 +116,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   updateSeries(event: Array<SearchResult | undefined>, relation: RelationControl) {
     if (event[0] === undefined) {
       relation.series = undefined;
+      this.cdRef.markForCheck();
       return;
     }
     relation.series = {id: event[0].seriesId, name: event[0].name};
