@@ -59,6 +59,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   appliedIndex: number = 0;
   form!: FormGroup;
   files: NgxFileDropEntry[] = [];
+  acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].join(',');
 
   mode: 'file' | 'url' | 'all' = 'all';
   private readonly onDestroy = new Subject<void>();
