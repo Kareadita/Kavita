@@ -4,7 +4,7 @@
         <div class="col-4"><button class="btn btn-primary float-end" (click)="addLibrary()" title="Add Library"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add Library</span></button></div>
     </div>
     <ul class="list-group" *ngIf="!createLibraryToggle; else createLibrary">
-        <li *ngFor="let library of libraries; let idx = index; trackby: trackbyLibrary" class="list-group-item no-hover">
+        <li *ngFor="let library of libraries; let idx = index; trackBy: libraryTrackBy" class="list-group-item no-hover">
             <div>
                 <h4>
                     <span id="library-name--{{idx}}"><a [routerLink]="'/library/' + library.id">{{library.name}}</a></span>&nbsp;

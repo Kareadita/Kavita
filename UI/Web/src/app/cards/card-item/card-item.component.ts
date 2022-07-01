@@ -144,6 +144,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     if (this.suppressLibraryLink === false) {
       if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
         this.libraryId = (this.entity as Series).libraryId;
+        this.changeDetectionRef.markForCheck();
       }
 
       if (this.libraryId !== undefined && this.libraryId > 0) {
@@ -176,7 +177,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
 
       this.read = updateEvent.pagesRead;
-      this.changeDetectionRef.markForCheck();
+      this.changeDetectionRef.detectChanges();
     });
   }
 
@@ -190,6 +191,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     if (!this.allowSelection) return;
 
     this.selectionInProgress = false;
+    this.changeDetectionRef.markForCheck();
   }
 
   @HostListener('touchstart', ['$event'])
@@ -305,5 +307,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     this.selection.emit(this.selected);
+    this.changeDetectionRef.detectChanges();
   }
 }

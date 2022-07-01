@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
+import { ReplaySubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Action, ActionFactoryService } from '../_services/action-factory.service';
+import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 
 type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark';
 
@@ -22,6 +23,9 @@ export class BulkSelectionService {
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
   private dataSourceMax: { [key: string]: number} = {};
   public isShiftDown: boolean = false;
+
+  private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
+  public actions$ = this.actionsSource.asObservable();
 
   constructor(private router: Router, private actionFactory: ActionFactoryService) {
     router.events
@@ -61,6 +65,7 @@ export class BulkSelectionService {
     this.prevIndex = index;
     this.prevDataSource = dataSource;
     this.dataSourceMax[dataSource] = maxIndex;
+    this.actionsSource.next(this.getActions(() => {}));
   }
 
   isCardSelected(dataSource: DataSource, index: number) {
