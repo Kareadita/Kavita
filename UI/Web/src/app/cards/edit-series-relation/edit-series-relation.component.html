@@ -23,6 +23,7 @@
             </div>
             <div class="col-sm-auto col-md-3">
                 <select class="form-select" [formControl]="relation.formControl">
+                    <option [value]="RelationKind.Parent" disabled>Parent</option>
                     <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.text}}</option>
                 </select>
             </div>
