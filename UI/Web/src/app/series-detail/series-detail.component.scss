@@ -27,3 +27,8 @@
   position: relative;
   overscroll-behavior-y: none;
 }
+
+.title, .subtitle-with-actionable {
+  word-break: break-all;
+  margin-bottom: 0;
+}
