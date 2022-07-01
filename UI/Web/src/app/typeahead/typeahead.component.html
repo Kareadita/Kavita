@@ -33,7 +33,7 @@
         <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
       </li>
       <li *ngIf="(filteredOptions | async)?.length === 0 && !showAddItem" class="list-group-item no-hover" role="status">
-        No data{{this.settings.addIfNonExisting ? ', type to add a custom item.' : '.'}}
+        No data{{this.settings.addIfNonExisting ? ', type to add a custom item' : ''}}
       </li>
     </ul>
   </div>

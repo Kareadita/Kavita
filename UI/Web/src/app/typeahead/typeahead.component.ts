@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { auditTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { auditTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
@@ -174,7 +174,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document) { }
+  constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -182,7 +182,6 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
     this.reset.pipe(takeUntil(this.onDestroy)).subscribe((resetToEmpty: boolean) => {
       this.clearSelections(resetToEmpty);
       this.init();
@@ -231,15 +230,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
         switchMap(val => {
           this.isLoadingOptions = true;
-          let results: Observable<any[]>;
-          if (Array.isArray(this.settings.fetchFn)) {
-            const filteredArray = this.settings.compareFn(this.settings.fetchFn, val.trim());
-            results = of(filteredArray).pipe(takeUntil(this.onDestroy), map((items: any[]) => items.filter(item => this.filterSelected(item))));
-          } else {
-            results = this.settings.fetchFn(val.trim()).pipe(takeUntil(this.onDestroy), map((items: any[]) => items.filter(item => this.filterSelected(item))));
-          }
-
-          return results;
+          return this.settings.fetchFn(val.trim()).pipe(takeUntil(this.onDestroy), map((items: any[]) => items.filter(item => this.filterSelected(item))));
         }),
         tap((filteredOptions) => {
           this.isLoadingOptions = false;
