@@ -133,7 +133,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
     private messageHub: MessageHubService, private accountService: AccountService, 
-    private scrollService: ScrollService, private changeDetectionRef: ChangeDetectorRef) {}
+    private scrollService: ScrollService, private readonly changeDetectionRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {

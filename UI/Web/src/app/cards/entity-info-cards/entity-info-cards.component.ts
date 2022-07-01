@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -13,7 +13,8 @@ import { SeriesService } from 'src/app/_services/series.service';
 @Component({
   selector: 'app-entity-info-cards',
   templateUrl: './entity-info-cards.component.html',
-  styleUrls: ['./entity-info-cards.component.scss']
+  styleUrls: ['./entity-info-cards.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntityInfoCardsComponent implements OnInit, OnDestroy {
 
@@ -51,7 +52,7 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
     return AgeRating;
   }
 
-  constructor(private utilityService: UtilityService, private seriesService: SeriesService) {}
+  constructor(private utilityService: UtilityService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.entity);
@@ -61,6 +62,7 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
     if (this.includeMetadata) {
       this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
         this.chapterMetadata = metadata;
+        this.cdRef.markForCheck();
       });
     }
     
@@ -86,11 +88,11 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
       this.readingTime.maxHours = vol.maxHoursToRead;
       this.readingTime.avgHours = vol.avgHoursToRead;
     }
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
   }
-
 }
