@@ -105,7 +105,6 @@ public class SeriesService : ISeriesService
                 series.Metadata.LanguageLocked = true;
             }
 
-
             series.Metadata.CollectionTags ??= new List<CollectionTag>();
             UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
             {

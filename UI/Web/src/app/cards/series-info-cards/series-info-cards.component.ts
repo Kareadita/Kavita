@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { debounceTime, filter, map, Subject, takeUntil } from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -18,7 +18,7 @@ import { ReaderService } from 'src/app/_services/reader.service';
   styleUrls: ['./series-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesInfoCardsComponent implements OnInit, OnDestroy {
+export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() series!: Series;
   @Input() seriesMetadata!: SeriesMetadata;
@@ -67,6 +67,10 @@ export class SeriesInfoCardsComponent implements OnInit, OnDestroy {
       this.readingTime.avgHours = this.series.avgHoursToRead;
       this.cdRef.markForCheck();
     }
+  }
+
+  ngOnChanges() {
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy(): void {
