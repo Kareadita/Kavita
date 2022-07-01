@@ -23,9 +23,7 @@ export class CarouselReelComponent {
 
   
 
-  constructor(private readonly cdRef: ChangeDetectorRef) { 
-    //this.trackByIdentity = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
-  }
+  constructor(private readonly cdRef: ChangeDetectorRef) {}
 
   nextPage() {
     if (this.swiper) {
