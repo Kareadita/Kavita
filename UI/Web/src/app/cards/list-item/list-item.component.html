@@ -14,7 +14,7 @@
     </div>
     <div class="flex-grow-1">
         <div class="g-0">
-            <h5 style="margin-bottom: 0px">
+            <h5>
                 <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="seriesName" iconClass="fa-ellipsis-v"></app-card-actionables>
                 <ng-content select="[title]"></ng-content>
                 <button class="btn btn-primary float-end" (click)="read.emit()">
