@@ -70,10 +70,6 @@ app-root {
   scrollbar-color: var(--primary-color-scrollbar);
 }
 
-.justify-content-between, .modal-title, .list-group {
-  word-break: break-all;
-}
-
 ::-webkit-scrollbar {
   width: 14px;
 }

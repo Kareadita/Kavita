@@ -6,3 +6,7 @@
     background-color: var(--bs-body-bg);
     color: var(--body-text-color);
 }
+
+.modal-title {
+    word-break: break-all;
+}
