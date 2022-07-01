@@ -2,6 +2,8 @@ $image-height: 230px;
 $image-width: 160px;
 $triangle-size: 30px;
 
+// with summary and cards, we have a height of 220px, we might want to default to 220px and let it grow from there to help with virtualization
+
 .download {
     width: 80px;
     height: 80px;
