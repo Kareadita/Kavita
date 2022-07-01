@@ -57,6 +57,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
+        this.changeDetectionRef.markForCheck();
       }
     });
   }
@@ -65,12 +66,14 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     if (this.data) {
       this.imageUrl = this.imageService.getSeriesCoverImage(this.data.id);
+      this.changeDetectionRef.markForCheck();
     }
   }
 
   ngOnChanges(changes: any) {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
+      this.changeDetectionRef.markForCheck();
     }
   }
 
