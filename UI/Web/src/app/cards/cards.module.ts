@@ -18,7 +18,6 @@ import { BulkOperationsComponent } from './bulk-operations/bulk-operations.compo
 import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
-import { FileInfoComponent } from './file-info/file-info.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-drawer.component';
@@ -44,7 +43,6 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
     BulkOperationsComponent,
     BulkAddToCollectionComponent,
     ChapterMetadataDetailComponent,
-    FileInfoComponent,
     EditSeriesRelationComponent,
     CardDetailDrawerComponent,
     EntityTitleComponent,
