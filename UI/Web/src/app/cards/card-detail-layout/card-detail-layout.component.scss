@@ -47,6 +47,10 @@
     align-items: center;
     justify-content: space-around;
 
+    @media (max-width: 576px) {
+        padding: 0 10px 0 5px;
+    }
+
     .btn {
         text-decoration: none;
         color: hsla(0,0%,100%,.7);
