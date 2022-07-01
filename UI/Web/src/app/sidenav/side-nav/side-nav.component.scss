@@ -2,7 +2,7 @@
     padding-bottom: 10px;
     width: 190px;
     background-color: var(--side-nav-bg-color);
-    height: calc(100vh - 85px);
+    height: calc((var(--vh)*100) - 85px);
     position: fixed;
     margin: 0;
     left: 10px;
@@ -36,7 +36,7 @@
         padding: 10px 0;
         width: 55vw;
         background-color: var(--side-nav-mobile-bg-color);
-        height: calc(100vh - 56px);
+        height: calc((var(--vh)*100) - 56px);
         position: fixed;
         margin: 0;
         left: 0;
@@ -61,7 +61,7 @@
     .side-nav-overlay {
         background-color: var(--side-nav-overlay-color);
         width: 100vw;
-        height: calc(100vh - 56px);
+        height: calc((var(--vh)*100) - 56px);
         position: absolute;
         left: 0;
         z-index: 998;
