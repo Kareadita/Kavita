@@ -82,3 +82,8 @@
   //background-color: red;
   //max-height: calc(var(--vh)*100 - 170px);
 }
+
+h2 {
+    display: inline-block;
+    word-break: break-all;
+}

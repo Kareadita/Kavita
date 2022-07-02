@@ -1,7 +1,7 @@
 
 <div class="row mt-2 g-0 pb-2" *ngIf="header !== undefined && header.length > 0">
     <div class="col me-auto">
-        <h2 style="display: inline-block">
+        <h2>
             <span *ngIf="actions.length > 0" class="">
                 <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
             </span>
