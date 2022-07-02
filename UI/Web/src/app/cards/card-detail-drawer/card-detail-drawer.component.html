@@ -95,7 +95,7 @@
                 </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[TabID.Cover]">
+            <li [ngbNavItem]="tabs[TabID.Cover]" [disabled]="!(isAdmin$ | async)">
                 <a ngbNavLink>{{tabs[TabID.Cover].title}}</a>
                 <ng-template ngbNavContent>
                     <app-cover-image-chooser [(imageUrls)]="imageUrls" 
@@ -115,7 +115,7 @@
                     <ul class="list-unstyled">
                         <li class="d-flex my-4" *ngFor="let chapter of chapters">
                             <a (click)="readChapter(chapter)" href="javascript:void(0);" title="Read {{utilityService.formatChapterName(libraryType, true, false)}} {{formatChapterNumber(chapter)}}">
-                                <app-image class="me-2" width="74px" [imageUrl]="chapter.coverImage"></app-image>
+                                <app-image class="me-2" width="74px" [imageUrl]="imageService.getChapterCoverImage(chapter.id)"></app-image>
                             </a>
                             <div class="flex-grow-1">
                                 <h5 class="mt-0 mb-1">
