@@ -1,11 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { filter, map, take, takeUntil } from 'rxjs/operators';
+import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../shared/_services/utility.service';
 import { Library, LibraryType } from '../../_models/library';
-import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
 import { Action, ActionFactoryService, ActionItem } from '../../_services/action-factory.service';
 import { ActionService } from '../../_services/action.service';
@@ -19,9 +18,7 @@ import { NavService } from '../../_services/nav.service';
 })
 export class SideNavComponent implements OnInit, OnDestroy {
 
-  user: User | undefined;
   libraries: Library[] = [];
-  isAdmin = false;
   actions: ActionItem<Library>[] = [];
 
   filterQuery: string = '';
@@ -34,15 +31,28 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
-    private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService, private router: Router) { }
+    private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService, private router: Router) {
+
+      this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd), 
+        takeUntil(this.onDestroy),
+        map(evt => evt as NavigationEnd),
+        filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet))
+      .subscribe((evt: NavigationEnd) => {
+        // Collapse side nav on mobile
+        this.navService.sideNavCollapsed$.pipe(take(1)).subscribe(collapsed => {
+          if (!collapsed) {
+            this.navService.toggleSideNav();
+          }
+        });
+      });
+
+  }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      this.user = user;
-
-      if (this.user) {
-        this.isAdmin = this.accountService.hasAdminRole(this.user);
-        this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
+      if (user) {
+        this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
           this.libraries = libraries;
         });
       }
@@ -50,25 +60,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
     });
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
-      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
+      this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
       });
     });
-
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd), 
-            takeUntil(this.onDestroy),
-            map(evt => evt as NavigationEnd))
-      .subscribe((evt: NavigationEnd) => {
-        if (this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
-          // collapse side nav
-          this.navService.sideNavCollapsed$.pipe(take(1)).subscribe(collapsed => {
-            if (!collapsed) {
-              this.navService.toggleSideNav();
-            }
-          });
-        }
-      });
   }
 
   ngOnDestroy(): void {
@@ -99,6 +94,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     }
   }
 
+  // TODO: Move to a pipe
   getLibraryTypeIcon(format: LibraryType) {
     switch (format) {
       case LibraryType.Book:
