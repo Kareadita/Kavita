@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -15,18 +15,17 @@ import { NavService } from '../../_services/nav.service';
 @Component({
   selector: 'app-user-login',
   templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.scss']
+  styleUrls: ['./user-login.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserLoginComponent implements OnInit {
 
-  model: any = {username: '', password: ''};
+  //model: any = {username: '', password: ''};
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required])
   });
 
-  memberNames: Array<string> = [];
-  isCollapsed: {[key: string]: boolean} = {};
   /**
    * If there are no admins on the server, this will enable the registration to kick in.
    */
@@ -37,7 +36,8 @@ export class UserLoginComponent implements OnInit {
   isLoaded: boolean = false;
 
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
-    private toastr: ToastrService, private navService: NavService, private settingsService: SettingsService, private modalService: NgbModal) {
+    private toastr: ToastrService, private navService: NavService, private modalService: NgbModal, 
+    private readonly cdRef: ChangeDetectorRef) {
       this.navService.showNavBar();
       this.navService.hideSideNav();
     }
@@ -45,47 +45,42 @@ export class UserLoginComponent implements OnInit {
   ngOnInit(): void {
     this.navService.showNavBar();
     this.navService.hideSideNav();
+    this.cdRef.markForCheck();
+
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.navService.showSideNav();
+        this.cdRef.markForCheck();
         this.router.navigateByUrl('/libraries');
       }
     });
+    
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       this.firstTimeFlow = !adminExists;
+      this.isLoaded = true;
 
       if (this.firstTimeFlow) {
         this.router.navigateByUrl('registration/register');
         return;
       }
 
-      this.setupAuthenticatedLoginFlow();
-      this.isLoaded = true;
+      this.cdRef.markForCheck();
     });
-  }
-
-  setupAuthenticatedLoginFlow() {
-    if (this.memberNames.indexOf(' Login ') >= 0) { return; }
-    this.memberNames.push(' Login ');
-      this.memberNames.forEach(name => this.isCollapsed[name] = false);
-      const lastLogin = localStorage.getItem(this.accountService.lastLoginKey);
-      if (lastLogin != undefined && lastLogin != null && lastLogin != '') {
-        this.loginForm.get('username')?.setValue(lastLogin);
-      }
   }
 
   onAdminCreated(user: User | null) {
     if (user != null) {
       this.firstTimeFlow = false;
+      this.cdRef.markForCheck();
     } else {
       this.toastr.error('There was an issue creating the new user. Please refresh and try again.');
     }
   }
 
   login() {
-    this.model = this.loginForm.getRawValue();
-    this.accountService.login(this.model).subscribe(() => {
+    const model = this.loginForm.getRawValue();
+    this.accountService.login(model).subscribe(() => {
       this.loginForm.reset();
       this.navService.showNavBar();
       this.navService.showSideNav();
@@ -101,9 +96,8 @@ export class UserLoginComponent implements OnInit {
     }, err => {
       if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {
         const modalRef = this.modalService.open(AddEmailToAccountMigrationModalComponent, { scrollable: true, size: 'md' });
-        modalRef.componentInstance.username = this.model.username;
+        modalRef.componentInstance.username = model.username;
         modalRef.closed.pipe(take(1)).subscribe(() => {
-
         });
       } else {
         this.toastr.error(err.error);
