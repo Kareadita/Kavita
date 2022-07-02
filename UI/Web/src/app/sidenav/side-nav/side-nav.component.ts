@@ -42,10 +42,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
       if (this.user) {
         this.isAdmin = this.accountService.hasAdminRole(this.user);
+        this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
+          this.libraries = libraries;
+        });
       }
-      this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe((libraries: Library[]) => {
-        this.libraries = libraries;
-      });
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     });
 

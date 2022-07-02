@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { SettingsService } from '../../admin/settings.service';
 import { AddEmailToAccountMigrationModalComponent } from '../add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
 import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
