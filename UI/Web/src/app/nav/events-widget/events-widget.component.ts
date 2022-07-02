@@ -61,7 +61,6 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Debounce for testing. Kavita's too fast
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
