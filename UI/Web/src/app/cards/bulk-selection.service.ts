@@ -27,6 +27,12 @@ export class BulkSelectionService {
   private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
   public actions$ = this.actionsSource.asObservable();
 
+  private selectionsSource = new ReplaySubject<number>(1);
+  /**
+   * Number of active selections
+   */
+  public selections$ = this.selectionsSource.asObservable();
+
   constructor(private router: Router, private actionFactory: ActionFactoryService) {
     router.events
       .pipe(filter(event => event instanceof NavigationStart))
@@ -82,6 +88,7 @@ export class BulkSelectionService {
 
     if (from === to) {
       this.selectedCards[dataSource][to] = value;
+      this.selectionsSource.next(this.totalSelections());
       return;
     }
 
@@ -94,10 +101,12 @@ export class BulkSelectionService {
     for (let i = from; i <= to; i++) {
       this.selectedCards[dataSource][i] = value;
     }
+    this.selectionsSource.next(this.totalSelections());
   }
 
   deselectAll() {
     this.selectedCards = {};
+    this.selectionsSource.next(0);
   }
 
   hasSelections() {
