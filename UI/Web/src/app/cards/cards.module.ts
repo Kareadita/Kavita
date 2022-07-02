@@ -13,7 +13,6 @@ import { SharedModule } from '../shared/shared.module';
 import { RouterModule } from '@angular/router';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { CardDetailLayoutComponent } from './card-detail-layout/card-detail-layout.component';
-import { CardDetailsModalComponent } from './_modals/card-details-modal/card-details-modal.component';
 import { BulkOperationsComponent } from './bulk-operations/bulk-operations.component';
 import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/bulk-add-to-collection.component';
 import { PipeModule } from '../pipe/pipe.module';
@@ -39,7 +38,6 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
     EditCollectionTagsComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
-    CardDetailsModalComponent,
     BulkOperationsComponent,
     BulkAddToCollectionComponent,
     ChapterMetadataDetailComponent,
@@ -91,7 +89,6 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
     EditCollectionTagsComponent,
     CardActionablesComponent,
     CardDetailLayoutComponent,
-    CardDetailsModalComponent,
     BulkOperationsComponent,
     ChapterMetadataDetailComponent,
     EditSeriesRelationComponent,
