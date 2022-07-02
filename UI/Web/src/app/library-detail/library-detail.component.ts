@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -24,7 +24,8 @@ import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 @Component({
   selector: 'app-library-detail',
   templateUrl: './library-detail.component.html',
-  styleUrls: ['./library-detail.component.scss']
+  styleUrls: ['./library-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibraryDetailComponent implements OnInit, OnDestroy {
 
@@ -58,30 +59,32 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       case Action.AddToReadingList:
         this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.AddToCollection:
         this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsRead:
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
         });
         
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
         });
         break;
       case Action.Delete:
         this.actionService.deleteMultipleSeries(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
         });
         break;
     }
@@ -111,6 +114,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       this.jumpKeys = barDetails;
       this.cdRef.markForCheck();
     });
+
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
@@ -197,6 +201,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
+    this.cdRef.markForCheck();
+    
     this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result; 
       this.pagination = series.pagination;
