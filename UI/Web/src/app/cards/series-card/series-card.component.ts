@@ -44,36 +44,28 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
    */
    @Output() selection = new EventEmitter<boolean>();
 
-  isAdmin = false;
   actions: ActionItem<Series>[] = [];
   imageUrl: string = '';
   onDestroy: Subject<void> = new Subject<void>();
 
-  constructor(private accountService: AccountService, private router: Router,
+  constructor(private router: Router, private cdRef: ChangeDetectorRef,
               private seriesService: SeriesService, private toastr: ToastrService,
               private modalService: NgbModal, private imageService: ImageService, 
               private actionFactoryService: ActionFactoryService,
-              private actionService: ActionService, private changeDetectionRef: ChangeDetectorRef) {
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.isAdmin = this.accountService.hasAdminRole(user);
-        this.changeDetectionRef.markForCheck();
-      }
-    });
-  }
+              private actionService: ActionService) {}
 
 
   ngOnInit(): void {
     if (this.data) {
       this.imageUrl = this.imageService.getSeriesCoverImage(this.data.id);
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     }
   }
 
   ngOnChanges(changes: any) {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     }
   }
 
@@ -123,7 +115,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       if (closeResult.success) {
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;
-          this.changeDetectionRef.markForCheck();
+          this.cdRef.markForCheck();
           this.reload.emit(true);
           this.dataChanged.emit(series);
         });
@@ -153,7 +145,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     this.actionService.markSeriesAsUnread(series, () => {
       if (this.data) {
         this.data.pagesRead = 0;
-        this.changeDetectionRef.markForCheck();
+        this.cdRef.markForCheck();
       }
       
       this.dataChanged.emit(series);
@@ -164,7 +156,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     this.actionService.markSeriesAsRead(series, () => {
       if (this.data) {
         this.data.pagesRead = series.pages;
-        this.changeDetectionRef.markForCheck();
+        this.cdRef.markForCheck();
       }
       this.dataChanged.emit(series);
     });
