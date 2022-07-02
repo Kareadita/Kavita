@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
@@ -163,7 +164,14 @@ public class TaskScheduler : ITaskScheduler
     public void ScanLibrary(int libraryId)
     {
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-        // TODO: If a library scan is already queued up for libraryId, don't do anything
+        // If a library scan is already queued up for libraryId, don't do anything
+        var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs("default", 0, int.MaxValue);
+        if (enqueuedJobs.Any(j =>
+                j.Value.Job.Args.Contains(libraryId) && j.Value.Job.Method.Name.Equals("ScanLibrary") && j.Value.InEnqueuedState))
+        {
+            _logger.LogInformation("A duplicate request to scan library for library occured. Skipping");
+            return;
+        }
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());

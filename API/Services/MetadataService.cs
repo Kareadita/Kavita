@@ -35,6 +35,7 @@ public interface IMetadataService
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
     Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true);
 }
 
@@ -278,6 +279,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
     public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true)
     {
         var sw = Stopwatch.StartNew();

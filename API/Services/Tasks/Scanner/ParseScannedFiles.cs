@@ -40,6 +40,7 @@ namespace API.Services.Tasks.Scanner
         /// <param name="logger">Logger of the parent class that invokes this</param>
         /// <param name="directoryService">Directory Service</param>
         /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
+        /// <param name="eventHub">For firing off SignalR events</param>
         public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
             IReadingItemService readingItemService, IEventHub eventHub)
         {
@@ -251,6 +252,7 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="libraryType">Type of library. Used for selecting the correct file extensions to search for and parsing files</param>
         /// <param name="folders">The folders to scan. By default, this should be library.Folders, however it can be overwritten to restrict folders</param>
+        /// <param name="libraryName">Name of the Library</param>
         /// <returns></returns>
         public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
         {
