@@ -197,4 +197,35 @@ export class UtilityService {
     return [windowWidth, windowHeight];
   }
 
+  /**
+   * 
+   * @param data An array of objects
+   * @param keySelector A method to fetch a string from the object, which is used to classify the JumpKey
+   * @returns 
+   */
+  getJumpKeys(data :Array<any>, keySelector: (data: any) => string) {
+    const keys: {[key: string]: number} = {};
+    data.forEach(obj => {
+      let ch = keySelector(obj).charAt(0);
+      if (/\d|\#|!|%|@|\(|\)|\^|\*/g.test(ch)) {
+        ch = '#';
+      }
+      if (!keys.hasOwnProperty(ch)) {
+        keys[ch] = 0;
+      }
+      keys[ch] += 1;
+    });
+    return Object.keys(keys).map(k => {
+      return {
+        key: k,
+        size: keys[k],
+        title: k.toUpperCase()
+      }
+    }).sort((a, b) => {
+      if (a.key < b.key) return -1;
+      if (a.key > b.key) return 1;
+      return 0;
+    });
+  }
+
 }
