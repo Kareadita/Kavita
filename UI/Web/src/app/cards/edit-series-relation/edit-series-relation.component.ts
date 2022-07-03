@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -20,9 +20,9 @@ interface RelationControl {
   selector: 'app-edit-series-relation',
   templateUrl: './edit-series-relation.component.html',
   styleUrls: ['./edit-series-relation.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditSeriesRelationComponent implements OnInit, OnChanges, OnDestroy {
+export class EditSeriesRelationComponent implements OnInit, OnDestroy {
 
   @Input() series!: Series;
   /**
@@ -73,10 +73,6 @@ export class EditSeriesRelationComponent implements OnInit, OnChanges, OnDestroy
     this.save.pipe(takeUntil(this.onDestroy)).subscribe(() => this.saveState());
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    this.cdRef.markForCheck();
-  }
-
   ngOnDestroy(): void {
       this.onDestroy.next();
       this.onDestroy.complete();
@@ -92,11 +88,13 @@ export class EditSeriesRelationComponent implements OnInit, OnChanges, OnDestroy
       return {series: item, typeaheadSettings: settings, formControl: form};
     }).forEach(async p => {
       this.relations.push(await p);
+      this.cdRef.markForCheck();
     });
   }
 
   async addNewRelation() {
     this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []), typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation))});
+    this.cdRef.markForCheck();
 
     // Focus on the new typeahead
     setTimeout(() => {
@@ -104,7 +102,6 @@ export class EditSeriesRelationComponent implements OnInit, OnChanges, OnDestroy
       if (typeahead) typeahead.focus();
     }, 10);
 
-    this.cdRef.markForCheck();
   }
 
   removeRelation(index: number) {
