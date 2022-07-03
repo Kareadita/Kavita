@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -15,7 +15,8 @@ export interface ItemRemoveEvent {
 @Component({
   selector: 'app-draggable-ordered-list',
   templateUrl: './draggable-ordered-list.component.html',
-  styleUrls: ['./draggable-ordered-list.component.scss']
+  styleUrls: ['./draggable-ordered-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DraggableOrderedListComponent implements OnInit {
 
@@ -25,7 +26,7 @@ export class DraggableOrderedListComponent implements OnInit {
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
-  constructor() { }
+  constructor(private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
   }
@@ -38,6 +39,7 @@ export class DraggableOrderedListComponent implements OnInit {
       toPosition: event.currentIndex,
       item: this.items[event.currentIndex]
     });
+    this.cdRef.markForCheck();
   }
 
   updateIndex(previousIndex: number, item: any) {
@@ -51,6 +53,7 @@ export class DraggableOrderedListComponent implements OnInit {
       toPosition: newIndex,
       item: this.items[newIndex]
     });
+    this.cdRef.markForCheck();
   }
 
   removeItem(item: any, position: number) {
@@ -58,6 +61,6 @@ export class DraggableOrderedListComponent implements OnInit {
       position,
       item
     });
+    this.cdRef.markForCheck();
   }
-
 }
