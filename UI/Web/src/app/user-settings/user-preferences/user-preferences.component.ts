@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
@@ -22,7 +22,8 @@ enum AccordionPanelID {
 @Component({
   selector: 'app-user-preferences',
   templateUrl: './user-preferences.component.html',
-  styleUrls: ['./user-preferences.component.scss']
+  styleUrls: ['./user-preferences.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -62,10 +63,14 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     return AccordionPanelID;
   }
 
+  public get password() { return this.passwordChangeForm.get('password'); }
+  public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
+
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
     private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
-    private router: Router) {
+    private router: Router, private readonly cdRef: ChangeDetectorRef) {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
+    this.cdRef.markForCheck();
 
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
@@ -74,10 +79,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       } else {
         this.active = this.tabs[0]; // Default to first tab
       }
+      this.cdRef.markForCheck();
     });
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -87,6 +94,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), map(user => {
       return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
     }));
+    this.cdRef.markForCheck();
 
     forkJoin({
       user: this.accountService.currentUser$.pipe(take(1)),
@@ -124,6 +132,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
       this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
       this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
+      this.cdRef.markForCheck();
     });
 
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
@@ -132,13 +141,16 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.observableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
       const values = this.passwordChangeForm.value;
       this.passwordsMatch = values.password === values.confirmPassword;
+      this.cdRef.markForCheck();
     }));
 
     this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(mode => {
       if (mode) {
         this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
+        this.cdRef.markForCheck();
       }
     });
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
@@ -147,8 +159,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  public get password() { return this.passwordChangeForm.get('password'); }
-  public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
 
   resetForm() {
     if (this.user === undefined) { return; }
@@ -171,12 +181,14 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
     this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
     this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
+    this.cdRef.markForCheck();
   }
 
   resetPasswordForm() {
     this.passwordChangeForm.get('password')?.setValue('');
     this.passwordChangeForm.get('confirmPassword')?.setValue('');
     this.resetPasswordErrors = [];
+    this.cdRef.markForCheck();
   }
 
   save() {
@@ -209,6 +221,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.toastr.success('Server settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
+        this.cdRef.markForCheck();
       }
       this.resetForm();
     }));
