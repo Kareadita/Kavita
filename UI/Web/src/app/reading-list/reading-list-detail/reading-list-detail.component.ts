@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
@@ -20,7 +20,8 @@ import { ReaderService } from 'src/app/_services/reader.service';
 @Component({
   selector: 'app-reading-list-detail',
   templateUrl: './reading-list-detail.component.html',
-  styleUrls: ['./reading-list-detail.component.scss']
+  styleUrls: ['./reading-list-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];
@@ -48,7 +49,8 @@ export class ReadingListDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
     public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, 
-    private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService) {}
+    private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService,
+    private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -57,14 +59,7 @@ export class ReadingListDetailComponent implements OnInit {
       this.router.navigateByUrl('/libraries');
       return;
     }
-
     this.listId = parseInt(listId, 10);
-
-    //this.readingListImage = this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
-
-    this.libraryService.getLibraries().subscribe(libs => {
-      
-    });
 
     forkJoin([
       this.libraryService.getLibraries(), 
@@ -86,12 +81,15 @@ export class ReadingListDetailComponent implements OnInit {
       this.readingList = readingList;
       this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
 
+      this.cdRef.markForCheck();
+
       this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
           this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
           
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
+          this.cdRef.markForCheck();
         }
       });
     });
@@ -100,9 +98,12 @@ export class ReadingListDetailComponent implements OnInit {
 
   getListItems() {
     this.isLoading = true;
+    this.cdRef.markForCheck();
+
     this.readingListService.getListItems(this.listId).subscribe(items => {
       this.items = items;
       this.isLoading = false;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -131,6 +132,7 @@ export class ReadingListDetailComponent implements OnInit {
           // Reload information around list
           this.readingList = readingList;
           this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
+          this.cdRef.markForCheck();
         });
         break;
     }
@@ -170,12 +172,14 @@ export class ReadingListDetailComponent implements OnInit {
   itemRemoved(event: ItemRemoveEvent) {
     this.readingListService.deleteItem(this.readingList.id, event.item.id).subscribe(() => {
       this.items.splice(event.position, 1);
+      this.cdRef.markForCheck();
       this.toastr.success('Item removed');
     });
   }
 
   removeRead() {
     this.isLoading = true;
+    this.cdRef.markForCheck();
     this.readingListService.removeRead(this.readingList.id).subscribe((resp) => {
       if (resp === 'Nothing to remove') {
         this.toastr.info(resp);
@@ -186,6 +190,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   read() {
+    // TODO: Can I do this in the backend?
     let currentlyReadingChapter = this.items[0];
     for (let i = 0; i < this.items.length; i++) {
       if (this.items[i].pagesRead >= this.items[i].pagesTotal) {
