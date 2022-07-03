@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { shareReplay, take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { LibraryType } from 'src/app/_models/library';
@@ -145,24 +145,6 @@ export class ReadingListDetailComponent implements OnInit {
       this.toastr.success('Reading list deleted');
       this.router.navigateByUrl('library#lists');
     });
-  }
-
-  formatTitle(item: ReadingListItem) {
-    // TODO: Use new app-entity-title component instead
-    if (item.chapterNumber === '0') {
-      return 'Volume ' + item.volumeNumber;
-    }
-
-    if (item.seriesFormat === MangaFormat.EPUB) {
-      return 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
-    }
-
-    let chapterNum = item.chapterNumber;
-    if (!item.chapterNumber.match(/^\d+$/)) {
-      chapterNum = this.utilityService.cleanSpecialTitle(item.chapterNumber);
-    }
-
-    return this.utilityService.formatChapterName(this.libraryTypes[item.libraryId], true, true) + chapterNum;
   }
 
   orderUpdated(event: IndexUpdateEvent) {

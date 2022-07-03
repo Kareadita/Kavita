@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
@@ -14,7 +14,8 @@ import { NavService } from '../../_services/nav.service';
 @Component({
   selector: 'app-side-nav',
   templateUrl: './side-nav.component.html',
-  styleUrls: ['./side-nav.component.scss']
+  styleUrls: ['./side-nav.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideNavComponent implements OnInit, OnDestroy {
 
@@ -31,7 +32,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
-    private actionFactoryService: ActionFactoryService, private actionService: ActionService, public navService: NavService, private router: Router) {
+    private actionFactoryService: ActionFactoryService, private actionService: ActionService, 
+    public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef) {
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd), 
@@ -43,6 +45,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
         this.navService.sideNavCollapsed$.pipe(take(1)).subscribe(collapsed => {
           if (!collapsed) {
             this.navService.toggleSideNav();
+            this.cdRef.markForCheck();
           }
         });
       });
@@ -54,14 +57,17 @@ export class SideNavComponent implements OnInit, OnDestroy {
       if (user) {
         this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
           this.libraries = libraries;
+          this.cdRef.markForCheck();
         });
       }
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
+      this.cdRef.markForCheck();
     });
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
       this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
+        this.cdRef.markForCheck();
       });
     });
   }
@@ -94,7 +100,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
     }
   }
 
-  // TODO: Move to a pipe
   getLibraryTypeIcon(format: LibraryType) {
     switch (format) {
       case LibraryType.Book:
@@ -103,6 +108,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
       case LibraryType.Manga:
         return 'fa-book-open';
     }
+  }
+
+  toggleNavBar() {
+    this.navService.toggleSideNav();
+    //this.cdRef.markForCheck();
   }
 
 }
