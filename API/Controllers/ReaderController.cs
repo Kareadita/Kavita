@@ -87,7 +87,7 @@ namespace API.Controllers
                 var format = Path.GetExtension(path).Replace(".", "");
 
                 Response.AddCacheHeader(path, (int) TimeSpan.FromMinutes(10).TotalSeconds);
-                return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+                return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);
             }
             catch (Exception)
             {
