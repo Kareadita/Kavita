@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -39,7 +39,8 @@ const enum DEBUG_MODES {
 @Component({
   selector: 'app-infinite-scroller',
   templateUrl: './infinite-scroller.component.html',
-  styleUrls: ['./infinite-scroller.component.scss']
+  styleUrls: ['./infinite-scroller.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
@@ -150,11 +151,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
 
-
-
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readerService: ReaderService, private renderer: Renderer2, @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService) {
+  constructor(private readerService: ReaderService, private renderer: Renderer2, 
+    @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService,
+    private readonly cdRef: ChangeDetectorRef) {
     // This will always exist at this point in time since this is used within manga reader
     const reader = document.querySelector('.reader');
     if (reader !== null) {
@@ -165,6 +166,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.hasOwnProperty('totalPages') && changes['totalPages'].previousValue != changes['totalPages'].currentValue) {
       this.totalPages = changes['totalPages'].currentValue;
+      this.cdRef.markForCheck();
       this.initWebtoonReader();
     }
   }
@@ -211,6 +213,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         const image = document.querySelector('img[id^="page-' + page + '"]');
         if (image) {
           this.renderer.addClass(image, 'bookmark-effect');
+          
           setTimeout(() => {
             this.renderer.removeClass(image, 'bookmark-effect');
           }, 1000);
@@ -222,6 +225,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.fullscreenToggled.pipe(takeUntil(this.onDestroy)).subscribe(isFullscreen => {
         this.debugLog('[FullScreen] Fullscreen mode: ', isFullscreen);
         this.isFullscreenMode = isFullscreen;
+        this.cdRef.markForCheck();
+
         this.recalculateImageWidth();
         this.initScrollHandler();
         this.setPageNum(this.pageNum, true);
@@ -232,6 +237,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   recalculateImageWidth() {
     const [_, innerWidth] = this.getInnerDimensions();
     this.webtoonImageWidth = innerWidth || document.body.clientWidth || document.documentElement.clientWidth;
+    this.cdRef.markForCheck();
   }
 
   getVerticalOffset() {
@@ -256,9 +262,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param event Scroll Event
    */
   handleScrollEvent(event?: any) {
-    // Need a fullscreen handler here too
-    let verticalOffset = this.getVerticalOffset();
-
+    const verticalOffset = this.getVerticalOffset();
 
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;
@@ -270,6 +274,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isScrolling && this.currentPageElem != null && this.isElementVisible(this.currentPageElem)) {
       this.debugLog('[Scroll] Image is visible from scroll, isScrolling is now false');
       this.isScrolling = false;
+      this.cdRef.markForCheck();
     }
 
     if (!this.isScrolling) {
@@ -282,11 +287,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.setPageNum(parseInt(midlineImages[0].getAttribute('page') || this.pageNum + '', 10));
       }
     }
-    
 
     // Check if we hit the last page
     this.checkIfShouldTriggerContinuousReader();
-
   }
 
   getTotalHeight() {
@@ -294,17 +297,18 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     document.querySelectorAll('img[id^="page-"]').forEach(img => totalHeight += img.getBoundingClientRect().height);
     return Math.round(totalHeight);
   }
+
   getTotalScroll() {
     if (this.isFullscreenMode) {
       return this.readerElemRef.nativeElement.offsetHeight + this.readerElemRef.nativeElement.scrollTop;
     }
     return document.body.offsetHeight + document.body.scrollTop;
   }
+
   getScrollTop() {
     if (this.isFullscreenMode) {
       return this.readerElemRef.nativeElement.scrollTop;
     }
-
     return document.body.scrollTop;
   }
 
@@ -318,25 +322,32 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       // If we were at top but have started scrolling down past page 0, remove top spacer
       if (this.atTop && this.pageNum > 0) {
         this.atTop = false;
+        this.cdRef.markForCheck();
       }
 
       if (totalScroll === totalHeight && !this.atBottom) {
         this.atBottom = true;
+        this.cdRef.markForCheck();
         this.setPageNum(this.totalPages);
 
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = this.getScrollTop();
-        requestAnimationFrame(() => document.body.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2));
+        requestAnimationFrame(() => {
+          document.body.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2);
+          this.cdRef.markForCheck();
+        });
       } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
         // This if statement will fire once we scroll into the spacer at all
         this.loadNextChapter.emit();
+        this.cdRef.markForCheck();
       }
     } else {
       // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
       if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
         this.atBottom = false;
-
         this.atTop = true; 
+        this.cdRef.markForCheck();
+
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.body.scrollHeight - document.body.scrollTop;
         
@@ -345,9 +356,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
         // If already at top, then we moving on
         this.loadPrevChapter.emit();
+        this.cdRef.markForCheck();
       }
     }
-
   }
 
   /**
@@ -376,9 +387,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     this.debugLog('[Visibility] Checking if Page ' + elem.getAttribute('id') + ' is visible');
     // NOTE: This will say an element is visible if it is 1 px offscreen on top
-    var rect = elem.getBoundingClientRect();
+    const rect = elem.getBoundingClientRect();
 
-    let [innerHeight, innerWidth] = this.getInnerDimensions();
+    const [innerHeight, innerWidth] = this.getInnerDimensions();
 
     return (rect.bottom >= 0 && 
             rect.right >= 0 && 
@@ -396,9 +407,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    shouldElementCountAsCurrentPage(elem: Element) {
     if (elem === null || elem === undefined) { return false; }
 
-    var rect = elem.getBoundingClientRect();
+    const rect = elem.getBoundingClientRect();
 
-    let [innerHeight, innerWidth] = this.getInnerDimensions();
+    const [innerHeight, innerWidth] = this.getInnerDimensions();
 
 
     if (rect.bottom >= 0 && 
@@ -420,13 +431,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.webtoonImages.next([]);
     this.atBottom = false;
     this.checkIfShouldTriggerContinuousReader();
-
+    this.cdRef.markForCheck();
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
     this.debugLog('[INIT] Prefetching pages ' + startingIndex + ' to ' + endingIndex + '. Current page: ', this.pageNum);
     for(let i = startingIndex; i <= endingIndex; i++) {
       this.loadWebtoonImage(i);
     }
+    this.cdRef.markForCheck();
   }
 
   /**
@@ -460,9 +472,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
             this.scrollToCurrentPage();
           } else {
             this.initFinished = true;
+            this.cdRef.markForCheck();
           }
           
           this.allImagesLoaded = true;
+          this.cdRef.markForCheck();
       });
     }
   }
@@ -496,6 +510,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
     this.pageNum = pageNum;
     this.pageNumberChange.emit(this.pageNum);
+    this.cdRef.markForCheck();
 
     this.prefetchWebtoonImages();
 
@@ -519,26 +534,27 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     // Update prevScrollPosition, so the next scroll event properly calculates direction
     this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
     this.isScrolling = true;
+    this.cdRef.markForCheck();
 
     setTimeout(() => {
       if (this.currentPageElem) {
         this.debugLog('[Scroll] Scrolling to page ', this.pageNum);
         this.currentPageElem.scrollIntoView({behavior: 'smooth'});
         this.initFinished = true;
+        this.cdRef.markForCheck();
       }
     }, 600);
   }
 
   loadWebtoonImage(page: number) {
-    let data = this.webtoonImages.value;
-
     if (this.imagesLoaded.hasOwnProperty(page)) {
       this.debugLog('\t[PREFETCH] Skipping prefetch of ', page);
       return;
     }
-    this.debugLog('\t[PREFETCH] Prefetching ', page);
 
-    data = data.concat({src: this.urlProvider(page), page});
+    this.debugLog('\t[PREFETCH] Prefetching ', page);
+    
+    const data = this.webtoonImages.value.concat({src: this.urlProvider(page), page});
 
     data.sort((a: WebtoonImage, b: WebtoonImage) => {
       if (a.page < b.page) { return -1; }
@@ -547,6 +563,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     });
 
     this.allImagesLoaded = false;
+    this.cdRef.markForCheck();
     this.webtoonImages.next(data);
 
     if (!this.imagesLoaded.hasOwnProperty(page)) {
@@ -603,7 +620,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   prefetchWebtoonImages(pageNum: number = -1) {
-
     if (pageNum === -1) {
       pageNum = this.pageNum;
     }
@@ -621,6 +637,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       .map((img: any) => new Promise(resolve => { img.onload = img.onerror = resolve; })))
       .then(() => {
         this.allImagesLoaded = true;
+        this.cdRef.markForCheck();
     });
   }
 
