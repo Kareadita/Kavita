@@ -61,4 +61,8 @@ export class TypeaheadSettings<T> {
      * Required for addIfNonExisting to transform the text from model into the item
      */
     addTransformFn!: (text: string) => T;
+    /**
+     * An optional, but recommended trackby identity function to help Angular render the list better
+     */
+    trackByIdentityFn!: (index: number, value: T) => T;
 }
