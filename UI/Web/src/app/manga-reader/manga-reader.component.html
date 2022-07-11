@@ -1,7 +1,7 @@
 <div class="reader" #reader [ngStyle]="{overflow: (isFullscreen ? 'auto' : 'visible')}">
     <div class="fixed-top overlay" *ngIf="menuOpen" [@slideFromTop]="menuOpen">
         <div style="display: flex; margin-top: 5px;">
-            <button class="btn btn-icon" style="height: 100%" title="Back" (click)="closeReader()">
+            <button class="btn btn-icon" style="height: 100%" title="Back" (click)="readerService.closeReader()">
                 <i class="fa fa-arrow-left" aria-hidden="true"></i>
                 <span class="visually-hidden">Back</span>
             </button>
