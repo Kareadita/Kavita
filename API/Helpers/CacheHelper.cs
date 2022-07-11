@@ -66,9 +66,9 @@ public class CacheHelper : ICacheHelper
     /// <summary>
     /// Has the file been modified since last scan or is user forcing an update
     /// </summary>
-    /// <param name="lastScan"></param>
-    /// <param name="forceUpdate"></param>
-    /// <param name="firstFile"></param>
+    /// <param name="lastScan">Last time the scan was performed on this file</param>
+    /// <param name="forceUpdate">Should we ignore any logic and force this to return true</param>
+    /// <param name="firstFile">The file in question</param>
     /// <returns></returns>
     public bool HasFileChangedSinceLastScan(DateTime lastScan, bool forceUpdate, MangaFile firstFile)
     {
@@ -76,10 +76,6 @@ public class CacheHelper : ICacheHelper
         if (forceUpdate) return true;
         return _fileService.HasFileBeenModifiedSince(firstFile.FilePath, lastScan)
                || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified);
-        // return firstFile != null &&
-        //        (!forceUpdate &&
-        //         !(_fileService.HasFileBeenModifiedSince(firstFile.FilePath, lastScan)
-        //           || _fileService.HasFileBeenModifiedSince(firstFile.FilePath, firstFile.LastModified)));
     }
 
     /// <summary>

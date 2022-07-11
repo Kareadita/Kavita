@@ -686,6 +686,7 @@ namespace API.Services
         /// </summary>
         /// <param name="fileFilePath"></param>
         /// <param name="fileName">Name of the new file.</param>
+        /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
         /// <returns></returns>
         public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {

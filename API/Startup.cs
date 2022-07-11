@@ -22,6 +22,7 @@ using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -30,6 +31,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -230,7 +232,13 @@ namespace API
 
             app.UseStaticFiles(new StaticFileOptions
             {
-                ContentTypeProvider = new FileExtensionContentTypeProvider()
+                ContentTypeProvider = new FileExtensionContentTypeProvider(),
+                HttpsCompression = HttpsCompressionMode.Compress,
+                OnPrepareResponse = ctx =>
+                {
+                    const int durationInSeconds = 60 * 60 * 24;
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + durationInSeconds;
+                }
             });
 
             app.Use(async (context, next) =>

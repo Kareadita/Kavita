@@ -132,7 +132,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
   constructor(public imageService: ImageService, private libraryService: LibraryService,
     public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
-    private messageHub: MessageHubService, private accountService: AccountService, private scrollService: ScrollService, private changeDetectionRef: ChangeDetectorRef) {}
+    private messageHub: MessageHubService, private accountService: AccountService, 
+    private scrollService: ScrollService, private readonly changeDetectionRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
@@ -143,6 +144,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     if (this.suppressLibraryLink === false) {
       if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
         this.libraryId = (this.entity as Series).libraryId;
+        this.changeDetectionRef.markForCheck();
       }
 
       if (this.libraryId !== undefined && this.libraryId > 0) {
@@ -175,7 +177,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
 
       this.read = updateEvent.pagesRead;
-      this.changeDetectionRef.markForCheck();
+      this.changeDetectionRef.detectChanges();
     });
   }
 
@@ -189,6 +191,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     if (!this.allowSelection) return;
 
     this.selectionInProgress = false;
+    this.changeDetectionRef.markForCheck();
   }
 
   @HostListener('touchstart', ['$event'])
@@ -304,5 +307,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     this.selection.emit(this.selected);
+    this.changeDetectionRef.detectChanges();
   }
 }

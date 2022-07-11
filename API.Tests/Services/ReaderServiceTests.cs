@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -16,7 +15,6 @@ using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -28,7 +26,6 @@ public class ReaderServiceTests
 
     private readonly IUnitOfWork _unitOfWork;
 
-    private readonly DbConnection _connection;
     private readonly DataContext _context;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";
@@ -39,7 +36,6 @@ public class ReaderServiceTests
     public ReaderServiceTests()
     {
         var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
 
         _context = new DataContext(contextOptions);
         Task.Run(SeedDb).GetAwaiter().GetResult();
@@ -83,7 +79,7 @@ public class ReaderServiceTests
         return await _context.SaveChangesAsync() > 0;
     }
 
-    private async Task ResetDB()
+    private async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
 
@@ -122,7 +118,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task CapPageToChapterTest()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -161,7 +157,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task SaveReadingProgress_ShouldCreateNewEntity()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -210,7 +206,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task SaveReadingProgress_ShouldUpdateExisting()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -276,7 +272,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersAsReadTest()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -314,7 +310,7 @@ public class ReaderServiceTests
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumes(1);
-        readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
         await _context.SaveChangesAsync();
 
         Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
@@ -326,7 +322,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChapterAsUnreadTest()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -364,12 +360,12 @@ public class ReaderServiceTests
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
 
         await _context.SaveChangesAsync();
         Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
 
-        readerService.MarkChaptersAsUnread(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await readerService.MarkChaptersAsUnread(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
         await _context.SaveChangesAsync();
 
         var progresses = (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
@@ -385,7 +381,7 @@ public class ReaderServiceTests
     public async Task GetNextChapterIdAsync_ShouldGetNextVolume()
     {
         // V1 -> V2
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -431,7 +427,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -478,7 +474,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoChaptersFromVolume()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -519,9 +515,54 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetNextChapterIdAsync_ShouldRollIntoNextChapterWhenVolumesAreOnlyOneChapterAndNextChapterIs0()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("66", false, new List<MangaFile>()),
+                    EntityFactory.CreateChapter("67", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
+        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+        Assert.NotEqual(-1, nextChapter);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.Equal("0", actualChapter.Range);
+    }
+
+    [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -562,7 +603,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromVolume()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -598,7 +639,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromLastChapter_NoSpecials()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -639,7 +680,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldMoveFromVolumeToSpecial_NoLooseLeafChapters()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -682,7 +723,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldMoveFromLooseLeafChapterToSpecial()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -721,7 +762,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldFindNoNextChapterFromSpecial_WithVolumeAndLooseLeafChapters()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -763,7 +804,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetNextChapterIdAsync_ShouldMoveFromSpecialToSpecial()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -811,7 +852,7 @@ public class ReaderServiceTests
     public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume()
     {
         // V1 -> V2
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -857,7 +898,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -904,7 +945,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToVolume()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -947,7 +988,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolume()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -983,7 +1024,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapter()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -1018,7 +1059,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapterAndHasNormalChapters()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -1058,7 +1099,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromVolumeWithZeroChapterAndHasNormalChapters2()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -1112,7 +1153,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldFindNoPrevChapterFromChapter()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -1148,7 +1189,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldMoveFromSpecialToSpecial()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -1191,7 +1232,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetPrevChapterIdAsync_ShouldMoveFromChapterToVolume()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -1902,7 +1943,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsReadAnythingUntil()
     {
-        await ResetDB();
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1979,7 +2020,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkSeriesAsReadTest()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -2044,7 +2085,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkSeriesAsUnreadTest()
     {
-        await ResetDB();
+        await ResetDb();
 
         _context.Series.Add(new Series()
         {
@@ -2082,7 +2123,7 @@ public class ReaderServiceTests
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
 
         await _context.SaveChangesAsync();
         Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
@@ -2093,6 +2134,42 @@ public class ReaderServiceTests
         var progresses = (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
         Assert.Equal(0, progresses.Max(p => p.PagesRead));
         Assert.Equal(2, progresses.Count);
+    }
+
+    #endregion
+
+    #region FormatChapterName
+
+    [Fact]
+    public void FormatChapterName_Manga_Chapter()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Manga, false, false);
+        Assert.Equal("Chapter", actual);
+    }
+
+    [Fact]
+    public void FormatChapterName_Book_Chapter_WithTitle()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Book, false, false);
+        Assert.Equal("Book", actual);
+    }
+
+    [Fact]
+    public void FormatChapterName_Comic()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Comic, false, false);
+        Assert.Equal("Issue", actual);
+    }
+
+    [Fact]
+    public void FormatChapterName_Comic_WithHash()
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var actual = readerService.FormatChapterName(LibraryType.Comic, true, true);
+        Assert.Equal("Issue #", actual);
     }
 
     #endregion

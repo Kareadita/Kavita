@@ -15,7 +15,7 @@
 
                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
 
-                    <ngb-accordion [closeOthers]="true" [activeIds]="AccordionPanelID.ImageReader" #acc="ngbAccordion">
+                    <ngb-accordion [closeOthers]="true" [activeIds]="AccordionPanelID.GlobalSettings" #acc="ngbAccordion">
                         <ngb-panel [id]="AccordionPanelID.GlobalSettings" title="Global Settings">
                             <ng-template ngbPanelHeader>
                                 <h2 class="accordion-header">

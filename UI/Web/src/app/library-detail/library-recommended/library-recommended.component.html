@@ -1,7 +1,7 @@
 
 
-<ng-container *ngIf="noData">
-    <p>Nothing to show here. Add some metadata to your library, read something or rate something.</p>
+<ng-container *ngIf="all$ | async as all">
+    <p *ngIf="all.length === 0">Nothing to show here. Add some metadata to your library, read something or rate something.</p>
 </ng-container>
 
 <ng-container *ngIf="onDeck$ | async as onDeck">

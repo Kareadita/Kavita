@@ -26,5 +26,5 @@
             </ng-container>
         </app-side-nav-item>
     </div>
-    <div class="side-nav-overlay" (click)="navService?.toggleSideNav()" [ngClass]="{'closed' : (navService?.sideNavCollapsed$ | async)}"></div>
+    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService?.sideNavCollapsed$ | async)}"></div>
 </ng-container>

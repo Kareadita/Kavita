@@ -1,11 +1,12 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'app-icon-and-title',
   templateUrl: './icon-and-title.component.html',
-  styleUrls: ['./icon-and-title.component.scss']
+  styleUrls: ['./icon-and-title.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class IconAndTitleComponent implements OnInit {
+export class IconAndTitleComponent {
   /**
    * If the component is clickable and should emit click events
    */
@@ -19,15 +20,9 @@ export class IconAndTitleComponent implements OnInit {
 
   @Output() click: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
 
-
-
   constructor() { }
-
-  ngOnInit(): void {
-  }
 
   handleClick(event: MouseEvent) {
     if (this.clickable) this.click.emit(event);
   }
-
 }

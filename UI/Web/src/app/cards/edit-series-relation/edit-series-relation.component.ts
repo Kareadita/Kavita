@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -19,7 +19,8 @@ interface RelationControl {
 @Component({
   selector: 'app-edit-series-relation',
   templateUrl: './edit-series-relation.component.html',
-  styleUrls: ['./edit-series-relation.component.scss']
+  styleUrls: ['./edit-series-relation.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditSeriesRelationComponent implements OnInit, OnDestroy {
 
@@ -30,18 +31,22 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   @Input() save: EventEmitter<void> = new EventEmitter();
 
   @Output() saveApi = new ReplaySubject(1);
-  relationOptions = RelationKinds;
 
+  relationOptions = RelationKinds;
   relations: Array<RelationControl> = [];
   seriesSettings: TypeaheadSettings<SearchResult> = new TypeaheadSettings();
   libraryNames: {[key:number]: string} = {};
 
+  get RelationKind() {
+    return RelationKind;
+  }
 
 
   private onDestroy: Subject<void> = new Subject<void>();
 
   constructor(private seriesService: SeriesService, private utilityService: UtilityService, 
-    public imageService: ImageService, private libraryService: LibraryService) { }
+    public imageService: ImageService, private libraryService: LibraryService, 
+    private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.seriesService.getRelatedForSeries(this.series.id).subscribe(async relations => {
@@ -57,10 +62,12 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
         this.setupRelationRows(relations.doujinshis, RelationKind.Doujinshi);
         this.setupRelationRows(relations.contains, RelationKind.Contains);
         this.setupRelationRows(relations.parent, RelationKind.Parent);
+        this.cdRef.detectChanges();
     });
 
     this.libraryService.getLibraryNames().subscribe(names => {
       this.libraryNames = names;
+      this.cdRef.markForCheck();
     });
 
     this.save.pipe(takeUntil(this.onDestroy)).subscribe(() => this.saveState());
@@ -74,27 +81,43 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   setupRelationRows(relations: Array<Series>, kind: RelationKind) {
     relations.map(async item => {
       const settings = await firstValueFrom(this.createSeriesTypeahead(item, kind));
-      return {series: item, typeaheadSettings: settings, formControl: new FormControl(kind, [])}
+      const form = new FormControl(kind, []);
+      if (kind === RelationKind.Parent) {
+        form.disable();
+      }
+      return {series: item, typeaheadSettings: settings, formControl: form};
     }).forEach(async p => {
       this.relations.push(await p);
+      this.cdRef.markForCheck();
     });
   }
 
   async addNewRelation() {
     this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []), typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation))});
+    this.cdRef.markForCheck();
+
+    // Focus on the new typeahead
+    setTimeout(() => {
+      const typeahead = document.querySelector(`#relation--${this.relations.length - 1} .typeahead-input input`) as HTMLInputElement;
+      if (typeahead) typeahead.focus();
+    }, 10);
+
   }
 
   removeRelation(index: number) {
     this.relations.splice(index, 1);
+    this.cdRef.markForCheck();
   }
 
  
   updateSeries(event: Array<SearchResult | undefined>, relation: RelationControl) {
     if (event[0] === undefined) {
       relation.series = undefined;
+      this.cdRef.markForCheck();
       return;
     }
     relation.series = {id: event[0].seriesId, name: event[0].name};
+    this.cdRef.markForCheck();
   }
 
   createSeriesTypeahead(series: Series | undefined, relationship: RelationKind): Observable<TypeaheadSettings<SearchResult>> {
@@ -143,8 +166,6 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
     
     // TODO: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
-
-    //this.saveApi.next(this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis));
     this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis).subscribe(() => {});
     
   }

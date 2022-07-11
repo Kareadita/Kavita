@@ -13,15 +13,17 @@ export class CarouselReelComponent {
   @Input() items: any[] = [];
   @Input() title = '';
   @Input() clickableTitle: boolean = true;
+  /**
+   * Track by identity. By default, this has an implementation based on title, item's name, pagesRead, and index
+   */
+  @Input() trackByIdentity: (index: number, item: any) => string = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
   @Output() sectionClick = new EventEmitter<string>();
 
   swiper: Swiper | undefined;
 
-  trackByIdentity: (index: number, item: any) => string;
+  
 
-  constructor(private readonly cdRef: ChangeDetectorRef) { 
-    this.trackByIdentity = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;
-  }
+  constructor(private readonly cdRef: ChangeDetectorRef) {}
 
   nextPage() {
     if (this.swiper) {

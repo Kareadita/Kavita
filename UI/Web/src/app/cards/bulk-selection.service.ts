@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { ChangeDetectorRef, Injectable } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
+import { ReplaySubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { Action, ActionFactoryService } from '../_services/action-factory.service';
+import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 
 type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark';
 
@@ -22,6 +23,15 @@ export class BulkSelectionService {
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
   private dataSourceMax: { [key: string]: number} = {};
   public isShiftDown: boolean = false;
+
+  private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
+  public actions$ = this.actionsSource.asObservable();
+
+  private selectionsSource = new ReplaySubject<number>(1);
+  /**
+   * Number of active selections
+   */
+  public selections$ = this.selectionsSource.asObservable();
 
   constructor(private router: Router, private actionFactory: ActionFactoryService) {
     router.events
@@ -61,6 +71,7 @@ export class BulkSelectionService {
     this.prevIndex = index;
     this.prevDataSource = dataSource;
     this.dataSourceMax[dataSource] = maxIndex;
+    this.actionsSource.next(this.getActions(() => {}));
   }
 
   isCardSelected(dataSource: DataSource, index: number) {
@@ -77,6 +88,7 @@ export class BulkSelectionService {
 
     if (from === to) {
       this.selectedCards[dataSource][to] = value;
+      this.selectionsSource.next(this.totalSelections());
       return;
     }
 
@@ -89,10 +101,12 @@ export class BulkSelectionService {
     for (let i = from; i <= to; i++) {
       this.selectedCards[dataSource][i] = value;
     }
+    this.selectionsSource.next(this.totalSelections());
   }
 
   deselectAll() {
     this.selectedCards = {};
+    this.selectionsSource.next(0);
   }
 
   hasSelections() {

@@ -1,8 +1,8 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { debounceTime, map, take, takeUntil, tap, shareReplay } from 'rxjs/operators';
 import { FilterQueryParam } from '../shared/_services/filter-utilities.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
@@ -11,7 +11,6 @@ import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { Series } from '../_models/series';
 import { SortField } from '../_models/series-filter';
 import { SeriesGroup } from '../_models/series-group';
-import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ImageService } from '../_services/image.service';
 import { LibraryService } from '../_services/library.service';
@@ -21,7 +20,8 @@ import { SeriesService } from '../_services/series.service';
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
@@ -30,10 +30,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   @Input() libraryId: number = 0;
 
-  user: User | undefined;
-  libraries: Library[] = [];
-  isLoading = false;
-  isAdmin = false;
+  libraries$: Observable<Library[]> = of([]);
+  isLoading = true;
+  
+  isAdmin$: Observable<boolean> = of(false);
 
   recentlyUpdatedSeries: SeriesGroup[] = [];
   inProgress: Series[] = [];
@@ -49,13 +49,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(public accountService: AccountService, private libraryService: LibraryService, 
     private seriesService: SeriesService, private router: Router, 
     private titleService: Title, public imageService: ImageService, 
-    private messageHub: MessageHubService) {
+    private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef) {
+
       this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
         if (res.event === EVENTS.SeriesAdded) {
           const seriesAddedEvent = res.payload as SeriesAddedEvent;
 
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
             this.recentlyAddedSeries.unshift(series);
+            this.cdRef.markForCheck();
           });
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
@@ -63,28 +65,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
+          this.cdRef.markForCheck();
         } else if (res.event === EVENTS.ScanSeries) {
           // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
           this.loadRecentlyAdded$.next();
         }
       });
 
-      this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntil(this.onDestroy)).subscribe(() => this.loadRecentlyAdded());
+      this.isAdmin$ = this.accountService.currentUser$.pipe(
+        takeUntil(this.onDestroy), 
+        map(user => (user && this.accountService.hasAdminRole(user)) || false), 
+        shareReplay()
+      );
+
+      this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntil(this.onDestroy)).subscribe(() => {
+        this.loadRecentlyAdded();
+        this.cdRef.markForCheck();
+      });
   }
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - Dashboard');
     this.isLoading = true;
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      this.user = user;
-      if (this.user) {
-        this.isAdmin = this.accountService.hasAdminRole(this.user);
-        this.libraryService.getLibrariesForMember().pipe(take(1)).subscribe(libraries => {
-          this.libraries = libraries;
-          this.isLoading = false;
-        });
-      }
-    });
+    this.cdRef.markForCheck();
+
+    this.libraries$ = this.libraryService.getLibrariesForMember().pipe(take(1), tap((libs) => {
+      this.isLoading = false;
+      this.cdRef.markForCheck();
+    }));
 
     this.reloadSeries();
   }
@@ -120,6 +128,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     api.pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -130,6 +139,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
     api.pipe(takeUntil(this.onDestroy)).subscribe((updatedSeries) => {
       this.recentlyAddedSeries = updatedSeries.result;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -144,6 +154,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.libraryId === 0) return true;
         return group.libraryId === this.libraryId;
       });
+      this.cdRef.markForCheck();
     });
   }
 
