@@ -331,6 +331,8 @@ public class ReaderService : IReaderService
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
             } else if (double.Parse(firstChapter.Number) > double.Parse(currentChapter.Number)) return firstChapter.Id;
+            // If we are the last chapter and next volume is there, we should try to use it (unless it's volume 0)
+            else if (double.Parse(firstChapter.Number) == 0) return firstChapter.Id;
         }
 
         // If we are the last volume and we didn't find any next volume, loop back to volume 0 and give the first chapter
