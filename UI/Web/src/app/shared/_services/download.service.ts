@@ -6,13 +6,24 @@ import { ConfirmService } from '../confirm.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler, Observable } from 'rxjs';
+import { asyncScheduler, BehaviorSubject, Observable, ReplaySubject, tap, finalize } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { catchError, throttleTime } from 'rxjs/operators';
 
 export const DEBOUNCE_TIME = 100;
+
+export interface DownloadEvent {
+  /**
+   * Type of entity being downloaded
+   */
+  entityType: 'series' | 'volume' | 'chapter' | 'bookmarks';
+  /**
+   * What to show user. For example, for Series, we might show series name.
+   */
+  subTitle: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +35,9 @@ export class DownloadService {
    * Size in bytes in which to inform the user for confirmation before download starts. Defaults to 100 MB.
    */
   public SIZE_WARNING = 104_857_600;
+
+  private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
+  public activeDownloads$ = this.downloadsSource.asObservable();
 
   constructor(private httpClient: HttpClient, private confirmService: ConfirmService, private toastr: ToastrService, @Inject(SAVER) private save: Saver) { }
 
@@ -52,9 +66,23 @@ export class DownloadService {
   downloadSeries(series: Series) {
     return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
-              this.save(blob, filename)
-            }));
+            ).pipe(
+              tap((d) => {
+                if (d.type !== 0) return; // type 0 is the first event to pass through, so use that to track a new download
+                const values = this.downloadsSource.getValue();
+                values.push({entityType: 'series', subTitle: series.name});
+                this.downloadsSource.next(values);
+              }),
+              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+              download((blob, filename) => {
+                this.save(blob, filename)
+              }),
+              finalize(() => {
+                let values = this.downloadsSource.getValue();
+                values = values.filter(v => !(v.entityType === 'series' && v.subTitle === series.name));
+                this.downloadsSource.next(values);
+              })
+            );
   }
 
   downloadChapter(chapter: Chapter) {
@@ -66,14 +94,16 @@ export class DownloadService {
   }
 
   downloadVolume(volume: Volume): Observable<Download> {
-    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id, 
-                      {observe: 'events', responseType: 'blob', reportProgress: true}
-            ).pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), download((blob, filename) => {
+    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id, {observe: 'events', responseType: 'blob', reportProgress: true})
+      .pipe(throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+            download((blob, filename) => {
               this.save(blob, filename)
-            }));
+            })
+      );
   }
 
   async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series' | 'reading list') {
+    // TODO: Hook in and check if CheckSizeBeforeDownload enabled
     return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
   }
 

@@ -1,10 +1,11 @@
 <ng-container *ngIf="isAdmin$ | async">
-    
-    <ng-container *ngIf="errors$ | async as errors">
-        <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0, 'colored-error': errors.length > 0}" 
-            [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
-            <i aria-hidden="true" class="fa fa-wave-square nav"></i>
-        </button>
+    <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
+        <ng-container *ngIf="errors$ | async as errors">
+            <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0, 'colored-error': errors.length > 0}" 
+                [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
+                <i aria-hidden="true" class="fa fa-wave-square nav"></i>
+            </button>
+        </ng-container>
     </ng-container>
     
 
@@ -85,6 +86,18 @@
                     </li>
                 </ng-container>
             </ng-container>
+
+            <!-- Active Downloads by the user-->
+            <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
+                <ng-container *ngFor="let download of activeDownloads">
+                    <li class="list-group-item dark-menu-item update-available">
+                        <div>Downloading {{download.entityType}}</div>
+                        <div class="accent-text" *ngIf="download.subTitle !== ''">{{download.subTitle}}</div>
+                    </li>
+                </ng-container>
+            </ng-container>
+
+            
 
             <!-- Errors -->
             <ng-container *ngIf="errors$ | async as errors">
