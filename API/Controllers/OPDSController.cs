@@ -622,8 +622,8 @@ public class OpdsController : BaseApiController
         }
 
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-        var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
-        return File(bytes, contentType, fileDownloadName);
+        var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
+        return PhysicalFile(zipFile, contentType, fileDownloadName, true);
     }
 
     private static ContentResult CreateXmlResult(string xml)
