@@ -58,6 +58,7 @@ export class ConfirmEmailComponent {
     }, err => {
       console.log('error: ', err);
       this.errors = err;
+      this.cdRef.markForCheck();
     });
   }
 

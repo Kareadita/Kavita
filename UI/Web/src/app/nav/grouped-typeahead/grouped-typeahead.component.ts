@@ -77,7 +77,6 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   get hasData() {
-    console.log('render occured')
     return !(this.noResultsTemplate != undefined && !this.grouppedData.persons.length && !this.grouppedData.collections.length 
       && !this.grouppedData.series.length && !this.grouppedData.persons.length && !this.grouppedData.tags.length && !this.grouppedData.genres.length && !this.grouppedData.libraries.length
       && !this.grouppedData.files.length && !this.grouppedData.chapters.length);
