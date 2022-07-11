@@ -6,11 +6,12 @@ import { ConfirmService } from '../confirm.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
 import { ToastrService } from 'ngx-toastr';
-import { asyncScheduler, BehaviorSubject, Observable, ReplaySubject, tap, finalize } from 'rxjs';
+import { asyncScheduler, BehaviorSubject, Observable, ReplaySubject, tap, finalize, of, map, filter } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
-import { catchError, throttleTime } from 'rxjs/operators';
+import { catchError, switchMap, takeWhile, throttleTime } from 'rxjs/operators';
+import { AccountService } from 'src/app/_services/account.service';
 
 export const DEBOUNCE_TIME = 100;
 
@@ -39,7 +40,9 @@ export class DownloadService {
   private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
   public activeDownloads$ = this.downloadsSource.asObservable();
 
-  constructor(private httpClient: HttpClient, private confirmService: ConfirmService, private toastr: ToastrService, @Inject(SAVER) private save: Saver) { }
+  constructor(private httpClient: HttpClient, private confirmService: ConfirmService, 
+    private toastr: ToastrService, @Inject(SAVER) private save: Saver, 
+    private accountService: AccountService) { }
 
 
   public downloadSeriesSize(seriesId: number) {
@@ -101,8 +104,35 @@ export class DownloadService {
             })
       );
   }
+  
+  async promptForSize(entityType: 'volume' | 'chapter' | 'series', id: number) {
+    let sizeCheckCall: Observable<number>; 
+    switch (entityType) {
+      case 'series':
+        sizeCheckCall = this.downloadSeriesSize(id);
+        break;
+      case 'volume':
+        sizeCheckCall = this.downloadVolumeSize(id);
+        break;
+      case 'chapter':
+        sizeCheckCall = this.downloadChapterSize(id);
+        break;
+    }
 
-  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series' | 'reading list') {
+    this.accountService.currentUser$.pipe(switchMap(user => {
+      if (!user) return of(0);
+      // user.preferences.promptForDownloadSize
+      if (true) {
+        return sizeCheckCall;
+      }
+    }), map(async (size) => {
+        return of(await this.confirmSize(size, entityType));
+    })
+    );
+
+  }
+
+  async confirmSize(size: number, entityType: 'volume' | 'chapter' | 'series') {
     // TODO: Hook in and check if CheckSizeBeforeDownload enabled
     return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
   }
