@@ -608,7 +608,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         event.preventDefault();
         return;
       }
-      this.readerService.closeReader();
+      this.closeReader();
     } else if (event.key === KEY_CODES.SPACE) {
       this.toggleMenu();
     } else if (event.key === KEY_CODES.G) {
@@ -762,9 +762,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.render();
     }, () => {
       setTimeout(() => {
-        this.readerService.closeReader();
+        this.closeReader();
       }, 200);
     });
+  }
+
+  closeReader() {
+    this.readerService.closeReader(this.readingListMode, this.readingListId);
   }
 
   render() {
