@@ -1013,7 +1013,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pageAmount = pageAmount;
 
       if (this.readerMode !== ReaderMode.Webtoon) {
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
+        this.setCanvasImage();
       }
     }
 
@@ -1058,12 +1058,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum - pageAmount);
       if (this.readerMode !== ReaderMode.Webtoon) {
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
+        this.setCanvasImage();
       }
     }
 
     if (this.readerMode !== ReaderMode.Webtoon) {
       this.loadPage();
+    }
+  }
+
+  /**
+   * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
+   */
+  setCanvasImage() {
+    const img = this.cachedImages.arr.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
+    if (img) {
+      this.canvasImage = img;
+    } else {
+      this.canvasImage.src = this.getPageUrl(this.pageNum);
     }
   }
 
@@ -1315,7 +1327,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImageAheadBy2.src = '';
 
     this.isLoose = (this.pageAmount === 1 ? true : false);
-    this.canvasImage.src = this.getPageUrl(this.pageNum);
+    this.setCanvasImage();
+
 
     if (this.layoutMode !== LayoutMode.Single) {
       this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()

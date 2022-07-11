@@ -254,7 +254,7 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Runs a Cover Image Genearation task
+        /// Runs a Cover Image Generation task
         /// </summary>
         /// <param name="refreshSeriesDto"></param>
         /// <returns></returns>
