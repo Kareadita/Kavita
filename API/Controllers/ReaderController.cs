@@ -57,7 +57,7 @@ namespace API.Controllers
                 var path = _cacheService.GetCachedFile(chapter);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
 
-                Response.AddCacheHeader(path, TimeSpan.FromMinutes(60).Seconds);
+                Response.AddCacheHeader(path, (int) TimeSpan.FromMinutes(60).TotalSeconds);
                 return PhysicalFile(path, "application/pdf", Path.GetFileName(path), true);
             }
             catch (Exception)
@@ -86,7 +86,7 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
-                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
+                Response.AddCacheHeader(path, (int) TimeSpan.FromMinutes(10).TotalSeconds);
                 return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
             }
             catch (Exception)
@@ -121,7 +121,7 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
-                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
+                Response.AddCacheHeader(path, (int) TimeSpan.FromMinutes(10).TotalSeconds);
                 return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
             }
             catch (Exception)

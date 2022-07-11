@@ -36,7 +36,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
             var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
-            Response.AddCacheHeader(path);
+            Response.AddCacheHeader(path, 30 * 60);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
@@ -52,7 +52,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
             var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
-            Response.AddCacheHeader(path);
+            Response.AddCacheHeader(path, 30 * 60);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
@@ -68,7 +68,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
             var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
-            Response.AddCacheHeader(path);
+            Response.AddCacheHeader(path, 30 * 60);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
@@ -84,7 +84,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
             var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
-            Response.AddCacheHeader(path);
+            Response.AddCacheHeader(path, 30 * 60);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
@@ -100,7 +100,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
             var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
-            Response.AddCacheHeader(path);
+            Response.AddCacheHeader(path, 30 * 60);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
@@ -124,7 +124,7 @@ namespace API.Controllers
             var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
             var format = Path.GetExtension(file.FullName).Replace(".", "");
 
-            Response.AddCacheHeader(file.FullName);
+            Response.AddCacheHeader(file.FullName, 30 * 60);
             return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
         }
 
@@ -141,7 +141,7 @@ namespace API.Controllers
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"File does not exist");
             var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
 
-            Response.AddCacheHeader(path);
+            Response.AddCacheHeader(path, 30 * 60);
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
     }
