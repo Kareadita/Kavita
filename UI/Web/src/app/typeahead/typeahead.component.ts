@@ -1,3 +1,4 @@
+import { trigger, state, style, transition, animate } from '@angular/animations';
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
@@ -130,10 +131,34 @@ export class SelectionModel<T> {
   }
 }
 
+const ANIMATION_SPEED = 200;
+
 @Component({
   selector: 'app-typeahead',
   templateUrl: './typeahead.component.html',
-  styleUrls: ['./typeahead.component.scss']
+  styleUrls: ['./typeahead.component.scss'],
+  animations: [
+    trigger('slideFromTop', [
+      state('in', style({ transform: 'translateY(0)'})),
+      transition('void => *', [
+        style({ transform: 'translateY(-100%)' }),
+        animate(ANIMATION_SPEED)
+      ]),
+      transition('* => void', [
+        animate(ANIMATION_SPEED, style({ transform: 'translateY(-100%)' })),
+      ])
+    ]),
+    trigger('slideFromBottom', [
+      state('in', style({ transform: 'translateY(0)'})),
+      transition('void => *', [
+        style({ transform: 'translateY(100%)' }),
+        animate(ANIMATION_SPEED)
+      ]),
+      transition('* => void', [
+        animate(ANIMATION_SPEED, style({ transform: 'translateY(100%)' })),
+      ])
+    ])
+  ]
 })
 export class TypeaheadComponent implements OnInit, OnDestroy {
   /**
