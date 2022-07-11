@@ -75,7 +75,7 @@ export class DownloadService {
               }),
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
               download((blob, filename) => {
-                this.save(blob, filename)
+                this.save(blob, filename);
               }),
               finalize(() => {
                 let values = this.downloadsSource.getValue();
