@@ -1077,6 +1077,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.canvasImage.src = this.getPageUrl(this.pageNum);
     }
+    this.cdRef.markForCheck();
   }
 
   loadNextChapter() {
