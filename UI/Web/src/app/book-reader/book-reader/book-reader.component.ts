@@ -1240,9 +1240,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.immersiveMode && !this.drawerOpen) {
       this.actionBarVisible = false;
     }
-    this.cdRef.markForCheck();
-
     this.updateReadingSectionHeight();
+    this.cdRef.markForCheck();
   }
 
   updateReadingSectionHeight() {
