@@ -98,6 +98,7 @@ namespace API.Controllers
             existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
             existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
             existingPreferences.LayoutMode = preferencesDto.LayoutMode;
+            existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
 
             _unitOfWork.UserRepository.Update(existingPreferences);
 

@@ -37,12 +37,23 @@
 
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="form-check form-switch">
-                                                <input type="checkbox" id="auto-close" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="blurUnreadSummaries" [value]="true" aria-labelledby="auto-close-label">
+                                                <input type="checkbox" id="auto-close" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
                                                 <label class="form-check-label" for="auto-close">Blur Unread Summaries</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="blurUnreadSummariesTooltip" role="button" tabindex="0"></i>
                                             </div>
                                             
                                             <ng-template #blurUnreadSummariesTooltip>Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)</ng-template>
                                             <span class="visually-hidden" id="settings-global-blurUnreadSummaries-help">Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)</span>
+                                        </div>
+                                    </div>
+                                    <div class="row g-0">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <div class="form-check form-switch">
+                                                <input type="checkbox" id="prompt-download" role="switch" formControlName="promptForDownloadSize" class="form-check-input" aria-describedby="settings-global-promptForDownloadSize-help" [value]="true" aria-labelledby="auto-close-label">
+                                                <label class="form-check-label" for="prompt-download">Prompt on Download</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="promptForDownloadSizeTooltip" role="button" tabindex="0"></i>
+                                            </div>
+                                            
+                                            <ng-template #promptForDownloadSizeTooltip>Prompt when a download exceedes 100MB in size</ng-template>
+                                            <span class="visually-hidden" id="settings-global-promptForDownloadSize-help">Prompt when a download exceedes 100MB in size</span>
                                         </div>
                                     </div>
 

@@ -3,8 +3,8 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, Subject } from 'rxjs';
-import { finalize, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { forkJoin, Subject, tap } from 'rxjs';
+import { filter, finalize, switchMap, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
@@ -39,6 +39,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { PageLayoutMode } from '../_models/page-layout-mode';
 import { DOCUMENT } from '@angular/common';
 import { User } from '../_models/user';
+import { Download } from '../shared/_models/download';
 
 interface RelatedSeris {
   series: Series;
@@ -725,19 +726,13 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
   }
 
   downloadSeries() {
-    this.downloadService.downloadSeriesSize(this.seriesId).pipe(take(1)).subscribe(async (size) => {
-      const wantToDownload = await this.downloadService.confirmSize(size, 'series');
-      if (!wantToDownload) { return; }
-      this.downloadInProgress = true;
+    this.downloadService.download('series', this.series, (d) => {
+      if (d) {
+        this.downloadInProgress = true;
+      } else {
+        this.downloadInProgress = false;
+      }
       this.changeDetectionRef.markForCheck();
-      this.downloadService.downloadSeries(this.series).pipe(
-        takeWhile(val => {
-          return val.state != 'DONE';
-        }),
-        finalize(() => {
-          this.downloadInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        })).subscribe(() => {/* No Operation */});;
     });
   }
 
