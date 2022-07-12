@@ -1,5 +1,6 @@
 import { AfterViewInit, Directive, ElementRef, TemplateRef, ViewContainerRef } from '@angular/core';
 
+// TODO: Fix this code or remove it
 @Directive({
   selector: '[appShowIfScrollbar]'
 })

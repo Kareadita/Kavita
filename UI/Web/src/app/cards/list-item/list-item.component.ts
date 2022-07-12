@@ -1,12 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, Observable, of, take, takeWhile } from 'rxjs';
+import { finalize, Observable, take, takeWhile } from 'rxjs';
 import { Download } from 'src/app/shared/_models/download';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
-import { Series } from 'src/app/_models/series';
 import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
@@ -14,7 +13,8 @@ import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 @Component({
   selector: 'app-list-item',
   templateUrl: './list-item.component.html',
-  styleUrls: ['./list-item.component.scss']
+  styleUrls: ['./list-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ListItemComponent implements OnInit {
 
@@ -70,7 +70,6 @@ export class ListItemComponent implements OnInit {
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
 
   actionInProgress: boolean = false;
-  summary$: Observable<string> = of('');
   summary: string = '';
   isChapter: boolean = false;
   
@@ -84,16 +83,17 @@ export class ListItemComponent implements OnInit {
   }
 
 
-  constructor(private utilityService: UtilityService, private downloadService: DownloadService, private toastr: ToastrService) { }
+  constructor(private utilityService: UtilityService, private downloadService: DownloadService, 
+    private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-
     this.isChapter = this.utilityService.isChapter(this.entity);
     if (this.isChapter) {
       this.summary = this.utilityService.asChapter(this.entity).summary || '';
     } else {
       this.summary = this.utilityService.asVolume(this.entity).chapters[0].summary || '';
     }
+    this.cdRef.markForCheck();
   }
 
   performAction(action: ActionItem<any>) {
@@ -109,6 +109,7 @@ export class ListItemComponent implements OnInit {
           const wantToDownload = await this.downloadService.confirmSize(size, 'volume');
           if (!wantToDownload) { return; }
           this.downloadInProgress = true;
+          this.cdRef.markForCheck();
           this.download$ = this.downloadService.downloadVolume(volume).pipe(
             takeWhile(val => {
               return val.state != 'DONE';
@@ -116,7 +117,9 @@ export class ListItemComponent implements OnInit {
             finalize(() => {
               this.download$ = null;
               this.downloadInProgress = false;
+              this.cdRef.markForCheck();
             }));
+          this.cdRef.markForCheck();
         });
       } else if (this.utilityService.isChapter(this.entity)) {
         const chapter = this.utilityService.asChapter(this.entity);
@@ -124,6 +127,7 @@ export class ListItemComponent implements OnInit {
           const wantToDownload = await this.downloadService.confirmSize(size, 'chapter');
           if (!wantToDownload) { return; }
           this.downloadInProgress = true;
+          this.cdRef.markForCheck();
           this.download$ = this.downloadService.downloadChapter(chapter).pipe(
             takeWhile(val => {
               return val.state != 'DONE';
@@ -131,7 +135,9 @@ export class ListItemComponent implements OnInit {
             finalize(() => {
               this.download$ = null;
               this.downloadInProgress = false;
+              this.cdRef.markForCheck();
             }));
+          this.cdRef.markForCheck();
         });
       }
       return; // Don't propagate the download from a card

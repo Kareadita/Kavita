@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Location } from '@angular/common';
+import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
-import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { HourEstimateRange } from '../_models/hour-estimate-range';
 import { MangaFormat } from '../_models/manga-format';
@@ -23,7 +24,7 @@ export class ReaderService {
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
-  constructor(private httpClient: HttpClient, private utilityService: UtilityService) { }
+  constructor(private httpClient: HttpClient, private router: Router, private location: Location) { }
 
   getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
     if (format === undefined) format = MangaFormat.ARCHIVE;
@@ -144,7 +145,6 @@ export class ReaderService {
     return this.httpClient.get<Chapter>(this.baseUrl + 'reader/continue-point?seriesId=' + seriesId);
   }
 
-  // TODO: Cache this information
   getTimeLeft(seriesId: number) {
     return this.httpClient.get<HourEstimateRange>(this.baseUrl + 'reader/time-left?seriesId=' + seriesId);
   }
@@ -239,5 +239,16 @@ export class ReaderService {
    */
   checkFullscreenMode() {
     return document.fullscreenElement != null;
+  }
+
+  /**
+   * Closes the reader and causes a redirection
+   */
+  closeReader(readingListMode: boolean = false, readingListId: number = 0) {
+    if (readingListMode) {
+      this.router.navigateByUrl('lists/' + readingListId);
+    } else {
+      this.location.back();
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, AfterViewInit, Inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -65,7 +65,7 @@ interface StoryLineItem {
   styleUrls: ['./series-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SeriesDetailComponent implements OnInit, OnDestroy {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -180,16 +180,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       case Action.AddToReadingList:
         this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => {
           this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
           this.bulkSelectionService.deselectAll();
+          this.changeDetectionRef.markForCheck();
         });
         break;
       case Action.MarkAsRead:
         this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
           this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
           this.bulkSelectionService.deselectAll();
+          this.changeDetectionRef.markForCheck();
         });
 
         break;
@@ -197,8 +197,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
           this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
           this.bulkSelectionService.deselectAll();
+          this.changeDetectionRef.markForCheck();
         });
         break;
     }
@@ -305,18 +305,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onDestroy.complete();
   }
 
-  ngAfterViewInit(): void {
-  //  this.initScroll();
-  }
-
-  // initScroll() {
-  //   // TODO: Remove this code? 
-  //   if (this.scrollingBlock === undefined || this.scrollingBlock.nativeElement === undefined) {
-  //     setTimeout(() => {this.initScroll()}, 10);
-  //     return;
-  //   }
-  // }
-
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
     if (event.key === KEY_CODES.SHIFT) {
@@ -353,22 +341,37 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
         });
         break;
       case(Action.ScanLibrary):
-        this.actionService.scanSeries(series, () => this.actionInProgress = false);
+        this.actionService.scanSeries(series, () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetdata(series, () => this.actionInProgress = false);
+        this.actionService.refreshMetdata(series, () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
         break;
       case(Action.Delete):
         this.deleteSeries(series);
         break;
       case(Action.AddToReadingList):
-        this.actionService.addSeriesToReadingList(series, () => this.actionInProgress = false);
+        this.actionService.addSeriesToReadingList(series, () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
         break;
       case(Action.AddToCollection):
-        this.actionService.addMultipleSeriesToCollectionTag([series], () => this.actionInProgress = false);
+        this.actionService.addMultipleSeriesToCollectionTag([series], () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
         break;
       case (Action.AnalyzeFiles):
-        this.actionService.analyzeFilesForSeries(series, () => this.actionInProgress = false);
+        this.actionService.analyzeFilesForSeries(series, () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
         break;
       case (Action.Download):
         if (this.downloadInProgress) return;
@@ -437,7 +440,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   loadSeries(seriesId: number) {
-    this.seriesService.getMetadata(seriesId).subscribe(metadata => this.seriesMetadata = metadata);
+    this.seriesService.getMetadata(seriesId).subscribe(metadata => {
+      this.seriesMetadata = metadata;
+      this.changeDetectionRef.markForCheck();
+    });
+    
     this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
       this.readingLists = lists;
       this.changeDetectionRef.markForCheck();
@@ -673,7 +680,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterViewInit {
       if (closeResult.success) {
         this.seriesService.getSeries(this.seriesId).subscribe(s => {
           this.series = s;
-          this.changeDetectionRef.markForCheck();
+          this.changeDetectionRef.detectChanges();
         });
         
         this.loadSeries(this.seriesId);

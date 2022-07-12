@@ -21,20 +21,22 @@
     </div>
   </div>
 
-  <div class="dropdown" *ngIf="hasFocus">
-    <ul class="list-group results" #results>
-      <li *ngIf="showAddItem" 
-          class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
-          Add {{typeaheadControl.value}}...
-      </li>
-      <li *ngFor="let option of filteredOptions | async; let index = index;" (click)="handleOptionClick(option)"  
-          class="list-group-item" role="option" [attr.data-index]="index"
-          (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
-        <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
-      </li>
-      <li *ngIf="(filteredOptions | async)?.length === 0 && !showAddItem" class="list-group-item no-hover" role="status">
-        No data{{this.settings.addIfNonExisting ? ', type to add a custom item.' : '.'}}
-      </li>
-    </ul>
-  </div>
+  <ng-container *ngIf="filteredOptions | async as options">
+    <div class="dropdown" *ngIf="hasFocus" [@slideFromTop]="hasFocus">
+      <ul class="list-group results" #results>
+        <li *ngIf="showAddItem" 
+            class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
+            Add {{typeaheadControl.value}}...
+        </li>
+        <li *ngFor="let option of options; let index = index; trackBy: settings.trackByIdentityFn" (click)="handleOptionClick(option)"  
+            class="list-group-item" role="option" [attr.data-index]="index"
+            (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
+          <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+        </li>
+        <li *ngIf="options.length === 0 && !showAddItem" class="list-group-item no-hover" role="status">
+          No data{{this.settings.addIfNonExisting ? ', type to add a custom item' : ''}}
+        </li>
+      </ul>
+    </div>
+  </ng-container>
 </form>

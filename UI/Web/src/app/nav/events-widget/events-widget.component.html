@@ -1,4 +1,4 @@
-<ng-container *ngIf="isAdmin">
+<ng-container *ngIf="isAdmin$ | async">
     
     <ng-container *ngIf="errors$ | async as errors">
         <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0, 'colored-error': errors.length > 0}" 

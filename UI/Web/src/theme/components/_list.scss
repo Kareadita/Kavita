@@ -2,6 +2,7 @@
   color: var(--list-group-item-text-color);
   background-color: var(--list-group-item-bg-color);
   border-color: var(--list-group-item-border-color);
+  word-break: break-all;
 
   &:hover {
     color: var(--list-group-hover-text-color);

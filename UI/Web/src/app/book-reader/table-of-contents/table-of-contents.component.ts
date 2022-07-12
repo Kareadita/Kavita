@@ -1,11 +1,12 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Subject } from 'rxjs';
 import { BookChapterItem } from '../_models/book-chapter-item';
 
 @Component({
   selector: 'app-table-of-contents',
   templateUrl: './table-of-contents.component.html',
-  styleUrls: ['./table-of-contents.component.scss']
+  styleUrls: ['./table-of-contents.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Default
 })
 export class TableOfContentsComponent implements OnInit, OnDestroy {
 
@@ -16,10 +17,7 @@ export class TableOfContentsComponent implements OnInit, OnDestroy {
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
-  
-
   private onDestroy: Subject<void> = new Subject();
-
 
   pageAnchors: {[n: string]: number } = {};
 
@@ -44,5 +42,4 @@ export class TableOfContentsComponent implements OnInit, OnDestroy {
   loadChapterPage(pageNum: number, part: string) {
     this.loadChapter.emit({pageNum, part});
   }
-
 }

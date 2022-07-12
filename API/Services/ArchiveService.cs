@@ -189,6 +189,7 @@ namespace API.Services
         /// <remarks>This always creates a thumbnail</remarks>
         /// <param name="archivePath"></param>
         /// <param name="fileName">File name to use based on context of entity.</param>
+        /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
         /// <returns></returns>
         public string GetCoverImage(string archivePath, string fileName, string outputDirectory)
         {
@@ -261,16 +262,16 @@ namespace API.Services
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
 
-        // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
         /// <summary>
-        ///
+        /// Creates a zip file form the listed files and outputs to the temp folder.
         /// </summary>
-        /// <param name="files"></param>
+        /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
         /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
-        /// <returns></returns>
+        /// <returns>All bytes for the given file in a Tuple</returns>
         /// <exception cref="KavitaException"></exception>
         public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
+            // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
             var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");

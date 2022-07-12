@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
@@ -7,7 +7,8 @@ import { Volume } from 'src/app/_models/volume';
 @Component({
   selector: 'app-entity-title',
   templateUrl: './entity-title.component.html',
-  styleUrls: ['./entity-title.component.scss']
+  styleUrls: ['./entity-title.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntityTitleComponent implements OnInit {
 
@@ -27,7 +28,6 @@ export class EntityTitleComponent implements OnInit {
   @Input() prioritizeTitleName: boolean = true;
 
   isChapter = false;
-  chapter!: Chapter;
   titleName: string = '';
   volumeTitle: string = '';
 
@@ -38,7 +38,7 @@ export class EntityTitleComponent implements OnInit {
 
   
 
-  constructor(private utilityService: UtilityService) {
+  constructor(private utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
@@ -53,5 +53,6 @@ export class EntityTitleComponent implements OnInit {
       this.volumeTitle = v.name || '';
       this.titleName = v.chapters[0].titleName || '';
     }
+    this.cdRef.markForCheck();
   }
 }

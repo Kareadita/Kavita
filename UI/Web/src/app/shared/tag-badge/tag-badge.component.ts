@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 
 /**
  * What type of cursor to apply to the tag badge
@@ -24,29 +24,15 @@ export enum TagBadgeCursor {
 @Component({
   selector: 'app-tag-badge',
   templateUrl: './tag-badge.component.html',
-  styleUrls: ['./tag-badge.component.scss']
+  styleUrls: ['./tag-badge.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TagBadgeComponent implements OnInit {
+export class TagBadgeComponent {
 
   @Input() selectionMode: TagBadgeCursor = TagBadgeCursor.Selectable;
   @Input() fillStyle: 'filled' | 'outline' = 'outline';
 
-  cursor: string = 'default';
-
-  constructor() { }
-
-  ngOnInit(): void {
-    switch (this.selectionMode) {
-      case TagBadgeCursor.Selectable:
-        this.cursor = 'selectable-cursor';
-        break;
-      case TagBadgeCursor.NotAllowed:
-        this.cursor = 'not-allowed-cursor';
-        break;
-      case TagBadgeCursor.Clickable:
-        this.cursor = 'clickable-cursor';
-        break;
-    }
+  get TagBadgeCursor() {
+    return TagBadgeCursor;
   }
-
 }

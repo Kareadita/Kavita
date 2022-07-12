@@ -1,8 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
 import { ThemeService } from 'src/app/_services/theme.service';
-import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { SiteTheme, ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
@@ -10,7 +9,8 @@ import { AccountService } from 'src/app/_services/account.service';
 @Component({
   selector: 'app-theme-manager',
   templateUrl: './theme-manager.component.html',
-  styleUrls: ['./theme-manager.component.scss']
+  styleUrls: ['./theme-manager.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ThemeManagerComponent implements OnInit, OnDestroy {
 
@@ -24,7 +24,9 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
     return ThemeProvider;
   }
 
-  constructor(public themeService: ThemeService, private accountService: AccountService, private toastr: ToastrService) {
+  constructor(public themeService: ThemeService, private accountService: AccountService, 
+    private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) {
+
     themeService.currentTheme$.pipe(takeUntil(this.onDestroy), distinctUntilChanged()).subscribe(theme => {
       this.currentTheme = theme;
     });
@@ -33,6 +35,7 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
       if (user) {
         this.user = user;
         this.isAdmin = accountService.hasAdminRole(user);
+        this.cdRef.markForCheck();
       }
     });
   }
@@ -55,6 +58,7 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
           this.user.preferences = updatedPref;
         }
         this.themeService.setTheme(theme.name);
+        this.cdRef.markForCheck();
       });
     }
 
@@ -71,5 +75,4 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
       this.toastr.info('A site theme scan has been queued');
     });
   }
-
 }

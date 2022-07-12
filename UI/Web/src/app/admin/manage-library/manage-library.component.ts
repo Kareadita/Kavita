@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, filter, take, takeLast, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
 import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
@@ -14,7 +14,8 @@ import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/lib
 @Component({
   selector: 'app-manage-library',
   templateUrl: './manage-library.component.html',
-  styleUrls: ['./manage-library.component.scss']
+  styleUrls: ['./manage-library.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageLibraryComponent implements OnInit, OnDestroy {
 
@@ -31,7 +32,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
 
   constructor(private modalService: NgbModal, private libraryService: LibraryService, 
     private toastr: ToastrService, private confirmService: ConfirmService,
-    private hubService: MessageHubService) { }
+    private hubService: MessageHubService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.getLibraries();
@@ -56,6 +57,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
           const existingLibrary = this.libraries.find(lib => lib.id === libId);
           if (existingLibrary !== undefined) {
             existingLibrary.lastScanned = newLibrary?.lastScanned || existingLibrary.lastScanned;
+            this.cdRef.markForCheck();
           }
         });
     });
@@ -79,9 +81,11 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
 
   getLibraries() {
     this.loading = true;
+    this.cdRef.markForCheck();
     this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
       this.libraries = libraries;
       this.loading = false;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -109,6 +113,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
       this.deletionInProgress = true;
       this.libraryService.delete(library.id).pipe(take(1)).subscribe(() => {
         this.deletionInProgress = false;
+        this.cdRef.markForCheck();
         this.getLibraries();
         this.toastr.success('Library has been removed');
       });
@@ -120,16 +125,4 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
       this.toastr.info('A scan has been queued for ' + library.name);
     });
   }
-
-  libraryType(libraryType: LibraryType) {
-    switch(libraryType) {
-      case LibraryType.Book:
-        return 'Book';
-      case LibraryType.Comic:
-        return 'Comic';
-      case LibraryType.Manga:
-        return 'Manga';
-    }
-  }
-
 }

@@ -12,6 +12,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { SharedModule } from '../shared/shared.module';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
+import { ReadingListItemComponent } from './reading-list-item/reading-list-item.component';
 
 
 
@@ -21,7 +22,8 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
     ReadingListDetailComponent,
     AddToListModalComponent,
     ReadingListsComponent,
-    EditReadingListModalComponent
+    EditReadingListModalComponent,
+    ReadingListItemComponent
   ],
   imports: [
     CommonModule,

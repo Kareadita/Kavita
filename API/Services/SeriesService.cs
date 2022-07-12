@@ -105,7 +105,6 @@ public class SeriesService : ISeriesService
                 series.Metadata.LanguageLocked = true;
             }
 
-
             series.Metadata.CollectionTags ??= new List<CollectionTag>();
             UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
             {
@@ -200,10 +199,11 @@ public class SeriesService : ISeriesService
         return false;
     }
 
-    // TODO: Move this to a helper so we can easily test
+
     private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
+        // TODO: Move UpdateRelatedList to a helper so we can easily test
         if (tags == null) return;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();

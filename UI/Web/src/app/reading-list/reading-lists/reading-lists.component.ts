@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
@@ -14,32 +13,32 @@ import { ReadingListService } from 'src/app/_services/reading-list.service';
 @Component({
   selector: 'app-reading-lists',
   templateUrl: './reading-lists.component.html',
-  styleUrls: ['./reading-lists.component.scss']
+  styleUrls: ['./reading-lists.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReadingListsComponent implements OnInit {
 
   lists: ReadingList[] = [];
   loadingLists = false;
   pagination!: Pagination;
-  actions: ActionItem<ReadingList>[] = [];
   isAdmin: boolean = false;
 
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService,
-    private filterUtilityService: FilterUtilitiesService) { }
+   private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.loadPage();
-
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
+        this.loadPage();
       }
     });
   }
 
   getActions(readingList: ReadingList) {
-    return this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
+    return this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
+      .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
   }
 
   performAction(action: ActionItem<any>, readingList: ReadingList) {
@@ -60,6 +59,7 @@ export class ReadingListsComponent implements OnInit {
         this.actionService.editReadingList(readingList, (updatedList: ReadingList) => {
           // Reload information around list
           readingList = updatedList;
+          this.cdRef.markForCheck();
         });
         break;
     }
@@ -76,18 +76,15 @@ export class ReadingListsComponent implements OnInit {
       this.pagination.currentPage = parseInt(page, 10);
     }
     this.loadingLists = true;
+    this.cdRef.markForCheck();
 
     this.readingListService.getReadingLists(true).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists = readingLists.result;
       this.pagination = readingLists.pagination;
       this.loadingLists = false;
       window.scrollTo(0, 0);
+      this.cdRef.markForCheck();
     });
-  }
-
-  onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);;
-    this.loadPage();
   }
 
   handleClick(list: ReadingList) {

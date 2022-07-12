@@ -1,6 +1,5 @@
 ﻿namespace API.Entities
 {
-    //[Index(nameof(SeriesId), nameof(VolumeId), nameof(ChapterId), IsUnique = true)]
     public class ReadingListItem
     {
         public int Id { get; init; }
@@ -16,7 +15,7 @@
         public ReadingList ReadingList { get; set; }
         public int ReadingListId { get; set; }
 
-        // Idea, keep these for easy join statements
+        // Keep these for easy join statements
         public Series Series { get; set; }
         public Volume Volume { get; set; }
         public Chapter Chapter { get; set; }

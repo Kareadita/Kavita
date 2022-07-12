@@ -1,6 +1,5 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
-import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../shared/tag-badge/tag-badge.component';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
@@ -15,7 +14,8 @@ import { MetadataService } from '../../_services/metadata.service';
 @Component({
   selector: 'app-series-metadata-detail',
   templateUrl: './series-metadata-detail.component.html',
-  styleUrls: ['./series-metadata-detail.component.scss']
+  styleUrls: ['./series-metadata-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
@@ -29,9 +29,6 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
-
-  // readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
-  // readingTimeLeft: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
 
   /**
    * Html representation of Series Summary
@@ -50,7 +47,9 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return FilterQueryParam;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService, private router: Router, public readerService: ReaderService) {
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService, 
+    private router: Router, public readerService: ReaderService,
+    private readonly cdRef: ChangeDetectorRef) {
     
   }
   
@@ -68,6 +67,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
     }
+    this.cdRef.markForCheck();
   }
 
   ngOnInit(): void {
@@ -75,6 +75,7 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
 
   toggleView() {
     this.isCollapsed = !this.isCollapsed;
+    this.cdRef.markForCheck();
   }
 
   handleGoTo(event: {queryParamName: FilterQueryParam, filter: any}) {
@@ -87,5 +88,4 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     params[FilterQueryParam.Page] = 1;
     this.router.navigate(['library', this.series.libraryId], {queryParams: params});
   }
-
 }

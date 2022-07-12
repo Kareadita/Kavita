@@ -31,7 +31,7 @@ export class TypeaheadSettings<T> {
      * Function to compare the elements. Should return all elements that fit the matching criteria. 
      * This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead (TODO)
      */
-    compareFn!:  ((optionList: T[], filter: string)  => T[]);
+    compareFn!: ((optionList: T[], filter: string)  => T[]);
     /**
      * Function which is used for comparing objects when keeping track of state. 
      * Useful over shallow equal when you have image urls that have random numbers on them.
@@ -40,7 +40,7 @@ export class TypeaheadSettings<T> {
     /**
      * Function to fetch the data from the server. If data is mainatined in memory, wrap in an observable.
      */
-    fetchFn!: ((filter: string) => Observable<T[]>) | T[];
+    fetchFn!: (filter: string) => Observable<T[]>;
     /**
      * Minimum number of characters needed to type to trigger the fetch pipeline
      */
@@ -61,4 +61,8 @@ export class TypeaheadSettings<T> {
      * Required for addIfNonExisting to transform the text from model into the item
      */
     addTransformFn!: (text: string) => T;
+    /**
+     * An optional, but recommended trackby identity function to help Angular render the list better
+     */
+    trackByIdentityFn!: (index: number, value: T) => T;
 }

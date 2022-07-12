@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject, take, takeUntil } from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
@@ -60,7 +60,8 @@ const mobileBreakpointMarginOverride = 700;
 @Component({
   selector: 'app-reader-settings',
   templateUrl: './reader-settings.component.html',
-  styleUrls: ['./reader-settings.component.scss']
+  styleUrls: ['./reader-settings.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
@@ -131,12 +132,14 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
   constructor(private bookService: BookService, private accountService: AccountService, 
-    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {}
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService,
+    private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     
     this.fontFamilies = this.bookService.getFontFamilies();
     this.fontOptions = this.fontFamilies.map(f => f.title);
+    this.cdRef.markForCheck();
 
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
@@ -211,6 +214,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         
 
         this.setTheme(this.user.preferences.bookReaderThemeName || this.themeService.defaultBookTheme);
+        this.cdRef.markForCheck();
 
         // Emit first time so book reader gets the setting
         this.readingDirection.emit(this.readingDirectionModel);
@@ -241,6 +245,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     }
     
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
+    this.cdRef.markForCheck();
     this.styleUpdate.emit(this.pageStyles);
   }
 
@@ -264,12 +269,12 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       'margin-right': margin || this.pageStyles['margin-right']  || defaultMargin,
       'line-height': lineHeight || this.pageStyles['line-height'] || '100%'
     };
-
   }
 
   setTheme(themeName: string) {
     const theme = this.themes.find(t => t.name === themeName);
     this.activeTheme = theme;
+    this.cdRef.markForCheck();
     this.colorThemeUpdate.emit(theme);
   }
 
@@ -280,11 +285,13 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
       this.readingDirectionModel = ReadingDirection.LeftToRight;
     }
 
+    this.cdRef.markForCheck();
     this.readingDirection.emit(this.readingDirectionModel);
   }
 
   toggleFullscreen() {
     this.isFullscreen = !this.isFullscreen;
+    this.cdRef.markForCheck();
     this.fullscreen.emit();
   }
 }

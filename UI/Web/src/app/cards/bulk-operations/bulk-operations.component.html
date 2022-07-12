@@ -1,8 +1,27 @@
-<div *ngIf="bulkSelectionService.hasSelections()" class="bulk-select mb-3 fixed-top" [ngStyle]="{'margin-top': topOffset + 'px'}">
-    <div class="d-flex justify-content-around align-items-center">
-        <span class="highlight"><i class="fa fa-check" aria-hidden="true"></i>&nbsp;{{bulkSelectionService.totalSelections()}} selected</span>
-        <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"></app-card-actionables>
-        <span id="bulk-actions-header"  class="visually-hidden">Bulk Actions</span>
-        <button class="btn btn-icon" (click)="bulkSelectionService.deselectAll()"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Deselect All</button>
+<ng-container *ngIf="bulkSelectionService.selections$ | async as selectionCount">
+    <div *ngIf="selectionCount > 0" class="bulk-select mb-3 fixed-top" [ngStyle]="{'margin-top': topOffset + 'px'}">
+        <div class="d-flex justify-content-around align-items-center">
+            
+            <span class="highlight">
+                <i class="fa fa-check me-1" aria-hidden="true"></i>
+                {{selectionCount}} items selected
+            </span>
+
+            <span>
+                <button *ngIf="hasMarkAsUnread" class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" ngbTooltip="Mark as Unread" placement="bottom">
+                    <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
+                    <span class="visually-hidden">Mark as Unread</span>
+                </button>
+                <button *ngIf="hasMarkAsRead" class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" ngbTooltip="Mark as Read" placement="bottom">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                    <span class="visually-hidden">Mark as Read</span>
+                </button>
+                <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"></app-card-actionables>
+            </span>
+            
+            <span id="bulk-actions-header"  class="visually-hidden">Bulk Actions</span>
+            
+            <button class="btn btn-icon" (click)="bulkSelectionService.deselectAll()"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Deselect All</button>
+        </div>
     </div>
-</div>
+</ng-container>
