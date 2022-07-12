@@ -103,16 +103,14 @@
             <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
                 <ng-container *ngFor="let download of activeDownloads">
                     <li class="list-group-item dark-menu-item">
-                        <div class="d-inline-flex">
-                            <span class="download">
-                                <app-circular-loader [currentValue]="25" [maxValue]="100" fontSize="16px" [showIcon]="true" width="25px" height="unset" [center]="false"></app-circular-loader>
-                                <span class="visually-hidden" role="status">
-                                  {{download.progress}}% downloaded
-                                </span>
-                              </span>
-                            Downloading {{download.entityType | sentenceCase}}
+                        <div class="h6 mb-1">Downloading {{download.entityType | sentenceCase}}</div>
+                        <div class="accent-text mb-1" *ngIf="download.subTitle !== ''">{{download.subTitle}}</div>
+                        <div class="progress-container row g-0 align-items-center">
+                            <div class="col-2">{{download.progress}}%</div>
+                            <div class="col-10 progress" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': download.progress + '%'}" [attr.aria-valuenow]="download.progress" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
                         </div>
-                        <div class="accent-text" *ngIf="download.subTitle !== ''">{{download.subTitle}}</div>
                     </li>
                 </ng-container>
             </ng-container>

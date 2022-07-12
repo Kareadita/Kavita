@@ -79,20 +79,23 @@ export class DownloadService {
                 this.save(blob, filename);
               }),
               tap((d) => {
-                const values = this.downloadsSource.getValue();
-                console.log('download state: ', d.state);
+                let values = this.downloadsSource.getValue();
+                //console.log('download state: ', d.state);
                 if (d.state === 'PENDING') {
                   // type 0 is the first event to pass through, so use that to track a new download
+                  console.log('Adding new download for ', series.name);
                   values.push({entityType: 'series', subTitle: series.name, progress: 0});
-                  this.downloadsSource.next(values);
-                } else {
+                } else if (d.state === 'IN_PROGRESS') {
                   const index = values.findIndex(v => v.entityType === 'series' && v.subTitle === series.name);
                   if (index >= 0) {
                     values[index].progress = d.progress;
-                    this.downloadsSource.next(values);
-                    console.log('Updating state to ', d.progress);
+                    console.log('Updating progress to ', d.progress);
                   }
+                } else if (d.state === 'DONE') {
+                  values = values.filter(v => !(v.entityType === 'series' && v.subTitle === series.name));
+                  console.log('Removing download for ', series.name);
                 }
+                this.downloadsSource.next(values);
               }),
               finalize(() => {
                 let values = this.downloadsSource.getValue();
