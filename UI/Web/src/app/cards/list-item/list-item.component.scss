@@ -37,3 +37,12 @@ $triangle-size: 30px;
     border-width: 0 $triangle-size $triangle-size 0;
     border-color: transparent var(--primary-color) transparent transparent;
 }
+
+h5 {
+    margin-bottom: 0;
+}
+
+.subtitle-with-actionables {
+    font-size: 0.75rem;
+    word-break: break-all;
+ }
