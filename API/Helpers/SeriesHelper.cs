@@ -16,10 +16,15 @@ public static class SeriesHelper
     /// <returns></returns>
     public static bool FindSeries(Series series, ParsedSeries parsedInfoKey)
     {
-        return (series.NormalizedName.Equals(parsedInfoKey.NormalizedName)
-                || Parser.Parser.Normalize(series.OriginalName).Equals(parsedInfoKey.NormalizedName)
-                || Parser.Parser.Normalize(series.LocalizedName).Equals(parsedInfoKey.NormalizedName))
+        return (series.NormalizedName.Equals(parsedInfoKey.NormalizedName) ||
+                Parser.Parser.Normalize(series.LocalizedName).Equals(parsedInfoKey.NormalizedName) ||
+                Parser.Parser.Normalize(series.OriginalName).Equals(parsedInfoKey.NormalizedName))
                && (series.Format == parsedInfoKey.Format || series.Format == MangaFormat.Unknown);
+
+        // return (series.NormalizedName.Equals(parsedInfoKey.NormalizedName)
+        //         || Parser.Parser.Normalize(series.OriginalName).Equals(parsedInfoKey.NormalizedName)
+        //         || Parser.Parser.Normalize(series.LocalizedName).Equals(parsedInfoKey.NormalizedName))
+        //        && (series.Format == parsedInfoKey.Format || series.Format == MangaFormat.Unknown);
     }
 
     /// <summary>
