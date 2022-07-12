@@ -100,6 +100,7 @@ export class CardDetailDrawerComponent implements OnInit {
     public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService) { }
 
   ngOnInit(): void {
+    this.imageUrls = this.chapters.map(c => this.imageService.getChapterCoverImage(c.id));
     this.isChapter = this.utilityService.isChapter(this.data);
 
     this.chapter = this.utilityService.isChapter(this.data) ? (this.data as Chapter) : (this.data as Volume).chapters[0];
