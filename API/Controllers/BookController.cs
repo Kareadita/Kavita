@@ -94,6 +94,7 @@ namespace API.Controllers
         /// <param name="file"></param>
         /// <returns></returns>
         [HttpGet("{chapterId}/book-resources")]
+        [ResponseCache(Duration = 60 * 1, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
@@ -105,7 +106,6 @@ namespace API.Controllers
             var bookFile = book.Content.AllFiles[key];
             var content = await bookFile.ReadContentAsBytesAsync();
 
-            Response.AddCacheHeader(content);
             var contentType = BookService.GetContentType(bookFile.ContentType);
             return File(content, contentType, $"{chapterId}-{file}");
         }

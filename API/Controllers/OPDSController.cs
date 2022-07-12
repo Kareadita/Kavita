@@ -830,6 +830,7 @@ public class OpdsController : BaseApiController
     }
 
     [HttpGet("{apiKey}/favicon")]
+    [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Client, NoStore = false)]
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
         var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
@@ -839,7 +840,7 @@ public class OpdsController : BaseApiController
         var format = Path.GetExtension(path).Replace(".", "");
 
         // Calculates SHA1 Hash for byte[]
-        Response.AddCacheHeader(content);
+        //Response.AddCacheHeader(content);
 
         return File(content, "image/" + format);
     }
