@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +15,7 @@ namespace API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IDirectoryService _directoryService;
-        private const int ImageCacheSeconds = 5 * 60;
+        private const int ImageCacheSeconds = 1 * 60;
 
         /// <inheritdoc />
         public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService)
