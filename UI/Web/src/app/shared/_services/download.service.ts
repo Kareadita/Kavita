@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpEventType } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
@@ -24,6 +24,10 @@ export interface DownloadEvent {
    * What to show user. For example, for Series, we might show series name.
    */
   subTitle: string;
+  /**
+   * Progress of the download itself
+   */
+  progress: number; 
 }
 
 @Injectable({
@@ -70,15 +74,25 @@ export class DownloadService {
     return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id, 
                       {observe: 'events', responseType: 'blob', reportProgress: true}
             ).pipe(
-              tap((d) => {
-                if (d.type !== 0) return; // type 0 is the first event to pass through, so use that to track a new download
-                const values = this.downloadsSource.getValue();
-                values.push({entityType: 'series', subTitle: series.name});
-                this.downloadsSource.next(values);
-              }),
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
               download((blob, filename) => {
                 this.save(blob, filename);
+              }),
+              tap((d) => {
+                const values = this.downloadsSource.getValue();
+                console.log('download state: ', d.state);
+                if (d.state === 'PENDING') {
+                  // type 0 is the first event to pass through, so use that to track a new download
+                  values.push({entityType: 'series', subTitle: series.name, progress: 0});
+                  this.downloadsSource.next(values);
+                } else {
+                  const index = values.findIndex(v => v.entityType === 'series' && v.subTitle === series.name);
+                  if (index >= 0) {
+                    values[index].progress = d.progress;
+                    this.downloadsSource.next(values);
+                    console.log('Updating state to ', d.progress);
+                  }
+                }
               }),
               finalize(() => {
                 let values = this.downloadsSource.getValue();

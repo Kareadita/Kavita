@@ -42,7 +42,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
 
   activeEvents: number = 0;
 
-  debugMode: boolean = false;
+  debugMode: boolean = true;
 
 
   get EVENTS() {

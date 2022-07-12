@@ -46,6 +46,18 @@
                     </div>
                     <button type="button" class="btn-close float-end" aria-label="close" ></button>
                 </li>
+                <li class="list-group-item dark-menu-item">
+                    <div class="d-inline-flex">
+                        <span class="download">
+                            <app-circular-loader [currentValue]="25" [maxValue]="100" fontSize="16px" [showIcon]="true" width="25px" height="unset" [center]="false"></app-circular-loader>
+                            <span class="visually-hidden" role="status">
+                              10% downloaded
+                            </span>
+                          </span>
+                        <span class="h6 mb-1">Downloading {{'series' | sentenceCase}}</span>
+                    </div>
+                    <div class="accent-text">PDFs</div>
+                </li>
             </ng-container>
             <!-- Progress Events-->
             <ng-container *ngIf="progressEvents$ | async as progressUpdates">
@@ -90,13 +102,20 @@
             <!-- Active Downloads by the user-->
             <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
                 <ng-container *ngFor="let download of activeDownloads">
-                    <li class="list-group-item dark-menu-item update-available">
-                        <div>Downloading {{download.entityType}}</div>
+                    <li class="list-group-item dark-menu-item">
+                        <div class="d-inline-flex">
+                            <span class="download">
+                                <app-circular-loader [currentValue]="25" [maxValue]="100" fontSize="16px" [showIcon]="true" width="25px" height="unset" [center]="false"></app-circular-loader>
+                                <span class="visually-hidden" role="status">
+                                  {{download.progress}}% downloaded
+                                </span>
+                              </span>
+                            Downloading {{download.entityType | sentenceCase}}
+                        </div>
                         <div class="accent-text" *ngIf="download.subTitle !== ''">{{download.subTitle}}</div>
                     </li>
                 </ng-container>
             </ng-container>
-
             
 
             <!-- Errors -->

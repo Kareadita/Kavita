@@ -12,4 +12,18 @@ export class CircularLoaderComponent {
   @Input() maxValue: number = 0;
   @Input() animation: boolean = true;
   @Input() innerStrokeColor: string = 'transparent';
+  @Input() fontSize: string = '36px';
+  @Input() showIcon: boolean = true;
+  /**
+   * The width in pixels of the loader
+   */
+  @Input() width: string = '100px';
+  /**
+   * The height in pixels of the loader
+   */
+   @Input() height: string = '100px';
+  /**
+   * Centers the icon in the middle of the loader. Best for card use. 
+   */
+  @Input() center: boolean = true;
 }
