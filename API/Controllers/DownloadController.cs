@@ -197,6 +197,7 @@ namespace API.Controllers
         public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
         {
             if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
+            if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest("Bookmarks cannot be empty");
 
             // We know that all bookmarks will be for one single seriesId
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
