@@ -120,9 +120,11 @@ export class DownloadService {
       }
       return of(0);
     }), switchMap(async (size) => {
-        return await this.confirmSize(size, entityType);
+      return await this.confirmSize(size, entityType);
     })
-    ).pipe(filter(wantsToDownload => wantsToDownload), switchMap(() => {
+    ).pipe(filter(wantsToDownload => {
+      return wantsToDownload;
+    }), switchMap(() => {
       return downloadCall.pipe(
         tap((d) => {
           if (callback) callback(d);
