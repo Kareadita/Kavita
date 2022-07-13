@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
@@ -192,6 +191,7 @@ public class ScannerService : IScannerService
             MessageFactory.ScanSeriesEvent(libraryId, seriesId, series.Name));
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
+        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, series.Id, false));
     }
@@ -329,6 +329,7 @@ public class ScannerService : IScannerService
 
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
+        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
     private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs)
