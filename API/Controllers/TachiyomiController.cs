@@ -1,26 +1,41 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+/// <summary>
+/// All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any
+/// other purposes.
+/// </summary>
 public class TachiyomiController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReaderService _readerService;
+    private readonly IMapper _mapper;
 
-    public TachiyomiController(IUnitOfWork unitOfWork, IReaderService readerService)
+    public TachiyomiController(IUnitOfWork unitOfWork, IReaderService readerService, IMapper mapper)
     {
         _unitOfWork = unitOfWork;
         _readerService = readerService;
+        _mapper = mapper;
     }
 
+    /// <summary>
+    /// Given the series Id, this should return the latest chapter that has been fully read.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns>ChapterDTO of latest chapter. Only Chapter number is used by consuming app. All other fields may be missing.</returns>
     [HttpGet("latest-chapter")]
     public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
     {
@@ -31,10 +46,45 @@ public class TachiyomiController : BaseApiController
         var prevChapterId =
             await _readerService.GetPrevChapterIdAsync(seriesId, currentChapter.VolumeId, currentChapter.Id, userId);
 
-        if (prevChapterId == -1) return null;
+        // If prevChapterId is -1, this means either nothing is read or everything is read.
+        if (prevChapterId == -1)
+        {
+            var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+            var userHasProgress =
+                userWithProgress.Progresses.Any(x => x.SeriesId == seriesId);
 
+            // If the user doesn't have progress, then return null, which the extension will catch as 204 (no content) and report nothing as read
+            if (!userHasProgress) return null;
+
+            // Else return the max chapter to Tachiyomi so it can consider everything read
+            var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(seriesId)).ToImmutableList();
+            var looseLeafChapterVolume = volumes.FirstOrDefault(v => v.Number == 0);
+            if (looseLeafChapterVolume == null)
+            {
+                var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparerZeroFirst()).Last());
+                return Ok(new ChapterDto()
+                {
+                    Number = $"{int.Parse(volumeChapter.Number) / 100f}"
+                });
+            }
+
+            var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
+            return Ok(_mapper.Map<ChapterDto>(lastChapter));
+        }
+
+        // There is progress, we now need to figure out the highest volume or chapter and return that.
         var prevChapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId);
+        var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
+        if (volumeWithProgress.Number != 0)
+        {
+            // The progress is on a volume, encode it as a fake chapterDTO
+            return Ok(new ChapterDto()
+            {
+                Number = $"{volumeWithProgress.Number / 100f}"
+            });
+        }
 
+        // Progress is just on a chapter, return as is
         return Ok(prevChapter);
     }
 
@@ -51,8 +101,9 @@ public class TachiyomiController : BaseApiController
 
         switch (chapterNumber)
         {
-            // Tachiyomi sends chapter 0.0f when there's no chapters read.
-            // Due to the encoding for volumes this marks all chapters in volume 0 (loose chapters) as read so we ignore it
+            // When Tachiyomi sync's progress, if there is no current progress in Tachiyomi, 0.0f is sent.
+            // Due to the encoding for volumes, this marks all chapters in volume 0 (loose chapters) as read.
+            // Hence we catch and return early, so we ignore the request.
             case 0.0f:
                 return true;
             case < 1.0f:

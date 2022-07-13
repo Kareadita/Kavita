@@ -1,10 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ActionItem } from 'src/app/_services/action-factory.service';
 
 @Component({
   selector: 'app-card-actionables',
   templateUrl: './card-actionables.component.html',
-  styleUrls: ['./card-actionables.component.scss']
+  styleUrls: ['./card-actionables.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CardActionablesComponent implements OnInit {
 
@@ -19,11 +20,12 @@ export class CardActionablesComponent implements OnInit {
   nonAdminActions: ActionItem<any>[] = [];
 
 
-  constructor() { }
+  constructor(private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.nonAdminActions = this.actions.filter(item => !item.requiresAdmin);
     this.adminActions = this.actions.filter(item => item.requiresAdmin);
+    this.cdRef.markForCheck();
   }
 
   preventClick(event: any) {

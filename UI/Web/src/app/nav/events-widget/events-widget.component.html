@@ -1,9 +1,13 @@
-<ng-container *ngIf="isAdmin">
+<ng-container *ngIf="isAdmin$ | async">
+    <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
+        <ng-container *ngIf="errors$ | async as errors">
+            <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0, 'colored-error': errors.length > 0}" 
+                [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
+                <i aria-hidden="true" class="fa fa-wave-square nav"></i>
+            </button>
+        </ng-container>
+    </ng-container>
     
-    <button type="button" class="btn btn-icon {{activeEvents > 0 ? 'colored' : ''}}" 
-        [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
-        <i aria-hidden="true" class="fa fa-wave-square nav"></i>
-    </button>
 
     <ng-template #popContent>
         <ul class="list-group list-group-flush dark-menu">
@@ -41,6 +45,18 @@
                         <div class="accent-text mb-1">Click for more information</div>
                     </div>
                     <button type="button" class="btn-close float-end" aria-label="close" ></button>
+                </li>
+                <li class="list-group-item dark-menu-item">
+                    <div class="d-inline-flex">
+                        <span class="download">
+                            <app-circular-loader [currentValue]="25" [maxValue]="100" fontSize="16px" [showIcon]="true" width="25px" height="unset" [center]="false"></app-circular-loader>
+                            <span class="visually-hidden" role="status">
+                              10% downloaded
+                            </span>
+                          </span>
+                        <span class="h6 mb-1">Downloading {{'series' | sentenceCase}}</span>
+                    </div>
+                    <div class="accent-text">PDFs</div>
                 </li>
             </ng-container>
             <!-- Progress Events-->
@@ -82,6 +98,23 @@
                     </li>
                 </ng-container>
             </ng-container>
+
+            <!-- Active Downloads by the user-->
+            <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
+                <ng-container *ngFor="let download of activeDownloads">
+                    <li class="list-group-item dark-menu-item">
+                        <div class="h6 mb-1">Downloading {{download.entityType | sentenceCase}}</div>
+                        <div class="accent-text mb-1" *ngIf="download.subTitle !== ''">{{download.subTitle}}</div>
+                        <div class="progress-container row g-0 align-items-center">
+                            <div class="col-2">{{download.progress}}%</div>
+                            <div class="col-10 progress" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': download.progress + '%'}" [attr.aria-valuenow]="download.progress" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </li>
+                </ng-container>
+            </ng-container>
+            
 
             <!-- Errors -->
             <ng-container *ngIf="errors$ | async as errors">

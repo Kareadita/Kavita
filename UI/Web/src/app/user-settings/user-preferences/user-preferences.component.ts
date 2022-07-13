@@ -1,10 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { BookService } from 'src/app/book-reader/book.service';
-import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes } from 'src/app/_models/preferences/preferences';
+import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes, pageLayoutModes } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,13 +15,15 @@ import { forkJoin, Observable, of, Subject } from 'rxjs';
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
-  BookReader = 'book-reader'
+  BookReader = 'book-reader',
+  GlobalSettings = 'global-settings'
 }
 
 @Component({
   selector: 'app-user-preferences',
   templateUrl: './user-preferences.component.html',
-  styleUrls: ['./user-preferences.component.scss']
+  styleUrls: ['./user-preferences.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -32,6 +34,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   layoutModes = layoutModes;
   bookLayoutModes = bookLayoutModes;
   bookColorThemes = bookColorThemes;
+  pageLayoutModes = pageLayoutModes;
 
   settingsForm: FormGroup = new FormGroup({});
   passwordChangeForm: FormGroup = new FormGroup({});
@@ -41,7 +44,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
 
-  obserableHandles: Array<any> = [];
+  observableHandles: Array<any> = [];
   fontFamilies: Array<string> = [];
 
   tabs: Array<{title: string, fragment: string}> = [
@@ -60,10 +63,14 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     return AccordionPanelID;
   }
 
+  public get password() { return this.passwordChangeForm.get('password'); }
+  public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
+
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
     private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
-    private router: Router) {
+    private router: Router, private readonly cdRef: ChangeDetectorRef) {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
+    this.cdRef.markForCheck();
 
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
@@ -72,10 +79,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       } else {
         this.active = this.tabs[0]; // Default to first tab
       }
+      this.cdRef.markForCheck();
     });
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -85,6 +94,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), map(user => {
       return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
     }));
+    this.cdRef.markForCheck();
 
     forkJoin({
       user: this.accountService.currentUser$.pipe(take(1)),
@@ -120,31 +130,36 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
 
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
+      this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
+      this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
+      this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
+      this.cdRef.markForCheck();
     });
 
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
     this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
 
-    this.obserableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
+    this.observableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
       const values = this.passwordChangeForm.value;
       this.passwordsMatch = values.password === values.confirmPassword;
+      this.cdRef.markForCheck();
     }));
 
     this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(mode => {
       if (mode) {
         this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
+        this.cdRef.markForCheck();
       }
     });
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
-    this.obserableHandles.forEach(o => o.unsubscribe());
+    this.observableHandles.forEach(o => o.unsubscribe());
     this.onDestroy.next();
     this.onDestroy.complete();
   }
 
-  public get password() { return this.passwordChangeForm.get('password'); }
-  public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
 
   resetForm() {
     if (this.user === undefined) { return; }
@@ -165,12 +180,17 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
     this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
+    this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
+    this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
+    this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
+    this.cdRef.markForCheck();
   }
 
   resetPasswordForm() {
     this.passwordChangeForm.get('password')?.setValue('');
     this.passwordChangeForm.get('confirmPassword')?.setValue('');
     this.resetPasswordErrors = [];
+    this.cdRef.markForCheck();
   }
 
   save() {
@@ -184,7 +204,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
-      backgroundColor: modelSettings.backgroundColor, // this.user.preferences.backgroundColor,
+      backgroundColor: modelSettings.backgroundColor,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,
@@ -194,13 +214,17 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),
       bookReaderThemeName: modelSettings.bookReaderThemeName,
       theme: modelSettings.theme,
-      bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode
+      bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode,
+      globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
+      blurUnreadSummaries: modelSettings.blurUnreadSummaries,
+      promptForDownloadSize: modelSettings.promptForDownloadSize,
     };
 
-    this.obserableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+    this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
       this.toastr.success('Server settings updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
+        this.cdRef.markForCheck();
       }
       this.resetForm();
     }));
@@ -211,7 +235,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     const model = this.passwordChangeForm.value;
     this.resetPasswordErrors = [];
-    this.obserableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword).subscribe(() => {
+    this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword).subscribe(() => {
       this.toastr.success('Password has been updated');
       this.resetPasswordForm();
     }, err => {

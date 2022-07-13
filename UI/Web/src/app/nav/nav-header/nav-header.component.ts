@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -22,7 +22,8 @@ import { NavService } from '../../_services/nav.service';
 @Component({
   selector: 'app-nav-header',
   templateUrl: './nav-header.component.html',
-  styleUrls: ['./nav-header.component.scss']
+  styleUrls: ['./nav-header.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NavHeaderComponent implements OnInit, OnDestroy {
 
@@ -51,12 +52,34 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService,
     private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
-    private scrollService: ScrollService, private seriesService: SeriesService) { }
+    private scrollService: ScrollService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // setTimeout(() => this.setupScrollChecker(), 1000);
+    // // TODO: on router change, reset the scroll check 
+
+    // this.router.events
+    //   .pipe(filter(event => event instanceof NavigationStart))
+    //   .subscribe((event) => {
+    //     setTimeout(() => this.setupScrollChecker(), 1000);
+    //   });
+  }
+
+  // setupScrollChecker() {
+  //   const viewportScroller = this.document.querySelector('.viewport-container');
+  //   console.log('viewport container', viewportScroller);
+
+  //   if (viewportScroller) {
+  //     fromEvent(viewportScroller, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded());
+  //   } else {
+  //     fromEvent(this.document.body, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded());
+  //   }
+  // }
 
   @HostListener('body:scroll', [])
   checkBackToTopNeeded() {
+    // TODO: This somehow needs to hook into the scrolling for virtual scroll
+    
     const offset = this.scrollService.scrollPosition;
     if (offset > 100) {
       this.backToTopNeeded = true;
@@ -86,14 +109,17 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   onChangeSearch(val: string) {
       this.isLoading = true;
       this.searchTerm = val.trim();
+      this.cdRef.markForCheck();
 
       this.libraryService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
+        this.cdRef.markForCheck();
       }, err => {
         this.searchResults.reset();
         this.isLoading = false;
         this.searchTerm = '';
+        this.cdRef.markForCheck();
       });
   }
 
@@ -148,6 +174,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     this.searchViewRef.clear();
     this.searchTerm = '';
     this.searchResults = new SearchResultGroup();
+    this.cdRef.markForCheck();
   }
 
   clickSeriesSearchResult(item: SearchResult) {
@@ -163,7 +190,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
       if (series !== undefined && series !== null) {
         this.router.navigate(['library', series.libraryId, 'series', series.id]);
       }
-    })
+    });
   }
 
   clickChapterSearchResult(item: Chapter) {
@@ -172,10 +199,11 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
       if (series !== undefined && series !== null) {
         this.router.navigate(['library', series.libraryId, 'series', series.id]);
       }
-    })
+    });
   }
 
   clickLibraryResult(item: Library) {
+    this.clearSearch();
     this.router.navigate(['library', item.id]);
   }
 
@@ -195,8 +223,8 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   }
 
   focusUpdate(searchFocused: boolean) {
-    this.searchFocused = searchFocused
-    return searchFocused;
+    this.searchFocused = searchFocused;
+    this.cdRef.markForCheck();
   }
 
   hideSideNav() {

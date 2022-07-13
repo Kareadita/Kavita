@@ -1,8 +1,8 @@
 <ng-container *ngIf="toggleService.toggleState$ | async as isOpen">
     <div class="phone-hidden">
-            <div #collapse="ngbCollapse" [ngbCollapse]="!isOpen" (ngbCollapseChange)="setToggle($event)">
-                <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
-            </div>
+        <div #collapse="ngbCollapse" [ngbCollapse]="!isOpen" (ngbCollapseChange)="setToggle($event)">
+            <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
+        </div>
     </div>
 
     <div class="not-phone-hidden">
@@ -340,6 +340,7 @@
                             <option [value]="SortField.Created">Created</option>
                             <option [value]="SortField.LastModified">Last Modified</option> 
                             <option [value]="SortField.LastChapterAdded">Item Added</option> 
+                            <option [value]="SortField.TimeToRead">Time to Read</option> 
                         </select>
                     </div>
                 </form>

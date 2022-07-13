@@ -72,8 +72,7 @@ namespace API.Controllers
         {
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
-
-            return Ok(await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(userId, items.ToList()));
+            return Ok(items);
         }
 
         /// <summary>
@@ -463,7 +462,7 @@ namespace API.Controllers
 
             var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
             var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
-                .OrderBy(c => float.Parse(c.Volume.Name))
+                .OrderBy(c => Parser.Parser.MinNumberFromRange(c.Volume.Name))
                 .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
 
             var index = lastOrder + 1;

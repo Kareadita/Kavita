@@ -1,23 +1,68 @@
-﻿using System;
-using API.Entities.Enums;
+﻿using API.Entities.Enums;
 
-namespace API.DTOs.Reader
+namespace API.DTOs.Reader;
+
+/// <summary>
+/// Information about the Chapter for the Reader to render
+/// </summary>
+public class ChapterInfoDto : IChapterInfoDto
 {
-    public class ChapterInfoDto : IChapterInfoDto
-    {
+    /// <summary>
+    /// The Chapter Number
+    /// </summary>
+    public string ChapterNumber { get; set; }
+    /// <summary>
+    /// The Volume Number
+    /// </summary>
+    public string VolumeNumber { get; set; }
+    /// <summary>
+    /// Volume entity Id
+    /// </summary>
+    public int VolumeId { get; set; }
+    /// <summary>
+    /// Series Name
+    /// </summary>
+    public string SeriesName { get; set; }
+    /// <summary>
+    /// Series Format
+    /// </summary>
+    public MangaFormat SeriesFormat { get; set; }
+    /// <summary>
+    /// Series entity Id
+    /// </summary>
+    public int SeriesId { get; set; }
+    /// <summary>
+    /// Library entity Id
+    /// </summary>
+    public int LibraryId { get; set; }
+    /// <summary>
+    /// Library type
+    /// </summary>
+    public LibraryType LibraryType { get; set; }
+    /// <summary>
+    /// Chapter's title if set via ComicInfo.xml (Title field)
+    /// </summary>
+    public string ChapterTitle { get; set; } = string.Empty;
+    /// <summary>
+    /// Total Number of pages in this Chapter
+    /// </summary>
+    public int Pages { get; set; }
+    /// <summary>
+    /// File name of the chapter
+    /// </summary>
+    public string FileName { get; set; }
+    /// <summary>
+    /// If this is marked as a special in Kavita
+    /// </summary>
+    public bool IsSpecial { get; set; }
+    /// <summary>
+    /// The subtitle to render on the reader
+    /// </summary>
+    public string Subtitle { get; set; }
+    /// <summary>
+    /// Series Title
+    /// </summary>
+    /// <remarks>Usually just series name, but can include chapter title</remarks>
+    public string Title { get; set; }
 
-        public string ChapterNumber { get; set; }
-        public string VolumeNumber { get; set; }
-        public int VolumeId { get; set; }
-        public string SeriesName { get; set; }
-        public MangaFormat SeriesFormat { get; set; }
-        public int SeriesId { get; set; }
-        public int LibraryId { get; set; }
-        public LibraryType LibraryType { get; set; }
-        public string ChapterTitle { get; set; } = string.Empty;
-        public int Pages { get; set; }
-        public string FileName { get; set; }
-        public bool IsSpecial { get; set; }
-
-    }
 }

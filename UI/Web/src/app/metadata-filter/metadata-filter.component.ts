@@ -1,4 +1,4 @@
-import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
@@ -24,7 +24,8 @@ import { FilterSettings } from './filter-settings';
 @Component({
   selector: 'app-metadata-filter',
   templateUrl: './metadata-filter.component.html',
-  styleUrls: ['./metadata-filter.component.scss']
+  styleUrls: ['./metadata-filter.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterComponent implements OnInit, OnDestroy {
 
@@ -86,21 +87,24 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
-    private utilityService: UtilityService, private collectionTagService: CollectionTagService, public toggleService: ToggleService) {
+    private utilityService: UtilityService, private collectionTagService: CollectionTagService, public toggleService: ToggleService,
+    private readonly cdRef: ChangeDetectorRef) {
   }
 
   ngOnInit(): void {
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
+      this.cdRef.markForCheck();
     }
 
     if (this.filterOpen) {
       this.filterOpen.pipe(takeUntil(this.onDestroy)).subscribe(openState => {
         this.filteringCollapsed = !openState;
         this.toggleService.set(!this.filteringCollapsed);
+        this.cdRef.markForCheck();
       });
     }
-
+    
     this.filter = this.seriesService.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
@@ -135,6 +139,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
         this.readProgressGroup.get('notRead')?.enable({ emitEvent: false });
         this.readProgressGroup.get('inProgress')?.enable({ emitEvent: false });
       }
+      this.cdRef.markForCheck();
     });
 
     this.sortGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
@@ -145,14 +150,17 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
         };
       }
       this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
+      this.cdRef.markForCheck();
     });
 
     this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
       map(val => (val || '').trim()),
       distinctUntilChanged(), 
-      takeUntil(this.onDestroy))
-      .subscribe(changes => {
-      this.filter.seriesNameQuery = changes;
+      takeUntil(this.onDestroy)
+    )
+    .subscribe(changes => {
+      this.filter.seriesNameQuery = changes; // TODO: See if we can make this into observable
+      this.cdRef.markForCheck();
     });
 
     this.loadFromPresetsAndSetup();
@@ -162,6 +170,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.filterOpen.emit(false);
     this.filteringCollapsed = true;
     this.toggleService.set(!this.filteringCollapsed);
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
@@ -199,6 +208,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     }
 
     this.setupFormatTypeahead();
+    this.cdRef.markForCheck();
 
     forkJoin([
       this.setupLibraryTypeahead(),
@@ -212,10 +222,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     ]).subscribe(results => {
       this.fullyLoaded = true;
       this.resetTypeaheads.next(false); // Pass false to ensure we reset to the preset and not to an empty typeahead
-      if (this.filterSettings.openByDefault) {
-        this.filteringCollapsed = false;
-        this.toggleService.set(!this.filteringCollapsed);
-      }
+      this.cdRef.markForCheck();
       this.apply();
     });
   }
@@ -491,21 +498,26 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   updateFormatFilters(formats: FilterItem<MangaFormat>[]) {
     this.filter.formats = formats.map(item => item.value) || [];
+    this.formatSettings.savedData = formats;
   }
 
   updateLibraryFilters(libraries: Library[]) {
     this.filter.libraries = libraries.map(item => item.id) || [];
+    this.librarySettings.savedData = libraries;
   }
 
   updateGenreFilters(genres: Genre[]) {
     this.filter.genres = genres.map(item => item.id) || [];
+    this.genreSettings.savedData = genres;
   }
 
   updateTagFilters(tags: Tag[]) {
     this.filter.tags = tags.map(item => item.id) || [];
+    this.tagsSettings.savedData = tags;
   }
 
   updatePersonFilters(persons: Person[], role: PersonRole) {
+    this.peopleSettings[role].savedData = persons;
     switch (role) {
       case PersonRole.CoverArtist:
         this.filter.coverArtist = persons.map(p => p.id);
@@ -542,6 +554,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   updateCollectionFilters(tags: CollectionTag[]) {
     this.filter.collectionTags = tags.map(item => item.id) || [];
+    this.collectionSettings.savedData = tags;
   }
 
   updateRating(rating: any) {
@@ -551,14 +564,17 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   updateAgeRating(ratingDtos: AgeRatingDto[]) {
     this.filter.ageRating = ratingDtos.map(item => item.value) || [];
+    this.ageRatingSettings.savedData = ratingDtos;
   }
 
   updatePublicationStatus(dtos: PublicationStatusDto[]) {
     this.filter.publicationStatus = dtos.map(item => item.value) || [];
+    this.publicationStatusSettings.savedData = dtos;
   }
 
   updateLanguages(languages: Language[]) {
     this.filter.languages = languages.map(item => item.isoCode) || [];
+    this.languageSettings.savedData = languages;
   }
 
   updateReadStatus(status: string) {
@@ -591,6 +607,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.readProgressGroup.get('inProgress')?.setValue(true);
     this.sortGroup.get('sortField')?.setValue(SortField.SortName);
     this.isAscendingSort = true;
+    this.cdRef.markForCheck();
     // Apply any presets which will trigger the apply
     this.loadFromPresetsAndSetup();
   }
@@ -598,10 +615,12 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   apply() {
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
     this.updateApplied++;
+    this.cdRef.markForCheck();
   }
 
   toggleSelected() {
     this.toggleService.toggle();
+    this.cdRef.markForCheck();
   }
 
   setToggle(event: any) {

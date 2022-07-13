@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Data.Metadata;
@@ -27,7 +25,14 @@ namespace API.Services
         ComicInfo GetComicInfo(string archivePath);
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
-        Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+        /// <summary>
+        /// Creates a zip file form the listed files and outputs to the temp folder.
+        /// </summary>
+        /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
+        /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
+        /// <returns>Path to the temp zip</returns>
+        /// <exception cref="KavitaException"></exception>
+        string CreateZipForDownload(IEnumerable<string> files, string tempFolder);
     }
 
     /// <summary>
@@ -189,6 +194,7 @@ namespace API.Services
         /// <remarks>This always creates a thumbnail</remarks>
         /// <param name="archivePath"></param>
         /// <param name="fileName">File name to use based on context of entity.</param>
+        /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
         /// <returns></returns>
         public string GetCoverImage(string archivePath, string fileName, string outputDirectory)
         {
@@ -249,7 +255,7 @@ namespace API.Services
 
         /// <summary>
         /// Given an archive stream, will assess whether directory needs to be flattened so that the extracted archive files are directly
-        /// under extract path and not nested in subfolders. See <see cref="DirectoryInfoExtensions"/> Flatten method.
+        /// under extract path and not nested in subfolders. See <see cref="DirectoryService"/> Flatten method.
         /// </summary>
         /// <param name="archive">An opened archive stream</param>
         /// <returns></returns>
@@ -261,20 +267,27 @@ namespace API.Services
                    archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
 
-        // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
         /// <summary>
-        ///
+        /// Creates a zip file form the listed files and outputs to the temp folder.
         /// </summary>
-        /// <param name="files"></param>
+        /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
         /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
-        /// <returns></returns>
+        /// <returns>Path to the temp zip</returns>
         /// <exception cref="KavitaException"></exception>
-        public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
+        public string CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
             var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
+            var potentialExistingFile = _directoryService.FileSystem.FileInfo.FromFileName(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip"));
+            if (potentialExistingFile.Exists)
+            {
+                // A previous download exists, just return it immediately
+                return potentialExistingFile.FullName;
+            }
+
             _directoryService.ExistOrCreate(tempLocation);
+
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
@@ -291,13 +304,7 @@ namespace API.Services
                 throw new KavitaException("There was an issue creating temp archive");
             }
 
-
-            var fileBytes = await _directoryService.ReadFileAsync(zipPath);
-
-            _directoryService.ClearAndDeleteDirectory(tempLocation); // NOTE: For sending back just zip, just schedule this to be called after the file is returned or let next temp storage cleanup take care of it
-            (new FileInfo(zipPath)).Delete();
-
-            return Tuple.Create(fileBytes, zipPath);
+            return zipPath;
         }
 
 
@@ -412,7 +419,6 @@ namespace API.Services
 
         private void ExtractArchiveEntries(ZipArchive archive, string extractPath)
         {
-            // TODO: In cases where we try to extract, but there are InvalidPathChars, we need to inform the user (throw exception, let middleware inform user)
             var needsFlattening = ArchiveNeedsFlattening(archive);
             if (!archive.HasFiles() && !needsFlattening) return;
 
@@ -476,7 +482,8 @@ namespace API.Services
             catch (Exception e)
             {
                 _logger.LogWarning(e, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
-                return;
+                throw new KavitaException(
+                    $"There was an error when extracting {archivePath}. Check the file exists, has read permissions or the server OS can support all path characters.");
             }
             _logger.LogDebug("Extracted archive to {ExtractPath} in {ElapsedMilliseconds} milliseconds", extractPath, sw.ElapsedMilliseconds);
         }

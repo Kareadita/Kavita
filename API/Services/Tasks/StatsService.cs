@@ -4,13 +4,15 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Stats;
-using API.DTOs.Theme;
 using API.Entities.Enums;
+using API.Entities.Enums.UserPreferences;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -24,12 +26,14 @@ public class StatsService : IStatsService
 {
     private readonly ILogger<StatsService> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly DataContext _context;
     private const string ApiUrl = "https://stats.kavitareader.com";
 
-    public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork)
+    public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _context = context;
 
         FlurlHttp.ConfigureClient(ApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -102,6 +106,8 @@ public class StatsService : IStatsService
         var installId = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId);
         var installVersion = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
 
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
         var serverInfo = new ServerInfoDto
         {
             InstallId = installId.Value,
@@ -114,10 +120,23 @@ public class StatsService : IStatsService
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
             NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
             NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count(),
-            OPDSEnabled = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds,
+            OPDSEnabled = serverSettings.EnableOpds,
             NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsers()).Count(),
             TotalFiles = await _unitOfWork.LibraryRepository.GetTotalFiles(),
+            TotalGenres = await _unitOfWork.GenreRepository.GetCountAsync(),
+            TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync(),
+            UsingSeriesRelationships = await GetIfUsingSeriesRelationship(),
+            StoreBookmarksAsWebP = serverSettings.ConvertBookmarkToWebP,
+            MaxSeriesInALibrary = await MaxSeriesInAnyLibrary(),
+            MaxVolumesInASeries = await MaxVolumesInASeries(),
+            MaxChaptersInASeries = await MaxChaptersInASeries(),
         };
+
+        var usersWithPref = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences)).ToList();
+        serverInfo.UsersOnCardLayout =
+            usersWithPref.Count(u => u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.Cards);
+        serverInfo.UsersOnListLayout =
+            usersWithPref.Count(u => u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.List);
 
         var firstAdminUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).FirstOrDefault();
 
@@ -131,5 +150,41 @@ public class StatsService : IStatsService
         }
 
         return serverInfo;
+    }
+
+    private Task<bool> GetIfUsingSeriesRelationship()
+    {
+        return _context.SeriesRelation.AnyAsync();
+    }
+
+    private Task<int> MaxSeriesInAnyLibrary()
+    {
+        return _context.Series
+            .Select(s => new
+            {
+                LibraryId = s.LibraryId,
+                Count = _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series).Count()
+            })
+            .MaxAsync(d => d.Count);
+    }
+
+    private Task<int> MaxVolumesInASeries()
+    {
+        return _context.Volume
+            .Select(v => new
+            {
+                v.SeriesId,
+                Count = _context.Series.Where(s => s.Id == v.SeriesId).SelectMany(s => s.Volumes).Count()
+            })
+            .MaxAsync(d => d.Count);
+    }
+
+    private Task<int> MaxChaptersInASeries()
+    {
+        return _context.Series
+            .MaxAsync(s => s.Volumes
+                .Where(v => v.Number == 0)
+                .SelectMany(v => v.Chapters)
+                .Count());
     }
 }

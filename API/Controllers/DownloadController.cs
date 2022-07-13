@@ -18,6 +18,9 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// All APIs related to downloading entities from the system. Requires Download Role or Admin Role.
+    /// </summary>
     [Authorize(Policy="RequireDownloadRole")]
     public class DownloadController : BaseApiController
     {
@@ -42,6 +45,11 @@ namespace API.Controllers
             _bookmarkService = bookmarkService;
         }
 
+        /// <summary>
+        /// For a given volume, return the size in bytes
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
         [HttpGet("volume-size")]
         public async Task<ActionResult<long>> GetVolumeSize(int volumeId)
         {
@@ -49,6 +57,11 @@ namespace API.Controllers
             return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
+        /// <summary>
+        /// For a given chapter, return the size in bytes
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("chapter-size")]
         public async Task<ActionResult<long>> GetChapterSize(int chapterId)
         {
@@ -56,6 +69,11 @@ namespace API.Controllers
             return Ok(_directoryService.GetTotalSize(files.Select(c => c.FilePath)));
         }
 
+        /// <summary>
+        /// For a series, return the size in bytes
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("series-size")]
         public async Task<ActionResult<long>> GetSeriesSize(int seriesId)
         {
@@ -64,7 +82,11 @@ namespace API.Controllers
         }
 
 
-
+        /// <summary>
+        /// Downloads all chapters within a volume. If the chapters are multiple zips, they will all be zipped up.
+        /// </summary>
+        /// <param name="volumeId"></param>
+        /// <returns></returns>
         [Authorize(Policy="RequireDownloadRole")]
         [HttpGet("volume")]
         public async Task<ActionResult> DownloadVolume(int volumeId)
@@ -90,12 +112,17 @@ namespace API.Controllers
             return await _downloadService.HasDownloadPermission(user);
         }
 
-        private async Task<ActionResult> GetFirstFileDownload(IEnumerable<MangaFile> files)
+        private ActionResult GetFirstFileDownload(IEnumerable<MangaFile> files)
         {
-            var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
-            return File(bytes, contentType, fileDownloadName);
+            var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
+            return PhysicalFile(zipFile, contentType, fileDownloadName, true);
         }
 
+        /// <summary>
+        /// Returns the zip for a single chapter. If the chapter contains multiple files, they will be zipped.
+        /// </summary>
+        /// <param name="chapterId"></param>
+        /// <returns></returns>
         [HttpGet("chapter")]
         public async Task<ActionResult> DownloadChapter(int chapterId)
         {
@@ -126,15 +153,14 @@ namespace API.Controllers
                     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                         MessageFactory.DownloadProgressEvent(User.GetUsername(),
                             Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
-                    return await GetFirstFileDownload(files);
+                    return GetFirstFileDownload(files);
                 }
 
-                var (fileBytes, _) = await _archiveService.CreateZipForDownload(files.Select(c => c.FilePath),
-                    tempFolder);
+                var filePath = _archiveService.CreateZipForDownload(files.Select(c => c.FilePath), tempFolder);
                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                     MessageFactory.DownloadProgressEvent(User.GetUsername(),
                         Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
-                return File(fileBytes, DefaultContentType, downloadName);
+                return PhysicalFile(filePath, DefaultContentType, downloadName, true);
             }
             catch (Exception ex)
             {
@@ -162,10 +188,16 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Downloads all bookmarks in a zip for
+        /// </summary>
+        /// <param name="downloadBookmarkDto"></param>
+        /// <returns></returns>
         [HttpPost("bookmarks")]
         public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
         {
             if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
+            if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest("Bookmarks cannot be empty");
 
             // We know that all bookmarks will be for one single seriesId
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
@@ -176,13 +208,14 @@ namespace API.Controllers
             var filename = $"{series.Name} - Bookmarks.zip";
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 0F));
-            var (fileBytes, _) = await _archiveService.CreateZipForDownload(files,
-                $"download_{user.Id}_{series.Id}_bookmarks");
+            var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());
+            var filePath =  _archiveService.CreateZipForDownload(files,
+                $"download_{user.Id}_{seriesIds}_bookmarks");
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 1F));
 
 
-            return File(fileBytes, DefaultContentType, filename);
+            return PhysicalFile(filePath, DefaultContentType, filename, true);
         }
 
     }

@@ -8,6 +8,7 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
+using API.DTOs.Reader;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
@@ -104,7 +105,6 @@ public class SeriesService : ISeriesService
                 series.Metadata.LanguageLocked = true;
             }
 
-
             series.Metadata.CollectionTags ??= new List<CollectionTag>();
             UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
             {
@@ -199,10 +199,11 @@ public class SeriesService : ISeriesService
         return false;
     }
 
-    // TODO: Move this to a helper so we can easily test
+
     private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
+        // TODO: Move UpdateRelatedList to a helper so we can easily test
         if (tags == null) return;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();
@@ -458,7 +459,6 @@ public class SeriesService : ISeriesService
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
             .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
-        var chapters = volumes.SelectMany(v => v.Chapters).ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
         var processedVolumes = new List<VolumeDto>();
@@ -479,8 +479,15 @@ public class SeriesService : ISeriesService
             processedVolumes.ForEach(v => v.Name = $"Volume {v.Name}");
         }
 
-
         var specials = new List<ChapterDto>();
+        var chapters = volumes.SelectMany(v => v.Chapters.Select(c =>
+        {
+            if (v.Number == 0) return c;
+            c.VolumeTitle = v.Name;
+            return c;
+        })).ToList();
+
+
         foreach (var chapter in chapters)
         {
             chapter.Title = FormatChapterTitle(chapter, libraryType);
@@ -489,7 +496,6 @@ public class SeriesService : ISeriesService
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
             specials.Add(chapter);
         }
-
 
         // Don't show chapter 0 (aka single volume chapters) in the Chapters tab or books that are just single numbers (they show as volumes)
         IEnumerable<ChapterDto> retChapters;
@@ -503,18 +509,17 @@ public class SeriesService : ISeriesService
                 .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
         }
 
-
+        var storylineChapters = volumes
+            .Where(v => v.Number == 0)
+            .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
+            .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
 
         return new SeriesDetailDto()
         {
             Specials = specials,
             Chapters = retChapters,
             Volumes = processedVolumes,
-            StorylineChapters = volumes
-                .Where(v => v.Number == 0)
-                .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-                .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer())
-
+            StorylineChapters = storylineChapters
         };
     }
 

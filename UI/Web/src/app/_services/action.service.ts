@@ -527,5 +527,4 @@ export class ActionService implements OnDestroy {
       }
     });
   }
-
 }

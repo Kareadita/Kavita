@@ -7,6 +7,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
+using API.Entities.Enums.UserPreferences;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;

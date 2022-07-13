@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
@@ -174,6 +175,12 @@ public class TaskScheduler : ITaskScheduler
     {
         // TODO: If a library scan is already queued up for libraryId, don't do anything
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
+        if (HasAlreadyEnqueuedTask("ScannerService","ScanLibrary",  new object[] {libraryId}))
+        {
+            _logger.LogInformation("A duplicate request to scan library for library occured. Skipping");
+            return;
+        }
+        _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
@@ -186,24 +193,48 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshMetadata(int libraryId, bool forceUpdate = true)
     {
+        if (HasAlreadyEnqueuedTask("MetadataService","RefreshMetadata",  new object[] {libraryId, forceUpdate}))
+        {
+            _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
+            return;
+        }
+
         _logger.LogInformation("Enqueuing library metadata refresh for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, forceUpdate));
     }
 
-    public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = true)
+    public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
     {
+        if (HasAlreadyEnqueuedTask("MetadataService","RefreshMetadataForSeries",  new object[] {libraryId, seriesId, forceUpdate}))
+        {
+            _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
+            return;
+        }
+
         _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
     }
 
     public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
+        if (HasAlreadyEnqueuedTask("ScannerService", "ScanSeries", new object[] {libraryId, seriesId, forceUpdate}))
+        {
+            _logger.LogInformation("A duplicate request to scan series occured. Skipping");
+            return;
+        }
+
         _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId, CancellationToken.None));
     }
 
     public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
+        if (HasAlreadyEnqueuedTask("WordCountAnalyzerService", "ScanSeries", new object[] {libraryId, seriesId, forceUpdate}))
+        {
+            _logger.LogInformation("A duplicate request to scan series occured. Skipping");
+            return;
+        }
+
         _logger.LogInformation("Enqueuing analyze files scan for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
@@ -221,5 +252,22 @@ public class TaskScheduler : ITaskScheduler
     {
         var update = await _versionUpdaterService.CheckForUpdate();
         await _versionUpdaterService.PushUpdate(update);
+    }
+
+    /// <summary>
+    /// Checks if this same invocation is already enqueued
+    /// </summary>
+    /// <param name="methodName">Method name that was enqueued</param>
+    /// <param name="className">Class name the method resides on</param>
+    /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
+    /// <param name="queue">Queue to check against. Defaults to "default"</param>
+    /// <returns></returns>
+    private static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = "default")
+    {
+        var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
+        return enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
+                                     j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+                                     j.Value.Job.Method.Name.Equals(methodName) &&
+                                     j.Value.Job.Method.DeclaringType.Name.Equals(className));
     }
 }

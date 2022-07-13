@@ -1,6 +1,7 @@
 
 import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 import { BookPageLayoutMode } from '../book-page-layout-mode';
+import { PageLayoutMode } from '../page-layout-mode';
 import { PageSplitOption } from './page-split-option';
 import { ReaderMode } from './reader-mode';
 import { ReadingDirection } from './reading-direction';
@@ -31,6 +32,9 @@ export interface Preferences {
 
     // Global
     theme: SiteTheme;
+    globalPageLayoutMode: PageLayoutMode;
+    blurUnreadSummaries: boolean;
+    promptForDownloadSize: boolean;
 }
 
 export const readingDirections = [{text: 'Left to Right', value: ReadingDirection.LeftToRight}, {text: 'Right to Left', value: ReadingDirection.RightToLeft}];
@@ -39,3 +43,4 @@ export const pageSplitOptions = [{text: 'Fit to Screen', value: PageSplitOption.
 export const readingModes = [{text: 'Left to Right', value: ReaderMode.LeftRight}, {text: 'Up to Down', value: ReaderMode.UpDown}, {text: 'Webtoon', value: ReaderMode.Webtoon}];
 export const layoutModes = [{text: 'Single', value: LayoutMode.Single}, {text: 'Double', value: LayoutMode.Double}, {text: 'Double (Manga)', value: LayoutMode.DoubleReversed}];
 export const bookLayoutModes = [{text: 'Default', value: BookPageLayoutMode.Default}, {text: '1 Column', value: BookPageLayoutMode.Column1}, {text: '2 Column', value: BookPageLayoutMode.Column2}];
+export const pageLayoutModes = [{text: 'Cards', value: PageLayoutMode.Cards}, {text: 'List', value: PageLayoutMode.List}];

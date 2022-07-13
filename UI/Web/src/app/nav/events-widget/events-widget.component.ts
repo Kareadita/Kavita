@@ -1,10 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
+import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ErrorEvent } from 'src/app/_models/events/error-event';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
 import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event';
@@ -15,12 +16,13 @@ import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hu
 @Component({
   selector: 'app-nav-events-toggle',
   templateUrl: './events-widget.component.html',
-  styleUrls: ['./events-widget.component.scss']
+  styleUrls: ['./events-widget.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input() user!: User;
 
-  isAdmin: boolean = false;
+  isAdmin$: Observable<boolean> = of(false);
 
   private readonly onDestroy = new Subject<void>();
 
@@ -48,7 +50,8 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
   constructor(public messageHub: MessageHubService, private modalService: NgbModal, 
-    private accountService: AccountService, private confirmService: ConfirmService) { }
+    private accountService: AccountService, private confirmService: ConfirmService,
+    private readonly cdRef: ChangeDetectorRef, public downloadService: DownloadService) { }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
@@ -59,7 +62,6 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Debounce for testing. Kavita's too fast
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
@@ -68,27 +70,27 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         values.push(event.payload as ErrorEvent);
         this.errorSource.next(values);
         this.activeEvents += 1;
+        this.cdRef.markForCheck();
       }
     });
-    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
-      if (user) {
-        this.isAdmin = this.accountService.hasAdminRole(user);
-      } else {
-        this.isAdmin = false;
-      }
-    });
+
+    this.isAdmin$ = this.accountService.currentUser$.pipe(
+      takeUntil(this.onDestroy), 
+      map(user => (user && this.accountService.hasAdminRole(user)) || false), 
+      shareReplay()
+    );
   }
 
   processNotificationProgressEvent(event: Message<NotificationProgressEvent>) {
     const message = event.payload as NotificationProgressEvent;
     let data;
-    let index = -1;
     switch (event.payload.eventType) {
       case 'single':
         const values = this.singleUpdateSource.getValue();
         values.push(message);
         this.singleUpdateSource.next(values);
         this.activeEvents += 1;
+        this.cdRef.markForCheck();
         break;
       case 'started':
         // Sometimes we can receive 2 started on long running scans, so better to just treat as a merge then.
@@ -104,6 +106,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         data = data.filter(m => m.name !== message.name);
         this.progressEventsSource.next(data);
         this.activeEvents = Math.max(this.activeEvents - 1, 0);
+        this.cdRef.markForCheck();
         break;
       default:
         break;
@@ -116,6 +119,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     if (index < 0) {
       data.push(message);
       this.activeEvents += 1;
+      this.cdRef.markForCheck();
     } else {
       data[index] = message;
     }
@@ -158,6 +162,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     data = data.filter(m => m !== error); 
     this.errorSource.next(data);
     this.activeEvents = Math.max(this.activeEvents - 1, 0);
+    this.cdRef.markForCheck();
   }
 
   prettyPrintProgress(progress: number) {

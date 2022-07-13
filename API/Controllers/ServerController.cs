@@ -112,13 +112,13 @@ namespace API.Controllers
         }
 
         [HttpGet("logs")]
-        public async Task<ActionResult> GetLogs()
+        public ActionResult GetLogs()
         {
             var files = _backupService.GetLogFiles(_config.GetMaxRollingFiles(), _config.GetLoggingFileName());
             try
             {
-                var (fileBytes, zipPath) = await _archiveService.CreateZipForDownload(files, "logs");
-                return File(fileBytes, "application/zip", Path.GetFileName(zipPath));
+                var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
+                return PhysicalFile(zipPath, "application/zip", Path.GetFileName(zipPath), true);
             }
             catch (KavitaException ex)
             {

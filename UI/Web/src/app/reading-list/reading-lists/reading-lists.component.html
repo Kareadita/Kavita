@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar pageHeader="Home">
+<app-side-nav-companion-bar>
     <h2 title>
         Reading Lists
     </h2>
@@ -8,12 +8,12 @@
 <app-card-detail-layout
     [isLoading]="loadingLists"
     [items]="lists"
-    [actions]="actions"
     [pagination]="pagination"
     [filteringDisabled]="true"
-    (pageChange)="onPageChange($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
-        <app-card-item [title]="item.title" [entity]="item" [actions]="getActions(item)" [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)" (clicked)="handleClick(item)"></app-card-item>
+        <app-card-item [title]="item.title" [entity]="item" [actions]="getActions(item)" 
+            [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)" 
+            (clicked)="handleClick(item)"></app-card-item>
     </ng-template>
 </app-card-detail-layout>

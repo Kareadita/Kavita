@@ -604,6 +604,7 @@ public class OpdsController : BaseApiController
     /// <summary>
     /// Downloads a file
     /// </summary>
+    /// <param name="apiKey">User's API Key</param>
     /// <param name="seriesId"></param>
     /// <param name="volumeId"></param>
     /// <param name="chapterId"></param>
@@ -621,8 +622,8 @@ public class OpdsController : BaseApiController
         }
 
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-        var (bytes, contentType, fileDownloadName) = await _downloadService.GetFirstFileDownload(files);
-        return File(bytes, contentType, fileDownloadName);
+        var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
+        return PhysicalFile(zipFile, contentType, fileDownloadName, true);
     }
 
     private static ContentResult CreateXmlResult(string xml)
@@ -829,6 +830,7 @@ public class OpdsController : BaseApiController
     }
 
     [HttpGet("{apiKey}/favicon")]
+    [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Client, NoStore = false)]
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
         var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
@@ -836,9 +838,6 @@ public class OpdsController : BaseApiController
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);
         var format = Path.GetExtension(path).Replace(".", "");
-
-        // Calculates SHA1 Hash for byte[]
-        Response.AddCacheHeader(content);
 
         return File(content, "image/" + format);
     }

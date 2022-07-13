@@ -1,6 +1,8 @@
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ContentChild, EventEmitter, Inject, Input, OnDestroy, OnInit, Output, Renderer2, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
-import { from, Subject } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
+import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -8,23 +10,27 @@ import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
-const FILTER_PAG_REGEX = /[^0-9]/g;
+const keySize = 24;
 
 @Component({
   selector: 'app-card-detail-layout',
   templateUrl: './card-detail-layout.component.html',
-  styleUrls: ['./card-detail-layout.component.scss']
+  styleUrls: ['./card-detail-layout.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
   @Input() items: any[] = [];
   @Input() pagination!: Pagination;
-  
+  /**
+   * Parent scroll for virtualize pagination
+   */
+  @Input() parentScroll!: Element | Window;
+
   // Filter Code
   @Input() filterOpen!: EventEmitter<boolean>;
   /**
@@ -35,26 +41,27 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
    * Any actions to exist on the header for the parent collection (library, collection)
    */
   @Input() actions: ActionItem<any>[] = [];
-  @Input() trackByIdentity!: (index: number, item: any) => string;
+  @Input() trackByIdentity!: TrackByFunction<any>; //(index: number, item: any) => string
   @Input() filterSettings!: FilterSettings;
 
-  @Input() jumpBarKeys: Array<JumpKey> = [];
+
+  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels wide
+  jumpBarKeysToRender: Array<JumpKey> = []; // Original
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
-  @Output() pageChange: EventEmitter<Pagination> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('cardItem') itemTemplate!: TemplateRef<any>;
   @ContentChild('noData') noDataTemplate!: TemplateRef<any>;
+  @ViewChild('.jump-bar') jumpBar!: ElementRef<HTMLDivElement>;
+  @ViewChild('scroller') scroller!: CdkVirtualScrollViewport;
 
+  @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
   filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
-
-  intersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleIntersection(entries), { threshold: 0.01 });
-
 
   private onDestory: Subject<void> = new Subject();
 
@@ -62,57 +69,103 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
     return Breakpoint;
   }
 
-  constructor(private seriesService: SeriesService, public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-              private scrollService: ScrollService) {
+  constructor(private seriesService: SeriesService, public utilityService: UtilityService,
+    @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef) {
     this.filter = this.seriesService.createSeriesFilter();
+    this.changeDetectionRef.markForCheck();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  @HostListener('window:orientationchange', ['$event'])
+  resizeJumpBar() {
+    const fullSize = (this.jumpBarKeys.length * keySize);
+    const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
+    if (currentSize >= fullSize) {
+      this.jumpBarKeysToRender = [...this.jumpBarKeys];
+      this.changeDetectionRef.markForCheck();
+      return;
+    }
+
+    const targetNumberOfKeys = parseInt(Math.floor(currentSize / keySize) + '', 10);
+    const removeCount = this.jumpBarKeys.length - targetNumberOfKeys - 3;
+    if (removeCount <= 0) return;
+
+
+    this.jumpBarKeysToRender = [];
+
+    const removalTimes = Math.ceil(removeCount / 2);
+    const midPoint = Math.floor(this.jumpBarKeys.length / 2);
+    this.jumpBarKeysToRender.push(this.jumpBarKeys[0]);
+    this.removeFirstPartOfJumpBar(midPoint, removalTimes);
+    this.jumpBarKeysToRender.push(this.jumpBarKeys[midPoint]);
+    this.removeSecondPartOfJumpBar(midPoint, removalTimes);
+    this.jumpBarKeysToRender.push(this.jumpBarKeys[this.jumpBarKeys.length - 1]);
+    this.changeDetectionRef.markForCheck();
+  }
+
+  removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
+    const removedIndexes: Array<number> = [];
+    for(let removal = 0; removal < numberOfRemovals; removal++) {
+      let min = 100000000;
+      let minIndex = -1;
+      for(let i = midPoint + 1; i < this.jumpBarKeys.length - 2; i++) {
+        if (this.jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
+          min = this.jumpBarKeys[i].size;
+          minIndex = i;
+        }
+      }
+      removedIndexes.push(minIndex);
+    }
+    for(let i = midPoint + 1; i < this.jumpBarKeys.length - 2; i++) {
+      if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
+    }
+  }
+
+  removeFirstPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
+    const removedIndexes: Array<number> = [];
+    for(let removal = 0; removal < numberOfRemovals; removal++) {
+      let min = 100000000;
+      let minIndex = -1;
+      for(let i = 1; i < midPoint; i++) {
+        if (this.jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
+          min = this.jumpBarKeys[i].size;
+          minIndex = i;
+        }
+      }
+      removedIndexes.push(minIndex);
+    }
+
+    for(let i = 1; i < midPoint; i++) {
+      if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
+    }
   }
 
   ngOnInit(): void {
-    this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.pagination?.currentPage}_${this.updateApplied}_${item?.libraryId}`;
+    if (this.trackByIdentity === undefined) {
+      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
+    }
 
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
+      this.changeDetectionRef.markForCheck();
     }
 
     if (this.pagination === undefined) {
-      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1}
+      this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
+      this.changeDetectionRef.markForCheck();
     }
   }
 
-  ngAfterViewInit() {
-
-    const parent = this.document.querySelector('.card-container');
-    if (parent == null) return;
-    console.log('card divs', this.document.querySelectorAll('div[id^="jumpbar-index--"]'));
-    console.log('cards: ', this.document.querySelectorAll('.card'));
-
-    Array.from(this.document.querySelectorAll('div')).forEach(elem => this.intersectionObserver.observe(elem));
+  ngOnChanges(changes: SimpleChanges): void {
+    this.jumpBarKeysToRender = [...this.jumpBarKeys];
+    this.resizeJumpBar();
   }
+
 
   ngOnDestroy() {
-    this.intersectionObserver.disconnect();
     this.onDestory.next();
     this.onDestory.complete();
-  }
-
-  handleIntersection(entries: IntersectionObserverEntry[]) {
-    console.log('interception: ', entries.filter(e => e.target.hasAttribute('no-observe')));
-    
-
-  }
-
-  onPageChange(page: number) {
-    this.pageChange.emit(this.pagination);
-  }
-
-  selectPageStr(page: string) {
-    this.pagination.currentPage = parseInt(page, 10) || 1;
-    this.onPageChange(this.pagination.currentPage);
-  }
-
-  formatInput(input: HTMLInputElement) {
-    input.value = input.value.replace(FILTER_PAG_REGEX, '');
   }
 
   performAction(action: ActionItem<any>) {
@@ -124,52 +177,19 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, AfterViewIn
   applyMetadataFilter(event: FilterEvent) {
     this.applyFilter.emit(event);
     this.updateApplied++;
+    this.changeDetectionRef.markForCheck();
   }
 
-  // onScroll() {
-
-  // }
-
-  // onScrollDown() {
-  //   console.log('scrolled down');
-  // }
-  // onScrollUp() {
-  //   console.log('scrolled up');
-  // }
-
-  
 
   scrollTo(jumpKey: JumpKey) {
-    // TODO: Figure out how to do this
-    
     let targetIndex = 0;
     for(var i = 0; i < this.jumpBarKeys.length; i++) {
       if (this.jumpBarKeys[i].key === jumpKey.key) break;
       targetIndex += this.jumpBarKeys[i].size;
     }
-    //console.log('scrolling to card that starts with ', jumpKey.key, + ' with index of ', targetIndex);
 
-    // Basic implementation based on itemsPerPage being the same. 
-    //var minIndex = this.pagination.currentPage * this.pagination.itemsPerPage;
-    var targetPage = Math.max(Math.ceil(targetIndex / this.pagination.itemsPerPage), 1);
-    //console.log('We are on page ', this.pagination.currentPage, ' and our target page is ', targetPage);
-    if (targetPage === this.pagination.currentPage) {
-      // Scroll to the element
-      const elem = this.document.querySelector(`div[id="jumpbar-index--${targetIndex}"`);
-      if (elem !== null) {
-        elem.scrollIntoView({
-          behavior: 'smooth'
-        });
-      }
-      return;
-    }
-
-    this.selectPageStr(targetPage + '');
-
-    // if (minIndex > targetIndex) {
-    //   // We need to scroll forward (potentially to another page)
-    // } else if (minIndex < targetIndex) {
-    //   // We need to scroll back (potentially to another page)
-    // }
+    this.virtualScroller.scrollToIndex(targetIndex, true, undefined, 1000);
+    this.changeDetectionRef.markForCheck();
+    return;
   }
 }

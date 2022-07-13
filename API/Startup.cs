@@ -22,6 +22,7 @@ using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -30,6 +31,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -53,24 +55,25 @@ namespace API
             services.AddControllers();
             services.Configure<ForwardedHeadersOptions>(options =>
             {
-                options.ForwardedHeaders =
-                    ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.ForwardedHeaders = ForwardedHeaders.All;
+                foreach(var proxy in _config.GetSection("KnownProxies").AsEnumerable().Where(c => c.Value != null)) {
+                    options.KnownProxies.Add(IPAddress.Parse(proxy.Value));
+                }
             });
             services.AddCors();
             services.AddIdentityServices(_config);
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kavita API", Version = "v1" });
-
-                c.SwaggerDoc("Kavita API", new OpenApiInfo()
+                c.SwaggerDoc("v1", new OpenApiInfo()
                 {
                     Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
                     Title = "Kavita API",
                     Version = "v1",
                 });
 
+
                 var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
-                c.IncludeXmlComments(filePath);
+                c.IncludeXmlComments(filePath, true);
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
                     In = ParameterLocation.Header,
                     Description = "Please insert JWT with Bearer into field",
@@ -96,6 +99,19 @@ namespace API
                     Description = "Local Server",
                     Url = "http://localhost:5000/",
                 });
+
+                c.AddServer(new OpenApiServer()
+                {
+                    Url = "https://demo.kavitareader.com/",
+                    Description = "Kavita Demo"
+                });
+
+                c.AddServer(new OpenApiServer()
+                {
+                    Url = "http://" + GetLocalIpAddress() + ":5000/",
+                    Description = "Local IP"
+                });
+
             });
             services.AddResponseCompression(options =>
             {
@@ -112,13 +128,6 @@ namespace API
             });
 
             services.AddResponseCaching();
-
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders =
-                    ForwardedHeaders.All;
-            });
-
 
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
@@ -176,22 +185,29 @@ namespace API
 
             app.UseMiddleware<ExceptionMiddleware>();
 
+            Task.Run(async () =>
+            {
+                var allowSwaggerUi = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync())
+                    .EnableSwaggerUi;
+
+                if (env.IsDevelopment() || allowSwaggerUi)
+                {
+                    app.UseSwagger();
+                    app.UseSwaggerUI(c =>
+                    {
+                        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+                    });
+                }
+            });
+
             if (env.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
-                });
                 app.UseHangfireDashboard();
             }
 
             app.UseResponseCompression();
 
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
-            });
+            app.UseForwardedHeaders();
 
             app.UseRouting();
 
@@ -216,11 +232,14 @@ namespace API
 
             app.UseStaticFiles(new StaticFileOptions
             {
-                ContentTypeProvider = new FileExtensionContentTypeProvider()
+                ContentTypeProvider = new FileExtensionContentTypeProvider(),
+                HttpsCompression = HttpsCompressionMode.Compress,
+                OnPrepareResponse = ctx =>
+                {
+                    const int durationInSeconds = 60 * 60 * 24;
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + durationInSeconds;
+                }
             });
-
-
-
 
             app.Use(async (context, next) =>
             {
@@ -275,7 +294,6 @@ namespace API
             if (socket.LocalEndPoint is IPEndPoint endPoint) return endPoint.Address.ToString();
             throw new KavitaException("No network adapters with an IPv4 address in the system!");
         }
-
 
     }
 }

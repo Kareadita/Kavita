@@ -113,7 +113,7 @@ namespace API.Helpers
                         opt.MapFrom(src => src.BookThemeName))
                 .ForMember(dest => dest.BookReaderLayoutMode,
                     opt =>
-                        opt.MapFrom(src => src.PageLayoutMode));
+                        opt.MapFrom(src => src.BookReaderLayoutMode));
 
 
             CreateMap<AppUserBookmark, BookmarkDto>();
@@ -138,7 +138,8 @@ namespace API.Helpers
 
             CreateMap<RegisterDto, AppUser>();
 
-
+            CreateMap<IList<ServerSetting>, ServerSettingDto>()
+                .ConvertUsing<ServerSettingConverter>();
 
             CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
                 .ConvertUsing<ServerSettingConverter>();

@@ -55,6 +55,11 @@
 }
 
 
+// .download {
+//     width: 80px;
+//     height: 80px;
+// }
+
 
 
 .btn-icon {
@@ -63,6 +68,11 @@
 
 .colored {
     background-color: var(--primary-color);
+    border-radius: 60px;
+}
+
+.colored-error {
+    background-color: var(--error-color) !important;
     border-radius: 60px;
 }
 

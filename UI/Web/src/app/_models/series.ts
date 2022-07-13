@@ -52,4 +52,7 @@ export interface Series {
      * Number of words in the series
      */
     wordCount: number;
+    minHoursToRead: number;
+    maxHoursToRead: number;
+    avgHoursToRead: number;
 }

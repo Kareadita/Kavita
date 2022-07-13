@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 
 export class DrawerOptions {
   /**
@@ -11,7 +11,8 @@ export class DrawerOptions {
   selector: 'app-drawer',
   templateUrl: './drawer.component.html',
   styleUrls: ['./drawer.component.scss'],
-  exportAs: "drawer"
+  exportAs: "drawer",
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DrawerComponent {
   @Input() isOpen = false;
@@ -24,10 +25,12 @@ export class DrawerComponent {
   @Output() drawerClosed = new EventEmitter();
   @Output() isOpenChange: EventEmitter<boolean> = new EventEmitter();
 
+  constructor(private readonly cdRef: ChangeDetectorRef) {}
 
   close() {
     this.isOpen = false;
     this.isOpenChange.emit(false);
     this.drawerClosed.emit(false);
+    this.cdRef.markForCheck();
   }
 }

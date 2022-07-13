@@ -64,7 +64,7 @@ namespace API.Extensions
         }
 
         private static void AddSqLite(this IServiceCollection services, IConfiguration config,
-            IWebHostEnvironment env)
+            IHostEnvironment env)
         {
             services.AddDbContext<DataContext>(options =>
             {

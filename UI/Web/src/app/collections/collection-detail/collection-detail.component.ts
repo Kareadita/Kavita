@@ -1,4 +1,5 @@
-import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -12,6 +13,7 @@ import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilitie
 import { KEY_CODES, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { SeriesAddedToCollectionEvent } from 'src/app/_models/events/series-added-to-collection-event';
+import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { FilterEvent, SeriesFilter } from 'src/app/_models/series-filter';
@@ -25,9 +27,13 @@ import { SeriesService } from 'src/app/_services/series.service';
 @Component({
   selector: 'app-collection-detail',
   templateUrl: './collection-detail.component.html',
-  styleUrls: ['./collection-detail.component.scss']
+  styleUrls: ['./collection-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CollectionDetailComponent implements OnInit, OnDestroy {
+
+  @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
+  @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
   collectionTag!: CollectionTag;
   tagImage: string = '';
@@ -43,8 +49,10 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
   filterActiveCheck!: SeriesFilter;
   filterActive: boolean = false;
 
+  jumpbarKeys: Array<JumpKey> = [];
+
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  
+ 
 
   private onDestory: Subject<void> = new Subject<void>();
 
@@ -56,39 +64,56 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       case Action.AddToReadingList:
         this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.AddToCollection:
         this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsRead:
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.Delete:
         this.actionService.deleteMultipleSeries(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
+          this.cdRef.markForCheck();
         });
         break;
     }
+  }
+
+  get ScrollingBlockHeight() {
+    if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
+    const navbar = this.document.querySelector('.navbar') as HTMLElement;
+    if (navbar === null) return 'calc(var(--vh)*100)';
+
+    const companionHeight = this.companionBar!.nativeElement.offsetHeight;
+    const navbarHeight = navbar.offsetHeight;
+    const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
+    return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
   constructor(public imageService: ImageService, private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
     private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
     private modalService: NgbModal, private titleService: Title, 
     public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
-    private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService) {
+    private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
+    private readonly cdRef: ChangeDetectorRef) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
       const routeId = this.route.snapshot.paramMap.get('id');
@@ -103,6 +128,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       this.filterSettings.presets.collectionTags = [tagId];
       this.filterActiveCheck = this.seriesService.createSeriesFilter();
       this.filterActiveCheck.collectionTags = [tagId];
+      this.cdRef.markForCheck();
       
       this.updateTag(tagId);
   }
@@ -154,21 +180,22 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
       this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
+      this.cdRef.markForCheck();
     });
-  }
-
-  onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, undefined);
-    this.loadPage();
   }
 
   loadPage() {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    this.seriesService.getAllSeries(this.seriesPagination?.currentPage, this.seriesPagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
+    this.isLoading = true;
+    this.cdRef.markForCheck();
+    
+    this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.seriesPagination = series.pagination;
+      this.jumpbarKeys = this.utilityService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
       window.scrollTo(0, 0);
+      this.cdRef.markForCheck();
     });
   }
 

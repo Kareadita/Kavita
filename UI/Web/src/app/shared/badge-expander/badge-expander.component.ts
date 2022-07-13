@@ -1,9 +1,10 @@
-import { Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/core';
 
 @Component({
   selector: 'app-badge-expander',
   templateUrl: './badge-expander.component.html',
-  styleUrls: ['./badge-expander.component.scss']
+  styleUrls: ['./badge-expander.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BadgeExpanderComponent implements OnInit {
 
@@ -18,16 +19,18 @@ export class BadgeExpanderComponent implements OnInit {
   get itemsLeft() {
     return Math.max(this.items.length - this.itemsTillExpander, 0);
   }
-  constructor() { }
+
+  constructor(private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.visibleItems = this.items.slice(0, this.itemsTillExpander);
+    this.cdRef.markForCheck();
   }
 
   toggleVisible() {
     this.isCollapsed = !this.isCollapsed;
-
     this.visibleItems = this.items;
+    this.cdRef.markForCheck();
   }
 
 }

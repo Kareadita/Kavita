@@ -1,6 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { NgbActiveModal, NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
+import { catchError, debounceTime, distinctUntilChanged, filter, map, merge, Observable, of, OperatorFunction, Subject, switchMap, tap } from 'rxjs';
 import { Stack } from 'src/app/shared/data-structures/stack';
+import { DirectoryDto } from 'src/app/_models/system/directory-dto';
 import { LibraryService } from '../../../_services/library.service';
 
 
@@ -8,6 +10,7 @@ export interface DirectoryPickerResult {
   success: boolean;
   folderPath: string;
 }
+
 
 
 @Component({
@@ -24,9 +27,40 @@ export class DirectoryPickerComponent implements OnInit {
   @Input() helpUrl: string = 'https://wiki.kavitareader.com/en/guides/first-time-setup#adding-a-library-to-kavita';
 
   currentRoot = '';
-  folders: string[] = [];
+  folders: DirectoryDto[] = [];
   routeStack: Stack<string> = new Stack<string>();
-  filterQuery: string = '';
+
+
+  path: string = '';
+  @ViewChild('instance', {static: true}) instance!: NgbTypeahead;
+  focus$ = new Subject<string>();
+  click$ = new Subject<string>();
+  searching: boolean = false;
+  searchFailed: boolean = false;
+
+
+  search: OperatorFunction<string, readonly string[]> = (text$: Observable<string>) => {
+    const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());
+    const clicksWithClosedPopup$ = this.click$.pipe(filter(() => !this.instance.isPopupOpen()));
+    const inputFocus$ = this.focus$;
+
+    return merge(debouncedText$, inputFocus$, clicksWithClosedPopup$, text$).pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap(() => this.searching = true),
+      switchMap(term =>
+        this.libraryService.listDirectories(this.path).pipe(
+          tap(() => this.searchFailed = false),
+          tap((folders) => this.folders = folders),
+          map(folders => folders.map(f => f.fullPath)),
+          catchError(() => {
+            this.searchFailed = true;
+            return of([]);
+          }))
+      ),
+      tap(() => this.searching = false)
+    )
+  }
 
   constructor(public modal: NgbActiveModal, private libraryService: LibraryService) {
 
@@ -51,15 +85,17 @@ export class DirectoryPickerComponent implements OnInit {
     }
   }
 
-  filterFolder = (folder: string) => {
-    return folder.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
+  updateTable() {
+    this.loadChildren(this.path);
   }
 
-  selectNode(folderName: string) {
-    this.currentRoot = folderName;
-    this.routeStack.push(folderName);
-    const fullPath = this.routeStack.items.join('/');
-    this.loadChildren(fullPath); 
+
+  selectNode(folder: DirectoryDto) {
+    if (folder.disabled) return;
+    this.currentRoot = folder.name;
+    this.routeStack.push(folder.name);
+    this.path = folder.fullPath;
+    this.loadChildren(this.path);
   }
 
   goBack() {
@@ -77,25 +113,26 @@ export class DirectoryPickerComponent implements OnInit {
 
   loadChildren(path: string) {
     this.libraryService.listDirectories(path).subscribe(folders => {
-      this.filterQuery = '';
       this.folders = folders;
     }, err => {
       // If there was an error, pop off last directory added to stack
       this.routeStack.pop();
+      const item = this.folders.find(f => f.fullPath === path);
+      if (item) {
+        item.disabled = true;
+      }
     });
   }
 
-  shareFolder(folderName: string, event: any) {
+  shareFolder(fullPath: string, event: any) {
     event.preventDefault();
     event.stopPropagation();
 
-    let fullPath = folderName;
-    if (this.routeStack.items.length > 0) {
-      const pathJoin = this.routeStack.items.join('/');
-      fullPath = pathJoin + ((pathJoin.endsWith('/') || pathJoin.endsWith('\\')) ? '' : '/') + folderName;
-    }
-
     this.modal.close({success: true, folderPath: fullPath});
+  }
+
+  share() {
+    this.modal.close({success: true, folderPath: this.path});
   }
 
   close() {
@@ -122,6 +159,9 @@ export class DirectoryPickerComponent implements OnInit {
     }
     
     const fullPath = this.routeStack.items.join('/');
+    this.path = fullPath;
     this.loadChildren(fullPath);
   }
 }
+
+

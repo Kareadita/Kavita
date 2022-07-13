@@ -9,6 +9,10 @@ import { RelationshipPipe } from './relationship.pipe';
 import { DefaultValuePipe } from './default-value.pipe';
 import { CompactNumberPipe } from './compact-number.pipe';
 import { LanguageNamePipe } from './language-name.pipe';
+import { AgeRatingPipe } from './age-rating.pipe';
+import { MangaFormatPipe } from './manga-format.pipe';
+import { MangaFormatIconPipe } from './manga-format-icon.pipe';
+import { LibraryTypePipe } from './library-type.pipe';
 
 
 
@@ -22,7 +26,11 @@ import { LanguageNamePipe } from './language-name.pipe';
     RelationshipPipe,
     DefaultValuePipe,
     CompactNumberPipe,
-    LanguageNamePipe
+    LanguageNamePipe,
+    AgeRatingPipe,
+    MangaFormatPipe,
+    MangaFormatIconPipe,
+    LibraryTypePipe
   ],
   imports: [
     CommonModule,
@@ -36,7 +44,11 @@ import { LanguageNamePipe } from './language-name.pipe';
     RelationshipPipe,
     DefaultValuePipe,
     CompactNumberPipe,
-    LanguageNamePipe
+    LanguageNamePipe,
+    AgeRatingPipe,
+    MangaFormatPipe,
+    MangaFormatIconPipe,
+    LibraryTypePipe
   ]
 })
 export class PipeModule { }

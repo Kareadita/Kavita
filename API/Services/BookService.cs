@@ -47,6 +47,7 @@ namespace API.Services
         /// </summary>
         /// <param name="fileFilePath"></param>
         /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
+        [Obsolete("This method of reading is no longer supported. Please use native pdf reader")]
         void ExtractPdfImages(string fileFilePath, string targetDirectory);
 
         Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
@@ -246,12 +247,16 @@ namespace API.Services
         private static void ScopeImages(HtmlDocument doc, EpubBookRef book, string apiBase)
         {
             var images = doc.DocumentNode.SelectNodes("//img")
-                         ?? doc.DocumentNode.SelectNodes("//image");
+                         ?? doc.DocumentNode.SelectNodes("//image") ?? doc.DocumentNode.SelectNodes("//svg");
 
             if (images == null) return;
 
+
+            var parent = images.First().ParentNode;
+
             foreach (var image in images)
             {
+
                 string key = null;
                 if (image.Attributes["src"] != null)
                 {
@@ -269,6 +274,7 @@ namespace API.Services
                 image.Attributes.Add(key, $"{apiBase}" + imageFile);
 
                 // Add a custom class that the reader uses to ensure images stay within reader
+                parent.AddClass("kavita-scale-width-container");
                 image.AddClass("kavita-scale-width");
             }
 
@@ -579,8 +585,7 @@ namespace API.Services
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex) &&
-                        (!string.IsNullOrEmpty(specialName) || groupPosition.Equals("series") || groupPosition.Equals("set")))
+                    if (!string.IsNullOrEmpty(series) && !string.IsNullOrEmpty(seriesIndex))
                     {
                         if (string.IsNullOrEmpty(specialName))
                         {
@@ -600,7 +605,7 @@ namespace API.Services
                         };
 
                         // Don't set titleSort if the book belongs to a group
-                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex))
+                        if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex) && (groupPosition.Equals("series") || groupPosition.Equals("set")))
                         {
                             info.SeriesSort = titleSort;
                         }
@@ -681,6 +686,7 @@ namespace API.Services
         /// </summary>
         /// <param name="fileFilePath"></param>
         /// <param name="fileName">Name of the new file.</param>
+        /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
         /// <returns></returns>
         public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory)
         {

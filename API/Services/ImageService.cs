@@ -25,6 +25,7 @@ public interface IImageService
     /// Converts the passed image to webP and outputs it in the same directory
     /// </summary>
     /// <param name="filePath">Full path to the image to convert</param>
+    /// <param name="outputPath">Where to output the file</param>
     /// <returns>File of written webp image</returns>
     Task<string> ConvertToWebP(string filePath, string outputPath);
 }
@@ -50,7 +51,7 @@ public class ImageService : IImageService
         _directoryService = directoryService;
     }
 
-    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount)
+    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1)
     {
         _directoryService.ExistOrCreate(targetDirectory);
         if (fileCount == 1)
@@ -89,6 +90,7 @@ public class ImageService : IImageService
     /// </summary>
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
+    /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory)
     {

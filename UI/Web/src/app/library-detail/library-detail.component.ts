@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -19,11 +19,13 @@ import { NavService } from '../_services/nav.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FilterSettings } from '../metadata-filter/filter-settings';
 import { JumpKey } from '../_models/jumpbar/jump-key';
+import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 
 @Component({
   selector: 'app-library-detail',
   templateUrl: './library-detail.component.html',
-  styleUrls: ['./library-detail.component.scss']
+  styleUrls: ['./library-detail.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibraryDetailComponent implements OnInit, OnDestroy {
 
@@ -57,30 +59,32 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       case Action.AddToReadingList:
         this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.AddToCollection:
         this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsRead:
         this.actionService.markMultipleSeriesAsRead(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
         });
         
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
         });
         break;
       case Action.Delete:
         this.actionService.deleteMultipleSeries(selectedSeries, () => {
-          this.loadPage();
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
         });
         break;
     }
@@ -89,7 +93,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
+    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService,
+    private readonly cdRef: ChangeDetectorRef) {
     const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
@@ -102,12 +107,14 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
       this.libraryName = names[this.libraryId];
       this.titleService.setTitle('Kavita - ' + this.libraryName);
+      this.cdRef.markForCheck();
     });
 
     this.libraryService.getJumpBar(this.libraryId).subscribe(barDetails => {
-      console.log('JumpBar: ', barDetails);
       this.jumpKeys = barDetails;
+      this.cdRef.markForCheck();
     });
+
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
@@ -118,14 +125,20 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.filterActiveCheck.libraries = [this.libraryId];
 
     this.filterSettings.libraryDisabled = true;
+    this.cdRef.markForCheck();
   }
 
   ngOnInit(): void {
     this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
-      if (event.event !== EVENTS.SeriesAdded) return;
-      const seriesAdded = event.payload as SeriesAddedEvent;
-      if (seriesAdded.libraryId !== this.libraryId) return;
-      this.loadPage();
+      if (event.event === EVENTS.SeriesAdded) {
+        const seriesAdded = event.payload as SeriesAddedEvent;
+        if (seriesAdded.libraryId !== this.libraryId) return;
+        this.loadPage();
+      } else if (event.event === EVENTS.SeriesRemoved) {
+        const seriesRemoved = event.payload as SeriesRemovedEvent;
+        if (seriesRemoved.libraryId !== this.libraryId) return;
+        this.loadPage();
+      }
     });
   }
 
@@ -183,26 +196,25 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     if (this.filter == undefined) {
       this.filter = this.seriesService.createSeriesFilter();
       this.filter.libraries.push(this.libraryId);
+      this.cdRef.markForCheck();
     }
 
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
-    this.seriesService.getSeriesForLibrary(0, this.pagination?.currentPage, this.pagination?.itemsPerPage, this.filter).pipe(take(1)).subscribe(series => {
-      this.series = series.result;
+    this.cdRef.markForCheck();
+    
+    this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+      this.series = series.result; 
       this.pagination = series.pagination;
       this.loadingSeries = false;
+      this.cdRef.markForCheck();
       window.scrollTo(0, 0);
     });
-  }
-
-  onPageChange(pagination: Pagination) {
-    this.filterUtilityService.updateUrlFromFilter(this.pagination, undefined);
-    this.loadPage();
   }
 
   seriesClicked(series: Series) {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.originalName}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 }

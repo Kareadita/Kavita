@@ -71,10 +71,11 @@ export class FilterUtilitiesService {
   /**
    * Will fetch current page from route if present
    * @param ActivatedRouteSnapshot to fetch page from. Must be from component else may get stale data
+   * @param itemsPerPage If you want pagination, pass non-zero number
    * @returns A default pagination object
    */
-  pagination(snapshot: ActivatedRouteSnapshot): Pagination {
-    return {currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage: 30, totalItems: 0, totalPages: 1};
+  pagination(snapshot: ActivatedRouteSnapshot, itemsPerPage: number = 0): Pagination {
+    return {currentPage: parseInt(snapshot.queryParamMap.get('page') || '1', 10), itemsPerPage, totalItems: 0, totalPages: 1};
   }
 
 

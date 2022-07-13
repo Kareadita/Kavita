@@ -253,30 +253,50 @@ namespace API.Controllers
             return Ok(pagedList);
         }
 
+        /// <summary>
+        /// Runs a Cover Image Generation task
+        /// </summary>
+        /// <param name="refreshSeriesDto"></param>
+        /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("refresh-metadata")]
         public ActionResult RefreshSeriesMetadata(RefreshSeriesDto refreshSeriesDto)
         {
-            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
+            _taskScheduler.RefreshSeriesMetadata(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate);
             return Ok();
         }
 
+        /// <summary>
+        /// Scan a series and force each file to be updated. This should be invoked via the User, hence why we force.
+        /// </summary>
+        /// <param name="refreshSeriesDto"></param>
+        /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
         public ActionResult ScanSeries(RefreshSeriesDto refreshSeriesDto)
         {
-            _taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            _taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate);
             return Ok();
         }
 
+        /// <summary>
+        /// Run a file analysis on the series.
+        /// </summary>
+        /// <param name="refreshSeriesDto"></param>
+        /// <returns></returns>
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("analyze")]
         public ActionResult AnalyzeSeries(RefreshSeriesDto refreshSeriesDto)
         {
-            _taskScheduler.AnalyzeFilesForSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId);
+            _taskScheduler.AnalyzeFilesForSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate);
             return Ok();
         }
 
+        /// <summary>
+        /// Returns metadata for a given series
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("metadata")]
         public async Task<ActionResult<SeriesMetadataDto>> GetSeriesMetadata(int seriesId)
         {
@@ -284,6 +304,11 @@ namespace API.Controllers
             return Ok(metadata);
         }
 
+        /// <summary>
+        /// Update series metadata
+        /// </summary>
+        /// <param name="updateSeriesMetadataDto"></param>
+        /// <returns></returns>
         [HttpPost("metadata")]
         public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
         {
@@ -331,6 +356,11 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
         }
 
+        /// <summary>
+        /// Get the age rating for the <see cref="AgeRating"/> enum value
+        /// </summary>
+        /// <param name="ageRating"></param>
+        /// <returns></returns>
         [HttpGet("age-rating")]
         public ActionResult<string> GetAgeRating(int ageRating)
         {
@@ -339,6 +369,12 @@ namespace API.Controllers
             return Ok(val.ToDescription());
         }
 
+        /// <summary>
+        /// Get a special DTO for Series Detail page.
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
+        /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
         [HttpGet("series-detail")]
         public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
         {
@@ -386,16 +422,24 @@ namespace API.Controllers
             return Ok(await _unitOfWork.SeriesRepository.GetSeriesForRelationKind(userId, seriesId, relation));
         }
 
+        /// <summary>
+        /// Returns all related series against the passed series Id
+        /// </summary>
+        /// <param name="seriesId"></param>
+        /// <returns></returns>
         [HttpGet("all-related")]
         public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
         {
-            // Send back a custom DTO with each type or maybe sorted in some way
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             return Ok(await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId));
         }
 
 
-
+        /// <summary>
+        /// Update the relations attached to the Series. Does not generate associated Sequel/Prequel pairs on target series.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [Authorize(Policy="RequireAdminRole")]
         [HttpPost("update-related")]
         public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
@@ -421,7 +465,8 @@ namespace API.Controllers
             return BadRequest("There was an issue updating relationships");
         }
 
-        private void UpdateRelationForKind(IList<int> dtoTargetSeriesIds, IEnumerable<SeriesRelation> adaptations, Series series, RelationKind kind)
+        // TODO: Move this to a Service and Unit Test it
+        private void UpdateRelationForKind(ICollection<int> dtoTargetSeriesIds, IEnumerable<SeriesRelation> adaptations, Series series, RelationKind kind)
         {
             foreach (var adaptation in adaptations.Where(adaptation => !dtoTargetSeriesIds.Contains(adaptation.TargetSeriesId)))
             {

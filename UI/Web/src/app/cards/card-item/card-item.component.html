@@ -1,23 +1,19 @@
 <div class="card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
-      <ng-container *ngIf="total > 0 || supressArchiveWarning">
+      <ng-container *ngIf="total > 0 || suppressArchiveWarning">
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageUrl"></app-image>
       </ng-container>
-      <ng-container *ngIf="total === 0 && !supressArchiveWarning">
+      <ng-container *ngIf="total === 0 && !suppressArchiveWarning">
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageService.errorImage"></app-image>
       </ng-container>
       
-      <div class="progress-banner" *ngIf="read < total && total > 0 && read !== total">
-        <p><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
-
-        <span class="download" *ngIf="download$ | async as download">
-          <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
-          <span class="visually-hidden" role="status">
-            {{download.progress}}% downloaded
-          </span>
+      <div class="progress-banner">
+        <p *ngIf="read < total && total > 0 && read !== total"><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
+        <span class="download">
+          <app-download-indicator [download$]="download$"></app-download-indicator>
         </span>
       </div>
-      <div class="error-banner" *ngIf="total === 0 && !supressArchiveWarning">
+      <div class="error-banner" *ngIf="total === 0 && !suppressArchiveWarning">
         Cannot Read
       </div>
       
@@ -44,7 +40,10 @@
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>
             <span class="visually-hidden">(promoted)</span>
           </span>
-          <i class="fa {{utilityService.mangaFormatIcon(format)}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{utilityService.mangaFormat(format)}}"></i><span class="visually-hidden">{{utilityService.mangaFormat(format)}}</span>
+          <ng-container *ngIf="format | mangaFormat as formatString">
+            <i class="fa {{format | mangaFormatIcon}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{formatString}}"></i>
+            <span class="visually-hidden">{{formatString}}</span>
+          </ng-container>
           &nbsp;{{title}}
         </span>
         <span class="card-actions float-end">

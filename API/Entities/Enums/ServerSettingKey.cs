@@ -81,5 +81,15 @@ namespace API.Entities.Enums
         /// </summary>
         [Description("ConvertBookmarkToWebP")]
         ConvertBookmarkToWebP = 14,
+        /// <summary>
+        /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
+        /// </summary>
+        [Description("EnableSwaggerUi")]
+        EnableSwaggerUi = 15,
+        /// <summary>
+        /// Total Number of Backups to maintain before cleaning. Default 30, min 1.
+        /// </summary>
+        [Description("TotalBackups")]
+        TotalBackups = 16,
     }
 }

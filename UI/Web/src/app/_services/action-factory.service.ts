@@ -65,6 +65,10 @@ export enum Action {
    * Open Series detail page for said series
    */
   ViewSeries = 13,
+  /**
+   * Open the reader for entity
+   */
+  Read = 14,
 }
 
 export interface ActionItem<T> {

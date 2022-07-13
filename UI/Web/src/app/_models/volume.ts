@@ -1,4 +1,5 @@
 import { Chapter } from './chapter';
+import { HourEstimateRange } from './hour-estimate-range';
 
 export interface Volume {
     id: number;
@@ -8,5 +9,12 @@ export interface Volume {
     lastModified: string;
     pages: number;
     pagesRead: number;
-    chapters: Array<Chapter>; // TODO: Validate any cases where this is undefined
+    chapters: Array<Chapter>;
+    /**
+     * This is only available on the object when fetched for SeriesDetail
+     */
+    timeEstimate?: HourEstimateRange; 
+    minHoursToRead: number;
+    maxHoursToRead: number;
+    avgHoursToRead: number;
 }

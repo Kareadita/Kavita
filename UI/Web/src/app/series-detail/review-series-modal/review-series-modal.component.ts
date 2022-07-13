@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbModal, NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Series } from 'src/app/_models/series';
@@ -7,20 +7,22 @@ import { SeriesService } from 'src/app/_services/series.service';
 @Component({
   selector: 'app-review-series-modal',
   templateUrl: './review-series-modal.component.html',
-  styleUrls: ['./review-series-modal.component.scss']
+  styleUrls: ['./review-series-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewSeriesModalComponent implements OnInit {
 
   @Input() series!: Series;
   reviewGroup!: FormGroup;
 
-  constructor(public modal: NgbActiveModal, private seriesService: SeriesService) {}
+  constructor(public modal: NgbActiveModal, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
       review: new FormControl(this.series.userReview, []),
       rating: new FormControl(this.series.userRating, [])
     });
+    this.cdRef.markForCheck();
   }
 
   close() {
@@ -29,6 +31,7 @@ export class ReviewSeriesModalComponent implements OnInit {
 
   clearRating() {
     this.reviewGroup.get('rating')?.setValue(0);
+    this.cdRef.markForCheck();
   }
 
   save() {
@@ -37,5 +40,4 @@ export class ReviewSeriesModalComponent implements OnInit {
       this.modal.close({success: true, review: model.review, rating: model.rating});
     });
   }
-
 }

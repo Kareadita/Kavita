@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
           this.toastr.error('You are not authorized to view this page.');
         }
         localStorage.setItem(this.urlKey, window.location.pathname);
-        this.router.navigateByUrl('/libraries');
+        this.router.navigateByUrl('/login');
         return false;
       })
     );

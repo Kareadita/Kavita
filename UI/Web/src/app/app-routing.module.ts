@@ -68,11 +68,16 @@ const routes: Routes = [
         path: ':libraryId/series/:seriesId/book',
         loadChildren: () => import('../app/book-reader/book-reader.module').then(m => m.BookReaderModule)
       },
+      {
+        path: ':libraryId/series/:seriesId/pdf',
+        loadChildren: () => import('../app/pdf-reader/pdf-reader.module').then(m => m.PdfReaderModule)
+      },
     ]
   },
   {path: 'login', loadChildren: () => import('../app/registration/registration.module').then(m => m.RegistrationModule)},
+  //{path: '', pathMatch: 'full', redirectTo: 'login'}, // This shouldn't be needed
   {path: '**', pathMatch: 'full', redirectTo: 'libraries'},
-  {path: '', pathMatch: 'full', redirectTo: 'login'},
+  {path: '**', pathMatch: 'prefix', redirectTo: 'libraries'},
 ];
 
 @NgModule({
