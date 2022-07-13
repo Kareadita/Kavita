@@ -192,7 +192,7 @@ public class ScannerService : IScannerService
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, series.Id, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, series.Id, false));
     }
 
@@ -327,7 +327,7 @@ public class ScannerService : IScannerService
 
         await CleanupDbEntities();
 
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }

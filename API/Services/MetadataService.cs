@@ -29,14 +29,14 @@ public interface IMetadataService
     /// <param name="forceUpdate"></param>
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    Task RefreshMetadata(int libraryId, bool forceUpdate = false);
+    Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false);
     /// <summary>
     /// Performs a forced refresh of cover images just for a series and it's nested entities
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
-    Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true);
+    Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
 }
 
 public class MetadataService : IMetadataService
@@ -207,7 +207,7 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
+    public async Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
         _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
@@ -290,7 +290,7 @@ public class MetadataService : IMetadataService
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
-    public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true)
+    public async Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true)
     {
         var sw = Stopwatch.StartNew();
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
