@@ -839,9 +839,6 @@ public class OpdsController : BaseApiController
         var content = await _directoryService.ReadFileAsync(path);
         var format = Path.GetExtension(path).Replace(".", "");
 
-        // Calculates SHA1 Hash for byte[]
-        //Response.AddCacheHeader(content);
-
         return File(content, "image/" + format);
     }
 

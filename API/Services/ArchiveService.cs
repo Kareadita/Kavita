@@ -25,6 +25,13 @@ namespace API.Services
         ComicInfo GetComicInfo(string archivePath);
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
+        /// <summary>
+        /// Creates a zip file form the listed files and outputs to the temp folder.
+        /// </summary>
+        /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
+        /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
+        /// <returns>Path to the temp zip</returns>
+        /// <exception cref="KavitaException"></exception>
         string CreateZipForDownload(IEnumerable<string> files, string tempFolder);
     }
 

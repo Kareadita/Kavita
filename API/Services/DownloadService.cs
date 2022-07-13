@@ -18,13 +18,11 @@ public interface IDownloadService
 }
 public class DownloadService : IDownloadService
 {
-    private readonly IDirectoryService _directoryService;
     private readonly UserManager<AppUser> _userManager;
     private readonly FileExtensionContentTypeProvider _fileTypeProvider = new FileExtensionContentTypeProvider();
 
-    public DownloadService(IDirectoryService directoryService, UserManager<AppUser> userManager)
+    public DownloadService(UserManager<AppUser> userManager)
     {
-        _directoryService = directoryService;
         _userManager = userManager;
     }
 
