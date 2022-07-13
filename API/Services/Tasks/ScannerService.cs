@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
@@ -83,6 +82,7 @@ public class ScannerService : IScannerService
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
             .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
             .ToList();
+        var libraryPaths = library.Folders.Select(f => f.Path).ToList();
 
         if (!await CheckMounts(library.Name, seriesFolderPaths))
         {
@@ -90,7 +90,7 @@ public class ScannerService : IScannerService
             return;
         }
 
-        if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList()))
+        if (!await CheckMounts(library.Name, libraryPaths))
         {
             _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
             return;
@@ -100,7 +100,8 @@ public class ScannerService : IScannerService
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
         var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
 
-        var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(seriesFolderPaths, files.Select(f => f.FilePath).ToList());
+        // Shouldn't this be libraryPath?
+        var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
         if (seriesDirs.Keys.Count == 0)
         {
             _logger.LogDebug("Scan Series has files spread outside a main series folder. Defaulting to library folder");
@@ -190,6 +191,7 @@ public class ScannerService : IScannerService
             MessageFactory.ScanSeriesEvent(libraryId, seriesId, series.Name));
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
+        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, series.Id, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, series.Id, false));
     }
@@ -197,8 +199,7 @@ public class ScannerService : IScannerService
     private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
     {
         var keys = parsedSeries.Keys;
-        foreach (var key in keys.Where(key =>
-                      series.Format != key.Format || !SeriesHelper.FindSeries(series, key)))
+        foreach (var key in keys.Where(key => !SeriesHelper.FindSeries(series, key))) // series.Format != key.Format ||
         {
             parsedSeries.Remove(key);
         }
@@ -328,6 +329,7 @@ public class ScannerService : IScannerService
 
         BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
+        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
     private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs)

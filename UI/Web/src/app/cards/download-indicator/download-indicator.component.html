@@ -1,0 +1,6 @@
+<span class="download" *ngIf="download$ | async as download">
+    <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
+    <span class="visually-hidden" role="status">
+      {{download.progress}}% downloaded
+    </span>
+</span>

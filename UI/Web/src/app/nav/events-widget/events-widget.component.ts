@@ -5,6 +5,7 @@ import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
+import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ErrorEvent } from 'src/app/_models/events/error-event';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
 import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event';
@@ -50,7 +51,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
 
   constructor(public messageHub: MessageHubService, private modalService: NgbModal, 
     private accountService: AccountService, private confirmService: ConfirmService,
-    private readonly cdRef: ChangeDetectorRef) { }
+    private readonly cdRef: ChangeDetectorRef, public downloadService: DownloadService) { }
 
   ngOnDestroy(): void {
     this.onDestroy.next();

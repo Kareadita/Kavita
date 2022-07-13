@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using API.DTOs.Update;
 using API.Entities;
+using API.Extensions;
 
 namespace API.SignalR
 {
@@ -302,7 +303,7 @@ namespace API.SignalR
             {
                 Name = DownloadProgress,
                 Title = $"Downloading {downloadName}",
-                SubTitle = $"{username} is downloading {downloadName}",
+                SubTitle = $"Preparing {username.SentenceCase()} the download of {downloadName}",
                 EventType = eventType,
                 Progress = ProgressType.Determinate,
                 Body = new

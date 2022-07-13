@@ -25,6 +25,7 @@ import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.
 import { ListItemComponent } from './list-item/list-item.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
+import { DownloadIndicatorComponent } from './download-indicator/download-indicator.component';
 
 
 
@@ -47,6 +48,7 @@ import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.
     EntityInfoCardsComponent,
     ListItemComponent,
     SeriesInfoCardsComponent,
+    DownloadIndicatorComponent,
   ],
   imports: [
     CommonModule,

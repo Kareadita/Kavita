@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,19 +12,17 @@ namespace API.Services;
 
 public interface IDownloadService
 {
-    Task<(byte[], string, string)> GetFirstFileDownload(IEnumerable<MangaFile> files);
+    Tuple<string, string, string> GetFirstFileDownload(IEnumerable<MangaFile> files);
     string GetContentTypeFromFile(string filepath);
     Task<bool> HasDownloadPermission(AppUser user);
 }
 public class DownloadService : IDownloadService
 {
-    private readonly IDirectoryService _directoryService;
     private readonly UserManager<AppUser> _userManager;
     private readonly FileExtensionContentTypeProvider _fileTypeProvider = new FileExtensionContentTypeProvider();
 
-    public DownloadService(IDirectoryService directoryService, UserManager<AppUser> userManager)
+    public DownloadService(UserManager<AppUser> userManager)
     {
-        _directoryService = directoryService;
         _userManager = userManager;
     }
 
@@ -32,10 +31,10 @@ public class DownloadService : IDownloadService
     /// </summary>
     /// <param name="files"></param>
     /// <returns></returns>
-    public async Task<(byte[], string, string)> GetFirstFileDownload(IEnumerable<MangaFile> files)
+    public Tuple<string, string, string> GetFirstFileDownload(IEnumerable<MangaFile> files)
     {
         var firstFile = files.Select(c => c.FilePath).First();
-        return (await _directoryService.ReadFileAsync(firstFile), GetContentTypeFromFile(firstFile), Path.GetFileName(firstFile));
+        return Tuple.Create(firstFile, GetContentTypeFromFile(firstFile), Path.GetFileName(firstFile));
     }
 
     public string GetContentTypeFromFile(string filepath)

@@ -86,12 +86,11 @@ export class BookmarksComponent implements OnInit, OnDestroy {
 
     switch (action) {
       case Action.DownloadBookmark:
-        this.downloadService.downloadBookmarks(this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId))).pipe(
-          takeWhile(val => {
-            return val.state != 'DONE';
-          })).subscribe(() => {
+        this.downloadService.download('bookmark', this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId)), (d) => {
+          if (!d) {
             this.bulkSelectionService.deselectAll();
-          });
+          }
+        });
         break;
       case Action.Delete:
         if (!await this.confirmService.confirm('Are you sure you want to clear all bookmarks for multiple series? This cannot be undone.')) {
@@ -158,13 +157,18 @@ export class BookmarksComponent implements OnInit, OnDestroy {
 
   downloadBookmarks(series: Series) {
     this.downloadingSeries[series.id] = true;
-    this.downloadService.downloadBookmarks(this.bookmarks.filter(bmk => bmk.seriesId === series.id)).pipe(
-      takeWhile(val => {
-        return val.state != 'DONE';
-      }),
-      finalize(() => {
+    this.downloadService.download('bookmark', this.bookmarks.filter(bmk => bmk.seriesId === series.id), (d) => {
+      if (!d) {
         this.downloadingSeries[series.id] = false;
-      })).subscribe(() => {/* No Operation */});
+      }
+    });
+    // this.downloadService.downloadBookmarks(this.bookmarks.filter(bmk => bmk.seriesId === series.id)).pipe(
+    //   takeWhile(val => {
+    //     return val.state != 'DONE';
+    //   }),
+    //   finalize(() => {
+    //     this.downloadingSeries[series.id] = false;
+    //   })).subscribe(() => {/* No Operation */});
   }
 
 }

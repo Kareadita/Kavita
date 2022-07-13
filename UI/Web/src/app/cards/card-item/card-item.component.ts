@@ -3,7 +3,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 import { filter, finalize, map, take, takeUntil, takeWhile } from 'rxjs/operators';
 import { Download } from 'src/app/shared/_models/download';
-import { DownloadService } from 'src/app/shared/_services/download.service';
+import { DownloadEntityType, DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -101,9 +101,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
   format: MangaFormat = MangaFormat.UNKNOWN;
   chapterTitle: string = '';
 
-
-  download$: Observable<Download> | null = null;
-  downloadInProgress: boolean = false;
+  /**
+   * This is the download we get from download service. 
+   */
+  download$: Observable<DownloadEvent | null> | null = null;
 
   /**
    * Handles touch events for selection on mobile devices
@@ -133,24 +134,24 @@ export class CardItemComponent implements OnInit, OnDestroy {
     public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
     private messageHub: MessageHubService, private accountService: AccountService, 
-    private scrollService: ScrollService, private readonly changeDetectionRef: ChangeDetectorRef) {}
+    private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
       this.suppressArchiveWarning = true;
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     }
 
     if (this.suppressLibraryLink === false) {
       if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
         this.libraryId = (this.entity as Series).libraryId;
-        this.changeDetectionRef.markForCheck();
+        this.cdRef.markForCheck();
       }
 
       if (this.libraryId !== undefined && this.libraryId > 0) {
         this.libraryService.getLibraryName(this.libraryId).pipe(takeUntil(this.onDestroy)).subscribe(name => {
           this.libraryName = name;
-          this.changeDetectionRef.markForCheck();
+          this.cdRef.markForCheck();
         });
       }
     }
@@ -177,8 +178,18 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
 
       this.read = updateEvent.pagesRead;
-      this.changeDetectionRef.detectChanges();
+      this.cdRef.detectChanges();
     });
+
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntil(this.onDestroy), map((events) => {
+      if(this.utilityService.isSeries(this.entity)) return events.find(e => e.entityType === 'series' && e.subTitle === this.downloadService.downloadSubtitle('series', (this.entity as Series))) || null;
+      if(this.utilityService.isVolume(this.entity)) return events.find(e => e.entityType === 'volume' && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
+      if(this.utilityService.isChapter(this.entity)) return events.find(e => e.entityType === 'chapter' && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;
+      // Is PageBookmark[]
+      if(this.entity.hasOwnProperty('length')) return events.find(e => e.entityType === 'bookmark' && e.subTitle === this.downloadService.downloadSubtitle('bookmark', [(this.entity as PageBookmark)])) || null;
+      return null;
+    }));
+
   }
 
   ngOnDestroy() {
@@ -191,7 +202,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     if (!this.allowSelection) return;
 
     this.selectionInProgress = false;
-    this.changeDetectionRef.markForCheck();
+    this.cdRef.markForCheck();
   }
 
   @HostListener('touchstart', ['$event'])
@@ -230,62 +241,21 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {
-      if (this.downloadInProgress === true) {
-        this.toastr.info('Download is already in progress. Please wait.');
-        return;
-      }
+
+      // if (this.download$ !== null) {
+      //   this.toastr.info('Download is already in progress. Please wait.');
+      //   return;
+      // }
 
       if (this.utilityService.isVolume(this.entity)) {
         const volume = this.utilityService.asVolume(this.entity);
-        this.downloadService.downloadVolumeSize(volume.id).pipe(take(1)).subscribe(async (size) => {
-          const wantToDownload = await this.downloadService.confirmSize(size, 'volume');
-          if (!wantToDownload) { return; }
-          this.downloadInProgress = true;
-          this.changeDetectionRef.markForCheck();
-          this.download$ = this.downloadService.downloadVolume(volume).pipe(
-            takeWhile(val => {
-              return val.state != 'DONE';
-            }),
-            finalize(() => {
-              this.download$ = null;
-              this.downloadInProgress = false;
-              this.changeDetectionRef.markForCheck();
-            }));
-        });
+        this.downloadService.download('volume', volume);
       } else if (this.utilityService.isChapter(this.entity)) {
         const chapter = this.utilityService.asChapter(this.entity);
-        this.downloadService.downloadChapterSize(chapter.id).pipe(take(1)).subscribe(async (size) => {
-          const wantToDownload = await this.downloadService.confirmSize(size, 'chapter');
-          if (!wantToDownload) { return; }
-          this.downloadInProgress = true;
-          this.changeDetectionRef.markForCheck();
-          this.download$ = this.downloadService.downloadChapter(chapter).pipe(
-            takeWhile(val => {
-              return val.state != 'DONE';
-            }),
-            finalize(() => {
-              this.download$ = null;
-              this.downloadInProgress = false;
-              this.changeDetectionRef.markForCheck();
-            }));
-        });
+        this.downloadService.download('chapter', chapter);
       } else if (this.utilityService.isSeries(this.entity)) {
         const series = this.utilityService.asSeries(this.entity);
-        this.downloadService.downloadSeriesSize(series.id).pipe(take(1)).subscribe(async (size) => {
-          const wantToDownload = await this.downloadService.confirmSize(size, 'series');
-          if (!wantToDownload) { return; }
-          this.downloadInProgress = true;
-          this.changeDetectionRef.markForCheck();
-          this.download$ = this.downloadService.downloadSeries(series).pipe(
-            takeWhile(val => {
-              return val.state != 'DONE';
-            }),
-            finalize(() => {
-              this.download$ = null;
-              this.downloadInProgress = false;
-              this.changeDetectionRef.markForCheck();
-            }));
-        });
+        this.downloadService.download('series', series);
       }
       return; // Don't propagate the download from a card
     }
@@ -307,6 +277,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
     this.selection.emit(this.selected);
-    this.changeDetectionRef.detectChanges();
+    this.cdRef.detectChanges();
   }
 }

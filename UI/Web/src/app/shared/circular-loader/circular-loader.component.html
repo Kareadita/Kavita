@@ -1,8 +1,8 @@
 <ng-container *ngIf="currentValue > 0">
-   <div class="number">
-      <i class="fa fa-angle-double-down" style="font-size: 36px;" aria-hidden="true"></i>
+   <div [ngClass]="{'number': center}" class="indicator" *ngIf="showIcon">
+      <i class="fa fa-angle-double-down" [ngStyle]="{'font-size': fontSize}" aria-hidden="true"></i>
    </div>
-   <div style="width: 100px; height: 100px;">
+   <div [ngStyle]="{'width': width, 'height': height}">
       <circle-progress
          [percent]="currentValue"
          [radius]="100"
