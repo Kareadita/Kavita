@@ -804,6 +804,8 @@ public class ScannerService : IScannerService
                 _unitOfWork.VolumeRepository.Add(volume);
             }
 
+            volume.Name = volumeNumber;
+
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
             UpdateChapters(series, volume, infos);

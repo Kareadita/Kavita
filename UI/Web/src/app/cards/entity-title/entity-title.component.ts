@@ -53,6 +53,7 @@ export class EntityTitleComponent implements OnInit {
       this.volumeTitle = v.name || '';
       this.titleName = v.chapters[0].titleName || '';
     }
+    console.log('volume title: ', this.volumeTitle);
     this.cdRef.markForCheck();
   }
 }
