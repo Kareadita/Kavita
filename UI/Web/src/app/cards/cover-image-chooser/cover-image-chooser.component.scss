@@ -8,7 +8,6 @@ $image-width: 160px;
 }
 
 .image-card {
-    margin: 10px;
     cursor: pointer;
 }
 
@@ -16,6 +15,13 @@ $image-width: 160px;
     outline: 5px solid var(--primary-color);
     outline-width: medium;
     outline-offset: -1px;
+}
+
+.chooser {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 158px);
+    grid-gap: 0.5rem;
+    justify-content: space-around;
 }
 
 ngx-file-drop ::ng-deep > div {
