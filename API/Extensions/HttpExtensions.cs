@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -6,6 +7,7 @@ using System.Text;
 using System.Text.Json;
 using API.Helpers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
 
 namespace API.Extensions
 {
@@ -31,29 +33,11 @@ namespace API.Extensions
         /// <param name="content">If byte[] is null or empty, will only add cache-control</param>
         public static void AddCacheHeader(this HttpResponse response, byte[] content)
         {
-            if (content == null || content.Length <= 0) return;
+            if (content is not {Length: > 0}) return;
             using var sha1 = SHA256.Create();
 
-            response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
+            response.Headers.Add(HeaderNames.ETag, string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
+            response.Headers.CacheControl =  $"private,max-age=100";
         }
-
-        /// <summary>
-        /// Calculates SHA256 hash for a cover image filename and sets as ETag. Ensures Cache-Control: private header is added.
-        /// </summary>
-        /// <param name="response"></param>
-        /// <param name="filename"></param>
-        /// <param name="maxAge">Maximum amount of seconds to set for Cache-Control</param>
-        public static void AddCacheHeader(this HttpResponse response, string filename, int maxAge = 10)
-        {
-            if (filename is not {Length: > 0}) return;
-            var hashContent = filename + File.GetLastWriteTimeUtc(filename);
-            using var sha1 = SHA256.Create();
-            response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(Encoding.UTF8.GetBytes(hashContent)).Select(x => x.ToString("X2"))));
-            if (maxAge != 10)
-            {
-                response.Headers.CacheControl =  $"max-age={maxAge}";
-            }
-        }
-
     }
 }

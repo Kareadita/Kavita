@@ -5,7 +5,7 @@ import { ConfirmService } from 'src/app/shared/confirm.service';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
 import { catchError, finalize, shareReplay, take, takeWhile } from 'rxjs/operators';
-import { forkJoin, Observable, of } from 'rxjs';
+import { defer, forkJoin, Observable, of } from 'rxjs';
 import { ServerService } from 'src/app/_services/server.service';
 import { Job } from 'src/app/_models/job/job';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
@@ -55,10 +55,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     {
       name: 'Download Logs', 
       description: 'Compiles all log files into a zip and downloads it',
-      api: this.downloadService.downloadLogs().pipe(
-        takeWhile(val => {
-          return val.state != 'DONE';
-        })), 
+      api: defer(() => of(this.downloadService.download('logs', undefined))), 
       successMessage: ''
     },
     {

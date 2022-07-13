@@ -668,7 +668,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.bookmarkMode) {
       this.readerService.getBookmarkInfo(this.seriesId).subscribe(bookmarkInfo => {
         this.setPageNum(0);
-        this.title = bookmarkInfo.seriesName + ' Bookmarks';
+        this.title = bookmarkInfo.seriesName;
+        this.subtitle = 'Bookmarks';
         this.libraryType = bookmarkInfo.libraryType;
         this.maxPages = bookmarkInfo.pages;
 
@@ -677,6 +678,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
         this.pageOptions = newOptions;
         this.inSetup = false;
+        this.cdRef.markForCheck();
 
         const images = [];
         for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
@@ -684,6 +686,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
+        this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
         this.render();
       });
@@ -1013,7 +1016,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pageAmount = pageAmount;
 
       if (this.readerMode !== ReaderMode.Webtoon) {
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
+        this.setCanvasImage();
       }
     }
 
@@ -1058,7 +1061,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isNoSplit() || notInSplit) {
       this.setPageNum(this.pageNum - pageAmount);
       if (this.readerMode !== ReaderMode.Webtoon) {
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
+        this.setCanvasImage();
       }
     }
 
@@ -1067,15 +1070,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
+   */
+  setCanvasImage() {
+    const img = this.cachedImages.arr.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
+    if (img) {
+      this.canvasImage = img;
+    } else {
+      this.canvasImage.src = this.getPageUrl(this.pageNum);
+    }
+    this.cdRef.markForCheck();
+  }
+
   loadNextChapter() {
-    if (this.nextPageDisabled) { return; }
-    if (this.nextChapterDisabled) { 
+    if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) { 
       this.toastr.info('No Next Chapter');
       return;
      }
 
-    this.isLoading = true;
-    this.cdRef.markForCheck();
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.nextChapterId = chapterId;
@@ -1087,13 +1100,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadPrevChapter() {
-    if (this.prevPageDisabled) { return; }
-    if (this.prevChapterDisabled) { 
+    if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode) { 
       this.toastr.info('No Previous Chapter');
       return; 
     }
-    this.isLoading = true;
-    this.cdRef.markForCheck();
     this.continuousChaptersStack.pop();
     const prevChapter = this.continuousChaptersStack.peek();
     if (prevChapter != this.chapterId) {
@@ -1103,6 +1113,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
     }
+
+    console.log('prevChapterId', this.prevChapterId);
 
     if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -1115,7 +1127,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadChapter(chapterId: number, direction: 'Next' | 'Prev') {
-    if (chapterId >= 0) {
+    console.log('chapterId: ', chapterId);
+    if (chapterId > 0) {
+      this.isLoading = true;
+      this.cdRef.markForCheck();
+
       this.chapterId = chapterId;
       this.continuousChaptersStack.push(chapterId);
       // Load chapter Id onto route but don't reload
@@ -1238,7 +1254,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.firstPageRendered = true;
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
-      //this.cdRef.markForCheck();
   }
 
   /**
@@ -1315,7 +1330,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImageAheadBy2.src = '';
 
     this.isLoose = (this.pageAmount === 1 ? true : false);
-    this.canvasImage.src = this.getPageUrl(this.pageNum);
+    this.setCanvasImage();
+
 
     if (this.layoutMode !== LayoutMode.Single) {
       this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()

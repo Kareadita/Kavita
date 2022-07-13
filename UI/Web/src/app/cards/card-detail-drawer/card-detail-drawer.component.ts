@@ -237,22 +237,12 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       this.toastr.info('Download is already in progress. Please wait.');
       return;
     }
-    
-    this.downloadService.downloadChapterSize(chapter.id).pipe(take(1)).subscribe(async (size) => {
-      const wantToDownload = await this.downloadService.confirmSize(size, 'chapter');
-      if (!wantToDownload) { return; }
 
-      this.downloadInProgress = true;
-      this.download$ = this.downloadService.downloadChapter(chapter).pipe(
-        takeWhile(val => {
-          return val.state != 'DONE';
-        }),
-        finalize(() => {
-          this.download$ = null;
-          this.downloadInProgress = false;
-          this.cdRef.markForCheck();
-        }));
-      this.download$.subscribe(() => {});
+    this.downloadInProgress = true;
+    this.cdRef.markForCheck();
+    this.downloadService.download('chapter', chapter, (d) => {
+      if (d) return;
+      this.downloadInProgress = false;
       this.cdRef.markForCheck();
     });
   }

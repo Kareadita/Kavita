@@ -47,6 +47,7 @@ namespace API.Controllers
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("pdf")]
+        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<ActionResult> GetPdf(int chapterId)
         {
             var chapter = await _cacheService.Ensure(chapterId);
@@ -57,7 +58,6 @@ namespace API.Controllers
                 var path = _cacheService.GetCachedFile(chapter);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
 
-                Response.AddCacheHeader(path, TimeSpan.FromMinutes(60).Seconds);
                 return PhysicalFile(path, "application/pdf", Path.GetFileName(path), true);
             }
             catch (Exception)
@@ -74,6 +74,7 @@ namespace API.Controllers
         /// <param name="page"></param>
         /// <returns></returns>
         [HttpGet("image")]
+        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
             if (page < 0) page = 0;
@@ -86,8 +87,7 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
-                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
-                return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+                return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);
             }
             catch (Exception)
             {
@@ -105,6 +105,7 @@ namespace API.Controllers
         /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
         /// <returns></returns>
         [HttpGet("bookmark-image")]
+        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
         {
             if (page < 0) page = 0;
@@ -121,7 +122,6 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
                 var format = Path.GetExtension(path).Replace(".", "");
 
-                Response.AddCacheHeader(path, TimeSpan.FromMinutes(10).Seconds);
                 return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
             }
             catch (Exception)

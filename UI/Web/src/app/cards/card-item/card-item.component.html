@@ -9,12 +9,8 @@
       
       <div class="progress-banner">
         <p *ngIf="read < total && total > 0 && read !== total"><ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar></p>
-
-        <span class="download" *ngIf="download$ | async as download">
-          <app-circular-loader [currentValue]="download.progress"></app-circular-loader>
-          <span class="visually-hidden" role="status">
-            {{download.progress}}% downloaded
-          </span>
+        <span class="download">
+          <app-download-indicator [download$]="download$"></app-download-indicator>
         </span>
       </div>
       <div class="error-banner" *ngIf="total === 0 && !suppressArchiveWarning">

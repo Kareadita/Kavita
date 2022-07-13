@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Data.Metadata;
@@ -27,7 +25,14 @@ namespace API.Services
         ComicInfo GetComicInfo(string archivePath);
         ArchiveLibrary CanOpen(string archivePath);
         bool ArchiveNeedsFlattening(ZipArchive archive);
-        Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder);
+        /// <summary>
+        /// Creates a zip file form the listed files and outputs to the temp folder.
+        /// </summary>
+        /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
+        /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
+        /// <returns>Path to the temp zip</returns>
+        /// <exception cref="KavitaException"></exception>
+        string CreateZipForDownload(IEnumerable<string> files, string tempFolder);
     }
 
     /// <summary>
@@ -267,15 +272,22 @@ namespace API.Services
         /// </summary>
         /// <param name="files">List of files to be zipped up. Should be full file paths.</param>
         /// <param name="tempFolder">Temp folder name to use for preparing the files. Will be created and deleted</param>
-        /// <returns>All bytes for the given file in a Tuple</returns>
+        /// <returns>Path to the temp zip</returns>
         /// <exception cref="KavitaException"></exception>
-        public async Task<Tuple<byte[], string>> CreateZipForDownload(IEnumerable<string> files, string tempFolder)
+        public string CreateZipForDownload(IEnumerable<string> files, string tempFolder)
         {
-            // TODO: Refactor CreateZipForDownload to return the temp file so we can stream it from temp
             var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
             var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
+            var potentialExistingFile = _directoryService.FileSystem.FileInfo.FromFileName(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip"));
+            if (potentialExistingFile.Exists)
+            {
+                // A previous download exists, just return it immediately
+                return potentialExistingFile.FullName;
+            }
+
             _directoryService.ExistOrCreate(tempLocation);
+
             if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
             {
                 throw new KavitaException("Unable to copy files to temp directory archive download.");
@@ -292,13 +304,7 @@ namespace API.Services
                 throw new KavitaException("There was an issue creating temp archive");
             }
 
-
-            var fileBytes = await _directoryService.ReadFileAsync(zipPath);
-
-            _directoryService.ClearAndDeleteDirectory(tempLocation); // NOTE: For sending back just zip, just schedule this to be called after the file is returned or let next temp storage cleanup take care of it
-            (new FileInfo(zipPath)).Delete();
-
-            return Tuple.Create(fileBytes, zipPath);
+            return zipPath;
         }
 
 

@@ -137,6 +137,27 @@ public class SeriesHelperTests
             NormalizedName = API.Parser.Parser.Normalize("SomethingRandom")
         }));
     }
+
+    [Fact]
+    public void FindSeries_ShouldFind_UsingLocalizedName_2()
+    {
+        var series = DbFactory.Series("My Dress-Up Darling");
+        series.LocalizedName = "Sono Bisque Doll wa Koi wo Suru";
+        series.Format = MangaFormat.Archive;
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Archive,
+            Name = "My Dress-Up Darling",
+            NormalizedName = API.Parser.Parser.Normalize("My Dress-Up Darling")
+        }));
+
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Archive,
+            Name = "Sono Bisque Doll wa Koi wo Suru".ToLower(),
+            NormalizedName = API.Parser.Parser.Normalize("Sono Bisque Doll wa Koi wo Suru")
+        }));
+    }
     #endregion
 
     [Fact]

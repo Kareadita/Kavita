@@ -23,20 +23,20 @@ namespace API.Services;
 public interface IMetadataService
 {
     /// <summary>
-    /// Recalculates metadata for all entities in a library.
+    /// Recalculates cover images for all entities in a library.
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="forceUpdate"></param>
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    Task RefreshMetadata(int libraryId, bool forceUpdate = false);
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false);
     /// <summary>
-    /// Performs a forced refresh of metadata just for a series and it's nested entities
+    /// Performs a forced refresh of cover images just for a series and it's nested entities
     /// </summary>
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
-    Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true);
+    Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
 }
 
 public class MetadataService : IMetadataService
@@ -48,6 +48,7 @@ public class MetadataService : IMetadataService
     private readonly IReadingItemService _readingItemService;
     private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
+    private IList<SignalRMessage> _updateEvents = new List<SignalRMessage>();
     public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
         IEventHub eventHub, ICacheHelper cacheHelper,
         IReadingItemService readingItemService, IDirectoryService directoryService)
@@ -65,25 +66,27 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="chapter"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private async Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate)
+    private Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
 
         if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
-            return false;
+            return Task.FromResult(false);
 
-        if (firstFile == null) return false;
+        if (firstFile == null) return Task.FromResult(false);
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
-        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-            MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
-        return true;
+
+        // await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+        //     MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
+        _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
+        return Task.FromResult(true);
     }
 
     private void UpdateChapterLastModified(Chapter chapter, bool forceUpdate)
     {
-        var firstFile = chapter.Files.OrderBy(x => x.Chapter).FirstOrDefault();
+        var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
         firstFile.UpdateLastModified();
@@ -94,22 +97,23 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="volume"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private async Task<bool> UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
+    private Task<bool> UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
         if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(
                 _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, volume.CoverImage),
-                null, volume.Created, forceUpdate)) return false;
+                null, volume.Created, forceUpdate)) return Task.FromResult(false);
+
 
         volume.Chapters ??= new List<Chapter>();
         var firstChapter = volume.Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
-        if (firstChapter == null) return false;
+        if (firstChapter == null) return Task.FromResult(false);
 
         volume.CoverImage = firstChapter.CoverImage;
-        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume), false);
+        //await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume), false);
+        _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
 
-
-        return true;
+        return Task.FromResult(true);
     }
 
     /// <summary>
@@ -117,13 +121,13 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private async Task UpdateSeriesCoverImage(Series series, bool forceUpdate)
+    private Task UpdateSeriesCoverImage(Series series, bool forceUpdate)
     {
-        if (series == null) return;
+        if (series == null) return Task.CompletedTask;
 
         if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, series.CoverImage),
                 null, series.Created, forceUpdate, series.CoverImageLocked))
-            return;
+            return Task.CompletedTask;
 
         series.Volumes ??= new List<Volume>();
         var firstCover = series.Volumes.GetCoverImage(series.Format);
@@ -143,7 +147,9 @@ public class MetadataService : IMetadataService
             }
         }
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
-        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
+        //await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
+        _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
+        return Task.CompletedTask;
     }
 
 
@@ -194,17 +200,19 @@ public class MetadataService : IMetadataService
 
 
     /// <summary>
-    /// Refreshes Metadata for a whole library
+    /// Refreshes Cover Images for a whole library
     /// </summary>
     /// <remarks>This can be heavy on memory first run</remarks>
     /// <param name="libraryId"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task RefreshMetadata(int libraryId, bool forceUpdate = false)
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    public async Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
         _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
+
+        _updateEvents.Clear();
 
         var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
         var stopwatch = Stopwatch.StartNew();
@@ -253,6 +261,8 @@ public class MetadataService : IMetadataService
 
             await _unitOfWork.CommitAsync();
 
+            await FlushEvents();
+
             _logger.LogInformation(
                 "[MetadataService] Processed {SeriesStart} - {SeriesEnd} out of {TotalSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                 chunk * chunkInfo.ChunkSize, (chunk * chunkInfo.ChunkSize) + nonLibrarySeries.Count, chunkInfo.TotalSize, stopwatch.ElapsedMilliseconds, library.Name);
@@ -280,7 +290,7 @@ public class MetadataService : IMetadataService
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
-    public async Task RefreshMetadataForSeries(int libraryId, int seriesId, bool forceUpdate = true)
+    public async Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true)
     {
         var sw = Stopwatch.StartNew();
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
@@ -309,8 +319,19 @@ public class MetadataService : IMetadataService
         if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
         {
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
+            await FlushEvents();
         }
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
+    }
+
+    private async Task FlushEvents()
+    {
+        // Send all events out now that entities are saved
+        foreach (var updateEvent in _updateEvents)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, updateEvent, false);
+        }
+        _updateEvents.Clear();
     }
 }

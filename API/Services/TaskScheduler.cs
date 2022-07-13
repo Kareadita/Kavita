@@ -188,7 +188,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Enqueuing library metadata refresh for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadata(libraryId, forceUpdate));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, forceUpdate));
     }
 
     public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
@@ -200,7 +200,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Enqueuing series metadata refresh for: {SeriesId}", seriesId);
-        BackgroundJob.Enqueue(() => _metadataService.RefreshMetadataForSeries(libraryId, seriesId, forceUpdate));
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
     }
 
     public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)

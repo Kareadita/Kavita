@@ -3,8 +3,9 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { auditTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { auditTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
+import { ToggleService } from '../_services/toggle.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
 /**

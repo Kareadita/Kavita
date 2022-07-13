@@ -132,6 +132,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
       this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
       this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
+      this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
       this.cdRef.markForCheck();
     });
 
@@ -181,6 +182,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
     this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
     this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
+    this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
     this.cdRef.markForCheck();
   }
 
@@ -215,6 +217,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderImmersiveMode: modelSettings.bookReaderImmersiveMode,
       globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
       blurUnreadSummaries: modelSettings.blurUnreadSummaries,
+      promptForDownloadSize: modelSettings.promptForDownloadSize,
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
