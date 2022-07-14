@@ -307,6 +307,33 @@ public class ParseScannedFilesTests
 
     }
 
+    #endregion
+
+    #region ScanFiles
+
+    [Fact]
+    public async Task ScanFiles_ShouldFindAllFiles()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddDirectory("C:/Data/Accel World");
+        fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Nothing.pdf", new MockFileData(string.Empty));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+
+        var allFiles = psf.ScanFiles("C:/Data/");
+
+        Assert.Equal(5, allFiles.Count);
+        //Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
+    }
 
     #endregion
 }

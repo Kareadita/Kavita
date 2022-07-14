@@ -72,6 +72,11 @@ namespace API.Services.Tasks.Scanner
             return infos;
         }
 
+        public IList<string> ScanFiles(string folderPath)
+        {
+            return new List<string>();
+        }
+
         /// <summary>
         /// Processes files found during a library scan.
         /// Populates a collection of <see cref="ParserInfo"/> for DB updates later.
