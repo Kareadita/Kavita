@@ -2,3 +2,7 @@ img {
     width: 100%;
 }
 
+.img-placeholder {
+    background: rgb(44,47,51);
+    background: radial-gradient(circle, rgba(44,47,51,1) 0%, rgba(34,42,24,1) 37%, rgba(2,0,36,1) 100%);
+}
