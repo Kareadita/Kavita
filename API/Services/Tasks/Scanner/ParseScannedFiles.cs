@@ -72,9 +72,35 @@ namespace API.Services.Tasks.Scanner
             return infos;
         }
 
-        public IList<string> ScanFiles(string folderPath)
+        /**
+         * FindFiles()
+            1) Given a folder, validate it exists.
+            2) If exists, append .kavitaignore and validate if said file exists
+            3) If exists, load blob information into ignores[]
+            4) Find all folders, excluding global excludes and ignores
+            6) Recursively apply from step 1
+            7) Until no folders exist
+            8) Find all files, excluding global excludes and ignores
+            9) Return to higher level for processing of files
+         */
+        public IEnumerable<string> ScanFiles(string folderPath)
         {
-            return new List<string>();
+            var files = new List<string>();
+            if (!_directoryService.Exists(folderPath)) return files;
+            var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, ".kavitaignore");
+            if (_directoryService.FileSystem.File.Exists(potentialIgnoreFile))
+            {
+                // TODO: Parse .ignore file
+            }
+
+            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(folderPath))
+            {
+                files.AddRange(ScanFiles(directory));
+            }
+
+            files.AddRange(_directoryService.GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions));
+
+            return files;
         }
 
         /// <summary>

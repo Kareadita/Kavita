@@ -57,6 +57,10 @@ namespace API.Services
         void RemoveNonImages(string directoryName);
         void Flatten(string directoryName);
         Task<bool> CheckWriteAccess(string directoryName);
+
+        IEnumerable<string> GetFilesWithCertainExtensions(string path,
+            string searchPatternExpression = "",
+            SearchOption searchOption = SearchOption.TopDirectoryOnly);
     }
     public class DirectoryService : IDirectoryService
     {
@@ -100,7 +104,7 @@ namespace API.Services
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       private IEnumerable<string> GetFilesWithCertainExtensions(string path,
+       public IEnumerable<string> GetFilesWithCertainExtensions(string path,
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
@@ -507,6 +511,7 @@ namespace API.Services
        /// <summary>
        /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
        /// up processing.
+       /// NOTE: This is no longer parallel due to user's machines locking up
        /// </summary>
        /// <param name="root">Directory to scan</param>
        /// <param name="action">Action to apply on file path</param>
