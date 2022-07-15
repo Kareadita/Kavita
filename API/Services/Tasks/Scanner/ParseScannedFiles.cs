@@ -83,10 +83,17 @@ namespace API.Services.Tasks.Scanner
         {
             if (isLibraryFolder)
             {
-                foreach (var directory in _directoryService.GetDirectories(folderPath))
+                var directories = _directoryService.GetDirectories(folderPath).ToList();
+
+                foreach (var directory in directories)
                 {
                     folderAction(ScanFiles(directory));
                 }
+
+                // if (directories.Count() == 0)
+                // {
+                //     folderAction(ScanFiles(folderPath));
+                // }
             }
             else
             {
@@ -454,33 +461,7 @@ namespace API.Services.Tasks.Scanner
             return info.Series;
         }
 
-        // The goal of this method is to a) Find all files
-        // public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType,
-        //     IEnumerable<string> folders, string libraryName)
-        // {
-        //     // Scan for files
-        //     // For a group of files in a folder, parse them and extract series names (and parserInfo's)
-        //     // Put them in dictionary (or put on queue)
-        //     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
-        //
-        //     foreach (var folder in folders)
-        //     {
-        //         var files = ScanFiles(folder);
-        //
-        //     }
-        //
-        //
-        //     try
-        //     {
-        //         TrackSeries(info);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
-        //     }
-        //
-        //     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
-        // }
+
 
         /// <summary>
         ///
@@ -531,50 +512,78 @@ namespace API.Services.Tasks.Scanner
         /// <param name="folders"></param>
         /// <param name="libraryName"></param>
         /// <returns></returns>
-        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
+        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType, IEnumerable<string> folders, string libraryName, bool isLibraryScan)
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
-
 
             foreach (var folderPath in folders)
             {
                 try
                 {
+                    var infos = new List<ParserInfo>();
+                    ProcessFiles(folderPath, isLibraryScan, (files) =>
+                    {
+                        foreach (var file in files)
+                        {
+                            try
+                            {
+                                var info = ProcessFile2(file, folderPath, libraryType);
+                                if (info != null) infos.Add(info);
 
-                    var files = ScanFiles(folderPath); // This has the same problem that whole library must be scanned before we can move on
+                            }
+                            catch (FileNotFoundException exception)
+                            {
+                                _logger.LogError(exception, "The file {Filename} could not be found", file);
+                            }
+                        }
+                    });
+                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
+                    //var files = ScanFiles(folderPath); // This has the same problem that whole library must be scanned before we can move on
 
                     // Group into a series
-                    var infos = new List<ParserInfo>();
-                    foreach (var file in files)
+
+
+
+                    // See if we can combine any series with others that have a localizedSeries
+                    var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
+                    if (hasLocalizedSeries)
+                    {
+                        var localizedSeries = infos.Select(i => i.LocalizedSeries).Distinct()
+                            .FirstOrDefault(i => !string.IsNullOrEmpty(i));
+                        if (!string.IsNullOrEmpty(localizedSeries))
+                        {
+                            var nonLocalizedSeries = infos.Select(i => i.Series).Distinct()
+                                .FirstOrDefault(series => !series.Equals(localizedSeries));
+
+                            var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
+                            foreach (var infoNeedingMapping in infos.Where(i => !Parser.Parser.Normalize(i.Series).Equals(normalizedNonLocalizedSeries)))
+                            {
+                                infoNeedingMapping.Series = nonLocalizedSeries;
+                            }
+                        }
+                    }
+
+
+                    foreach (var info in infos)
                     {
                         try
                         {
-                            var info = ProcessFile2(file, folderPath, libraryType);
-                            if (info != null) infos.Add(info);
-                            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(file, libraryName, ProgressEventType.Updated));
+                            TrackSeries(info);
                         }
-                        catch (FileNotFoundException exception)
+                        catch (Exception ex)
                         {
-                            _logger.LogError(exception, "The file {Filename} could not be found", file);
+                            _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
                         }
                     }
 
-                    // See if we can combine any series with others that have a localizedSeries
-                    foreach (var info in infos)
-                    {
-                        var localizedMerge = infos.Where(i => info.Series.Equals(i.LocalizedSeries));
-                        foreach (var mergeInfo in localizedMerge)
-                        {
-                            mergeInfo.Series = info.Series;
-                        }
-                    }
 
-                    var seriesNames = infos.Select(i => i.Series).ToList();
-                    var localizedNames = infos.Select(i => i.LocalizedSeries).ToList();
-                    if (seriesNames.All(s => s.Equals(seriesNames[0])))
-                    {
 
-                    }
+                    // var seriesNames = infos.Select(i => i.Series).ToList();
+                    // var localizedNames = infos.Select(i => i.LocalizedSeries).ToList();
+                    // if (seriesNames.All(s => s.Equals(seriesNames[0])))
+                    // {
+                    //
+                    // }
                 }
                 catch (ArgumentException ex)
                 {

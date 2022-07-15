@@ -101,7 +101,7 @@ public class ScannerService : IScannerService
 
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, dirs);
+        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, dirs, false);
 
 
 
@@ -231,7 +231,7 @@ public class ScannerService : IScannerService
         }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, seriesDirs.Keys);
+        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, seriesDirs.Keys, false);
 
 
 
@@ -281,7 +281,7 @@ public class ScannerService : IScannerService
                     }
                 }
 
-                var (totalFiles2, scanElapsedTime2, parsedSeries2) = await ScanFiles(library, seriesDirs.Keys);
+                var (totalFiles2, scanElapsedTime2, parsedSeries2) = await ScanFiles(library, seriesDirs.Keys, false);
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
                 totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
@@ -408,7 +408,7 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
-        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path));
+        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path), true);
         _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
 
         foreach (var folderPath in library.Folders)
@@ -440,11 +440,11 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
-    private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs)
+    private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs, bool isLibraryScan)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = new Stopwatch();
-        var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name);
+        var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name, isLibraryScan);
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
@@ -1057,6 +1057,7 @@ public class ScannerService : IScannerService
         }
     }
 
+    #nullable enable
     private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, ComicInfo? info)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
@@ -1215,4 +1216,5 @@ public class ScannerService : IScannerService
                 genre => chapter.Genres.Add(genre));
         }
     }
+    #nullable disable
 }

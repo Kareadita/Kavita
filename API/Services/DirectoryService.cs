@@ -508,11 +508,14 @@ namespace API.Services
            return dirs;
        }
 
-       /**
-        * Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
-        */
+       /// <summary>
+       /// Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
+       /// </summary>
+       /// <param name="folderPath"></param>
+       /// <returns>List of directory paths, empty if path doesn't exist</returns>
        public IEnumerable<string> GetDirectories(string folderPath)
        {
+           if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
            return FileSystem.Directory.GetDirectories(folderPath)
                .Where(path => ExcludeDirectories.Matches(path).Count == 0);
        }
