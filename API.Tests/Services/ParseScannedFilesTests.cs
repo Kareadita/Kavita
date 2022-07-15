@@ -17,6 +17,7 @@ using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -25,9 +26,9 @@ namespace API.Tests.Services;
 
 internal class MockReadingItemService : IReadingItemService
 {
-    private readonly DefaultParser _defaultParser;
+    private readonly IDefaultParser _defaultParser;
 
-    public MockReadingItemService(DefaultParser defaultParser)
+    public MockReadingItemService(IDefaultParser defaultParser)
     {
         _defaultParser = defaultParser;
     }
@@ -304,7 +305,6 @@ public class ParseScannedFilesTests
 
         Assert.Equal(3, parsedSeries.Values.Count);
         Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
-
     }
 
     #endregion
@@ -322,7 +322,7 @@ public class ParseScannedFilesTests
         fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
         fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
         fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/**/*.*"));
+        fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**"));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
@@ -332,6 +332,44 @@ public class ParseScannedFilesTests
         var allFiles = psf.ScanFiles("C:/Data/");
 
         Assert.Equal(0, allFiles.Count());
+
+        return Task.CompletedTask;
+    }
+
+    [Theory]
+    [InlineData("*.md", "/test/test.md")]
+    [InlineData("*.md", "/test/test.txt")]
+    public void MatcherTest(string exclude, string file)
+    {
+        Matcher m = new();
+        m.AddExclude(exclude);
+        m.AddInclude("**");
+        Assert.False(m.Match(file).HasMatches);
+    }
+
+
+    [Fact]
+    public Task ScanFiles_ShouldFindNoNestedFiles_IgnoreNestedFiles()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddDirectory("C:/Data/Accel World");
+        fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/Accel World/**"));
+        fileSystem.AddFile("C:/Data/Hello.pdf", new MockFileData(string.Empty));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+
+        var allFiles = psf.ScanFiles("C:/Data/");
+
+        Assert.Equal(1, allFiles.Count());
 
         return Task.CompletedTask;
     }
@@ -360,6 +398,67 @@ public class ParseScannedFilesTests
         Assert.Equal(5, allFiles.Count());
 
         return Task.CompletedTask;
+    }
+
+    #endregion
+
+
+    #region ProcessFiles
+
+    [Fact]
+    public void ProcessFiles_ShouldCallFolderActionTwice()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddDirectory("C:/Data/Accel World");
+        fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Black World/Black World SP01.cbz", new MockFileData(string.Empty));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+        var callCount = 0;
+        psf.ProcessFiles("C:/Data", true, (files) =>
+        {
+            callCount++;
+        });
+
+        Assert.Equal(2, callCount);
+    }
+
+
+    /// <summary>
+    /// Due to this not being a library, it's going to consider everything under C:/Data as being one folder aka a series folder
+    /// </summary>
+    [Fact]
+    public void ProcessFiles_ShouldCallFolderActionOnce()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddDirectory("C:/Data/Accel World");
+        fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Black World/Black World SP01.cbz", new MockFileData(string.Empty));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+        var callCount = 0;
+        psf.ProcessFiles("C:/Data", false, (files) =>
+        {
+            callCount++;
+        });
+
+        Assert.Equal(1, callCount);
     }
 
     #endregion

@@ -61,6 +61,8 @@ namespace API.Services
         IEnumerable<string> GetFilesWithCertainExtensions(string path,
             string searchPatternExpression = "",
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
+
+        IEnumerable<string> GetDirectories(string folderPath);
     }
     public class DirectoryService : IDirectoryService
     {
@@ -506,6 +508,15 @@ namespace API.Services
            return dirs;
        }
 
+       /**
+        * Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
+        */
+       public IEnumerable<string> GetDirectories(string folderPath)
+       {
+           return FileSystem.Directory.GetDirectories(folderPath)
+               .Where(path => ExcludeDirectories.Matches(path).Count == 0);
+       }
+
 
 
        /// <summary>
@@ -539,7 +550,7 @@ namespace API.Services
                string[] files;
 
                try {
-                  subDirs = FileSystem.Directory.GetDirectories(currentDir).Where(path => ExcludeDirectories.Matches(path).Count == 0);
+                  subDirs = GetDirectories(currentDir);
                }
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {

@@ -20,7 +20,7 @@ public class ReadingItemService : IReadingItemService
     private readonly IBookService _bookService;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
-    private readonly DefaultParser _defaultParser;
+    private readonly IDefaultParser _defaultParser;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService, IDirectoryService directoryService)
     {

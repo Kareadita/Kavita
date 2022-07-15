@@ -43,6 +43,9 @@ public interface IScannerService
 
 }
 
+/**
+ * Responsible for Scanning the disk and importing/updating/deleting files -> DB entities.
+ */
 public class ScannerService : IScannerService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -336,6 +339,12 @@ public class ScannerService : IScannerService
         }
     }
 
+    /// <summary>
+    /// Ensure that all library folders are mounted. In the case that any are empty or non-existent, emit an event to the UI via EventHub and return false
+    /// </summary>
+    /// <param name="libraryName"></param>
+    /// <param name="folders"></param>
+    /// <returns></returns>
     private async Task<bool> CheckMounts(string libraryName, IList<string> folders)
     {
         // Check if any of the folder roots are not available (ie disconnected from network, etc) and fail if any of them are
@@ -354,8 +363,6 @@ public class ScannerService : IScannerService
         // For Docker instances check if any of the folder roots are not available (ie disconnected volumes, etc) and fail if any of them are
         if (folders.Any(f => _directoryService.IsDirectoryEmpty(f)))
         {
-            // NOTE: Food for thought, move this to throw an exception and let a middleware inform the UI to keep the code clean. (We can throw a custom exception which
-            // will always propagate to the UI)
             // That way logging and UI informing is all in one place with full context
             _logger.LogError("Some of the root folders for the library are empty. " +
                              "Either your mount has been disconnected or you are trying to delete all series in the library. " +
@@ -378,8 +385,7 @@ public class ScannerService : IScannerService
     public async Task ScanLibraries()
     {
         _logger.LogInformation("Starting Scan of All Libraries");
-        var libraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
-        foreach (var lib in libraries)
+        foreach (var lib in await _unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
             await ScanLibrary(lib.Id);
         }
@@ -413,7 +419,7 @@ public class ScannerService : IScannerService
 
         await UpdateLibrary(library, series);
 
-        library.LastScanned = DateTime.Now;
+
         _unitOfWork.LibraryRepository.Update(library);
         if (await _unitOfWork.CommitAsync())
         {
@@ -438,7 +444,7 @@ public class ScannerService : IScannerService
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = new Stopwatch();
-        var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name);
+        var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name);
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
@@ -627,6 +633,7 @@ public class ScannerService : IScannerService
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended));
 
+        library.LastScanned = DateTime.Now;
         _logger.LogInformation(
             "[ScannerService] Added {NewSeries} series in {ElapsedScanTime} milliseconds for {LibraryName}",
             newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
@@ -646,12 +653,16 @@ public class ScannerService : IScannerService
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = Parser.Parser.Normalize(series.Name);
+            series.OriginalName ??= parsedInfos[0].Series;
+
             series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+
             if (series.Format == MangaFormat.Unknown)
             {
                 series.Format = parsedInfos[0].Format;
             }
-            series.OriginalName ??= parsedInfos[0].Series;
+
+
             if (string.IsNullOrEmpty(series.SortName))
             {
                 series.SortName = series.Name;
@@ -671,6 +682,15 @@ public class ScannerService : IScannerService
             {
                 series.LocalizedName = localizedSeries;
             }
+
+            // TODO: Update series FolderPath here
+            // series.FolderPath =
+            // var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders, parsedInfos.Select(f => f.FullFilePath).ToList());
+            // if (seriesDirs.Keys.Count == 0)
+            // {
+            //     _logger.LogDebug("Scan Series has files spread outside a main series folder. Defaulting to library folder");
+            //     seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
+            // }
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 

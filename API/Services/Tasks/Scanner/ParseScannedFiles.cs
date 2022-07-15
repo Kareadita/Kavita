@@ -12,6 +12,7 @@ using API.Helpers;
 using API.Parser;
 using API.SignalR;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner
@@ -72,35 +73,79 @@ namespace API.Services.Tasks.Scanner
             return infos;
         }
 
-        /**
-         * FindFiles()
-            1) Given a folder, validate it exists.
-            2) If exists, append .kavitaignore and validate if said file exists
-            3) If exists, load blob information into ignores[]
-            4) Find all folders, excluding global excludes and ignores
-            6) Recursively apply from step 1
-            7) Until no folders exist
-            8) Find all files, excluding global excludes and ignores
-            9) Return to higher level for processing of files
-         */
-        public IEnumerable<string> ScanFiles(string folderPath)
+
+        /// <summary>
+        /// This will Scan all files in a folder path. For each folder within the folderPath, FolderAction will be invoked for all files contained
+        /// </summary>
+        /// <param name="folderPath">A library folder or series folder</param>
+        /// <param name="folderAction"></param>
+        public void ProcessFiles(string folderPath, bool isLibraryFolder, Action<IEnumerable<string>> folderAction)
+        {
+            if (isLibraryFolder)
+            {
+                foreach (var directory in _directoryService.GetDirectories(folderPath))
+                {
+                    folderAction(ScanFiles(directory));
+                }
+            }
+            else
+            {
+                folderAction(ScanFiles(folderPath));
+            }
+        }
+
+
+        public IEnumerable<string> ScanFiles(string folderPath, Matcher? matcher = null)
         {
             var files = new List<string>();
             if (!_directoryService.Exists(folderPath)) return files;
+
             var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, ".kavitaignore");
-            if (_directoryService.FileSystem.File.Exists(potentialIgnoreFile))
+            if (matcher == null)
             {
-                // TODO: Parse .ignore file
+                matcher = CreateIgnoreMatcher(potentialIgnoreFile);
             }
 
-            foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(folderPath))
+
+            foreach (var directory in _directoryService.GetDirectories(folderPath))
             {
-                files.AddRange(ScanFiles(directory));
+                files.AddRange(ScanFiles(directory, matcher));
             }
 
-            files.AddRange(_directoryService.GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions));
+
+            // Get the matcher from either ignore or global (default setup)
+            if (matcher == null)
+            {
+                files.AddRange(_directoryService.GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions));
+            }
+            else
+            {
+                // Matching only works on files
+                files.AddRange(matcher.GetResultsInFullPath(folderPath).Where(f => f.EndsWith(Parser.Parser.SupportedExtensions)));
+            }
 
             return files;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>See https://www.digitalocean.com/community/tools/glob for testing</remarks>
+        /// <param name="ignoreFile"></param>
+        /// <returns></returns>
+        private Matcher CreateIgnoreMatcher(string ignoreFile)
+        {
+            Matcher matcher = new();
+
+            if (!_directoryService.FileSystem.File.Exists(ignoreFile))
+            {
+                return null;
+            }
+
+            // Read file in and add each line to Matcher
+            matcher.AddInclude("**/*"); // All files, nested or otherwise
+            matcher.AddExcludePatterns(_directoryService.FileSystem.File.ReadAllLines(ignoreFile));
+            return matcher;
         }
 
         /// <summary>
@@ -180,6 +225,72 @@ namespace API.Services.Tasks.Scanner
             {
                 _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
             }
+        }
+
+
+        private ParserInfo? ProcessFileNoTrack(string path, string rootPath, LibraryType type)
+        {
+            var info = _readingItemService.Parse(path, rootPath, type);
+            if (info == null)
+            {
+                // If the file is an image and literally a cover image, skip processing.
+                if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
+                {
+                    _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
+                }
+                return null;
+            }
+
+
+            // This catches when original library type is Manga/Comic and when parsing with non
+            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
+            {
+                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
+                var info2 = _readingItemService.Parse(path, rootPath, type);
+                info.Merge(info2);
+            }
+
+            info.ComicInfo = _readingItemService.GetComicInfo(path);
+            if (info.ComicInfo != null)
+            {
+                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+                {
+                    info.Volumes = info.ComicInfo.Volume;
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+                {
+                    info.Series = info.ComicInfo.Series.Trim();
+                }
+                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+                {
+                    info.Chapters = info.ComicInfo.Number;
+                }
+
+                // Patch is SeriesSort from ComicInfo
+                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+                {
+                    info.SeriesSort = info.ComicInfo.TitleSort.Trim();
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+                {
+                    info.IsSpecial = true;
+                    info.Chapters = Parser.Parser.DefaultChapter;
+                    info.Volumes = Parser.Parser.DefaultVolume;
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
+                {
+                    info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
+                }
+
+                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+                {
+                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
+                }
+            }
+
+            return info;
         }
 
         private ParserInfo ProcessFile2(string path, string rootPath, LibraryType type)
@@ -343,6 +454,34 @@ namespace API.Services.Tasks.Scanner
             return info.Series;
         }
 
+        // The goal of this method is to a) Find all files
+        // public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType,
+        //     IEnumerable<string> folders, string libraryName)
+        // {
+        //     // Scan for files
+        //     // For a group of files in a folder, parse them and extract series names (and parserInfo's)
+        //     // Put them in dictionary (or put on queue)
+        //     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
+        //
+        //     foreach (var folder in folders)
+        //     {
+        //         var files = ScanFiles(folder);
+        //
+        //     }
+        //
+        //
+        //     try
+        //     {
+        //         TrackSeries(info);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
+        //     }
+        //
+        //     await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
+        // }
+
         /// <summary>
         ///
         /// </summary>
@@ -380,6 +519,8 @@ namespace API.Services.Tasks.Scanner
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
 
+            // Can't I fix the localizedTitle and title duplication here by doing another loop through our dictionary
+
             return SeriesWithInfos();
         }
 
@@ -394,40 +535,44 @@ namespace API.Services.Tasks.Scanner
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
 
+
             foreach (var folderPath in folders)
             {
-
                 try
                 {
-                    foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(folderPath))
+
+                    var files = ScanFiles(folderPath); // This has the same problem that whole library must be scanned before we can move on
+
+                    // Group into a series
+                    var infos = new List<ParserInfo>();
+                    foreach (var file in files)
                     {
-                        var files = new List<string>();
-                        _directoryService.TraverseTreeParallelForEach(directory, (string f) => {files.Add(f);}, Parser.Parser.SupportedExtensions, _logger);
-
-                        // First check if there is an .ignore file and filter out found files (ideally we want to do this ahead of time)
-
-                        // Group into a series
-                        var infos = new List<ParserInfo>();
-                        foreach (var file in files)
+                        try
                         {
-                            try
-                            {
-                                var info = ProcessFile2(file, folderPath, libraryType);
-                                if (info != null) infos.Add(info);
-                                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(file, libraryName, ProgressEventType.Updated));
-                            }
-                            catch (FileNotFoundException exception)
-                            {
-                                _logger.LogError(exception, "The file {Filename} could not be found", file);
-                            }
+                            var info = ProcessFile2(file, folderPath, libraryType);
+                            if (info != null) infos.Add(info);
+                            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(file, libraryName, ProgressEventType.Updated));
                         }
-
-                        var seriesNames = infos.Select(i => i.Series).ToList();
-                        var localizedNames = infos.Select(i => i.LocalizedSeries).ToList();
-                        if (seriesNames.All(s => s.Equals(seriesNames[0])))
+                        catch (FileNotFoundException exception)
                         {
-
+                            _logger.LogError(exception, "The file {Filename} could not be found", file);
                         }
+                    }
+
+                    // See if we can combine any series with others that have a localizedSeries
+                    foreach (var info in infos)
+                    {
+                        var localizedMerge = infos.Where(i => info.Series.Equals(i.LocalizedSeries));
+                        foreach (var mergeInfo in localizedMerge)
+                        {
+                            mergeInfo.Series = info.Series;
+                        }
+                    }
+
+                    var seriesNames = infos.Select(i => i.Series).ToList();
+                    var localizedNames = infos.Select(i => i.LocalizedSeries).ToList();
+                    if (seriesNames.All(s => s.Equals(seriesNames[0])))
+                    {
 
                     }
                 }

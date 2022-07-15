@@ -5,10 +5,16 @@ using API.Services;
 
 namespace API.Parser;
 
+public interface IDefaultParser
+{
+    ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga);
+    void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret);
+}
+
 /// <summary>
 /// This is an implementation of the Parser that is the basis for everything
 /// </summary>
-public class DefaultParser
+public class DefaultParser : IDefaultParser
 {
     private readonly IDirectoryService _directoryService;
 
