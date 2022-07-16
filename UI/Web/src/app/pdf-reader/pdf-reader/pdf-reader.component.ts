@@ -62,7 +62,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   backgroundColor: string = this.themeMap[this.theme].background;
   fontColor: string = this.themeMap[this.theme].font;
 
-  isLoading: boolean = false;
+  isLoading: boolean = true;
 
   /**
    * This can't be updated dynamically: 
@@ -191,6 +191,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   closeReader() {
     this.readerService.closeReader(this.readingListMode, this.readingListId);
+  }
+
+  updateLoading(state: boolean) {
+    this.isLoading = state;
+    console.log('PDF is loading: ', state);
+    this.cdRef.markForCheck();
   }
 
 }

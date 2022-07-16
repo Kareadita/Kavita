@@ -1,4 +1,11 @@
 <div class="{{theme}}">
+
+    <ng-container > <!-- *ngIf="isLoading"-->
+        <div class="loading mx-auto" style="min-width: 200px; width: 600px;">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...PDFs may take longer than expected
+        </div>
+    </ng-container>
     <ngx-extended-pdf-viewer
         #pdfViewer
         [src]="readerService.downloadPdf(this.chapterId)"
@@ -23,6 +30,8 @@
         [customToolbar]="multiToolbar"
 
         (pageChange)="saveProgress()"
+        (pdfLoadingStarts)="updateLoading(true)"
+        (pdfLoaded)="updateLoading(false)"
     > 
     
     </ngx-extended-pdf-viewer>
