@@ -67,6 +67,18 @@ namespace API.Parser
         private static readonly Regex SpecialTokenRegex = new Regex(@"(SP|HS)\d+",
             MatchOptions, RegexTimeout);
 
+        private const string seriesExpr = $@"(?<Series>{balanced})";
+        private const string volumeExpr = @"(?<Volume>\d+(\.\d)?(-\d+(\.\d)?)?)";
+        private const string chapterExpr = @"(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)";
+        private const string balancedParen = @"(?:(?:[^()]|(?<open>\()|(?<-open>\)))+?(?(open)(?!)))";
+        private const string balancedBrackets = @"(:?(?:[^\[\]]|(?<openbracket>\[)|(?<closebracket>-<openbracket>\]))+?(?(openbracket)(?!)))";
+        // non greedy matching of a string where parenthesis and brackets are balanced
+        private const string balanced = @"(?:(?:[^()\[\]]|(?<open>\()|(?<-open>\))|(?<openbracket>\[)|(?<-openbracket>\]))*?(?(openbracket)(?!))(?(open)(?!)))";
+        // French Volume: tome, t, t. -> volume
+        private const string volumePrefixes = @"(v|t|(v\.|vol\.?|volume|t\.|tome)\s?)";
+        // n°,n. -> numero sign
+        private const string chapterPrefixes = @"(c|chapter[-\s]+|issue\s?#?|#|(n°|n\.|Ep\.?)[-\s]*)";
+
 
         private static readonly Regex[] MangaVolumeRegex = new[]
         {
@@ -79,16 +91,16 @@ namespace API.Parser
             // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
             // Tonikaku Cawaii [Volume 11].cbz
             new Regex(
-                @"(?<Series>.*?)\b(vol\.?|volume)\s?(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)\b",
+                $@"{seriesExpr}\b(vol\.?|volume)\s?(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)\b",
                 MatchOptions, RegexTimeout),
             // Historys Strongest Disciple Kenichi_v11_c90-98.zip
             // Dance in the Vampire Bund v16-17
             new Regex(
-                @"(?<Series>.*?)\b(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
+                $@"{seriesExpr}\b(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
                 MatchOptions, RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
-                @"(?<Series>.*)\bS(?<Volume>\d+)\b",
+                $@"{seriesExpr}\bS(?<Volume>\d+)\b",
                 MatchOptions, RegexTimeout),
             // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
             new Regex(
@@ -124,11 +136,11 @@ namespace API.Parser
         {
             // Grand Blue Dreaming - SP02
             new Regex(
-                @"(?<Series>.*)(\b|-|\s)(?:sp)\d",
+                $@"{seriesExpr}(\b|-|\s)(?:sp)\d",
                 MatchOptions, RegexTimeout),
             // Yuusha Ga Shinda! - Vol.tbd Chapter 27.001 V2 Infection ①.cbz
             new Regex(
-                @"^(?<Series>.*) Vol\.?tbd\b",
+                $@"^{seriesExpr} Vol\.?tbd\b",
                 MatchOptions, RegexTimeout),
             // [SugoiSugoi] NEEDLESS Vol.2 - Disk The Informant 5 [ENG].rar
             // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex),
@@ -159,54 +171,41 @@ namespace API.Parser
             // Kodoja #001 (March 2016)
             // [BAA] Darker than Black c1
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)[\s-\[](v|vo|vol\.?|volume|episode|c|chp?.?|chapter|chapters|s|#)[-\s]?\d",
-                //@"^(?!Vol)(?<Series>.*)( |-)(?<!-)(episode|chapter|chp?.?|chapters) ?\d",
-                //@"^(?<Series>.+?)[\s-\[](vol\.?|volume)[-\s]?\d",
+                $@"^(?!Vol){seriesExpr}[\s-\[](v|vo|vol\.?|volume|episode|c|chp?.?|chapter|chapters|s|#)[-\s]?\d",
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"(?<Series>.*)\s+(?<Chapter>\d+)\s+(?:\(\d{4}\))\s",
+                $@"{seriesExpr}\s+(?<Chapter>\d+)\s+(?:\(\d{{4}}\))\s",
                 MatchOptions, RegexTimeout),
             // Goblin Slayer - Brand New Day 006.5 (2019) (Digital) (danke-Empire)
             new Regex(
-                @"(?<Series>.*) (-)?(?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{4}\)",
+                $@"{seriesExpr} (-)?(?<Chapter>\d+(?:.\d+|-\d+)?) \(\d{{4}}\)",
                 MatchOptions, RegexTimeout),
             // It's Witching Time! 001 (Digital) (Anonymous1234)
             new Regex(
-                @"(?<Series>.+?)(\s|-)+?\d+(\s|-)\(",
+                $@"{seriesExpr}(\s|-)+?\d+(\s|-)\(",
                 MatchOptions, RegexTimeout),
             // Akame ga KILL! ZERO (2016-2019) (Digital) (LuCaZ)
             new Regex(
-                @"(?<Series>.*)\(\d",
+                $@"{seriesExpr}\(\d",
                 MatchOptions, RegexTimeout),
             // Tonikaku Kawaii (Ch 59-67) (Ongoing)
             new Regex(
-                @"(?<Series>.*)\s\((c\s|ch\s|chapter\s)",
+                $@"{seriesExpr}\s\((c\s|ch\s|chapter\s)",
                 MatchOptions, RegexTimeout),
             // [BAA]_Darker_than_Black_Omake-1.zip
             new Regex(
-                @"^(?!Vol)(?<Series>.*)(-)\d", // This catches a lot of stuff ^(?!Vol)(?<Series>.*) (\d+)
+                $@"^(?!Vol){seriesExpr}(-)\d", // This catches a lot of stuff
                 MatchOptions, RegexTimeout),
             // Akiiro Bousou Biyori - 01.jpg, Beelzebub 172 RHS.zip, Cynthia the Mission 29.rar, A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)
             new Regex(
-                @"^(?!Vol\.?)(?!Chapter)(?<Series>.+?)(\s|-)(?<!-)\d",
+                $@"^(?!Vol\.?)(?!Chapter){seriesExpr}\b(?<!-)\d",
                 MatchOptions, RegexTimeout),
             // Japanese Volume: n巻 -> Volume n
             new Regex(
                 @"(?<Series>.+?)第(?<Volume>\d+(?:(\-)\d+)?)巻",
                 MatchOptions, RegexTimeout),
         };
-
-        //private const string seriesExpr = @"(?<Series>.+?)";
-        private const string seriesExpr = $@"(?<Series>{balanced})";
-        private const string volumeExpr = @"(?<Volume>\d+([-.]\d+)?)";
-        private const string chapterExpr = @"(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)";
-        private const string balancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))+?(?(open)(?!))";
-        private const string balancedBrackets = @"(?:[^\[\]]|(?<openbracket>\[)|(?<closebracket>-<openbracket>\]))+?(?(openbracket)(?!))";
-        // non greedy matching of a string where parenthesis and brackets are balanced
-        private const string balanced = @"(?:[^()\[\]]|(?<open>\()|(?<-open>\))|(?<openbracket>\[)|(?<-openbracket>\]))+?(?(openbracket)(?!))(?(open)(?!))";
-        private const string volumePrefixes = @"(t|v|(t.|tome|v\.|vol\.?|volume)\s?)";
-        private const string chapterPrefixes = @"(c|chapter[-\s]+|issue\s?#?|#|(n°|n\.|Ep\.?)[-\s]*)";
 
         private static readonly Regex[] ComicSeriesRegex = new[]
         {
@@ -227,11 +226,11 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // 01 Spider-Man & Wolverine 01.cbr
             new Regex(
-            @"^(?<Volume>\d+)\s(?:-\s)(?<Series>.*) (\d+)?",
+            $@"^(?<Volume>\d+)\s(?:-\s){seriesExpr} (\d+)?",
                 MatchOptions, RegexTimeout),
             // Batman & Wildcat (1 of 3)
             new Regex(
-            @"(?<Series>.*(\d{4})?) \((?<Volume>\d+) of \d+\)",
+            $@"^{seriesExpr} \((?<Volume>\d+) of \d+\)",
                 MatchOptions, RegexTimeout),
             // Amazing Man Comics chapter 25
             // Amazing Man Comics issue #25
@@ -292,7 +291,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Batman Beyond 04 (of 6) (1999)
             new Regex(
-                @"(?<Series>.+?)(?<Chapter>\d+)(\s|-)?\(of",
+                $@"({seriesExpr}?<Chapter>\d+)(\s|-)?\(of",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -308,7 +307,7 @@ namespace API.Parser
             // Métal Hurlant-n°31
             // Darkyears-copterminator-issue02
             new Regex(
-                $@"^(?<Series>.+?)[-\s]+{chapterPrefixes}{chapterExpr}\b",
+                $@"^{seriesExpr}[-\s]+{chapterPrefixes}{chapterExpr}\b",
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
@@ -318,7 +317,6 @@ namespace API.Parser
             // spawn-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
                 $@"^{balanced}[-\s]+(?<!{volumePrefixes}(\d+[-\.])?){chapterExpr}\b",
-                //@"^(?<Series>.+?)[-\s](?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)\b",
                 MatchOptions, RegexTimeout),
 
         };
@@ -345,19 +343,19 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (Rare case, if causes issue remove)
             new Regex(
-                @"^(?<Series>.*)\s#(?<Chapter>\d+)",
+                $@"^{seriesExpr}\s#(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // Green Worldz - Chapter 027, Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 11-10
             new Regex(
-                @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-]+)?)",
+                $@"^(?!Vol){seriesExpr}\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-]+)?)",
                 MatchOptions, RegexTimeout),
             // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
             new Regex(
-                @"^(?!Vol)(?<Series>.+?)(?<!Vol)(?<!Vol.)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?<Part>b)?(?:\s\(\d{4}\))?\b",
+                $@"^(?!Vol){seriesExpr}(?<!Vol)(?<!Vol.)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?<Part>b)?(?:\s\(\d{{4}}\))?\b",
                 MatchOptions, RegexTimeout),
             // Tower Of God S01 014 (CBT) (digital).cbz
             new Regex(
-                @"(?<Series>.*)\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
+                $@"^{seriesExpr}\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
                 MatchOptions, RegexTimeout),
             // Beelzebub 01 [Noodles].zip, Beelzebub 153b RHS.zip
             new Regex(
@@ -369,7 +367,7 @@ namespace API.Parser
                 MatchOptions, RegexTimeout),
             // [Hidoi] Amaenaideyo MS vol01 chp02.rar
             new Regex(
-                @"(?<Series>.*)\s(vol\d+)?\sChp\.? ?(?<Chapter>\d+)",
+                $@"^{seriesExpr}\s(vol\d+)?\sChp\.? ?(?<Chapter>\d+)",
                 MatchOptions, RegexTimeout),
             // Vol 1 Chapter 2
             new Regex(
