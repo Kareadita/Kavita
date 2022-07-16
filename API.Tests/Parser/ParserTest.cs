@@ -55,14 +55,15 @@ namespace API.Tests.Parser
         }
 
         [Theory]
-        [InlineData("Hello I am here   ",  false, "Hello I am here")]
+        [InlineData("Hello_I_am_here", false, "Hello I am here")]
+        [InlineData("Hello_I_am_here   ",  false, "Hello I am here")]
         [InlineData("[ReleaseGroup] The Title", false, "The Title")]
+        [InlineData("[ReleaseGroup]_The_Title", false, "The Title")]
         [InlineData("-The Title", false, "The Title")]
         [InlineData("- The Title", false, "The Title")]
-        [InlineData("[Suihei Kiki] Kasumi Otoko no Ko [Taruby] v1.1", false, "Kasumi Otoko no Ko v1.1")]
+        [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
         [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
         [InlineData("Something - Full Color Edition", false, "Something - Full Color Edition")]
-        [InlineData("Sillage HS Premières armes", true, "Sillage Premières armes")]
         public void CleanTitleTest(string input, bool isComic, string expected)
         {
             Assert.Equal(expected, CleanTitle(input, isComic));
