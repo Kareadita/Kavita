@@ -83,7 +83,7 @@ namespace API.Parser
         {
             // vol_001-1.cbz for MangaPy default naming convention
             new Regex(
-                @"^(vol\s)(?<Volume>\d+(\.\d)?)-\d+$",
+                @"^(vol\s)(?<Volume>\d+(\.\d)?)-\d+",
                 MatchOptions, RegexTimeout),
             // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
             // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
