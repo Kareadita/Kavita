@@ -13,10 +13,6 @@ namespace API.Tests.Parser
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly DefaultParser _defaultParser;
 
-        private string replaceUnderscores(string filename) {
-            return filename.Replace("_", " ");
-        }
-
         public ComicParserTests(ITestOutputHelper testOutputHelper)
         {
             _testOutputHelper = testOutputHelper;
@@ -87,7 +83,6 @@ namespace API.Tests.Parser
         [InlineData("La Mémoire des arbres T01-02 - La Hache et le Fusil", "La Mémoire des arbres")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
-            filename = replaceUnderscores(filename);
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
         }
 
@@ -140,7 +135,6 @@ namespace API.Tests.Parser
         [InlineData("La Mémoire des arbres T01-02 - La Hache et le Fusil", "1-2")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
-            filename = replaceUnderscores(filename);
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
         }
 
@@ -211,7 +205,6 @@ namespace API.Tests.Parser
         [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
-            input = replaceUnderscores(input);
             Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
         }
     }
