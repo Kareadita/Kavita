@@ -500,6 +500,40 @@ public class ScannerService : IScannerService
         _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
     }
 
+    /// <summary>
+    /// This is a new approach to Updating/Scanning a library
+    /// </summary>
+    /// <param name="library"></param>
+    private async Task UpdateLibraryAsync(Library library)
+    {
+        // First, this code is done Series by Series and we do chunks of 50.
+
+        _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
+
+        var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
+        var shouldUseLibraryScan = await AreLibraryFolderPathsAreSeriesFolders(libraryFolderPaths);
+        if (shouldUseLibraryScan)
+        {
+            _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
+        }
+
+        // My idea here is that we call the ScanFiles and pass an action. For every Series aka every TrackInfo, a Function is called (async, doesn't wait)
+        // and that is where we process the new information. In this way, we are essentially streamlining and tackling one at a time.
+        // Then after this whole loop runs, we remove any series not on disk and Save everything.
+        // This would allow async processing of series folders.
+
+        var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
+        var scanWatch = Stopwatch.StartNew();
+
+        var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, libraryFolderPaths, library.Name, shouldUseLibraryScan);
+        var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
+        var scanElapsedTime = scanWatch.ElapsedMilliseconds;
+
+        //var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan);
+        _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
+
+    }
+
     private async Task UpdateLibrary(Library library, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
     {
         if (parsedSeries == null) return;
@@ -516,13 +550,15 @@ public class ScannerService : IScannerService
         // Update existing series
         _logger.LogInformation("[ScannerService] Updating existing series for {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size",
             library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
+
+        // if (chunkInfo.TotalChunks == 0) continue; (this will avoid the loop altogher)
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
-            if (chunkInfo.TotalChunks == 0) continue;
             totalTime += stopwatch.ElapsedMilliseconds;
             stopwatch.Restart();
             _logger.LogInformation("[ScannerService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
                 chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
+
             var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id, new UserParams()
             {
                 PageNumber = chunk,
@@ -598,6 +634,12 @@ public class ScannerService : IScannerService
         var allSeries = (await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id)).ToList();
         _logger.LogDebug("[ScannerService] Fetched {AllSeriesCount} series for comparing new series with. There should be {DeltaToParsedSeries} new series",
             allSeries.Count, parsedSeries.Count - allSeries.Count);
+
+        // Let's rewrite this code. Essentially it's going through each parsedSeries and checking if a series already exists.
+        // If so, then it's creating a new series, adding to an array then calling UpdateSeries on each of those series
+        // The new way I want to approach this is:
+
+
         // TODO: Once a parsedSeries is processed, remove the key to free up some memory
         foreach (var (key, infos) in parsedSeries)
         {
