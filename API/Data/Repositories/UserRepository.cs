@@ -205,6 +205,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.ReadingLists)
             .ThenInclude(l => l.Items)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.UserName == username);
     }
 
@@ -244,6 +245,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.Library
             .Include(l => l.AppUsers)
+            .AsSplitQuery()
             .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId));
     }
 
