@@ -62,6 +62,7 @@ public class VolumeRepository : IVolumeRepository
             .Where(c => volumeId == c.VolumeId)
             .Include(c => c.Files)
             .SelectMany(c => c.Files)
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }
@@ -106,7 +107,7 @@ public class VolumeRepository : IVolumeRepository
 
         if (includeChapters)
         {
-            query = query.Include(v => v.Chapters);
+            query = query.Include(v => v.Chapters).AsSplitQuery();
         }
         return await query.ToListAsync();
     }
@@ -123,6 +124,7 @@ public class VolumeRepository : IVolumeRepository
             .Where(vol => vol.Id == volumeId)
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Files)
+            .AsSplitQuery()
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
             .SingleAsync(vol => vol.Id == volumeId);
 
@@ -143,6 +145,7 @@ public class VolumeRepository : IVolumeRepository
             .Where(vol => vol.SeriesId == seriesId)
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Files)
+            .AsSplitQuery()
             .OrderBy(vol => vol.Number)
             .ToListAsync();
     }
@@ -157,6 +160,7 @@ public class VolumeRepository : IVolumeRepository
         return await _context.Volume
             .Include(vol => vol.Chapters)
             .ThenInclude(c => c.Files)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(vol => vol.Id == volumeId);
     }
 
@@ -220,6 +224,4 @@ public class VolumeRepository : IVolumeRepository
             v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);
         }
     }
-
-
 }

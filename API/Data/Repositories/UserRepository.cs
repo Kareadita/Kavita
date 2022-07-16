@@ -364,6 +364,7 @@ public class UserRepository : IUserRepository
                     Folders = l.Folders.Select(x => x.Path).ToList()
                 }).ToList()
             })
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }
@@ -392,6 +393,7 @@ public class UserRepository : IUserRepository
                     Folders = l.Folders.Select(x => x.Path).ToList()
                 }).ToList()
             })
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }

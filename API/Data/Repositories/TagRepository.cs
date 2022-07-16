@@ -54,6 +54,7 @@ public class TagRepository : ITagRepository
             .Include(p => p.SeriesMetadatas)
             .Include(p => p.Chapters)
             .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0 && p.ExternalTag == removeExternal)
+            .AsSplitQuery()
             .ToListAsync();
 
         _context.Tag.RemoveRange(tagsWithNoConnections);
@@ -66,6 +67,7 @@ public class TagRepository : ITagRepository
         return await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .SelectMany(s => s.Metadata.Tags)
+            .AsSplitQuery()
             .Distinct()
             .OrderBy(t => t.Title)
             .AsNoTracking()

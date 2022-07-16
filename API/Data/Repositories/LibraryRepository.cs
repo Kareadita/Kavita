@@ -169,6 +169,7 @@ public class LibraryRepository : ILibraryRepository
             .Include(f => f.Folders)
             .OrderBy(l => l.Name)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }
@@ -200,7 +201,7 @@ public class LibraryRepository : ILibraryRepository
             query = query.Include(l => l.AppUsers);
         }
 
-        return query;
+        return query.AsSplitQuery();
     }
 
 
@@ -259,6 +260,7 @@ public class LibraryRepository : ILibraryRepository
             .Where(library => library.AppUsers.Contains(user))
             .Include(l => l.Folders)
             .AsNoTracking()
+            .AsSplitQuery()
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -283,6 +285,7 @@ public class LibraryRepository : ILibraryRepository
         var ret = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Select(s => s.Metadata.Language)
+            .AsSplitQuery()
             .AsNoTracking()
             .Distinct()
             .ToListAsync();
@@ -302,6 +305,7 @@ public class LibraryRepository : ILibraryRepository
     {
         return  _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .AsSplitQuery()
             .Select(s => s.Metadata.PublicationStatus)
             .Distinct()
             .AsEnumerable()
@@ -312,6 +316,5 @@ public class LibraryRepository : ILibraryRepository
             })
             .OrderBy(s => s.Title);
     }
-
 
 }

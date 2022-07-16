@@ -59,6 +59,7 @@ public class CollectionTagRepository : ICollectionTagRepository
         var tagsToDelete = await _context.CollectionTag
             .Include(c => c.SeriesMetadatas)
             .Where(c => c.SeriesMetadatas.Count == 0)
+            .AsSplitQuery()
             .ToListAsync();
         _context.RemoveRange(tagsToDelete);
 
@@ -112,6 +113,7 @@ public class CollectionTagRepository : ICollectionTagRepository
         return await _context.CollectionTag
             .Where(c => c.Id == tagId)
             .Include(c => c.SeriesMetadatas)
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
 
