@@ -53,6 +53,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Highest path (that is under library root) that contains the series.
     /// </summary>
+    /// <remarks><see cref="Parser.Parser.NormalizePath"/> must be used before setting</remarks>
     public string FolderPath { get; set; }
 
     /// <summary>

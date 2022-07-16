@@ -426,6 +426,7 @@ public class ParseScannedFilesTests
         psf.ProcessFiles("C:/Data", true, (files) =>
         {
             callCount++;
+            return Task.CompletedTask;
         });
 
         Assert.Equal(2, callCount);
@@ -456,6 +457,7 @@ public class ParseScannedFilesTests
         psf.ProcessFiles("C:/Data", false, (files) =>
         {
             callCount++;
+            return Task.CompletedTask;
         });
 
         Assert.Equal(1, callCount);

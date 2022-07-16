@@ -76,11 +76,15 @@ public class ScannerService : IScannerService
         _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
+    /// <summary>
+    /// This scans by folder, knowing nothing about the series or library
+    /// </summary>
+    /// <param name="folder"></param>
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanSeriesFolder(string folder)
     {
-        var sw = new Stopwatch();
+        var sw = Stopwatch.StartNew();
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
         if (seriesId == 0) return;
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
@@ -194,7 +198,7 @@ public class ScannerService : IScannerService
 
     public async Task ScanSeries(int libraryId, int seriesId, CancellationToken token)
     {
-        var sw = new Stopwatch();
+        var sw = Stopwatch.StartNew();
         var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
@@ -232,7 +236,7 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
         var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, seriesDirs.Keys, false);
-
+        _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
@@ -408,7 +412,14 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
-        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, library.Folders.Select(fp => fp.Path), true);
+        var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
+        var shouldUseLibraryScan = await AreLibraryFolderPathsAreSeriesFolders(libraryFolderPaths);
+        if (shouldUseLibraryScan)
+        {
+            _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
+        }
+
+        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan);
         _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
 
         foreach (var folderPath in library.Folders)
@@ -440,10 +451,28 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
+
+    private async Task<bool> AreLibraryFolderPathsAreSeriesFolders(IEnumerable<string> libraryFolderPaths)
+    {
+        // Here is where we should do a check if the library folders are series folders (aka /manga/Accel World, /manga/Darker than Black) vs (/manga/).
+        // We need to pass a different flag in if a library has series folders. An easy way to handle this is check if there is a series on disk that has a folderpath of library path
+        // NOTE: This will not work until Series.FolderPath is set.
+        // TODO: Refactor with a custom method done all in the DB
+        foreach (var folderPath in libraryFolderPaths)
+        {
+            if ((await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folderPath)) <= 0) continue;
+            return false;
+        }
+
+        return true;
+    }
+
     private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs, bool isLibraryScan)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
-        var scanWatch = new Stopwatch();
+        var scanWatch = Stopwatch.StartNew();
+
+        //var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name);
         var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name, isLibraryScan);
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
@@ -683,14 +712,16 @@ public class ScannerService : IScannerService
                 series.LocalizedName = localizedSeries;
             }
 
-            // TODO: Update series FolderPath here
-            // series.FolderPath =
-            // var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders, parsedInfos.Select(f => f.FullFilePath).ToList());
-            // if (seriesDirs.Keys.Count == 0)
-            // {
-            //     _logger.LogDebug("Scan Series has files spread outside a main series folder. Defaulting to library folder");
-            //     seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
-            // }
+            // Update series FolderPath here (TODO: Move this into it's own private method)
+            var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(l => l.Path), parsedInfos.Select(f => f.FullFilePath).ToList());
+            if (seriesDirs.Keys.Count == 0)
+            {
+                _logger.LogCritical("Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are in a folder.");
+            }
+            else
+            {
+                series.FolderPath = Parser.Parser.NormalizePath(seriesDirs.Keys.First());
+            }
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 

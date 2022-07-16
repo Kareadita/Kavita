@@ -1058,6 +1058,12 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
+    /// <summary>
+    /// Given a folder path return a Series with the <see cref="Series.FolderPath"/> that matches.
+    /// </summary>
+    /// <remarks>This will apply normalization on the path.</remarks>
+    /// <param name="folder"></param>
+    /// <returns></returns>
     public async Task<int> GetSeriesIdByFolder(string folder)
     {
         var normalized = Parser.Parser.NormalizePath(folder);

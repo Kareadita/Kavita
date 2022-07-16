@@ -11,7 +11,6 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.Parser;
 using API.SignalR;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 
@@ -19,9 +18,22 @@ namespace API.Services.Tasks.Scanner
 {
     public class ParsedSeries
     {
+        /// <summary>
+        /// Name of the Series
+        /// </summary>
         public string Name { get; init; }
+        /// <summary>
+        /// Normalized Name of the Series
+        /// </summary>
         public string NormalizedName { get; init; }
+        /// <summary>
+        /// Format of the Series
+        /// </summary>
         public MangaFormat Format { get; init; }
+        /// <summary>
+        /// Highest Folder that contains the Series
+        /// </summary>
+        public string FolderPath { get; init; }
     }
 
 
@@ -79,18 +91,20 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="folderPath">A library folder or series folder</param>
         /// <param name="folderAction"></param>
-        public void ProcessFiles(string folderPath, bool isLibraryFolder, Action<IEnumerable<string>> folderAction)
+        public void ProcessFiles(string folderPath, bool isLibraryFolder, Func<IEnumerable<string>,Task> folderAction)
         {
             if (isLibraryFolder)
             {
                 var directories = _directoryService.GetDirectories(folderPath).ToList();
 
+                // We are close. If a library uses a set of Series Folders, then there is a sub-directory in one of the folders, the root files get skipped.
                 foreach (var directory in directories)
                 {
                     folderAction(ScanFiles(directory));
                 }
 
-                // if (directories.Count() == 0)
+                // If there was nothing in library directories, user is having their library consist of multiple
+                // if (directories.Count == 0)
                 // {
                 //     folderAction(ScanFiles(folderPath));
                 // }
@@ -521,7 +535,7 @@ namespace API.Services.Tasks.Scanner
                 try
                 {
                     var infos = new List<ParserInfo>();
-                    ProcessFiles(folderPath, isLibraryScan, (files) =>
+                    ProcessFiles(folderPath, isLibraryScan, async (files) =>
                     {
                         foreach (var file in files)
                         {
@@ -529,7 +543,7 @@ namespace API.Services.Tasks.Scanner
                             {
                                 var info = ProcessFile2(file, folderPath, libraryType);
                                 if (info != null) infos.Add(info);
-
+                                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
                             }
                             catch (FileNotFoundException exception)
                             {
@@ -537,31 +551,10 @@ namespace API.Services.Tasks.Scanner
                             }
                         }
                     });
-                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
-                    //var files = ScanFiles(folderPath); // This has the same problem that whole library must be scanned before we can move on
-
-                    // Group into a series
-
 
 
                     // See if we can combine any series with others that have a localizedSeries
-                    var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
-                    if (hasLocalizedSeries)
-                    {
-                        var localizedSeries = infos.Select(i => i.LocalizedSeries).Distinct()
-                            .FirstOrDefault(i => !string.IsNullOrEmpty(i));
-                        if (!string.IsNullOrEmpty(localizedSeries))
-                        {
-                            var nonLocalizedSeries = infos.Select(i => i.Series).Distinct()
-                                .FirstOrDefault(series => !series.Equals(localizedSeries));
-
-                            var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
-                            foreach (var infoNeedingMapping in infos.Where(i => !Parser.Parser.Normalize(i.Series).Equals(normalizedNonLocalizedSeries)))
-                            {
-                                infoNeedingMapping.Series = nonLocalizedSeries;
-                            }
-                        }
-                    }
+                    MergeLocalizedSeriesWithSeries(infos);
 
 
                     foreach (var info in infos)
@@ -575,15 +568,6 @@ namespace API.Services.Tasks.Scanner
                             _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
                         }
                     }
-
-
-
-                    // var seriesNames = infos.Select(i => i.Series).ToList();
-                    // var localizedNames = infos.Select(i => i.LocalizedSeries).ToList();
-                    // if (seriesNames.All(s => s.Equals(seriesNames[0])))
-                    // {
-                    //
-                    // }
                 }
                 catch (ArgumentException ex)
                 {
@@ -594,6 +578,38 @@ namespace API.Services.Tasks.Scanner
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
 
             return SeriesWithInfos();
+        }
+
+        /// <summary>
+        /// Checks if there are any ParserInfos that have a Series that matches the LocalizedSeries field in any other info. If so,
+        /// rewrites the infos with series name instead of the localized name, so they stack.
+        /// </summary>
+        /// <example>
+        /// Accel World v01.cbz has Series "Accel World" and Localized Series "World of Acceleration"
+        /// World of Acceleration v02.cbz has Series "World of Acceleration"
+        /// After running this code, we'd have:
+        /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
+        /// </example>
+        /// <param name="infos">A collection of ParserInfos</param>
+        private static void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo> infos)
+        {
+            var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
+            if (!hasLocalizedSeries) return;
+
+            var localizedSeries = infos.Select(i => i.LocalizedSeries).Distinct()
+                .FirstOrDefault(i => !string.IsNullOrEmpty(i));
+            if (string.IsNullOrEmpty(localizedSeries)) return;
+
+            var nonLocalizedSeries = infos.Select(i => i.Series).Distinct()
+                .FirstOrDefault(series => !series.Equals(localizedSeries));
+
+            var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
+            foreach (var infoNeedingMapping in infos.Where(i =>
+                         !Parser.Parser.Normalize(i.Series).Equals(normalizedNonLocalizedSeries)))
+            {
+                infoNeedingMapping.Series = nonLocalizedSeries;
+                infoNeedingMapping.LocalizedSeries = localizedSeries;
+            }
         }
 
         /// <summary>
