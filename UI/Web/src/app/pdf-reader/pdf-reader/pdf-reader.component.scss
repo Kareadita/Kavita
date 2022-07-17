@@ -11,8 +11,10 @@
     margin: 3px 0 4px !important;
 }
 
-.loading {
-    // position: absolute;
-    // top: 50%;
-    // left: 45%;
+.progress-container {
+    width: 100%;
+}
+.progress-bar {
+    // NOTE: We have to override due to theme variables not being available
+    background-color: #3B9E76;
 }

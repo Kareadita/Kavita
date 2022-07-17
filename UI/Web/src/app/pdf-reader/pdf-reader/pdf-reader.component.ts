@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PageViewModeType } from 'ngx-extended-pdf-viewer';
+import { PageViewModeType, ProgressBarEvent } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/book.service';
@@ -63,6 +63,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   fontColor: string = this.themeMap[this.theme].font;
 
   isLoading: boolean = true;
+  /**
+   * How much of the current document is loaded
+   */
+  loadPrecent: number = 0;
 
   /**
    * This can't be updated dynamically: 
@@ -141,13 +145,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.seriesService.getChapter(this.chapterId).subscribe(chapter => {
       this.maxPages = chapter.pages;
-      this.cdRef.markForCheck();
 
       if (this.currentPage >= this.maxPages) {
         this.currentPage = this.maxPages - 1;
         this.saveProgress();
-        this.cdRef.markForCheck();
       }
+      this.cdRef.markForCheck();
     });
 
   }
@@ -195,7 +198,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   updateLoading(state: boolean) {
     this.isLoading = state;
-    console.log('PDF is loading: ', state);
+    this.cdRef.markForCheck();
+  }
+
+  updateLoadProgress(event: ProgressBarEvent) {
+    this.loadPrecent = event.percent;
     this.cdRef.markForCheck();
   }
 
