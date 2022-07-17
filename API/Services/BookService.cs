@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using API.Data.Metadata;
+using API.DTOs.Reader;
+using API.Entities;
 using API.Entities.Enums;
 using API.Parser;
 using Docnet.Core;
@@ -15,6 +17,7 @@ using Docnet.Core.Models;
 using Docnet.Core.Readers;
 using ExCSS;
 using HtmlAgilityPack;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using SixLabors.ImageSharp;
@@ -51,6 +54,9 @@ namespace API.Services
         void ExtractPdfImages(string fileFilePath, string targetDirectory);
 
         Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
+        Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter);
+
+        Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl);
     }
 
     public class BookService : IBookService
@@ -61,6 +67,7 @@ namespace API.Services
         private readonly StylesheetParser _cssParser = new ();
         private static readonly RecyclableMemoryStreamManager StreamManager = new ();
         private const string CssScopeClass = ".book-content";
+        private const string BookApiUrl = "book-resources?file=";
         public static readonly EpubReaderOptions BookReaderOptions = new()
         {
             PackageReaderOptions = new PackageReaderOptions()
@@ -682,6 +689,182 @@ namespace API.Services
         }
 
         /// <summary>
+        /// This will return a list of mappings from ID -> page num. ID will be the xhtml key and page num will be the reading order
+        /// this is used to rewrite anchors in the book text so that we always load properly in our reader.
+        /// </summary>
+        /// <param name="chapter">Chapter with at least one file</param>
+        /// <returns></returns>
+        public async Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter)
+        {
+            using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookReaderOptions);
+            var mappings = await CreateKeyToPageMappingAsync(book);
+
+            var navItems = await book.GetNavigationAsync();
+            var chaptersList = new List<BookChapterItem>();
+
+            foreach (var navigationItem in navItems)
+            {
+                if (navigationItem.NestedItems.Count == 0)
+                {
+                    CreateToCChapter(navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
+                    continue;
+                }
+
+                var nestedChapters = new List<BookChapterItem>();
+
+                foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
+                {
+                    var key = BookService.CleanContentKeys(nestedChapter.Link.ContentFileName);
+                    if (mappings.ContainsKey(key))
+                    {
+                        nestedChapters.Add(new BookChapterItem()
+                        {
+                            Title = nestedChapter.Title,
+                            Page = mappings[key],
+                            Part = nestedChapter.Link.Anchor ?? string.Empty,
+                            Children = new List<BookChapterItem>()
+                        });
+                    }
+                }
+
+                CreateToCChapter(navigationItem, nestedChapters, chaptersList, mappings);
+            }
+
+            if (chaptersList.Count != 0) return chaptersList;
+            // Generate from TOC
+            var tocPage = book.Content.Html.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
+            if (tocPage == null) return chaptersList;
+
+            // Find all anchor tags, for each anchor we get inner text, to lower then title case on UI. Get href and generate page content
+            var doc = new HtmlDocument();
+            var content = await book.Content.Html[tocPage].ReadContentAsync();
+            doc.LoadHtml(content);
+            var anchors = doc.DocumentNode.SelectNodes("//a");
+            if (anchors == null) return chaptersList;
+
+            foreach (var anchor in anchors)
+            {
+                if (!anchor.Attributes.Contains("href")) continue;
+
+                var key = BookService.CleanContentKeys(anchor.Attributes["href"].Value).Split("#")[0];
+                if (!mappings.ContainsKey(key))
+                {
+                    // Fallback to searching for key (bad epub metadata)
+                    var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+                    if (!string.IsNullOrEmpty(correctedKey))
+                    {
+                        key = correctedKey;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(key) || !mappings.ContainsKey(key)) continue;
+                var part = string.Empty;
+                if (anchor.Attributes["href"].Value.Contains('#'))
+                {
+                    part = anchor.Attributes["href"].Value.Split("#")[1];
+                }
+                chaptersList.Add(new BookChapterItem()
+                {
+                    Title = anchor.InnerText,
+                    Page = mappings[key],
+                    Part = part,
+                    Children = new List<BookChapterItem>()
+                });
+            }
+
+            return chaptersList;
+        }
+
+        /// <summary>
+        /// This returns a single page within the epub book. All html will be rewritten to be scoped within our reader,
+        /// all css is scoped, etc.
+        /// </summary>
+        /// <param name="page">The requested page</param>
+        /// <param name="chapterId">The chapterId</param>
+        /// <param name="cachedEpubPath">The path to the cached epub file</param>
+        /// <param name="baseUrl">The API base for Kavita, to rewrite urls to so we load though our endpoint</param>
+        /// <returns>Full epub HTML Page, scoped to Kavita's reader</returns>
+        /// <exception cref="KavitaException">All exceptions throw this</exception>
+        public async Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl)
+        {
+            using var book = await EpubReader.OpenBookAsync(cachedEpubPath, BookReaderOptions);
+            var mappings = await CreateKeyToPageMappingAsync(book);
+            var apiBase = baseUrl + "book/" + chapterId + "/" + BookApiUrl;
+
+            var counter = 0;
+            var doc = new HtmlDocument {OptionFixNestedTags = true};
+
+
+            var bookPages = await book.GetReadingOrderAsync();
+            foreach (var contentFileRef in bookPages)
+            {
+                if (page != counter)
+                {
+                    counter++;
+                    continue;
+                }
+
+                var content = await contentFileRef.ReadContentAsync();
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
+
+                // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
+                content = BookService.EscapeTags(content);
+
+                doc.LoadHtml(content);
+                var body = doc.DocumentNode.SelectSingleNode("//body");
+
+                if (body == null)
+                {
+                    if (doc.ParseErrors.Any())
+                    {
+                        LogBookErrors(book, contentFileRef, doc);
+                        throw new KavitaException("The file is malformed! Cannot read.");
+                    }
+                    _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+                    doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+                    body = doc.DocumentNode.SelectSingleNode("/html/body");
+                }
+
+                return await ScopePage(doc, book, apiBase, body, mappings, page);
+            }
+
+            throw new KavitaException("Could not find the appropriate html for that page");
+        }
+
+        private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters, IList<BookChapterItem> chaptersList,
+            IReadOnlyDictionary<string, int> mappings)
+        {
+            if (navigationItem.Link == null)
+            {
+                var item = new BookChapterItem()
+                {
+                    Title = navigationItem.Title,
+                    Children = nestedChapters
+                };
+                if (nestedChapters.Count > 0)
+                {
+                    item.Page = nestedChapters[0].Page;
+                }
+
+                chaptersList.Add(item);
+            }
+            else
+            {
+                var groupKey = CleanContentKeys(navigationItem.Link.ContentFileName);
+                if (mappings.ContainsKey(groupKey))
+                {
+                    chaptersList.Add(new BookChapterItem()
+                    {
+                        Title = navigationItem.Title,
+                        Page = mappings[groupKey],
+                        Children = nestedChapters
+                    });
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Extracts the cover image to covers directory and returns file path back
         /// </summary>
         /// <param name="fileFilePath"></param>
@@ -743,6 +926,12 @@ namespace API.Services
             return string.Empty;
         }
 
+        /// <summary>
+        /// Returns an image raster of a page within a PDF
+        /// </summary>
+        /// <param name="docReader"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="stream"></param>
         private static void GetPdfPage(IDocReader docReader, int pageNumber, Stream stream)
         {
             using var pageReader = docReader.GetPageReader(pageNumber);
@@ -783,6 +972,15 @@ namespace API.Services
 
 
             return body;
+        }
+
+        private void LogBookErrors(EpubBookRef book, EpubContentFileRef contentFileRef, HtmlDocument doc)
+        {
+            _logger.LogError("{FilePath} has an invalid html file (Page {PageName})", book.FilePath, contentFileRef.FileName);
+            foreach (var error in doc.ParseErrors)
+            {
+                _logger.LogError("Line {LineNumber}, Reason: {Reason}", error.Line, error.Reason);
+            }
         }
     }
 }

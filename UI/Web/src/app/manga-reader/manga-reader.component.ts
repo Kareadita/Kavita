@@ -1080,6 +1080,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.canvasImage.src = this.getPageUrl(this.pageNum);
     }
+    this.canvasImage.onload = () => {
+      this.cdRef.markForCheck();
+    };
+    
     this.cdRef.markForCheck();
   }
 
@@ -1114,8 +1118,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    console.log('prevChapterId', this.prevChapterId);
-
     if (this.prevChapterId === CHAPTER_ID_NOT_FETCHED || this.prevChapterId === this.chapterId) {
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
         this.prevChapterId = chapterId;
@@ -1127,7 +1129,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadChapter(chapterId: number, direction: 'Next' | 'Prev') {
-    console.log('chapterId: ', chapterId);
     if (chapterId > 0) {
       this.isLoading = true;
       this.cdRef.markForCheck();

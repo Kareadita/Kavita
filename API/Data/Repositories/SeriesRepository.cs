@@ -279,6 +279,7 @@ public class SeriesRepository : ISeriesRepository
                 .Include(l => l.AppUsers)
                 .Where(library => library.AppUsers.Any(user => user.Id == userId))
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Select(library => library.Id)
                 .ToListAsync();
         }
@@ -485,6 +486,7 @@ public class SeriesRepository : ISeriesRepository
         var volumes = await _context.Volume
             .Where(v => seriesIds.Contains(v.SeriesId))
             .Include(v => v.Chapters)
+            .AsSplitQuery()
             .ToListAsync();
 
         IList<int> chapterIds = new List<int>();
@@ -509,6 +511,7 @@ public class SeriesRepository : ISeriesRepository
         var volumes = await _context.Volume
             .Where(v => seriesIds.Contains(v.SeriesId))
             .Include(v => v.Chapters)
+            .AsSplitQuery()
             .ToListAsync();
 
         var seriesChapters = new Dictionary<int, IList<int>>();
@@ -532,10 +535,12 @@ public class SeriesRepository : ISeriesRepository
     {
         var userProgress = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
+            .AsSplitQuery()
             .ToListAsync();
 
         var userRatings = await _context.AppUserRating
             .Where(r => r.AppUserId == userId && series.Select(s => s.Id).Contains(r.SeriesId))
+            .AsSplitQuery()
             .ToListAsync();
 
         foreach (var s in series)
@@ -804,6 +809,7 @@ public class SeriesRepository : ISeriesRepository
         var userLibraries = _context.Library
             .Include(l => l.AppUsers)
             .Where(library => library.AppUsers.Any(user => user.Id == userId))
+            .AsSplitQuery()
             .AsNoTracking()
             .Select(library => library.Id)
             .ToList();
@@ -829,6 +835,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(v => v.Chapters)
             .ThenInclude(c => c.Files)
             .SelectMany(v => v.Chapters.SelectMany(c => c.Files))
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }
@@ -838,6 +845,7 @@ public class SeriesRepository : ISeriesRepository
         var allowedLibraries = _context.Library
             .Include(l => l.AppUsers)
             .Where(library => library.AppUsers.Any(x => x.Id == userId))
+            .AsSplitQuery()
             .Select(l => l.Id);
 
         return await _context.Series
@@ -920,6 +928,7 @@ public class SeriesRepository : ISeriesRepository
         return await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .Include(sm => sm.CollectionTags)
+            .AsSplitQuery()
             .ToListAsync();
     }
 
@@ -993,6 +1002,7 @@ public class SeriesRepository : ISeriesRepository
     {
         return _context.AppUser
             .Where(u => u.Id == userId)
+            .AsSplitQuery()
             .SelectMany(l => l.Libraries.Select(lib => lib.Id));
     }
 

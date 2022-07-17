@@ -55,6 +55,7 @@ public class GenreRepository : IGenreRepository
             .Include(p => p.SeriesMetadatas)
             .Include(p => p.Chapters)
             .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0 && p.ExternalTag == removeExternal)
+            .AsSplitQuery()
             .ToListAsync();
 
         _context.Genre.RemoveRange(genresWithNoConnections);
@@ -67,6 +68,7 @@ public class GenreRepository : IGenreRepository
         return await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .SelectMany(s => s.Metadata.Genres)
+            .AsSplitQuery()
             .Distinct()
             .OrderBy(p => p.Title)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)

@@ -10,3 +10,11 @@
 ::ng-deep #presentationMode {
     margin: 3px 0 4px !important;
 }
+
+.progress-container {
+    width: 100%;
+}
+.progress-bar {
+    // NOTE: We have to override due to theme variables not being available
+    background-color: #3B9E76;
+}

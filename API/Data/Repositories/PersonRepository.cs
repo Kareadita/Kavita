@@ -54,6 +54,7 @@ public class PersonRepository : IPersonRepository
             .Include(p => p.SeriesMetadatas)
             .Include(p => p.ChapterMetadatas)
             .Where(p => p.SeriesMetadatas.Count == 0 && p.ChapterMetadatas.Count == 0)
+            .AsSplitQuery()
             .ToListAsync();
 
         _context.Person.RemoveRange(peopleWithNoConnections);
@@ -69,6 +70,7 @@ public class PersonRepository : IPersonRepository
             .Distinct()
             .OrderBy(p => p.Name)
             .AsNoTracking()
+            .AsSplitQuery()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
