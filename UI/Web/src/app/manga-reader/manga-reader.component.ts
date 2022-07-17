@@ -277,10 +277,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   bookmarks: {[key: string]: number} = {};
   /**
-   * Tracks if the first page is rendered or not. This is used to keep track of Automatic Scaling and adjusting decision after first page dimensions load up.
-   */
-  firstPageRendered: boolean = false;
-  /**
    * Library Type used for rendering chapter or issue
    */
   libraryType: LibraryType = LibraryType.Manga;
@@ -1084,14 +1080,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   setCanvasImage() {
     console.log('Canvas Image set, page num: ', this.pageNum);
-    const img = this.cachedImages.arr.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
-    if (img) {
-      this.canvasImage = img;
-      console.log('Setting Canvas Image from prefetched image', this.readerService.imageUrlToPageNum(img.src), img.src)
+    if (this.layoutMode === LayoutMode.Single) {
+      const img = this.cachedImages.arr.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
+      if (img) {
+        this.canvasImage = img; // If we tried to use this for double, then the src might change after being set (idk how tho)
+      } else {
+        this.canvasImage.src = this.getPageUrl(this.pageNum);
+      }
     } else {
       this.canvasImage.src = this.getPageUrl(this.pageNum);
-      console.log('Setting Canvas Image from scratch', this.getPageUrl(this.pageNum))
     }
+
+    
     this.canvasImage.onload = () => {
       this.cdRef.markForCheck();
     };
@@ -1257,7 +1257,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         newScale = FITTING_OPTION.HEIGHT;
       }
 
-      this.firstPageRendered = true;
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
   }
 
@@ -1410,6 +1409,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
+    console.log('Set page number from ', this.pageNum, ' to ', Math.max(Math.min(pageNum, this.maxPages - 1), 0));
     this.pageNum = Math.max(Math.min(pageNum, this.maxPages - 1), 0);
     this.cdRef.markForCheck();
 
@@ -1476,14 +1476,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isFullscreen) {
       this.readerService.exitFullscreen(() => {
         this.isFullscreen = false;
-        this.firstPageRendered = false;
         this.fullscreenEvent.next(false);
         this.render();
       });
     } else {
       this.readerService.enterFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
-        this.firstPageRendered = false;
         this.fullscreenEvent.next(true);
         this.render();
       });
