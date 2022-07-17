@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PageViewModeType, ProgressBarEvent } from 'ngx-extended-pdf-viewer';
+import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/book.service';
+import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
@@ -80,10 +81,17 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     private seriesService: SeriesService, public readerService: ReaderService,
     private navService: NavService, private toastr: ToastrService,
     private bookService: BookService, private themeService: ThemeService, 
-    private readonly cdRef: ChangeDetectorRef) {
+    private readonly cdRef: ChangeDetectorRef, private pdfViewerService: NgxExtendedPdfViewerService) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
+  }
+
+  @HostListener('window:keyup', ['$event'])
+  handleKeyPress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.ESC_KEY) {
+      this.closeReader();
+    }
   }
 
   ngOnDestroy(): void {
