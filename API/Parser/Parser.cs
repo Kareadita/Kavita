@@ -67,16 +67,34 @@ namespace API.Parser
         private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
             MatchOptions, RegexTimeout);
 
+        //
+        // Define regex sub-expressions, i.e some pattern commonly reused in the regular expressions used by
+        // this parser. This is an attempt at a tokenizing the parser and thus provide a way to clearly identify
+        // those patterns and consistently reuse them across multiple regular expressions
+        //
+
+        // Some generic helper patterns:
+        // - non greedy matching of a string where parenthesis are balanced
+        private const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
+        // - non greedy matching of a string where parentheses and brackets are balanced
+        private const string Balanced = @"(?:[^()\[\]]|(?<open>\()|(?<-open>\))|(?<openbracket>\[)|(?<-openbracket>\]))*?(?(openbracket)(?!))(?(open)(?!))";
+
+
+        // Pattern used to capture a series name. We use a balanced string to avoid matching partial content from tags
+        // enclosed by brackets and parentheses.
         private const string SeriesExpr = $@"(?<Series>{Balanced})";
+
+        // Patterns capturing chapters and volumes.
+        // Chapter and volume are commonly expressed as a number with a decimal or a range of such numbers
         private const string VolumeExpr = @"(?<Volume>\d+(\.\d)?(-\d+(\.\d)?)?)";
         private const string ChapterExpr = @"(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)";
-        private const string BalancedParen = @"(?:(?:[^()]|(?<open>\()|(?<-open>\)))+?(?(open)(?!)))";
-        // non greedy matching of a string where parenthesis and brackets are balanced
-        private const string Balanced = @"(?:(?:[^()\[\]]|(?<open>\()|(?<-open>\))|(?<openbracket>\[)|(?<-openbracket>\]))*?(?(openbracket)(?!))(?(open)(?!)))";
+
+        // Regex sub expression matching prefixes commonly used for denoting volumes in Comics
         // French Volume: tome, t, t. -> volume
-        private const string VolumePrefixes = @"(v|t|(v\.|vol\.?|volume|t\.|tome)\s?)";
+        private const string ComicVolumePrefixes = @"(v|t|(v\.|vol\.?|volume|t\.|tome)\s?)";
+        // Regex sub expression matching prefixes commonly used for denoting issues in Comics
         // n°,n. -> numero sign
-        private const string chapterPrefixes = @"(c|chapter[-\s]+|issue\s?#?|#|(n°|n\.|Ep\.?)[-\s]*)";
+        private const string ComicChapterPrefixes = @"(c|chapter[-\s]+|issue\s?#?|#|(n°|n\.|Ep\.?)[-\s]*)";
 
 
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -213,7 +231,7 @@ namespace API.Parser
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus), Aldebaran-Antares-t6
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                $@"^{SeriesExpr}[-\s]{VolumePrefixes}{VolumeExpr}\b",
+                $@"^{SeriesExpr}[-\s]{ComicVolumePrefixes}{VolumeExpr}\b",
                 MatchOptions, RegexTimeout),
             // Batman Beyond 2.0 001 (2013)
             new Regex(
@@ -239,7 +257,7 @@ namespace API.Parser
             // Darkyears-copterminator-issue02
             // Batman Wayne Family Adventures - Ep. 001 - Moving In
             new Regex(
-                $@"^{SeriesExpr}[-\s]+{chapterPrefixes}{ChapterExpr}\b",
+                $@"^{SeriesExpr}[-\s]+{ComicChapterPrefixes}{ChapterExpr}\b",
                 MatchOptions, RegexTimeout),
             // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)
@@ -262,7 +280,7 @@ namespace API.Parser
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Batgirl Vol.2000 #57 (December, 2004)
             new Regex(
-                $@"^{SeriesExpr}[-\s]{VolumePrefixes}{VolumeExpr}\b",
+                $@"^{SeriesExpr}[-\s]{ComicVolumePrefixes}{VolumeExpr}\b",
                 MatchOptions, RegexTimeout),
             // Chinese Volume: 第n卷 -> Volume n, 第n册 -> Volume n, 幽游白书完全版 第03卷 天下 or 阿衰online 第1册
             new Regex(
@@ -306,7 +324,7 @@ namespace API.Parser
             // Métal Hurlant-n°31
             // Darkyears-copterminator-issue02
             new Regex(
-                $@"^{SeriesExpr}[-\s]+{chapterPrefixes}{ChapterExpr}\b",
+                $@"^{SeriesExpr}[-\s]+{ComicChapterPrefixes}{ChapterExpr}\b",
                 MatchOptions, RegexTimeout),
             // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
             // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
@@ -315,7 +333,7 @@ namespace API.Parser
             // Saga 001 (2012) (Digital) (Empire-Zone)
             // spawn-123 (from https://github.com/Girbons/comics-downloader)
             new Regex(
-                $@"^{Balanced}[-\s]+(?<!{VolumePrefixes}(\d+[-\.])?){ChapterExpr}\b",
+                $@"^{Balanced}[-\s]+(?<!{ComicVolumePrefixes}(\d+[-\.])?){ChapterExpr}\b",
                 MatchOptions, RegexTimeout),
 
         };
