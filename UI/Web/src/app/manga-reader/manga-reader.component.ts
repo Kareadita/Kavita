@@ -1045,18 +1045,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     let pageAmount = 1;
     if (this.layoutMode === LayoutMode.Double) {
-      pageAmount = (
-        !this.isCoverImage() &&
-        !this.isWideImage(this.canvasImagePrev)
-        ? 2 : 1);
+      pageAmount = !(
+        this.isCoverImage()
+        || this.isWideImage(this.canvasImagePrev)
+      ) ? 2 : 1;
     }
     if (this.layoutMode === LayoutMode.DoubleReversed) {
-      pageAmount = (
-        !this.isCoverImage() &&
-        !this.isCoverImage(this.pageNum - 1) &&
-        !this.isWideImage(this.canvasImage) && // JOE: At this point, these aren't yet set to the new values
-        !this.isWideImage(this.canvasImageNext)
-        ? 2 : 1);
+      pageAmount = !(
+        this.isCoverImage() 
+        || this.isCoverImage(this.pageNum - 1) 
+        || this.isWideImage(this.canvasImage)  // JOE: At this point, these aren't yet set to the new values
+        || this.isWideImage(this.canvasImagePrev) // This should be Prev, if prev image  (original: canvasImageNext)
+      ) ? 2 : 1;
     }
 
     if ((this.pageNum - 1 < 0 && notInSplit) || this.isLoading) {
@@ -1079,7 +1079,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
    */
   setCanvasImage() {
-    console.log('Canvas Image set, page num: ', this.pageNum);
     if (this.layoutMode === LayoutMode.Single) {
       const img = this.cachedImages.arr.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
       if (img) {
