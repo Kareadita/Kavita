@@ -348,6 +348,24 @@ namespace API.Controllers
             return BadRequest("There was an exception when updating the user");
         }
 
+        /// <summary>
+        /// Requests the Invite Url for the UserId. Will return error if user is already validated.
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="withBaseUrl">Include the "https://ip:port/" in the generated link</param>
+        /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
+        [HttpGet("invite-url")]
+        public async Task<ActionResult<string>> GetInviteUrl(int userId, bool withBaseUrl)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            if (user.EmailConfirmed)
+                return BadRequest("User is already confirmed");
+            if (string.IsNullOrEmpty(user.ConfirmationToken))
+                return BadRequest("Manual setup is unable to be completed. Please cancel and recreate the invite.");
+
+            return GenerateEmailLink(user.ConfirmationToken, "confirm-email", user.Email, withBaseUrl);
+        }
 
 
         /// <summary>
@@ -428,11 +446,9 @@ namespace API.Controllers
                     lib.AppUsers.Add(user);
                 }
 
-                await _unitOfWork.CommitAsync();
-
-
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
+
 
                 var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
                 _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
@@ -447,6 +463,11 @@ namespace API.Controllers
                         ServerConfirmationLink = emailLink
                     });
                 }
+
+                user.ConfirmationToken = token;
+
+                await _unitOfWork.CommitAsync();
+
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = emailLink,
@@ -486,6 +507,7 @@ namespace API.Controllers
             if (!await ConfirmEmailToken(dto.Token, user)) return BadRequest("Invalid Email Token");
 
             user.UserName = dto.Username;
+            user.ConfirmationToken = null;
             var errors = await _accountService.ChangeUserPassword(user, dto.Password);
             if (errors.Any())
             {
@@ -617,12 +639,11 @@ namespace API.Controllers
             return Ok(emailLink);
         }
 
-        private string GenerateEmailLink(string token, string routePart, string email)
+        private string GenerateEmailLink(string token, string routePart, string email, bool withHost = true)
         {
             var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-            var emailLink =
-                $"{Request.Scheme}://{host}{Request.PathBase}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
-            return emailLink;
+            if (withHost) return $"{Request.Scheme}://{host}{Request.PathBase}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+            return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
         }
 
         /// <summary>

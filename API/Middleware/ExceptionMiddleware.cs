@@ -35,9 +35,9 @@ namespace API.Middleware
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
 
-                var response = _env.IsDevelopment()
-                    ? new ApiException(context.Response.StatusCode, ex.Message, ex.StackTrace)
-                    : new ApiException(context.Response.StatusCode, "Internal Server Error", ex.StackTrace);
+                var errorMessage = string.IsNullOrEmpty(ex.Message) ? "Internal Server Error" : ex.Message;
+
+                var response = new ApiException(context.Response.StatusCode, errorMessage, ex.StackTrace);
 
                 var options = new JsonSerializerOptions
                 {

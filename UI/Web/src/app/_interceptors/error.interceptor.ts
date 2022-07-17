@@ -85,9 +85,9 @@ export class ErrorInterceptor implements HttpInterceptor {
           this.toastr.error('There was an issue downloading this file or you do not have permissions', error.status);         
           return; 
         }
-        this.toastr.error(error.error, error.status);
+        this.toastr.error(error.error, error.status + ' Error');
       } else {
-        this.toastr.error(error.statusText === 'OK' ? error.error : error.statusText, error.status);
+        this.toastr.error(error.statusText === 'OK' ? error.error : error.statusText, error.status + ' Error');
       }
     }
   }
