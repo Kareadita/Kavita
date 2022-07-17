@@ -467,7 +467,7 @@ namespace API.Parser
 
         public static string ParseEdition(string filePath)
         {
-            filePath = replaceUnderscores(filePath);
+            filePath = ReplaceUnderscores(filePath);
             foreach (var regex in MangaEditionRegex)
             {
                 var matches = regex.Matches(filePath);
@@ -491,7 +491,7 @@ namespace API.Parser
         /// <returns></returns>
         public static bool HasSpecialMarker(string filePath)
         {
-            filePath = replaceUnderscores(filePath);
+            filePath = ReplaceUnderscores(filePath);
             var matches = SpecialMarkerRegex.Matches(filePath);
             return matches.Select(match => match.Groups["Special"])
                 .Any(group => group.Success && group != Match.Empty);
@@ -499,7 +499,7 @@ namespace API.Parser
 
         public static string ParseMangaSpecial(string filePath)
         {
-            filePath = replaceUnderscores(filePath);
+            filePath = ReplaceUnderscores(filePath);
             foreach (var regex in MangaSpecialRegex)
             {
                 var matches = regex.Matches(filePath);
@@ -515,7 +515,7 @@ namespace API.Parser
 
         public static string ParseComicSpecial(string filePath)
         {
-            filePath = replaceUnderscores(filePath);
+            filePath = ReplaceUnderscores(filePath);
             foreach (var regex in ComicSpecialRegex)
             {
                 var matches = regex.Matches(filePath);
@@ -531,7 +531,7 @@ namespace API.Parser
 
         public static string ParseSeries(string filename)
         {
-            filename = replaceUnderscores(filename);
+            filename = ReplaceUnderscores(filename);
             foreach (var regex in MangaSeriesRegex)
             {
                 var matches = regex.Matches(filename);
@@ -546,7 +546,7 @@ namespace API.Parser
         }
         public static string ParseComicSeries(string filename)
         {
-            filename = replaceUnderscores(filename);
+            filename = ReplaceUnderscores(filename);
             foreach (var regex in ComicSeriesRegex)
             {
                 var matches = regex.Matches(filename);
@@ -562,7 +562,7 @@ namespace API.Parser
 
         public static string ParseVolume(string filename)
         {
-            filename = replaceUnderscores(filename);
+            filename = ReplaceUnderscores(filename);
             foreach (var regex in MangaVolumeRegex)
             {
                 var matches = regex.Matches(filename);
@@ -581,7 +581,7 @@ namespace API.Parser
 
         public static string ParseComicVolume(string filename)
         {
-            filename = replaceUnderscores(filename);
+            filename = ReplaceUnderscores(filename);
             foreach (var regex in ComicVolumeRegex)
             {
                 var matches = regex.Matches(filename);
@@ -615,7 +615,7 @@ namespace API.Parser
 
         public static string ParseChapter(string filename)
         {
-            filename = replaceUnderscores(filename);
+            filename = ReplaceUnderscores(filename);
             foreach (var regex in MangaChapterRegex)
             {
                 var matches = regex.Matches(filename);
@@ -645,7 +645,7 @@ namespace API.Parser
 
         public static string ParseComicChapter(string filename)
         {
-            filename = replaceUnderscores(filename);
+            filename = ReplaceUnderscores(filename);
             foreach (var regex in ComicChapterRegex)
             {
                 var matches = regex.Matches(filename);
@@ -749,7 +749,7 @@ namespace API.Parser
         public static string CleanTitle(string title, bool isComic = false)
         {
 
-            title = replaceUnderscores(title);
+            title = ReplaceUnderscores(title);
             title = RemoveReleaseGroup(title);
 
             title = RemoveEditionTagHolders(title);
@@ -889,8 +889,8 @@ namespace API.Parser
         /// <returns></returns>
         public static string CleanSpecialTitle(string name)
         {
-            name = replaceUnderscores(name);
             if (string.IsNullOrEmpty(name)) return name;
+            name = ReplaceUnderscores(name);
             var cleaned = SpecialTokenRegex.Replace(name, string.Empty).Trim();
             var lastIndex = cleaned.LastIndexOf('.');
             if (lastIndex > 0)
@@ -961,8 +961,9 @@ namespace API.Parser
             return FormatTagSpecialKeywords.Contains(comicInfoFormat);
         }
 
-        private static string replaceUnderscores(string filename) {
-            return filename.Replace("_", " ");
+        private static string ReplaceUnderscores(string name) {
+            if (string.IsNullOrEmpty(name)) return name;
+            return name.Replace("_", " ");
         }
     }
 }
