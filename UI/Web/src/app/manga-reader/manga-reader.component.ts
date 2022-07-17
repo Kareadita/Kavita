@@ -123,16 +123,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isLoading = true;
 
-  /**
-   * A temp variable to allow us to update isLoose. 
-   */
-  pageAmount = 0;
-  /**
-   * For double page layout, if only one page will be rendered.
-   */
-  isLoose = false;
-
-
   private ctx!: CanvasRenderingContext2D;
   /**
    * Used to render a page on the canvas or in the image tag. This Image element is prefetched by the cachedImages buffer.
@@ -340,10 +330,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       || this.isCoverImage(this.pageNum - 1) 
       || this.isWideImage(this.canvasImage) 
       || this.isWideImage(this.canvasImageNext)
-      //|| this.isLoose // This shouldn't be needed because it's implied by ShouldRenderReverseDouble
       );
     
-      console.log('Should Render Reverse Double: ', result);
     return result;
   }
 
@@ -986,13 +974,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    this.pageAmount = 1;
+    let pageAmount = 1;
 
     // If we are on the cover image, always do 1 page
     
     if (!this.isCoverImage()) {
       if (this.layoutMode === LayoutMode.Double) {
-        this.pageAmount = (
+        pageAmount = (
           !this.isCoverImage() &&
           !this.isWideImage() &&
           !this.isWideImage(this.canvasImageNext) &&
@@ -1005,7 +993,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         // 2. The next page + 1 is a wide image (why do we care at this point?)
         // 3. We are on the second to last page
         // 4. We are on the last page
-        this.pageAmount = !(
+        pageAmount = !(
           this.isWideImage(this.canvasImageNext)  
           || this.isWideImage(this.canvasImageAheadBy2)  // Remember we are doing this logic before we've hit the next page, so we need this
           || this.isSecondLastImage()
@@ -1013,12 +1001,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           ) ? 2 : 1;
       }
     }
-    
 
-    console.log('[Next Page] Moving ', this.pageAmount, ' pages');
 
     const notInSplit = this.currentImageSplitPart !== (this.isSplitLeftToRight() ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
-    if ((this.pageNum + this.pageAmount >= this.maxPages && notInSplit) || this.isLoading) {
+    if ((this.pageNum + pageAmount >= this.maxPages && notInSplit) || this.isLoading) {
 
       if (this.isLoading) { return; }
 
@@ -1029,7 +1015,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     if (this.isNoSplit() || notInSplit) {
-      this.setPageNum(this.pageNum + this.pageAmount);
+      this.setPageNum(this.pageNum + pageAmount);
     }
 
     this.loadPage();
@@ -1094,8 +1080,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImage.onload = () => {
       this.cdRef.markForCheck();
     };
-
-    console.log('Canvas Image set to ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
     
     this.cdRef.markForCheck();
   }
@@ -1324,7 +1308,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         index += 1;
       }
     }, this.cachedImages.size() - 3);
-    //console.log('Prefetched Images: ', this.cachedImages.arr.map(i => this.readerService.imageUrlToPageNum(i.src)));
   }
 
 
@@ -1335,7 +1318,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImage2.src = '';
     this.canvasImageAheadBy2.src = '';
 
-    this.isLoose = (this.pageAmount === 1 ? true : false);
+
     this.setCanvasImage();
 
 
@@ -1357,8 +1340,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.canvasImage2.src = this.canvasImagePrev.src;
         }
       }
-
-      console.log('Canvas Image 2 set to page ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
     }
     this.cdRef.markForCheck();
 
@@ -1408,7 +1389,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
-    console.log('Set page number from ', this.pageNum, ' to ', Math.max(Math.min(pageNum, this.maxPages - 1), 0));
     this.pageNum = Math.max(Math.min(pageNum, this.maxPages - 1), 0);
     this.cdRef.markForCheck();
 
@@ -1504,7 +1484,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // We must set this here because loadPage from render doesn't call if we aren't page splitting
     if (this.readerMode !== ReaderMode.Webtoon) {
-      console.log('Updating canvas image for reader mode toggle');
       this.canvasImage = this.cachedImages.current();
       this.isLoading = true;
     }
