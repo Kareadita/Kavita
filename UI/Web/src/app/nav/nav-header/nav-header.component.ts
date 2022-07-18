@@ -58,17 +58,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     }
 
   ngOnInit(): void {
-    // setTimeout(() => this.setupScrollChecker(), 1000);
-    // // TODO: on router change, reset the scroll check 
-
-    // this.router.events
-    //   .pipe(filter(event => event instanceof NavigationEnd))
-    //   .subscribe((event) => {
-    //     setTimeout(() => this.setupScrollChecker(), 1000);
-    //   });
-
     this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntil(this.onDestroy), tap((scrollContainer) => {
-      console.log('Scroll Container: ', scrollContainer);
       if (scrollContainer === 'body' || scrollContainer === undefined) {
         this.scrollElem = this.document.body;
         fromEvent(this.document.body, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(this.document.body));
@@ -78,14 +68,10 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
         fromEvent(elem.nativeElement, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(elem.nativeElement));
       }
     })).subscribe();
-
-
-
   }
 
   checkBackToTopNeeded(elem: HTMLElement) {
     const offset = elem.scrollTop || 0;
-    console.log('Scroll Offset: ', offset);
     if (offset > 100) {
       this.backToTopNeeded = true;
     } else if (offset < 40) {

@@ -1,8 +1,8 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
-import { Subject } from 'rxjs';
+import { first, Subject, takeUntil, takeWhile } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -21,7 +21,7 @@ const keySize = 25; // Height of the JumpBar button
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
@@ -63,6 +63,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
+  hasResumedJumpKey: boolean = false;
 
   private onDestory: Subject<void> = new Subject();
 
@@ -81,55 +82,14 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   @HostListener('window:orientationchange', ['$event'])
   resizeJumpBar() {
     const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
-
-
     this.jumpBarKeysToRender = this.jumpbarService.generateJumpBar(this.jumpBarKeys, currentSize);
     this.changeDetectionRef.markForCheck();
-  }
-
-  removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
-    const removedIndexes: Array<number> = [];
-    for(let removal = 0; removal < numberOfRemovals; removal++) {
-      let min = 100000000;
-      let minIndex = -1;
-      for(let i = midPoint + 1; i < this.jumpBarKeys.length - 2; i++) {
-        if (this.jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
-          min = this.jumpBarKeys[i].size;
-          minIndex = i;
-        }
-      }
-      removedIndexes.push(minIndex);
-    }
-    for(let i = midPoint + 1; i < this.jumpBarKeys.length - 2; i++) {
-      if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
-    }
-  }
-
-  removeFirstPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1) {
-    const removedIndexes: Array<number> = [];
-    for(let removal = 0; removal < numberOfRemovals; removal++) {
-      let min = 100000000;
-      let minIndex = -1;
-      for(let i = 1; i < midPoint; i++) {
-        if (this.jumpBarKeys[i].size < min && !removedIndexes.includes(i)) {
-          min = this.jumpBarKeys[i].size;
-          minIndex = i;
-        }
-      }
-      removedIndexes.push(minIndex);
-    }
-
-    for(let i = 1; i < midPoint; i++) {
-      if (!removedIndexes.includes(i)) this.jumpBarKeysToRender.push(this.jumpBarKeys[i]);
-    }
   }
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
       this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
-
-
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
@@ -140,12 +100,29 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
       this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
       this.changeDetectionRef.markForCheck();
     }
-    
+  }
+
+  ngAfterViewInit(): void {
+    // NOTE: I can't seem to figure out a way to resume the JumpKey with the scroller. 
+    // this.virtualScroller.vsUpdate.pipe(takeWhile(() => this.hasResumedJumpKey), takeUntil(this.onDestory)).subscribe(() => {
+    //   const resumeKey = this.jumpbarService.getResumeKey(this.header);
+    //   console.log('Resume key:', resumeKey);
+    //   if (resumeKey !== '') {
+    //       const keys = this.jumpBarKeys.filter(k => k.key === resumeKey);
+    //       if (keys.length >= 1) {
+    //         console.log('Scrolling to ', keys[0].key);
+    //         this.scrollTo(keys[0]);
+    //         this.hasResumedJumpKey = true;
+    //       }
+    //   }
+    //   this.hasResumedJumpKey = true;
+    // });
   }
 
   ngOnChanges(): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
+    
   }
 
 
@@ -174,7 +151,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
       targetIndex += this.jumpBarKeys[i].size;
     }
 
-    this.virtualScroller.scrollToIndex(targetIndex, true, undefined, 1000);
+    this.virtualScroller.scrollToIndex(targetIndex, true, 800, 1000);
+    this.jumpbarService.saveResumeKey(this.header, jumpKey.key);
     this.changeDetectionRef.markForCheck();
     return;
   }

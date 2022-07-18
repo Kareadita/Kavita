@@ -8,8 +8,19 @@ const keySize = 25; // Height of the JumpBar button
 })
 export class JumpbarService {
 
+  resumeKeys: {[key: string]: string} = {};
+
   constructor() { }
 
+
+  getResumeKey(key: string) {
+    if (this.resumeKeys.hasOwnProperty(key)) return this.resumeKeys[key];
+    return '';
+  }
+
+  saveResumeKey(key: string, value: string) {
+    this.resumeKeys[key] = value;
+  }
 
   generateJumpBar(jumpBarKeys: Array<JumpKey>, currentSize: number) {
     const fullSize = (jumpBarKeys.length * keySize);
