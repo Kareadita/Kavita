@@ -205,6 +205,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Include(u => u.ReadingLists)
             .ThenInclude(l => l.Items)
+            .AsSplitQuery()
             .SingleOrDefaultAsync(x => x.UserName == username);
     }
 
@@ -244,6 +245,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.Library
             .Include(l => l.AppUsers)
+            .AsSplitQuery()
             .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId));
     }
 
@@ -362,6 +364,7 @@ public class UserRepository : IUserRepository
                     Folders = l.Folders.Select(x => x.Path).ToList()
                 }).ToList()
             })
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }
@@ -390,6 +393,7 @@ public class UserRepository : IUserRepository
                     Folders = l.Folders.Select(x => x.Path).ToList()
                 }).ToList()
             })
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
     }

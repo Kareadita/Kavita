@@ -147,6 +147,15 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email', model);
   }
 
+  /**
+   * Given a user id, returns a full url for setting up the user account
+   * @param userId 
+   * @returns 
+   */
+  getInviteUrl(userId: number, withBaseUrl: boolean = true) {
+    return this.httpClient.get<string>(this.baseUrl + 'account/invite-url?userId=' + userId + '&withBaseUrl=' + withBaseUrl, {responseType: 'text' as 'json'});
+  }
+
   getDecodedToken(token: string) {
     return JSON.parse(atob(token.split('.')[1]));
   }

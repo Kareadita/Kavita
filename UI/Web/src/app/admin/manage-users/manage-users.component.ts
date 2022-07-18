@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { take } from 'rxjs/operators';
+import { catchError, take } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
 import { Member } from 'src/app/_models/member';
 import { User } from 'src/app/_models/user';
@@ -13,6 +13,7 @@ import { MessageHubService } from 'src/app/_services/message-hub.service';
 import { InviteUserComponent } from '../invite-user/invite-user.component';
 import { EditUserComponent } from '../edit-user/edit-user.component';
 import { ServerService } from 'src/app/_services/server.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-manage-users',
@@ -34,7 +35,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
               private toastr: ToastrService,
               private confirmService: ConfirmService,
               public messageHub: MessageHubService,
-              private serverService: ServerService) {
+              private serverService: ServerService,
+              private router: Router) {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
       if (user) {
         this.loggedInUsername = user.username;
@@ -122,7 +124,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   }
 
   resendEmail(member: Member) {
-
     this.serverService.isServerAccessible().subscribe(canAccess => {
       this.accountService.resendConfirmationEmail(member.id).subscribe(async (email) => {
         if (canAccess) {
@@ -134,7 +135,15 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
       });
     });
-    
+  }
+
+  setup(member: Member) {
+    this.accountService.getInviteUrl(member.id, false).subscribe(url => {
+      console.log('Url: ', url);
+      if (url) {
+        this.router.navigateByUrl(url);
+      }
+    });
   }
 
   updatePassword(member: Member) {

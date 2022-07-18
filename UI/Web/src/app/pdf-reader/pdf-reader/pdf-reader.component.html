@@ -1,4 +1,16 @@
 <div class="{{theme}}">
+
+    <ng-container *ngIf="isLoading">
+        <div class="loading mx-auto" style="min-width: 200px; width: 600px;">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Loading...PDFs may take longer than expected
+        </div>
+        <div class="progress-container row g-0 align-items-center">
+            <div class="progress" style="height: 5px;">
+                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': loadPrecent + '%'}" [attr.aria-valuenow]="loadPrecent" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    </ng-container>
     <ngx-extended-pdf-viewer
         #pdfViewer
         [src]="readerService.downloadPdf(this.chapterId)"
@@ -23,6 +35,9 @@
         [customToolbar]="multiToolbar"
 
         (pageChange)="saveProgress()"
+        (pdfLoadingStarts)="updateLoading(true)"
+        (pdfLoaded)="updateLoading(false)"
+        (progress)="updateLoadProgress($event)"
     > 
     
     </ngx-extended-pdf-viewer>

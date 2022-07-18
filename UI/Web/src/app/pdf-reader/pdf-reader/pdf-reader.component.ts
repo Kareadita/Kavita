@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { PageViewModeType } from 'ngx-extended-pdf-viewer';
+import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/book.service';
+import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
@@ -62,7 +63,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   backgroundColor: string = this.themeMap[this.theme].background;
   fontColor: string = this.themeMap[this.theme].font;
 
-  isLoading: boolean = false;
+  isLoading: boolean = true;
+  /**
+   * How much of the current document is loaded
+   */
+  loadPrecent: number = 0;
 
   /**
    * This can't be updated dynamically: 
@@ -76,10 +81,17 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     private seriesService: SeriesService, public readerService: ReaderService,
     private navService: NavService, private toastr: ToastrService,
     private bookService: BookService, private themeService: ThemeService, 
-    private readonly cdRef: ChangeDetectorRef) {
+    private readonly cdRef: ChangeDetectorRef, private pdfViewerService: NgxExtendedPdfViewerService) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
       this.navService.hideSideNav();
+  }
+
+  @HostListener('window:keyup', ['$event'])
+  handleKeyPress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.ESC_KEY) {
+      this.closeReader();
+    }
   }
 
   ngOnDestroy(): void {
@@ -141,13 +153,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.seriesService.getChapter(this.chapterId).subscribe(chapter => {
       this.maxPages = chapter.pages;
-      this.cdRef.markForCheck();
 
       if (this.currentPage >= this.maxPages) {
         this.currentPage = this.maxPages - 1;
         this.saveProgress();
-        this.cdRef.markForCheck();
       }
+      this.cdRef.markForCheck();
     });
 
   }
@@ -191,6 +202,16 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   closeReader() {
     this.readerService.closeReader(this.readingListMode, this.readingListId);
+  }
+
+  updateLoading(state: boolean) {
+    this.isLoading = state;
+    this.cdRef.markForCheck();
+  }
+
+  updateLoadProgress(event: ProgressBarEvent) {
+    this.loadPrecent = event.percent;
+    this.cdRef.markForCheck();
   }
 
 }

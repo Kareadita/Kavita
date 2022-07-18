@@ -96,6 +96,7 @@ public class ReadingListRepository : IReadingListRepository
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
+            .AsSplitQuery()
             .OrderBy(l => l.LastModified)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
@@ -108,6 +109,7 @@ public class ReadingListRepository : IReadingListRepository
         return await _context.ReadingList
             .Where(r => r.Id == readingListId)
             .Include(r => r.Items.OrderBy(item => item.Order))
+            .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
 
@@ -116,6 +118,7 @@ public class ReadingListRepository : IReadingListRepository
         var userLibraries = _context.Library
             .Include(l => l.AppUsers)
             .Where(library => library.AppUsers.Any(user => user.Id == userId))
+            .AsSplitQuery()
             .AsNoTracking()
             .Select(library => library.Id)
             .ToList();
@@ -165,6 +168,7 @@ public class ReadingListRepository : IReadingListRepository
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)
+            .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
 

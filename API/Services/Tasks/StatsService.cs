@@ -165,6 +165,8 @@ public class StatsService : IStatsService
                 LibraryId = s.LibraryId,
                 Count = _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series).Count()
             })
+            .AsNoTracking()
+            .AsSplitQuery()
             .MaxAsync(d => d.Count);
     }
 
@@ -176,12 +178,16 @@ public class StatsService : IStatsService
                 v.SeriesId,
                 Count = _context.Series.Where(s => s.Id == v.SeriesId).SelectMany(s => s.Volumes).Count()
             })
+            .AsNoTracking()
+            .AsSplitQuery()
             .MaxAsync(d => d.Count);
     }
 
     private Task<int> MaxChaptersInASeries()
     {
         return _context.Series
+            .AsNoTracking()
+            .AsSplitQuery()
             .MaxAsync(s => s.Volumes
                 .Where(v => v.Number == 0)
                 .SelectMany(v => v.Chapters)
