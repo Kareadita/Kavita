@@ -55,7 +55,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     /// <remarks><see cref="Parser.Parser.NormalizePath"/> must be used before setting</remarks>
     public string FolderPath { get; set; }
-
+    /// <summary>
+    /// Last time the folder was scanned
+    /// </summary>
+    public DateTime LastFolderScanned { get; set; }
     /// <summary>
     /// The type of all the files attached to this series
     /// </summary>

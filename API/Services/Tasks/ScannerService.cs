@@ -203,12 +203,11 @@ public class ScannerService : IScannerService
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
-        var folderPaths = library.Folders.Select(f => f.Path).ToList();
-
+        var libraryPaths = library.Folders.Select(f => f.Path).ToList();
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
             .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
+            .Distinct()
             .ToList();
-        var libraryPaths = library.Folders.Select(f => f.Path).ToList();
 
         if (!await CheckMounts(library.Name, seriesFolderPaths))
         {
@@ -222,16 +221,25 @@ public class ScannerService : IScannerService
             return;
         }
 
+        // If all series Folder paths haven't been modified since last scan, abort
+        if (seriesFolderPaths.All(folder => File.GetLastWriteTimeUtc(folder) <= series.LastFolderScanned))
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
+            _logger.LogInformation("[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan", series.Name);
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+            return;
+        }
+
+
         var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
         var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
 
-        // Shouldn't this be libraryPath?
         var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
         if (seriesDirs.Keys.Count == 0)
         {
             _logger.LogDebug("Scan Series has files spread outside a main series folder. Defaulting to library folder");
-            seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(folderPaths, files.Select(f => f.FilePath).ToList());
+            seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
         }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
@@ -272,7 +280,7 @@ public class ScannerService : IScannerService
                 {
                     seriesDirs = new Dictionary<string, string>();
                     var path = Directory.GetParent(existingFolder)?.FullName;
-                    if (!folderPaths.Contains(path) || !folderPaths.Any(p => p.Contains(path ?? string.Empty)))
+                    if (!libraryPaths.Contains(path) || !libraryPaths.Any(p => p.Contains(path ?? string.Empty)))
                     {
                         _logger.LogCritical("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
                         await _eventHub.SendMessageAsync(MessageFactory.Error,
@@ -408,11 +416,18 @@ public class ScannerService : IScannerService
     public async Task ScanLibrary(int libraryId)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
-        if (!await CheckMounts(library.Name, library.Folders.Select(f => f.Path).ToList())) return;
+        var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
+        if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
+
+        // If all library Folder paths haven't been modified since last scan, abort
+        if (library.Folders.All(folder => File.GetLastWriteTimeUtc(folder.Path) <= folder.LastScanned))
+        {
+            _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
+            return;
+        }
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
-        var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         var shouldUseLibraryScan = await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths);
         if (shouldUseLibraryScan)
         {
@@ -424,7 +439,7 @@ public class ScannerService : IScannerService
 
         foreach (var folderPath in library.Folders)
         {
-            folderPath.LastScanned = DateTime.Now;
+            folderPath.LastScanned = DateTime.UtcNow;
         }
         var sw = Stopwatch.StartNew();
 
@@ -760,6 +775,7 @@ public class ScannerService : IScannerService
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, library.Type);
+            series.LastFolderScanned = DateTime.UtcNow;
         }
         catch (Exception ex)
         {
