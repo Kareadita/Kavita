@@ -25,7 +25,7 @@ public class GlobMatcher
     public bool ExcludeMatches(string file)
     {
         // NOTE: Glob.IsMatch() returns the opposite of what you'd expect
-        return _excludes.Any(p => !p.IsMatch(file));
+        return _excludes.Any(p => p.IsMatch(file));
     }
 
     /// <summary>

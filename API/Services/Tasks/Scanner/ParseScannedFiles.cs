@@ -121,12 +121,10 @@ namespace API.Services.Tasks.Scanner
             }
 
 
-            // TODO: Apply matcher to directories
-            foreach (var directory in _directoryService.GetDirectories(folderPath).Where(folder =>
-                     {
-                         if (matcher == null) return true;
-                         return !matcher.ExcludeMatches(Parser.Parser.NormalizePath(folder));
-                     }))
+            var directories = _directoryService.GetDirectories(folderPath)
+                .Select(folder => _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(folder).Name + _directoryService.FileSystem.Path.AltDirectorySeparatorChar)
+                .Where(folderName => !matcher.ExcludeMatches(folderName));
+            foreach (var directory in directories)
             {
                 files.AddRange(ScanFiles(directory, matcher));
             }
@@ -139,9 +137,11 @@ namespace API.Services.Tasks.Scanner
             }
             else
             {
-                // Matching only works on files
-                files.AddRange(_directoryService.GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
-                    .Where(file => !matcher.ExcludeMatches(Parser.Parser.NormalizePath(file))));
+                var foundFiles = _directoryService.GetFilesWithCertainExtensions(folderPath,
+                        Parser.Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
+                    .Select(file => _directoryService.FileSystem.FileInfo.FromFileName(file).Name)
+                    .Where(fileName => !matcher.ExcludeMatches(fileName));
+                files.AddRange(foundFiles);
             }
 
             return files;

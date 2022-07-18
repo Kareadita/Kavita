@@ -360,7 +360,7 @@ public class ParseScannedFilesTests
         fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
         fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
         fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("*Accel World/*"));
+        fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/Accel World/*")); // *Accel World/*
         fileSystem.AddFile("C:/Data/Hello.pdf", new MockFileData(string.Empty));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
