@@ -1,6 +1,6 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
@@ -10,6 +10,7 @@ import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 const keySize = 24;

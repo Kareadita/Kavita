@@ -278,7 +278,7 @@ namespace API.Services
 
                 var imageFile = GetKeyForImage(book, image.Attributes[key].Value);
                 image.Attributes.Remove(key);
-                // UrlEncode here to transform ../ into an escaped version, which avoids blocking on ngnix
+                // UrlEncode here to transform ../ into an escaped version, which avoids blocking on nginx
                 image.Attributes.Add(key, $"{apiBase}" + HttpUtility.UrlEncode(imageFile));
 
                 // Add a custom class that the reader uses to ensure images stay within reader
