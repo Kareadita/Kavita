@@ -490,7 +490,10 @@ public class ScannerService : IScannerService
     /// <param name="library"></param>
     private async Task UpdateLibraryAsync(Library library)
     {
-        // First, this code is done Series by Series and we do chunks of 50.
+        // My idea here is that we call the ScanFiles and pass an action. For every Series aka every TrackInfo, a Function is called (async, doesn't wait)
+        // and that is where we process the new information. In this way, we are essentially streamlining and tackling one at a time.
+        // Then after this whole loop runs, we remove any series not on disk and Save everything.
+        // This would allow async processing of series folders.
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
@@ -501,15 +504,20 @@ public class ScannerService : IScannerService
             _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
         }
 
-        // My idea here is that we call the ScanFiles and pass an action. For every Series aka every TrackInfo, a Function is called (async, doesn't wait)
-        // and that is where we process the new information. In this way, we are essentially streamlining and tackling one at a time.
-        // Then after this whole loop runs, we remove any series not on disk and Save everything.
-        // This would allow async processing of series folders.
+
 
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();
 
-        var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, libraryFolderPaths, library.Name, shouldUseLibraryScan);
+        IList<string> seenSeries = new List<string>();
+
+        var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, libraryFolderPaths, library.Name, shouldUseLibraryScan, (
+            infos =>
+            {
+                // This is a full series of information, we can now update the series
+
+                //seenSeries.Add();
+            }));
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 

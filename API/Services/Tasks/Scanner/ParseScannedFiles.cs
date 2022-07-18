@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Parser;
 using API.SignalR;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 
@@ -102,12 +101,6 @@ namespace API.Services.Tasks.Scanner
                 {
                     folderAction(ScanFiles(directory));
                 }
-
-                // If there was nothing in library directories, user is having their library consist of multiple
-                // if (directories.Count == 0)
-                // {
-                //     folderAction(ScanFiles(folderPath));
-                // }
             }
             else
             {
@@ -116,7 +109,7 @@ namespace API.Services.Tasks.Scanner
         }
 
 
-        public IEnumerable<string> ScanFiles(string folderPath, Matcher? matcher = null)
+        public IEnumerable<string> ScanFiles(string folderPath, GlobMatcher? matcher = null)
         {
             var files = new List<string>();
             if (!_directoryService.Exists(folderPath)) return files;
@@ -128,7 +121,12 @@ namespace API.Services.Tasks.Scanner
             }
 
 
-            foreach (var directory in _directoryService.GetDirectories(folderPath))
+            // TODO: Apply matcher to directories
+            foreach (var directory in _directoryService.GetDirectories(folderPath).Where(folder =>
+                     {
+                         if (matcher == null) return true;
+                         return !matcher.ExcludeMatches(Parser.Parser.NormalizePath(folder));
+                     }))
             {
                 files.AddRange(ScanFiles(directory, matcher));
             }
@@ -142,7 +140,8 @@ namespace API.Services.Tasks.Scanner
             else
             {
                 // Matching only works on files
-                files.AddRange(matcher.GetResultsInFullPath(folderPath).Where(f => f.EndsWith(Parser.Parser.SupportedExtensions)));
+                files.AddRange(_directoryService.GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
+                    .Where(file => !matcher.ExcludeMatches(Parser.Parser.NormalizePath(file))));
             }
 
             return files;
@@ -154,18 +153,27 @@ namespace API.Services.Tasks.Scanner
         /// <remarks>See https://www.digitalocean.com/community/tools/glob for testing</remarks>
         /// <param name="ignoreFile"></param>
         /// <returns></returns>
-        private Matcher CreateIgnoreMatcher(string ignoreFile)
+        private GlobMatcher CreateIgnoreMatcher(string ignoreFile)
         {
-            Matcher matcher = new();
-
             if (!_directoryService.FileSystem.File.Exists(ignoreFile))
             {
                 return null;
             }
 
             // Read file in and add each line to Matcher
-            matcher.AddInclude("**/*"); // All files, nested or otherwise
-            matcher.AddExcludePatterns(_directoryService.FileSystem.File.ReadAllLines(ignoreFile));
+            var lines = _directoryService.FileSystem.File.ReadAllLines(ignoreFile);
+            if (lines.Length == 0)
+            {
+                _logger.LogError("Kavita Ignore file found but empty, ignoring: {IgnoreFile}", ignoreFile);
+                return null;
+            }
+
+            GlobMatcher matcher = new();
+            foreach (var line in lines)
+            {
+                matcher.AddExclude(line);
+            }
+
             return matcher;
         }
 
@@ -526,7 +534,8 @@ namespace API.Services.Tasks.Scanner
         /// <param name="folders"></param>
         /// <param name="libraryName"></param>
         /// <returns></returns>
-        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType, IEnumerable<string> folders, string libraryName, bool isLibraryScan)
+        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType,
+            IEnumerable<string> folders, string libraryName, bool isLibraryScan, Action<IEnumerable<ParserInfo>> processSeriesInfos = null)
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
 
@@ -567,6 +576,12 @@ namespace API.Services.Tasks.Scanner
                         {
                             _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
                         }
+                    }
+
+                    // Here we can all an Action async (or put on queueue) to process all the infos
+                    if (infos.Count > 0)
+                    {
+                        processSeriesInfos?.Invoke(infos);
                     }
                 }
                 catch (ArgumentException ex)
