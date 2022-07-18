@@ -119,11 +119,24 @@ namespace API.Services.Tasks.Scanner
             {
                 matcher = CreateIgnoreMatcher(potentialIgnoreFile);
             }
+            // I need a way to handle nested ignore files when there is a parent
+            else
+            {
+                matcher.Merge(CreateIgnoreMatcher(potentialIgnoreFile));
+            }
 
 
-            var directories = _directoryService.GetDirectories(folderPath)
-                .Select(folder => _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(folder).Name + _directoryService.FileSystem.Path.AltDirectorySeparatorChar)
-                .Where(folderName => !matcher.ExcludeMatches(folderName));
+            IEnumerable<string> directories;
+            if (matcher == null)
+            {
+                directories = _directoryService.GetDirectories(folderPath);
+            }
+            else
+            {
+                directories = _directoryService.GetDirectories(folderPath)
+                    .Where(folder => matcher != null && !matcher.ExcludeMatches(_directoryService.FileSystem.DirectoryInfo.FromDirectoryName(folder).Name + _directoryService.FileSystem.Path.AltDirectorySeparatorChar));
+            }
+
             foreach (var directory in directories)
             {
                 files.AddRange(ScanFiles(directory, matcher));
@@ -139,8 +152,7 @@ namespace API.Services.Tasks.Scanner
             {
                 var foundFiles = _directoryService.GetFilesWithCertainExtensions(folderPath,
                         Parser.Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
-                    .Select(file => _directoryService.FileSystem.FileInfo.FromFileName(file).Name)
-                    .Where(fileName => !matcher.ExcludeMatches(fileName));
+                    .Where(file => !matcher.ExcludeMatches(_directoryService.FileSystem.FileInfo.FromFileName(file).Name));
                 files.AddRange(foundFiles);
             }
 

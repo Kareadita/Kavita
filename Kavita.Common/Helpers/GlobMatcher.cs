@@ -45,4 +45,19 @@ public class GlobMatcher
 
         return false;
     }
+
+    public void Merge(GlobMatcher matcher)
+    {
+        if (matcher == null) return;
+        foreach (var glob in matcher._excludes)
+        {
+            _excludes.Add(glob);
+        }
+
+        foreach (var glob in matcher._includes)
+        {
+            _includes.Add(glob);
+        }
+
+    }
 }

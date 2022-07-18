@@ -375,17 +375,38 @@ public class ParseScannedFilesTests
         return Task.CompletedTask;
     }
 
-    // [Theory]
-    // [InlineData("C:/Data/Accel World/file.cbz", "Accel World/*", true)]
-    // [InlineData("C:/Accel World/file.cbz", "Accel World/*", true)]
-    // [InlineData("C:/Accel World/", "Accel World/*", true)]
-    // [InlineData("C:/Accel World2/", "Accel World/*", false)]
-    // [InlineData("C:/Accel World2/hello.cbz", "*.cbz", true)]
-    // [InlineData("C:/Accel World2/hello.pdf", "*.cbz", false)]
-    // public void ShouldMatch(string inputString, string pattern, bool expected)
-    // {
-    //     Assert.Equal(expected, Glob.Parse(pattern).IsMatch(inputString));
-    // }
+
+    [Fact]
+    public Task ScanFiles_NestedIgnore_IgnoreNestedFilesInOneDirectoryOnly()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddDirectory("C:/Data/Accel World");
+        fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+        fileSystem.AddDirectory("C:/Data/Specials/");
+        fileSystem.AddDirectory("C:/Data/Specials/ArtBooks/");
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/Accel World/*"));
+        fileSystem.AddFile("C:/Data/Specials/.kavitaignore", new MockFileData("**/ArtBooks/*"));
+        fileSystem.AddFile("C:/Data/Specials/Hi.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Specials/ArtBooks/art book 01.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Hello.pdf", new MockFileData(string.Empty));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+
+        var allFiles = psf.ScanFiles("C:/Data/");
+
+        Assert.Equal(2, allFiles.Count()); // Ignore files are not counted in files, only valid extensions
+
+        return Task.CompletedTask;
+    }
+
 
     [Fact]
     public Task ScanFiles_ShouldFindAllFiles()
