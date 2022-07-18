@@ -47,6 +47,7 @@ public interface ILibraryRepository
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
+    Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -315,6 +316,16 @@ public class LibraryRepository : ILibraryRepository
                 Title = s.ToDescription()
             })
             .OrderBy(s => s.Title);
+    }
+
+    /// <summary>
+    /// Checks if any series folders match the folders passed in
+    /// </summary>
+    /// <param name="folders"></param>
+    /// <returns></returns>
+    public async Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders)
+    {
+        return await _context.Series.AnyAsync(s => folders.Contains(s.FolderPath));
     }
 
 }

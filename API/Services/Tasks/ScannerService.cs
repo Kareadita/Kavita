@@ -413,7 +413,7 @@ public class ScannerService : IScannerService
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
-        var shouldUseLibraryScan = await AreLibraryFolderPathsAreSeriesFolders(libraryFolderPaths);
+        var shouldUseLibraryScan = await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths);
         if (shouldUseLibraryScan)
         {
             _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
@@ -449,22 +449,6 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-    }
-
-
-    private async Task<bool> AreLibraryFolderPathsAreSeriesFolders(IEnumerable<string> libraryFolderPaths)
-    {
-        // Here is where we should do a check if the library folders are series folders (aka /manga/Accel World, /manga/Darker than Black) vs (/manga/).
-        // We need to pass a different flag in if a library has series folders. An easy way to handle this is check if there is a series on disk that has a folderpath of library path
-        // NOTE: This will not work until Series.FolderPath is set.
-        // TODO: Refactor with a custom method done all in the DB
-        foreach (var folderPath in libraryFolderPaths)
-        {
-            if ((await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folderPath)) <= 0) continue;
-            return false;
-        }
-
-        return true;
     }
 
     private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs, bool isLibraryScan)
@@ -511,7 +495,7 @@ public class ScannerService : IScannerService
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
-        var shouldUseLibraryScan = await AreLibraryFolderPathsAreSeriesFolders(libraryFolderPaths);
+        var shouldUseLibraryScan = await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths);
         if (shouldUseLibraryScan)
         {
             _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
