@@ -1,7 +1,7 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
-import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { IPageInfo, VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
@@ -10,7 +10,6 @@ import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 const keySize = 24;
@@ -147,6 +146,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     }
 
 
+
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
       this.changeDetectionRef.markForCheck();
@@ -156,6 +156,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
       this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
       this.changeDetectionRef.markForCheck();
     }
+    
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -192,5 +193,9 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.virtualScroller.scrollToIndex(targetIndex, true, undefined, 1000);
     this.changeDetectionRef.markForCheck();
     return;
+  }
+
+  showViewInfo(info: any) {
+    console.log(info);
   }
 }
