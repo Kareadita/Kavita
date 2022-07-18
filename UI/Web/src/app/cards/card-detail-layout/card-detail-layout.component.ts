@@ -1,7 +1,7 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
-import { IPageInfo, VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
@@ -10,9 +10,10 @@ import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
+import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
-const keySize = 24;
+const keySize = 25; // Height of the JumpBar button
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -70,7 +71,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   constructor(private seriesService: SeriesService, public utilityService: UtilityService,
-    @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef) {
+    @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
+    private jumpbarService: JumpbarService) {
     this.filter = this.seriesService.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
   }
@@ -78,28 +80,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   resizeJumpBar() {
-    const fullSize = (this.jumpBarKeys.length * keySize);
     const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
-    if (currentSize >= fullSize) {
-      this.jumpBarKeysToRender = [...this.jumpBarKeys];
-      this.changeDetectionRef.markForCheck();
-      return;
-    }
-
-    const targetNumberOfKeys = parseInt(Math.floor(currentSize / keySize) + '', 10);
-    const removeCount = this.jumpBarKeys.length - targetNumberOfKeys - 3;
-    if (removeCount <= 0) return;
 
 
-    this.jumpBarKeysToRender = [];
-
-    const removalTimes = Math.ceil(removeCount / 2);
-    const midPoint = Math.floor(this.jumpBarKeys.length / 2);
-    this.jumpBarKeysToRender.push(this.jumpBarKeys[0]);
-    this.removeFirstPartOfJumpBar(midPoint, removalTimes);
-    this.jumpBarKeysToRender.push(this.jumpBarKeys[midPoint]);
-    this.removeSecondPartOfJumpBar(midPoint, removalTimes);
-    this.jumpBarKeysToRender.push(this.jumpBarKeys[this.jumpBarKeys.length - 1]);
+    this.jumpBarKeysToRender = this.jumpbarService.generateJumpBar(this.jumpBarKeys, currentSize);
     this.changeDetectionRef.markForCheck();
   }
 
@@ -159,7 +143,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
   }
@@ -193,9 +177,5 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.virtualScroller.scrollToIndex(targetIndex, true, undefined, 1000);
     this.changeDetectionRef.markForCheck();
     return;
-  }
-
-  showViewInfo(info: any) {
-    console.log(info);
   }
 }
