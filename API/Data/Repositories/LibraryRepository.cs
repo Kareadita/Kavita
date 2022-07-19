@@ -37,7 +37,7 @@ public interface ILibraryRepository
     Task<Library> GetFullLibraryForIdAsync(int libraryId);
     Task<Library> GetFullLibraryForIdAsync(int libraryId, int seriesId);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
-    Task<IEnumerable<Library>> GetLibrariesAsync();
+    Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
@@ -48,6 +48,7 @@ public interface ILibraryRepository
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
+    Library GetLibraryByFolder(string folder);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -88,11 +89,14 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Library>> GetLibrariesAsync()
+    public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None)
     {
-        return await _context.Library
+        var query = _context.Library
             .Include(l => l.AppUsers)
-            .ToListAsync();
+            .Select(l => l);
+
+        query = AddIncludesToQuery(query, includes);
+        return await query.ToListAsync();
     }
 
     public async Task<bool> DeleteLibrary(int libraryId)
@@ -328,4 +332,12 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Series.AnyAsync(s => folders.Contains(s.FolderPath));
     }
 
+    public Library? GetLibraryByFolder(string folder)
+    {
+        var normalized = Parser.Parser.NormalizePath(folder);
+        return _context.Library
+            .Include(l => l.Folders)
+            .AsSplitQuery()
+            .SingleOrDefault(l => l.Folders.Select(f => f.Path).Contains(normalized));
+    }
 }

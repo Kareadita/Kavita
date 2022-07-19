@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using Hangfire;
-using Hangfire.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -217,14 +215,14 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask("ScannerService", "ScanSeries", new object[] {libraryId, seriesId, forceUpdate}))
+        if (HasAlreadyEnqueuedTask("ScannerService", "ScanSeries", new object[] {seriesId, forceUpdate}))
         {
             _logger.LogInformation("A duplicate request to scan series occured. Skipping");
             return;
         }
 
         _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
-        BackgroundJob.Enqueue(() => _scannerService.ScanSeries(libraryId, seriesId, CancellationToken.None));
+        BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, CancellationToken.None));
     }
 
     public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)

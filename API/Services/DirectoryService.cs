@@ -63,6 +63,8 @@ namespace API.Services
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         IEnumerable<string> GetDirectories(string folderPath);
+
+        string GetParentDirectoryName(string fileOrFolder);
     }
     public class DirectoryService : IDirectoryService
     {
@@ -520,6 +522,35 @@ namespace API.Services
                .Where(path => ExcludeDirectories.Matches(path).Count == 0);
        }
 
+       /// <summary>
+       /// Returns the parent directories name for a file or folder. Empty string is path is not valid.
+       /// </summary>
+       /// <remarks>This does touch I/O with an Attribute lookup</remarks>
+       /// <param name="fileOrFolder"></param>
+       /// <returns></returns>
+       public string GetParentDirectoryName(string fileOrFolder)
+       {
+           // TODO: Write Unit tests
+           try
+           {
+               var attr = File.GetAttributes(fileOrFolder);
+               var isDirectory = attr.HasFlag(FileAttributes.Directory);
+               if (isDirectory)
+               {
+                   return Parser.Parser.NormalizePath(FileSystem.DirectoryInfo
+                       .FromDirectoryName(fileOrFolder).Parent
+                       .FullName);
+               }
+
+               return Parser.Parser.NormalizePath(FileSystem.FileInfo
+                   .FromFileName(fileOrFolder).Directory.Parent
+                   .FullName);
+           }
+           catch (Exception)
+           {
+               return string.Empty;
+           }
+       }
 
 
        /// <summary>

@@ -196,145 +196,85 @@ namespace API.Services.Tasks.Scanner
         /// <param name="path">Path of a file</param>
         /// <param name="rootPath"></param>
         /// <param name="type">Library type to determine parsing to perform</param>
-        private void ProcessFile(string path, string rootPath, LibraryType type)
-        {
-            var info = _readingItemService.Parse(path, rootPath, type);
-            if (info == null)
-            {
-                // If the file is an image and literally a cover image, skip processing.
-                if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
-                {
-                    _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
-                }
-                return;
-            }
+        // private void ProcessFile(string path, string rootPath, LibraryType type)
+        // {
+        //     var info = _readingItemService.Parse(path, rootPath, type);
+        //     if (info == null)
+        //     {
+        //         // If the file is an image and literally a cover image, skip processing.
+        //         if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
+        //         {
+        //             _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
+        //         }
+        //         return;
+        //     }
+        //
+        //
+        //     // This catches when original library type is Manga/Comic and when parsing with non
+        //     if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
+        //     {
+        //         info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
+        //         var info2 = _readingItemService.Parse(path, rootPath, type);
+        //         info.Merge(info2);
+        //     }
+        //
+        //     info.ComicInfo = _readingItemService.GetComicInfo(path);
+        //     if (info.ComicInfo != null)
+        //     {
+        //         if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+        //         {
+        //             info.Volumes = info.ComicInfo.Volume;
+        //         }
+        //         if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+        //         {
+        //             info.Series = info.ComicInfo.Series.Trim();
+        //         }
+        //         if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+        //         {
+        //             info.Chapters = info.ComicInfo.Number;
+        //         }
+        //
+        //         // Patch is SeriesSort from ComicInfo
+        //         if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+        //         {
+        //             info.SeriesSort = info.ComicInfo.TitleSort.Trim();
+        //         }
+        //
+        //         if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+        //         {
+        //             info.IsSpecial = true;
+        //             info.Chapters = Parser.Parser.DefaultChapter;
+        //             info.Volumes = Parser.Parser.DefaultVolume;
+        //         }
+        //
+        //         if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
+        //         {
+        //             info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
+        //         }
+        //
+        //         if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+        //         {
+        //             info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
+        //         }
+        //     }
+        //
+        //     try
+        //     {
+        //         TrackSeries(info);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
+        //     }
+        // }
 
-
-            // This catches when original library type is Manga/Comic and when parsing with non
-            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
-            {
-                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
-                var info2 = _readingItemService.Parse(path, rootPath, type);
-                info.Merge(info2);
-            }
-
-            info.ComicInfo = _readingItemService.GetComicInfo(path);
-            if (info.ComicInfo != null)
-            {
-                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
-                {
-                    info.Volumes = info.ComicInfo.Volume;
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-                {
-                    info.Series = info.ComicInfo.Series.Trim();
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-                {
-                    info.Chapters = info.ComicInfo.Number;
-                }
-
-                // Patch is SeriesSort from ComicInfo
-                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
-                {
-                    info.SeriesSort = info.ComicInfo.TitleSort.Trim();
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
-                {
-                    info.IsSpecial = true;
-                    info.Chapters = Parser.Parser.DefaultChapter;
-                    info.Volumes = Parser.Parser.DefaultVolume;
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
-                {
-                    info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
-                {
-                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
-                }
-            }
-
-            try
-            {
-                TrackSeries(info);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
-            }
-        }
-
-
-        private ParserInfo? ProcessFileNoTrack(string path, string rootPath, LibraryType type)
-        {
-            var info = _readingItemService.Parse(path, rootPath, type);
-            if (info == null)
-            {
-                // If the file is an image and literally a cover image, skip processing.
-                if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
-                {
-                    _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
-                }
-                return null;
-            }
-
-
-            // This catches when original library type is Manga/Comic and when parsing with non
-            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
-            {
-                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
-                var info2 = _readingItemService.Parse(path, rootPath, type);
-                info.Merge(info2);
-            }
-
-            info.ComicInfo = _readingItemService.GetComicInfo(path);
-            if (info.ComicInfo != null)
-            {
-                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
-                {
-                    info.Volumes = info.ComicInfo.Volume;
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-                {
-                    info.Series = info.ComicInfo.Series.Trim();
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-                {
-                    info.Chapters = info.ComicInfo.Number;
-                }
-
-                // Patch is SeriesSort from ComicInfo
-                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
-                {
-                    info.SeriesSort = info.ComicInfo.TitleSort.Trim();
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
-                {
-                    info.IsSpecial = true;
-                    info.Chapters = Parser.Parser.DefaultChapter;
-                    info.Volumes = Parser.Parser.DefaultVolume;
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
-                {
-                    info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
-                {
-                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
-                }
-            }
-
-            return info;
-        }
-
-        private ParserInfo ProcessFile2(string path, string rootPath, LibraryType type)
+        /// <summary>
+        /// Processes files found during a library scan.
+        /// </summary>
+        /// <param name="path">Path of a file</param>
+        /// <param name="rootPath"></param>
+        /// <param name="type">Library type to determine parsing to perform</param>
+        private ParserInfo ProcessFile(string path, string rootPath, LibraryType type)
         {
             var info = _readingItemService.Parse(path, rootPath, type);
             if (info == null)
@@ -562,7 +502,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             try
                             {
-                                var info = ProcessFile2(file, folderPath, libraryType);
+                                var info = ProcessFile(file, folderPath, libraryType);
                                 if (info != null) infos.Add(info);
                                 await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
                             }

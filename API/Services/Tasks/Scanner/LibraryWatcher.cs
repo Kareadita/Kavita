@@ -51,7 +51,7 @@ public class LibraryWatcher : ILibraryWatcher
 
     private IList<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
 
-    private Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary =
+    private readonly Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary =
         new Dictionary<string, IList<FileSystemWatcher>>();
 
     private IList<string> _libraryFolders = new List<string>();
@@ -73,6 +73,7 @@ public class LibraryWatcher : ILibraryWatcher
     {
         _logger.LogInformation("Starting file watchers");
         _libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).SelectMany(l => l.Folders).ToList();
+        //_libraryFolders = new List<string>() { "E:/empty/" };
 
         foreach (var library in await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
         {
@@ -109,38 +110,44 @@ public class LibraryWatcher : ILibraryWatcher
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
-        if (!new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(e.FullPath).Extension)) return;
-        ProcessQueue();
         Console.WriteLine($"Changed: {e.FullPath}, {e.Name}");
+        ProcessChange(e.FullPath);
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
-        // TODO: This needs to enqueue a job that runs in 5 mins or so (as multiple files can be processed).
-        if (!new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(e.FullPath).Extension)) return;
+        Console.WriteLine($"Created: {e.FullPath}, {e.Name}");
+        ProcessChange(e.FullPath);
+    }
 
-        var attr = File.GetAttributes(e.FullPath);
-        var isDirectory = attr.HasFlag(FileAttributes.Directory);
+    private void OnDeleted(object sender, FileSystemEventArgs e) {
+        Console.WriteLine($"Deleted: {e.FullPath}, {e.Name}");
+        ProcessChange(e.FullPath);
+    }
 
-        string parentDirectory = string.Empty;
-        if (isDirectory)
-        {
-            parentDirectory = Parser.Parser.NormalizePath(_directoryService.FileSystem.DirectoryInfo.FromDirectoryName(e.FullPath).Parent
-                .FullName);
-        }
-        else
-        {
-            parentDirectory = Parser.Parser.NormalizePath(_directoryService.FileSystem.FileInfo.FromFileName(e.FullPath).Directory.Parent
-                .FullName);
-        }
 
-        //var directory = _directoryService.FileSystem.FileInfo.FromFileName(e.FullPath).DirectoryName; //.Directory.Parent;
+
+    private void OnRenamed(object sender, RenamedEventArgs e)
+    {
+        Console.WriteLine($"Renamed:");
+        Console.WriteLine($"    Old: {e.OldFullPath}");
+        Console.WriteLine($"    New: {e.FullPath}");
+        ProcessChange(e.FullPath);
+    }
+
+    private void ProcessChange(string filePath)
+    {
+        if (!new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
+
+        var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
+        if (string.IsNullOrEmpty(parentDirectory)) return;
+
         // We need to find the library this creation belongs to
         var libraryFolder = _libraryFolders.Select(Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
 
-        var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, e.FullPath).ToList();
+        var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
         if (!rootFolder.Any()) return;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
@@ -159,25 +166,6 @@ public class LibraryWatcher : ILibraryWatcher
         _scanQueue.Enqueue(queueItem);
 
         ProcessQueue();
-
-        Console.WriteLine($"Created: {e.FullPath}, {e.Name}");
-    }
-
-    private void OnDeleted(object sender, FileSystemEventArgs e) {
-        if (!new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(e.FullPath).Extension)) return;
-        ProcessQueue();
-        Console.WriteLine($"Deleted: {e.FullPath}, {e.Name}");
-    }
-
-
-
-    private void OnRenamed(object sender, RenamedEventArgs e)
-    {
-        if (!new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(e.FullPath).Extension)) return;
-        ProcessQueue();
-        Console.WriteLine($"Renamed:");
-        Console.WriteLine($"    Old: {e.OldFullPath}");
-        Console.WriteLine($"    New: {e.FullPath}");
     }
 
     /// <summary>
@@ -185,13 +173,15 @@ public class LibraryWatcher : ILibraryWatcher
     /// </summary>
     private void ProcessQueue()
     {
+        // This is problematic as it requires more than one modification for anything to happen
         var i = 0;
         while (i < _scanQueue.Count)
         {
             var item = _scanQueue.Peek();
             if (item.QueueTime < DateTime.Now.Subtract(TimeSpan.FromSeconds(10))) // TimeSpan.FromMinutes(5)
             {
-                BackgroundJob.Enqueue(() => _scannerService.ScanSeriesFolder(item.FolderPath));
+                _logger.LogDebug("Scheduling ScanSeriesFolder for {Folder}", item.FolderPath);
+                BackgroundJob.Enqueue(() => _scannerService.ScanFolder(item.FolderPath));
                 _scanQueue.Dequeue();
                 i++;
             }
@@ -200,5 +190,11 @@ public class LibraryWatcher : ILibraryWatcher
                 break;
             }
         }
+
+        if (_scanQueue.Count > 0)
+        {
+            Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(t=> ProcessQueue());
+        }
+
     }
 }

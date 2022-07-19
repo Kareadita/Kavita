@@ -120,6 +120,7 @@ public interface ISeriesRepository
     Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
     Task<int> GetSeriesIdByFolder(string folder);
+    Task<Series> GetSeriesByFolderPath(string folder);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1081,6 +1082,17 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.FolderPath.Equals(normalized))
             .SingleOrDefaultAsync();
         return series?.Id ?? 0;
+    }
+
+    /// <summary>
+    /// Return a Series by Folder path. Null if not found.
+    /// </summary>
+    /// <param name="folder">This will be normalized in the query</param>
+    /// <returns></returns>
+    public async Task<Series> GetSeriesByFolderPath(string folder)
+    {
+        var normalized = Parser.Parser.NormalizePath(folder);
+        return await _context.Series.SingleOrDefaultAsync(s => s.FolderPath.Equals(normalized));
     }
 
 
