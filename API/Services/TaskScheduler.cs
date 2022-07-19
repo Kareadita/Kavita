@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -191,7 +192,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshMetadata(int libraryId, bool forceUpdate = true)
     {
-        if (HasAlreadyEnqueuedTask("MetadataService","RefreshMetadata",  new object[] {libraryId, forceUpdate}))
+        if (HasAlreadyEnqueuedTask("MetadataService","GenerateCoversForLibrary",  new object[] {libraryId, forceUpdate}))
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
@@ -203,7 +204,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask("MetadataService","RefreshMetadataForSeries",  new object[] {libraryId, seriesId, forceUpdate}))
+        if (HasAlreadyEnqueuedTask("MetadataService","GenerateCoversForSeries",  new object[] {libraryId, seriesId, forceUpdate}))
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
@@ -260,12 +261,20 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
     /// <returns></returns>
-    private static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = "default")
+    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = "default")
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
         return enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
                                      j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
                                      j.Value.Job.Method.Name.Equals(methodName) &&
                                      j.Value.Job.Method.DeclaringType.Name.Equals(className));
+    }
+
+    public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = "default")
+    {
+        var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
+        return enqueuedJobs.Any(j => !j.Value.InEnqueuedState &&
+                                     //j.Value.Job.Method.Name.Equals(methodName) &&
+                                     classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
     }
 }

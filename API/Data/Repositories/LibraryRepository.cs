@@ -329,7 +329,8 @@ public class LibraryRepository : ILibraryRepository
     /// <returns></returns>
     public async Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders)
     {
-        return await _context.Series.AnyAsync(s => folders.Contains(s.FolderPath));
+        var normalized = folders.Select(Parser.Parser.NormalizePath);
+        return await _context.Series.AnyAsync(s => normalized.Contains(s.FolderPath));
     }
 
     public Library? GetLibraryByFolder(string folder)

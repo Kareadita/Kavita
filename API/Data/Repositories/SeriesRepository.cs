@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -21,10 +20,8 @@ using API.Services;
 using API.Services.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Kavita.Common.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
+
 
 namespace API.Data.Repositories;
 
@@ -121,6 +118,7 @@ public interface ISeriesRepository
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
     Task<int> GetSeriesIdByFolder(string folder);
     Task<Series> GetSeriesByFolderPath(string folder);
+    Task<Series> GetFullSeriesByName(string series, int libraryId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1093,6 +1091,38 @@ public class SeriesRepository : ISeriesRepository
     {
         var normalized = Parser.Parser.NormalizePath(folder);
         return await _context.Series.SingleOrDefaultAsync(s => s.FolderPath.Equals(normalized));
+    }
+
+    public Task<Series> GetFullSeriesByName(string series, int libraryId)
+    {
+        return _context.Series
+            .Where(s => s.Name.Equals(series) && s.LibraryId == libraryId)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.People)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Genres)
+            .Include(s => s.Library)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(cm => cm.People)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+
+
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Files)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync();
     }
 
 

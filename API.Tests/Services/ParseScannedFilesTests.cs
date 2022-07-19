@@ -440,7 +440,7 @@ public class ParseScannedFilesTests
     #region ProcessFiles
 
     [Fact]
-    public void ProcessFiles_ShouldCallFolderActionTwice()
+    public async Task ProcessFiles_ShouldCallFolderActionTwice()
     {
         var fileSystem = new MockFileSystem();
         fileSystem.AddDirectory("C:/Data/");
@@ -457,7 +457,7 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var callCount = 0;
-        psf.ProcessFiles("C:/Data", true, (files) =>
+        await psf.ProcessFiles("C:/Data", true, (files, folderPath) =>
         {
             callCount++;
             return Task.CompletedTask;
@@ -471,7 +471,7 @@ public class ParseScannedFilesTests
     /// Due to this not being a library, it's going to consider everything under C:/Data as being one folder aka a series folder
     /// </summary>
     [Fact]
-    public void ProcessFiles_ShouldCallFolderActionOnce()
+    public async Task ProcessFiles_ShouldCallFolderActionOnce()
     {
         var fileSystem = new MockFileSystem();
         fileSystem.AddDirectory("C:/Data/");
@@ -488,7 +488,7 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var callCount = 0;
-        psf.ProcessFiles("C:/Data", false, (files) =>
+        await psf.ProcessFiles("C:/Data", false, (files, folderPath) =>
         {
             callCount++;
             return Task.CompletedTask;

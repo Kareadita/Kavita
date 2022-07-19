@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -58,6 +59,7 @@ public class LibraryWatcher : ILibraryWatcher
 
     // TODO: This needs to be blocking so we can consume from another thread
     private readonly Queue<FolderScanQueueable> _scanQueue = new Queue<FolderScanQueueable>();
+    //public readonly BlockingCollection<FolderScanQueueable> ScanQueue = new BlockingCollection<FolderScanQueueable>();
 
 
 
@@ -73,7 +75,6 @@ public class LibraryWatcher : ILibraryWatcher
     {
         _logger.LogInformation("Starting file watchers");
         _libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).SelectMany(l => l.Folders).ToList();
-        //_libraryFolders = new List<string>() { "E:/empty/" };
 
         foreach (var library in await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
         {
@@ -138,6 +139,13 @@ public class LibraryWatcher : ILibraryWatcher
     private void ProcessChange(string filePath)
     {
         if (!new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
+        // Don't do anything if a Library or ScanSeries in progress
+        if (TaskScheduler.RunningAnyTasksByMethod(new[] {"MetadataService", "ScannerService"}))
+        {
+            _logger.LogDebug("Suppressing Change due to scan being inprogress");
+            return;
+        }
+
 
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
         if (string.IsNullOrEmpty(parentDirectory)) return;
