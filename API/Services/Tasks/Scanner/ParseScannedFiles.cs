@@ -389,11 +389,12 @@ namespace API.Services.Tasks.Scanner
             {
                 try
                 {
-                    var infos = new List<ParserInfo>();
+
                     await ProcessFiles(folderPath, isLibraryScan, async (files, folder) =>
                     {
                         _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
                         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+                        var infos = new List<ParserInfo>();
                         foreach (var file in files)
                         {
                             var info = _readingItemService.ParseFile(file, folderPath, libraryType);
@@ -448,10 +449,10 @@ namespace API.Services.Tasks.Scanner
                     // }
 
                     // Here we can all an Action async (or put on queueue) to process all the infos
-                    if (infos.Count > 0)
-                    {
-                        processSeriesInfos?.Invoke(infos);
-                    }
+                    // if (infos.Count > 0)
+                    // {
+                    //     processSeriesInfos?.Invoke(infos);
+                    // }
                 }
                 catch (ArgumentException ex)
                 {

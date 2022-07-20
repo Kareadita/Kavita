@@ -389,7 +389,7 @@ public class ScannerService : IScannerService
             if (infos.Count == 0) return Task.CompletedTask;
 
             seenSeries.Add(infos.First().Series);
-            //await ProcessSeriesAsync(infos, allPeople, allTags, allGenres, library);
+            //await ProcessSeriesAsync(infos, allPeople, allTags, allGenres, library); // I'm seeing this be called multiple times for the same folders
             parsedSeries.Add(new ParsedSeries()
             {
                 Name = infos.First().Series,
@@ -442,7 +442,7 @@ public class ScannerService : IScannerService
         //var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name);
 
         var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name,
-            isLibraryScan,   processSeriesInfos);
+            isLibraryScan,  processSeriesInfos);
 
 
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
