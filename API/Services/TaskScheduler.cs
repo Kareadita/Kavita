@@ -29,7 +29,6 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
-    void ScanSeriesByFolder(string folderPath);
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -153,10 +152,6 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
-    public void ScanSeriesByFolder(string folderPath)
-    {
-        BackgroundJob.Enqueue(() => _scannerService.ScanSeriesFolder(folderPath));
-    }
 
     #endregion
 

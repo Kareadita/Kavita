@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 
@@ -24,6 +26,16 @@ namespace API.Entities
         public ICollection<FolderPath> Folders { get; set; }
         public ICollection<AppUser> AppUsers { get; set; }
         public ICollection<Series> Series { get; set; }
+
+        // Methods
+        /// <summary>
+        /// Has there been any modifications to the FolderPath's directory since the <see cref="FolderPath.LastScanned"/> date
+        /// </summary>
+        /// <returns></returns>
+        public bool AnyModificationsSinceLastScan()
+        {
+            return Folders.All(folder => File.GetLastWriteTimeUtc(folder.Path) > folder.LastScanned);
+        }
 
     }
 }

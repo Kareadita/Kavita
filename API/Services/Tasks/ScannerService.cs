@@ -40,7 +40,6 @@ public interface IScannerService
     Task ScanSeries(int seriesId, CancellationToken token);
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    Task ScanSeriesFolder(string seriesFolder);
     Task ScanFolder(string folder);
 
 }
@@ -80,7 +79,6 @@ public class ScannerService : IScannerService
 
     public async Task ScanFolder(string folder)
     {
-        // TODO: Let's actually put this on TaskScheduler because there we have access to distinctUntilChanged on scheduling
         // NOTE: I might want to move a lot of this code to the LibraryWatcher or something and just pack libraryId and seriesId
         // Validate if we are scanning a new series (that belongs to a library) or an existing series
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
@@ -104,114 +102,6 @@ public class ScannerService : IScannerService
         {
             BackgroundJob.Enqueue(() => ScanLibrary(library.Id));
         }
-
-
-
-        // var allLibraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync(LibraryIncludes.Folders);
-        // foreach (var lib in allLibraries)
-        // {
-        //     if (lib.Folders.Select(l => l.Path).Any(p => p.StartsWith(folder)))
-        //     {
-        //         BackgroundJob.Enqueue(() => ScanLibrary(lib.Id));
-        //         break;
-        //     }
-        // }
-        // At this point, I have no idea what would pass through, we should just ignore
-
-    }
-
-    /// <summary>
-    /// This scans by folder, knowing nothing about the series or library
-    /// </summary>
-    /// <param name="folder"></param>
-    public async Task ScanSeriesFolder(string folder)
-    {
-        var sw = Stopwatch.StartNew();
-        var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
-        if (seriesId == 0)
-        {
-            // This happens on creation
-            return;
-        }
-        var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
-        var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
-
-
-
-        // var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
-        //     .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
-        //     .Distinct()
-        //     .ToList();
-
-        var dirs = new List<string>() {folder};
-
-        if (!await CheckMounts(library.Name, new List<string>() {folder}))
-        {
-            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            return;
-        }
-
-        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
-
-
-        _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, dirs, false);
-
-
-        // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
-        if (parsedSeries.Count == 0) // TODO: Refactor into a method
-        {
-            var anyFilesExist =
-                (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id)).Any(m => File.Exists(m.FilePath));
-
-            if (!anyFilesExist)
-            {
-                try
-                {
-                    _unitOfWork.SeriesRepository.Remove(series);
-                    await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogCritical(ex, "There was an error during ScanSeries to delete the series");
-                    await _unitOfWork.RollbackAsync();
-                }
-            }
-            else
-            {
-                // NOTE: I think we should just throw an error to the user, rather than try to support bad naming convention.
-                _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention. Aborting scan");
-                await _unitOfWork.RollbackAsync();
-                return;
-            }
-        }
-
-        try
-        {
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
-            await UpdateSeries(series, parsedSeries, allPeople, allTags, allGenres, library);
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
-
-            await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
-            await RemoveAbandonedMetadataKeys();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogCritical(ex, "There was an error during ScanSeries to update the series");
-            await _unitOfWork.RollbackAsync();
-        }
-        // Tell UI that this series is done
-        await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-            MessageFactory.ScanSeriesEvent(series.LibraryId, seriesId, series.Name));
-        await CleanupDbEntities();
-
-        BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
-        BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false));
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, false));
     }
 
     public async Task ScanSeries(int seriesId, CancellationToken token)
@@ -444,16 +334,18 @@ public class ScannerService : IScannerService
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
         // If all library Folder paths haven't been modified since last scan, abort
-        // TODO: Undelete this
-        // if (library.Folders.All(folder => File.GetLastWriteTimeUtc(folder.Path) <= folder.LastScanned))
-        // {
-        //     _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
-        //     // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
-        //     await _eventHub.SendMessageAsync(MessageFactory.Error,
-        //         MessageFactory.ErrorEvent($"{library.Name} scan has no work to do",
-        //             "All folders have not been changed since last scan. Scan will be aborted."));
-        //     return;
-        // }
+        //if (library.Folders.All(folder => File.GetLastWriteTimeUtc(folder.Path) <= folder.LastScanned))
+        if (library.AnyModificationsSinceLastScan())
+        {
+            _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
+            // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent($"{library.Name} scan has no work to do",
+                    "All folders have not been changed since last scan. Scan will be aborted."));
+            return;
+        }
+
+        // Validations are done, now we can start actual scan
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
 

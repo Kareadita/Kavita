@@ -334,6 +334,7 @@ public class ParseScannedFilesTests
         await psf.ProcessFiles("C:/Data", true, (files, folderPath) =>
         {
             callCount++;
+
             return Task.CompletedTask;
         });
 
