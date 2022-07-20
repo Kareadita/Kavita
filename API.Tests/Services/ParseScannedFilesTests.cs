@@ -18,7 +18,6 @@ using DotNet.Globbing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -55,6 +54,11 @@ internal class MockReadingItemService : IReadingItemService
     }
 
     public ParserInfo Parse(string path, string rootPath, LibraryType type)
+    {
+        return _defaultParser.Parse(path, rootPath, type);
+    }
+
+    public ParserInfo ParseFile(string path, string rootPath, LibraryType type)
     {
         return _defaultParser.Parse(path, rootPath, type);
     }
@@ -165,7 +169,7 @@ public class ParseScannedFilesTests
             ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.cbz", false),
             ParserInfoFactory.CreateParsedInfo("Accel World", "2", "0", "Accel World v2.cbz", false)
         };
-        var parsedSeries = new Dictionary<ParsedSeries, List<ParserInfo>>
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>
         {
             {
                 new ParsedSeries()
@@ -210,7 +214,7 @@ public class ParseScannedFilesTests
             ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.cbz", false),
             ParserInfoFactory.CreateParsedInfo("Accel World", "2", "0", "Accel World v2.cbz", false)
         };
-        var parsedSeries = new Dictionary<ParsedSeries, List<ParserInfo>>
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>
         {
             {
                 new ParsedSeries()
@@ -312,6 +316,59 @@ public class ParseScannedFilesTests
 
 
     #region ProcessFiles
+
+    private MockFileSystem CreateTestFilesystem()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddDirectory("C:/Data/Accel World");
+        fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Black World/Black World SP01.cbz", new MockFileData(string.Empty));
+
+        return fileSystem;
+    }
+
+    [Fact]
+    public async Task ProcessFiles_ForLibraryMode_OnlyCallsFolderActionForEachTopLevelFolder()
+    {
+        var fileSystem = CreateTestFilesystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+        var directoriesSeen = new HashSet<string>();
+        await psf.ProcessFiles("C:/Data/", true, (files, directoryPath) =>
+        {
+            directoriesSeen.Add(directoryPath);
+            return Task.CompletedTask;
+        });
+
+        Assert.Equal(2, directoriesSeen.Count);
+    }
+
+    [Fact]
+    public async Task ProcessFiles_ForNonLibraryMode_CallsFolderActionOnce()
+    {
+        var fileSystem = CreateTestFilesystem();
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+        var directoriesSeen = new HashSet<string>();
+        await psf.ProcessFiles("C:/Data/", false, (files, directoryPath) =>
+        {
+            directoriesSeen.Add(directoryPath);
+            return Task.CompletedTask;
+        });
+
+        Assert.Equal(1, directoriesSeen.Count);
+        directoriesSeen.TryGetValue("C:/Data/", out var actual);
+        Assert.Equal("C:/Data/", actual);
+    }
 
     [Fact]
     public async Task ProcessFiles_ShouldCallFolderActionTwice()

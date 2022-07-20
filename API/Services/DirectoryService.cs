@@ -66,7 +66,7 @@ namespace API.Services
         IEnumerable<string> GetDirectories(string folderPath);
         string GetParentDirectoryName(string fileOrFolder);
         #nullable enable
-        IEnumerable<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
+        IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
         #nullable disable
     }
     public class DirectoryService : IDirectoryService
@@ -561,10 +561,9 @@ namespace API.Services
        /// <param name="folderPath"></param>
        /// <param name="matcher"></param>
        /// <returns></returns>
-       public IEnumerable<string> ScanFiles(string folderPath, GlobMatcher? matcher = null)
+       public IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null)
        {
-            // TODO: Write unit tests
-            _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
+           _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
             var files = new List<string>();
             if (!Exists(folderPath)) return files;
 

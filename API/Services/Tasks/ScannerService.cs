@@ -112,41 +112,21 @@ public class ScannerService : IScannerService
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
-        var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
-            .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
-            .Distinct()
-            .ToList();
+        if (!await ShouldScanSeries(seriesId, library, libraryPaths, series)) return;
 
-        if (!await CheckMounts(library.Name, seriesFolderPaths))
-        {
-            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            return;
-        }
-
-        if (!await CheckMounts(library.Name, libraryPaths))
-        {
-            _logger.LogCritical("Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
-            return;
-        }
-
-        // If all series Folder paths haven't been modified since last scan, abort
-        if (seriesFolderPaths.All(folder => File.GetLastWriteTimeUtc(folder) <= series.LastFolderScanned))
-        {
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
-            _logger.LogInformation("[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan", series.Name);
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
-            return;
-        }
 
 
         var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
         var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
 
+        // TODO: Hook in folderpath optimization _directoryService.Exists(series.FolderPath)
+
         var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
         if (seriesDirs.Keys.Count == 0)
         {
             _logger.LogCritical("Scan Series has files spread outside a main series folder. Defaulting to library folder (this is expensive)");
+            // TODO: We should send an INFO to the UI to inform user
             seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
         }
 
@@ -244,7 +224,44 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, series.Id, false));
     }
 
-    private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
+    private async Task<bool> ShouldScanSeries(int seriesId, Library library, List<string> libraryPaths, Series series)
+    {
+        var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
+            .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
+            .Distinct()
+            .ToList();
+
+        if (!await CheckMounts(library.Name, seriesFolderPaths))
+        {
+            _logger.LogCritical(
+                "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            return false;
+        }
+
+        if (!await CheckMounts(library.Name, libraryPaths))
+        {
+            _logger.LogCritical(
+                "Some of the root folders for library are not accessible. Please check that drives are connected and rescan. Scan will be aborted");
+            return false;
+        }
+
+        // If all series Folder paths haven't been modified since last scan, abort
+        if (seriesFolderPaths.All(folder => File.GetLastWriteTimeUtc(folder) <= series.LastFolderScanned))
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
+            _logger.LogInformation(
+                "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
+                series.Name);
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
     {
         var keys = parsedSeries.Keys;
         foreach (var key in keys.Where(key => !SeriesHelper.FindSeries(series, key))) // series.Format != key.Format ||
@@ -254,7 +271,7 @@ public class ScannerService : IScannerService
     }
 
     private async Task CommitAndSend(int totalFiles,
-        Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series)
+        Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series)
     {
         if (_unitOfWork.HasChanges())
         {
@@ -335,7 +352,7 @@ public class ScannerService : IScannerService
 
         // If all library Folder paths haven't been modified since last scan, abort
         //if (library.Folders.All(folder => File.GetLastWriteTimeUtc(folder.Path) <= folder.LastScanned))
-        if (library.AnyModificationsSinceLastScan())
+        if (!library.AnyModificationsSinceLastScan())
         {
             _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
             // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
@@ -359,19 +376,27 @@ public class ScannerService : IScannerService
         var seriesCount = 0;
         var fileCount = 0;
 
-        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+        // var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        // var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
         var seenSeries = new List<string>();
 
-        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, (async infos =>
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, (infos =>
         {
             seriesCount += 1;
             fileCount += infos.Count;
-            if (infos.Count == 0) return;
+            if (infos.Count == 0) return Task.CompletedTask;
 
             seenSeries.Add(infos.First().Series);
-            await ProcessSeriesAsync(infos, allPeople, allTags, allGenres, library);
+            //await ProcessSeriesAsync(infos, allPeople, allTags, allGenres, library);
+            parsedSeries.Add(new ParsedSeries()
+            {
+                Name = infos.First().Series,
+                NormalizedName = Parser.Parser.Normalize(infos.First().Series),
+                Format = infos.First().Format
+            }, infos);
+            return Task.CompletedTask;
         }));
 
         _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
@@ -383,7 +408,7 @@ public class ScannerService : IScannerService
 
         var sw = Stopwatch.StartNew();
 
-        //await UpdateLibrary(library, series);
+        await UpdateLibrary(library, parsedSeries);
 
         // TODO: Remove Series not seen from DB
 
@@ -408,7 +433,7 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
-    private async Task<Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs,
+    private async Task<Tuple<int, long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs,
         bool isLibraryScan, Func<IList<ParserInfo>, Task> processSeriesInfos = null)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
@@ -423,7 +448,7 @@ public class ScannerService : IScannerService
         var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
-        return new Tuple<int, long, Dictionary<ParsedSeries, List<ParserInfo>>>(totalFiles, scanElapsedTime, parsedSeries);
+        return new Tuple<int, long, Dictionary<ParsedSeries, IList<ParserInfo>>>(totalFiles, scanElapsedTime, parsedSeries);
     }
 
     /// <summary>
@@ -549,7 +574,7 @@ public class ScannerService : IScannerService
 
     }
 
-    private async Task UpdateLibrary(Library library, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+    private async Task UpdateLibrary(Library library, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
     {
         if (parsedSeries == null) return;
 
@@ -725,7 +750,7 @@ public class ScannerService : IScannerService
             newSeries.Count, stopwatch.ElapsedMilliseconds, library.Name);
     }
 
-    private async Task UpdateSeries(Series series, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries,
+    private async Task UpdateSeries(Series series, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries,
         ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, Library library)
     {
         try
@@ -797,7 +822,7 @@ public class ScannerService : IScannerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
     }
 
-    public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+    public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
     {
         return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
     }

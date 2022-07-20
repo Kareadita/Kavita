@@ -9,8 +9,6 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.Parser;
 using API.SignalR;
-using Kavita.Common.Helpers;
-using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner
@@ -38,7 +36,7 @@ namespace API.Services.Tasks.Scanner
 
     public class ParseScannedFiles
     {
-        private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
+        private readonly ConcurrentDictionary<ParsedSeries, IList<ParserInfo>> _scannedSeries;
         private readonly ILogger _logger;
         private readonly IDirectoryService _directoryService;
         private readonly IReadingItemService _readingItemService;
@@ -59,7 +57,7 @@ namespace API.Services.Tasks.Scanner
             _logger = logger;
             _directoryService = directoryService;
             _readingItemService = readingItemService;
-            _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+            _scannedSeries = new ConcurrentDictionary<ParsedSeries, IList<ParserInfo>>();
             _defaultParser = new DefaultParser(_directoryService);
             _eventHub = eventHub;
         }
@@ -70,7 +68,7 @@ namespace API.Services.Tasks.Scanner
         /// <param name="parsedSeries"></param>
         /// <param name="series"></param>
         /// <returns></returns>
-        public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
+        public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
         {
             var allKeys = parsedSeries.Keys.Where(ps =>
                 SeriesHelper.FindSeries(series, ps));
@@ -90,7 +88,7 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="folderPath">A library folder or series folder</param>
         /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
-        public async Task ProcessFiles(string folderPath, bool isLibraryFolder, Func<IEnumerable<string>, string,Task> folderAction)
+        public async Task ProcessFiles(string folderPath, bool isLibraryFolder, Func<IList<string>, string,Task> folderAction)
         {
             if (isLibraryFolder)
             {
@@ -104,7 +102,6 @@ namespace API.Services.Tasks.Scanner
             }
             else
             {
-                //folderAction(ScanFiles(folderPath));
                 await folderAction(_directoryService.ScanFiles(folderPath), folderPath);
             }
         }
@@ -118,7 +115,7 @@ namespace API.Services.Tasks.Scanner
         /// <param name="path">Path of a file</param>
         /// <param name="rootPath"></param>
         /// <param name="type">Library type to determine parsing to perform</param>
-        private ParserInfo ProcessFile(string path, string rootPath, LibraryType type)
+        private ParserInfo ProcessFile(string path, string rootPath, LibraryType type, bool trackSeries = false)
         {
             var info = _readingItemService.Parse(path, rootPath, type);
             if (info == null)
@@ -177,6 +174,11 @@ namespace API.Services.Tasks.Scanner
             if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
             {
                 info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
+            }
+
+            if (trackSeries && info != null)
+            {
+                TrackSeries(info);
             }
 
             return info;
@@ -335,7 +337,7 @@ namespace API.Services.Tasks.Scanner
         /// <param name="folders">The folders to scan. By default, this should be library.Folders, however it can be overwritten to restrict folders</param>
         /// <param name="libraryName">Name of the Library</param>
         /// <returns></returns>
-        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
+        public async Task<Dictionary<ParsedSeries, IList<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
             foreach (var folderPath in folders)
@@ -347,6 +349,7 @@ namespace API.Services.Tasks.Scanner
                         try
                         {
                             ProcessFile(f, folderPath, libraryType);
+                            //_readingItemService.ParseFile(f, folderPath, libraryType);
                             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName, ProgressEventType.Updated));
                         }
                         catch (FileNotFoundException exception)
@@ -377,7 +380,7 @@ namespace API.Services.Tasks.Scanner
         /// <param name="folders"></param>
         /// <param name="libraryName"></param>
         /// <returns></returns>
-        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType,
+        public async Task<Dictionary<ParsedSeries, IList<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType,
             IEnumerable<string> folders, string libraryName, bool isLibraryScan, Func<IList<ParserInfo>, Task> processSeriesInfos = null)
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
@@ -389,28 +392,22 @@ namespace API.Services.Tasks.Scanner
                     var infos = new List<ParserInfo>();
                     await ProcessFiles(folderPath, isLibraryScan, async (files, folder) =>
                     {
-                        _logger.LogDebug("All files found for {Folder}, {Count} files found", folder, files.Count());
-                        // Send update on scan progress (how?)
-                        // await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                        //     MessageFactory.FileScanProgressEvent($"All files found for {folder}, {files.Count()} files found", libraryName, ProgressEventType.Updated));
+                        _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
                         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
                         foreach (var file in files)
                         {
-                            try
-                            {
-                                var info = ProcessFile(file, folderPath, libraryType);
-                                if (info != null) infos.Add(info);
-                                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
-                            }
-                            catch (FileNotFoundException exception)
-                            {
-                                _logger.LogError(exception, "The file {Filename} could not be found", file);
-                            }
+                            var info = _readingItemService.ParseFile(file, folderPath, libraryType);
+                            if (info != null) infos.Add(info);
+                            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
+                        }
+
+                        // NOTE: I might want to only call the TrackSeries locally when this isn't false, otherewise do a global track
+                        if (processSeriesInfos != null)
+                        {
+
                         }
 
                         MergeLocalizedSeriesWithSeries(infos);
-
-                        // BUG: We can still get to this point and have files that shouldn't map to the same series
 
                         foreach (var info in infos)
                         {
@@ -431,9 +428,6 @@ namespace API.Services.Tasks.Scanner
                                 await processSeriesInfos.Invoke(scannedSeries[series]);
                             }
                         }
-
-
-
                     });
 
 
@@ -506,10 +500,12 @@ namespace API.Services.Tasks.Scanner
         /// Returns any series where there were parsed infos
         /// </summary>
         /// <returns></returns>
-        private Dictionary<ParsedSeries, List<ParserInfo>> SeriesWithInfos()
+        private Dictionary<ParsedSeries, IList<ParserInfo>> SeriesWithInfos()
         {
+            // Technically we don't need to do this as the code later will handle the if no count.
             var filtered = _scannedSeries.Where(kvp => kvp.Value.Count > 0);
             var series = filtered.ToDictionary(v => v.Key, v => v.Value);
+
             return series;
         }
     }
