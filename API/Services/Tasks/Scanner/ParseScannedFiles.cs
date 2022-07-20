@@ -99,96 +99,18 @@ namespace API.Services.Tasks.Scanner
                 foreach (var directory in directories)
                 {
                     // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
-                    await folderAction(ScanFiles(directory), directory);
+                    await folderAction(_directoryService.ScanFiles(directory), directory);
                 }
             }
             else
             {
                 //folderAction(ScanFiles(folderPath));
-                await folderAction(ScanFiles(folderPath), folderPath);
+                await folderAction(_directoryService.ScanFiles(folderPath), folderPath);
             }
         }
 
 
-        public IEnumerable<string> ScanFiles(string folderPath, GlobMatcher? matcher = null)
-        {
-            // TODO: Figure how to hook message in here to inform the UI that a scan is taking place
-            // await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            //     MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
-            _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
-            var files = new List<string>();
-            if (!_directoryService.Exists(folderPath)) return files;
 
-            var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, ".kavitaignore");
-            if (matcher == null)
-            {
-                matcher = CreateIgnoreMatcher(potentialIgnoreFile);
-            }
-            // I need a way to handle nested ignore files when there is a parent
-            else
-            {
-                matcher.Merge(CreateIgnoreMatcher(potentialIgnoreFile));
-            }
-
-
-            IEnumerable<string> directories;
-            if (matcher == null)
-            {
-                directories = _directoryService.GetDirectories(folderPath);
-            }
-            else
-            {
-                directories = _directoryService.GetDirectories(folderPath)
-                    .Where(folder => matcher != null &&
-                                     !matcher.ExcludeMatches(_directoryService.FileSystem.DirectoryInfo.FromDirectoryName(folder).Name
-                                                             + _directoryService.FileSystem.Path.AltDirectorySeparatorChar));
-            }
-
-            foreach (var directory in directories)
-            {
-                files.AddRange(ScanFiles(directory, matcher));
-            }
-
-
-            // Get the matcher from either ignore or global (default setup)
-            if (matcher == null)
-            {
-                files.AddRange(_directoryService.GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions));
-            }
-            else
-            {
-                var foundFiles = _directoryService.GetFilesWithCertainExtensions(folderPath,
-                        Parser.Parser.SupportedExtensions, SearchOption.TopDirectoryOnly)
-                    .Where(file => !matcher.ExcludeMatches(_directoryService.FileSystem.FileInfo.FromFileName(file).Name));
-                files.AddRange(foundFiles);
-            }
-
-            return files;
-        }
-
-        private GlobMatcher CreateIgnoreMatcher(string ignoreFile)
-        {
-            if (!_directoryService.FileSystem.File.Exists(ignoreFile))
-            {
-                return null;
-            }
-
-            // Read file in and add each line to Matcher
-            var lines = _directoryService.FileSystem.File.ReadAllLines(ignoreFile);
-            if (lines.Length == 0)
-            {
-                _logger.LogError("Kavita Ignore file found but empty, ignoring: {IgnoreFile}", ignoreFile);
-                return null;
-            }
-
-            GlobMatcher matcher = new();
-            foreach (var line in lines)
-            {
-                matcher.AddExclude(line);
-            }
-
-            return matcher;
-        }
 
         /// <summary>
         /// Processes files found during a library scan.

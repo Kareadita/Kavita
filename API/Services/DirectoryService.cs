@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using API.DTOs.System;
 using API.Entities.Enums;
 using API.Extensions;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -63,8 +64,10 @@ namespace API.Services
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         IEnumerable<string> GetDirectories(string folderPath);
-
         string GetParentDirectoryName(string fileOrFolder);
+        #nullable enable
+        IEnumerable<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
+        #nullable disable
     }
     public class DirectoryService : IDirectoryService
     {
@@ -550,6 +553,88 @@ namespace API.Services
            {
                return string.Empty;
            }
+       }
+
+       /// <summary>
+       /// Scans a directory by utilizing a recursive folder search. If a .kavitaignore file is found, will ignore matching patterns
+       /// </summary>
+       /// <param name="folderPath"></param>
+       /// <param name="matcher"></param>
+       /// <returns></returns>
+       public IEnumerable<string> ScanFiles(string folderPath, GlobMatcher? matcher = null)
+       {
+            // TODO: Write unit tests
+            _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
+            var files = new List<string>();
+            if (!Exists(folderPath)) return files;
+
+            var potentialIgnoreFile = FileSystem.Path.Join(folderPath, ".kavitaignore");
+            if (matcher == null)
+            {
+                matcher = CreateMatcherFromFile(potentialIgnoreFile);
+            }
+            // I need a way to handle nested ignore files when there is a parent
+            else
+            {
+                matcher.Merge(CreateMatcherFromFile(potentialIgnoreFile));
+            }
+
+
+            IEnumerable<string> directories;
+            if (matcher == null)
+            {
+                directories = GetDirectories(folderPath);
+            }
+            else
+            {
+                directories = GetDirectories(folderPath)
+                    .Where(folder => matcher != null &&
+                                     !matcher.ExcludeMatches($"{FileSystem.DirectoryInfo.FromDirectoryName(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
+            }
+
+            foreach (var directory in directories)
+            {
+                files.AddRange(ScanFiles(directory, matcher));
+            }
+
+
+            // Get the matcher from either ignore or global (default setup)
+            if (matcher == null)
+            {
+                files.AddRange(GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions));
+            }
+            else
+            {
+                var foundFiles = GetFilesWithCertainExtensions(folderPath,
+                        Parser.Parser.SupportedExtensions)
+                    .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.FromFileName(file).Name));
+                files.AddRange(foundFiles);
+            }
+
+            return files;
+       }
+
+       private GlobMatcher CreateMatcherFromFile(string filePath)
+       {
+           if (!FileSystem.File.Exists(filePath))
+           {
+               return null;
+           }
+
+           // Read file in and add each line to Matcher
+           var lines = FileSystem.File.ReadAllLines(filePath);
+           if (lines.Length == 0)
+           {
+               return null;
+           }
+
+           GlobMatcher matcher = new();
+           foreach (var line in lines)
+           {
+               matcher.AddExclude(line);
+           }
+
+           return matcher;
        }
 
 

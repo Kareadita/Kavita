@@ -28,6 +28,7 @@ public class GlobMatcher
         return _excludes.Any(p => p.IsMatch(file));
     }
 
+
     /// <summary>
     ///
     /// </summary>
