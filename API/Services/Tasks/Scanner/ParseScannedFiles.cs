@@ -27,10 +27,6 @@ namespace API.Services.Tasks.Scanner
         /// Format of the Series
         /// </summary>
         public MangaFormat Format { get; init; }
-        /// <summary>
-        /// Highest Folder that contains the Series
-        /// </summary>
-        public string FolderPath { get; init; }
     }
 
 
@@ -243,7 +239,7 @@ namespace API.Services.Tasks.Scanner
             if (info.Series == string.Empty) return;
 
             // Check if normalized info.Series already exists and if so, update info to use that name instead
-            info.Series = MergeName(info);
+            info.Series = MergeName2(scannedSeries, info);
 
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedSortSeries = Parser.Parser.Normalize(info.SeriesSort);
@@ -328,6 +324,48 @@ namespace API.Services.Tasks.Scanner
             return info.Series;
         }
 
+        /// <summary>
+        /// Using a normalized name from the passed ParserInfo, this checks against all found series so far and if an existing one exists with
+        /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
+        /// </summary>
+        /// <param name="info"></param>
+        /// <returns>Series Name to group this info into</returns>
+        public string MergeName2(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
+        {
+            var normalizedSeries = Parser.Parser.Normalize(info.Series);
+            var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
+
+            try
+            {
+                var existingName =
+                    scannedSeries.SingleOrDefault(p =>
+                            (Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedSeries) ||
+                             Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedLocalSeries)) &&
+                            p.Key.Format == info.Format)
+                        .Key;
+
+                if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
+                {
+                    return existingName.Name;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
+                var values = scannedSeries.Where(p =>
+                    (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
+                     Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                    p.Key.Format == info.Format);
+                foreach (var pair in values)
+                {
+                    _logger.LogCritical("Duplicate Series in DB matches with {SeriesName}: {DuplicateName}", info.Series, pair.Key.Name);
+                }
+
+            }
+
+            return info.Series;
+        }
+
 
 
         /// <summary>
@@ -348,8 +386,8 @@ namespace API.Services.Tasks.Scanner
                     {
                         try
                         {
-                            ProcessFile(f, folderPath, libraryType);
-                            //_readingItemService.ParseFile(f, folderPath, libraryType);
+                            //ProcessFile(f, folderPath, libraryType);
+                            _readingItemService.ParseFile(f, folderPath, libraryType);
                             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName, ProgressEventType.Updated));
                         }
                         catch (FileNotFoundException exception)

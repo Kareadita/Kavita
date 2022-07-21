@@ -283,8 +283,10 @@ public class ParseScannedFilesTests
 
         await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName");
 
-        Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.epub", false)));
-        Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.epub", false)));
+        Assert.Equal("Accel World",
+            psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.epub", false)));
+        Assert.Equal("Accel World",
+            psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.epub", false)));
     }
 
     #endregion
@@ -306,7 +308,12 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
 
-        var parsedSeries = await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName");
+        var parsedSeries = await psf.ScanLibrariesForSeries2(LibraryType.Manga,
+            new List<string>() {"C:/Data/"}, "libraryName",true, list =>
+            {
+                //parsedSeries
+                return Task.CompletedTask;
+            });
 
         Assert.Equal(3, parsedSeries.Values.Count);
         Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
