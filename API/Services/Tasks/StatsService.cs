@@ -103,18 +103,15 @@ public class StatsService : IStatsService
 
     public async Task<ServerInfoDto> GetServerInfo()
     {
-        var installId = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId);
-        var installVersion = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
-
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         var serverInfo = new ServerInfoDto
         {
-            InstallId = installId.Value,
+            InstallId = serverSettings.InstallId,
             Os = RuntimeInformation.OSDescription,
-            KavitaVersion = installVersion.Value,
+            KavitaVersion = serverSettings.InstallVersion,
             DotnetVersion = Environment.Version.ToString(),
-            IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
+            IsDocker = new OsInfo().IsDocker,
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
