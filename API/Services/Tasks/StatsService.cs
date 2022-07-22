@@ -154,22 +154,20 @@ public class StatsService : IStatsService
         return _context.SeriesRelation.AnyAsync();
     }
 
-    private Task<int> MaxSeriesInAnyLibrary()
+    private async Task<int> MaxSeriesInAnyLibrary()
     {
-        return _context.Series
-            .Select(s => new
-            {
-                LibraryId = s.LibraryId,
-                Count = _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series).Count()
-            })
-            .AsNoTracking()
-            .AsSplitQuery()
-            .MaxAsync(d => d.Count);
+        // If first time flow, just return 0
+        if (!await _context.Series.AnyAsync()) return 0;
+        return await _context.Series
+            .Select(s => _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series).Count())
+            .MaxAsync();
     }
 
-    private Task<int> MaxVolumesInASeries()
+    private async Task<int> MaxVolumesInASeries()
     {
-        return _context.Volume
+        // If first time flow, just return 0
+        if (!await _context.Volume.AnyAsync()) return 0;
+        return await _context.Volume
             .Select(v => new
             {
                 v.SeriesId,
@@ -180,9 +178,11 @@ public class StatsService : IStatsService
             .MaxAsync(d => d.Count);
     }
 
-    private Task<int> MaxChaptersInASeries()
+    private async Task<int> MaxChaptersInASeries()
     {
-        return _context.Series
+        // If first time flow, just return 0
+        if (!await _context.Chapter.AnyAsync()) return 0;
+        return await _context.Series
             .AsNoTracking()
             .AsSplitQuery()
             .MaxAsync(s => s.Volumes
