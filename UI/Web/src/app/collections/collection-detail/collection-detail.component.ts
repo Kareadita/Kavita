@@ -235,6 +235,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
       this.loadPage();
       if (results.coverImageUpdated) {
         this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
+        this.collectionTag.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
+        this.cdRef.markForCheck();
       }
     });
   }
