@@ -48,7 +48,7 @@ public class MetadataService : IMetadataService
     private readonly IReadingItemService _readingItemService;
     private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
-    private IList<SignalRMessage> _updateEvents = new List<SignalRMessage>();
+    private readonly IList<SignalRMessage> _updateEvents = new List<SignalRMessage>();
     public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
         IEventHub eventHub, ICacheHelper cacheHelper,
         IReadingItemService readingItemService, IDirectoryService directoryService)
