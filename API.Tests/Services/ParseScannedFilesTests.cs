@@ -15,6 +15,7 @@ using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;
 using DotNet.Globbing;
+using Flurl.Util;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -308,15 +309,39 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
 
-        var parsedSeries = await psf.ScanLibrariesForSeries2(LibraryType.Manga,
-            new List<string>() {"C:/Data/"}, "libraryName",true, list =>
-            {
-                //parsedSeries
-                return Task.CompletedTask;
-            });
+        var parsedSeries = await psf.ScanLibrariesForSeries(LibraryType.Manga,
+            new List<string>() {"C:/Data/"}, "libraryName");
 
         Assert.Equal(3, parsedSeries.Values.Count);
         Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
+    }
+
+
+    [Fact]
+    public async Task ScanLibrariesForSeries2_ShouldFindFiles()
+    {
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory("C:/Data/");
+        fileSystem.AddFile("C:/Data/Accel World v1.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World v2.cbz", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Accel World v2.pdf", new MockFileData(string.Empty));
+        fileSystem.AddFile("C:/Data/Nothing.pdf", new MockFileData(string.Empty));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+
+        var seriesSeen = new HashSet<IList<ParserInfo>>();
+        // IsLibraryScan is problematic due to the complexity it adds. We should try to find a way around this
+        await psf.ScanLibrariesForSeries2(LibraryType.Manga,
+            new List<string>() {"C:/Data/"}, "libraryName",true, list =>
+            {
+                seriesSeen.Add(list);
+                return Task.CompletedTask;
+            });
+
+        Assert.Equal(3, seriesSeen.Count);
+        //Assert.NotEmpty(seriesSeen.ToKeyValuePairs().Select(kv => kv.Key).Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
     }
 
     #endregion

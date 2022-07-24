@@ -29,6 +29,12 @@ namespace API.Services.Tasks.Scanner
         public MangaFormat Format { get; init; }
     }
 
+    public enum Modified
+    {
+        Modified = 1,
+        NotModified = 2
+    }
+
 
     public class ParseScannedFiles
     {
@@ -82,11 +88,12 @@ namespace API.Services.Tasks.Scanner
         /// <summary>
         /// This will Scan all files in a folder path. For each folder within the folderPath, FolderAction will be invoked for all files contained
         /// </summary>
+        /// <param name="scanDirectoryByDirectory">Scan directory by directory and for each, call folderAction</param>
         /// <param name="folderPath">A library folder or series folder</param>
         /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
-        public async Task ProcessFiles(string folderPath, bool isLibraryFolder, Func<IList<string>, string,Task> folderAction)
+        public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory, Func<IList<string>, string,Task> folderAction)
         {
-            if (isLibraryFolder)
+            if (scanDirectoryByDirectory)
             {
                 var directories = _directoryService.GetDirectories(folderPath).ToList();
 
@@ -452,7 +459,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             try
                             {
-                                TrackSeries2(scannedSeries, info); //NOTE: We could theoretically call UpdateSeries here
+                                TrackSeries2(scannedSeries, info);
                             }
                             catch (Exception ex)
                             {
@@ -464,7 +471,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
                             {
-                                await processSeriesInfos.Invoke(scannedSeries[series]);
+                                await processSeriesInfos.Invoke(scannedSeries[series]); //NOTE: We could theoretically call UpdateSeries here
                             }
                         }
                     });
