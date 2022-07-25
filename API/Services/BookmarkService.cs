@@ -89,11 +89,10 @@ public class BookmarkService : IBookmarkService
                 return false;
             }
 
-            var fileInfo = new FileInfo(imageToBookmark);
-            var bookmarkDirectory =
-                (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+            var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(imageToBookmark);
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var targetFolderStem = BookmarkStem(userWithBookmarks.Id, bookmarkDto.SeriesId, bookmarkDto.ChapterId);
-            var targetFilepath = Path.Join(bookmarkDirectory, targetFolderStem);
+            var targetFilepath = Path.Join(settings.BookmarksDirectory, targetFolderStem);
 
             var bookmark = new AppUserBookmark()
             {
@@ -111,8 +110,7 @@ public class BookmarkService : IBookmarkService
             _unitOfWork.UserRepository.Update(userWithBookmarks);
             await _unitOfWork.CommitAsync();
 
-            var convertToWebP = bool.Parse((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.ConvertBookmarkToWebP)).Value);
-            if (convertToWebP)
+            if (settings.ConvertBookmarkToWebP)
             {
                 // Enqueue a task to convert the bookmark to webP
                 BackgroundJob.Enqueue(() => ConvertBookmarkToWebP(bookmark.Id));
