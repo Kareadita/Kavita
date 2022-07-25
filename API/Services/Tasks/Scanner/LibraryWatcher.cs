@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data;
 using Hangfire;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -60,15 +61,19 @@ public class LibraryWatcher : ILibraryWatcher
     // TODO: This needs to be blocking so we can consume from another thread
     private readonly Queue<FolderScanQueueable> _scanQueue = new Queue<FolderScanQueueable>();
     //public readonly BlockingCollection<FolderScanQueueable> ScanQueue = new BlockingCollection<FolderScanQueueable>();
+    private readonly TimeSpan _queueWaitTime;
 
 
 
-    public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<LibraryWatcher> logger, IScannerService scannerService)
+    public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<LibraryWatcher> logger, IScannerService scannerService, IHostEnvironment environment)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _logger = logger;
         _scannerService = scannerService;
+
+        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(10) : TimeSpan.FromMinutes(5);
+
     }
 
     public async Task StartWatchingLibraries()
@@ -151,7 +156,8 @@ public class LibraryWatcher : ILibraryWatcher
         if (string.IsNullOrEmpty(parentDirectory)) return;
 
         // We need to find the library this creation belongs to
-        var libraryFolder = _libraryFolders.Select(Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
+        // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
+        var libraryFolder = _libraryFolders.Select(Parser.Parser.NormalizePath).FirstOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
 
@@ -181,12 +187,11 @@ public class LibraryWatcher : ILibraryWatcher
     /// </summary>
     private void ProcessQueue()
     {
-        // This is problematic as it requires more than one modification for anything to happen
         var i = 0;
         while (i < _scanQueue.Count)
         {
             var item = _scanQueue.Peek();
-            if (item.QueueTime < DateTime.Now.Subtract(TimeSpan.FromSeconds(10))) // TimeSpan.FromMinutes(5)
+            if (item.QueueTime < DateTime.Now.Subtract(_queueWaitTime))
             {
                 _logger.LogDebug("Scheduling ScanSeriesFolder for {Folder}", item.FolderPath);
                 BackgroundJob.Enqueue(() => _scannerService.ScanFolder(item.FolderPath));
