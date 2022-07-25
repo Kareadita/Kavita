@@ -107,4 +107,25 @@ public class GenreHelperTests
 
         Assert.Equal(1, genreRemoved.Count);
     }
+
+    [Fact]
+    public void RemoveEveryoneIfNothingInRemoveAllExcept()
+    {
+        var existingGenres = new List<Genre>
+        {
+            DbFactory.Genre("Action", false),
+            DbFactory.Genre("Sci-fi", false),
+        };
+
+        var peopleFromChapters = new List<Genre>();
+
+        var genreRemoved = new List<Genre>();
+        GenreHelper.KeepOnlySameGenreBetweenLists(existingGenres,
+            peopleFromChapters, genre =>
+            {
+                genreRemoved.Add(genre);
+            });
+
+        Assert.Equal(2, genreRemoved.Count);
+    }
 }
