@@ -57,6 +57,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.TotalBackups:
                         destination.TotalBackups = int.Parse(row.Value);
                         break;
+                    case ServerSettingKey.InstallId:
+                        destination.InstallId = row.Value;
+                        break;
                 }
             }
 

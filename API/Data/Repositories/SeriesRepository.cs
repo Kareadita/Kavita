@@ -1021,6 +1021,13 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
+    /// <summary>
+    /// Returns a list of Series that the user Has fully read
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams)
     {
         var libraryIds = GetLibraryIdsForUser(userId, libraryId);

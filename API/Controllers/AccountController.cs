@@ -143,7 +143,10 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Something went wrong when registering user");
-                await _unitOfWork.RollbackAsync();
+                // We need to manually delete the User as we've already committed
+                var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(registerDto.Username);
+                _unitOfWork.UserRepository.Delete(user);
+                await _unitOfWork.CommitAsync();
             }
 
             return BadRequest("Something went wrong when registering user");
@@ -175,7 +178,7 @@ namespace API.Controllers
 
             if (!validPassword)
             {
-                return Unauthorized("Your credentials are not correct");
+                return Unauthorized("Your credentials are not correct"); // TODO: Refactor backend to send back the string for i8ln
             }
 
             var result = await _signInManager

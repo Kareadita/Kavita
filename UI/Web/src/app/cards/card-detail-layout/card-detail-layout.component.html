@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <ng-container *ngIf="jumpBarKeysToRender.length >= 4" [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
+    <ng-container *ngIf="jumpBarKeysToRender.length >= 4 && scroll.viewPortInfo.maxScrollPosition > 0" [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
 </div>
 <ng-template #cardTemplate>
     <virtual-scroller #scroll [items]="items" [bufferAmount]="1">

@@ -83,6 +83,19 @@ namespace Kavita.Common.EnvironmentInfo
             }
         }
 
+        public OsInfo()
+        {
+            OsVersionModel osInfo = null;
+
+            Name = Os.ToString();
+            FullName = Name;
+
+            if (IsLinux && File.Exists("/proc/1/cgroup") && File.ReadAllText("/proc/1/cgroup").Contains("/docker/"))
+            {
+                IsDocker = true;
+            }
+        }
+
         private static Os GetPosixFlavour()
         {
             var output = RunAndCapture("uname", "-s");

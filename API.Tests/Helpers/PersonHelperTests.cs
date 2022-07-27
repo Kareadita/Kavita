@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
@@ -93,6 +94,25 @@ public class PersonHelperTests
     }
 
     [Fact]
+    public void RemovePeople_ShouldRemovePeopleOfSameRole_WhenNothingPassed()
+    {
+        var existingPeople = new List<Person>
+        {
+            DbFactory.Person("Joe Shmo", PersonRole.Writer),
+            DbFactory.Person("Joe Shmo", PersonRole.Writer),
+            DbFactory.Person("Joe Shmo", PersonRole.CoverArtist)
+        };
+        var peopleRemoved = new List<Person>();
+        PersonHelper.RemovePeople(existingPeople, Array.Empty<string>(), PersonRole.Writer, person =>
+        {
+            peopleRemoved.Add(person);
+        });
+
+        Assert.NotEqual(existingPeople, peopleRemoved);
+        Assert.Equal(2, peopleRemoved.Count);
+    }
+
+    [Fact]
     public void KeepOnlySamePeopleBetweenLists()
     {
         var existingPeople = new List<Person>
@@ -137,4 +157,5 @@ public class PersonHelperTests
         PersonHelper.AddPersonIfNotExists(existingPeople, DbFactory.Person("Joe Shmo Two", PersonRole.CoverArtist));
         Assert.Equal(4, existingPeople.Count);
     }
+
 }

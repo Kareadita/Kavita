@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -22,6 +22,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
@@ -30,7 +31,7 @@ import { SeriesService } from 'src/app/_services/series.service';
   styleUrls: ['./collection-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CollectionDetailComponent implements OnInit, OnDestroy {
+export class CollectionDetailComponent implements OnInit, OnDestroy, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -113,7 +114,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
     private modalService: NgbModal, private titleService: Title, 
     public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
     private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-    private readonly cdRef: ChangeDetectorRef) {
+    private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
       const routeId = this.route.snapshot.paramMap.get('id');
@@ -146,6 +147,10 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
         this.loadPage();
       }
     });
+  }
+
+  ngAfterContentChecked(): void {
+    this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
   ngOnDestroy() {
@@ -230,6 +235,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy {
       this.loadPage();
       if (results.coverImageUpdated) {
         this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
+        this.collectionTag.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
+        this.cdRef.markForCheck();
       }
     });
   }

@@ -103,18 +103,15 @@ public class StatsService : IStatsService
 
     public async Task<ServerInfoDto> GetServerInfo()
     {
-        var installId = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId);
-        var installVersion = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
-
         var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         var serverInfo = new ServerInfoDto
         {
-            InstallId = installId.Value,
+            InstallId = serverSettings.InstallId,
             Os = RuntimeInformation.OSDescription,
-            KavitaVersion = installVersion.Value,
+            KavitaVersion = serverSettings.InstallVersion,
             DotnetVersion = Environment.Version.ToString(),
-            IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
+            IsDocker = new OsInfo().IsDocker,
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
@@ -157,22 +154,20 @@ public class StatsService : IStatsService
         return _context.SeriesRelation.AnyAsync();
     }
 
-    private Task<int> MaxSeriesInAnyLibrary()
+    private async Task<int> MaxSeriesInAnyLibrary()
     {
-        return _context.Series
-            .Select(s => new
-            {
-                LibraryId = s.LibraryId,
-                Count = _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series).Count()
-            })
-            .AsNoTracking()
-            .AsSplitQuery()
-            .MaxAsync(d => d.Count);
+        // If first time flow, just return 0
+        if (!await _context.Series.AnyAsync()) return 0;
+        return await _context.Series
+            .Select(s => _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series).Count())
+            .MaxAsync();
     }
 
-    private Task<int> MaxVolumesInASeries()
+    private async Task<int> MaxVolumesInASeries()
     {
-        return _context.Volume
+        // If first time flow, just return 0
+        if (!await _context.Volume.AnyAsync()) return 0;
+        return await _context.Volume
             .Select(v => new
             {
                 v.SeriesId,
@@ -183,9 +178,11 @@ public class StatsService : IStatsService
             .MaxAsync(d => d.Count);
     }
 
-    private Task<int> MaxChaptersInASeries()
+    private async Task<int> MaxChaptersInASeries()
     {
-        return _context.Series
+        // If first time flow, just return 0
+        if (!await _context.Chapter.AnyAsync()) return 0;
+        return await _context.Series
             .AsNoTracking()
             .AsSplitQuery()
             .MaxAsync(s => s.Volumes
