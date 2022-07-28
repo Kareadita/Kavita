@@ -830,6 +830,44 @@ public class SeriesServiceTests
         Assert.True(series.Metadata.PublisherLocked);
     }
 
+
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldRemoveExistingPerson()
+    {
+        await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
+        };
+        var g = DbFactory.Person("Existing Person", PersonRole.Publisher);
+        _context.Series.Add(s);
+
+        _context.Person.Add(g);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                Publishers = new List<PersonDto>() {},
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.False(series.Metadata.People.Any());
+    }
+
     [Fact]
     public async Task UpdateSeriesMetadata_ShouldLockIfTold()
     {

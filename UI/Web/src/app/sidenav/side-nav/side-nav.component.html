@@ -1,5 +1,5 @@
 <ng-container>
-    <div class="side-nav" [ngClass]="{'closed' : (navService?.sideNavCollapsed$ | async), 'hidden' :!(navService?.sideNavVisibility$ | async)}"  *ngIf="accountService.currentUser$ | async as user">
+    <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'hidden' :!(navService.sideNavVisibility$ | async)}"  *ngIf="accountService.currentUser$ | async as user">
         <!-- <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
             <ng-container actions>
                 Todo: This will be customize dashboard/side nav controls
@@ -8,6 +8,7 @@
         </app-side-nav-item> -->
 
         <app-side-nav-item icon="fa-home" title="Home" link="/libraries/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-star" title="Want To Read" link="/want-to-read/"></app-side-nav-item>
         <app-side-nav-item icon="fa-list" title="Collections" link="/collections/"></app-side-nav-item>
         <app-side-nav-item icon="fa-list-ol" title="Reading Lists" link="/lists/"></app-side-nav-item>
         <app-side-nav-item icon="fa-bookmark" title="Bookmarks" link="/bookmarks/"></app-side-nav-item>
@@ -26,5 +27,5 @@
             </ng-container>
         </app-side-nav-item>
     </div>
-    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService?.sideNavCollapsed$ | async)}"></div>
+    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
 </ng-container>

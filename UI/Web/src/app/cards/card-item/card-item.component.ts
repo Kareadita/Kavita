@@ -177,6 +177,33 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.utilityService.isVolume(this.entity) && updateEvent.volumeId !== this.entity.id) return;
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
 
+      // For volume or Series, we can't just take the event 
+      if (this.utilityService.isVolume(this.entity) || this.utilityService.isSeries(this.entity)) {
+        if (this.utilityService.isVolume(this.entity)) {
+          const v = this.utilityService.asVolume(this.entity);
+          const chapter = v.chapters.find(c => c.id === updateEvent.chapterId);
+          if (chapter) {
+            chapter.pagesRead = updateEvent.pagesRead;
+          }
+        } else {
+          // re-request progress for the series
+          const s = this.utilityService.asSeries(this.entity);
+          let pagesRead = 0;
+          if (s.hasOwnProperty('volumes')) {
+            s.volumes.forEach(v => {
+              v.chapters.forEach(c => {
+                if (c.id === updateEvent.chapterId) {
+                  c.pagesRead = updateEvent.pagesRead;
+                }
+                pagesRead += c.pagesRead;
+              });
+            });
+            s.pagesRead = pagesRead;
+          }
+        }
+      }
+
+
       this.read = updateEvent.pagesRead;
       this.cdRef.detectChanges();
     });
@@ -231,6 +258,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
 
   handleClick(event?: any) {
+    if (this.bulkSelectionService.hasSelections()) {
+      this.handleSelection();
+      return;
+    }
     this.clicked.emit(this.title);
   }
 

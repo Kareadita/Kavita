@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { fromEvent, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -48,44 +48,36 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   backToTopNeeded = false;
   searchFocused: boolean = false;
+  scrollElem: HTMLElement;
   private readonly onDestroy = new Subject<void>();
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService,
     private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
-    private scrollService: ScrollService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) { }
+    private scrollService: ScrollService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {
+      this.scrollElem = this.document.body;
+    }
 
   ngOnInit(): void {
-    // setTimeout(() => this.setupScrollChecker(), 1000);
-    // // TODO: on router change, reset the scroll check 
-
-    // this.router.events
-    //   .pipe(filter(event => event instanceof NavigationStart))
-    //   .subscribe((event) => {
-    //     setTimeout(() => this.setupScrollChecker(), 1000);
-    //   });
+    this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntil(this.onDestroy), tap((scrollContainer) => {
+      if (scrollContainer === 'body' || scrollContainer === undefined) {
+        this.scrollElem = this.document.body;
+        fromEvent(this.document.body, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(this.document.body));
+      } else {
+        const elem = scrollContainer as ElementRef<HTMLDivElement>;
+        this.scrollElem = elem.nativeElement;
+        fromEvent(elem.nativeElement, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(elem.nativeElement));
+      }
+    })).subscribe();
   }
 
-  // setupScrollChecker() {
-  //   const viewportScroller = this.document.querySelector('.viewport-container');
-  //   console.log('viewport container', viewportScroller);
-
-  //   if (viewportScroller) {
-  //     fromEvent(viewportScroller, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded());
-  //   } else {
-  //     fromEvent(this.document.body, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded());
-  //   }
-  // }
-
-  @HostListener('body:scroll', [])
-  checkBackToTopNeeded() {
-    // TODO: This somehow needs to hook into the scrolling for virtual scroll
-    
-    const offset = this.scrollService.scrollPosition;
+  checkBackToTopNeeded(elem: HTMLElement) {
+    const offset = elem.scrollTop || 0;
     if (offset > 100) {
       this.backToTopNeeded = true;
     } else if (offset < 40) {
         this.backToTopNeeded = false;
     }
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
@@ -219,7 +211,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
 
   scrollToTop() {
-    this.scrollService.scrollTo(0, this.document.body);
+    this.scrollService.scrollTo(0, this.scrollElem);
   }
 
   focusUpdate(searchFocused: boolean) {

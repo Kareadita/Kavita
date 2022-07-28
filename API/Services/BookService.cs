@@ -121,7 +121,7 @@ namespace API.Services
             return contentType;
         }
 
-        public static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
+        private static void UpdateLinks(HtmlNode anchor, Dictionary<string, int> mappings, int currentPage)
         {
             if (anchor.Name != "a") return;
             var hrefParts = CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
@@ -278,7 +278,8 @@ namespace API.Services
 
                 var imageFile = GetKeyForImage(book, image.Attributes[key].Value);
                 image.Attributes.Remove(key);
-                image.Attributes.Add(key, $"{apiBase}" + imageFile);
+                // UrlEncode here to transform ../ into an escaped version, which avoids blocking on nginx
+                image.Attributes.Add(key, $"{apiBase}" + HttpUtility.UrlEncode(imageFile));
 
                 // Add a custom class that the reader uses to ensure images stay within reader
                 parent.AddClass("kavita-scale-width-container");

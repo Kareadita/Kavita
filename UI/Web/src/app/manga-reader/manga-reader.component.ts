@@ -611,7 +611,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (event.key === KEY_CODES.B) {
       this.bookmarkPage();
     } else if (event.key === KEY_CODES.F) {
-      this.toggleFullscreen()
+      this.toggleFullscreen();
+    } else if (event.key === KEY_CODES.H) {
+      this.openShortcutModal();
     }
   }
 
@@ -1068,7 +1070,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.layoutMode === LayoutMode.Single) {
       const img = this.cachedImages.arr.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
       if (img) {
-        this.canvasImage = img; // If we tried to use this for double, then the src might change after being set (idk how tho)
+        this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
       } else {
         this.canvasImage.src = this.getPageUrl(this.pageNum);
       }
@@ -1295,14 +1297,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   prefetch() {
     let index = 1;
 
-    this.cachedImages.applyFor((item, internalIndex) => {
+    this.cachedImages.applyFor((item, _) => {
       const offsetIndex = this.pageNum + index;
       const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
 
-      if (urlPageNum === offsetIndex) {
+      if (urlPageNum === offsetIndex || urlPageNum === this.pageNum) {
         index += 1;
         return;
       }
+      
       if (offsetIndex < this.maxPages - 1) {
         item.src = this.getPageUrl(offsetIndex);
         index += 1;

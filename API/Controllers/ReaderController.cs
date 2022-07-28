@@ -110,6 +110,8 @@ namespace API.Controllers
         {
             if (page < 0) page = 0;
             var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+
+            // NOTE: I'm not sure why I need this flow here
             var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
             if (page > totalPages)
             {

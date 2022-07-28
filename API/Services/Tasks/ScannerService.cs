@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -1236,9 +1237,6 @@ public class ScannerService : IScannerService
         }
 
 
-
-
-
         if (comicInfo.Year > 0)
         {
             var day = Math.Max(comicInfo.Day, 1);
@@ -1246,105 +1244,81 @@ public class ScannerService : IScannerService
             chapter.ReleaseDate = DateTime.Parse($"{month}/{day}/{comicInfo.Year}");
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.Colorist))
-        {
-            var people = comicInfo.Colorist.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Colorist,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
+        var people = GetTagValues(comicInfo.Colorist);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Colorist,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.Characters))
-        {
-            var people = comicInfo.Characters.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Character,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
+        people = GetTagValues(comicInfo.Characters);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Character,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.Translator))
-        {
-            var people = comicInfo.Translator.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
 
-        if (!string.IsNullOrEmpty(comicInfo.Tags))
-        {
-            var tags = comicInfo.Tags.Split(",").Select(s => s.Trim()).ToList();
-            // Remove all tags that aren't matching between chapter tags and metadata
-            TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
-            TagHelper.UpdateTag(allTags, tags, false,
-                (tag, _) =>
-                {
-                    chapter.Tags.Add(tag);
-                });
-        }
+        people = GetTagValues(comicInfo.Translator);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.Writer))
-        {
-            var people = comicInfo.Writer.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Writer,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
 
-        if (!string.IsNullOrEmpty(comicInfo.Editor))
-        {
-            var people = comicInfo.Editor.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Editor,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
+        people = GetTagValues(comicInfo.Writer);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Writer,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.Inker))
-        {
-            var people = comicInfo.Inker.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Inker,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
+        people = GetTagValues(comicInfo.Editor);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Editor,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.Letterer))
-        {
-            var people = comicInfo.Letterer.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Letterer,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
+        people = GetTagValues(comicInfo.Inker);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Inker,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.Penciller))
-        {
-            var people = comicInfo.Penciller.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Penciller,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
+        people = GetTagValues(comicInfo.Letterer);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Letterer,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.CoverArtist))
-        {
-            var people = comicInfo.CoverArtist.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.CoverArtist,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
 
-        if (!string.IsNullOrEmpty(comicInfo.Publisher))
-        {
-            var people = comicInfo.Publisher.Split(",");
-            PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-            PersonHelper.UpdatePeople(allPeople, people, PersonRole.Publisher,
-                person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
-        }
+        people = GetTagValues(comicInfo.Penciller);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Penciller,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
 
-        if (!string.IsNullOrEmpty(comicInfo.Genre))
+        people = GetTagValues(comicInfo.CoverArtist);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.CoverArtist,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+
+        people = GetTagValues(comicInfo.Publisher);
+        PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
+        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Publisher,
+            person => PersonHelper.AddPersonIfNotExists(chapter.People, person));
+
+        var genres = GetTagValues(comicInfo.Genre);
+        GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
+        GenreHelper.UpdateGenre(allGenres, genres, false,
+            genre => chapter.Genres.Add(genre));
+
+        var tags = GetTagValues(comicInfo.Tags);
+        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
+        TagHelper.UpdateTag(allTags, tags, false,
+            (tag, _) =>
+            {
+                chapter.Tags.Add(tag);
+            });
+    }
+
+    private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
+    {
+
+        if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
-            var genres = comicInfo.Genre.Split(",");
-            GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
-            GenreHelper.UpdateGenre(allGenres, genres, false,
-                genre => chapter.Genres.Add(genre));
+            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).ToList();
         }
+        return ImmutableList<string>.Empty;
     }
     #nullable disable
 }

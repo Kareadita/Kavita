@@ -10,6 +10,7 @@ using API.Data.Repositories;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -44,7 +45,9 @@ public class BookmarkServiceTests
         _context = new DataContext(contextOptions);
         Task.Run(SeedDb).GetAwaiter().GetResult();
 
-        _unitOfWork = new UnitOfWork(_context, Substitute.For<IMapper>(), null);
+        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
+        var mapper = config.CreateMapper();
+        _unitOfWork = new UnitOfWork(_context, mapper, null);
     }
 
     private BookmarkService Create(IDirectoryService ds)

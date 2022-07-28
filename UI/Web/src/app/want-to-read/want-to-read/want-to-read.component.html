@@ -1,0 +1,33 @@
+<div #companionBar>
+    <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
+        <ng-container title>
+            <h2>
+                Want To Read
+            </h2>
+        </ng-container>
+    </app-side-nav-companion-bar>
+</div>
+
+<div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
+    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+
+    <app-card-detail-layout
+        [isLoading]="isLoading"
+        [items]="series"
+        [pagination]="seriesPagination"
+        [filterSettings]="filterSettings"
+        [filterOpen]="filterOpen"
+        [parentScroll]="scrollingBlock"
+        [jumpBarKeys]="jumpbarKeys"
+        (applyFilter)="updateFilter($event)">
+        <ng-template #cardItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
+            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+            ></app-series-card>
+        </ng-template>
+
+        <ng-template #noData>
+            No Series match your filter or exist in your list.
+        </ng-template>
+    </app-card-detail-layout>
+</div>

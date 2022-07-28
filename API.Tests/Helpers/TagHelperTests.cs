@@ -116,4 +116,25 @@ public class TagHelperTests
 
         Assert.Equal(1, tagRemoved.Count);
     }
+
+    [Fact]
+    public void RemoveEveryoneIfNothingInRemoveAllExcept()
+    {
+        var existingTags = new List<Tag>
+        {
+            DbFactory.Tag("Action", false),
+            DbFactory.Tag("Sci-fi", false),
+        };
+
+        var peopleFromChapters = new List<Tag>();
+
+        var tagRemoved = new List<Tag>();
+        TagHelper.KeepOnlySameTagBetweenLists(existingTags,
+            peopleFromChapters, tag =>
+            {
+                tagRemoved.Add(tag);
+            });
+
+        Assert.Equal(2, tagRemoved.Count);
+    }
 }

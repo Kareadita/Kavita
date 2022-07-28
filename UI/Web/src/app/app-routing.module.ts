@@ -46,6 +46,10 @@ const routes: Routes = [
     loadChildren: () => import('../app/dashboard/dashboard.module').then(m => m.DashboardModule)
   },
   {
+    path: 'want-to-read',
+    loadChildren: () => import('../app/want-to-read/want-to-read.module').then(m => m.WantToReadModule)
+  },
+  {
     path: 'library',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],

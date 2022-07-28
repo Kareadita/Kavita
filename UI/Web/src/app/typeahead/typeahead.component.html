@@ -10,7 +10,6 @@
           <ng-container [ngTemplateOutlet]="badgeTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: i }"></ng-container>
           <i class="fa fa-times" *ngIf="!disabled" (click)="toggleSelection(option)" tabindex="0" aria-label="close"></i>
         </app-tag-badge>
-
         <input #input [id]="settings.id" type="text" autocomplete="off" formControlName="typeahead" *ngIf="!disabled">
         <div class="spinner-border spinner-border-sm {{settings.multiple ? 'close-offset' : ''}}" role="status" *ngIf="isLoadingOptions">
           <span class="visually-hidden">Loading...</span>

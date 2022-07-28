@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked, AfterViewInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
@@ -40,6 +40,7 @@ import { PageLayoutMode } from '../_models/page-layout-mode';
 import { DOCUMENT } from '@angular/common';
 import { User } from '../_models/user';
 import { Download } from '../shared/_models/download';
+import { ScrollService } from '../_services/scroll.service';
 
 interface RelatedSeris {
   series: Series;
@@ -66,7 +67,7 @@ interface StoryLineItem {
   styleUrls: ['./series-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesDetailComponent implements OnInit, OnDestroy {
+export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -179,9 +180,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
 
     switch (action) {
       case Action.AddToReadingList:
-        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => {
+        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, (success) => {
           this.actionInProgress = false;
-          this.bulkSelectionService.deselectAll();
+          if (success) this.bulkSelectionService.deselectAll();
           this.changeDetectionRef.markForCheck();
         });
         break;
@@ -250,7 +251,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
               public imageSerivce: ImageService, private messageHub: MessageHubService,
               private readingListService: ReadingListService, public navService: NavService,
               private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document, 
-              private changeDetectionRef: ChangeDetectorRef
+              private changeDetectionRef: ChangeDetectorRef, private scrollService: ScrollService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -263,6 +264,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         this.changeDetectionRef.markForCheck();
       }
     });
+  }
+
+  ngAfterContentChecked(): void {
+    this.scrollService.setScrollContainer(this.scrollingBlock);
   }
 
 
@@ -370,6 +375,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy {
         break;
       case (Action.AnalyzeFiles):
         this.actionService.analyzeFilesForSeries(series, () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
+        break;
+      case Action.AddToWantToReadList:
+        this.actionService.addMultipleSeriesToWantToReadList([series.id], () => {
           this.actionInProgress = false;
           this.changeDetectionRef.markForCheck();
         });

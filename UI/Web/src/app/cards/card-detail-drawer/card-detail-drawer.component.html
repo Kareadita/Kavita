@@ -108,7 +108,7 @@
                 </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[TabID.Files]">
+            <li [ngbNavItem]="tabs[TabID.Files]" [disabled]="!(isAdmin$ | async)">
                 <a ngbNavLink>{{tabs[TabID.Files].title}}</a>
                 <ng-template ngbNavContent>
                     <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>

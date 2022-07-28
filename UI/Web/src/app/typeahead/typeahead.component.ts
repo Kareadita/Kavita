@@ -286,8 +286,12 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   }
 
 
-  @HostListener('window:click', ['$event'])
+  @HostListener('body:click', ['$event'])
   handleDocumentClick(event: any) {
+    // Don't close the typeahead when we select an item from it
+    if (event.target && (event.target as HTMLElement).classList.contains('list-group-item')) {
+      return;
+    }
     this.hasFocus = false;
   }
 
@@ -331,7 +335,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       case KEY_CODES.DELETE:
       {
         if (this.typeaheadControl.value !== null && this.typeaheadControl.value !== undefined && this.typeaheadControl.value.trim() !== '') {
-          return;
+          break;
         }
         const selected = this.optionSelection.selected();
         if (selected.length > 0) {
@@ -364,12 +368,14 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       if (!untoggleAll && this.settings.savedData) {
         const isArray = this.settings.savedData.hasOwnProperty('length');
          if (isArray) {
-          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData);
+          this.optionSelection = new SelectionModel<any>(true, this.settings.savedData); // NOTE: Library-detail will break the 'x' button due to how savedData is being set to avoid state reset
          } else {
           this.optionSelection = new SelectionModel<any>(true, [this.settings.savedData]);
          }
+         this.cdRef.markForCheck();
       } else {
         this.optionSelection.selected().forEach(item => this.optionSelection.toggle(item, false));
+        this.cdRef.markForCheck();
       }
 
       this.selectedData.emit(this.optionSelection.selected());
@@ -386,7 +392,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.toggleSelection(opt);
 
     this.resetField();
-    this.onInputFocus(undefined);
+    this.onInputFocus();
   }
 
   addNewItem(title: string) {
@@ -398,7 +404,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.toggleSelection(newItem);
 
     this.resetField();
-    this.onInputFocus(undefined);
+    this.onInputFocus();
   }
 
   /**
@@ -421,7 +427,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     });
   }
 
-  onInputFocus(event: any) {
+  onInputFocus(event?: any) {
     if (event) {
       event.stopPropagation();
       event.preventDefault();

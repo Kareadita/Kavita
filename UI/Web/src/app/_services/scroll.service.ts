@@ -1,11 +1,27 @@
-import { Injectable } from '@angular/core';
+import { ElementRef, Injectable } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter, ReplaySubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollService {
 
-  constructor() { }
+  private scrollContainerSource =  new ReplaySubject<string | ElementRef<HTMLElement>>(1);
+  /**
+   * Exposes the current container on the active screen that is our primary overlay area. Defaults to 'body' and changes to 'body' on page loads
+   */
+  public scrollContainer$ = this.scrollContainerSource.asObservable();
+
+  constructor(router: Router) {
+
+    router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.scrollContainerSource.next('body');
+      });
+    this.scrollContainerSource.next('body');
+  }
 
   get scrollPosition() {
     return (window.pageYOffset 
@@ -25,5 +41,11 @@ export class ScrollService {
       left: left,
       behavior: 'auto'
     });
+  }
+
+  setScrollContainer(elem: ElementRef<HTMLElement> | undefined) {
+    if (elem !== undefined) {
+      this.scrollContainerSource.next(elem);
+    }
   }
 }

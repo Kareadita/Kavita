@@ -69,6 +69,14 @@ export enum Action {
    * Open the reader for entity
    */
   Read = 14,
+  /**
+   * Add to user's Want to Read List
+   */
+  AddToWantToReadList = 15,
+  /**
+   * Remove from user's Want to Read List
+   */
+  RemoveFromWantToReadList = 16,
 }
 
 export interface ActionItem<T> {
@@ -274,6 +282,12 @@ export class ActionFactoryService {
       {
         action: Action.AddToReadingList,
         title: 'Add to Reading List',
+        callback: this.dummyCallback,
+        requiresAdmin: false
+      },
+      {
+        action: Action.AddToWantToReadList,
+        title: 'Add to Want To Read',
         callback: this.dummyCallback,
         requiresAdmin: false
       }

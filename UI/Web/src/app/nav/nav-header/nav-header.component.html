@@ -129,8 +129,8 @@
       </ul>
 
       <ng-container *ngIf="!searchFocused">
-        <div class="back-to-top">
-          <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()" *ngIf="backToTopNeeded">
+        <div class="back-to-top" *ngIf="backToTopNeeded">
+          <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
             <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
             <span class="visually-hidden">Scroll to Top</span>
           </button>

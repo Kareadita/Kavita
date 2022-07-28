@@ -51,7 +51,10 @@ export class EntityTitleComponent implements OnInit {
     } else {
       const v = this.utilityService.asVolume(this.entity);
       this.volumeTitle = v.name || '';
-      this.titleName = v.chapters[0].titleName || '';
+      this.titleName = v.name || '';
+      if (v.chapters[0].titleName) {
+        this.titleName += ' - ' + v.chapters[0].titleName;
+      }
     }
     this.cdRef.markForCheck();
   }

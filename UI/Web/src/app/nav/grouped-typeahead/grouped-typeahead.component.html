@@ -1,16 +1,14 @@
 <form [formGroup]="typeaheadForm" class="grouped-typeahead">
       <div class="typeahead-input" [ngClass]="{'focused': hasFocus == true}" (click)="onInputFocus($event)">
         <div class="search">
-          <input #input [id]="id" type="search" autocomplete="off" formControlName="typeahead" [placeholder]="placeholder"
+          <input #input [id]="id" type="text" autocomplete="off" formControlName="typeahead" [placeholder]="placeholder"
           aria-haspopup="listbox" aria-owns="dropdown" aria-expanded="hasFocus && (grouppedData.persons.length || grouppedData.collections.length || grouppedData.series.length || grouppedData.persons.length || grouppedData.tags.length || grouppedData.genres.length)"
           aria-autocomplete="list" (focusout)="close($event)" (focus)="open($event)" role="search" 
           >
           <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoading">
             <span class="visually-hidden">Loading...</span>
           </div>
-          <button type="button" class="btn-close" aria-label="Close" (click)="resetField()">
-            
-            </button>
+          <button type="button" class="btn-close" aria-label="Close" (click)="resetField()" *ngIf="typeaheadForm.get('typeahead')?.value.length > 0"></button>
         </div>
       </div>
       <div class="dropdown" *ngIf="hasFocus">

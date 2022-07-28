@@ -13,6 +13,7 @@ public static class PersonHelper
     /// Given a list of all existing people, this will check the new names and roles and if it doesn't exist in allPeople, will create and
     /// add an entry. For each person in name, the callback will be executed.
     /// </summary>
+    /// <remarks>This does not remove people if an empty list is passed into names</remarks>
     /// <remarks>This is used to add new people to a list without worrying about duplicating rows in the DB</remarks>
     /// <param name="allPeople"></param>
     /// <param name="names"></param>
@@ -48,6 +49,17 @@ public static class PersonHelper
     public static void RemovePeople(ICollection<Person> existingPeople, IEnumerable<string> people, PersonRole role, Action<Person> action = null)
     {
         var normalizedPeople = people.Select(Parser.Parser.Normalize).ToList();
+        if (normalizedPeople.Count == 0)
+        {
+            var peopleToRemove = existingPeople.Where(p => p.Role == role).ToList();
+            foreach (var existingRoleToRemove in peopleToRemove)
+            {
+                existingPeople.Remove(existingRoleToRemove);
+                action?.Invoke(existingRoleToRemove);
+            }
+            return;
+        }
+
         foreach (var person in normalizedPeople)
         {
             var existingPerson = existingPeople.FirstOrDefault(p => p.Role == role && person.Equals(p.NormalizedName));
