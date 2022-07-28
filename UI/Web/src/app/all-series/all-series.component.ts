@@ -41,8 +41,8 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
 
     switch (action) {
       case Action.AddToReadingList:
-        this.actionService.addMultipleSeriesToReadingList(selectedSeries, () => {
-          this.bulkSelectionService.deselectAll();
+        this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
+          if (success) this.bulkSelectionService.deselectAll();
         });
         break;
       case Action.AddToWantToReadList:
@@ -50,9 +50,14 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
           this.bulkSelectionService.deselectAll();
         });
         break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
+      case Action.RemoveFromWantToReadList:
+        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
           this.bulkSelectionService.deselectAll();
+        });
+        break;
+      case Action.AddToCollection:
+        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
+          if (success) this.bulkSelectionService.deselectAll();
         });
         break;
       case Action.MarkAsRead:

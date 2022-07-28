@@ -412,7 +412,7 @@ export class ActionService implements OnDestroy {
    * @param callback 
    * @returns 
    */
-  addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: VoidActionCallback) {
+  addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.collectionModalRef != null) { return; }
       this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
@@ -421,13 +421,13 @@ export class ActionService implements OnDestroy {
       this.collectionModalRef.closed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;
         if (callback) {
-          callback();
+          callback(true);
         }
       });
       this.collectionModalRef.dismissed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;
         if (callback) {
-          callback();
+          callback(false);
         }
       });
   }

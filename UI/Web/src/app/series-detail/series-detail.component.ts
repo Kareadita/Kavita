@@ -182,9 +182,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       case Action.AddToReadingList:
         this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, (success) => {
           this.actionInProgress = false;
-          if (success) {
-            this.bulkSelectionService.deselectAll();
-          }
+          if (success) this.bulkSelectionService.deselectAll();
           this.changeDetectionRef.markForCheck();
         });
         break;

@@ -58,9 +58,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     switch (action) {
       case Action.AddToReadingList:
         this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
-          if (success) {
-            this.bulkSelectionService.deselectAll();
-          }
+          if (success) this.bulkSelectionService.deselectAll();
           this.cdRef.markForCheck();
         });
         break;
@@ -70,9 +68,15 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.cdRef.markForCheck();
         });
         break;
-      case Action.AddToCollection:
-        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
+      case Action.RemoveFromWantToReadList:
+        this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
           this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
+        });
+        break;
+      case Action.AddToCollection:
+        this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, (success) => {
+          if (success) this.bulkSelectionService.deselectAll();
           this.cdRef.markForCheck();
         });
         break;
