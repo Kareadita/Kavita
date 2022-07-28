@@ -3,7 +3,7 @@
         <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
         {{libraryName}}
     </h2>
-    <h6 subtitle class="subtitle-with-actionables" *ngIf="active.fragment === ''">{{pagination?.totalItems}} Series</h6>
+    <h6 subtitle class="subtitle-with-actionables" *ngIf="active.fragment === ''">{{pagination.totalItems}} Series</h6>
     <div main>
         <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills" style="flex-wrap: nowrap;">
             <li *ngFor="let tab of tabs" [ngbNavItem]="tab">

@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -118,5 +120,17 @@ namespace API.Controllers
                 await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername()));
 
         }
+
+        [HttpPost("want-to-read")]
+        public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams userParams, FilterDto filterDto)
+        {
+            userParams ??= new UserParams();
+            filterDto ??= new FilterDto();
+
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            return Ok(_unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id, userParams, filterDto));
+        }
+
+
     }
 }

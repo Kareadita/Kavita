@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -122,6 +122,19 @@ export class SeriesService {
 
   getRecentlyUpdatedSeries() {
     return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {});
+  }
+
+  getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter): Observable<PaginatedResult<Series[]>> {
+    const data = this.createSeriesFilter(filter);
+
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<Series[]>(this.baseUrl + 'want-to-read/', data, {observe: 'response', params}).pipe(
+      map(response => {
+        console.log('response: ', this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>()))
+        return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
+    }));
   }
 
   getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {

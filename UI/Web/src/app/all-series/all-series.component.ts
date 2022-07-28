@@ -45,6 +45,11 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
           this.bulkSelectionService.deselectAll();
         });
         break;
+      case Action.AddToWantToReadList:
+        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
+          this.bulkSelectionService.deselectAll();
+        });
+        break;
       case Action.AddToCollection:
         this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();

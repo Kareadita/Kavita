@@ -68,6 +68,12 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
           this.cdRef.markForCheck();
         });
         break;
+      case Action.AddToWantToReadList:
+        this.actionService.addMultipleSeriesToWantToReadList(selectedSeries.map(s => s.id), () => {
+          this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
+        });
+        break;
       case Action.AddToCollection:
         this.actionService.addMultipleSeriesToCollectionTag(selectedSeries, () => {
           this.bulkSelectionService.deselectAll();
