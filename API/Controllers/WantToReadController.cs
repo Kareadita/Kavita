@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+/// <summary>
+/// Responsible for all things Want To Read
+/// </summary>
 [Route("api/want-to-read")]
 public class WantToReadController : BaseApiController
 {
@@ -22,6 +25,12 @@ public class WantToReadController : BaseApiController
         _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// Return all Series that are in the current logged in user's Want to Read list, filtered
+    /// </summary>
+    /// <param name="userParams"></param>
+    /// <param name="filterDto"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams userParams, FilterDto filterDto)
     {
@@ -32,6 +41,11 @@ public class WantToReadController : BaseApiController
         return Ok(pagedList);
     }
 
+    /// <summary>
+    /// Given a list of Series Ids, add them to the current logged in user's Want To Read list
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("add-series")]
     public async Task<ActionResult> AddSeries(UpdateWantToReadDto dto)
     {
@@ -55,6 +69,11 @@ public class WantToReadController : BaseApiController
         return BadRequest("There was an issue updating Read List");
     }
 
+    /// <summary>
+    /// Given a list of Series Ids, remove them from the current logged in user's Want To Read list
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("remove-series")]
     public async Task<ActionResult> RemoveSeries(UpdateWantToReadDto dto)
     {

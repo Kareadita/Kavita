@@ -120,17 +120,5 @@ namespace API.Controllers
                 await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername()));
 
         }
-
-        [HttpPost("want-to-read")]
-        public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams userParams, FilterDto filterDto)
-        {
-            userParams ??= new UserParams();
-            filterDto ??= new FilterDto();
-
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return Ok(_unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id, userParams, filterDto));
-        }
-
-
     }
 }

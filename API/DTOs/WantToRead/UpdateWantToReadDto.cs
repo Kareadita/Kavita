@@ -2,6 +2,9 @@
 
 namespace API.DTOs.WantToRead;
 
+/// <summary>
+/// A list of Series to pass when working with Want To Read APIs
+/// </summary>
 public class UpdateWantToReadDto
 {
     /// <summary>

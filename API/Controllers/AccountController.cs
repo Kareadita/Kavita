@@ -178,7 +178,7 @@ namespace API.Controllers
 
             if (!validPassword)
             {
-                return Unauthorized("Your credentials are not correct"); // TODO: Refactor backend to send back the string for i8ln
+                return Unauthorized("Your credentials are not correct");
             }
 
             var result = await _signInManager
