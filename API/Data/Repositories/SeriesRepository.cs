@@ -1363,4 +1363,19 @@ public class SeriesRepository : ISeriesRepository
             .AsEnumerable();
         return ret;
     }
+
+    public async Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter)
+    {
+        var libraryIds = GetLibraryIdsForUser(userId);
+        var query = _context.AppUser
+            .Where(user => user.Id == userId)
+            .SelectMany(u => u.WantToRead)
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
+
+        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+    }
 }
