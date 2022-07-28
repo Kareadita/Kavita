@@ -116,6 +116,8 @@ public class ScannerService : IScannerService
         if (!await ShouldScanSeries(seriesId, library, libraryPaths, series)) return;
 
 
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        var totalFiles = 0; // TODO: Figure this out
 
         var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
         var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
@@ -132,7 +134,7 @@ public class ScannerService : IScannerService
         }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var (totalFiles, scanElapsedTime, parsedSeries) = await ScanFiles(library, seriesDirs.Keys, false);
+        var scanElapsedTime = await ScanFiles(library, seriesDirs.Keys, false);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
 
@@ -189,20 +191,18 @@ public class ScannerService : IScannerService
                     }
                 }
 
-                var (_, scanElapsedTime2, _) = await ScanFiles(library, seriesDirs.Keys, false,
-                    parsedFiles =>
-                    {
-                        if (parsedFiles.Count == 0) return Task.CompletedTask;
-                        var firstFile = parsedFiles.First();
-                        parsedSeries.Add(new ParsedSeries()
-                        {
-                            Format = firstFile.Format,
-                            Name = firstFile.Series,
-                            NormalizedName = Parser.Parser.Normalize(firstFile.Series)
-                        }, parsedFiles);
-                        return Task.CompletedTask;
-                    });
+                Task TrackFiles(IList<ParserInfo> parsedFiles)
+                {
+                    if (parsedFiles.Count == 0) return Task.CompletedTask;
+                    var firstFile = parsedFiles.First();
+                    parsedSeries.Add(new ParsedSeries() {Format = firstFile.Format, Name = firstFile.Series, NormalizedName = Parser.Parser.Normalize(firstFile.Series)}, parsedFiles);
+                    totalFiles += parsedFiles.Count;
+                    return Task.CompletedTask;
+                }
+
+                var scanElapsedTime2 = await ScanFiles(library, seriesDirs.Keys, false, TrackFiles);
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
+
                 //totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
                 //parsedSeries = parsedSeries2;
@@ -237,7 +237,7 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, series.Id, false));
     }
 
-    private async Task<bool> ShouldScanSeries(int seriesId, Library library, List<string> libraryPaths, Series series)
+    private async Task<bool> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series)
     {
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
             .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
@@ -386,31 +386,29 @@ public class ScannerService : IScannerService
             _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
         }
 
-        var seriesCount = 0;
-        var fileCount = 0;
 
-        // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        // var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        // var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
-        var seenSeries = new List<string>();
-
+        var totalFiles = 0;
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        var (totalFiles, scanElapsedTime, series) = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, (infos =>
-        {
-            seriesCount += 1;
-            fileCount += infos.Count;
-            if (infos.Count == 0) return Task.CompletedTask;
 
-            seenSeries.Add(infos.First().Series);
+        Task TrackFiles(IList<ParserInfo> parsedFiles)
+        {
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
+            totalFiles += parsedFiles.Count;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
+
+            //seenSeries.Add(infos.First().Series);
             //await ProcessSeriesAsync(infos, allPeople, allTags, allGenres, library); // I'm seeing this be called multiple times for the same folders
             parsedSeries.Add(new ParsedSeries()
             {
-                Name = infos.First().Series,
-                NormalizedName = Parser.Parser.Normalize(infos.First().Series),
-                Format = infos.First().Format
-            }, infos);
+                Name = parsedFiles.First().Series,
+                NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
+                Format = parsedFiles.First().Format
+            }, parsedFiles);
             return Task.CompletedTask;
-        }));
+        }
+
+
+        var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles);
 
         _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
 
@@ -431,7 +429,7 @@ public class ScannerService : IScannerService
         {
             _logger.LogInformation(
                 "[ScannerService] Finished scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                totalFiles, series.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
+                totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, library.Name);
         }
         else
         {
@@ -446,7 +444,7 @@ public class ScannerService : IScannerService
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
-    private async Task<Tuple<int, long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IEnumerable<string> dirs,
+    private async Task<long> ScanFiles(Library library, IEnumerable<string> dirs,
         bool isLibraryScan, Func<IList<ParserInfo>, Task> processSeriesInfos = null)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
@@ -461,7 +459,7 @@ public class ScannerService : IScannerService
         //var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
-        return new Tuple<int, long, Dictionary<ParsedSeries, IList<ParserInfo>>>(0, scanElapsedTime, new Dictionary<ParsedSeries, IList<ParserInfo>>());
+        return scanElapsedTime;
     }
 
     /// <summary>
