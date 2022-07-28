@@ -16,6 +16,9 @@
 <div class="viewport-container">
     <div class="content-container">
         <div class="card-container mt-2 mb-2">
+            <p *ngIf="items.length === 0 && !isLoading">
+                <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+            </p>
             <virtual-scroller #scroll [items]="items" [bufferAmount]="1" [parentScroll]="parentScroll">
                 <div class="grid row g-0" #container>
                     <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
@@ -23,10 +26,6 @@
                     </div>
                 </div>
             </virtual-scroller>
-            
-            <p *ngIf="items.length === 0 && !isLoading">
-                <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-            </p>
         </div>
     </div>
 
@@ -42,7 +41,9 @@
     </virtual-scroller>
 
     <div class="mx-auto" *ngIf="items.length === 0 && !isLoading" style="width: 200px;">
-        <p><ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container></p>
+        <p>
+            <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+        </p>
     </div>
 </ng-template>
 

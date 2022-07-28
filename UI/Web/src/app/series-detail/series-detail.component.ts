@@ -180,9 +180,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
     switch (action) {
       case Action.AddToReadingList:
-        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, () => {
+        this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, (success) => {
           this.actionInProgress = false;
-          this.bulkSelectionService.deselectAll();
+          if (success) this.bulkSelectionService.deselectAll();
           this.changeDetectionRef.markForCheck();
         });
         break;
@@ -375,6 +375,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         break;
       case (Action.AnalyzeFiles):
         this.actionService.analyzeFilesForSeries(series, () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
+        break;
+      case Action.AddToWantToReadList:
+        this.actionService.addMultipleSeriesToWantToReadList([series.id], () => {
           this.actionInProgress = false;
           this.changeDetectionRef.markForCheck();
         });

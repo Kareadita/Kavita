@@ -22,7 +22,8 @@ public enum AppUserIncludes
     Bookmarks = 4,
     ReadingLists = 8,
     Ratings = 16,
-    UserPreferences = 32
+    UserPreferences = 32,
+    WantToRead = 64
 }
 
 public interface IUserRepository
@@ -174,6 +175,11 @@ public class UserRepository : IUserRepository
         if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
         {
             query = query.Include(u => u.UserPreferences);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
+        {
+            query = query.Include(u => u.WantToRead);
         }
 
 

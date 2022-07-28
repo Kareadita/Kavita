@@ -85,8 +85,6 @@ namespace Kavita.Common.EnvironmentInfo
 
         public OsInfo()
         {
-            OsVersionModel osInfo = null;
-
             Name = Os.ToString();
             FullName = Name;
 

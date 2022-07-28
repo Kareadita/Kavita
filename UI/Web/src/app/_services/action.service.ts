@@ -13,6 +13,7 @@ import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { LibraryService } from './library.service';
+import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
 
@@ -33,13 +34,12 @@ export type BooleanActionCallback = (result: boolean) => void;
 export class ActionService implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
-  private bookmarkModalRef: NgbModalRef | null = null;
   private readingListModalRef: NgbModalRef | null = null;
   private collectionModalRef: NgbModalRef | null = null;
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService) { }
+    private confirmService: ConfirmService, private memberService: MemberService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -342,7 +342,7 @@ export class ActionService implements OnDestroy {
     });
   }
 
-  addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: VoidActionCallback) {
+  addMultipleToReadingList(seriesId: number, volumes: Array<Volume>, chapters?: Array<Chapter>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
       this.readingListModalRef.componentInstance.seriesId = seriesId;
@@ -355,18 +355,36 @@ export class ActionService implements OnDestroy {
       this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
         if (callback) {
-          callback();
+          callback(true);
         }
       });
       this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
         if (callback) {
-          callback();
+          callback(false);
         }
       });
   }
 
-  addMultipleSeriesToReadingList(series: Array<Series>, callback?: VoidActionCallback) {
+  addMultipleSeriesToWantToReadList(seriesIds: Array<number>, callback?: VoidActionCallback) {
+    this.memberService.addSeriesToWantToRead(seriesIds).subscribe(() => {
+      this.toastr.success('Series added to Want to Read list');
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  removeMultipleSeriesFromWantToReadList(seriesIds: Array<number>, callback?: VoidActionCallback) {
+    this.memberService.removeSeriesToWantToRead(seriesIds).subscribe(() => {
+      this.toastr.success('Series removed from Want to Read list');
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
+  addMultipleSeriesToReadingList(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.readingListModalRef != null) { return; }
       this.readingListModalRef = this.modalService.open(AddToListModalComponent, { scrollable: true, size: 'md' });
       this.readingListModalRef.componentInstance.seriesIds = series.map(v => v.id);
@@ -377,13 +395,13 @@ export class ActionService implements OnDestroy {
       this.readingListModalRef.closed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
         if (callback) {
-          callback();
+          callback(true);
         }
       });
       this.readingListModalRef.dismissed.pipe(take(1)).subscribe(() => {
         this.readingListModalRef = null;
         if (callback) {
-          callback();
+          callback(false);
         }
       });
   }
@@ -394,7 +412,7 @@ export class ActionService implements OnDestroy {
    * @param callback 
    * @returns 
    */
-  addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: VoidActionCallback) {
+  addMultipleSeriesToCollectionTag(series: Array<Series>, callback?: BooleanActionCallback) {
     if (this.collectionModalRef != null) { return; }
       this.collectionModalRef = this.modalService.open(BulkAddToCollectionComponent, { scrollable: true, size: 'md', windowClass: 'collection' });
       this.collectionModalRef.componentInstance.seriesIds = series.map(v => v.id);
@@ -403,13 +421,13 @@ export class ActionService implements OnDestroy {
       this.collectionModalRef.closed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;
         if (callback) {
-          callback();
+          callback(true);
         }
       });
       this.collectionModalRef.dismissed.pipe(take(1)).subscribe(() => {
         this.collectionModalRef = null;
         if (callback) {
-          callback();
+          callback(false);
         }
       });
   }
