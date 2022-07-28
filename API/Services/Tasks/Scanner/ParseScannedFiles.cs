@@ -434,7 +434,6 @@ namespace API.Services.Tasks.Scanner
             {
                 try
                 {
-
                     await ProcessFiles(folderPath, isLibraryScan, async (files, folder) =>
                     {
                         _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
@@ -507,7 +506,7 @@ namespace API.Services.Tasks.Scanner
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
 
-            return SeriesWithInfos();
+            return SeriesWithInfos(); // This isn't needed in this new method, because we invoke on each series
         }
 
         /// <summary>

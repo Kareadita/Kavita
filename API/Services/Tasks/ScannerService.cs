@@ -188,11 +188,23 @@ public class ScannerService : IScannerService
                     }
                 }
 
-                var (totalFiles2, scanElapsedTime2, parsedSeries2) = await ScanFiles(library, seriesDirs.Keys, false);
+                var (_, scanElapsedTime2, _) = await ScanFiles(library, seriesDirs.Keys, false,
+                    parsedFiles =>
+                    {
+                        if (parsedFiles.Count == 0) return Task.CompletedTask;
+                        var firstFile = parsedFiles.First();
+                        parsedSeries.Add(new ParsedSeries()
+                        {
+                            Format = firstFile.Format,
+                            Name = firstFile.Series,
+                            NormalizedName = Parser.Parser.Normalize(firstFile.Series)
+                        }, parsedFiles);
+                        return Task.CompletedTask;
+                    });
                 _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
-                totalFiles += totalFiles2;
+                //totalFiles += totalFiles2;
                 scanElapsedTime += scanElapsedTime2;
-                parsedSeries = parsedSeries2;
+                //parsedSeries = parsedSeries2;
                 RemoveParsedInfosNotForSeries(parsedSeries, series);
             }
             // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
@@ -350,17 +362,17 @@ public class ScannerService : IScannerService
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
+        // TODO: Uncomment this
         // If all library Folder paths haven't been modified since last scan, abort
-        //if (library.Folders.All(folder => File.GetLastWriteTimeUtc(folder.Path) <= folder.LastScanned))
-        if (!library.AnyModificationsSinceLastScan())
-        {
-            _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
-            // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
-            await _eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent($"{library.Name} scan has no work to do",
-                    "All folders have not been changed since last scan. Scan will be aborted."));
-            return;
-        }
+        // if (!library.AnyModificationsSinceLastScan())
+        // {
+        //     _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
+        //     // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
+        //     await _eventHub.SendMessageAsync(MessageFactory.Error,
+        //         MessageFactory.ErrorEvent($"{library.Name} scan has no work to do",
+        //             "All folders have not been changed since last scan. Scan will be aborted."));
+        //     return;
+        // }
 
         // Validations are done, now we can start actual scan
 
@@ -441,14 +453,14 @@ public class ScannerService : IScannerService
 
         //var parsedSeries = await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name);
 
-        var parsedSeries = await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name,
+        await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name,
             isLibraryScan,  processSeriesInfos);
 
 
-        var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
+        //var totalFiles = parsedSeries.Keys.Sum(key => parsedSeries[key].Count);
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 
-        return new Tuple<int, long, Dictionary<ParsedSeries, IList<ParserInfo>>>(totalFiles, scanElapsedTime, parsedSeries);
+        return new Tuple<int, long, Dictionary<ParsedSeries, IList<ParserInfo>>>(0, scanElapsedTime, new Dictionary<ParsedSeries, IList<ParserInfo>>());
     }
 
     /// <summary>
