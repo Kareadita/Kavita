@@ -19,7 +19,7 @@
       
       <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
       <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
-        <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity?.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
+        <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
       </div>
 
       <div class="count" *ngIf="count > 1">
@@ -35,7 +35,7 @@
 
     <div class="card-body" *ngIf="title.length > 0 || actions.length > 0">
       <div>
-        <span class="card-title" placement="top" id="{{title}}_{{entity?.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
+        <span class="card-title" placement="top" id="{{title}}_{{entity.id}}" [ngbTooltip]="tooltipTitle" (click)="handleClick($event)" tabindex="0">
           <span *ngIf="isPromoted()">
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>
             <span class="visually-hidden">(promoted)</span>
