@@ -2,8 +2,6 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
 import { Subject, take, pipe, debounceTime, takeUntil } from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
@@ -13,9 +11,8 @@ import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { SeriesFilter, FilterEvent } from 'src/app/_models/series-filter';
-import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
+import { Action } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
-import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -86,9 +83,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
 
       this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
       [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-      //this.filterSettings.presets.collectionTags = [tagId];
       this.filterActiveCheck = this.seriesService.createSeriesFilter();
-      //this.filterActiveCheck.collectionTags = [tagId];
       this.cdRef.markForCheck();
       
   }
@@ -133,7 +128,6 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     this.seriesService.getWantToRead(undefined, undefined, this.filter).pipe(take(1)).subscribe(paginatedList => {
       this.series = paginatedList.result;
       this.seriesPagination = paginatedList.pagination;
-      console.log(paginatedList);
       this.jumpbarKeys = this.utilityService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
       window.scrollTo(0, 0);
@@ -146,14 +140,6 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
     this.loadPage();
-  }
-
-
-
-  performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action.action, this.collectionTag);
-    }
   }
 }
 

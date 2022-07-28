@@ -25,5 +25,9 @@
             (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
             ></app-series-card>
         </ng-template>
+
+        <ng-template #noData>
+            No Series match your filter or exist in your list.
+        </ng-template>
     </app-card-detail-layout>
 </div>

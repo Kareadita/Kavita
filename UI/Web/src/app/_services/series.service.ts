@@ -132,7 +132,6 @@ export class SeriesService {
 
     return this.httpClient.post<Series[]>(this.baseUrl + 'want-to-read/', data, {observe: 'response', params}).pipe(
       map(response => {
-        console.log('response: ', this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>()))
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
     }));
   }
