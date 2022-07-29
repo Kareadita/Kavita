@@ -369,6 +369,7 @@ public class ScannerService : IScannerService
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId)
     {
+        var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
@@ -422,7 +423,6 @@ public class ScannerService : IScannerService
             allTags.Add(tag);
         }
 
-        var sw = Stopwatch.StartNew();
         var processTasks = new List<Task>();
         Task TrackFiles(IList<ParserInfo> parsedFiles)
         {
@@ -459,7 +459,8 @@ public class ScannerService : IScannerService
         }
 
         // TODO: Remove Series not seen from DB
-
+        // Get all series id's for the names in the list seenSeries
+        // Remove all series
 
 
         _unitOfWork.LibraryRepository.Update(library);
