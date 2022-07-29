@@ -460,12 +460,9 @@ public class ScannerService : IScannerService
             folderPath.LastScanned = DateTime.UtcNow;
         }
 
-        // TODO: Remove Series not seen from DB
-        // Get all series id's for the names in the list seenSeries
-        // Remove all series
         // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
-        //await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
-
+        // NOTE: This implementation is expensive
+        await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
 
         _unitOfWork.LibraryRepository.Update(library);
         if (await _unitOfWork.CommitAsync())
@@ -479,6 +476,7 @@ public class ScannerService : IScannerService
             _logger.LogCritical(
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
         }
+
 
         await CleanupDbEntities();
 

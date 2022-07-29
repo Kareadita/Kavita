@@ -1198,26 +1198,21 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
     {
-        // TODO: Figure out how to write this
         if (seenSeries.Count == 0) return;
-        var format = seenSeries.First().Format; // This doesn't work as each series has it's own format
-        var names = seenSeries.Select(s => s.NormalizedName);
-        foreach (var series in seenSeries)
+        var ids = new List<int>();
+        foreach (var parsedSeries in seenSeries)
         {
-            await _context.Series.Where(s => s.Format == series.Format && s.NormalizedName == series.NormalizedName)
-                .Select(s => s.Id).SingleAsync();
+            ids.Add(await _context.Series.Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName && s.LibraryId == libraryId)
+                .Select(s => s.Id).SingleAsync());
         }
 
-        await _context.Series
+        var seriesToRemove = await _context.Series
             .Where(s => s.LibraryId == libraryId)
-            .Where(s => s.Format == format && !names.Contains(s.NormalizedName))
+            .Where(s => !ids.Contains(s.Id))
             .ToListAsync();
-        // _context.Library
-        //     .Where(l => l.Id == libraryId)
-        //     .Where(l => l.Series.)
 
+        _context.Series.RemoveRange(seriesToRemove);
     }
-
 
     public async Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams)
     {
