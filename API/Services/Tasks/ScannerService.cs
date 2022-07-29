@@ -1,26 +1,20 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
-using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Entities;
-using API.Entities.Enums;
-using API.Extensions;
 using API.Helpers;
 using API.Parser;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using Hangfire;
-using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -56,27 +50,23 @@ public class ScannerService : IScannerService
     private readonly IMetadataService _metadataService;
     private readonly ICacheService _cacheService;
     private readonly IEventHub _eventHub;
-    private readonly IFileService _fileService;
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
-    private readonly ICacheHelper _cacheHelper;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IProcessSeries _processSeries;
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
-        IFileService fileService, IDirectoryService directoryService, IReadingItemService readingItemService,
-        ICacheHelper cacheHelper, IWordCountAnalyzerService wordCountAnalyzerService, IProcessSeries processSeries)
+        IDirectoryService directoryService, IReadingItemService readingItemService,
+        IWordCountAnalyzerService wordCountAnalyzerService, IProcessSeries processSeries)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _metadataService = metadataService;
         _cacheService = cacheService;
         _eventHub = eventHub;
-        _fileService = fileService;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
-        _cacheHelper = cacheHelper;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _processSeries = processSeries;
     }
@@ -125,7 +115,7 @@ public class ScannerService : IScannerService
         // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
         // var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
         // var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
-        var allPeople = new BlockingCollection<Person>();;
+        var allPeople = new BlockingCollection<Person>();
         foreach (var person in await _unitOfWork.PersonRepository.GetAllPeople())
         {
             allPeople.Add(person);
@@ -415,7 +405,7 @@ public class ScannerService : IScannerService
         var seenSeries = new List<ParsedSeries>();
 
         // The reality is that we need to change how we add and make these thread safe
-        var allPeople = new BlockingCollection<Person>();;
+        var allPeople = new BlockingCollection<Person>();
         foreach (var person in await _unitOfWork.PersonRepository.GetAllPeople())
         {
             allPeople.Add(person);
@@ -433,10 +423,11 @@ public class ScannerService : IScannerService
         }
 
         var sw = Stopwatch.StartNew();
-        async Task TrackFiles(IList<ParserInfo> parsedFiles)
+        var processTasks = new List<Task>();
+        Task TrackFiles(IList<ParserInfo> parsedFiles)
         {
 
-            if (parsedFiles.Count == 0) return;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
             totalFiles += parsedFiles.Count;
 
             var foundParsedSeries = new ParsedSeries()
@@ -447,12 +438,15 @@ public class ScannerService : IScannerService
             };
             seenSeries.Add(foundParsedSeries);
             //_processSeries.Enqueue(parsedFiles, library);
-            await _processSeries.ProcessSeriesAsync(parsedFiles, allPeople, allTags, allGenres, library);
+            processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, allPeople, allTags, allGenres, library));
             parsedSeries.Add(foundParsedSeries, parsedFiles);
+            return Task.CompletedTask;
         }
 
 
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles);
+
+        await Task.WhenAll(processTasks);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
