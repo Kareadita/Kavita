@@ -205,7 +205,7 @@ public class ProcessSeries : IProcessSeries
         {
             // This first step seems kinda redundant
             PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-            allPeople.Add(person);
+            allPeople.Add(person); // This shouldn't be needed as it's already there from being done at the Chapter level
         }
 
         // Handle People
@@ -541,12 +541,18 @@ public class ProcessSeries : IProcessSeries
 
         void AddGenre(Genre genre)
         {
+            _unitOfWork.GenreRepository.Attach(genre);
+            _unitOfWork.Commit();
             chapter.Genres.Add(genre);
+            GenreHelper.AddGenreIfNotExists(allGenres, genre);
         }
 
         void AddTag(Tag tag, bool added)
         {
+            _unitOfWork.TagRepository.Attach(tag);
+            _unitOfWork.Commit();
             chapter.Tags.Add(tag);
+            TagHelper.AddTagIfNotExists(allTags, tag);
         }
 
 

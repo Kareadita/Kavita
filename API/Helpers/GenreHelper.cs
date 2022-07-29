@@ -88,4 +88,14 @@ public static class GenreHelper
             metadataGenres.Add(genre);
         }
     }
+
+    public static void AddGenreIfNotExists(BlockingCollection<Genre> metadataGenres, Genre genre)
+    {
+        var existingGenre = metadataGenres.FirstOrDefault(p =>
+            p.NormalizedTitle == Parser.Parser.Normalize(genre.Title));
+        if (existingGenre == null)
+        {
+            metadataGenres.Add(genre);
+        }
+    }
 }

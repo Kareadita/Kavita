@@ -95,6 +95,16 @@ public static class TagHelper
         }
     }
 
+    public static void AddTagIfNotExists(BlockingCollection<Tag> metadataTags, Tag tag)
+    {
+        var existingGenre = metadataTags.FirstOrDefault(p =>
+            p.NormalizedTitle == Parser.Parser.Normalize(tag.Title));
+        if (existingGenre == null)
+        {
+            metadataTags.Add(tag);
+        }
+    }
+
     /// <summary>
     /// Remove tags on a list
     /// </summary>
