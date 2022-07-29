@@ -68,6 +68,7 @@ public static class PersonHelper
         }
     }
 
+
     /// <summary>
     /// Remove people on a list for a given role
     /// </summary>

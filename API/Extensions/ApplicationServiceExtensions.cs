@@ -47,6 +47,7 @@ namespace API.Extensions
             services.AddScoped<IBookmarkService, BookmarkService>();
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<ISeriesService, SeriesService>();
+            services.AddScoped<IProcessSeries, ProcessSeries>();
 
             services.AddScoped<IScannerService, ScannerService>();
             services.AddScoped<IMetadataService, MetadataService>();
