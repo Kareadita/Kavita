@@ -262,8 +262,7 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
-
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
         }
 
         /// <summary>

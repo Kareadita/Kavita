@@ -370,6 +370,7 @@ public class ScannerService : IScannerService
     public async Task ScanLibrary(int libraryId)
     {
         var sw = Stopwatch.StartNew();
+        var scanStart = DateTime.UtcNow;
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
@@ -448,6 +449,7 @@ public class ScannerService : IScannerService
 
         await Task.WhenAll(processTasks);
 
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
 
@@ -461,6 +463,8 @@ public class ScannerService : IScannerService
         // TODO: Remove Series not seen from DB
         // Get all series id's for the names in the list seenSeries
         // Remove all series
+        // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
+        //await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
 
 
         _unitOfWork.LibraryRepository.Update(library);

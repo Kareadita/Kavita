@@ -54,18 +54,17 @@ public class ProcessSeries : IProcessSeries
 
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos.First().Series;
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName));
         _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}", seriesName);
 
         // Check if there is a Series
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesByName(parsedInfos.First().Series, library.Id) ?? DbFactory.Series(parsedInfos.First().Series);
-
         if (series.LibraryId == 0) series.LibraryId = library.Id;
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, series.Name));
+
         try
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-            //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             // Get all associated ParsedInfos to the series. This includes infos that use a different filename that matches Series LocalizedName
 
@@ -78,10 +77,6 @@ public class ProcessSeries : IProcessSeries
             {
                 series.Format = parsedInfos[0].Format;
             }
-
-
-
-
 
 
             if (string.IsNullOrEmpty(series.SortName))
@@ -143,8 +138,6 @@ public class ProcessSeries : IProcessSeries
         {
             _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
         }
-
-        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
 

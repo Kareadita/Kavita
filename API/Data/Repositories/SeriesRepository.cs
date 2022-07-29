@@ -18,6 +18,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
+using API.Services.Tasks.Scanner;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -120,6 +121,7 @@ public interface ISeriesRepository
     Task<int> GetSeriesIdByFolder(string folder);
     Task<Series> GetSeriesByFolderPath(string folder);
     Task<Series> GetFullSeriesByName(string series, int libraryId);
+    Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1192,6 +1194,28 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
             .SingleOrDefaultAsync();
+    }
+
+    public async Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
+    {
+        // TODO: Figure out how to write this
+        if (seenSeries.Count == 0) return;
+        var format = seenSeries.First().Format; // This doesn't work as each series has it's own format
+        var names = seenSeries.Select(s => s.NormalizedName);
+        foreach (var series in seenSeries)
+        {
+            await _context.Series.Where(s => s.Format == series.Format && s.NormalizedName == series.NormalizedName)
+                .Select(s => s.Id).SingleAsync();
+        }
+
+        await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .Where(s => s.Format == format && !names.Contains(s.NormalizedName))
+            .ToListAsync();
+        // _context.Library
+        //     .Where(l => l.Id == libraryId)
+        //     .Where(l => l.Series.)
+
     }
 
 
