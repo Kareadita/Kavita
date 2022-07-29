@@ -141,7 +141,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event) => {
+    this.hubService.messages$.pipe(debounceTime(3000), takeUntil(this.onDestroy)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
