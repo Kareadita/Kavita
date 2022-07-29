@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, Subject, takeUntil } from 'rxjs';
 import { NavService } from '../../_services/nav.service';
@@ -6,7 +6,8 @@ import { NavService } from '../../_services/nav.service';
 @Component({
   selector: 'app-side-nav-item',
   templateUrl: './side-nav-item.component.html',
-  styleUrls: ['./side-nav-item.component.scss']
+  styleUrls: ['./side-nav-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SideNavItemComponent implements OnInit, OnDestroy {
   /**
@@ -29,13 +30,14 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
   highlighted = false;
   private onDestroy: Subject<void> = new Subject();
    
-  constructor(public navService: NavService, private router: Router) {
+  constructor(public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef) {
     router.events
       .pipe(filter(event => event instanceof NavigationEnd), 
             takeUntil(this.onDestroy),
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
         this.updateHightlight(evt.url.split('?')[0]);
+        
       });
   }
 
@@ -54,6 +56,7 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
   updateHightlight(page: string) {
     if (this.link === undefined) {
       this.highlighted = false;
+      this.cdRef.markForCheck();
       return;
     }
 
@@ -63,14 +66,17 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
 
     if (this.comparisonMethod === 'equals' && page === this.link) {
       this.highlighted = true;
+      this.cdRef.markForCheck();
       return;
     }
     if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
       this.highlighted = true;
+      this.cdRef.markForCheck();
       return;
     }
 
     this.highlighted = false;
+    this.cdRef.markForCheck();
   }
 
 }
