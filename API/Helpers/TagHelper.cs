@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
@@ -16,6 +17,35 @@ public static class TagHelper
     /// <param name="isExternal"></param>
     /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
     public static void UpdateTag(ICollection<Tag> allTags, IEnumerable<string> names, bool isExternal, Action<Tag, bool> action)
+    {
+        foreach (var name in names)
+        {
+            if (string.IsNullOrEmpty(name.Trim())) continue;
+
+            var added = false;
+            var normalizedName = Parser.Parser.Normalize(name);
+
+            var genre = allTags.FirstOrDefault(p =>
+                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+            if (genre == null)
+            {
+                added = true;
+                genre = DbFactory.Tag(name, false);
+                allTags.Add(genre);
+            }
+
+            action(genre, added);
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="allTags"></param>
+    /// <param name="names"></param>
+    /// <param name="isExternal"></param>
+    /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
+    public static void UpdateTag(BlockingCollection<Tag> allTags, IEnumerable<string> names, bool isExternal, Action<Tag, bool> action)
     {
         foreach (var name in names)
         {

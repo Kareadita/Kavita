@@ -425,7 +425,7 @@ namespace API.Services.Tasks.Scanner
         /// <param name="folders"></param>
         /// <param name="libraryName"></param>
         /// <returns></returns>
-        public async Task<Dictionary<ParsedSeries, IList<ParserInfo>>> ScanLibrariesForSeries2(LibraryType libraryType,
+        public async Task ScanLibrariesForSeries2(LibraryType libraryType,
             IEnumerable<string> folders, string libraryName, bool isLibraryScan, Func<IList<ParserInfo>, Task> processSeriesInfos = null)
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
@@ -446,11 +446,6 @@ namespace API.Services.Tasks.Scanner
                             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
                         }
 
-                        // NOTE: I might want to only call the TrackSeries locally when this isn't false, otherewise do a global track
-                        if (processSeriesInfos != null)
-                        {
-
-                        }
 
                         MergeLocalizedSeriesWithSeries(infos);
 
@@ -470,33 +465,10 @@ namespace API.Services.Tasks.Scanner
                         {
                             if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
                             {
-                                await processSeriesInfos.Invoke(scannedSeries[series]); //NOTE: We could theoretically call UpdateSeries here
+                                await processSeriesInfos.Invoke(scannedSeries[series]);
                             }
                         }
                     });
-
-
-                    // See if we can combine any series with others that have a localizedSeries
-                    // MergeLocalizedSeriesWithSeries(infos);
-                    //
-                    //
-                    // foreach (var info in infos)
-                    // {
-                    //     try
-                    //     {
-                    //         TrackSeries(info);
-                    //     }
-                    //     catch (Exception ex)
-                    //     {
-                    //         _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
-                    //     }
-                    // }
-
-                    // Here we can all an Action async (or put on queueue) to process all the infos
-                    // if (infos.Count > 0)
-                    // {
-                    //     processSeriesInfos?.Invoke(infos);
-                    // }
                 }
                 catch (ArgumentException ex)
                 {
@@ -506,7 +478,7 @@ namespace API.Services.Tasks.Scanner
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
 
-            return SeriesWithInfos(); // This isn't needed in this new method, because we invoke on each series
+            //return SeriesWithInfos(); // This isn't needed in this new method, because we invoke on each series
         }
 
         /// <summary>

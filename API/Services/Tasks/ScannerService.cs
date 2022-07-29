@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -119,9 +120,25 @@ public class ScannerService : IScannerService
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
         var totalFiles = 0; // TODO: Figure this out
 
-        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+        // var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        // var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        var allPeople = new BlockingCollection<Person>();;
+        foreach (var person in await _unitOfWork.PersonRepository.GetAllPeople())
+        {
+            allPeople.Add(person);
+        }
+
+        var allGenres = new BlockingCollection<Genre>();
+        foreach (var genre in await _unitOfWork.GenreRepository.GetAllGenresAsync())
+        {
+            allGenres.Add(genre);
+        }
+        var allTags = new BlockingCollection<Tag>();
+        foreach (var tag in await _unitOfWork.TagRepository.GetAllTagsAsync())
+        {
+            allTags.Add(tag);
+        }
 
         // TODO: Hook in folderpath optimization _directoryService.Exists(series.FolderPath)
 
@@ -392,10 +409,24 @@ public class ScannerService : IScannerService
         var seenSeries = new List<ParsedSeries>();
 
         // The reality is that we need to change how we add and make these thread safe
-        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        var allPeople = new BlockingCollection<Person>();;
+        foreach (var person in await _unitOfWork.PersonRepository.GetAllPeople())
+        {
+            allPeople.Add(person);
+        }
 
+        var allGenres = new BlockingCollection<Genre>();
+        foreach (var genre in await _unitOfWork.GenreRepository.GetAllGenresAsync())
+        {
+            allGenres.Add(genre);
+        }
+        var allTags = new BlockingCollection<Tag>();
+        foreach (var tag in await _unitOfWork.TagRepository.GetAllTagsAsync())
+        {
+            allTags.Add(tag);
+        }
+
+        var sw = Stopwatch.StartNew();
         async Task TrackFiles(IList<ParserInfo> parsedFiles)
         {
             if (parsedFiles.Count == 0) return;
@@ -416,16 +447,20 @@ public class ScannerService : IScannerService
 
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles);
 
-        _logger.LogInformation("[ScannerService] Finished file scan. Updating database");
+        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", sw.ElapsedMilliseconds);
 
         foreach (var folderPath in library.Folders)
         {
             folderPath.LastScanned = DateTime.UtcNow;
         }
 
-        var sw = Stopwatch.StartNew();
 
-        await UpdateLibrary(library, parsedSeries);
+
+
+        // If ProcessSeriesAsync, then we don't call this
+        //await UpdateLibrary(library, parsedSeries);
+
+
 
         // TODO: Remove Series not seen from DB
 
@@ -489,7 +524,7 @@ public class ScannerService : IScannerService
     /// Given a set of infos for a given series, will update or add a new Series
     /// </summary>
     private async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos,
-        ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, Library library)
+        BlockingCollection<Person> allPeople, BlockingCollection<Tag> allTags, BlockingCollection<Genre> allGenres, Library library)
     {
         if (!parsedInfos.Any()) return;
 
@@ -499,6 +534,8 @@ public class ScannerService : IScannerService
 
         // Check if there is a Series
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesByName(parsedInfos.First().Series, library.Id) ?? DbFactory.Series(parsedInfos.First().Series);
+
+        if (series.LibraryId == 0) series.LibraryId = library.Id;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
         try
@@ -562,6 +599,7 @@ public class ScannerService : IScannerService
 
             UpdateSeriesMetadata(series, allPeople, allGenres, allTags, library.Type);
             series.LastFolderScanned = DateTime.UtcNow;
+            _unitOfWork.SeriesRepository.Attach(series);
 
             try
             {
@@ -597,9 +635,25 @@ public class ScannerService : IScannerService
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
 
-        var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
+        // var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        // var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        var allPeople = new BlockingCollection<Person>();;
+        foreach (var person in await _unitOfWork.PersonRepository.GetAllPeople())
+        {
+            allPeople.Add(person);
+        }
+
+        var allGenres = new BlockingCollection<Genre>();
+        foreach (var genre in await _unitOfWork.GenreRepository.GetAllGenresAsync())
+        {
+            allGenres.Add(genre);
+        }
+        var allTags = new BlockingCollection<Tag>();
+        foreach (var tag in await _unitOfWork.TagRepository.GetAllTagsAsync())
+        {
+            allTags.Add(tag);
+        }
 
         // Update existing series
         _logger.LogInformation("[ScannerService] Updating existing series for {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size",
@@ -765,7 +819,7 @@ public class ScannerService : IScannerService
     }
 
     private async Task UpdateSeries(Series series, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries,
-        ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, Library library)
+        BlockingCollection<Person> allPeople, BlockingCollection<Tag> allTags, BlockingCollection<Genre> allGenres, Library library)
     {
         try
         {
@@ -849,7 +903,7 @@ public class ScannerService : IScannerService
     }
 
 
-    private static void UpdateSeriesMetadata(Series series, ICollection<Person> allPeople, ICollection<Genre> allGenres, ICollection<Tag> allTags, LibraryType libraryType)
+    private static void UpdateSeriesMetadata(Series series, BlockingCollection<Person> allPeople, BlockingCollection<Genre> allGenres, BlockingCollection<Tag> allTags, LibraryType libraryType)
     {
         var isBook = libraryType == LibraryType.Book;
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
@@ -1042,7 +1096,7 @@ public class ScannerService : IScannerService
 
 
 
-    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres)
+    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, BlockingCollection<Person> allPeople, BlockingCollection<Tag> allTags, BlockingCollection<Genre> allGenres)
     {
         var startingVolumeCount = series.Volumes.Count;
         // Add new volumes and update chapters per volume
@@ -1190,7 +1244,7 @@ public class ScannerService : IScannerService
     }
 
     #nullable enable
-    private void UpdateChapterFromComicInfo(Chapter chapter, ICollection<Person> allPeople, ICollection<Tag> allTags, ICollection<Genre> allGenres, ComicInfo? info)
+    private void UpdateChapterFromComicInfo(Chapter chapter, BlockingCollection<Person> allPeople, BlockingCollection<Tag> allTags, BlockingCollection<Genre> allGenres, ComicInfo? info)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||

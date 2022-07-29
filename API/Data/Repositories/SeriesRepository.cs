@@ -1165,7 +1165,7 @@ public class SeriesRepository : ISeriesRepository
     public Task<Series> GetFullSeriesByName(string series, int libraryId)
     {
         return _context.Series
-            .Where(s => s.Name.Equals(series) && s.LibraryId == libraryId)
+            .Where(s => s.NormalizedName.Equals(Parser.Parser.Normalize(series)) && s.LibraryId == libraryId)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Include(s => s.Metadata)

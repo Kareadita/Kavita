@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
@@ -16,6 +17,32 @@ public static class GenreHelper
     /// <param name="isExternal"></param>
     /// <param name="action"></param>
     public static void UpdateGenre(ICollection<Genre> allGenres, IEnumerable<string> names, bool isExternal, Action<Genre> action)
+    {
+        foreach (var name in names)
+        {
+            if (string.IsNullOrEmpty(name.Trim())) continue;
+
+            var normalizedName = Parser.Parser.Normalize(name);
+            var genre = allGenres.FirstOrDefault(p =>
+                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+            if (genre == null)
+            {
+                genre = DbFactory.Genre(name, false);
+                allGenres.Add(genre);
+            }
+
+            action(genre);
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="allGenres"></param>
+    /// <param name="names"></param>
+    /// <param name="isExternal"></param>
+    /// <param name="action"></param>
+    public static void UpdateGenre(BlockingCollection<Genre> allGenres, IEnumerable<string> names, bool isExternal, Action<Genre> action)
     {
         foreach (var name in names)
         {
