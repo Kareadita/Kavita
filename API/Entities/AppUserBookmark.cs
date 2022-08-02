@@ -1,11 +1,13 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
+using API.Entities.Interfaces;
 
 namespace API.Entities
 {
     /// <summary>
     /// Represents a saved page in a Chapter entity for a given user.
     /// </summary>
-    public class AppUserBookmark
+    public class AppUserBookmark : IEntityDate
     {
         public int Id { get; set; }
         public int Page { get; set; }
@@ -23,5 +25,7 @@ namespace API.Entities
         [JsonIgnore]
         public AppUser AppUser { get; set; }
         public int AppUserId { get; set; }
+        public DateTime Created { get; set; }
+        public DateTime LastModified { get; set; }
     }
 }

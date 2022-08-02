@@ -54,6 +54,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
       case Action.RemoveFromWantToReadList:
         this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
           this.bulkSelectionService.deselectAll();
+          this.loadPage();
           this.cdRef.markForCheck();
         });
         break;

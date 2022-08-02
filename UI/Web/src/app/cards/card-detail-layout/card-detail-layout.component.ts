@@ -117,7 +117,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
     //   }
     //   this.hasResumedJumpKey = true;
     // });
-    console.log(this.noDataTemplate);
   }
 
   ngOnChanges(): void {

@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Injectable } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { ReplaySubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
@@ -23,6 +23,7 @@ export class BulkSelectionService {
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
   private dataSourceMax: { [key: string]: number} = {};
   public isShiftDown: boolean = false;
+  private activeRoute: string = '';
 
   private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
   public actions$ = this.actionsSource.asObservable();
@@ -33,14 +34,16 @@ export class BulkSelectionService {
    */
   public selections$ = this.selectionsSource.asObservable();
 
-  constructor(private router: Router, private actionFactory: ActionFactoryService) {
+  constructor(private router: Router, private actionFactory: ActionFactoryService, private route: ActivatedRoute) {
     router.events
       .pipe(filter(event => event instanceof NavigationStart))
       .subscribe((event) => {
         this.deselectAll();
         this.dataSourceMax = {};
         this.prevIndex = 0;
+        this.activeRoute = this.router.url;
       });
+
   }
 
   handleCardSelection(dataSource: DataSource, index: number, maxIndex: number, wasSelected: boolean) {
@@ -143,7 +146,14 @@ export class BulkSelectionService {
     // else returns volume/chapter items
     const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection, Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList];
     if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
-      return this.actionFactory.getSeriesActions(callback).filter(item => allowedActions.includes(item.action));
+      let actions = this.actionFactory.getSeriesActions(callback).filter(item => allowedActions.includes(item.action));
+      if (this.activeRoute.startsWith('/want-to-read')) {
+        const removeFromWantToRead = {...actions[0]};
+        removeFromWantToRead.action = Action.RemoveFromWantToReadList;
+        removeFromWantToRead.title = 'Remove from Want to Read';
+        actions.push(removeFromWantToRead);
+      }
+      return actions;
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
