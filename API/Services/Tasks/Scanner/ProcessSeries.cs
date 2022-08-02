@@ -534,23 +534,23 @@ public class ProcessSeries : IProcessSeries
 
         void AddPerson(Person person)
         {
-            _unitOfWork.PersonRepository.Attach(person);
-            _unitOfWork.Commit();
+            // _unitOfWork.PersonRepository.Attach(person);
+            // _unitOfWork.Commit();
             PersonHelper.AddPersonIfNotExists(chapter.People, person);
         }
 
         void AddGenre(Genre genre)
         {
-            _unitOfWork.GenreRepository.Attach(genre);
-            _unitOfWork.Commit();
+            // _unitOfWork.GenreRepository.Attach(genre);
+            // _unitOfWork.Commit();
             chapter.Genres.Add(genre);
             GenreHelper.AddGenreIfNotExists(allGenres, genre);
         }
 
         void AddTag(Tag tag, bool added)
         {
-            _unitOfWork.TagRepository.Attach(tag);
-            _unitOfWork.Commit();
+            // _unitOfWork.TagRepository.Attach(tag);
+            // _unitOfWork.Commit();
             chapter.Tags.Add(tag);
             TagHelper.AddTagIfNotExists(allTags, tag);
         }

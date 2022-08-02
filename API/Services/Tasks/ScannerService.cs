@@ -370,7 +370,6 @@ public class ScannerService : IScannerService
     public async Task ScanLibrary(int libraryId)
     {
         var sw = Stopwatch.StartNew();
-        var scanStart = DateTime.UtcNow;
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
@@ -479,6 +478,7 @@ public class ScannerService : IScannerService
 
 
         await CleanupDbEntities();
+
 
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
