@@ -178,6 +178,8 @@ namespace API.Tests.Parser
         [InlineData("Zettai Karen Children v02 c003 - The Invisible Guardian (2) [JS Scans]", "Zettai Karen Children")]
         [InlineData("My Charms Are Wasted on Kuroiwa Medaka - Ch. 37.5 - Volume Extras", "My Charms Are Wasted on Kuroiwa Medaka")]
         [InlineData("Highschool of the Dead - Full Color Edition v02 [Uasaha] (Yen Press)", "Highschool of the Dead - Full Color Edition")]
+        [InlineData("諌山創] 進撃の巨人 第23巻", "諌山創] 進撃の巨人")]
+        [InlineData("(一般コミック) [奥浩哉] いぬやしき 第09巻", "いぬやしき")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
