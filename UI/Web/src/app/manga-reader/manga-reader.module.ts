@@ -9,6 +9,7 @@ import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { InfiniteScrollerComponent } from './infinite-scroller/infinite-scroller.component';
 import { ReaderSharedModule } from '../reader-shared/reader-shared.module';
 import { FullscreenIconPipe } from './fullscreen-icon.pipe';
+import { PipeModule } from '../pipe/pipe.module';
 
 @NgModule({
   declarations: [
@@ -20,6 +21,7 @@ import { FullscreenIconPipe } from './fullscreen-icon.pipe';
     CommonModule,
     MangaReaderRoutingModule,
     ReactiveFormsModule,
+    PipeModule,
 
     NgbDropdownModule,
     NgxSliderModule,

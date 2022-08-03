@@ -480,10 +480,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         autoCloseMenu: this.autoCloseMenu,
         pageSplitOption: this.pageSplitOption,
         fittingOption: this.translateScalingOption(this.scalingOption),
-        layoutMode: this.layoutMode
+        layoutMode: this.layoutMode,
+        darkness: 100
       });
 
       this.updateForm();
+
+      this.generalSettingsForm.get('darkness')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        console.log('brightness: ', val);
+        //this.cdRef.markForCheck();
+      });
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
 
