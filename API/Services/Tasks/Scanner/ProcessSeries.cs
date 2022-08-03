@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -19,6 +20,7 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
+    Task Prime();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, BlockingCollection<Person> allPeople, BlockingCollection<Tag> allTags, BlockingCollection<Genre> allGenres, Library library);
 }
 
@@ -35,6 +37,12 @@ public class ProcessSeries : IProcessSeries
     private readonly IReadingItemService _readingItemService;
     private readonly IFileService _fileService;
 
+    private IList<Genre> _genres;
+    private IList<Person> _people;
+    private IList<Tag> _tags;
+
+
+
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService)
@@ -46,6 +54,16 @@ public class ProcessSeries : IProcessSeries
         _cacheHelper = cacheHelper;
         _readingItemService = readingItemService;
         _fileService = fileService;
+    }
+
+    /// <summary>
+    /// Invoke this before processing any series, just once to prime all the needed data during a scan
+    /// </summary>
+    public async Task Prime()
+    {
+        _genres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        _people = await _unitOfWork.PersonRepository.GetAllPeople();
+        _tags = await _unitOfWork.TagRepository.GetAllTagsAsync();
     }
 
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, BlockingCollection<Person> allPeople, BlockingCollection<Tag> allTags, BlockingCollection<Genre> allGenres, Library library)
@@ -335,8 +353,6 @@ public class ProcessSeries : IProcessSeries
             });
     }
 
-
-
     private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, BlockingCollection<Person> allPeople, BlockingCollection<Tag> allTags, BlockingCollection<Genre> allGenres)
     {
         var startingVolumeCount = series.Volumes.Count;
@@ -565,66 +581,66 @@ public class ProcessSeries : IProcessSeries
 
         var people = GetTagValues(comicInfo.Colorist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Colorist,
+        UpdatePeople(people, PersonRole.Colorist,
             AddPerson);
 
         people = GetTagValues(comicInfo.Characters);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Character,
+        UpdatePeople(people, PersonRole.Character,
             AddPerson);
 
 
         people = GetTagValues(comicInfo.Translator);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Translator,
+        UpdatePeople(people, PersonRole.Translator,
             AddPerson);
 
 
         people = GetTagValues(comicInfo.Writer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Writer,
+        UpdatePeople(people, PersonRole.Writer,
             AddPerson);
 
         people = GetTagValues(comicInfo.Editor);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Editor,
+        UpdatePeople(people, PersonRole.Editor,
             AddPerson);
 
         people = GetTagValues(comicInfo.Inker);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Inker,
+        UpdatePeople(people, PersonRole.Inker,
             AddPerson);
 
         people = GetTagValues(comicInfo.Letterer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Letterer,
+        UpdatePeople(people, PersonRole.Letterer,
             AddPerson);
 
 
         people = GetTagValues(comicInfo.Penciller);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Penciller,
+        UpdatePeople(people, PersonRole.Penciller,
             AddPerson);
 
         people = GetTagValues(comicInfo.CoverArtist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.CoverArtist,
+        UpdatePeople(people, PersonRole.CoverArtist,
             AddPerson);
 
         people = GetTagValues(comicInfo.Publisher);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-        PersonHelper.UpdatePeople(allPeople, people, PersonRole.Publisher,
+        UpdatePeople(people, PersonRole.Publisher,
             AddPerson);
 
-        var genres = GetTagValues(comicInfo.Genre);
-        GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
-        GenreHelper.UpdateGenre(allGenres, genres, false,
-            AddGenre);
-
-        var tags = GetTagValues(comicInfo.Tags);
-        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
-        TagHelper.UpdateTag(allTags, tags, false,
-            AddTag);
+        // var genres = GetTagValues(comicInfo.Genre);
+        // GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
+        // GenreHelper.UpdateGenre(allGenres, genres, false,
+        //     AddGenre);
+        //
+        // var tags = GetTagValues(comicInfo.Tags);
+        // TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
+        // TagHelper.UpdateTag(allTags, tags, false,
+        //     AddTag);
     }
 
     private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
@@ -637,5 +653,37 @@ public class ProcessSeries : IProcessSeries
         return ImmutableList<string>.Empty;
     }
     #nullable disable
+
+    /// <summary>
+    /// Given a list of all existing people, this will check the new names and roles and if it doesn't exist in allPeople, will create and
+    /// add an entry. For each person in name, the callback will be executed.
+    /// </summary>
+    /// <remarks>This does not remove people if an empty list is passed into names</remarks>
+    /// <remarks>This is used to add new people to a list without worrying about duplicating rows in the DB</remarks>
+    /// <param name="names"></param>
+    /// <param name="role"></param>
+    /// <param name="action"></param>
+    private void UpdatePeople(IEnumerable<string> names, PersonRole role, Action<Person> action)
+    {
+
+        var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
+
+        foreach (var name in names)
+        {
+            var normalizedName = Parser.Parser.Normalize(name);
+            var person = allPeopleTypeRole.FirstOrDefault(p =>
+                p.NormalizedName.Equals(normalizedName));
+            if (person == null)
+            {
+                person = DbFactory.Person(name, role);
+                lock (_people)
+                {
+                    _people.Add(person);
+                }
+            }
+
+            action(person);
+        }
+    }
 
 }

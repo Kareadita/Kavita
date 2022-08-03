@@ -226,6 +226,7 @@ public class ScannerService : IScannerService
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
             var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
+            await _processSeries.Prime();
             await _processSeries.ProcessSeriesAsync(parsedInfos, allPeople, allTags, allGenres, library);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
@@ -423,6 +424,7 @@ public class ScannerService : IScannerService
             allTags.Add(tag);
         }
 
+        await _processSeries.Prime();
         var processTasks = new List<Task>();
         Task TrackFiles(IList<ParserInfo> parsedFiles)
         {
