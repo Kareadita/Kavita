@@ -14,6 +14,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Parser;
 using API.SignalR;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -36,6 +37,7 @@ public class ProcessSeries : IProcessSeries
     private readonly ICacheHelper _cacheHelper;
     private readonly IReadingItemService _readingItemService;
     private readonly IFileService _fileService;
+    private readonly IMetadataService _metadataService;
 
     private IList<Genre> _genres;
     private IList<Person> _people;
@@ -45,7 +47,7 @@ public class ProcessSeries : IProcessSeries
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
-        IFileService fileService)
+        IFileService fileService, IMetadataService metadataService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -54,6 +56,7 @@ public class ProcessSeries : IProcessSeries
         _cacheHelper = cacheHelper;
         _readingItemService = readingItemService;
         _fileService = fileService;
+        _metadataService = metadataService;
     }
 
     /// <summary>
@@ -80,7 +83,6 @@ public class ProcessSeries : IProcessSeries
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesByName(parsedInfos.First().Series, library.Id) ?? DbFactory.Series(parsedInfos.First().Series);
         if (series.LibraryId == 0) series.LibraryId = library.Id;
 
-
         try
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
@@ -96,7 +98,6 @@ public class ProcessSeries : IProcessSeries
             {
                 series.Format = parsedInfos[0].Format;
             }
-
 
             if (string.IsNullOrEmpty(series.SortName))
             {
@@ -152,7 +153,6 @@ public class ProcessSeries : IProcessSeries
                     MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
                         string.Empty));
             }
-
         }
         catch (Exception ex)
         {
@@ -160,7 +160,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
-
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false));
     }
 
     private void UpdateSeriesMetadata(Series series, LibraryType libraryType)
@@ -418,6 +418,7 @@ public class ProcessSeries : IProcessSeries
             if (volume == null)
             {
                 volume = DbFactory.Volume(volumeNumber);
+                volume.SeriesId = series.Id;
                 series.Volumes.Add(volume);
                 _unitOfWork.VolumeRepository.Add(volume);
             }

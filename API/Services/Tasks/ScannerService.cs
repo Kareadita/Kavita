@@ -212,7 +212,7 @@ public class ScannerService : IScannerService
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
-            await RemoveAbandonedMetadataKeys();
+            await _metadataService.RemoveAbandonedMetadataKeys();
         }
         catch (Exception ex)
         {
@@ -225,7 +225,7 @@ public class ScannerService : IScannerService
         await CleanupDbEntities();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(library.Id, series.Id, false));
+        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(library.Id, series.Id, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, series.Id, false));
     }
 
@@ -416,6 +416,7 @@ public class ScannerService : IScannerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
+        await _metadataService.RemoveAbandonedMetadataKeys();
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);
 
@@ -445,7 +446,7 @@ public class ScannerService : IScannerService
         await CleanupDbEntities();
 
 
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, false));
+        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
@@ -487,12 +488,5 @@ public class ScannerService : IScannerService
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
     {
         return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
-    }
-
-    private async Task RemoveAbandonedMetadataKeys()
-    {
-        await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
-        await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
-        await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
     }
 }
