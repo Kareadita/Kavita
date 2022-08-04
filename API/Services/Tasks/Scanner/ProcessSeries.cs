@@ -69,6 +69,7 @@ public class ProcessSeries : IProcessSeries
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library)
     {
         if (!parsedInfos.Any()) return;
+        // NOTE: We could put an optimizatiion to avoid any DB work if nothing has changed
 
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos.First().Series;
@@ -144,6 +145,7 @@ public class ProcessSeries : IProcessSeries
             }
             catch (Exception ex)
             {
+                await _unitOfWork.RollbackAsync();
                 _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the for series {@SeriesName}", series);
 
                 await _eventHub.SendMessageAsync(MessageFactory.Error,
