@@ -153,50 +153,13 @@ public class ScannerService : IScannerService
             }
             else
             {
-                // TODO: I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
+                // I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
                 _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan");
                 await _eventHub.SendMessageAsync(MessageFactory.Error,
                     MessageFactory.ErrorEvent("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan",
                         series.Name));
                 await _unitOfWork.RollbackAsync();
-
                 return;
-
-                // We need to do an additional check for an edge case: If the scan ran and the files do not match the existing Series name, then it is very likely,
-                // the files have crap naming and if we don't correct, the series will get deleted due to the parser not being able to fallback onto folder parsing as the root
-                // is the series folder.
-                // var existingFolder = seriesDirs.Keys.FirstOrDefault(key => key.Contains(series.OriginalName));
-                // if (seriesDirs.Keys.Count == 1 && !string.IsNullOrEmpty(existingFolder))
-                // {
-                //     seriesDirs = new Dictionary<string, string>();
-                //     var path = Directory.GetParent(existingFolder)?.FullName;
-                //     if (!libraryPaths.Contains(path) || !libraryPaths.Any(p => p.Contains(path ?? string.Empty)))
-                //     {
-                //         _logger.LogCritical("[ScanService] Aborted: {SeriesName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library", series.OriginalName);
-                //         await _eventHub.SendMessageAsync(MessageFactory.Error,
-                //             MessageFactory.ErrorEvent($"Scan of {series.Name} aborted", $"{series.OriginalName} has bad naming convention and sits at root of library. Cannot scan series without deletion occuring. Correct file names to have Series Name within it or perform Scan Library"));
-                //         return;
-                //     }
-                //     if (!string.IsNullOrEmpty(path))
-                //     {
-                //         seriesDirs[path] = string.Empty;
-                //     }
-                // }
-
-                // Task TrackFiles(IList<ParserInfo> parsedFiles)
-                // {
-                //     if (parsedFiles.Count == 0) return Task.CompletedTask;
-                //     var firstFile = parsedFiles.First();
-                //     parsedSeries.Add(new ParsedSeries() {Format = firstFile.Format, Name = firstFile.Series, NormalizedName = Parser.Parser.Normalize(firstFile.Series)}, parsedFiles);
-                //     totalFiles += parsedFiles.Count;
-                //     return Task.CompletedTask;
-                // }
-                //
-                // var scanElapsedTime2 = await ScanFiles(library, seriesDirs.Keys, false, TrackFiles);
-                // _logger.LogInformation("{SeriesName} has bad naming convention, forcing rescan at a higher directory", series.OriginalName);
-                //
-                // scanElapsedTime += scanElapsedTime2;
-                // RemoveParsedInfosNotForSeries(parsedSeries, series);
             }
             // At this point, parsedSeries will have at least one key and we can perform the update. If it still doesn't, just return and don't do anything
             if (parsedSeries.Count == 0) return;
@@ -212,7 +175,6 @@ public class ScannerService : IScannerService
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
-            await _metadataService.RemoveAbandonedMetadataKeys();
         }
         catch (Exception ex)
         {
@@ -222,10 +184,11 @@ public class ScannerService : IScannerService
         // Tell UI that this series is done
         await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
-        await CleanupDbEntities();
+
+
+        await _metadataService.RemoveAbandonedMetadataKeys();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(library.Id, series.Id, false));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, series.Id, false));
     }
 
@@ -416,8 +379,6 @@ public class ScannerService : IScannerService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
-        await _metadataService.RemoveAbandonedMetadataKeys();
-
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);
 
         foreach (var folderPath in library.Folders)
@@ -442,11 +403,7 @@ public class ScannerService : IScannerService
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
         }
 
-
-        await CleanupDbEntities();
-
-
-        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(libraryId, false));
+        await _metadataService.RemoveAbandonedMetadataKeys();
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }

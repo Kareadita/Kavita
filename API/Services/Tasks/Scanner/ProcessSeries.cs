@@ -21,6 +21,10 @@ namespace API.Services.Tasks.Scanner;
 
 public interface IProcessSeries
 {
+    /// <summary>
+    /// Do not allow this Prime to be invoked by multiple threads. It will break the DB.
+    /// </summary>
+    /// <returns></returns>
     Task Prime();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library);
 }
@@ -86,8 +90,6 @@ public class ProcessSeries : IProcessSeries
         try
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
-
-            // Get all associated ParsedInfos to the series. This includes infos that use a different filename that matches Series LocalizedName
 
             UpdateVolumes(series, parsedInfos);
             series.Pages = series.Volumes.Sum(v => v.Pages);
@@ -220,14 +222,6 @@ public class ProcessSeries : IProcessSeries
             series.Metadata.Language = firstChapter.Language;
         }
 
-
-        void HandleAddPerson(Person person)
-        {
-            // This first step seems kinda redundant
-            PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-            //allPeople.Add(person); // This shouldn't be needed as it's already there from being done at the Chapter level
-        }
-
         // Handle People
         foreach (var chapter in chapters)
         {
@@ -237,9 +231,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-
-                // UpdatePeople(chapter.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Name), PersonRole.Writer,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.CoverArtistLocked)
@@ -248,8 +239,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.CoverArtist).Select(p => p.Name), PersonRole.CoverArtist,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.PublisherLocked)
@@ -258,8 +247,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Publisher).Select(p => p.Name), PersonRole.Publisher,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.CharacterLocked)
@@ -268,8 +255,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Character).Select(p => p.Name), PersonRole.Character,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.ColoristLocked)
@@ -278,8 +263,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Colorist).Select(p => p.Name), PersonRole.Colorist,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.EditorLocked)
@@ -288,9 +271,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Editor).Select(p => p.Name), PersonRole.Editor,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.InkerLocked)
@@ -299,8 +279,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Inker).Select(p => p.Name), PersonRole.Inker,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.LettererLocked)
@@ -309,8 +287,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Letterer).Select(p => p.Name), PersonRole.Letterer,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.PencillerLocked)
@@ -319,8 +295,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Penciller).Select(p => p.Name), PersonRole.Penciller,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.TranslatorLocked)
@@ -329,8 +303,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
                 }
-                // PersonHelper.UpdatePeople(allPeople, chapter.People.Where(p => p.Role == PersonRole.Translator).Select(p => p.Name), PersonRole.Translator,
-                //     HandleAddPerson);
             }
 
             if (!series.Metadata.TagsLocked)
@@ -339,12 +311,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
                 }
-
-                // TagHelper.UpdateTag(allTags, chapter.Tags.Select(t => t.Title), false, (tag, _) =>
-                // {
-                //     TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
-                //     allTags.Add(tag);
-                // });
             }
 
             if (!series.Metadata.GenresLocked)
@@ -353,11 +319,6 @@ public class ProcessSeries : IProcessSeries
                 {
                     GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
                 }
-                // GenreHelper.UpdateGenre(allGenres, chapter.Genres.Select(t => t.Title), false, genre =>
-                // {
-                //     GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
-                //     allGenres.Add(genre);
-                // });
             }
         }
 

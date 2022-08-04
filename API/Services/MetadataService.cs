@@ -283,6 +283,9 @@ public class MetadataService : IMetadataService
         await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
+        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+
     }
 
     /// <summary>
