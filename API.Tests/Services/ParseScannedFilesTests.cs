@@ -333,7 +333,7 @@ public class ParseScannedFilesTests
 
         var seriesSeen = new HashSet<IList<ParserInfo>>();
         // IsLibraryScan is problematic due to the complexity it adds. We should try to find a way around this
-        await psf.ScanLibrariesForSeries2(LibraryType.Manga,
+        await psf.ScanLibrariesForSeries(LibraryType.Manga,
             new List<string>() {"C:/Data/"}, "libraryName",true, list =>
             {
                 seriesSeen.Add(list);

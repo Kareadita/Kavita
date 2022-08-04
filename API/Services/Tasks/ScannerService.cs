@@ -414,7 +414,7 @@ public class ScannerService : IScannerService
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();
 
-        await scanner.ScanLibrariesForSeries2(library.Type, dirs, library.Name,
+        await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name,
             isLibraryScan,  processSeriesInfos);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;

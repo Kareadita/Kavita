@@ -109,13 +109,14 @@ namespace API.Services.Tasks.Scanner
         /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
         /// This will check if the name matches an existing series name (multiple fields) <see cref="MergeName"/>
         /// </summary>
+        /// <param name="scannedSeries">A localized list of a series' parsed infos</param>
         /// <param name="info"></param>
-        private void TrackSeries2(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
+        private void TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
         {
             if (info.Series == string.Empty) return;
 
             // Check if normalized info.Series already exists and if so, update info to use that name instead
-            info.Series = MergeName2(scannedSeries, info);
+            info.Series = MergeName(scannedSeries, info);
 
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedSortSeries = Parser.Parser.Normalize(info.SeriesSort);
@@ -165,7 +166,7 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="info"></param>
         /// <returns>Series Name to group this info into</returns>
-        public string MergeName2(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
+        public string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
@@ -209,10 +210,11 @@ namespace API.Services.Tasks.Scanner
         /// <param name="folders"></param>
         /// <param name="libraryName"></param>
         /// <returns></returns>
-        public async Task ScanLibrariesForSeries2(LibraryType libraryType,
+        public async Task ScanLibrariesForSeries(LibraryType libraryType,
             IEnumerable<string> folders, string libraryName, bool isLibraryScan, Func<IList<ParserInfo>, Task> processSeriesInfos = null)
         {
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Started));
+
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("Starting file scan", libraryName, ProgressEventType.Started));
 
             foreach (var folderPath in folders)
             {
@@ -223,12 +225,7 @@ namespace API.Services.Tasks.Scanner
                         _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
                         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
                         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-                        var infos = new List<ParserInfo>();
-                        foreach (var file in files)
-                        {
-                            var info = _readingItemService.ParseFile(file, folderPath, libraryType);
-                            if (info != null) infos.Add(info);
-                        }
+                        var infos = files.Select(file => _readingItemService.ParseFile(file, folderPath, libraryType)).Where(info => info != null).ToList();
 
 
                         MergeLocalizedSeriesWithSeries(infos);
@@ -237,7 +234,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             try
                             {
-                                TrackSeries2(scannedSeries, info);
+                                TrackSeries(scannedSeries, info);
                             }
                             catch (Exception ex)
                             {
@@ -262,7 +259,7 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
         }
 
         /// <summary>
