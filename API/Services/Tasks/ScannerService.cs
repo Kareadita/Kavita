@@ -325,8 +325,8 @@ public class ScannerService : IScannerService
         // {
         //     _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
         //     // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
-        //     await _eventHub.SendMessageAsync(MessageFactory.Error,
-        //         MessageFactory.ErrorEvent($"{library.Name} scan has no work to do",
+        //     await _eventHub.SendMessageAsync(MessageFactory.Info,
+        //         MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
         //             "All folders have not been changed since last scan. Scan will be aborted."));
         //     return;
         // }

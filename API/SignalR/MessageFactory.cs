@@ -108,7 +108,10 @@ namespace API.SignalR
         /// When files are being scanned to calculate word count
         /// </summary>
         private const string WordCountAnalyzerProgress = "WordCountAnalyzerProgress";
-
+        /// <summary>
+        /// A generic message that can occur in background processing to inform user, but no direct action is needed
+        /// </summary>
+        public const string Info = "Info";
 
 
         public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
@@ -261,14 +264,29 @@ namespace API.SignalR
             };
         }
 
-        /**
-         * A generic error that will show on events widget in the UI
-         */
+
         public static SignalRMessage ErrorEvent(string title, string subtitle)
         {
             return new SignalRMessage
             {
                 Name = Error,
+                Title = title,
+                SubTitle = subtitle,
+                Progress = ProgressType.None,
+                EventType = ProgressEventType.Single,
+                Body = new
+                {
+                    Title = title,
+                    SubTitle = subtitle,
+                }
+            };
+        }
+
+        public static SignalRMessage InfoEvent(string title, string subtitle)
+        {
+            return new SignalRMessage
+            {
+                Name = Info,
                 Title = title,
                 SubTitle = subtitle,
                 Progress = ProgressType.None,
