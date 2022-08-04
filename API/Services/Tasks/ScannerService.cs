@@ -112,25 +112,6 @@ public class ScannerService : IScannerService
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
         var totalFiles = 0; // TODO: Figure this out
 
-        // var allPeople = await _unitOfWork.PersonRepository.GetAllPeople();
-        // var allGenres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
-        // var allTags = await _unitOfWork.TagRepository.GetAllTagsAsync();
-        var allPeople = new BlockingCollection<Person>();
-        foreach (var person in await _unitOfWork.PersonRepository.GetAllPeople())
-        {
-            allPeople.Add(person);
-        }
-
-        var allGenres = new BlockingCollection<Genre>();
-        foreach (var genre in await _unitOfWork.GenreRepository.GetAllGenresAsync())
-        {
-            allGenres.Add(genre);
-        }
-        var allTags = new BlockingCollection<Tag>();
-        foreach (var tag in await _unitOfWork.TagRepository.GetAllTagsAsync())
-        {
-            allTags.Add(tag);
-        }
 
         // TODO: Hook in folderpath optimization _directoryService.Exists(series.FolderPath)
 
@@ -227,7 +208,7 @@ public class ScannerService : IScannerService
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
             var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
             await _processSeries.Prime();
-            await _processSeries.ProcessSeriesAsync(parsedInfos, allPeople, allTags, allGenres, library);
+            await _processSeries.ProcessSeriesAsync(parsedInfos, library);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
@@ -406,23 +387,6 @@ public class ScannerService : IScannerService
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
         var seenSeries = new List<ParsedSeries>();
 
-        // The reality is that we need to change how we add and make these thread safe
-        var allPeople = new BlockingCollection<Person>();
-        foreach (var person in await _unitOfWork.PersonRepository.GetAllPeople())
-        {
-            allPeople.Add(person);
-        }
-
-        var allGenres = new BlockingCollection<Genre>();
-        foreach (var genre in await _unitOfWork.GenreRepository.GetAllGenresAsync())
-        {
-            allGenres.Add(genre);
-        }
-        var allTags = new BlockingCollection<Tag>();
-        foreach (var tag in await _unitOfWork.TagRepository.GetAllTagsAsync())
-        {
-            allTags.Add(tag);
-        }
 
         await _processSeries.Prime();
         var processTasks = new List<Task>();
@@ -439,8 +403,7 @@ public class ScannerService : IScannerService
                 Format = parsedFiles.First().Format
             };
             seenSeries.Add(foundParsedSeries);
-            //_processSeries.Enqueue(parsedFiles, library);
-            processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, allPeople, allTags, allGenres, library));
+            processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
             parsedSeries.Add(foundParsedSeries, parsedFiles);
             return Task.CompletedTask;
         }
