@@ -141,15 +141,34 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(debounceTime(3000), takeUntil(this.onDestroy)).subscribe((event) => {
+    this.hubService.messages$.pipe(debounceTime(1000), takeUntil(this.onDestroy)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
-        this.loadPage();
+        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
+          this.loadPage();
+          return;
+        }
+        this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
+          this.series.push(s);
+          this.series = this.series.sort();
+          this.pagination.totalItems++;
+          this.cdRef.markForCheck();
+          
+        })
+        
+        
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
-        this.loadPage();
+        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
+          this.loadPage();
+          return;
+        }
+
+        this.series = this.series.filter(s => s.id != seriesRemoved.seriesId);
+        this.pagination.totalItems--;
+        this.cdRef.markForCheck();
       }
     });
   }
