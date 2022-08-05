@@ -86,7 +86,13 @@ public class ProcessSeries : IProcessSeries
         _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}", seriesName);
 
         // Check if there is a Series
-        var series = await _unitOfWork.SeriesRepository.GetFullSeriesByName(parsedInfos.First().Series, library.Id) ?? DbFactory.Series(parsedInfos.First().Series);
+        var seriesAdded = false;
+        var series = await _unitOfWork.SeriesRepository.GetFullSeriesByName(parsedInfos.First().Series, library.Id);
+        if (series == null)
+        {
+            seriesAdded = true;
+            series = DbFactory.Series(parsedInfos.First().Series);
+        }
         if (series.LibraryId == 0) series.LibraryId = library.Id;
 
         try
@@ -161,6 +167,12 @@ public class ProcessSeries : IProcessSeries
         catch (Exception ex)
         {
             _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
+        }
+
+        if (seriesAdded)
+        {
+            await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
+                MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId));
         }
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
