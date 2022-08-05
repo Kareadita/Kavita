@@ -142,7 +142,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _logger.LogInformation("[WordCountAnalyzerService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }
 
-    private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
+
+    public async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
         var isEpub = series.Format == MangaFormat.Epub;
         var existingWordCount = series.WordCount;
@@ -208,6 +209,11 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 chapter.MinHoursToRead = est.MinHours;
                 chapter.MaxHoursToRead = est.MaxHours;
                 chapter.AvgHoursToRead = est.AvgHours;
+                foreach (var file in chapter.Files)
+                {
+                    file.LastFileAnalysis = DateTime.Now;
+                    _unitOfWork.MangaFileRepository.Update(file);
+                }
                 _unitOfWork.ChapterRepository.Update(chapter);
             }
 

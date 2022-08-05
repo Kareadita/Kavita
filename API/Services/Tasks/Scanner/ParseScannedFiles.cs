@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Parser;
 using API.SignalR;
@@ -32,6 +33,14 @@ namespace API.Services.Tasks.Scanner
     {
         Modified = 1,
         NotModified = 2
+    }
+
+    public class SeriesModified
+    {
+        public string FolderPath { get; set; }
+        public string SeriesName { get; set; }
+        public DateTime LastScanned { get; set; }
+        public MangaFormat Format { get; set; }
     }
 
 
@@ -86,22 +95,37 @@ namespace API.Services.Tasks.Scanner
         /// <param name="scanDirectoryByDirectory">Scan directory by directory and for each, call folderAction</param>
         /// <param name="folderPath">A library folder or series folder</param>
         /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
-        public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory, Func<IList<string>, string,Task> folderAction)
+        public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory, IDictionary<string, IList<SeriesModified>> seriesPaths, Func<IList<string>, string,Task> folderAction)
         {
+            string normalizedPath;
             if (scanDirectoryByDirectory)
             {
                 var directories = _directoryService.GetDirectories(folderPath).ToList();
 
                 foreach (var directory in directories)
                 {
-                    // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
-                    await folderAction(_directoryService.ScanFiles(directory), directory);
+                    normalizedPath = Parser.Parser.NormalizePath(directory);
+                    if (HasSeriesFolderChangedSinceLastScan(seriesPaths, normalizedPath))
+                    {
+                        await folderAction(new List<string>(), directory);
+                    }
+                    else
+                    {
+                        // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
+                        await folderAction(_directoryService.ScanFiles(directory), directory);
+                    }
                 }
+
+                return;
             }
-            else
+
+            normalizedPath = Parser.Parser.NormalizePath(folderPath);
+            if (HasSeriesFolderChangedSinceLastScan(seriesPaths, normalizedPath))
             {
-                await folderAction(_directoryService.ScanFiles(folderPath), folderPath);
+                await folderAction(new List<string>(), folderPath);
+                return;
             }
+            await folderAction(_directoryService.ScanFiles(folderPath), folderPath);
         }
 
 
@@ -211,7 +235,8 @@ namespace API.Services.Tasks.Scanner
         /// <param name="libraryName"></param>
         /// <returns></returns>
         public async Task ScanLibrariesForSeries(LibraryType libraryType,
-            IEnumerable<string> folders, string libraryName, bool isLibraryScan, Func<IList<ParserInfo>, Task> processSeriesInfos = null)
+            IEnumerable<string> folders, string libraryName, bool isLibraryScan,
+            IDictionary<string, IList<SeriesModified>> seriesPaths, Func<Tuple<bool, IList<ParserInfo>>, Task> processSeriesInfos)
         {
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("Starting file scan", libraryName, ProgressEventType.Started));
@@ -220,8 +245,23 @@ namespace API.Services.Tasks.Scanner
             {
                 try
                 {
-                    await ProcessFiles(folderPath, isLibraryScan, async (files, folder) =>
+                    await ProcessFiles(folderPath, isLibraryScan, seriesPaths, async (files, folder) =>
                     {
+                        var normalizedFolder = Parser.Parser.NormalizePath(folder);
+                        if (HasSeriesFolderChangedSinceLastScan(seriesPaths, normalizedFolder))
+                        {
+                            if (processSeriesInfos != null) // TODO: We can remove this as it will always be there
+                            {
+                                var parsedInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
+                                {
+                                    Series = fp.SeriesName,
+                                    Format = fp.Format,
+                                }).ToList();
+                                await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
+                                _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
+                                return;
+                            }
+                        }
                         _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
                         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
                         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
@@ -248,7 +288,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
                             {
-                                await processSeriesInfos.Invoke(scannedSeries[series]);
+                                await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
                             }
                         }
                     });
@@ -260,6 +300,12 @@ namespace API.Services.Tasks.Scanner
             }
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
+        }
+
+        private bool HasSeriesFolderChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder)
+        {
+            return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
+                _directoryService.FileSystem.Directory.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerMinute));
         }
 
         /// <summary>

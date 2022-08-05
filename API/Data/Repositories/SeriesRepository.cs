@@ -122,6 +122,7 @@ public interface ISeriesRepository
     Task<Series> GetSeriesByFolderPath(string folder);
     Task<Series> GetFullSeriesByName(string series, int libraryId);
     Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
+    Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1202,7 +1203,8 @@ public class SeriesRepository : ISeriesRepository
         var ids = new List<int>();
         foreach (var parsedSeries in seenSeries)
         {
-            ids.Add(await _context.Series.Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName && s.LibraryId == libraryId)
+            ids.Add(await _context.Series
+                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName && s.LibraryId == libraryId)
                 .Select(s => s.Id).SingleAsync());
         }
 
@@ -1396,5 +1398,38 @@ public class SeriesRepository : ISeriesRepository
         var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
 
         return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId)
+    {
+        var info = await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .AsNoTracking()
+            .Select(s => new SeriesModified()
+            {
+                LastScanned = s.LastFolderScanned,
+                SeriesName = s.Name,
+                FolderPath = s.FolderPath,
+                Format = s.Format
+            }).ToListAsync();
+
+        var map = new Dictionary<string, IList<SeriesModified>>();
+        foreach (var series in info)
+        {
+            if (!map.ContainsKey(series.FolderPath))
+            {
+                map.Add(series.FolderPath, new List<SeriesModified>()
+                {
+                    series
+                });
+            }
+            else
+            {
+                map[series.FolderPath].Add(series);
+            }
+
+        }
+
+        return map;
     }
 }

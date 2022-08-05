@@ -189,7 +189,7 @@ public class ScannerService : IScannerService
         await _metadataService.RemoveAbandonedMetadataKeys();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, series.Id, false));
+        //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, series.Id, false));
     }
 
     private async Task<bool> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series)
@@ -216,13 +216,11 @@ public class ScannerService : IScannerService
         // If all series Folder paths haven't been modified since last scan, abort
         if (seriesFolderPaths.All(folder => File.GetLastWriteTimeUtc(folder) <= series.LastFolderScanned))
         {
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
             _logger.LogInformation(
                 "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
                 series.Name);
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+            await _eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.InfoEvent($"{series.Name} scan has no work to do", "All folders have not been changed since last scan. Scan will be aborted."));
             return false;
         }
 
@@ -334,7 +332,8 @@ public class ScannerService : IScannerService
         // Validations are done, now we can start actual scan
 
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, string.Empty));
+
+        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, string.Empty));
 
 
 
@@ -353,11 +352,11 @@ public class ScannerService : IScannerService
 
         await _processSeries.Prime();
         var processTasks = new List<Task>();
-        Task TrackFiles(IList<ParserInfo> parsedFiles)
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo) //(IList<ParserInfo> parsedFiles)
         {
-
+            var skippedScan = parsedInfo.Item1;
+            var parsedFiles = parsedInfo.Item2;
             if (parsedFiles.Count == 0) return Task.CompletedTask;
-            totalFiles += parsedFiles.Count;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -365,6 +364,21 @@ public class ScannerService : IScannerService
                 NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
                 Format = parsedFiles.First().Format
             };
+
+            if (skippedScan)
+            {
+                seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
+                {
+                    Name = pf.Series,
+                    NormalizedName = Parser.Parser.Normalize(pf.Series),
+                    Format = pf.Format
+                }));
+                return Task.CompletedTask;
+            }
+
+            totalFiles += parsedFiles.Count;
+
+
             seenSeries.Add(foundParsedSeries);
             processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
             parsedSeries.Add(foundParsedSeries, parsedFiles);
@@ -376,7 +390,7 @@ public class ScannerService : IScannerService
 
         await Task.WhenAll(processTasks);
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
+        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);
@@ -395,7 +409,7 @@ public class ScannerService : IScannerService
         {
             _logger.LogInformation(
                 "[ScannerService] Finished scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds, library.Name);
+                totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
         }
         else
         {
@@ -403,19 +417,22 @@ public class ScannerService : IScannerService
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
         }
 
+        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _metadataService.RemoveAbandonedMetadataKeys();
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false));
+        //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false)); // TODO: We need to move this within the ProcessSeries and optimize the cache checks to reduce work
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
     private async Task<long> ScanFiles(Library library, IEnumerable<string> dirs,
-        bool isLibraryScan, Func<IList<ParserInfo>, Task> processSeriesInfos = null)
+        bool isLibraryScan, Func<Tuple<bool, IList<ParserInfo>>, Task> processSeriesInfos = null)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();
 
+
+
         await scanner.ScanLibrariesForSeries(library.Type, dirs, library.Name,
-            isLibraryScan,  processSeriesInfos);
+            isLibraryScan, await _unitOfWork.SeriesRepository.GetFolderPathMap(library.Id), processSeriesInfos);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 

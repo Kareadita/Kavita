@@ -13,6 +13,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Parser;
+using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
 using Microsoft.Extensions.Logging;
@@ -42,6 +43,7 @@ public class ProcessSeries : IProcessSeries
     private readonly IReadingItemService _readingItemService;
     private readonly IFileService _fileService;
     private readonly IMetadataService _metadataService;
+    private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
     private IList<Genre> _genres;
     private IList<Person> _people;
@@ -51,7 +53,7 @@ public class ProcessSeries : IProcessSeries
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
-        IFileService fileService, IMetadataService metadataService)
+        IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -61,6 +63,7 @@ public class ProcessSeries : IProcessSeries
         _readingItemService = readingItemService;
         _fileService = fileService;
         _metadataService = metadataService;
+        _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
     /// <summary>
@@ -163,6 +166,7 @@ public class ProcessSeries : IProcessSeries
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, false));
     }
 
     private void UpdateSeriesMetadata(Series series, LibraryType libraryType)
