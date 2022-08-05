@@ -55,6 +55,7 @@ namespace API.Controllers
 
             try
             {
+
                 var path = _cacheService.GetCachedFile(chapter);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
 

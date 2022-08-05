@@ -79,7 +79,6 @@ public class ProcessSeries : IProcessSeries
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library)
     {
         if (!parsedInfos.Any()) return;
-        // NOTE: We could put an optimizatiion to avoid any DB work if nothing has changed
 
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos.First().Series;
