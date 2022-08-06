@@ -71,7 +71,11 @@ export enum EVENTS {
    /**
     * When files are being scanned to calculate word count
     */
-   WordCountAnalyzerProgress = 'WordCountAnalyzerProgress'
+   WordCountAnalyzerProgress = 'WordCountAnalyzerProgress',
+   /**
+    * When the user needs to be informed, but it's not a big deal
+    */
+   Info = 'Info',
 }
 
 export interface Message<T> {
@@ -213,6 +217,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.Error, resp => {
       this.messagesSource.next({
         event: EVENTS.Error,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.Info, resp => {
+      this.messagesSource.next({
+        event: EVENTS.Info,
         payload: resp.body
       });
     });

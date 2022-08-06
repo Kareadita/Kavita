@@ -119,7 +119,8 @@ public class ScannerService : IScannerService
 
 
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-
+        var seenSeries = new List<ParsedSeries>();
+        var processTasks = new List<Task>();
 
         // TODO: Hook in folderpath optimization _directoryService.Exists(series.FolderPath)
 
@@ -131,8 +132,39 @@ public class ScannerService : IScannerService
             seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(libraryPaths, files.Select(f => f.FilePath).ToList());
         }
 
+        await _processSeries.Prime();
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        {
+            var skippedScan = parsedInfo.Item1;
+            var parsedFiles = parsedInfo.Item2;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
+
+            var foundParsedSeries = new ParsedSeries()
+            {
+                Name = parsedFiles.First().Series,
+                NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
+                Format = parsedFiles.First().Format
+            };
+
+            if (skippedScan)
+            {
+                seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
+                {
+                    Name = pf.Series,
+                    NormalizedName = Parser.Parser.Normalize(pf.Series),
+                    Format = pf.Format
+                }));
+                return Task.CompletedTask;
+            }
+
+            seenSeries.Add(foundParsedSeries);
+            processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
+            parsedSeries.Add(foundParsedSeries, parsedFiles);
+            return Task.CompletedTask;
+        }
+
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanElapsedTime = await ScanFiles(library, seriesDirs.Keys, false);
+        var scanElapsedTime = await ScanFiles(library, seriesDirs.Keys, false, TrackFiles);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
 
@@ -164,8 +196,7 @@ public class ScannerService : IScannerService
                 // I think we should just fail and tell user to fix their setup. This is extremely expensive for an edge case
                 _logger.LogCritical("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan");
                 await _eventHub.SendMessageAsync(MessageFactory.Error,
-                    MessageFactory.ErrorEvent("We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan",
-                        series.Name));
+                    MessageFactory.ErrorEvent($"Error scanning {series.Name}", "We weren't able to find any files in the series scan, but there should be. Please correct your naming convention or put Series in a dedicated folder. Aborting scan"));
                 await _unitOfWork.RollbackAsync();
                 return;
             }
@@ -177,9 +208,9 @@ public class ScannerService : IScannerService
         try
         {
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
-            var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
-            await _processSeries.Prime();
-            await _processSeries.ProcessSeriesAsync(parsedInfos, library);
+            // var parsedInfos = ParseScannedFiles.GetInfosByName(parsedSeries, series);
+            //
+            // await _processSeries.ProcessSeriesAsync(parsedInfos, library);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
             await CommitAndSend(1, sw, scanElapsedTime, series);
@@ -360,7 +391,7 @@ public class ScannerService : IScannerService
 
         await _processSeries.Prime();
         var processTasks = new List<Task>();
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo) //(IList<ParserInfo> parsedFiles)
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
@@ -395,6 +426,7 @@ public class ScannerService : IScannerService
 
 
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles);
+
 
         await Task.WhenAll(processTasks);
 
