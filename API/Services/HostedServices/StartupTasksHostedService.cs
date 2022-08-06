@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Services.Tasks.Scanner;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -23,6 +24,8 @@ namespace API.Services.HostedServices
             await taskScheduler.ScheduleTasks();
             taskScheduler.ScheduleUpdaterTasks();
 
+
+
             try
             {
                 // These methods will automatically check if stat collection is disabled to prevent sending any data regardless
@@ -34,6 +37,9 @@ namespace API.Services.HostedServices
             {
                 //If stats startup fail the user can keep using the app
             }
+
+            var libraryWatcher = scope.ServiceProvider.GetRequiredService<ILibraryWatcher>();
+            await libraryWatcher.StartWatchingLibraries();
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

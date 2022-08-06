@@ -25,15 +25,22 @@ public interface IScannerService
     /// cover images if forceUpdate is true.
     /// </summary>
     /// <param name="libraryId">Library to scan against</param>
+    [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibrary(int libraryId);
+
+    [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanLibraries();
+
+    [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int seriesId, CancellationToken token);
+
+    [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanFolder(string folder);
@@ -71,6 +78,7 @@ public class ScannerService : IScannerService
         _processSeries = processSeries;
     }
 
+    [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanFolder(string folder)
     {
         // NOTE: I might want to move a lot of this code to the LibraryWatcher or something and just pack libraryId and seriesId
@@ -98,6 +106,7 @@ public class ScannerService : IScannerService
         }
     }
 
+    [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanSeries(int seriesId, CancellationToken token)
     {
         var sw = Stopwatch.StartNew();
@@ -110,7 +119,6 @@ public class ScannerService : IScannerService
 
 
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        var totalFiles = 0; // TODO: Figure this out
 
 
         // TODO: Hook in folderpath optimization _directoryService.Exists(series.FolderPath)
@@ -142,7 +150,7 @@ public class ScannerService : IScannerService
                 try
                 {
                     _unitOfWork.SeriesRepository.Remove(series);
-                    await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
+                    await CommitAndSend(1, sw, scanElapsedTime, series);
                 }
                 catch (Exception ex)
                 {
@@ -174,7 +182,7 @@ public class ScannerService : IScannerService
             await _processSeries.ProcessSeriesAsync(parsedInfos, library);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
-            await CommitAndSend(totalFiles, parsedSeries, sw, scanElapsedTime, series);
+            await CommitAndSend(1, sw, scanElapsedTime, series);
         }
         catch (Exception ex)
         {
@@ -189,7 +197,6 @@ public class ScannerService : IScannerService
         await _metadataService.RemoveAbandonedMetadataKeys();
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
-        //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, series.Id, false));
     }
 
     private async Task<bool> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series)
@@ -236,15 +243,14 @@ public class ScannerService : IScannerService
         }
     }
 
-    private async Task CommitAndSend(int totalFiles,
-        Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Stopwatch sw, long scanElapsedTime, Series series)
+    private async Task CommitAndSend(int seriesCount, Stopwatch sw, long scanElapsedTime, Series series)
     {
         if (_unitOfWork.HasChanges())
         {
             await _unitOfWork.CommitAsync();
             _logger.LogInformation(
-                "Processed {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
-                totalFiles, parsedSeries.Keys.Count, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
+                "Processed files and {SeriesCount} series in {ElapsedScanTime} milliseconds for {SeriesName}",
+                seriesCount, sw.ElapsedMilliseconds + scanElapsedTime, series.Name);
         }
     }
 
@@ -289,6 +295,7 @@ public class ScannerService : IScannerService
         return true;
     }
 
+    [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibraries()
@@ -308,6 +315,7 @@ public class ScannerService : IScannerService
     /// ie) all entities will be rechecked for new cover images and comicInfo.xml changes
     /// </summary>
     /// <param name="libraryId"></param>
+    [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId)

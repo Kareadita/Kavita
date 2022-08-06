@@ -64,11 +64,6 @@ public class ReadingItemService : IReadingItemService
         var info = Parse(path, rootPath, type);
         if (info == null)
         {
-            // If the file is an image and literally a cover image, skip processing.
-            // if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
-            // {
-            //     _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
-            // }
             return null;
         }
 

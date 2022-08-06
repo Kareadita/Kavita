@@ -141,7 +141,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(debounceTime(1000), takeUntil(this.onDestroy)).subscribe((event) => {
+    this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
@@ -149,9 +149,11 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.loadPage();
           return;
         }
+        console.log('Series Added: ', seriesAdded.seriesName);
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
           this.series.push(s);
-          this.series = this.series.sort();
+          this.series = ([] as Array<Series>).concat(this.series || []).sort();
+          console.log('Updated Series');
           this.pagination.totalItems++;
           this.cdRef.markForCheck();
           

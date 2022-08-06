@@ -159,6 +159,7 @@ public class SeriesRepository : ISeriesRepository
     /// Returns if a series name and format exists already in a library
     /// </summary>
     /// <param name="name">Name of series</param>
+    /// <param name="libraryId"></param>
     /// <param name="format">Format of series</param>
     /// <returns></returns>
     public async Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format)
@@ -182,6 +183,7 @@ public class SeriesRepository : ISeriesRepository
     /// Used for <see cref="ScannerService"/> to
     /// </summary>
     /// <param name="libraryId"></param>
+    /// <param name="userParams"></param>
     /// <returns></returns>
     public async Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams)
     {
@@ -435,6 +437,7 @@ public class SeriesRepository : ISeriesRepository
     /// Returns Volumes, Metadata (Incl Genres and People), and Collection Tags
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="includes"></param>
     /// <returns></returns>
     public async Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
