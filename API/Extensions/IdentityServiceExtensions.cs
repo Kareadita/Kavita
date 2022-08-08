@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -32,6 +33,11 @@ namespace API.Extensions
                     opt.Password.RequiredLength = 6;
 
                     opt.SignIn.RequireConfirmedEmail = true;
+
+                    opt.Lockout.AllowedForNewUsers = true;
+                    opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+                    opt.Lockout.MaxFailedAccessAttempts = 5;
+
                 })
                 .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider)
                 .AddRoles<AppRole>()

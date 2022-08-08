@@ -186,13 +186,13 @@ namespace API.Controllers
                     "You are missing an email on your account. Please wait while we migrate your account.");
             }
 
-            if (!validPassword)
-            {
-                return Unauthorized("Your credentials are not correct");
-            }
-
             var result = await _signInManager
-                .CheckPasswordSignInAsync(user, loginDto.Password, false);
+                .CheckPasswordSignInAsync(user, loginDto.Password, true);
+
+            if (result.IsLockedOut)
+            {
+                return Unauthorized("You've been locked out from too many authorization attempts. Please wait 10 minutes.");
+            }
 
             if (!result.Succeeded)
             {
