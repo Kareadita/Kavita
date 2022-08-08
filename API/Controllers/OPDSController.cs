@@ -17,10 +17,12 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+[AllowAnonymous]
 public class OpdsController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;

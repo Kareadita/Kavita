@@ -27,6 +27,8 @@ public interface IImageService
     /// <param name="filePath">Full path to the image to convert</param>
     /// <returns>File of written webp image</returns>
     Task<string> ConvertToWebP(string filePath, string outputPath);
+
+    Task<bool> IsImage(string filePath);
 }
 
 public class ImageService : IImageService
@@ -113,6 +115,23 @@ public class ImageService : IImageService
         using var sourceImage = await SixLabors.ImageSharp.Image.LoadAsync(filePath);
         await sourceImage.SaveAsWebpAsync(outputFile);
         return outputFile;
+    }
+
+    public async Task<bool> IsImage(string filePath)
+    {
+        try
+        {
+            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath);
+            if (info == null) return false;
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            /* Swallow Exception */
+        }
+
+        return false;
     }
 
 
