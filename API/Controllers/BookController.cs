@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using HtmlAgilityPack;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using VersOne.Epub;
@@ -94,6 +95,7 @@ namespace API.Controllers
         /// <param name="file"></param>
         /// <returns></returns>
         [HttpGet("{chapterId}/book-resources")]
+        [AllowAnonymous]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
