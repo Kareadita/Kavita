@@ -21,12 +21,12 @@ your reading collection with your friends and family!
 - [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
 - [x] Dark mode and customizable theming support
-- [ ] Provide hooks into metadata providers to fetch metadata for Comics, Manga, and Books
+- [ ] Provide a plugin system to allow external metadata integration and scrobbling for read status, ratings, and reviews
 - [x] Metadata should allow for collections, want to read integration from 3rd party services, genres.
 - [x] Ability to manage users, access, and ratings
-- [ ] Ability to sync ratings and reviews to external services
 - [x] Fully Accessible with active accessibility audits
 - [x] Dedicated webtoon reading mode
+- [ ] Full localization support
 - [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
 
 ## Support
@@ -93,6 +93,9 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 ## Palace-Designs
 We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png" alt="" width="128">](https://www.palace-designs.com/) who hosts our infrastructure pro-bono.
 
+## Huntr
+We would like to extend a big thank you to [Huntr](https://huntr.dev/repos/kareadita/kavita) who has worked with Kavita in reporting security vulnerabilities. If you are interested in 
+being paid to help secure Kavita, please give them a try.
 
 ### License
 
