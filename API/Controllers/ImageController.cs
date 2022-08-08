@@ -137,6 +137,8 @@ namespace API.Controllers
         [HttpGet("cover-upload")]
         public ActionResult GetCoverUploadImage(string filename)
         {
+            if (filename.Contains("..")) return BadRequest("Invalid Filename");
+
             var path = Path.Join(_directoryService.TempDirectory, filename);
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"File does not exist");
             var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
