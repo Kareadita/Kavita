@@ -7,6 +7,7 @@ import { AnnouncementsComponent } from "./announcements.component";
 const routes: Routes = [
   {path: '**', component: AnnouncementsComponent, pathMatch: 'full', canActivate: [AuthGuard, AdminGuard]},
   {
+    path: '',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, AdminGuard],
     children: [
