@@ -24,6 +24,7 @@ public class ThemeController : BaseApiController
         _taskScheduler = taskScheduler;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetThemes()
     {
