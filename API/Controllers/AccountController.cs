@@ -70,13 +70,21 @@ namespace API.Controllers
         /// </summary>
         /// <param name="resetPasswordDto"></param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost("reset-password")]
         public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
         {
+            // TODO: Log this request to Audit Table
             _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
-            var user = await _userManager.Users.SingleAsync(x => x.UserName == resetPasswordDto.UserName);
 
-            if (resetPasswordDto.UserName != User.GetUsername() && !(User.IsInRole(PolicyConstants.AdminRole) || User.IsInRole(PolicyConstants.ChangePasswordRole)))
+            var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
+            if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
+
+
+            if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || User.IsInRole(PolicyConstants.AdminRole)))
+                return Unauthorized("You are not permitted to this operation.");
+
+            if (resetPasswordDto.UserName != User.GetUsername() && !User.IsInRole(PolicyConstants.AdminRole))
                 return Unauthorized("You are not permitted to this operation.");
 
             var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
@@ -94,6 +102,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="registerDto"></param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<UserDto>> RegisterFirstUser(RegisterDto registerDto)
         {
@@ -158,6 +167,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="loginDto"></param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
         {
@@ -215,6 +225,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="tokenRequestDto"></param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost("refresh-token")]
         public async Task<ActionResult<TokenRequestDto>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
         {
@@ -486,6 +497,7 @@ namespace API.Controllers
             return BadRequest("There was an error setting up your account. Please check the logs");
         }
 
+        [AllowAnonymous]
         [HttpPost("confirm-email")]
         public async Task<ActionResult<UserDto>> ConfirmEmail(ConfirmEmailDto dto)
         {
