@@ -13,6 +13,7 @@ using API.Extensions;
 using API.Services;
 using API.SignalR;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -53,7 +54,6 @@ namespace API.Controllers
         [HttpGet("pdf")]
         public async Task<ActionResult> GetPdf(int chapterId)
         {
-
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
 
@@ -84,6 +84,7 @@ namespace API.Controllers
         /// <param name="page"></param>
         /// <returns></returns>
         [HttpGet("image")]
+        [AllowAnonymous]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
             if (page < 0) page = 0;

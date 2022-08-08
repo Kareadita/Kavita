@@ -1,7 +1,8 @@
-<div class="{{theme}}">
+<div class="{{theme}}" *ngIf="accountService.currentUser$ | async as user">
     <ngx-extended-pdf-viewer
         #pdfViewer
         [src]="readerService.downloadPdf(this.chapterId)"
+        [authorization]="'Bearer ' + user.token"
         height="100vh"
         [(page)]="currentPage"
         [textLayer]="true" 
@@ -15,6 +16,7 @@
         [showPropertiesButton]="false"
         [(zoom)]="zoomSetting"
         [showSecondaryToolbarButton]="true"
+        
         
         [showBorders]="true"
         [theme]="theme"
