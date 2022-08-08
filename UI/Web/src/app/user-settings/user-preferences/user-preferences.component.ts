@@ -188,6 +188,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
     this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
     this.cdRef.markForCheck();
+    this.settingsForm.markAsPristine();
   }
 
   resetPasswordForm() {
