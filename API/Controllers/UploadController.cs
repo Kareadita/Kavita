@@ -59,6 +59,8 @@ namespace API.Controllers
                 if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
                     return BadRequest($"Could not download file");
 
+                if (!await _imageService.IsImage(path)) return BadRequest("Url does not return a valid image");
+
                 return $"coverupload_{dateString}.{format}";
             }
             catch (FlurlHttpException ex)
