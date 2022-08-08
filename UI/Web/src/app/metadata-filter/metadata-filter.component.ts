@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { UtilityService } from '../shared/_services/utility.service';
@@ -66,9 +66,9 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   libraries: Array<FilterItem<Library>> = [];
 
 
-  readProgressGroup!: FormGroup;
-  sortGroup!: FormGroup;
-  seriesNameGroup!: FormGroup;
+  readProgressGroup!: UntypedFormGroup;
+  sortGroup!: UntypedFormGroup;
+  seriesNameGroup!: UntypedFormGroup;
   isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
@@ -106,18 +106,18 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     }
     
     this.filter = this.seriesService.createSeriesFilter();
-    this.readProgressGroup = new FormGroup({
-      read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
-      notRead: new FormControl({value: this.filter.readStatus.notRead, disabled: this.filterSettings.readProgressDisabled}, []),
-      inProgress: new FormControl({value: this.filter.readStatus.inProgress, disabled: this.filterSettings.readProgressDisabled}, []),
+    this.readProgressGroup = new UntypedFormGroup({
+      read: new UntypedFormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
+      notRead: new UntypedFormControl({value: this.filter.readStatus.notRead, disabled: this.filterSettings.readProgressDisabled}, []),
+      inProgress: new UntypedFormControl({value: this.filter.readStatus.inProgress, disabled: this.filterSettings.readProgressDisabled}, []),
     });
 
-    this.sortGroup = new FormGroup({
-      sortField: new FormControl({value: this.filter.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
+    this.sortGroup = new UntypedFormGroup({
+      sortField: new UntypedFormControl({value: this.filter.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
     });
 
-    this.seriesNameGroup = new FormGroup({
-      seriesNameQuery: new FormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
+    this.seriesNameGroup = new UntypedFormGroup({
+      seriesNameQuery: new UntypedFormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
     });
 
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { fromEvent, Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
@@ -57,19 +57,19 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
    * Only applies for showApplyButton. Used to track which image is applied.
    */
   appliedIndex: number = 0;
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp'].join(',');
 
   mode: 'file' | 'url' | 'all' = 'all';
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public imageService: ImageService, private fb: FormBuilder, private toastr: ToastrService, private uploadService: UploadService,
+  constructor(public imageService: ImageService, private fb: UntypedFormBuilder, private toastr: ToastrService, private uploadService: UploadService,
     @Inject(DOCUMENT) private document: Document, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      coverImageUrl: new FormControl('', [])
+      coverImageUrl: new UntypedFormControl('', [])
     });
     this.cdRef.markForCheck();
   }

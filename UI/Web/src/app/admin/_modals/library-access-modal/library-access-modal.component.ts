@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { SelectionModel } from 'src/app/typeahead/typeahead.component';
 import { Library } from 'src/app/_models/library';
@@ -24,7 +24,7 @@ export class LibraryAccessModalComponent implements OnInit {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  constructor(public modal: NgbActiveModal, private libraryService: LibraryService, private fb: FormBuilder) { }
+  constructor(public modal: NgbActiveModal, private libraryService: LibraryService, private fb: UntypedFormBuilder) { }
 
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libs => {

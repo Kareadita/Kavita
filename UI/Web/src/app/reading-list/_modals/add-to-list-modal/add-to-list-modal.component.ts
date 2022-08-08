@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ReadingList } from 'src/app/_models/reading-list';
@@ -56,7 +56,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
    */
   lists: Array<any> = [];
   loading: boolean = false;
-  listForm: FormGroup = new FormGroup({});
+  listForm: UntypedFormGroup = new UntypedFormGroup({});
 
   @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
@@ -65,8 +65,8 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
 
-    this.listForm.addControl('title', new FormControl(this.title, []));
-    this.listForm.addControl('filterQuery', new FormControl('', []));
+    this.listForm.addControl('title', new UntypedFormControl(this.title, []));
+    this.listForm.addControl('filterQuery', new UntypedFormControl('', []));
     
     this.loading = true;
     this.readingListService.getReadingLists(false).subscribe(lists => {

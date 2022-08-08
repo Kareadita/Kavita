@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { SafeUrl } from '@angular/platform-browser';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -17,7 +17,7 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
   @Input() password!: string;
 
   isSaving: boolean = false;
-  registerForm: FormGroup = new FormGroup({});
+  registerForm: UntypedFormGroup = new UntypedFormGroup({});
   emailLink: string = '';
   emailLinkUrl: SafeUrl | undefined;
   error: string = '';
@@ -27,9 +27,9 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.registerForm.addControl('username', new FormControl(this.username, [Validators.required]));
-    this.registerForm.addControl('email', new FormControl('', [Validators.required, Validators.email]));
-    this.registerForm.addControl('password', new FormControl(this.password, [Validators.required]));
+    this.registerForm.addControl('username', new UntypedFormControl(this.username, [Validators.required]));
+    this.registerForm.addControl('email', new UntypedFormControl('', [Validators.required, Validators.email]));
+    this.registerForm.addControl('password', new UntypedFormControl(this.password, [Validators.required]));
     this.cdRef.markForCheck();
   }
 
