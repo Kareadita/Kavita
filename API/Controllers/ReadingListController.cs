@@ -9,10 +9,12 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class ReadingListController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
