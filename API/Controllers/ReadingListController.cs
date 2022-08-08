@@ -74,8 +74,6 @@ namespace API.Controllers
             var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
             var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
             return Ok(items);
-
-            //return Ok(await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(userId, items.ToList()));
         }
 
         private async Task<AppUser?> UserHasReadingListAccess(int readingListId)
