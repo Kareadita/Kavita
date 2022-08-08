@@ -51,18 +51,22 @@
                         <button class="btn btn-primary btn-sm" (click)="openEditUser(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>
                     </div>
                 </h4>
-                <div>Last Active: 
-                    <span *ngIf="member.lastActive == '0001-01-01T00:00:00'; else activeDate">Never</span>
-                    <ng-template #activeDate>
-                        {{member.lastActive | date: 'short'}}
-                    </ng-template>
-                </div>
-                <div *ngIf="!hasAdminRole(member)">Sharing: {{formatLibraries(member)}}</div>
-                <div class="row g-0">
-                    Roles: <span *ngIf="getRoles(member).length === 0; else showRoles">None</span>
-                    <ng-template #showRoles>
-                        <app-tag-badge *ngFor="let role of getRoles(member)" class="col-auto">{{role}}</app-tag-badge>
-                    </ng-template>
+                <div class="user-info">
+                    <div>Last Active:
+                        <span *ngIf="member.lastActive == '0001-01-01T00:00:00'; else activeDate">Never</span>
+                        <ng-template #activeDate>
+                            {{member.lastActive | date: 'short'}}
+                        </ng-template>
+                    </div>
+                    <div *ngIf="!hasAdminRole(member)">Sharing: {{formatLibraries(member)}}</div>
+                    <div class="row g-0">
+                        <div>
+                            Roles: <span *ngIf="getRoles(member).length === 0; else showRoles">None</span>
+                            <ng-template #showRoles>
+                                <app-tag-badge *ngFor="let role of getRoles(member)" class="col-auto">{{role}}</app-tag-badge>
+                            </ng-template>
+                        </div>
+                    </div>
                 </div>
             </div>
         </li>
