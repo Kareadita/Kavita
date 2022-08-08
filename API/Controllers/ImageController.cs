@@ -11,6 +11,7 @@ namespace API.Controllers
     /// <summary>
     /// Responsible for servicing up images stored in Kavita for entities
     /// </summary>
+    [AllowAnonymous]
     public class ImageController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;

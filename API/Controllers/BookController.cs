@@ -8,6 +8,8 @@ using API.DTOs.Reader;
 using API.Entities.Enums;
 using API.Services;
 using Kavita.Common;
+using HtmlAgilityPack;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VersOne.Epub;
 
@@ -91,6 +93,7 @@ namespace API.Controllers
         /// <returns></returns>
         [HttpGet("{chapterId}/book-resources")]
         [ResponseCache(Duration = 60 * 1, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [AllowAnonymous]
         public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
         {
             if (chapterId <= 0) return BadRequest("Chapter is not valid");

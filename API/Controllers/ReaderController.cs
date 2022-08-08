@@ -13,6 +13,7 @@ using API.Extensions;
 using API.Services;
 using API.SignalR;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -80,6 +81,7 @@ namespace API.Controllers
         /// <returns></returns>
         [HttpGet("image")]
         [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [AllowAnonymous]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
             if (page < 0) page = 0;
