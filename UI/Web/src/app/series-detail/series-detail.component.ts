@@ -125,7 +125,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   /**
    * Track by function for Chapter to tell when to refresh card data
    */
-  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
   trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
     if (item.isChapter) {
