@@ -77,7 +77,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
+  constructor(private route: ActivatedRoute, private router: Router, public accountService: AccountService,
     private seriesService: SeriesService, public readerService: ReaderService,
     private navService: NavService, private toastr: ToastrService,
     private bookService: BookService, private themeService: ThemeService, 
