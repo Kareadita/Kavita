@@ -10,7 +10,7 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
-      {path: '/bookmarks', component: BookmarksComponent},
+      {path: 'bookmarks', component: BookmarksComponent},
     ]
   }
 ];

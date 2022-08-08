@@ -10,6 +10,10 @@
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
 
+    /* Bootstrap Overrides*/
+    --hr-color: transparent;
+    
+
     /* Navbar */
     --navbar-bg-color: black;
     --navbar-text-color: white;
@@ -42,6 +46,7 @@
     --btn-disabled-bg-color: #343a40;
     --btn-disabled-text-color: white;
     --btn-disabled-border-color: #6c757d;
+    --bs-btn-disabled-border-color: transparent;
 
     /* Nav (Tabs) */
     --nav-tab-border-color: rgba(44, 118, 88, 0.7);

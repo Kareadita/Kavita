@@ -10,7 +10,7 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AdminGuard],
     children: [
-      {path: '/dashboard', component: DashboardComponent},
+      {path: 'dashboard', component: DashboardComponent},
     ]
   }
 ];

@@ -1,9 +1,9 @@
 <app-side-nav-companion-bar>
   <h2 title>
     <span *ngIf="actions.length > 0">
-      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="readingList.title"></app-card-actionables>
+      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title"></app-card-actionables>
     </span>
-    {{readingList.title}}
+    {{readingList?.title}}
     <span *ngIf="readingList?.promoted" class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
   </h2>
   <h6 subtitle class="subtitle-with-actionables">{{items.length}} Items</h6>
