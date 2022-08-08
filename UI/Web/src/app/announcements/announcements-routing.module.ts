@@ -11,7 +11,7 @@ const routes: Routes = [
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, AdminGuard],
     children: [
-      {path: '/announcments', component: AnnouncementsComponent},
+      {path: 'announcments', component: AnnouncementsComponent},
     ]
   }
 ];

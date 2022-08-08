@@ -1,4 +1,4 @@
-:root .bg-dark {
+:root, :root .bg-dark {
     --color-scheme: dark;
     --primary-color: #4ac694;
     --primary-color-dark-shade: #3B9E76;
@@ -9,9 +9,6 @@
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
-
-    /* Bootstrap Overrides*/
-    --hr-color: transparent;
     
 
     /* Navbar */
