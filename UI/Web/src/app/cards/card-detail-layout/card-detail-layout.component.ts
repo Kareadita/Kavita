@@ -1,8 +1,8 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
-import { first, Subject, takeUntil, takeWhile } from 'rxjs';
+import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -44,6 +44,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
   @Input() actions: ActionItem<any>[] = [];
   @Input() trackByIdentity!: TrackByFunction<any>; //(index: number, item: any) => string
   @Input() filterSettings!: FilterSettings;
+  @Input() refresh!: EventEmitter<void>;
 
 
   @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels wide
@@ -76,6 +77,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
     private jumpbarService: JumpbarService) {
     this.filter = this.seriesService.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
+    
   }
 
   @HostListener('window:resize', ['$event'])
@@ -100,6 +102,16 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
       this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
       this.changeDetectionRef.markForCheck();
     }
+
+    if (this.refresh) {
+      this.refresh.subscribe(() => {
+        console.log('Refreshing data', this.items);
+        console.log('has expected item: ', this.items.filter(s => s.name === '0/6'));
+        this.changeDetectionRef.markForCheck();
+        this.virtualScroller.refresh();
+      });
+    }
+    
   }
 
   ngAfterViewInit(): void {
@@ -117,13 +129,11 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
     //   }
     //   this.hasResumedJumpKey = true;
     // });
-    console.log(this.noDataTemplate);
   }
 
   ngOnChanges(): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
-    
   }
 
 

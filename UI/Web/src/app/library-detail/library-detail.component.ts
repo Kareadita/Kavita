@@ -41,6 +41,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
   filterActiveCheck!: SeriesFilter;
+  refresh: EventEmitter<void> = new EventEmitter();
 
   jumpKeys: Array<JumpKey> = [];
 
@@ -151,13 +152,15 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         }
         console.log('Series Added: ', seriesAdded.seriesName);
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
-          this.series.push(s);
-          this.series = ([] as Array<Series>).concat(this.series || []).sort();
-          console.log('Updated Series');
+          this.series = [...this.series, s].sort((s1: Series, s2: Series) => {
+            if (s1.sortName < s2.sortName) return -1;
+            if (s1.sortName > s2.sortName) return 1;
+            return 0;
+          });
           this.pagination.totalItems++;
           this.cdRef.markForCheck();
-          
-        })
+          this.refresh.emit();
+        });
         
         
       } else if (event.event === EVENTS.SeriesRemoved) {
@@ -171,6 +174,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         this.series = this.series.filter(s => s.id != seriesRemoved.seriesId);
         this.pagination.totalItems--;
         this.cdRef.markForCheck();
+        this.refresh.emit();
       }
     });
   }
@@ -249,5 +253,5 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
-  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
+  trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;
 }

@@ -232,6 +232,7 @@ public class ScannerService : IScannerService
 
     private async Task<bool> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series)
     {
+        // TODO: Let's return a Reason as well. If no change, then we still should call next set of tasks (wordcount and cover)
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
             .Select(f => _directoryService.FileSystem.FileInfo.FromFileName(f.FilePath).Directory.FullName)
             .Distinct()
