@@ -17,7 +17,7 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId);
     Task<ReadingListDto> GetReadingListDtoByIdAsync(int readingListId, int userId);
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
-    Task<ReadingListDto> GetReadingListDtoByTitleAsync(string title);
+    Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title);
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
 
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
@@ -211,10 +211,10 @@ public class ReadingListRepository : IReadingListRepository
         return items;
     }
 
-    public async Task<ReadingListDto> GetReadingListDtoByTitleAsync(string title)
+    public async Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title)
     {
         return await _context.ReadingList
-            .Where(r => r.Title.Equals(title))
+            .Where(r => r.Title.Equals(title) && r.AppUserId == userId)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }
