@@ -1,11 +1,11 @@
 <ng-container *ngIf="link === undefined || link.length === 0; else useLink">
-    <div class="side-nav-item" [ngClass]="{'closed': (navService?.sideNavCollapsed$ | async), 'active': highlighted}">
+    <div class="side-nav-item" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
     </div>
 </ng-container>
 
 <ng-template #useLink>
-    <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService?.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link">
+    <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
     </a>
 </ng-template>

@@ -29,6 +29,10 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "extendedDiagnostics": {
+      "nullishCoalescingNotNullable": "warning",
+    }
+    
   }
 }

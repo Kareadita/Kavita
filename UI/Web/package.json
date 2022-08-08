@@ -40,7 +40,7 @@
     "ng-circle-progress": "^1.6.0",
     "ngx-color-picker": "^12.0.0",
     "ngx-extended-pdf-viewer": "^14.5.2",
-    "ngx-file-drop": "^13.0.0",
+    "ngx-file-drop": "^14.0.1",
     "ngx-infinite-scroll": "^13.0.2",
     "ngx-toastr": "^14.2.1",
     "requires": "^1.0.2",
