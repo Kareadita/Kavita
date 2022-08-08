@@ -34,7 +34,9 @@
                                                 <option *ngFor="let opt of pageLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
+                                    </div>
 
+                                    <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="form-check form-switch">
                                                 <input type="checkbox" id="auto-close" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
@@ -45,6 +47,7 @@
                                             <span class="visually-hidden" id="settings-global-blurUnreadSummaries-help">Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)</span>
                                         </div>
                                     </div>
+
                                     <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="form-check form-switch">
