@@ -290,6 +290,12 @@ export class ActionFactoryService {
         title: 'Add to Want To Read',
         callback: this.dummyCallback,
         requiresAdmin: false
+      },
+      {
+        action: Action.RemoveFromWantToReadList,
+        title: 'Remove from Want To Read',
+        callback: this.dummyCallback,
+        requiresAdmin: false
       }
     ];
 

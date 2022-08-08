@@ -49,7 +49,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
           }
         });
       });
-
   }
 
   ngOnInit(): void {

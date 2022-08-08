@@ -53,6 +53,11 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
 
+            // Validate the user has access to the PDF
+            var series = await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapter.Id,
+                await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername()));
+            if (series == null) return BadRequest("Invalid Access");
+
             try
             {
                 var path = _cacheService.GetCachedFile(chapter);

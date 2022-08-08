@@ -13,6 +13,7 @@ import { AgeRatingPipe } from './age-rating.pipe';
 import { MangaFormatPipe } from './manga-format.pipe';
 import { MangaFormatIconPipe } from './manga-format-icon.pipe';
 import { LibraryTypePipe } from './library-type.pipe';
+import { SafeStylePipe } from './safe-style.pipe';
 
 
 
@@ -30,7 +31,8 @@ import { LibraryTypePipe } from './library-type.pipe';
     AgeRatingPipe,
     MangaFormatPipe,
     MangaFormatIconPipe,
-    LibraryTypePipe
+    LibraryTypePipe,
+    SafeStylePipe
   ],
   imports: [
     CommonModule,
@@ -48,7 +50,8 @@ import { LibraryTypePipe } from './library-type.pipe';
     AgeRatingPipe,
     MangaFormatPipe,
     MangaFormatIconPipe,
-    LibraryTypePipe
+    LibraryTypePipe,
+    SafeStylePipe
   ]
 })
 export class PipeModule { }

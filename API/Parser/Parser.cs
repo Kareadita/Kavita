@@ -276,6 +276,10 @@ namespace API.Parser
             new Regex(
                 @"^(?!Vol)(?<Series>.*)( |_|-)(ch?)\d+",
                 MatchOptions, RegexTimeout),
+            // Japanese Volume: n巻 -> Volume n
+            new Regex(
+                @"(?<Series>.+?)第(?<Volume>\d+(?:(\-)\d+)?)巻",
+                MatchOptions, RegexTimeout),
         };
 
         private static readonly Regex[] ComicSeriesRegex = new[]
