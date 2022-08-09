@@ -26,7 +26,7 @@ import { ReaderService } from 'src/app/_services/reader.service';
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];
   listId!: number;
-  readingList!: ReadingList;
+  readingList: ReadingList | undefined;
   actions: Array<ActionItem<any>> = [];
   isAdmin: boolean = false;
   isLoading: boolean = false;
@@ -115,6 +115,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   readChapter(item: ReadingListItem) {
     let reader = 'manga';
+    if (!this.readingList) return;
     if (item.seriesFormat === MangaFormat.EPUB) {
       reader = 'book;'
     }
@@ -148,10 +149,12 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   orderUpdated(event: IndexUpdateEvent) {
+    if (!this.readingList) return;
     this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => { /* No Operation */ });
   }
 
   itemRemoved(event: ItemRemoveEvent) {
+    if (!this.readingList) return;
     this.readingListService.deleteItem(this.readingList.id, event.item.id).subscribe(() => {
       this.items.splice(event.position, 1);
       this.cdRef.markForCheck();
@@ -160,6 +163,7 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   removeRead() {
+    if (!this.readingList) return;
     this.isLoading = true;
     this.cdRef.markForCheck();
     this.readingListService.removeRead(this.readingList.id).subscribe((resp) => {
@@ -173,6 +177,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   read() {
     // TODO: Can I do this in the backend?
+    if (!this.readingList) return;
     let currentlyReadingChapter = this.items[0];
     for (let i = 0; i < this.items.length; i++) {
       if (this.items[i].pagesRead >= this.items[i].pagesTotal) {

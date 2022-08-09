@@ -6,6 +6,7 @@ import { UserPreferencesComponent } from './user-preferences/user-preferences.co
 const routes: Routes = [
     {path: '**', component: UserPreferencesComponent, pathMatch: 'full'},
     {
+      path: '',
       runGuardsAndResolvers: 'always',
       canActivate: [AuthGuard],
       children: [

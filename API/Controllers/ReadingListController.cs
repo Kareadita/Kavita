@@ -3,15 +3,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize]
     public class ReadingListController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -75,6 +78,18 @@ namespace API.Controllers
             return Ok(items);
         }
 
+        private async Task<AppUser?> UserHasReadingListAccess(int readingListId)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+                AppUserIncludes.ReadingLists);
+            if (user.ReadingLists.SingleOrDefault(rl => rl.Id == readingListId) == null && !await _unitOfWork.UserRepository.IsUserAdminAsync(user))
+            {
+                return null;
+            }
+
+            return user;
+        }
+
         /// <summary>
         /// Updates an items position
         /// </summary>
@@ -84,6 +99,11 @@ namespace API.Controllers
         public async Task<ActionResult> UpdateListItemPosition(UpdateReadingListPosition dto)
         {
             // Make sure UI buffers events
+            var user = await UserHasReadingListAccess(dto.ReadingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
             var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
             var item = items.Find(r => r.Id == dto.ReadingListItemId);
             items.Remove(item);
@@ -110,9 +130,14 @@ namespace API.Controllers
         [HttpPost("delete-item")]
         public async Task<ActionResult> DeleteListItem(UpdateReadingListPosition dto)
         {
+            var user = await UserHasReadingListAccess(dto.ReadingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
+
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
             readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).ToList();
-
 
             var index = 0;
             foreach (var readingListItem in readingList.Items)
@@ -139,9 +164,14 @@ namespace API.Controllers
         [HttpPost("remove-read")]
         public async Task<ActionResult> DeleteReadFromList([FromQuery] int readingListId)
         {
-            var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
-            items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(userId, items.ToList());
+            var user = await UserHasReadingListAccess(readingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
+
+            var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, user.Id);
+            items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
             // Collect all Ids to remove
             var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
@@ -174,15 +204,13 @@ namespace API.Controllers
         [HttpDelete]
         public async Task<ActionResult> DeleteList([FromQuery] int readingListId)
         {
-            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-            var readingList = user.ReadingLists.SingleOrDefault(r => r.Id == readingListId);
-            if (readingList == null && !isAdmin)
+            var user = await UserHasReadingListAccess(readingListId);
+            if (user == null)
             {
-                return BadRequest("User is not associated with this reading list");
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
             }
 
-            readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
+            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
 
             user.ReadingLists.Remove(readingList);
 
@@ -211,13 +239,14 @@ namespace API.Controllers
                 return BadRequest("A list of this name already exists");
             }
 
-            user.ReadingLists.Add(DbFactory.ReadingList(dto.Title, string.Empty, false));
+            var readingList = DbFactory.ReadingList(dto.Title, string.Empty, false);
+            user.ReadingLists.Add(readingList);
 
             if (!_unitOfWork.HasChanges()) return BadRequest("There was a problem creating list");
 
             await _unitOfWork.CommitAsync();
 
-            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByTitleAsync(dto.Title));
+            return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByTitleAsync(user.Id, dto.Title));
         }
 
         /// <summary>
@@ -231,7 +260,11 @@ namespace API.Controllers
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
             if (readingList == null) return BadRequest("List does not exist");
 
-
+            var user = await UserHasReadingListAccess(readingList.Id);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
 
             if (!string.IsNullOrEmpty(dto.Title))
             {
@@ -275,7 +308,12 @@ namespace API.Controllers
         [HttpPost("update-by-series")]
         public async Task<ActionResult> UpdateListBySeries(UpdateReadingListBySeriesDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var user = await UserHasReadingListAccess(dto.ReadingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
+
             var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
             if (readingList == null) return BadRequest("Reading List does not exist");
             var chapterIdsForSeries =
@@ -312,7 +350,11 @@ namespace API.Controllers
         [HttpPost("update-by-multiple")]
         public async Task<ActionResult> UpdateListByMultiple(UpdateReadingListByMultipleDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var user = await UserHasReadingListAccess(dto.ReadingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
             var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
             if (readingList == null) return BadRequest("Reading List does not exist");
 
@@ -352,7 +394,11 @@ namespace API.Controllers
         [HttpPost("update-by-multiple-series")]
         public async Task<ActionResult> UpdateListByMultipleSeries(UpdateReadingListByMultipleSeriesDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var user = await UserHasReadingListAccess(dto.ReadingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
             var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
             if (readingList == null) return BadRequest("Reading List does not exist");
 
@@ -386,9 +432,14 @@ namespace API.Controllers
         [HttpPost("update-by-volume")]
         public async Task<ActionResult> UpdateListByVolume(UpdateReadingListByVolumeDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var user = await UserHasReadingListAccess(dto.ReadingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
             var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
             if (readingList == null) return BadRequest("Reading List does not exist");
+
             var chapterIdsForVolume =
                 (await _unitOfWork.ChapterRepository.GetChaptersAsync(dto.VolumeId)).Select(c => c.Id).ToList();
 
@@ -417,7 +468,11 @@ namespace API.Controllers
         [HttpPost("update-by-chapter")]
         public async Task<ActionResult> UpdateListByChapter(UpdateReadingListByChapterDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(User.GetUsername());
+            var user = await UserHasReadingListAccess(dto.ReadingListId);
+            if (user == null)
+            {
+                return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
+            }
             var readingList = user.ReadingLists.SingleOrDefault(l => l.Id == dto.ReadingListId);
             if (readingList == null) return BadRequest("Reading List does not exist");
 

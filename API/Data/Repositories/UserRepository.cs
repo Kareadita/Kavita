@@ -224,6 +224,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserBookmark
             .Where(b => bookmarkIds.Contains(b.Id))
+            .OrderBy(b => b.Created)
             .ToListAsync();
     }
 

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
@@ -13,7 +13,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well
   typeaheadSettings: TypeaheadSettings<SearchResult>;
-  formControl: FormControl;
+  formControl: UntypedFormControl;
 }
 
 @Component({
@@ -81,7 +81,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   setupRelationRows(relations: Array<Series>, kind: RelationKind) {
     relations.map(async item => {
       const settings = await firstValueFrom(this.createSeriesTypeahead(item, kind));
-      const form = new FormControl(kind, []);
+      const form = new UntypedFormControl(kind, []);
       if (kind === RelationKind.Parent) {
         form.disable();
       }
@@ -93,7 +93,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   }
 
   async addNewRelation() {
-    this.relations.push({series: undefined, formControl: new FormControl(RelationKind.Adaptation, []), typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation))});
+    this.relations.push({series: undefined, formControl: new UntypedFormControl(RelationKind.Adaptation, []), typeaheadSettings: await firstValueFrom(this.createSeriesTypeahead(undefined, RelationKind.Adaptation))});
     this.cdRef.markForCheck();
 
     // Focus on the new typeahead

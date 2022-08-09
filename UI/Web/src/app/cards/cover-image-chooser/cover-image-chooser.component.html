@@ -61,7 +61,7 @@
             </ng-container>
         </div>
         <div class="image-card col-auto" 
-            *ngIf="showReset" tabindex="0" attr.aria-label="Reset cover image" (click)="reset()"
+            *ngIf="showReset" tabindex="0" aria-label="Reset cover image" (click)="reset()"
             [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
             <app-image class="card-img-top" title="Reset Cover Image" height="230px" width="158px" [imageUrl]="imageService.resetCoverImage"></app-image>
             <ng-container *ngIf="showApplyButton">

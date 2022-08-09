@@ -13,6 +13,7 @@ using API.Extensions;
 using API.Services;
 using API.SignalR;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -53,6 +54,11 @@ namespace API.Controllers
             var chapter = await _cacheService.Ensure(chapterId);
             if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
 
+            // Validate the user has access to the PDF
+            var series = await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapter.Id,
+                await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername()));
+            if (series == null) return BadRequest("Invalid Access");
+
             try
             {
 
@@ -76,6 +82,7 @@ namespace API.Controllers
         /// <returns></returns>
         [HttpGet("image")]
         [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [AllowAnonymous]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
             if (page < 0) page = 0;

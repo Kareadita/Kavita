@@ -80,7 +80,7 @@ public class WantToReadController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.WantToRead);
 
-        user.WantToRead = user.WantToRead.Where(s => @dto.SeriesIds.Contains(s.Id)).ToList();
+        user.WantToRead = user.WantToRead.Where(s => !dto.SeriesIds.Contains(s.Id)).ToList();
 
         if (!_unitOfWork.HasChanges()) return Ok();
         if (await _unitOfWork.CommitAsync()) return Ok();

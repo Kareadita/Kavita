@@ -9,7 +9,7 @@
             <a ngbNavLink>{{tabs[0].title}}</a>
             <ng-template ngbNavContent>
                 <p>
-                    This list is currently {{readingList?.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
+                    This list is currently {{readingList.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
                     Promotion means that the list can be seen server-wide, not just for admin users. All series that are within this list will still have user-access restrictions placed on them.
                 </p>
                 <form [formGroup]="reviewGroup">

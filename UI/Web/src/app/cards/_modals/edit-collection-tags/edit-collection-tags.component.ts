@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
@@ -37,7 +37,7 @@ export class EditCollectionTagsComponent implements OnInit {
   pagination!: Pagination;
   selectAll: boolean = true;
   libraryNames!: any;
-  collectionTagForm!: FormGroup;
+  collectionTagForm!: UntypedFormGroup;
   tabs = [{title: 'General', id: TabID.General}, {title: 'Cover Image', id: TabID.CoverImage}];
   active = TabID.General;
   imageUrls: Array<string> = [];
@@ -65,10 +65,10 @@ export class EditCollectionTagsComponent implements OnInit {
     if (this.pagination == undefined) {
       this.pagination = {totalPages: 1, totalItems: 200, itemsPerPage: 200, currentPage: 0};
     }
-    this.collectionTagForm = new FormGroup({
-      summary: new FormControl(this.tag.summary, []),
-      coverImageLocked: new FormControl(this.tag.coverImageLocked, []),
-      coverImageIndex: new FormControl(0, []),
+    this.collectionTagForm = new UntypedFormGroup({
+      summary: new UntypedFormControl(this.tag.summary, []),
+      coverImageLocked: new UntypedFormControl(this.tag.coverImageLocked, []),
+      coverImageIndex: new UntypedFormControl(0, []),
 
     });
     this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag.id)));

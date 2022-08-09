@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { KEY_CODES } from '../../shared/_services/utility.service';
@@ -66,7 +66,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
 
   hasFocus: boolean = false;
   isLoading: boolean = false;
-  typeaheadForm: FormGroup = new FormGroup({});
+  typeaheadForm: UntypedFormGroup = new UntypedFormGroup({});
 
   prevSearchTerm: string = '';
 
@@ -106,7 +106,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.typeaheadForm.addControl('typeahead', new FormControl(this.initialValue, []));
+    this.typeaheadForm.addControl('typeahead', new UntypedFormControl(this.initialValue, []));
     this.cdRef.markForCheck();
 
     this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntil(this.onDestroy)).subscribe(change => {

@@ -17,33 +17,30 @@ import { NavModule } from './nav/nav.module';
 
 
 @NgModule({
-  declarations: [
-    AppComponent,
-  ],
-  imports: [
-    HttpClientModule,
-    BrowserModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-
-    SidenavModule,
-    NavModule,
-
-    ToastrModule.forRoot({
-      positionClass: 'toast-bottom-right',
-      preventDuplicates: true,
-      timeOut: 6000,
-      countDuplicates: true,
-      autoDismiss: true
-    }),
-  ],
-  providers: [
-    {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
-    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true},
-    Title,
-    {provide: SAVER, useFactory: getSaver},
-  ],
-  entryComponents: [],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+    ],
+    imports: [
+        HttpClientModule,
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        SidenavModule,
+        NavModule,
+        ToastrModule.forRoot({
+            positionClass: 'toast-bottom-right',
+            preventDuplicates: true,
+            timeOut: 6000,
+            countDuplicates: true,
+            autoDismiss: true
+        }),
+    ],
+    providers: [
+        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+        Title,
+        { provide: SAVER, useFactory: getSaver },
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
