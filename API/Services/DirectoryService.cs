@@ -101,6 +101,10 @@ namespace API.Services
            SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
 
            ExistOrCreate(SiteThemeDirectory);
+           ExistOrCreate(BookmarkDirectory);
+           ExistOrCreate(CoverImageDirectory);
+           ExistOrCreate(CacheDirectory);
+           ExistOrCreate(LogDirectory);
        }
 
        /// <summary>
