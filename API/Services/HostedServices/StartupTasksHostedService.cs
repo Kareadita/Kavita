@@ -39,7 +39,7 @@ namespace API.Services.HostedServices
             }
 
             var libraryWatcher = scope.ServiceProvider.GetRequiredService<ILibraryWatcher>();
-            await libraryWatcher.StartWatchingLibraries();
+            //await libraryWatcher.StartWatchingLibraries(); // TODO: Enable this in the next PR
         }
 
         public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

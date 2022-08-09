@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
@@ -245,8 +246,9 @@ public class ParseScannedFilesTests
 
     #endregion
 
-    // #region MergeName
-    //
+    #region MergeName
+
+    // NOTE: I don't think I can test MergeName as it relies on Tracking Files, which is more complicated than I need
     // [Fact]
     // public async Task MergeName_ShouldMergeMatchingFormatAndName()
     // {
@@ -260,12 +262,34 @@ public class ParseScannedFilesTests
     //     var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
     //         new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
     //
+    //     var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+    //     var parsedFiles = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
     //
-    //     await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName");
+    //     void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+    //     {
+    //         var skippedScan = parsedInfo.Item1;
+    //         var parsedFiles = parsedInfo.Item2;
+    //         if (parsedFiles.Count == 0) return;
     //
-    //     Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.cbz", false)));
-    //     Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.cbz", false)));
-    //     Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accelworld", "1", "0", "Accel World v1.cbz", false)));
+    //         var foundParsedSeries = new ParsedSeries()
+    //         {
+    //             Name = parsedFiles.First().Series,
+    //             NormalizedName = API.Parser.Parser.Normalize(parsedFiles.First().Series),
+    //             Format = parsedFiles.First().Format
+    //         };
+    //
+    //         parsedSeries.Add(foundParsedSeries, parsedFiles);
+    //     }
+    //
+    //     await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName",
+    //         false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), TrackFiles);
+    //
+    //     Assert.Equal("Accel World",
+    //         psf.MergeName(parsedFiles, ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.cbz", false)));
+    //     Assert.Equal("Accel World",
+    //         psf.MergeName(parsedFiles, ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.cbz", false)));
+    //     Assert.Equal("Accel World",
+    //         psf.MergeName(parsedFiles, ParserInfoFactory.CreateParsedInfo("accelworld", "1", "0", "Accel World v1.cbz", false)));
     // }
     //
     // [Fact]
@@ -289,8 +313,8 @@ public class ParseScannedFilesTests
     //     Assert.Equal("Accel World",
     //         psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.epub", false)));
     // }
-    //
-    // #endregion
+
+    #endregion
 
     #region ScanLibrariesForSeries
 
