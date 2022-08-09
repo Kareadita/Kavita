@@ -100,6 +100,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   format: MangaFormat = MangaFormat.UNKNOWN;
   chapterTitle: string = '';
+  volumeTitle: string = '';
 
   /**
    * This is the download we get from download service. 
@@ -159,6 +160,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     if (this.utilityService.isChapter(this.entity)) {
       this.chapterTitle = this.utilityService.asChapter(this.entity).titleName;
+      this.volumeTitle = this.utilityService.asChapter(this.entity).volumeTitle || '';
     } else if (this.utilityService.isVolume(this.entity)) {
       const vol = this.utilityService.asVolume(this.entity);
       if (vol.chapters !== undefined && vol.chapters.length > 0) {

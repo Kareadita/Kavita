@@ -44,6 +44,9 @@
             <i class="fa {{format | mangaFormatIcon}}" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{formatString}}"></i>
             <span class="visually-hidden">{{formatString}}</span>
           </ng-container>
+          <ng-container *ngIf="volumeTitle != ''">
+            {{volumeTitle}}
+          </ng-container>
           &nbsp;{{title}}
         </span>
         <span class="card-actions float-end">
