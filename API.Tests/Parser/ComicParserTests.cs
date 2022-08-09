@@ -77,10 +77,6 @@ namespace API.Tests.Parser
         [InlineData("Bd Fr-Aldebaran-Antares-t6", "Aldebaran-Antares")]
         [InlineData("Tintin - T22 Vol 714 pour Sydney", "Tintin")]
         [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
-        [InlineData("Métal Hurlant-n°31", "Métal Hurlant")]
-        [InlineData("Force de l’ordre (La) - One Shot [Delcourt] [Digital-1711][RIP-Club]", "Force de l’ordre")]
-        [InlineData("Sex story - Une histoire du sexe (01-2016)", "Sex story - Une histoire du sexe")]
-        [InlineData("La Mémoire des arbres T01-02 - La Hache et le Fusil", "La Mémoire des arbres")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
@@ -124,15 +120,10 @@ namespace API.Tests.Parser
         [InlineData("Batgirl T2000 #57", "2000")]
         [InlineData("Teen Titans t1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
         [InlineData("Conquistador_Tome_2", "2")]
-        [InlineData("Conquistador_-Tome_2", "2")]
         [InlineData("Max_l_explorateur-_Tome_0", "0")]
         [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
         [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "0")]
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
-        [InlineData("Métal Hurlant-n°31", "0")]
-        [InlineData("Force de l’ordre (La) - One Shot [Delcourt] [Digital-1711][RIP-Club]", "0")]
-        [InlineData("Sex story - Une histoire du sexe (01-2016)", "0")]
-        [InlineData("La Mémoire des arbres T01-02 - La Hache et le Fusil", "1-2")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
@@ -178,12 +169,6 @@ namespace API.Tests.Parser
         [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
         [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "1")]
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "0")]
-        [InlineData("Métal Hurlant-n°31", "31")]
-        [InlineData("Darkyears-copterminator-issue02", "2")]
-        [InlineData("Force de l’ordre (La) - One Shot [Delcourt] [Digital-1711][RIP-Club]", "0")]
-        [InlineData("Sex story - Une histoire du sexe (01-2016)", "0")]
-        [InlineData("La Mémoire des arbres T01-02 - La Hache et le Fusil", "0")]
-
         public void ParseComicChapterTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));

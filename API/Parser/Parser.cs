@@ -90,11 +90,9 @@ namespace API.Parser
         private const string ChapterExpr = @"(?<Chapter>\d+(\.\d)?(-\d+(\.\d)?)?)";
 
         // Regex sub expression matching prefixes commonly used for denoting volumes in Comics
-        // French Volume: tome, t, t. -> volume
         private const string ComicVolumePrefixes = @"(v|t|(v\.|vol\.?|volume|t\.|tome)\s?)";
         // Regex sub expression matching prefixes commonly used for denoting issues in Comics
-        // n°,n. -> numero sign
-        private const string ComicChapterPrefixes = @"(c|chapter[-\s]+|issue\s?#?|#|(n°|n\.|Ep\.?)[-\s]*)";
+        private const string ComicChapterPrefixes = @"(c|chapter[-\s]+|issue\s?#?|#|Ep\.?[-\s]*)";
 
 
         private static readonly Regex[] MangaVolumeRegex = new[]
@@ -159,14 +157,14 @@ namespace API.Parser
             new Regex(
                 $@"^{SeriesExpr} Vol\.?tbd\b",
                 MatchOptions, RegexTimeout),
-            // [SugoiSugoi] NEEDLESS Vol.2 - Disk The Informant 5 [ENG].rar
+            // [SugoiSugoi]_NEEDLESS_Vol.2_-_Disk_The_Informant_5_[ENG].rar
             // Mad Chimera World - Volume 005 - Chapter 026.cbz (couldn't figure out how to get Volume negative lookaround working on below regex),
             // The Duke of Death and His Black Maid - Vol. 04 Ch. 054.5 - V4 Omake
             // [Hidoi]_Amaenaideyo_MS_vol01_chp02.rar
             // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
             // Tonikaku Kawaii Vol-1 (Ch 01-08)
             // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
-            // Ichiban Ushiro no Daimaou v04 ch34 [VISCANS].zip, VanDread-v01-c01.zip
+            // Ichiban_Ushiro_no_Daimaou_v04_ch34_[VISCANS].zip, VanDread-v01-c01.zip
             // Ichinensei ni Nacchattara v01 ch01 [Taruby] v1.1.zip must be before [Suihei Kiki] Kasumi Otoko no Ko [Taruby] v1.1.zip
             // Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA], Black Bullet - v4 c17 [batoto]
             // [Suihei Kiki] Kasumi Otoko no Ko [Taruby] v1.1.zip
@@ -253,7 +251,6 @@ namespace API.Parser
             // Amazing Man Comics issue #25
             // Batman & Robin the Teen Wonder #0
             // spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
-            // Métal Hurlant-n°31
             // Darkyears-copterminator-issue02
             // Batman Wayne Family Adventures - Ep. 001 - Moving In
             new Regex(
@@ -321,7 +318,6 @@ namespace API.Parser
             // Batman 2016 - Chapter 01, Batman 2016 - Issue 01,
             // Amazing Man Comics chapter 25
             // spawn-chapter-123 (from https://github.com/Girbons/comics-downloader)
-            // Métal Hurlant-n°31
             // Darkyears-copterminator-issue02
             new Regex(
                 $@"^{SeriesExpr}[-\s]+{ComicChapterPrefixes}{ChapterExpr}\b",
