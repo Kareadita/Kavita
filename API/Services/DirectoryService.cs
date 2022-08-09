@@ -530,6 +530,25 @@ namespace API.Services
        }
 
        /// <summary>
+       /// Returns all directories, including subdirectories. Automatically excludes directories that shouldn't be in scope.
+       /// </summary>
+       /// <param name="folderPath"></param>
+       /// <returns></returns>
+       public IEnumerable<string> GetAllDirectories(string folderPath)
+       {
+           if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
+           var directories = new List<string>();
+
+           var foundDirs = GetDirectories(folderPath);
+           foreach (var foundDir in foundDirs)
+           {
+               directories.AddRange(GetDirectories(foundDir));
+           }
+
+           return directories;
+       }
+
+       /// <summary>
        /// Returns the parent directories name for a file or folder. Empty string is path is not valid.
        /// </summary>
        /// <remarks>This does touch I/O with an Attribute lookup</remarks>
@@ -576,7 +595,6 @@ namespace API.Services
             {
                 matcher = CreateMatcherFromFile(potentialIgnoreFile);
             }
-            // I need a way to handle nested ignore files when there is a parent
             else
             {
                 matcher.Merge(CreateMatcherFromFile(potentialIgnoreFile));

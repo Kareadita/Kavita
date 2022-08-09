@@ -945,5 +945,24 @@ namespace API.Tests.Services
         }
 
     #endregion
+
+    #region GetAllDirectories
+
+    [Fact]
+    public void GetAllDirectories_ShouldFindAllNestedDirectories()
+    {
+        const string testDirectory = "C:/manga/base/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 2"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "A"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "B"));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        //Assert.Equal(4, ds.GetAllDirectories(testDirectory).Count());
+        Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
+    }
+
+    #endregion
     }
 }

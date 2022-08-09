@@ -238,7 +238,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Enqueuing series scan for: {SeriesId}", seriesId);
-        BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, CancellationToken.None));
+        BackgroundJob.Enqueue(() => _scannerService.ScanSeries(seriesId, forceUpdate));
     }
 
     public void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false)

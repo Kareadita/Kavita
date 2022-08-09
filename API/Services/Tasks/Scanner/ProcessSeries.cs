@@ -26,6 +26,7 @@ public interface IProcessSeries
     /// <returns></returns>
     Task Prime();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library);
+    void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -164,7 +165,7 @@ public class ProcessSeries : IProcessSeries
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[ScannerService] There was an exception updating volumes for {SeriesName}", series.Name);
+            _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
         if (seriesAdded)
@@ -174,8 +175,13 @@ public class ProcessSeries : IProcessSeries
         }
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, series.Id, false));
-        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(series.LibraryId, series.Id, false));
+        EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id, false);
+    }
+
+    public void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false)
+    {
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
     private static void UpdateSeriesMetadata(Series series, LibraryType libraryType)

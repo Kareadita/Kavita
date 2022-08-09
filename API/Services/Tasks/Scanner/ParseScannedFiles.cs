@@ -95,7 +95,9 @@ namespace API.Services.Tasks.Scanner
         /// <param name="scanDirectoryByDirectory">Scan directory by directory and for each, call folderAction</param>
         /// <param name="folderPath">A library folder or series folder</param>
         /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
-        public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory, IDictionary<string, IList<SeriesModified>> seriesPaths, Func<IList<string>, string,Task> folderAction)
+        /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
+        public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
+            IDictionary<string, IList<SeriesModified>> seriesPaths, Func<IList<string>, string,Task> folderAction, bool forceCheck = false)
         {
             string normalizedPath;
             if (scanDirectoryByDirectory)
@@ -105,7 +107,7 @@ namespace API.Services.Tasks.Scanner
                 foreach (var directory in directories)
                 {
                     normalizedPath = Parser.Parser.NormalizePath(directory);
-                    if (HasSeriesFolderChangedSinceLastScan(seriesPaths, normalizedPath))
+                    if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
                     {
                         await folderAction(new List<string>(), directory);
                     }
@@ -120,7 +122,7 @@ namespace API.Services.Tasks.Scanner
             }
 
             normalizedPath = Parser.Parser.NormalizePath(folderPath);
-            if (HasSeriesFolderChangedSinceLastScan(seriesPaths, normalizedPath))
+            if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
             {
                 await folderAction(new List<string>(), folderPath);
                 return;
@@ -236,7 +238,7 @@ namespace API.Services.Tasks.Scanner
         /// <returns></returns>
         public async Task ScanLibrariesForSeries(LibraryType libraryType,
             IEnumerable<string> folders, string libraryName, bool isLibraryScan,
-            IDictionary<string, IList<SeriesModified>> seriesPaths, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos)
+            IDictionary<string, IList<SeriesModified>> seriesPaths, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos, bool forceCheck = false)
         {
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("Starting file scan", libraryName, ProgressEventType.Started));
@@ -248,7 +250,7 @@ namespace API.Services.Tasks.Scanner
                     await ProcessFiles(folderPath, isLibraryScan, seriesPaths, async (files, folder) =>
                     {
                         var normalizedFolder = Parser.Parser.NormalizePath(folder);
-                        if (HasSeriesFolderChangedSinceLastScan(seriesPaths, normalizedFolder))
+                        if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedFolder, forceCheck))
                         {
                             if (processSeriesInfos != null) // TODO: We can remove this as it will always be there
                             {
@@ -291,7 +293,7 @@ namespace API.Services.Tasks.Scanner
                                 processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
                             }
                         }
-                    });
+                    }, forceCheck);
                 }
                 catch (ArgumentException ex)
                 {
@@ -302,10 +304,13 @@ namespace API.Services.Tasks.Scanner
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
         }
 
-        private bool HasSeriesFolderChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder)
+        private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder, bool forceCheck = false)
         {
+            // NOTE: There is a bug (on Windows) where we need to scan all the nested folders as LastWrite isn't propagating up
+            if (forceCheck) return false;
             return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
-                _directoryService.FileSystem.Directory.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerMinute));
+                _directoryService.GetDirectories(normalizedFolder)
+                    .Max(firstLevelFolder => _directoryService.FileSystem.Directory.GetLastWriteTime(firstLevelFolder).Truncate(TimeSpan.TicksPerMinute)));
         }
 
         /// <summary>

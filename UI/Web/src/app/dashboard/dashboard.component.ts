@@ -79,7 +79,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
 
       this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntil(this.onDestroy)).subscribe(() => {
-        console.log('Loading recently updated and added due to event from backend')
         this.loadRecentlyUpdated();
         this.loadRecentlyAddedSeries();
         this.cdRef.markForCheck();
