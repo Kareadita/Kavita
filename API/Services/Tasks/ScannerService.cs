@@ -133,11 +133,11 @@ public class ScannerService : IScannerService
         }
 
         await _processSeries.Prime();
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
+            if (parsedFiles.Count == 0) return;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -154,13 +154,12 @@ public class ScannerService : IScannerService
                     NormalizedName = Parser.Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
-                return Task.CompletedTask;
+                return;
             }
 
             seenSeries.Add(foundParsedSeries);
             processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
             parsedSeries.Add(foundParsedSeries, parsedFiles);
-            return Task.CompletedTask;
         }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
@@ -357,17 +356,16 @@ public class ScannerService : IScannerService
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
-        // TODO: Uncomment this
         // If all library Folder paths haven't been modified since last scan, abort
-        // if (!library.AnyModificationsSinceLastScan())
-        // {
-        //     _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
-        //     // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
-        //     await _eventHub.SendMessageAsync(MessageFactory.Info,
-        //         MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
-        //             "All folders have not been changed since last scan. Scan will be aborted."));
-        //     return;
-        // }
+        if (!library.AnyModificationsSinceLastScan())
+        {
+            _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
+            // NOTE: I think we should send this as an Info to the UI, rather than ERROR.
+            await _eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
+                    "All folders have not been changed since last scan. Scan will be aborted."));
+            return;
+        }
 
         // Validations are done, now we can start actual scan
 
@@ -386,17 +384,16 @@ public class ScannerService : IScannerService
 
 
         var totalFiles = 0;
-        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
         var seenSeries = new List<ParsedSeries>();
 
 
         await _processSeries.Prime();
         var processTasks = new List<Task>();
-        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return Task.CompletedTask;
+            if (parsedFiles.Count == 0) return;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -413,7 +410,7 @@ public class ScannerService : IScannerService
                     NormalizedName = Parser.Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
-                return Task.CompletedTask;
+                return;
             }
 
             totalFiles += parsedFiles.Count;
@@ -421,8 +418,6 @@ public class ScannerService : IScannerService
 
             seenSeries.Add(foundParsedSeries);
             processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
-            parsedSeries.Add(foundParsedSeries, parsedFiles);
-            return Task.CompletedTask;
         }
 
 
@@ -465,7 +460,7 @@ public class ScannerService : IScannerService
     }
 
     private async Task<long> ScanFiles(Library library, IEnumerable<string> dirs,
-        bool isLibraryScan, Func<Tuple<bool, IList<ParserInfo>>, Task> processSeriesInfos = null)
+        bool isLibraryScan, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos = null)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();

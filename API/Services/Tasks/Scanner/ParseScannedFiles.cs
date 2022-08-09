@@ -236,7 +236,7 @@ namespace API.Services.Tasks.Scanner
         /// <returns></returns>
         public async Task ScanLibrariesForSeries(LibraryType libraryType,
             IEnumerable<string> folders, string libraryName, bool isLibraryScan,
-            IDictionary<string, IList<SeriesModified>> seriesPaths, Func<Tuple<bool, IList<ParserInfo>>, Task> processSeriesInfos)
+            IDictionary<string, IList<SeriesModified>> seriesPaths, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos)
         {
 
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("Starting file scan", libraryName, ProgressEventType.Started));
@@ -257,7 +257,7 @@ namespace API.Services.Tasks.Scanner
                                     Series = fp.SeriesName,
                                     Format = fp.Format,
                                 }).ToList();
-                                await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
+                                processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
                                 _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
                                 return;
                             }
@@ -288,7 +288,7 @@ namespace API.Services.Tasks.Scanner
                         {
                             if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
                             {
-                                await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
+                                processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
                             }
                         }
                     });

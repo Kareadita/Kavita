@@ -245,52 +245,52 @@ public class ParseScannedFilesTests
 
     #endregion
 
-    #region MergeName
-
-    [Fact]
-    public async Task MergeName_ShouldMergeMatchingFormatAndName()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Data/");
-        fileSystem.AddFile("C:/Data/Accel World v1.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.pdf", new MockFileData(string.Empty));
-
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
-
-
-        await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName");
-
-        Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.cbz", false)));
-        Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.cbz", false)));
-        Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accelworld", "1", "0", "Accel World v1.cbz", false)));
-    }
-
-    [Fact]
-    public async Task MergeName_ShouldMerge_MismatchedFormatSameName()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Data/");
-        fileSystem.AddFile("C:/Data/Accel World v1.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.pdf", new MockFileData(string.Empty));
-
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
-
-
-        await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName");
-
-        Assert.Equal("Accel World",
-            psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.epub", false)));
-        Assert.Equal("Accel World",
-            psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.epub", false)));
-    }
-
-    #endregion
+    // #region MergeName
+    //
+    // [Fact]
+    // public async Task MergeName_ShouldMergeMatchingFormatAndName()
+    // {
+    //     var fileSystem = new MockFileSystem();
+    //     fileSystem.AddDirectory("C:/Data/");
+    //     fileSystem.AddFile("C:/Data/Accel World v1.cbz", new MockFileData(string.Empty));
+    //     fileSystem.AddFile("C:/Data/Accel World v2.cbz", new MockFileData(string.Empty));
+    //     fileSystem.AddFile("C:/Data/Accel World v2.pdf", new MockFileData(string.Empty));
+    //
+    //     var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+    //     var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+    //         new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+    //
+    //
+    //     await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName");
+    //
+    //     Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.cbz", false)));
+    //     Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.cbz", false)));
+    //     Assert.Equal("Accel World", psf.MergeName(ParserInfoFactory.CreateParsedInfo("accelworld", "1", "0", "Accel World v1.cbz", false)));
+    // }
+    //
+    // [Fact]
+    // public async Task MergeName_ShouldMerge_MismatchedFormatSameName()
+    // {
+    //     var fileSystem = new MockFileSystem();
+    //     fileSystem.AddDirectory("C:/Data/");
+    //     fileSystem.AddFile("C:/Data/Accel World v1.cbz", new MockFileData(string.Empty));
+    //     fileSystem.AddFile("C:/Data/Accel World v2.cbz", new MockFileData(string.Empty));
+    //     fileSystem.AddFile("C:/Data/Accel World v2.pdf", new MockFileData(string.Empty));
+    //
+    //     var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+    //     var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+    //         new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
+    //
+    //
+    //     await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName");
+    //
+    //     Assert.Equal("Accel World",
+    //         psf.MergeName(ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.epub", false)));
+    //     Assert.Equal("Accel World",
+    //         psf.MergeName(ParserInfoFactory.CreateParsedInfo("accel_world", "1", "0", "Accel World v1.epub", false)));
+    // }
+    //
+    // #endregion
 
     #region ScanLibrariesForSeries
 
@@ -308,40 +308,31 @@ public class ParseScannedFilesTests
         var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
-        var parsedSeries = await psf.ScanLibrariesForSeries(LibraryType.Manga,
-            new List<string>() {"C:/Data/"}, "libraryName");
+        void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        {
+            var skippedScan = parsedInfo.Item1;
+            var parsedFiles = parsedInfo.Item2;
+            if (parsedFiles.Count == 0) return;
+
+            var foundParsedSeries = new ParsedSeries()
+            {
+                Name = parsedFiles.First().Series,
+                NormalizedName = API.Parser.Parser.Normalize(parsedFiles.First().Series),
+                Format = parsedFiles.First().Format
+            };
+
+            parsedSeries.Add(foundParsedSeries, parsedFiles);
+        }
+
+
+        await psf.ScanLibrariesForSeries(LibraryType.Manga,
+            new List<string>() {"C:/Data/"}, "libraryName", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), TrackFiles);
+
 
         Assert.Equal(3, parsedSeries.Values.Count);
         Assert.NotEmpty(parsedSeries.Keys.Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
-    }
-
-
-    [Fact]
-    public async Task ScanLibrariesForSeries2_ShouldFindFiles()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.AddDirectory("C:/Data/");
-        fileSystem.AddFile("C:/Data/Accel World v1.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.cbz", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Accel World v2.pdf", new MockFileData(string.Empty));
-        fileSystem.AddFile("C:/Data/Nothing.pdf", new MockFileData(string.Empty));
-
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
-            new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
-
-        var seriesSeen = new HashSet<IList<ParserInfo>>();
-        // IsLibraryScan is problematic due to the complexity it adds. We should try to find a way around this
-        await psf.ScanLibrariesForSeries(LibraryType.Manga,
-            new List<string>() {"C:/Data/"}, "libraryName",true, list =>
-            {
-                seriesSeen.Add(list);
-                return Task.CompletedTask;
-            });
-
-        Assert.Equal(3, seriesSeen.Count);
-        //Assert.NotEmpty(seriesSeen.ToKeyValuePairs().Select(kv => kv.Key).Where(p => p.Format == MangaFormat.Archive && p.Name.Equals("Accel World")));
     }
 
     #endregion
@@ -373,7 +364,8 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var directoriesSeen = new HashSet<string>();
-        await psf.ProcessFiles("C:/Data/", true, (files, directoryPath) =>
+        await psf.ProcessFiles("C:/Data/", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),
+            (files, directoryPath) =>
         {
             directoriesSeen.Add(directoryPath);
             return Task.CompletedTask;
@@ -391,7 +383,7 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var directoriesSeen = new HashSet<string>();
-        await psf.ProcessFiles("C:/Data/", false, (files, directoryPath) =>
+        await psf.ProcessFiles("C:/Data/", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),(files, directoryPath) =>
         {
             directoriesSeen.Add(directoryPath);
             return Task.CompletedTask;
@@ -420,7 +412,7 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var callCount = 0;
-        await psf.ProcessFiles("C:/Data", true, (files, folderPath) =>
+        await psf.ProcessFiles("C:/Data", true, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),(files, folderPath) =>
         {
             callCount++;
 
@@ -452,7 +444,7 @@ public class ParseScannedFilesTests
             new MockReadingItemService(new DefaultParser(ds)), Substitute.For<IEventHub>());
 
         var callCount = 0;
-        await psf.ProcessFiles("C:/Data", false, (files, folderPath) =>
+        await psf.ProcessFiles("C:/Data", false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1),(files, folderPath) =>
         {
             callCount++;
             return Task.CompletedTask;
