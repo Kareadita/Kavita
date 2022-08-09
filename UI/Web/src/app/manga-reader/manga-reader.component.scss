@@ -277,7 +277,7 @@ img {
 
   .pagination-area {
     cursor: pointer;
-    z-index: 2;
+    z-index: 100;
 
     i {
         color: white;
@@ -290,6 +290,7 @@ img {
       top: 0px;
       width: $side-width;
       background: $pagination-bg;
+      z-index: 100;
     }
     
     .top {
@@ -298,6 +299,7 @@ img {
         top: 0px;
         width: 100%;
         background: $pagination-bg;
+        z-index: 100;
     }
     
     .left {
@@ -306,6 +308,7 @@ img {
         top: 0px;
         width: $side-width;
         background: $pagination-bg;
+        z-index: 100;
     }
     
     .bottom {
@@ -314,6 +317,7 @@ img {
         bottom: 0px;
         width: 100%;
         background: $pagination-bg;
+        z-index: 100;
     }
   }
 
