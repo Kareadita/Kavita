@@ -16,7 +16,7 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "ES6",
+    "target": "es2020",
     "module": "es2020",
     "lib": [
       "es2019",
@@ -29,6 +29,10 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "extendedDiagnostics": {
+      "nullishCoalescingNotNullable": "warning",
+    }
+    
   }
 }

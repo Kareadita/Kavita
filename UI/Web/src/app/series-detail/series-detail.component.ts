@@ -35,7 +35,7 @@ import { NavService } from '../_services/nav.service';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 import { RelationKind } from '../_models/series-detail/relation-kind';
 import { CardDetailDrawerComponent } from '../cards/card-detail-drawer/card-detail-drawer.component';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormGroup, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { PageLayoutMode } from '../_models/page-layout-mode';
 import { DOCUMENT } from '@angular/common';
 import { User } from '../_models/user';
@@ -152,8 +152,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   renderMode: PageLayoutMode = PageLayoutMode.Cards;
 
   pageExtrasGroup = new FormGroup({
-    'sortingOption': new FormControl(this.sortingOptions[0].value, []),
-    'renderMode': new FormControl(this.renderMode, []),
+    'sortingOption': new UntypedFormControl(this.sortingOptions[0].value, []),
+    'renderMode': new UntypedFormControl(this.renderMode, []),
   });
 
   isAscendingSort: boolean = false; // TODO: Get this from User preferences

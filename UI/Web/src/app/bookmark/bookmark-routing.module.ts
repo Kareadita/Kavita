@@ -6,10 +6,11 @@ import { BookmarksComponent } from "./bookmarks/bookmarks.component";
 const routes: Routes = [
   {path: '**', component: BookmarksComponent, pathMatch: 'full', canActivate: [AuthGuard]},
   {
+    path: '',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard],
     children: [
-      {path: '/bookmarks', component: BookmarksComponent},
+      {path: 'bookmarks', component: BookmarksComponent},
     ]
   }
 ];

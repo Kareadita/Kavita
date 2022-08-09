@@ -2,7 +2,7 @@
     <h2 title>
         Reading Lists
     </h2>
-    <h6 subtitle>{{pagination?.totalItems}} Items</h6>
+    <h6 subtitle *ngIf="pagination">{{pagination.totalItems}} Items</h6>
 </app-side-nav-companion-bar>
 
 <app-card-detail-layout

@@ -9,7 +9,7 @@
                 <h4>
                     <span id="library-name--{{idx}}"><a [routerLink]="'/library/' + library.id">{{library.name}}</a></span>&nbsp;
                     <div class="float-end">
-                        <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" ngbTooltip="Scan Library" attr.aria-label="Scan Library"><i class="fa fa-sync-alt" title="Scan"></i></button>
+                        <button class="btn btn-secondary me-2 btn-sm" (click)="scanLibrary(library)" placement="top" ngbTooltip="Scan Library" aria-label="Scan Library"><i class="fa fa-sync-alt" title="Scan"></i></button>
                         <button class="btn btn-danger me-2 btn-sm" [disabled]="deletionInProgress" (click)="deleteLibrary(library)"><i class="fa fa-trash" placement="top" ngbTooltip="Delete Library" attr.aria-label="Delete {{library.name | sentenceCase}}"></i></button>
                         <button class="btn btn-primary btn-sm" (click)="editLibrary(library)"><i class="fa fa-pen" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{library.name | sentenceCase}}"></i></button>
                     </div>

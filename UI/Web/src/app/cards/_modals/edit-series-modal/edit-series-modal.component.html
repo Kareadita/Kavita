@@ -46,7 +46,7 @@
                     <div class="row g-0" *ngIf="metadata">
                         <div class="mb-3" style="width: 100%">
                             <label for="summary" class="form-label">Summary</label>
-                            <div class="input-group {{metadata?.summaryLocked ? 'lock-active' : ''}}">
+                            <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
                                 <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
                                 <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
                             </div>

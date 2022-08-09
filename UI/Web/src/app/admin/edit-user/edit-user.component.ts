@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/member';
@@ -19,7 +19,7 @@ export class EditUserComponent implements OnInit {
   selectedLibraries: Array<number> = [];
   isSaving: boolean = false;
 
-  userForm: FormGroup = new FormGroup({});
+  userForm: UntypedFormGroup = new UntypedFormGroup({});
 
   public get email() { return this.userForm.get('email'); }
   public get username() { return this.userForm.get('username'); }
@@ -28,8 +28,8 @@ export class EditUserComponent implements OnInit {
   constructor(public modal: NgbActiveModal, private accountService: AccountService) { }
 
   ngOnInit(): void {
-    this.userForm.addControl('email', new FormControl(this.member.email, [Validators.required, Validators.email]));
-    this.userForm.addControl('username', new FormControl(this.member.username, [Validators.required]));
+    this.userForm.addControl('email', new UntypedFormControl(this.member.email, [Validators.required, Validators.email]));
+    this.userForm.addControl('username', new UntypedFormControl(this.member.username, [Validators.required]));
 
     this.userForm.get('email')?.disable();
   }

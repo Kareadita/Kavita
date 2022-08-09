@@ -1,7 +1,7 @@
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { auditTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
@@ -186,8 +186,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   showAddItem: boolean = false;
   filteredOptions!: Observable<string[]>;
   isLoadingOptions: boolean = false;
-  typeaheadControl!: FormControl;
-  typeaheadForm!: FormGroup;
+  typeaheadControl!: UntypedFormControl;
+  typeaheadForm!: UntypedFormGroup;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -220,9 +220,9 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     if (this.settings.hasOwnProperty('formControl') && this.settings.formControl) {
       this.typeaheadControl = this.settings.formControl;
     } else {
-      this.typeaheadControl = new FormControl('');
+      this.typeaheadControl = new UntypedFormControl('');
     }
-    this.typeaheadForm = new FormGroup({
+    this.typeaheadForm = new UntypedFormGroup({
       'typeahead': this.typeaheadControl
     });
 

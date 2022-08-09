@@ -42,9 +42,11 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 .btn-icon {
   cursor: pointer;
   color: var(--body-text-color);
+  border: none;
 
   &:hover, &:focus {
     color: var(--body-text-color);
+    border: none;
   }
 }
 

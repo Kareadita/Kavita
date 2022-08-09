@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Member } from 'src/app/_models/member';
 import { AccountService } from 'src/app/_services/account.service';
@@ -14,8 +14,8 @@ export class ResetPasswordModalComponent implements OnInit {
 
   @Input() member!: Member;
   errorMessage = '';
-  resetPasswordForm: FormGroup = new FormGroup({
-    password: new FormControl('', [Validators.required]),
+  resetPasswordForm: UntypedFormGroup = new UntypedFormGroup({
+    password: new UntypedFormControl('', [Validators.required]),
   });
 
   constructor(public modal: NgbActiveModal, private accountService: AccountService) { }

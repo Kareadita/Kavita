@@ -1,6 +1,6 @@
 
 <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Edit {{tag?.title}} Collection</h4>
+    <h4 class="modal-title" id="modal-basic-title">Edit {{tag.title}} Collection</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body  {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
@@ -9,7 +9,7 @@
             <a ngbNavLink>{{tabs[TabID.General].title}}</a>
             <ng-template ngbNavContent>
                 <p class="alert alert-secondary" role="alert">
-                    This tag is currently {{tag?.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
+                    This tag is currently {{tag.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
                     Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.
                 </p>
                 <form [formGroup]="collectionTagForm">
@@ -65,6 +65,6 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-    <button type="button" class="btn btn-secondary alt" (click)="togglePromotion()">{{tag?.promoted ? 'Demote' : 'Promote'}}</button>
+    <button type="button" class="btn btn-secondary alt" (click)="togglePromotion()">{{tag.promoted ? 'Demote' : 'Promote'}}</button>
     <button type="button" class="btn btn-primary" (click)="save()">Save</button>
 </div>

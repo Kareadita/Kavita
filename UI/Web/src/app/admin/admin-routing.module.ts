@@ -6,10 +6,11 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 const routes: Routes = [
   {path: '**', component: DashboardComponent, pathMatch: 'full', canActivate: [AdminGuard]},
   {
+    path: '',
     runGuardsAndResolvers: 'always',
     canActivate: [AdminGuard],
     children: [
-      {path: '/dashboard', component: DashboardComponent},
+      {path: 'dashboard', component: DashboardComponent},
     ]
   }
 ];

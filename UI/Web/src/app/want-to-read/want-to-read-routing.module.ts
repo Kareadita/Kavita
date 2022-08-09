@@ -6,6 +6,7 @@ import { WantToReadComponent } from './want-to-read/want-to-read.component';
 const routes: Routes = [
     {path: '**', component: WantToReadComponent, pathMatch: 'full'},
     {
+      path: '',
       runGuardsAndResolvers: 'always',
       canActivate: [AuthGuard],
       children: [
