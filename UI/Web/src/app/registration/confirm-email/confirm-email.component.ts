@@ -56,7 +56,7 @@ export class ConfirmEmailComponent {
       this.toastr.success('Account registration complete');
       this.router.navigateByUrl('login');
     }, err => {
-      console.log('error: ', err);
+      console.error('Error from Confirming Email: ', err);
       this.errors = err;
       this.cdRef.markForCheck();
     });

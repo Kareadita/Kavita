@@ -150,7 +150,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.loadPage();
           return;
         }
-        console.log('Series Added: ', seriesAdded.seriesName);
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
           this.series = [...this.series, s].sort((s1: Series, s2: Series) => {
             if (s1.sortName < s2.sortName) return -1;

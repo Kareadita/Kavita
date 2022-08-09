@@ -105,8 +105,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
 
     if (this.refresh) {
       this.refresh.subscribe(() => {
-        console.log('Refreshing data', this.items);
-        console.log('has expected item: ', this.items.filter(s => s.name === '0/6'));
         this.changeDetectionRef.markForCheck();
         this.virtualScroller.refresh();
       });

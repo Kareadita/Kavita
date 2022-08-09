@@ -229,7 +229,6 @@ export class MessageHubService {
     });
 
     this.hubConnection.on(EVENTS.SeriesAdded, resp => {
-      console.log('SeriesAdded event');
       this.messagesSource.next({
         event: EVENTS.SeriesAdded,
         payload: resp.body
