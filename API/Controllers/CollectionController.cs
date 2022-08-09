@@ -99,6 +99,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="dto"></param>
         /// <returns></returns>
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("update-for-series")]
         public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
         {
