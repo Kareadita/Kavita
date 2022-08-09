@@ -5,7 +5,7 @@ import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavService } from '../_services/nav.service';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
@@ -106,7 +106,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   maxPages = 1;
   user!: User;
-  generalSettingsForm!: UntypedFormGroup;
+  generalSettingsForm!: FormGroup;
 
   scalingOptions = scalingOptions;
   readingDirection = ReadingDirection.LeftToRight;
@@ -427,7 +427,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
-              public readerService: ReaderService, private formBuilder: UntypedFormBuilder, private navService: NavService,
+              public readerService: ReaderService, private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
               public utilityService: UtilityService, private renderer: Renderer2,
               @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,

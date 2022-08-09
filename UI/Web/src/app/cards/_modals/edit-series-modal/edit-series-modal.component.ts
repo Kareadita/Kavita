@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -52,7 +52,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Related', 'Info'];
   active = this.tabs[0];
   activeTabId = TabID.General;
-  editSeriesForm!: UntypedFormGroup;
+  editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   private readonly onDestroy = new Subject<void>();
 
@@ -105,7 +105,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   constructor(public modal: NgbActiveModal,
               private seriesService: SeriesService,
               public utilityService: UtilityService,
-              private fb: UntypedFormBuilder,
+              private fb: FormBuilder,
               public imageService: ImageService,
               private libraryService: LibraryService,
               private collectionService: CollectionTagService,
@@ -124,19 +124,19 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
 
     this.editSeriesForm = this.fb.group({
-      id: new UntypedFormControl(this.series.id, []),
-      summary: new UntypedFormControl('', []),
-      name: new UntypedFormControl(this.series.name, []),
-      localizedName: new UntypedFormControl(this.series.localizedName, []),
-      sortName: new UntypedFormControl(this.series.sortName, []),
-      rating: new UntypedFormControl(this.series.userRating, []),
+      id: new FormControl(this.series.id, []),
+      summary: new FormControl('', []),
+      name: new FormControl(this.series.name, []),
+      localizedName: new FormControl(this.series.localizedName, []),
+      sortName: new FormControl(this.series.sortName, []),
+      rating: new FormControl(this.series.userRating, []),
 
-      coverImageIndex: new UntypedFormControl(0, []),
-      coverImageLocked: new UntypedFormControl(this.series.coverImageLocked, []),
+      coverImageIndex: new FormControl(0, []),
+      coverImageLocked: new FormControl(this.series.coverImageLocked, []),
 
-      ageRating: new UntypedFormControl('', []),
-      publicationStatus: new UntypedFormControl('', []),
-      language: new UntypedFormControl('', []),
+      ageRating: new FormControl('', []),
+      publicationStatus: new FormControl('', []),
+      language: new FormControl('', []),
     });
     this.cdRef.markForCheck();
 
