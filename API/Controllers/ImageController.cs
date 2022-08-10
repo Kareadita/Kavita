@@ -134,7 +134,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="filename">Filename of file. This is used with upload/upload-by-url</param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize(Policy="RequireAdminRole")]
         [HttpGet("cover-upload")]
         [ResponseCache(Duration = ImageCacheSeconds, Location = ResponseCacheLocation.Client, NoStore = false)]
         public ActionResult GetCoverUploadImage(string filename)
