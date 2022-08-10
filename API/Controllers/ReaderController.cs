@@ -11,7 +11,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
-using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -113,6 +112,7 @@ namespace API.Controllers
         /// <returns></returns>
         [HttpGet("bookmark-image")]
         [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [AllowAnonymous]
         public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
         {
             if (page < 0) page = 0;
