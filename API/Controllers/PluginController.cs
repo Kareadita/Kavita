@@ -2,6 +2,7 @@
 using API.Data;
 using API.DTOs;
 using API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -26,6 +27,7 @@ namespace API.Controllers
         /// <param name="apiKey"></param>
         /// <param name="pluginName">Name of the Plugin</param>
         /// <returns></returns>
+        [AllowAnonymous]
         [HttpPost("authenticate")]
         public async Task<ActionResult<UserDto>> Authenticate(string apiKey, string pluginName)
         {
