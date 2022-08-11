@@ -100,6 +100,9 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       case Action.AddToWantToReadList:
         this.actionService.addMultipleSeriesToWantToReadList([series.id]);
         break;
+      case Action.RemoveFromWantToReadList:
+        this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
+        break;
       case(Action.AddToCollection):
         this.actionService.addMultipleSeriesToCollectionTag([series]);
         break;
