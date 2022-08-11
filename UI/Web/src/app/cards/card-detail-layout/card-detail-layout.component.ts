@@ -151,7 +151,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
       targetIndex += this.jumpBarKeys[i].size;
     }
 
-    this.virtualScroller.scrollToIndex(targetIndex, true, 800, 1000);
+    this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
     this.jumpbarService.saveResumeKey(this.header, jumpKey.key);
     this.changeDetectionRef.markForCheck();
     return;
