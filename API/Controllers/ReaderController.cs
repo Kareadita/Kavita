@@ -47,7 +47,7 @@ namespace API.Controllers
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("pdf")]
-        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [ResponseCache(CacheProfileName = "Hour")]
         public async Task<ActionResult> GetPdf(int chapterId)
         {
             var chapter = await _cacheService.Ensure(chapterId);
@@ -79,7 +79,7 @@ namespace API.Controllers
         /// <param name="page"></param>
         /// <returns></returns>
         [HttpGet("image")]
-        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [ResponseCache(CacheProfileName = "Hour")]
         [AllowAnonymous]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
@@ -111,7 +111,7 @@ namespace API.Controllers
         /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
         /// <returns></returns>
         [HttpGet("bookmark-image")]
-        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [ResponseCache(CacheProfileName = "Hour")]
         [AllowAnonymous]
         public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
         {

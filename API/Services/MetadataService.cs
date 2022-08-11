@@ -158,7 +158,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
-    private async Task ProcessSeriesMetadataUpdate(Series series, bool forceUpdate)
+    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate)
     {
         _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
         try
@@ -250,7 +250,7 @@ public class MetadataService : IMetadataService
 
                 try
                 {
-                    await ProcessSeriesMetadataUpdate(series, forceUpdate);
+                    await ProcessSeriesCoverGen(series, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -303,7 +303,7 @@ public class MetadataService : IMetadataService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(libraryId, 0F, ProgressEventType.Started, series.Name));
 
-        await ProcessSeriesMetadataUpdate(series, forceUpdate);
+        await ProcessSeriesCoverGen(series, forceUpdate);
 
 
         if (_unitOfWork.HasChanges())

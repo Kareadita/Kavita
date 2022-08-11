@@ -417,7 +417,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
-    this.modal.close({success: false, series: undefined});
+    this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset});
   }
 
   fetchCollectionTags(filter: string = '') {
@@ -458,7 +458,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.saveNestedComponents.emit();
 
     forkJoin(apis).subscribe(results => {
-      this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0});
+      this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset});
     });
   }
 

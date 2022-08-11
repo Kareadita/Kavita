@@ -25,6 +25,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
@@ -52,7 +53,23 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApplicationServices(_config, _env);
-            services.AddControllers();
+            services.AddControllers(options =>
+            {
+                options.CacheProfiles.Add("Images",
+                    new CacheProfile()
+                    {
+                        Duration = 60,
+                        Location = ResponseCacheLocation.None,
+                        NoStore = false
+                    });
+                options.CacheProfiles.Add("Hour",
+                    new CacheProfile()
+                    {
+                        Duration = 60 * 10,
+                        Location = ResponseCacheLocation.None,
+                        NoStore = false
+                    });
+            });
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.All;
