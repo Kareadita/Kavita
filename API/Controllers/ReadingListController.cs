@@ -508,6 +508,7 @@ namespace API.Controllers
         private async Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
             ReadingList readingList)
         {
+            // TODO: Move to ReadingListService and Unit Test
             readingList.Items ??= new List<ReadingListItem>();
             var lastOrder = 0;
             if (readingList.Items.Any())

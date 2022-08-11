@@ -3,7 +3,7 @@
     background-color: var(--primary-color);
 }
 
-.list-group {
+.scrollable-modal {
+    max-height: calc(var(--vh) * 100 - 198px);
     overflow: auto;
-    max-height: 350px;
 }
