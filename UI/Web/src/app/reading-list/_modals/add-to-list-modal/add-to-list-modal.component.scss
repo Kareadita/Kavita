@@ -2,3 +2,8 @@
 .clickable:hover, .clickable:focus {
     background-color: var(--primary-color);
 }
+
+.list-group {
+    overflow: auto;
+    max-height: 350px;
+}
