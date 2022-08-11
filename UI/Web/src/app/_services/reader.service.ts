@@ -67,7 +67,10 @@ export class ReaderService {
   }
 
   clearBookmarks(seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/remove-bookmarks', {seriesId});
+    return this.httpClient.post(this.baseUrl + 'reader/remove-bookmarks', {seriesId}, {responseType: 'text' as 'json'});
+  }
+  clearMultipleBookmarks(seriesIds: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'reader/bulk-remove-bookmarks', {seriesIds}, {responseType: 'text' as 'json'});
   }
 
   /**
