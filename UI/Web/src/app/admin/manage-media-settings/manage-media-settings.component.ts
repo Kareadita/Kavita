@@ -26,6 +26,7 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   resetForm() {
     this.settingsForm.get('convertBookmarkToWebP')?.setValue(this.serverSettings.convertBookmarkToWebP);
+    this.settingsForm.markAsPristine();
   }
 
   async saveSettings() {

@@ -60,6 +60,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
     this.settingsForm.get('enableSwaggerUi')?.setValue(this.serverSettings.enableSwaggerUi);
     this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups);
+    this.settingsForm.markAsPristine();
   }
 
   async saveSettings() {
@@ -91,7 +92,7 @@ export class ManageSettingsComponent implements OnInit {
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success && closeResult.folderPath !== '') {
         this.settingsForm.get(formControl)?.setValue(closeResult.folderPath);
-        this.settingsForm.markAsTouched();
+        this.settingsForm.markAsDirty();
       }
     });
   }

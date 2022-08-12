@@ -46,6 +46,7 @@ export class ManageSystemComponent implements OnInit {
     this.settingsForm.get('port')?.setValue(this.serverSettings.port);
     this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel);
     this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection);
+    this.settingsForm.markAsPristine();
   }
 
   saveSettings() {
