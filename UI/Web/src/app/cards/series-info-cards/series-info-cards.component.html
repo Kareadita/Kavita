@@ -1,19 +1,18 @@
 <div class="row g-0 mb-4 mt-3">
+    <ng-container *ngIf="seriesMetadata.releaseYear > 0">
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
+            <app-icon-and-title label="Release Year" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
+                {{seriesMetadata.releaseYear}}
+            </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+    </ng-container>
 
     <ng-container *ngIf="seriesMetadata">
         <ng-container *ngIf="seriesMetadata.ageRating">
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
                 <app-icon-and-title label="Age Rating" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
                     {{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
-
-        <ng-container *ngIf="seriesMetadata.releaseYear > 0">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-                <app-icon-and-title label="Release Year" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
-                    {{seriesMetadata.releaseYear}}
                 </app-icon-and-title>
             </div>
             <div class="vr d-none d-lg-block m-2"></div>
@@ -58,7 +57,6 @@
             </div>
             <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
-        
 
         <ng-container *ngIf="series.format === MangaFormat.EPUB; else showPages">
             <ng-container *ngIf="series.wordCount > 0">
@@ -67,9 +65,9 @@
                         {{series.wordCount | compactNumber}} Words
                     </app-icon-and-title>
                 </div>
-                <div class="vr d-none d-lg-block m-2"></div>    
+                <div class="vr d-none d-lg-block m-2"></div>
             </ng-container>
-            
+
         </ng-container>
         <ng-template #showPages>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
@@ -78,9 +76,7 @@
                 </app-icon-and-title>
             </div>
             <div class="vr d-none d-lg-block m-2"></div>
-        </ng-template>    
-        
-        
+        </ng-template>
 
         <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
@@ -93,11 +89,10 @@
             </div>
         </ng-container>
 
-        
         <ng-container *ngIf="hasReadingProgress && showReadingTimeLeft && readingTimeLeft && readingTimeLeft.avgHours !== 0">
             <div class="vr d-none d-lg-block m-2"></div>
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Read Left" [clickable]="false" fontClasses="fa-solid fa-clock">
+                <app-icon-and-title label="Time Left" [clickable]="false" fontClasses="fa-solid fa-clock">
                     ~{{readingTimeLeft.avgHours}} Hour{{readingTimeLeft.avgHours > 1 ? 's' : ''}} Left
                 </app-icon-and-title>
             </div>
