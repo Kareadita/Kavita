@@ -99,6 +99,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   resetForm() {
     this.settingsForm.get('taskScan')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
+    this.settingsForm.markAsPristine();
   }
 
   async saveSettings() {

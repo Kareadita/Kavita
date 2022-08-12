@@ -23,7 +23,7 @@
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>
-            <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+            <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">Save</button>
         </div>
     </form>
 </div>

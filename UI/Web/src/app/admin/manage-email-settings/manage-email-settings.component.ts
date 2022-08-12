@@ -26,6 +26,7 @@ export class ManageEmailSettingsComponent implements OnInit {
 
   resetForm() {
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
+    this.settingsForm.markAsPristine();
   }
 
   async saveSettings() {
