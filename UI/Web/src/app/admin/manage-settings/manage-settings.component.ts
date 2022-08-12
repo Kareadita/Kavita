@@ -89,7 +89,7 @@ export class ManageSettingsComponent implements OnInit {
     modalRef.componentInstance.startingFolder = existingDirectory || '';
     modalRef.componentInstance.helpUrl = '';
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
-      if (closeResult.success) {
+      if (closeResult.success && closeResult.folderPath !== '') {
         this.settingsForm.get(formControl)?.setValue(closeResult.folderPath);
         this.settingsForm.markAsTouched();
       }
