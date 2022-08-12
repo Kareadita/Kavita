@@ -21,6 +21,7 @@
     &:not(.collapsed) {
         color: var(--accordion-header-text-color); 
         background-color: var(--accordion-body-bg-color);
+        box-shadow: var(--accordion-body-box-shadow);
     }
 
     &.collapsed {
