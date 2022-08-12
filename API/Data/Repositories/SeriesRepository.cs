@@ -743,39 +743,7 @@ public class SeriesRepository : ISeriesRepository
                                              || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
             .AsNoTracking();
 
-        // If no sort options, default to using SortName
-        filter.SortOptions ??= new SortOptions()
-        {
-            IsAscending = true,
-            SortField = SortField.SortName
-        };
-
-        if (filter.SortOptions.IsAscending)
-        {
-            query = filter.SortOptions.SortField switch
-            {
-                SortField.SortName => query.OrderBy(s => s.SortName),
-                SortField.CreatedDate => query.OrderBy(s => s.Created),
-                SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
-                SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
-                SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
-                _ => query
-            };
-        }
-        else
-        {
-            query = filter.SortOptions.SortField switch
-            {
-                SortField.SortName => query.OrderByDescending(s => s.SortName),
-                SortField.CreatedDate => query.OrderByDescending(s => s.Created),
-                SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
-                SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
-                SortField.TimeToRead => query.OrderByDescending(s => s.AvgHoursToRead),
-                _ => query
-            };
-        }
-
-        return query;
+        return SortSeries(query, filter);
     }
 
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, IQueryable<Series> sQuery)
@@ -805,6 +773,11 @@ public class SeriesRepository : ISeriesRepository
                                              || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
             .AsNoTracking();
 
+        return SortSeries(query, filter);
+    }
+
+    private IQueryable<Series> SortSeries(IQueryable<Series> query, FilterDto filter)
+    {
         // If no sort options, default to using SortName
         filter.SortOptions ??= new SortOptions()
         {
@@ -816,7 +789,7 @@ public class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderBy(s => s.SortName),
+                SortField.SortName => query.OrderBy(s => EF.Functions.Collate(s.SortName, "NOCASE")),
                 SortField.CreatedDate => query.OrderBy(s => s.Created),
                 SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
@@ -828,7 +801,7 @@ public class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderByDescending(s => s.SortName),
+                SortField.SortName => query.OrderByDescending(s => EF.Functions.Collate(s.SortName, "NOCASE")),
                 SortField.CreatedDate => query.OrderByDescending(s => s.Created),
                 SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),

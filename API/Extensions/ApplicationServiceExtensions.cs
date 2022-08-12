@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System;
+using System.IO.Abstractions;
 using API.Data;
 using API.Helpers;
 using API.Services;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.Sqlite;
 
 namespace API.Extensions
 {
@@ -66,7 +68,11 @@ namespace API.Extensions
         {
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+                var conn = new SqliteConnection(config.GetConnectionString("DefaultConnection"));
+                conn.CreateCollation("NOCASE", (x, y) => string.Compare(x, y, StringComparison.CurrentCultureIgnoreCase));
+
+                options.UseSqlite(conn);
+                //options.UseSqlite(config.GetConnectionString("DefaultConnection"));
                 options.EnableDetailedErrors();
                 options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.LogLevel.Equals("Debug"));
             });
