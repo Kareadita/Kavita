@@ -17,8 +17,8 @@
         [pagination]="seriesPagination"
         [filterSettings]="filterSettings"
         [filterOpen]="filterOpen"
-        [parentScroll]="scrollingBlock"
         [jumpBarKeys]="jumpbarKeys"
+        [trackByIdentity]="trackByIdentity"
         (applyFilter)="updateFilter($event)">
         <ng-template #cardItem let-item let-position="idx">
             <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"

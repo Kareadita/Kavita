@@ -79,13 +79,24 @@ namespace API.Controllers
 
             var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
             if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
+            var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
 
 
-            if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || User.IsInRole(PolicyConstants.AdminRole)))
+            if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
                 return Unauthorized("You are not permitted to this operation.");
 
-            if (resetPasswordDto.UserName != User.GetUsername() && !User.IsInRole(PolicyConstants.AdminRole))
+            if (resetPasswordDto.UserName != User.GetUsername() && !isAdmin)
                 return Unauthorized("You are not permitted to this operation.");
+
+            if (string.IsNullOrEmpty(resetPasswordDto.OldPassword) && !isAdmin)
+                return BadRequest(new ApiException(400, "You must enter your existing password to change your account unless you're an admin"));
+
+            // If you're an admin and the username isn't yours, you don't need to validate the password
+            var isResettingOtherUser = (resetPasswordDto.UserName != User.GetUsername() && isAdmin);
+            if (!isResettingOtherUser && !await _userManager.CheckPasswordAsync(user, resetPasswordDto.OldPassword))
+            {
+                return BadRequest("Invalid Password");
+            }
 
             var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
             if (errors.Any())

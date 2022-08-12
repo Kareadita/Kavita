@@ -208,7 +208,7 @@ export class UtilityService {
     const keys: {[key: string]: number} = {};
     data.forEach(obj => {
       let ch = keySelector(obj).charAt(0);
-      if (/\d|\#|!|%|@|\(|\)|\^|\*/g.test(ch)) {
+      if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
         ch = '#';
       }
       if (!keys.hasOwnProperty(ch)) {

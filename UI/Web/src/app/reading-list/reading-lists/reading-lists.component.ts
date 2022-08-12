@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { PaginatedResult, Pagination } from 'src/app/_models/pagination';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
@@ -22,10 +24,11 @@ export class ReadingListsComponent implements OnInit {
   loadingLists = false;
   pagination!: Pagination;
   isAdmin: boolean = false;
+  jumpbarKeys: Array<JumpKey> = [];
 
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService,
-   private readonly cdRef: ChangeDetectorRef) { }
+    private utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -81,6 +84,7 @@ export class ReadingListsComponent implements OnInit {
     this.readingListService.getReadingLists(true).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists = readingLists.result;
       this.pagination = readingLists.pagination;
+      this.jumpbarKeys = this.utilityService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title);
       this.loadingLists = false;
       window.scrollTo(0, 0);
       this.cdRef.markForCheck();
