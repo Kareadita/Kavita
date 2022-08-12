@@ -273,7 +273,7 @@ namespace API
                 context.Response.Headers.XFrameOptions = "SAMEORIGIN";
 
                 // Setup CSP to ensure we load assets only from these origins
-                context.Response.Headers.Add("Content-Security-Policy", "default-src 'self' frame-ancestors 'none';");
+                context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
 
                 await next();
             });
