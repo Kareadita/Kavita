@@ -120,7 +120,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
   private user: User | undefined;
 
   get tooltipTitle() {
-    if (this.chapterTitle === '' || this.chapterTitle === null) return this.title;
+    if (this.chapterTitle === '' || this.chapterTitle === null)
+      return (this.volumeTitle + ' ' + this.title).trim();
     return this.chapterTitle;
   }
 
