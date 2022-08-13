@@ -135,9 +135,10 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       const keys: {[key: string]: number} = {};
+      const collator = new Intl.Collator();
       series.result.forEach(s => {
-        let ch = s.name.charAt(0);
-        if (/\d|\#|!|%|@|\(|\)|\^|\*/g.test(ch)) {
+        let ch = s.name.toUpperCase().normalize('NFKD').charAt(0);
+        if (!/\p{Alpha}/u.test(ch)) {
           ch = '#';
         }
         if (!keys.hasOwnProperty(ch)) {
@@ -149,13 +150,9 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
         return {
           key: k,
           size: keys[k],
-          title: k.toUpperCase()
-        }
-      }).sort((a, b) => {
-        if (a.key < b.key) return -1;
-        if (a.key > b.key) return 1;
-        return 0;
-      });
+          title: k
+        };
+      }).sort((a, b) => collator.compare(a.key, b.key));
       this.pagination = series.pagination;
       this.loadingSeries = false;
       window.scrollTo(0, 0);

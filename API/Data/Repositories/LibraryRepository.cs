@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Filtering;
@@ -135,10 +136,10 @@ public class LibraryRepository : ILibraryRepository
     public IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId)
     {
         var seriesSortCharacters = _context.Series.Where(s => s.LibraryId == libraryId)
-            .Select(s => s.SortName.ToUpper())
-            .OrderBy(s => s)
+            .Select(s => s.SortName)
+            .OrderBy(s => EF.Functions.Collate(s, "NOCASE"))
             .AsEnumerable()
-            .Select(s => s[0]);
+            .Select(s => s.ToUpper().Normalize(NormalizationForm.FormKD)[0]);
 
         // Map the title to the number of entities
         var firstCharacterMap = new Dictionary<char, int>();
