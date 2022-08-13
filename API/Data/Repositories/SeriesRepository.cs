@@ -171,7 +171,7 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Where(s => s.LibraryId == libraryId)
-            .OrderBy(s => s.SortName)
+            .OrderBy(s => EF.Functions.Collate(s.SortName, "NOCASE"))
             .ToListAsync();
     }
 
@@ -210,7 +210,7 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
-            .OrderBy(s => s.SortName);
+            .OrderBy(s => EF.Functions.Collate(s.SortName, "NOCASE"));
 
         return await PagedList<Series>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
@@ -855,7 +855,7 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(m => m.Series)
             .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
             .OrderBy(s => s.LibraryId)
-            .ThenBy(s => s.SortName)
+            .ThenBy(s => EF.Functions.Collate(s.SortName, "NOCASE"))
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .AsNoTracking();

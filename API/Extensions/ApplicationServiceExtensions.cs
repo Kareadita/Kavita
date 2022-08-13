@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO.Abstractions;
 using API.Data;
 using API.Helpers;
@@ -69,10 +70,10 @@ namespace API.Extensions
             services.AddDbContext<DataContext>(options =>
             {
                 var conn = new SqliteConnection(config.GetConnectionString("DefaultConnection"));
-                conn.CreateCollation("NOCASE", (x, y) => string.Compare(x, y, StringComparison.CurrentCultureIgnoreCase));
 
+                // Extend the NOCASE collation to be aware Unicode aware based on C# globalization support
+                conn.CreateCollation("NOCASE", (x, y) => String.Compare(x, y, CultureInfo.InvariantCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase | CompareOptions.StringSort));
                 options.UseSqlite(conn);
-                //options.UseSqlite(config.GetConnectionString("DefaultConnection"));
                 options.EnableDetailedErrors();
                 options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.LogLevel.Equals("Debug"));
             });
