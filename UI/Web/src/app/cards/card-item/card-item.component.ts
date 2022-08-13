@@ -75,8 +75,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   @Input() suppressArchiveWarning: boolean = false;
   /**
-    * The number of updates/items within the card. If less than 2, will not be shown.
-    */
+   * The number of updates/items within the card. If less than 2, will not be shown.
+   */
   @Input() count: number = 0;
   /**
    * Additional information to show on the overlay area. Will always render.
@@ -100,10 +100,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
    */
   format: MangaFormat = MangaFormat.UNKNOWN;
   chapterTitle: string = '';
-  volumeTitle: string = '';
+  tooltipTitle: string = this.title;
 
   /**
-   * This is the download we get from download service. 
+   * This is the download we get from download service.
    */
   download$: Observable<DownloadEvent | null> | null = null;
 
@@ -118,13 +118,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
   selectionInProgress: boolean = false;
 
   private user: User | undefined;
-
-  get tooltipTitle() {
-    if (this.chapterTitle === '' || this.chapterTitle === null)
-      return (this.volumeTitle + ' ' + this.title).trim();
-    return this.chapterTitle;
-  }
-
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -161,7 +154,11 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     if (this.utilityService.isChapter(this.entity)) {
       this.chapterTitle = this.utilityService.asChapter(this.entity).titleName;
-      this.volumeTitle = this.utilityService.asChapter(this.entity).volumeTitle || '';
+      if (this.chapterTitle === '' || this.chapterTitle === null) {
+        this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+      } else {
+        this.tooltipTitle = this.chapterTitle;
+      }
     } else if (this.utilityService.isVolume(this.entity)) {
       const vol = this.utilityService.asVolume(this.entity);
       if (vol.chapters !== undefined && vol.chapters.length > 0) {
