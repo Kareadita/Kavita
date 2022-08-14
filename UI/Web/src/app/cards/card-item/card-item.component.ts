@@ -99,7 +99,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
    * Format of the entity (only applies to Series)
    */
   format: MangaFormat = MangaFormat.UNKNOWN;
-  chapterTitle: string = '';
   tooltipTitle: string = this.title;
 
   /**
@@ -153,19 +152,21 @@ export class CardItemComponent implements OnInit, OnDestroy {
     this.format = (this.entity as Series).format;
 
     if (this.utilityService.isChapter(this.entity)) {
-      this.chapterTitle = this.utilityService.asChapter(this.entity).titleName;
-      if (this.chapterTitle === '' || this.chapterTitle === null) {
+      const chapterTitle = this.utilityService.asChapter(this.entity).titleName;
+      if (chapterTitle === '' || chapterTitle === null) {
         this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
       } else {
-        this.tooltipTitle = this.chapterTitle;
+        this.tooltipTitle = chapterTitle;
       }
     } else if (this.utilityService.isVolume(this.entity)) {
       const vol = this.utilityService.asVolume(this.entity);
       if (vol.chapters !== undefined && vol.chapters.length > 0) {
-        this.chapterTitle = vol.chapters[0].titleName;
+        this.tooltipTitle = vol.chapters[0].titleName;
+      }
+      if (this.tooltipTitle === '') {
+        this.tooltipTitle = vol.name;
       }
     }
-
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
       this.user = user;
     });
