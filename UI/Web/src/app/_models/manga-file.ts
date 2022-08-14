@@ -5,4 +5,5 @@ export interface MangaFile {
     filePath: string;
     pages: number;
     format: MangaFormat;
+    created: string;
 }
