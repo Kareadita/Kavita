@@ -34,10 +34,9 @@
     </ng-container>
 
     <div (touchstart)="onSwipe($event, 'start')" (touchend)="onSwipe($event, 'end')">
-        <div (click)="toggleMenu()" class="reading-area" 
-                [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
+        <div (click)="toggleMenu()" class="reading-area" [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
             
-                <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
+            <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
                 <div class="image-container" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
                     <canvas #content class="{{getFittingOptionClass()}}"
                         ondragstart="return false;" onselectstart="return false;">

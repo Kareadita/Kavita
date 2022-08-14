@@ -26,7 +26,7 @@ import { LibraryType } from '../_models/library';
 import { ShortcutsModalComponent } from '../reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
-import { swipe } from '../_services/utility.service';
+import { swipe } from './swipe.service';
 
 const PREFETCH_PAGES = 8;
 
@@ -961,7 +961,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  handlePageChange(event: any, direction: string) {
+  handlePageChange(event: any, direction: 'right' | 'left' | 'up' | 'down') {
     if (this.readerMode === ReaderMode.Webtoon) {
       if (direction === 'right') {
         this.nextPage(event);
@@ -970,9 +970,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return;
     }
-    if (direction === 'right') {
+    if (direction === 'right' || direction === 'down') {
       this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage(event) : this.prevPage(event);
-    } else if (direction === 'left') {
+    } else if (direction === 'left' || direction === 'up') {
       this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage(event) : this.nextPage(event);
     }
   }
@@ -1600,9 +1600,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
   }
 
-  onSwipe(e: TouchEvent, when: 'start' | 'end') {
+  onSwipe(e: TouchEvent, when: 'start'| 'end') {
+    if (this.readerMode === ReaderMode.Webtoon) return;
     const swipeDir = swipe(e, when);
-    if (swipeDir) this.handlePageChange(e, swipeDir);
+    if (!swipeDir) return;
+    if (this.readerMode === ReaderMode.UpDown 
+      && (swipeDir === 'right' || swipeDir === 'left')) 
+      return;
+    else if (this.readerMode === ReaderMode.LeftRight 
+      && (swipeDir === 'up' || swipeDir === 'down')) 
+      return;
+    this.handlePageChange(e, swipeDir);
   }
-  
 }
