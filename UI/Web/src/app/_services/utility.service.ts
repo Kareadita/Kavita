@@ -1,11 +1,11 @@
 let swipeCoord = [0, 0];
 let swipeTime = new Date().getTime();
 
-export function swipe(e: TouchEvent, when: string): string | undefined {
+export function swipe(e: TouchEvent, when: 'start' | 'end'): ('right' | 'left') | undefined {
 
+    if (e.changedTouches.length < 1) return;
     const coord: [number, number] = [e.changedTouches[0].clientX, e.changedTouches[0].clientY];
     const time = new Date().getTime();
-
     if (when === 'start') {
         swipeCoord = coord;
         swipeTime = time;

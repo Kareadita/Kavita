@@ -26,7 +26,7 @@ import { LibraryType } from '../_models/library';
 import { ShortcutsModalComponent } from '../reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
-import { swipe } from '../_services/gestures.service';
+import { swipe } from '../_services/utility.service';
 
 const PREFETCH_PAGES = 8;
 
@@ -1600,7 +1600,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     ];
   }
 
-  onSwipe(e: TouchEvent, when: string) {
+  onSwipe(e: TouchEvent, when: 'start' | 'end') {
     const swipeDir = swipe(e, when);
     if (swipeDir) this.handlePageChange(e, swipeDir);
   }
