@@ -97,12 +97,23 @@ img {
     white-space: nowrap;
 }
 
-.bottom-menu {
-    padding: 20px 20px;
+.fixed-bottom {
+  font-size: 0.75rem !important;
+  padding: 0.5rem 0.5rem;
 }
 
+.custom-slider {
+  flex-wrap: nowrap;
+}
 
-
+.btn-icon {
+  width: 2em;
+  height: 2em;
+  text-align: center;
+  padding: 0.25rem;
+  border-radius: 2rem !important;
+  border: none;
+}
 
 .overlay {
   background-color: var(--manga-reader-overlay-bg-color);
@@ -167,54 +178,45 @@ img {
   max-width: 100%;
 }
 
+button.bottom-menu {
+  position: relative;
+  padding: 0;
+  width: 3rem;
+}
+
+// Splitting Icon
+.form-control:focus {
+  box-shadow: none;
+}
 
 // Splitting Icon
 .split {
-    height: 20px;
-    width: 40px;
-    z-index: 1;
-    top: 0;
-    overflow: hidden;
-    border: 2px solid #ccc;
-    vertical-align: sub;
-    display: inline-block;
-
-    &::before {
-        margin-left: 30%;
-    }
+  height: 100%;
+  width: 100%;
+  top: 0;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.4);
 
     /* Control the left side */
-    .left-side {
-        height: 20px;
-        width: 20px;
-        background-color: rgba(255, 255, 255, 0.6);
-        margin-top: -16px;
+    &.left-side {
+        width: 50%;
+        left: 0;
+        border-radius: 0.25rem 0 0 0.25rem;
+        background-color: var(--bs-btn-bg);
+        transition: opacity .5s;
     }
     
     /* Control the right side */
-    .right-side {
-        height: 20px;
-        margin-left: 20px;
-        width: 20px;
-        background-color: rgba(255, 255, 255, 0.6);
-        margin-top: -16px;
+    &.right-side {
+        width: 50%;
+        right: 0;
+        background-color: var(--bs-btn-bg);;
+        transition: opacity .5s;
     }
 
-    .none {
-        background-color: rgba(255, 255, 255, 0.5);
-    }
-
-    // For layout only
-
-  }
-
-  .split-double {
-    height: 20px;
-    display: inline-block;
-    font-size: .7em;
-
-    .right {
-      left: -7px;
+    &.none, &.fit {
+      border-radius: 0.25rem 0 0 0.25rem;
+      background-color: rgba(0, 0, 0, 0);
     }
   }
 

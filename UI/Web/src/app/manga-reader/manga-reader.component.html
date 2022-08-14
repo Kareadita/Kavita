@@ -14,12 +14,12 @@
             </div>
 
             <div style="margin-left: auto; padding-right: 3%;">
-                <button class="btn btn-icon btn-small" title="Shortcuts" (click)="openShortcutModal()">
+                <button class="btn btn-icon btn-sm" title="Shortcuts" (click)="openShortcutModal()">
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
 
-                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
+                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-sm" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                         title="{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()">
                     <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
                     <span class="visually-hidden">{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span>
@@ -36,7 +36,7 @@
     <div (click)="toggleMenu()" class="reading-area" 
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
-            <div class="image-container" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
+            <div class="image-container" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('dimming')?.value + '%)'">
                 <canvas #content class="{{getFittingOptionClass()}}"
                     ondragstart="return false;" onselectstart="return false;">
                 </canvas>
@@ -66,7 +66,7 @@
                     'fit-to-width-double-offset' : FittingOption === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
                     'fit-to-height-double-offset': FittingOption === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
                     'original-double-offset' : FittingOption === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage}"
-                    [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle">
+                    [style.filter]="'brightness(' + generalSettingsForm.get('dimming')?.value + '%)' | safeStyle">
                 <img #image [src]="canvasImage.src" id="image-1"
                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
@@ -96,132 +96,112 @@
     </div>
 
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
-        <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
+        <div class="mb-1" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
             <span class="visually-hidden" id="slider-info"></span>
-            <div class="row g-0">
-                <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-                <button class="btn btn-small btn-icon col-1" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
-                <div class="col custom-slider" *ngIf="pageOptions.ceil > 0; else noSlider">
+            <div class="row align-items-center justify-content-center text-center">
+
+                <button class="col-1 btn btn-sm btn-icon" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+
+                <button class="col-1 btn btn-sm btn-icon" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+
+                <div class="col-5 custom-slider" *ngIf="pageOptions.ceil > 0; else noSlider">
                     <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
                 </div>
+
                 <ng-template #noSlider>
-                    <div class="col custom-slider">
+                    <div class="col-auto custom-slider">
                         <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
                     </div>
                 </ng-template>
-                <button class="btn btn-small btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
-                <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+
+                <button class="col-1 btn btn-sm btn-icon" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+
+                <button class="col-1 btn btn-sm btn-icon" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+
             </div>
         </div>
-        <div class="row pt-4 ms-2 me-2">
-            <div class="col">
+        <div class="row pb-1 ms-1 me-1 align-items-start justify-content-center text-center">
+            <div class="col-2">
                 <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>
             </div>
-            <div class="col">
+            <div class="col-2">
                 <button class="btn btn-icon" title="Reading Mode" (click)="toggleReaderMode();resetMenuCloseTimer();">
                     <i class="fa {{ReaderModeIcon}}" aria-hidden="true"></i>
                     <span class="visually-hidden">Reading Mode</span>
                 </button>
             </div>
-            <div class="col">
+            <div class="col-2">
                 <button class="btn btn-icon" title="{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
                     <i class="fa {{this.isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
                     <span class="visually-hidden">{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}</span>
                 </button>
             </div>
-            <div class="col">
+            <div class="col-2">
                 <button class="btn btn-icon" title="Settings" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
                     <i class="fa fa-sliders-h" aria-hidden="true"></i>
                     <span class="visually-hidden">Settings</span>
                 </button>
             </div>
+            <div class="col-2">
+                <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="btn btn-sm btn-check" [value]="true" aria-labelledby="auto-close-label" autocomplete="off"/>
+                <label id="auto-close-label" class="btn btn-sm btn-outline-secondary" for="auto-close"><i class="fa fa-thumbtack"></i></label>
+            </div>
         </div>
         <div class="bottom-menu" *ngIf="settingsOpen && generalSettingsForm">
             <form [formGroup]="generalSettingsForm">
-                <div class="row mb-2">
-                    <div class="col-md-6 col-sm-12">
-                        <label for="page-splitting" class="form-label">Image Splitting</label>&nbsp;
-                        <div class="split fa fa-image">
-                            <div class="{{SplitIconClass}}"></div>
-                        </div>
-                        <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
-                            <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6 col-sm-12">
-                        <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
-                        <select class="form-control" id="page-fitting" formControlName="fittingOption">
-                            <option value="full-height">Height</option>
-                            <option value="full-width">Width</option>
-                            <option value="original">Original</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row mb-2">
-                    <div class="col-md-6 col-sm-12">
-                        <label for="layout-mode" class="form-label">Layout Mode</label>&nbsp;
-                            <ng-container [ngSwitch]="layoutMode">
-                                <ng-container *ngSwitchCase="LayoutMode.Single">
-                                    <div class="split-double">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fa fa-image fa-stack-1x"></i>
-                                          </span>
-                                    </div>
-                                </ng-container>
-                                <ng-container *ngSwitchCase="LayoutMode.Double">
-                                    <div class="split-double">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-1 fa-stack-1x"></i>
-                                          </span>
-                                          <span class="fa-stack fa right">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-2 fa-stack-1x"></i>
-                                          </span>
-                                    </div>
-                                </ng-container>
-                                <ng-container *ngSwitchCase="LayoutMode.DoubleReversed">
-                                    <div class="split-double">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-2 fa-stack-1x"></i>
-                                          </span>
-                                          <span class="fa-stack fa right">
-                                            <i class="fa-regular fa-square-full fa-stack-2x"></i>
-                                            <i class="fab fa-1 fa-stack-1x"></i>
-                                          </span>
-                                    </div>                                   
-                                </ng-container>
-                                <!-- <div class="{{LayoutModeIconClass}}"></div> -->
-                            </ng-container>
-                        <select class="form-control" id="page-fitting" formControlName="layoutMode">
-                            <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 col-sm-12">
-                        <div class="mb-3">
-                            <label id="auto-close-label" class="form-label"></label>
-                            <div class="mb-3">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
-                                    <label class="form-check-label" for="auto-close">Auto Close Menu</label>
-                                </div>
-                            </div>
+                <div class="row pb-1 ms-2 me-2 align-items-center">
+                    <div class="col-3">
+                        <label for="page-splitting" class="form-label">Splitting </label>
+                        <div class="input-group input-group-sm">
+                            <button class="btn btn-secondary bottom-menu">
+                                <div class="split {{SplitIconClass}}"></div>
+                                <i class="fa-solid fa-panorama"></i>
+                            </button>
+                            <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
+                                <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
+                            </select>
                         </div>
                     </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-6 col-sm-12">
-                        <label for="darkness" class="form-label range-label">Darkess</label>
-                        <input type="range" class="form-range" id="darkness" 
-                                min="10" max="100" step="1" formControlName="darkness">
-                        <span class="range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
+                    <div class="col-3">
+                        <label for="page-fitting" class="form-label">Scaling </label>
+                        <div class="input-group input-group-sm">
+                            <button class="btn btn-secondary bottom-menu">
+                                <i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
+                            </button>
+                            <select class="form-control" id="page-fitting" formControlName="fittingOption">
+                                <option value="full-height">Height</option>
+                                <option value="full-width">Width</option>
+                                <option value="original">Original</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <label for="layout-mode" class="form-label">Layout </label>
+                        <div class="input-group input-group-sm">
+                                <ng-container [ngSwitch]="layoutMode">
+                                    <ng-container *ngSwitchCase="LayoutMode.Single">
+                                        <button class="btn btn-secondary bottom-menu">1</button>
+                                    </ng-container>
+                                    <ng-container *ngSwitchCase="LayoutMode.Double">
+                                        <button class="btn btn-secondary bottom-menu"><span> 1 | 2 </span></button>
+                                    </ng-container>
+                                    <ng-container *ngSwitchCase="LayoutMode.DoubleReversed">
+                                        <button class="btn btn-secondary bottom-menu"> 2 | 1 </button>
+                                    </ng-container>
+                                </ng-container>
+                            <select class="form-control" id="page-fitting" formControlName="layoutMode">
+                                <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
+                            </select>
+                        </div>
+                    </div>    
+                    <div class="col-3">
+                        <label for="dimming" class="form-label range-label">Dimming <span class="range-text">{{generalSettingsForm.get('dimming')?.value + '%'}}</span></label>
+                        <div class="input-group input-group-sm">
+                        <input type="range" class="form-range" id="dimming" min="10" max="100" step="1" formControlName="dimming">
+                        </div>
                     </div>
                 </div>
             </form>
