@@ -316,11 +316,8 @@ public class MetadataService : IMetadataService
 
         await RemoveAbandonedMetadataKeys();
 
-        if (_unitOfWork.HasChanges() && await _unitOfWork.CommitAsync())
-        {
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
-            await FlushEvents();
-        }
+        await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
+        await FlushEvents();
 
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }
@@ -328,6 +325,7 @@ public class MetadataService : IMetadataService
     private async Task FlushEvents()
     {
         // Send all events out now that entities are saved
+        _logger.LogDebug("Dispatching {Count} update events", _updateEvents.Count);
         foreach (var updateEvent in _updateEvents)
         {
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, updateEvent, false);
