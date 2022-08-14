@@ -485,8 +485,7 @@ public class SeriesService : ISeriesService
             if (v.Number == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
-        })).ToList();
-
+        }).OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()));
 
         foreach (var chapter in chapters)
         {
@@ -505,8 +504,7 @@ public class SeriesService : ISeriesService
         } else
         {
             retChapters = chapters
-                .Where(ShouldIncludeChapter)
-                .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
+                .Where(ShouldIncludeChapter);
         }
 
         var storylineChapters = volumes
