@@ -6,6 +6,7 @@ using API.Entities;
 using API.Entities.Enums.Theme;
 using API.SignalR;
 using Kavita.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Services.Tasks;
 
@@ -34,6 +35,7 @@ public class ThemeService : IThemeService
     /// </summary>
     /// <param name="themeId"></param>
     /// <returns></returns>
+    [AllowAnonymous]
     public async Task<string> GetContent(int themeId)
     {
         var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId);

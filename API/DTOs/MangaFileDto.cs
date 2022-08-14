@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using System;
+using API.Entities.Enums;
 
 namespace API.DTOs
 {
@@ -8,6 +9,7 @@ namespace API.DTOs
         public string FilePath { get; init; }
         public int Pages { get; init; }
         public MangaFormat Format { get; init; }
+        public DateTime Created { get; init; }
 
     }
 }

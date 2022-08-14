@@ -143,7 +143,15 @@
                                                 Pages: {{file.pages | number:''}}
                                             </div>
                                             <div class="col" *ngIf="data.hasOwnProperty('created')">
-                                                Added: {{(data.created | date: 'short') || '-'}}
+                                                Added: 
+                                                <!-- TODO: This data.created can be removed after v0.5.5 release -->
+                                                <ng-container *ngIf="file.created == '0001-01-01T00:00:00'; else fileDate">
+                                                    {{(data.created | date: 'short') || '-'}}
+                                                </ng-container>
+                                                <ng-template #fileDate>
+                                                    {{(file.created | date: 'short') || '-'}}
+                                                </ng-template>
+                                                
                                             </div>
                                         </div>
                                     </li>
