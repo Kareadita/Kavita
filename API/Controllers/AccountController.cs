@@ -727,21 +727,18 @@ namespace API.Controllers
         private async Task<bool> ConfirmEmailToken(string token, AppUser user)
         {
             var result = await _userManager.ConfirmEmailAsync(user, token);
-            if (!result.Succeeded)
-            {
-                _logger.LogCritical("Email validation failed");
-                if (result.Errors.Any())
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        _logger.LogCritical("Email validation error: {Message}", error.Description);
-                    }
-                }
+            if (result.Succeeded) return true;
 
-                return false;
+            _logger.LogCritical("[Account] Email validation failed");
+            if (!result.Errors.Any()) return false;
+
+            foreach (var error in result.Errors)
+            {
+                _logger.LogCritical("[Account] Email validation error: {Message}", error.Description);
             }
 
-            return true;
+            return false;
+
         }
     }
 }
