@@ -22,7 +22,7 @@ namespace API.Tests.Services
         [InlineData("The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub", 16)]
         [InlineData("Non-existent file.epub", 0)]
         [InlineData("Non an ebub.pdf", 0)]
-        //[InlineData("test_ſ.pdf", 1)] // This is dependent on Docnet bug https://github.com/GowenGit/docnet/issues/80
+        [InlineData("test_ſ.pdf", 1)] // This is dependent on Docnet bug https://github.com/GowenGit/docnet/issues/80
         [InlineData("test.pdf", 1)]
         public void GetNumberOfPagesTest(string filePath, int expectedPages)
         {
