@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { Series } from 'src/app/_models/series';
 import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
@@ -102,6 +102,9 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
         break;
       case Action.RemoveFromWantToReadList:
         this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
+        if (this.router.url.startsWith('/want-to-read')) {
+          this.reload.emit();
+        }
         break;
       case(Action.AddToCollection):
         this.actionService.addMultipleSeriesToCollectionTag([series]);
