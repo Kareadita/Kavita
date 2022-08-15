@@ -384,6 +384,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
           this.changeDetectionRef.markForCheck();
         });
         break;
+      case Action.RemoveFromWantToReadList:
+        this.actionService.removeMultipleSeriesFromWantToReadList([series.id], () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
+        break;
       case (Action.Download):
         if (this.downloadInProgress) return;
         this.downloadSeries();
