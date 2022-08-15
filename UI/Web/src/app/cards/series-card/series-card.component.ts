@@ -103,7 +103,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       case Action.RemoveFromWantToReadList:
         this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
         if (this.router.url.startsWith('/want-to-read')) {
-          this.reload.emit();
+          this.reload.emit(true);
         }
         break;
       case(Action.AddToCollection):

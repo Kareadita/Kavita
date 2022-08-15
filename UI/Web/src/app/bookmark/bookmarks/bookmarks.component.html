@@ -9,6 +9,8 @@
     [isLoading]="loadingBookmarks"
     [items]="series"
     [trackByIdentity]="trackByIdentity"
+    [refresh]="refresh"
+    
     >
     <ng-template #cardItem let-item let-position="idx">
         <app-card-item [entity]="item" (reload)="loadBookmarks()" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"

@@ -42,7 +42,6 @@ export class WantToReadComponent implements OnInit, OnDestroy {
   jumpbarKeys: Array<JumpKey> = [];
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
- 
 
   private onDestory: Subject<void> = new Subject<void>();
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
