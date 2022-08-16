@@ -1,4 +1,5 @@
 <div cdkDropList class="{{items.length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">   
+    <!-- BUG: https://github.com/angular/components/issues/14098 -->
     <div class="example-box" *ngFor="let item of items; index as i" cdkDrag [cdkDragData]="item" cdkDragBoundary=".example-list">
         <div class="d-flex list-container">
             <div class="me-3 align-middle">
