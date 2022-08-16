@@ -121,40 +121,43 @@
             </div>
         </div>
         <div class="row pb-1 ms-1 me-1 align-items-start justify-content-center text-center">
-            <div class="col-2">
+            <div class="col"></div>
+            <div class="col-1">
                 <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" title="Reading Direction: {{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
                     <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
                     <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                 </button>
             </div>
-            <div class="col-2">
+            <div class="col-1">
                 <button class="btn btn-icon" title="Reading Mode" (click)="toggleReaderMode();resetMenuCloseTimer();">
                     <i class="fa {{ReaderModeIcon}}" aria-hidden="true"></i>
                     <span class="visually-hidden">Reading Mode</span>
                 </button>
             </div>
-            <div class="col-2">
+            <div class="col-1">
                 <button class="btn btn-icon" title="{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
                     <i class="fa {{this.isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
                     <span class="visually-hidden">{{this.isFullscreen ? 'Collapse' : 'Fullscreen'}}</span>
                 </button>
             </div>
-            <div class="col-2">
+            <div class="col-1">
                 <button class="btn btn-icon" title="Settings" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
                     <i class="fa fa-sliders-h" aria-hidden="true"></i>
                     <span class="visually-hidden">Settings</span>
                 </button>
             </div>
-            <div class="col-2">
+            <div class="col-1">
                 <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="btn btn-sm btn-check" [value]="true" aria-labelledby="auto-close-label" autocomplete="off"/>
                 <label id="auto-close-label" class="btn btn-sm btn-outline-secondary" for="auto-close"><i class="fa fa-thumbtack"></i></label>
             </div>
+            <div class="col"></div>
         </div>
         <div class="bottom-menu" *ngIf="settingsOpen && generalSettingsForm">
             <form [formGroup]="generalSettingsForm">
                 <div class="row pb-1 ms-2 me-2 align-items-center">
-                    <div class="col-3">
-                        <label for="page-splitting" class="form-label">Splitting </label>
+                    <div class="col"></div>
+                    <div class="col-2">
+                        <label for="page-splitting" class="form-label"> Splitting </label>
                         <div class="input-group input-group-sm">
                             <button class="btn btn-secondary bottom-menu">
                                 <div class="split {{SplitIconClass}}"></div>
@@ -165,8 +168,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <label for="page-fitting" class="form-label">Scaling </label>
+                    <div class="col-2">
+                        <label for="page-fitting" class="form-label"> Scaling </label>
                         <div class="input-group input-group-sm">
                             <button class="btn btn-secondary bottom-menu">
                                 <i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
@@ -178,8 +181,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-3">
-                        <label for="layout-mode" class="form-label">Layout </label>
+                    <div class="col-2">
+                        <label for="layout-mode" class="form-label"> Layout </label>
                         <div class="input-group input-group-sm">
                                 <ng-container [ngSwitch]="layoutMode">
                                     <ng-container *ngSwitchCase="LayoutMode.Single">
@@ -197,12 +200,13 @@
                             </select>
                         </div>
                     </div>    
-                    <div class="col-3">
-                        <label for="dimming" class="form-label range-label">Dimming <span class="range-text">{{generalSettingsForm.get('dimming')?.value + '%'}}</span></label>
+                    <div class="col-2">
+                        <label for="dimming" class="form-label range-label"> Dimming <span class="range-text">{{generalSettingsForm.get('dimming')?.value + '%'}}</span></label>
                         <div class="input-group input-group-sm">
                         <input type="range" class="form-range" id="dimming" min="10" max="100" step="1" formControlName="dimming">
                         </div>
                     </div>
+                    <div class="col"></div>
                 </div>
             </form>
         </div>
