@@ -44,6 +44,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
   @Input() actions: ActionItem<any>[] = [];
   @Input() trackByIdentity!: TrackByFunction<any>; //(index: number, item: any) => string
   @Input() filterSettings!: FilterSettings;
+  @Input() refresh!: EventEmitter<void>;
 
 
   @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels wide
@@ -99,6 +100,13 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
     if (this.pagination === undefined) {
       this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
       this.changeDetectionRef.markForCheck();
+    }
+
+    if (this.refresh) {
+      this.refresh.subscribe(() => {
+        this.changeDetectionRef.markForCheck();
+        this.virtualScroller.refresh();
+      });
     }
   }
 

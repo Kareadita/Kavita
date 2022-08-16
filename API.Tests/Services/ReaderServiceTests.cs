@@ -2014,7 +2014,6 @@ public class ReaderServiceTests
 
     #endregion
 
-
     #region MarkSeriesAsRead
 
     [Fact]

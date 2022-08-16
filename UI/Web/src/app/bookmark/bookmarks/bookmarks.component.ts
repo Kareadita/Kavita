@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take, Subject } from 'rxjs';
@@ -30,6 +30,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   actions: ActionItem<Series>[] = [];
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
+  refresh: EventEmitter<void> = new EventEmitter();
 
   private onDestroy: Subject<void> = new Subject<void>();
   
@@ -153,6 +154,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
       }
       this.clearingSeries[series.id] = false;
       this.toastr.success(series.name + '\'s bookmarks have been removed');
+      this.refresh.emit();
       this.cdRef.markForCheck();
     });
   }

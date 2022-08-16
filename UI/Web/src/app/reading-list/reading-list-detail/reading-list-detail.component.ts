@@ -176,6 +176,12 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   read() {
+    if (!this.readingList) return;
+    const firstItem = this.items[0];
+    this.router.navigate(this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat), {queryParams: {readingListId: this.readingList.id}});
+  }
+
+  continue() {
     // TODO: Can I do this in the backend?
     if (!this.readingList) return;
     let currentlyReadingChapter = this.items[0];
