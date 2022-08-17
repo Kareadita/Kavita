@@ -32,7 +32,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   libraries$: Observable<Library[]> = of([]);
   isLoading = true;
-  
+
   isAdmin$: Observable<boolean> = of(false);
 
   recentlyUpdatedSeries: SeriesGroup[] = [];
@@ -46,9 +46,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
 
-  constructor(public accountService: AccountService, private libraryService: LibraryService, 
-    private seriesService: SeriesService, private router: Router, 
-    private titleService: Title, public imageService: ImageService, 
+  constructor(public accountService: AccountService, private libraryService: LibraryService,
+    private seriesService: SeriesService, private router: Router,
+    private titleService: Title, public imageService: ImageService,
     private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef) {
 
       this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           });
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
-          
+
           this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
           this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
@@ -73,8 +73,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
 
       this.isAdmin$ = this.accountService.currentUser$.pipe(
-        takeUntil(this.onDestroy), 
-        map(user => (user && this.accountService.hasAdminRole(user)) || false), 
+        takeUntil(this.onDestroy),
+        map(user => (user && this.accountService.hasAdminRole(user)) || false),
         shareReplay()
       );
 
@@ -179,7 +179,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       params[FilterQueryParam.SortBy] = SortField.Created + ',false'; // sort by created, desc
       params[FilterQueryParam.Page] = 1;
       this.router.navigate(['all-series'], {queryParams: params});
-    } 
+    }
   }
 
   removeFromArray(arr: Array<any>, element: any) {
