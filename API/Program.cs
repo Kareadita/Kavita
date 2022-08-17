@@ -105,6 +105,7 @@ namespace API
             string currentVersion = null;
             try
             {
+                if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
                 currentVersion =
                     (await context.ServerSetting.SingleOrDefaultAsync(s =>
                         s.Key == ServerSettingKey.InstallVersion))?.Value;

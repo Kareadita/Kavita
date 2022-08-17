@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
@@ -36,8 +36,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   bookColorThemes = bookColorThemes;
   pageLayoutModes = pageLayoutModes;
 
-  settingsForm: UntypedFormGroup = new UntypedFormGroup({});
-  passwordChangeForm: UntypedFormGroup = new UntypedFormGroup({});
+  settingsForm: FormGroup = new FormGroup({});
+  passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
   hasChangePasswordAbility: Observable<boolean> = of(false);
 
@@ -112,32 +112,36 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
         this.user.preferences.bookReaderFontFamily = 'default';
       }
 
-      this.settingsForm.addControl('readingDirection', new UntypedFormControl(this.user.preferences.readingDirection, []));
-      this.settingsForm.addControl('scalingOption', new UntypedFormControl(this.user.preferences.scalingOption, []));
-      this.settingsForm.addControl('pageSplitOption', new UntypedFormControl(this.user.preferences.pageSplitOption, []));
-      this.settingsForm.addControl('autoCloseMenu', new UntypedFormControl(this.user.preferences.autoCloseMenu, []));
-      this.settingsForm.addControl('showScreenHints', new UntypedFormControl(this.user.preferences.showScreenHints, []));
-      this.settingsForm.addControl('readerMode', new UntypedFormControl(this.user.preferences.readerMode, []));
-      this.settingsForm.addControl('layoutMode', new UntypedFormControl(this.user.preferences.layoutMode, []));
-      this.settingsForm.addControl('bookReaderFontFamily', new UntypedFormControl(this.user.preferences.bookReaderFontFamily, []));
-      this.settingsForm.addControl('bookReaderFontSize', new UntypedFormControl(this.user.preferences.bookReaderFontSize, []));
-      this.settingsForm.addControl('bookReaderLineSpacing', new UntypedFormControl(this.user.preferences.bookReaderLineSpacing, []));
-      this.settingsForm.addControl('bookReaderMargin', new UntypedFormControl(this.user.preferences.bookReaderMargin, []));
-      this.settingsForm.addControl('bookReaderReadingDirection', new UntypedFormControl(this.user.preferences.bookReaderReadingDirection, []));
-      this.settingsForm.addControl('bookReaderTapToPaginate', new UntypedFormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
-      this.settingsForm.addControl('bookReaderLayoutMode', new UntypedFormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
-      this.settingsForm.addControl('bookReaderThemeName', new UntypedFormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
-      this.settingsForm.addControl('bookReaderImmersiveMode', new UntypedFormControl(this.user?.preferences.bookReaderImmersiveMode, []));
+      this.settingsForm.addControl('readingDirection', new FormControl(this.user.preferences.readingDirection, []));
+      this.settingsForm.addControl('scalingOption', new FormControl(this.user.preferences.scalingOption, []));
+      this.settingsForm.addControl('pageSplitOption', new FormControl(this.user.preferences.pageSplitOption, []));
+      this.settingsForm.addControl('autoCloseMenu', new FormControl(this.user.preferences.autoCloseMenu, []));
+      this.settingsForm.addControl('showScreenHints', new FormControl(this.user.preferences.showScreenHints, []));
+      this.settingsForm.addControl('readerMode', new FormControl(this.user.preferences.readerMode, []));
+      this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
+      this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
+      this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
+      this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
+      this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
+      this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
+      this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
+      this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
+      this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
+      this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user?.preferences.bookReaderImmersiveMode, []));
 
-      this.settingsForm.addControl('theme', new UntypedFormControl(this.user.preferences.theme, []));
-      this.settingsForm.addControl('globalPageLayoutMode', new UntypedFormControl(this.user.preferences.globalPageLayoutMode, []));
-      this.settingsForm.addControl('blurUnreadSummaries', new UntypedFormControl(this.user.preferences.blurUnreadSummaries, []));
-      this.settingsForm.addControl('promptForDownloadSize', new UntypedFormControl(this.user.preferences.promptForDownloadSize, []));
+      this.settingsForm.addControl('theme', new FormControl(this.user.preferences.theme, []));
+      this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
+      this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
+      this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
+
       this.cdRef.markForCheck();
     });
 
-    this.passwordChangeForm.addControl('password', new UntypedFormControl('', [Validators.required]));
-    this.passwordChangeForm.addControl('confirmPassword', new UntypedFormControl('', [Validators.required]));
+    this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
+    this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
+    this.passwordChangeForm.addControl('oldPassword', new FormControl('', [Validators.required]));
+
+    
 
     this.observableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
       const values = this.passwordChangeForm.value;
@@ -184,11 +188,13 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
     this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
     this.cdRef.markForCheck();
+    this.settingsForm.markAsPristine();
   }
 
   resetPasswordForm() {
     this.passwordChangeForm.get('password')?.setValue('');
     this.passwordChangeForm.get('confirmPassword')?.setValue('');
+    this.passwordChangeForm.get('oldPassword')?.setValue('');
     this.resetPasswordErrors = [];
     this.cdRef.markForCheck();
   }
@@ -235,7 +241,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     const model = this.passwordChangeForm.value;
     this.resetPasswordErrors = [];
-    this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword).subscribe(() => {
+    this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
       this.toastr.success('Password has been updated');
       this.resetPasswordForm();
     }, err => {

@@ -5,6 +5,7 @@
                 Want To Read
             </h2>
         </ng-container>
+        <h6 subtitle>{{seriesPagination.totalItems}} Series</h6>
     </app-side-nav-companion-bar>
 </div>
 
@@ -17,8 +18,8 @@
         [pagination]="seriesPagination"
         [filterSettings]="filterSettings"
         [filterOpen]="filterOpen"
-        [parentScroll]="scrollingBlock"
         [jumpBarKeys]="jumpbarKeys"
+        [trackByIdentity]="trackByIdentity"
         (applyFilter)="updateFilter($event)">
         <ng-template #cardItem let-item let-position="idx">
             <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"

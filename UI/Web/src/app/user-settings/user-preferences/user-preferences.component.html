@@ -34,7 +34,9 @@
                                                 <option *ngFor="let opt of pageLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
                                             </select>
                                         </div>
+                                    </div>
 
+                                    <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="form-check form-switch">
                                                 <input type="checkbox" id="auto-close" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
@@ -45,6 +47,7 @@
                                             <span class="visually-hidden" id="settings-global-blurUnreadSummaries-help">Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)</span>
                                         </div>
                                     </div>
+
                                     <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="form-check form-switch">
@@ -59,7 +62,7 @@
 
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                                         <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
-                                        <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                                        <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">Save</button>
                                     </div>
                             </ng-template>
                         </ngb-panel>
@@ -152,7 +155,7 @@
 
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                                         <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
-                                        <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                                        <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">Save</button>
                                     </div>
                             </ng-template>
                         </ngb-panel>
@@ -267,7 +270,7 @@
 
                                 <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                                     <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
-                                    <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.touched && !settingsForm.dirty">Save</button>
+                                    <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">Save</button>
                                 </div>
                             </ng-template>
                         </ngb-panel>
@@ -283,8 +286,18 @@
                     </div>
                     <form [formGroup]="passwordChangeForm">
                         <div class="mb-3">
+                            <label for="oldpass" class="form-label">Current Password</label>
+                            <input class="form-control custom-input" type="password" id="oldpass" formControlName="oldPassword">
+                            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
+                                <div *ngIf="passwordChangeForm.get('oldPassword')?.errors?.required">
+                                    This field is required
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
                             <label for="new-password">New Password</label>
-                            <input class="form-control" type="password" id="new-password" formControlName="password" required>
+                            <input class="form-control" type="password" id="new-password" formControlName="password">
                             <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
                                 <div *ngIf="password?.errors?.required">
                                     This field is required
@@ -293,7 +306,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="confirm-password">Confirm Password</label>
-                            <input class="form-control" type="password" id="confirm-password" formControlName="confirmPassword" aria-describedby="password-validations" required>
+                            <input class="form-control" type="password" id="confirm-password" formControlName="confirmPassword" aria-describedby="password-validations">
                             <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
                                 <div *ngIf="!passwordsMatch">
                                     Passwords must match

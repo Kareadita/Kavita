@@ -1,0 +1,13 @@
+.virtual-scroller, virtual-scroller {
+    width: 100%;
+    height: calc(100vh - 85px);
+    max-height: calc(var(--vh)*100 - 170px);
+  }
+  
+  // This is responsible for ensuring we scroll down and only tabs and companion bar is visible
+  .main-container {
+    // Height set dynamically by  get ScrollingBlockHeight()
+    overflow-y: auto;
+    position: relative;
+    overscroll-behavior-y: none;
+  }

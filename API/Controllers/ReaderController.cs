@@ -11,7 +11,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
-using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +47,7 @@ namespace API.Controllers
         /// <param name="chapterId"></param>
         /// <returns></returns>
         [HttpGet("pdf")]
-        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [ResponseCache(CacheProfileName = "Hour")]
         public async Task<ActionResult> GetPdf(int chapterId)
         {
             var chapter = await _cacheService.Ensure(chapterId);
@@ -81,7 +80,7 @@ namespace API.Controllers
         /// <param name="page"></param>
         /// <returns></returns>
         [HttpGet("image")]
-        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [ResponseCache(CacheProfileName = "Hour")]
         [AllowAnonymous]
         public async Task<ActionResult> GetImage(int chapterId, int page)
         {
@@ -113,7 +112,8 @@ namespace API.Controllers
         /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
         /// <returns></returns>
         [HttpGet("bookmark-image")]
-        [ResponseCache(Duration = 60 * 10, Location = ResponseCacheLocation.Client, NoStore = false)]
+        [ResponseCache(CacheProfileName = "Hour")]
+        [AllowAnonymous]
         public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
         {
             if (page < 0) page = 0;
@@ -555,6 +555,7 @@ namespace API.Controllers
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
             if (user.Bookmarks == null) return Ok("Nothing to remove");
+
             try
             {
                 var bookmarksToRemove = user.Bookmarks.Where(bmk => bmk.SeriesId == dto.SeriesId).ToList();
@@ -581,7 +582,42 @@ namespace API.Controllers
             }
 
             return BadRequest("Could not clear bookmarks");
+        }
 
+        /// <summary>
+        /// Removes all bookmarks for all chapters linked to a Series
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPost("bulk-remove-bookmarks")]
+        public async Task<ActionResult> BulkRemoveBookmarks(BulkRemoveBookmarkForSeriesDto dto)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+            if (user.Bookmarks == null) return Ok("Nothing to remove");
+
+            try
+            {
+                foreach (var seriesId in dto.SeriesIds)
+                {
+                    var bookmarksToRemove = user.Bookmarks.Where(bmk => bmk.SeriesId == seriesId).ToList();
+                    user.Bookmarks = user.Bookmarks.Where(bmk => bmk.SeriesId != seriesId).ToList();
+                    _unitOfWork.UserRepository.Update(user);
+                    await _bookmarkService.DeleteBookmarkFiles(bookmarksToRemove);
+                }
+
+
+                if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
+                {
+                    return Ok();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception when trying to clear bookmarks");
+                await _unitOfWork.RollbackAsync();
+            }
+
+            return BadRequest("Could not clear bookmarks");
         }
 
         /// <summary>

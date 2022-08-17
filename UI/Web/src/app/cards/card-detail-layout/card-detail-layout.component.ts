@@ -77,7 +77,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
     private jumpbarService: JumpbarService) {
     this.filter = this.seriesService.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
-    
+
   }
 
   @HostListener('window:resize', ['$event'])
@@ -109,11 +109,11 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
         this.virtualScroller.refresh();
       });
     }
-    
+
   }
 
   ngAfterViewInit(): void {
-    // NOTE: I can't seem to figure out a way to resume the JumpKey with the scroller. 
+    // NOTE: I can't seem to figure out a way to resume the JumpKey with the scroller.
     // this.virtualScroller.vsUpdate.pipe(takeWhile(() => this.hasResumedJumpKey), takeUntil(this.onDestory)).subscribe(() => {
     //   const resumeKey = this.jumpbarService.getResumeKey(this.header);
     //   console.log('Resume key:', resumeKey);
@@ -160,7 +160,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
       targetIndex += this.jumpBarKeys[i].size;
     }
 
-    this.virtualScroller.scrollToIndex(targetIndex, true, 800, 1000);
+    this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
     this.jumpbarService.saveResumeKey(this.header, jumpKey.key);
     this.changeDetectionRef.markForCheck();
     return;

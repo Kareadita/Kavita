@@ -168,8 +168,8 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'account/confirm-password-reset', model);
   }
 
-  resetPassword(username: string, password: string) {
-    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password}, {responseType: 'json' as 'text'});
+  resetPassword(username: string, password: string, oldPassword: string) {
+    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, {responseType: 'json' as 'text'});
   }
 
   update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {

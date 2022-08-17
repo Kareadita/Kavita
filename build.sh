@@ -27,12 +27,12 @@ ProgressEnd()
 
 UpdateVersionNumber()
 {
-  # TODO: Enhance this to increment version number in KavitaCommon.csproj
+  # TODO: Read from KavitaCommon and update in Info.plist
     if [ "$KAVITAVERSION" != "" ]; then
         echo "Updating Version Info"
         sed -i'' -e "s/<AssemblyVersion>[0-9.*]\+<\/AssemblyVersion>/<AssemblyVersion>$KAVITAVERSION<\/AssemblyVersion>/g" src/Directory.Build.props
         sed -i'' -e "s/<AssemblyConfiguration>[\$()A-Za-z-]\+<\/AssemblyConfiguration>/<AssemblyConfiguration>${BUILD_SOURCEBRANCHNAME}<\/AssemblyConfiguration>/g" src/Directory.Build.props
-#        sed -i'' -e "s/<string>10.0.0.0<\/string>/<string>$KAVITAVERSION<\/string>/g" macOS/Kavita.app/Contents/Info.plist
+        sed -i'' -e "s/<string>10.0.0.0<\/string>/<string>$KAVITAVERSION<\/string>/g" macOS/Kavita.app/Contents/Info.plist
     fi
 }
 
@@ -105,7 +105,9 @@ Package()
     fi
 
     echo "Copying appsettings.json"
-    cp config/appsettings.Development.json $lOutputFolder/config/appsettings.json
+    cp config/appsettings.json $lOutputFolder/config/appsettings.json
+    echo "Removing appsettings.Development.json"
+    rm $lOutputFolder/config/appsettings.Development.json
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/
@@ -117,8 +119,6 @@ Package()
 
 }
 
-
-#UpdateVersionNumber
 
 RID="$1"
 

@@ -2,13 +2,14 @@
 using System;
 using System.IO;
 using API.Entities.Enums;
+using API.Entities.Interfaces;
 
 namespace API.Entities
 {
     /// <summary>
     /// Represents a wrapper to the underlying file. This provides information around file, like number of pages, format, etc.
     /// </summary>
-    public class MangaFile
+    public class MangaFile : IEntityDate
     {
         public int Id { get; set; }
         /// <summary>
@@ -20,6 +21,9 @@ namespace API.Entities
         /// </summary>
         public int Pages { get; set; }
         public MangaFormat Format { get; set; }
+        /// <inheritdoc cref="IEntityDate.Created"/>
+        public DateTime Created { get; set; }
+
         /// <summary>
         /// Last time underlying file was modified
         /// </summary>

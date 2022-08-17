@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, take, pipe, debounceTime, takeUntil } from 'rxjs';
+import { Subject, take, debounceTime, takeUntil } from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
@@ -42,9 +42,9 @@ export class WantToReadComponent implements OnInit, OnDestroy {
   jumpbarKeys: Array<JumpKey> = [];
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
- 
 
   private onDestory: Subject<void> = new Subject<void>();
+  trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
   bulkActionCallback = (action: Action, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -55,7 +55,6 @@ export class WantToReadComponent implements OnInit, OnDestroy {
         this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
           this.bulkSelectionService.deselectAll();
           this.loadPage();
-          this.cdRef.markForCheck();
         });
         break;
     }

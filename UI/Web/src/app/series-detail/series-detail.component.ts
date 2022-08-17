@@ -1,10 +1,10 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, Subject, tap } from 'rxjs';
-import { filter, finalize, switchMap, take, takeUntil, takeWhile } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
 import { ConfirmConfig } from '../shared/confirm-dialog/_models/confirm-config';
@@ -39,7 +39,6 @@ import { FormGroup, UntypedFormControl, UntypedFormGroup } from '@angular/forms'
 import { PageLayoutMode } from '../_models/page-layout-mode';
 import { DOCUMENT } from '@angular/common';
 import { User } from '../_models/user';
-import { Download } from '../shared/_models/download';
 import { ScrollService } from '../_services/scroll.service';
 
 interface RelatedSeris {
@@ -126,7 +125,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   /**
    * Track by function for Chapter to tell when to refresh card data
    */
-  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.pagesRead}`;
+  trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
   trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
     if (item.isChapter) {
@@ -381,6 +380,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         break;
       case Action.AddToWantToReadList:
         this.actionService.addMultipleSeriesToWantToReadList([series.id], () => {
+          this.actionInProgress = false;
+          this.changeDetectionRef.markForCheck();
+        });
+        break;
+      case Action.RemoveFromWantToReadList:
+        this.actionService.removeMultipleSeriesFromWantToReadList([series.id], () => {
           this.actionInProgress = false;
           this.changeDetectionRef.markForCheck();
         });
@@ -696,6 +701,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         });
         
         this.loadSeries(this.seriesId);
+      }
+
+      if (closeResult.coverImageUpdate) {
+        this.toastr.info('It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages.');
       }
     });
   }
