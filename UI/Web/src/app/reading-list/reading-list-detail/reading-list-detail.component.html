@@ -69,7 +69,7 @@
     <!-- TODO: This needs virtualization -->
     <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
         <ng-template #draggableItem let-item let-position="idx">
-          <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
+          <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes"
             [promoted]="item.promoted" (read)="readChapter($event)"></app-reading-list-item>
         </ng-template>
     </app-draggable-ordered-list>

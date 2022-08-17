@@ -107,6 +107,7 @@ namespace API.Controllers
             return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
         }
 
+
         /// <summary>
         /// Returns image for a given bookmark page
         /// </summary>

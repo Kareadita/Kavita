@@ -48,7 +48,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, 
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService,
     private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService,
     private readonly cdRef: ChangeDetectorRef) {}
 
@@ -62,7 +62,7 @@ export class ReadingListDetailComponent implements OnInit {
     this.listId = parseInt(listId, 10);
 
     forkJoin([
-      this.libraryService.getLibraries(), 
+      this.libraryService.getLibraries(),
       this.readingListService.getReadingList(this.listId)
     ]).subscribe(results => {
       const libraries = results[0];
@@ -87,7 +87,7 @@ export class ReadingListDetailComponent implements OnInit {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
           this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
-          
+
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
           this.cdRef.markForCheck();
         }

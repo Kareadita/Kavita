@@ -62,7 +62,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
   @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
   @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
-  
+
 
   hasFocus: boolean = false;
   isLoading: boolean = false;
@@ -77,7 +77,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   get hasData() {
-    return !(this.noResultsTemplate != undefined && !this.grouppedData.persons.length && !this.grouppedData.collections.length 
+    return !(this.noResultsTemplate != undefined && !this.grouppedData.persons.length && !this.grouppedData.collections.length
       && !this.grouppedData.series.length && !this.grouppedData.persons.length && !this.grouppedData.tags.length && !this.grouppedData.genres.length && !this.grouppedData.libraries.length
       && !this.grouppedData.files.length && !this.grouppedData.chapters.length);
   }
@@ -92,7 +92,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   @HostListener('window:keydown', ['$event'])
-  handleKeyPress(event: KeyboardEvent) { 
+  handleKeyPress(event: KeyboardEvent) {
     if (!this.hasFocus) { return; }
 
     switch(event.key) {
@@ -137,7 +137,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-   
+
     this.openDropdown();
     return this.hasFocus;
   }

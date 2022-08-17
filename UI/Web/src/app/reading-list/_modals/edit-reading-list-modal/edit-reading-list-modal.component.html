@@ -4,12 +4,12 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">     
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
         <li [ngbNavItem]="tabs[0]">
             <a ngbNavLink>{{tabs[0].title}}</a>
             <ng-template ngbNavContent>
                 <p>
-                    This list is currently {{readingList.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
+                    This list is currently {{readingList.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>).
                     Promotion means that the list can be seen server-wide, not just for admin users. All series that are within this list will still have user-access restrictions placed on them.
                 </p>
                 <form [formGroup]="reviewGroup">
@@ -17,7 +17,7 @@
                         <label for="title" class="form-label">Name</label>
                         <input id="title" class="form-control" formControlName="title" type="text">
                     </div>
-            
+
                     <div class="mb-3">
                         <label for="summary" class="form-label">Summary</label>
                         <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>

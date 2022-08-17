@@ -36,8 +36,8 @@ export class EditReadingListModalComponent implements OnInit {
     return Breakpoint;
   }
 
-  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService, 
-    public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService, 
+  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService,
+    public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService,
     private imageService: ImageService) { }
 
   ngOnInit(): void {
@@ -60,11 +60,11 @@ export class EditReadingListModalComponent implements OnInit {
     const model = {...this.reviewGroup.value, readingListId: this.readingList.id, promoted: this.readingList.promoted, coverImageLocked: this.coverImageLocked};
 
     const apis = [this.readingListService.update(model)];
-    
+
     if (this.selectedCover !== '') {
       apis.push(this.uploadService.updateReadingListCoverImage(this.readingList.id, this.selectedCover))
     }
-  
+
     forkJoin(apis).subscribe(results => {
       this.readingList.title = model.title;
       this.readingList.summary = model.summary;

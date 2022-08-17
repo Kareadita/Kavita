@@ -49,7 +49,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     return EVENTS;
   }
 
-  constructor(public messageHub: MessageHubService, private modalService: NgbModal, 
+  constructor(public messageHub: MessageHubService, private modalService: NgbModal,
     private accountService: AccountService, private confirmService: ConfirmService,
     private readonly cdRef: ChangeDetectorRef, public downloadService: DownloadService) { }
 
@@ -75,8 +75,8 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     });
 
     this.isAdmin$ = this.accountService.currentUser$.pipe(
-      takeUntil(this.onDestroy), 
-      map(user => (user && this.accountService.hasAdminRole(user)) || false), 
+      takeUntil(this.onDestroy),
+      map(user => (user && this.accountService.hasAdminRole(user)) || false),
       shareReplay()
     );
   }
@@ -159,7 +159,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
       event.preventDefault();
     }
     let data = this.errorSource.getValue();
-    data = data.filter(m => m !== error); 
+    data = data.filter(m => m !== error);
     this.errorSource.next(data);
     this.activeEvents = Math.max(this.activeEvents - 1, 0);
     this.cdRef.markForCheck();

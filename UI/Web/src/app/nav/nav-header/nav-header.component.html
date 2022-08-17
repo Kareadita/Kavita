@@ -4,7 +4,7 @@
       <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
       <a class="navbar-brand dark-exempt" routerLink="/libraries" routerLinkActive="active"><img width="28px" height="28px" class="logo" src="../../assets/images/logo.png" alt="kavita icon" aria-hidden="true"/><span class="d-none d-md-inline"> Kavita</span></a>
       <ul class="navbar-nav col me-auto">
-        
+
         <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
           <label for="nav-search" class="form-label visually-hidden">Search series</label>
           <div class="ng-autocomplete">
@@ -82,7 +82,7 @@
             <ng-template #personTemplate let-item>
               <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
                 <div class="ms-1">
-                  
+
                   <div [innerHTML]="item.name"></div>
                   <div class="text-light fst-italic">{{item.role | personRole}}</div>
                 </div>
@@ -97,7 +97,7 @@
               </div>
             </ng-template>
 
-            
+
 
             <ng-template #chapterTemplate let-item>
               <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
@@ -146,7 +146,7 @@
               <span class="visually-hidden">Server Settings</span>
             </a>
           </div>
-          
+
 
           <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
             <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
@@ -164,4 +164,3 @@
       </ng-container>
     </div>
 </nav>
-  
