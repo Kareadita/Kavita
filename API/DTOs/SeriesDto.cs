@@ -54,5 +54,7 @@ namespace API.DTOs
         public int MaxHoursToRead { get; set; }
         /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
         public int AvgHoursToRead { get; set; }
+
+        public string FolderPath { get; set; }
     }
 }
