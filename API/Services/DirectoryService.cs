@@ -640,12 +640,17 @@ namespace API.Services
        /// <summary>
        /// Recursively scans a folder and returns the max last write time on any folders
        /// </summary>
-       /// <remarks>This is required vs just an attribute check as NTFS does not bubble up certain events from nested folders</remarks>
+       /// <remarks>This is required vs just an attribute check as NTFS does not bubble up certain events from nested folders.
+       /// This will also ignore recursive nature if the device is not NTFS</remarks>
        /// <param name="folderPath"></param>
        /// <returns>Max Last Write Time</returns>
        public DateTime GetLastWriteTime(string folderPath)
        {
            if (!FileSystem.Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
+           if (new DriveInfo(FileSystem.Path.GetPathRoot(folderPath)).DriveFormat != "NTFS")
+           {
+               return FileSystem.Directory.GetLastWriteTime(folderPath);
+           }
 
            var directories = GetAllDirectories(folderPath).ToList();
            if (directories.Count == 0) return FileSystem.Directory.GetLastWriteTime(folderPath);
