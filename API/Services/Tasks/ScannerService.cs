@@ -408,8 +408,11 @@ public class ScannerService : IScannerService
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
         // If all library Folder paths haven't been modified since last scan, abort
-        // Unless if LastModified is > LastScan time, that will tell us if the user did something on the library (delete series) and thus we can bypass this check
-        if (library.LastModified < library.LastScanned || library.LastScanned == DateTime.MinValue)
+        // Unless the user did something on the library (delete series) and thus we can bypass this check
+        var wasLibraryUpdatedSinceLastScan = (library.LastModified.Truncate(TimeSpan.TicksPerMinute) >
+                                             library.LastScanned.Truncate(TimeSpan.TicksPerMinute))
+                                             && library.LastScanned != DateTime.MinValue;
+        if (!wasLibraryUpdatedSinceLastScan)
         {
             var haveFoldersChangedSinceLastScan = library.Folders
                 .All(f => _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute) > f.LastScanned.Truncate(TimeSpan.TicksPerMinute));
