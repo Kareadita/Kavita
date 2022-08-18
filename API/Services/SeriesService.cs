@@ -422,7 +422,9 @@ public class SeriesService : ISeriesService
             }
 
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
+
             _unitOfWork.SeriesRepository.Remove(series);
+
 
             if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync()) return true;
 

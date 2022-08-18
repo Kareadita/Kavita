@@ -41,7 +41,7 @@ public interface ILibraryRepository
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
-    Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds);
+    Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
     IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
@@ -89,6 +89,11 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns all libraries including their AppUsers + extra includes
+    /// </summary>
+    /// <param name="includes"></param>
+    /// <returns></returns>
     public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None)
     {
         var query = _context.Library
@@ -125,11 +130,13 @@ public class LibraryRepository : ILibraryRepository
             .SingleAsync();
     }
 
-    public async Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds)
+    public async Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None)
     {
-        return await _context.Library
-            .Where(x => libraryIds.Contains(x.Id))
-            .ToListAsync();
+        var query = _context.Library
+            .Where(x => libraryIds.Contains(x.Id));
+
+        AddIncludesToQuery(query, includes);
+            return await query.ToListAsync();
     }
 
     public async Task<int> GetTotalFiles()
