@@ -53,8 +53,7 @@ public class LibraryWatcher : ILibraryWatcher
 
     private IList<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
 
-    private readonly Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary =
-        new Dictionary<string, IList<FileSystemWatcher>>();
+    private readonly Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary = new ();
 
     private IList<string> _libraryFolders = new List<string>();
 
@@ -98,7 +97,7 @@ public class LibraryWatcher : ILibraryWatcher
                 watcher.Deleted += OnDeleted;
                 watcher.Renamed += OnRenamed;
 
-                watcher.Filter = "*.*";
+                watcher.Filter = "*.*"; // TODO: Configure with Parser files
                 watcher.IncludeSubdirectories = true;
                 watcher.EnableRaisingEvents = true;
                 _logger.LogInformation("Watching {Folder}", libraryFolder);

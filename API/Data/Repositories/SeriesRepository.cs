@@ -1408,6 +1408,7 @@ public class SeriesRepository : ISeriesRepository
         var info = await _context.Series
             .Where(s => s.LibraryId == libraryId)
             .AsNoTracking()
+            .Where(s => s.FolderPath != null)
             .Select(s => new SeriesModified()
             {
                 LastScanned = s.LastFolderScanned,

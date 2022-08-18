@@ -67,7 +67,8 @@ namespace API.Services
         string GetParentDirectoryName(string fileOrFolder);
         #nullable enable
         IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
-        #nullable disable
+        DateTime GetLastWriteTime(string folderPath);
+#nullable disable
     }
     public class DirectoryService : IDirectoryService
     {
@@ -635,6 +636,23 @@ namespace API.Services
 
             return files;
        }
+
+       /// <summary>
+       /// Recursively scans a folder and returns the max last write time on any folders
+       /// </summary>
+       /// <remarks>This is required vs just an attribute check as NTFS does not bubble up certain events from nested folders</remarks>
+       /// <param name="folderPath"></param>
+       /// <returns>Max Last Write Time</returns>
+       public DateTime GetLastWriteTime(string folderPath)
+       {
+           if (!FileSystem.Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
+
+           var directories = GetAllDirectories(folderPath).ToList();
+           if (directories.Count == 0) return FileSystem.Directory.GetLastWriteTime(folderPath);
+
+           return directories.Max(d => FileSystem.Directory.GetLastWriteTime(d));
+       }
+
 
        private GlobMatcher CreateMatcherFromFile(string filePath)
        {

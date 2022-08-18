@@ -306,11 +306,10 @@ namespace API.Services.Tasks.Scanner
 
         private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder, bool forceCheck = false)
         {
-            // NOTE: There is a bug (on Windows) where we need to scan all the nested folders as LastWrite isn't propagating up
             if (forceCheck) return false;
+
             return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
-                _directoryService.GetDirectories(normalizedFolder)
-                    .Max(firstLevelFolder => _directoryService.FileSystem.Directory.GetLastWriteTime(firstLevelFolder).Truncate(TimeSpan.TicksPerMinute)));
+                _directoryService.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerMinute));
         }
 
         /// <summary>

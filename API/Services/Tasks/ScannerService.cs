@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using API.Parser;
 using API.Services.Tasks.Metadata;
@@ -296,9 +297,11 @@ public class ScannerService : IScannerService
         // NOTE: On windows, the parent folder will not update LastWriteTime if a subfolder was updated with files. Need to do a bit of light I/O.
         if (!bypassFolderChecks)
         {
+
             var allFolders = seriesFolderPaths.SelectMany(path => _directoryService.GetDirectories(path)).ToList();
             allFolders.AddRange(seriesFolderPaths);
-            if (allFolders.All(folder => File.GetLastWriteTimeUtc(folder) <= series.LastFolderScanned))
+
+            if (allFolders.All(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
             {
                 _logger.LogInformation(
                     "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
@@ -406,14 +409,17 @@ public class ScannerService : IScannerService
 
         // If all library Folder paths haven't been modified since last scan, abort
         // NOTE: This has an issue. If the user has deleted a series and then rescans, but nothing on disk happened, this wouldn't move through
-        // if (!library.AnyModificationsSinceLastScan())
-        // {
-        //     _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
-        // await _eventHub.SendMessageAsync(MessageFactory.Info,
-        //     MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
-        //         "All folders have not been changed since last scan. Scan will be aborted."));
-        //     return;
-        // }
+        var haveFoldersChangedSinceLastScan = library.Folders.All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
+                                 _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute));
+
+        if (!haveFoldersChangedSinceLastScan)
+        {
+            _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
+        await _eventHub.SendMessageAsync(MessageFactory.Info,
+            MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
+                "All folders have not been changed since last scan. Scan will be aborted."));
+            return;
+        }
 
         // Validations are done, now we can start actual scan
 

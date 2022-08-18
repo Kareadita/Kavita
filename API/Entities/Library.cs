@@ -34,6 +34,7 @@ namespace API.Entities
         /// <returns></returns>
         public bool AnyModificationsSinceLastScan()
         {
+            // NOTE: I don't think we can do this due to NTFS
             return Folders.All(folder => File.GetLastWriteTimeUtc(folder.Path) > folder.LastScanned);
         }
 
