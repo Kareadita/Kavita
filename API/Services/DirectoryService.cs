@@ -544,7 +544,8 @@ namespace API.Services
            var foundDirs = GetDirectories(folderPath);
            foreach (var foundDir in foundDirs)
            {
-               directories.AddRange(GetDirectories(foundDir));
+               directories.Add(foundDir);
+               directories.AddRange(GetAllDirectories(foundDir));
            }
 
            return directories;
