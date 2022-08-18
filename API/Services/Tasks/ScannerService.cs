@@ -409,10 +409,12 @@ public class ScannerService : IScannerService
 
         // If all library Folder paths haven't been modified since last scan, abort
         // NOTE: This has an issue. If the user has deleted a series and then rescans, but nothing on disk happened, this wouldn't move through
+        // Can i just have a force flag that bypasses this single check if Scan Library is done via UI?
         var haveFoldersChangedSinceLastScan = library.Folders.All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
                                  _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute));
 
-        if (!haveFoldersChangedSinceLastScan)
+        // If nothing changed && library folder's have all been scanned at least once
+        if (!haveFoldersChangedSinceLastScan && library.Folders.All(f => f.LastScanned > DateTime.MinValue))
         {
             _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
         await _eventHub.SendMessageAsync(MessageFactory.Info,
@@ -507,9 +509,9 @@ public class ScannerService : IScannerService
                 "[ScannerService] There was a critical error that resulted in a failed scan. Please check logs and rescan");
         }
 
-        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _metadataService.RemoveAbandonedMetadataKeys();
-        //BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, false)); // TODO: We need to move this within the ProcessSeries and optimize the cache checks to reduce work
+
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }
 
