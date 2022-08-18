@@ -146,7 +146,7 @@ public class ProcessSeries : IProcessSeries
             series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
             UpdateSeriesMetadata(series, library.Type);
 
-            series.LastFolderScanned = DateTime.UtcNow;
+            series.LastFolderScanned = DateTime.Now;
             _unitOfWork.SeriesRepository.Attach(series);
 
             try

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import { map, max, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
@@ -68,6 +68,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (event.event === EVENTS.NotificationProgress) {
+        console.log('[Event Widget]: Event came in ', event.event);
         this.processNotificationProgressEvent(event);
       } else if (event.event === EVENTS.Error) {
         const values = this.errorSource.getValue();

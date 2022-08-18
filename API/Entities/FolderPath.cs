@@ -10,6 +10,7 @@ namespace API.Entities
         /// <summary>
         /// Used when scanning to see if we can skip if nothing has changed
         /// </summary>
+        /// <remarks>Time stored in UTC</remarks>
         public DateTime LastScanned { get; set; }
 
         // Relationship

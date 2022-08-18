@@ -408,28 +408,26 @@ public class ScannerService : IScannerService
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
         // If all library Folder paths haven't been modified since last scan, abort
-        // NOTE: This has an issue. If the user has deleted a series and then rescans, but nothing on disk happened, this wouldn't move through
-        // Can i just have a force flag that bypasses this single check if Scan Library is done via UI?
-        var haveFoldersChangedSinceLastScan = library.Folders.All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
-                                 _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute));
-
-        // If nothing changed && library folder's have all been scanned at least once
-        if (!haveFoldersChangedSinceLastScan && library.Folders.All(f => f.LastScanned > DateTime.MinValue))
+        // Unless if LastModified is > LastScan time, that will tell us if the user did something on the library (delete series) and thus we can bypass this check
+        if (library.LastModified < library.LastScanned || library.LastScanned == DateTime.MinValue)
         {
-            _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
-        await _eventHub.SendMessageAsync(MessageFactory.Info,
-            MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
-                "All folders have not been changed since last scan. Scan will be aborted."));
-            return;
+            var haveFoldersChangedSinceLastScan = library.Folders
+                .All(f => _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute) > f.LastScanned.Truncate(TimeSpan.TicksPerMinute));
+
+            // If nothing changed && library folder's have all been scanned at least once
+            if (!haveFoldersChangedSinceLastScan && library.Folders.All(f => f.LastScanned > DateTime.MinValue))
+            {
+                _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
+                await _eventHub.SendMessageAsync(MessageFactory.Info,
+                    MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
+                        "All folders have not been changed since last scan. Scan will be aborted."));
+                return;
+            }
         }
 
+
         // Validations are done, now we can start actual scan
-
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
-
-        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, string.Empty));
-
-
 
         // This doesn't work for something like M:/Manga/ and a series has library folder as root
         var shouldUseLibraryScan = !(await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
@@ -487,10 +485,13 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);
 
+        var time = DateTime.Now;
         foreach (var folderPath in library.Folders)
         {
-            folderPath.LastScanned = DateTime.UtcNow;
+            folderPath.LastScanned = time;
         }
+
+        library.LastScanned = time;
 
         // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
         // NOTE: This implementation is expensive

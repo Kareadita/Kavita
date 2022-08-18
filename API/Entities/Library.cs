@@ -22,6 +22,7 @@ namespace API.Entities
         /// <summary>
         /// Last time Library was scanned
         /// </summary>
+        /// <remarks>Time stored in UTC</remarks>
         public DateTime LastScanned { get; set; }
         public ICollection<FolderPath> Folders { get; set; }
         public ICollection<AppUser> AppUsers { get; set; }
