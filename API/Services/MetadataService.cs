@@ -37,6 +37,9 @@ public interface IMetadataService
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
     Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
+
+    Task GenerateCoversForSeries(Series series, bool forceUpdate = false);
+    Task RemoveAbandonedMetadataKeys();
 }
 
 public class MetadataService : IMetadataService
@@ -77,10 +80,8 @@ public class MetadataService : IMetadataService
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
-
-        // await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-        //     MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
-        _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
+        _unitOfWork.ChapterRepository.Update(chapter); // BUG: CoverImage isn't saving for Monter Masume with new scan loop
+        _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter)); // TODO: IDEA: Instead of firing here where it's not yet saved, maybe collect the ids and fire after save
         return Task.FromResult(true);
     }
 
@@ -271,17 +272,18 @@ public class MetadataService : IMetadataService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 1F, ProgressEventType.Ended, $"Complete"));
 
-        await RemoveAbandonedMetadataKeys();
-
         _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
     }
 
 
-    private async Task RemoveAbandonedMetadataKeys()
+    public async Task RemoveAbandonedMetadataKeys()
     {
         await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
+        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+
     }
 
     /// <summary>
@@ -292,7 +294,6 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
     public async Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true)
     {
-        var sw = Stopwatch.StartNew();
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null)
         {
@@ -300,8 +301,19 @@ public class MetadataService : IMetadataService
             return;
         }
 
+        await GenerateCoversForSeries(series, forceUpdate);
+    }
+
+    /// <summary>
+    /// Generate Cover for a Series. This is used by Scan Loop and should not be invoked directly via User Interaction.
+    /// </summary>
+    /// <param name="series">A full Series, with metadata, chapters, etc</param>
+    /// <param name="forceUpdate"></param>
+    public async Task GenerateCoversForSeries(Series series, bool forceUpdate = false)
+    {
+        var sw = Stopwatch.StartNew();
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.CoverUpdateProgressEvent(libraryId, 0F, ProgressEventType.Started, series.Name));
+            MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 0F, ProgressEventType.Started, series.Name));
 
         await ProcessSeriesCoverGen(series, forceUpdate);
 
@@ -309,17 +321,14 @@ public class MetadataService : IMetadataService
         if (_unitOfWork.HasChanges())
         {
             await _unitOfWork.CommitAsync();
+            _logger.LogInformation("[MetadataService] Updated cover images for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.CoverUpdateProgressEvent(libraryId, 1F, ProgressEventType.Ended, series.Name));
-
-        await RemoveAbandonedMetadataKeys();
+            MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 1F, ProgressEventType.Ended, series.Name));
 
         await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
         await FlushEvents();
-
-        _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }
 
     private async Task FlushEvents()

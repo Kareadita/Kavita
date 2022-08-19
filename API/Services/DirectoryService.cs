@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using API.DTOs.System;
 using API.Entities.Enums;
 using API.Extensions;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -57,6 +58,17 @@ namespace API.Services
         void RemoveNonImages(string directoryName);
         void Flatten(string directoryName);
         Task<bool> CheckWriteAccess(string directoryName);
+
+        IEnumerable<string> GetFilesWithCertainExtensions(string path,
+            string searchPatternExpression = "",
+            SearchOption searchOption = SearchOption.TopDirectoryOnly);
+
+        IEnumerable<string> GetDirectories(string folderPath);
+        string GetParentDirectoryName(string fileOrFolder);
+        #nullable enable
+        IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
+        DateTime GetLastWriteTime(string folderPath);
+#nullable disable
     }
     public class DirectoryService : IDirectoryService
     {
@@ -105,7 +117,7 @@ namespace API.Services
        /// <param name="searchPatternExpression">Regex version of search pattern (ie \.mp3|\.mp4). Defaults to * meaning all files.</param>
        /// <param name="searchOption">SearchOption to use, defaults to TopDirectoryOnly</param>
        /// <returns>List of file paths</returns>
-       private IEnumerable<string> GetFilesWithCertainExtensions(string path,
+       public IEnumerable<string> GetFilesWithCertainExtensions(string path,
           string searchPatternExpression = "",
           SearchOption searchOption = SearchOption.TopDirectoryOnly)
        {
@@ -507,10 +519,175 @@ namespace API.Services
            return dirs;
        }
 
+       /// <summary>
+       /// Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
+       /// </summary>
+       /// <param name="folderPath"></param>
+       /// <returns>List of directory paths, empty if path doesn't exist</returns>
+       public IEnumerable<string> GetDirectories(string folderPath)
+       {
+           if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
+           return FileSystem.Directory.GetDirectories(folderPath)
+               .Where(path => ExcludeDirectories.Matches(path).Count == 0);
+       }
+
+       /// <summary>
+       /// Returns all directories, including subdirectories. Automatically excludes directories that shouldn't be in scope.
+       /// </summary>
+       /// <param name="folderPath"></param>
+       /// <returns></returns>
+       public IEnumerable<string> GetAllDirectories(string folderPath)
+       {
+           if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
+           var directories = new List<string>();
+
+           var foundDirs = GetDirectories(folderPath);
+           foreach (var foundDir in foundDirs)
+           {
+               directories.Add(foundDir);
+               directories.AddRange(GetAllDirectories(foundDir));
+           }
+
+           return directories;
+       }
+
+       /// <summary>
+       /// Returns the parent directories name for a file or folder. Empty string is path is not valid.
+       /// </summary>
+       /// <remarks>This does touch I/O with an Attribute lookup</remarks>
+       /// <param name="fileOrFolder"></param>
+       /// <returns></returns>
+       public string GetParentDirectoryName(string fileOrFolder)
+       {
+           // TODO: Write Unit tests
+           try
+           {
+               var attr = File.GetAttributes(fileOrFolder);
+               var isDirectory = attr.HasFlag(FileAttributes.Directory);
+               if (isDirectory)
+               {
+                   return Parser.Parser.NormalizePath(FileSystem.DirectoryInfo
+                       .FromDirectoryName(fileOrFolder).Parent
+                       .FullName);
+               }
+
+               return Parser.Parser.NormalizePath(FileSystem.FileInfo
+                   .FromFileName(fileOrFolder).Directory.Parent
+                   .FullName);
+           }
+           catch (Exception)
+           {
+               return string.Empty;
+           }
+       }
+
+       /// <summary>
+       /// Scans a directory by utilizing a recursive folder search. If a .kavitaignore file is found, will ignore matching patterns
+       /// </summary>
+       /// <param name="folderPath"></param>
+       /// <param name="matcher"></param>
+       /// <returns></returns>
+       public IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null)
+       {
+           _logger.LogDebug("[ScanFiles] called on {Path}", folderPath);
+            var files = new List<string>();
+            if (!Exists(folderPath)) return files;
+
+            var potentialIgnoreFile = FileSystem.Path.Join(folderPath, ".kavitaignore");
+            if (matcher == null)
+            {
+                matcher = CreateMatcherFromFile(potentialIgnoreFile);
+            }
+            else
+            {
+                matcher.Merge(CreateMatcherFromFile(potentialIgnoreFile));
+            }
+
+
+            IEnumerable<string> directories;
+            if (matcher == null)
+            {
+                directories = GetDirectories(folderPath);
+            }
+            else
+            {
+                directories = GetDirectories(folderPath)
+                    .Where(folder => matcher != null &&
+                                     !matcher.ExcludeMatches($"{FileSystem.DirectoryInfo.FromDirectoryName(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
+            }
+
+            foreach (var directory in directories)
+            {
+                files.AddRange(ScanFiles(directory, matcher));
+            }
+
+
+            // Get the matcher from either ignore or global (default setup)
+            if (matcher == null)
+            {
+                files.AddRange(GetFilesWithCertainExtensions(folderPath, Parser.Parser.SupportedExtensions));
+            }
+            else
+            {
+                var foundFiles = GetFilesWithCertainExtensions(folderPath,
+                        Parser.Parser.SupportedExtensions)
+                    .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.FromFileName(file).Name));
+                files.AddRange(foundFiles);
+            }
+
+            return files;
+       }
+
+       /// <summary>
+       /// Recursively scans a folder and returns the max last write time on any folders
+       /// </summary>
+       /// <remarks>This is required vs just an attribute check as NTFS does not bubble up certain events from nested folders.
+       /// This will also ignore recursive nature if the device is not NTFS</remarks>
+       /// <param name="folderPath"></param>
+       /// <returns>Max Last Write Time</returns>
+       public DateTime GetLastWriteTime(string folderPath)
+       {
+           if (!FileSystem.Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
+           if (new DriveInfo(FileSystem.Path.GetPathRoot(folderPath)).DriveFormat != "NTFS")
+           {
+               return FileSystem.Directory.GetLastWriteTime(folderPath);
+           }
+
+           var directories = GetAllDirectories(folderPath).ToList();
+           if (directories.Count == 0) return FileSystem.Directory.GetLastWriteTime(folderPath);
+
+           return directories.Max(d => FileSystem.Directory.GetLastWriteTime(d));
+       }
+
+
+       private GlobMatcher CreateMatcherFromFile(string filePath)
+       {
+           if (!FileSystem.File.Exists(filePath))
+           {
+               return null;
+           }
+
+           // Read file in and add each line to Matcher
+           var lines = FileSystem.File.ReadAllLines(filePath);
+           if (lines.Length == 0)
+           {
+               return null;
+           }
+
+           GlobMatcher matcher = new();
+           foreach (var line in lines)
+           {
+               matcher.AddExclude(line);
+           }
+
+           return matcher;
+       }
+
 
        /// <summary>
        /// Recursively scans files and applies an action on them. This uses as many cores the underlying PC has to speed
        /// up processing.
+       /// NOTE: This is no longer parallel due to user's machines locking up
        /// </summary>
        /// <param name="root">Directory to scan</param>
        /// <param name="action">Action to apply on file path</param>
@@ -538,18 +715,16 @@ namespace API.Services
                string[] files;
 
                try {
-                  subDirs = FileSystem.Directory.GetDirectories(currentDir).Where(path => ExcludeDirectories.Matches(path).Count == 0);
+                  subDirs = GetDirectories(currentDir);
                }
                // Thrown if we do not have discovery permission on the directory.
                catch (UnauthorizedAccessException e) {
-                  Console.WriteLine(e.Message);
-                  logger.LogError(e, "Unauthorized access on {Directory}", currentDir);
+                   logger.LogCritical(e, "Unauthorized access on {Directory}", currentDir);
                   continue;
                }
                // Thrown if another process has deleted the directory after we retrieved its name.
                catch (DirectoryNotFoundException e) {
-                  Console.WriteLine(e.Message);
-                  logger.LogError(e, "Directory not found on {Directory}", currentDir);
+                   logger.LogCritical(e, "Directory not found on {Directory}", currentDir);
                   continue;
                }
 
@@ -558,15 +733,15 @@ namespace API.Services
                      .ToArray();
                }
                catch (UnauthorizedAccessException e) {
-                  Console.WriteLine(e.Message);
+                   logger.LogCritical(e, "Unauthorized access on a file in {Directory}", currentDir);
                   continue;
                }
                catch (DirectoryNotFoundException e) {
-                  Console.WriteLine(e.Message);
+                   logger.LogCritical(e, "Directory not found on a file in {Directory}", currentDir);
                   continue;
                }
                catch (IOException e) {
-                  Console.WriteLine(e.Message);
+                   logger.LogCritical(e, "IO exception on a file in {Directory}", currentDir);
                   continue;
                }
 
@@ -577,19 +752,16 @@ namespace API.Services
                    foreach (var file in files) {
                      action(file);
                      fileCount++;
-                  }
+                   }
                }
                catch (AggregateException ae) {
                   ae.Handle((ex) => {
-                               if (ex is UnauthorizedAccessException) {
-                                  // Here we just output a message and go on.
-                                  Console.WriteLine(ex.Message);
-                                  _logger.LogError(ex, "Unauthorized access on file");
-                                  return true;
-                               }
-                               // Handle other exceptions here if necessary...
+                      if (ex is not UnauthorizedAccessException) return false;
+                      // Here we just output a message and go on.
+                      _logger.LogError(ex, "Unauthorized access on file");
+                      return true;
+                      // Handle other exceptions here if necessary...
 
-                               return false;
                   });
                }
 

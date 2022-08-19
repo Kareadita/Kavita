@@ -16,7 +16,7 @@ public static class ParserInfoHelpers
     /// <param name="parsedSeries"></param>
     /// <returns></returns>
     public static bool SeriesHasMatchingParserInfoFormat(Series series,
-        Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+        Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
     {
         var format = MangaFormat.Unknown;
         foreach (var pSeries in parsedSeries.Keys)

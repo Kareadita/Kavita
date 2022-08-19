@@ -1,17 +1,27 @@
 <ng-container *ngIf="isAdmin$ | async">
     <ng-container *ngIf="downloadService.activeDownloads$ | async as activeDownloads">
         <ng-container *ngIf="errors$ | async as errors">
-            <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0, 'colored-error': errors.length > 0}" 
-                [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
-                <i aria-hidden="true" class="fa fa-wave-square nav"></i>
-            </button>
+            <ng-container *ngIf="infos$ | async as infos">
+                <button type="button" class="btn btn-icon" [ngClass]="{'colored': activeEvents > 0 || activeDownloads.length > 0, 'colored-error': errors.length > 0,
+                    'colored-info': infos.length > 0 && errors.length === 0}" 
+                    [ngbPopover]="popContent" title="Activity" placement="bottom" [popoverClass]="'nav-events'" [autoClose]="'outside'">
+                    <i aria-hidden="true" class="fa fa-wave-square nav"></i>
+                </button>
+            </ng-container>
         </ng-container>
     </ng-container>
     
 
     <ng-template #popContent>
-        <ul class="list-group list-group-flush dark-menu">
 
+        <ul class="list-group list-group-flush dark-menu">
+            <ng-container *ngIf="errors$ | async as errors">
+                <ng-container *ngIf="infos$ | async as infos">
+                    <li class="list-group-item dark-menu-item clickable" *ngIf="errors.length > 0 || infos.length > 0" (click)="clearAllErrorOrInfos()">
+                        Dismiss All
+                    </li>
+                </ng-container>
+            </ng-container>
             <ng-container *ngIf="debugMode">
                 <li class="list-group-item dark-menu-item">
                     <div class="h6 mb-1">Title goes here</div>
@@ -46,6 +56,13 @@
                     </div>
                     <button type="button" class="btn-close float-end" aria-label="close" ></button>
                 </li>
+                <li class="list-group-item dark-menu-item info">
+                    <div>
+                        <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2"></i>Scan didn't run becasuse nothing to do</div>
+                        <div class="accent-text mb-1">Click for more information</div>
+                    </div>
+                    <button type="button" class="btn-close float-end" aria-label="close" ></button>
+                </li>
                 <li class="list-group-item dark-menu-item">
                     <div class="d-inline-flex">
                         <span class="download">
@@ -59,6 +76,7 @@
                     <div class="accent-text">PDFs</div>
                 </li>
             </ng-container>
+
             <!-- Progress Events-->
             <ng-container *ngIf="progressEvents$ | async as progressUpdates">
                 <ng-container *ngFor="let message of progressUpdates">
@@ -119,12 +137,25 @@
             <!-- Errors -->
             <ng-container *ngIf="errors$ | async as errors">
                 <ng-container *ngFor="let error of errors">
-                    <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMoreError(error)">
+                    <li class="list-group-item dark-menu-item error" role="alert" (click)="seeMore(error)">
                         <div>
                             <div class="h6 mb-1"><i class="fa-solid fa-triangle-exclamation me-2"></i>{{error.title}}</div>
                             <div class="accent-text mb-1">Click for more information</div>
                         </div>
-                        <button type="button" class="btn-close float-end" aria-label="close" (click)="removeError(error, $event)"></button>
+                        <button type="button" class="btn-close float-end" aria-label="close" (click)="removeErrorOrInfo(error, $event)"></button>
+                    </li>
+                </ng-container>
+            </ng-container>
+
+            <!-- Infos -->
+            <ng-container *ngIf="infos$ | async as infos">
+                <ng-container *ngFor="let info of infos">
+                    <li class="list-group-item dark-menu-item info" role="alert" (click)="seeMore(info)">
+                        <div>
+                            <div class="h6 mb-1"><i class="fa-solid fa-circle-info me-2"></i>{{info.title}}</div>
+                            <div class="accent-text mb-1">Click for more information</div>
+                        </div>
+                        <button type="button" class="btn-close float-end" aria-label="close" (click)="removeErrorOrInfo(info, $event)"></button>
                     </li>
                 </ng-container>
             </ng-container>

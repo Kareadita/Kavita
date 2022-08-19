@@ -34,19 +34,19 @@ public interface ILibraryRepository
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
     Task<bool> LibraryExists(string libraryName);
     Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes);
-    Task<Library> GetFullLibraryForIdAsync(int libraryId);
-    Task<Library> GetFullLibraryForIdAsync(int libraryId, int seriesId);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
-    Task<IEnumerable<Library>> GetLibrariesAsync();
+    Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
-    Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds);
+    Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
     IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
+    Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
+    Library GetLibraryByFolder(string folder);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -87,11 +87,19 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Library>> GetLibrariesAsync()
+    /// <summary>
+    /// Returns all libraries including their AppUsers + extra includes
+    /// </summary>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    public async Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None)
     {
-        return await _context.Library
+        var query = _context.Library
             .Include(l => l.AppUsers)
-            .ToListAsync();
+            .Select(l => l);
+
+        query = AddIncludesToQuery(query, includes);
+        return await query.ToListAsync();
     }
 
     public async Task<bool> DeleteLibrary(int libraryId)
@@ -120,11 +128,13 @@ public class LibraryRepository : ILibraryRepository
             .SingleAsync();
     }
 
-    public async Task<IEnumerable<Library>> GetLibraryForIdsAsync(IList<int> libraryIds)
+    public async Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None)
     {
-        return await _context.Library
-            .Where(x => libraryIds.Contains(x.Id))
-            .ToListAsync();
+        var query = _context.Library
+            .Where(x => libraryIds.Contains(x.Id));
+
+        AddIncludesToQuery(query, includes);
+            return await query.ToListAsync();
     }
 
     public async Task<int> GetTotalFiles()
@@ -317,4 +327,23 @@ public class LibraryRepository : ILibraryRepository
             .OrderBy(s => s.Title);
     }
 
+    /// <summary>
+    /// Checks if any series folders match the folders passed in
+    /// </summary>
+    /// <param name="folders"></param>
+    /// <returns></returns>
+    public async Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders)
+    {
+        var normalized = folders.Select(Parser.Parser.NormalizePath);
+        return await _context.Series.AnyAsync(s => normalized.Contains(s.FolderPath));
+    }
+
+    public Library? GetLibraryByFolder(string folder)
+    {
+        var normalized = Parser.Parser.NormalizePath(folder);
+        return _context.Library
+            .Include(l => l.Folders)
+            .AsSplitQuery()
+            .SingleOrDefault(l => l.Folders.Select(f => f.Path).Contains(normalized));
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
@@ -56,6 +57,16 @@ public static class TagHelper
     /// <param name="metadataTags"></param>
     /// <param name="tag"></param>
     public static void AddTagIfNotExists(ICollection<Tag> metadataTags, Tag tag)
+    {
+        var existingGenre = metadataTags.FirstOrDefault(p =>
+            p.NormalizedTitle == Parser.Parser.Normalize(tag.Title));
+        if (existingGenre == null)
+        {
+            metadataTags.Add(tag);
+        }
+    }
+
+    public static void AddTagIfNotExists(BlockingCollection<Tag> metadataTags, Tag tag)
     {
         var existingGenre = metadataTags.FirstOrDefault(p =>
             p.NormalizedTitle == Parser.Parser.Normalize(tag.Title));

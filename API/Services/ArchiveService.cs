@@ -140,9 +140,10 @@ namespace API.Services
         }
 
         /// <summary>
-        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="OrderByNatural"/> for ordering files
+        /// Returns first entry that is an image and is not in a blacklisted folder path. Uses <see cref="EnumerableExtensions.OrderByNatural"/> for ordering files
         /// </summary>
         /// <param name="entryFullNames"></param>
+        /// <param name="archiveName"></param>
         /// <returns>Entry name of match, null if no match</returns>
         public static string? FirstFileEntry(IEnumerable<string> entryFullNames, string archiveName)
         {

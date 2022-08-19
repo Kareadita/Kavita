@@ -69,6 +69,11 @@
     border-radius: 60px;
 }
 
+.colored-info {
+    background-color: var(--event-widget-info-bg-color) !important;
+    border-radius: 60px;
+}
+
 .update-available {
     cursor: pointer;
     
@@ -91,6 +96,25 @@
 
     .btn-close {
         top: 5px;
+        right: 10px;
+        font-size: 11px;
+        position: absolute;
+    }
+}
+
+.info {
+    cursor: pointer;
+    position: relative;
+    .h6 {
+        color: var(--event-widget-info-bg-color);
+    }
+
+    i.fa {
+        color: var(--primary-color) !important;
+    }
+
+    .btn-close {
+        top: 10px;
         right: 10px;
         font-size: 11px;
         position: absolute;

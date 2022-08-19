@@ -14,6 +14,7 @@ import { MangaFormatPipe } from './manga-format.pipe';
 import { MangaFormatIconPipe } from './manga-format-icon.pipe';
 import { LibraryTypePipe } from './library-type.pipe';
 import { SafeStylePipe } from './safe-style.pipe';
+import { DefaultDatePipe } from './default-date.pipe';
 
 
 
@@ -32,7 +33,8 @@ import { SafeStylePipe } from './safe-style.pipe';
     MangaFormatPipe,
     MangaFormatIconPipe,
     LibraryTypePipe,
-    SafeStylePipe
+    SafeStylePipe,
+    DefaultDatePipe
   ],
   imports: [
     CommonModule,
@@ -51,7 +53,8 @@ import { SafeStylePipe } from './safe-style.pipe';
     MangaFormatPipe,
     MangaFormatIconPipe,
     LibraryTypePipe,
-    SafeStylePipe
+    SafeStylePipe,
+    DefaultDatePipe
   ]
 })
 export class PipeModule { }

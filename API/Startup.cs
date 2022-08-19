@@ -152,8 +152,10 @@ namespace API
                 .UseMemoryStorage());
 
             // Add the processing server as IHostedService
-            services.AddHangfireServer();
-
+            services.AddHangfireServer(options =>
+            {
+                options.Queues = new[] {TaskScheduler.ScanQueue, TaskScheduler.DefaultQueue};
+            });
             // Add IHostedService for startup tasks
             // Any services that should be bootstrapped go here
             services.AddHostedService<StartupTasksHostedService>();

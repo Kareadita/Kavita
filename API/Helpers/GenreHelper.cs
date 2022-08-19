@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
@@ -34,6 +35,7 @@ public static class GenreHelper
         }
     }
 
+
     public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre> action = null)
     {
         var existing = existingGenres.ToList();
@@ -53,6 +55,16 @@ public static class GenreHelper
     /// <param name="metadataGenres"></param>
     /// <param name="genre"></param>
     public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
+    {
+        var existingGenre = metadataGenres.FirstOrDefault(p =>
+            p.NormalizedTitle == Parser.Parser.Normalize(genre.Title));
+        if (existingGenre == null)
+        {
+            metadataGenres.Add(genre);
+        }
+    }
+
+    public static void AddGenreIfNotExists(BlockingCollection<Genre> metadataGenres, Genre genre)
     {
         var existingGenre = metadataGenres.FirstOrDefault(p =>
             p.NormalizedTitle == Parser.Parser.Normalize(genre.Title));

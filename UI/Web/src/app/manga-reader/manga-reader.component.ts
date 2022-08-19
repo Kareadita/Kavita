@@ -486,11 +486,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.updateForm();
 
-      this.generalSettingsForm.get('darkness')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-        console.log('brightness: ', val);
-        //this.cdRef.markForCheck();
-      });
-
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
 
         const changeOccurred = parseInt(val, 10) !== this.layoutMode;

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -19,12 +18,11 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
+using API.Services.Tasks.Scanner;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Kavita.Common.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
+
 
 namespace API.Data.Repositories;
 
@@ -120,6 +118,11 @@ public interface ISeriesRepository
     Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
+    Task<int> GetSeriesIdByFolder(string folder);
+    Task<Series> GetSeriesByFolderPath(string folder);
+    Task<Series> GetFullSeriesByName(string series, int libraryId);
+    Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
+    Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -156,6 +159,7 @@ public class SeriesRepository : ISeriesRepository
     /// Returns if a series name and format exists already in a library
     /// </summary>
     /// <param name="name">Name of series</param>
+    /// <param name="libraryId"></param>
     /// <param name="format">Format of series</param>
     /// <returns></returns>
     public async Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format)
@@ -179,6 +183,7 @@ public class SeriesRepository : ISeriesRepository
     /// Used for <see cref="ScannerService"/> to
     /// </summary>
     /// <param name="libraryId"></param>
+    /// <param name="userParams"></param>
     /// <returns></returns>
     public async Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams)
     {
@@ -432,6 +437,7 @@ public class SeriesRepository : ISeriesRepository
     /// Returns Volumes, Metadata (Incl Genres and People), and Collection Tags
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="includes"></param>
     /// <returns></returns>
     public async Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
@@ -1136,21 +1142,82 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter)
+    /// <summary>
+    /// Given a folder path return a Series with the <see cref="Series.FolderPath"/> that matches.
+    /// </summary>
+    /// <remarks>This will apply normalization on the path.</remarks>
+    /// <param name="folder"></param>
+    /// <returns></returns>
+    public async Task<int> GetSeriesIdByFolder(string folder)
     {
-        var libraryIds = GetLibraryIdsForUser(userId);
-        var query = _context.AppUser
-            .Where(user => user.Id == userId)
-            .SelectMany(u => u.WantToRead)
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .AsSplitQuery()
-            .AsNoTracking();
-
-        var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
-
-        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+        var normalized = Parser.Parser.NormalizePath(folder);
+        var series = await _context.Series
+            .Where(s => s.FolderPath.Equals(normalized))
+            .SingleOrDefaultAsync();
+        return series?.Id ?? 0;
     }
 
+    /// <summary>
+    /// Return a Series by Folder path. Null if not found.
+    /// </summary>
+    /// <param name="folder">This will be normalized in the query</param>
+    /// <returns></returns>
+    public async Task<Series> GetSeriesByFolderPath(string folder)
+    {
+        var normalized = Parser.Parser.NormalizePath(folder);
+        return await _context.Series.SingleOrDefaultAsync(s => s.FolderPath.Equals(normalized));
+    }
+
+    public Task<Series> GetFullSeriesByName(string series, int libraryId)
+    {
+        return _context.Series
+            .Where(s => s.NormalizedName.Equals(Parser.Parser.Normalize(series)) && s.LibraryId == libraryId)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.People)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Genres)
+            .Include(s => s.Library)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(cm => cm.People)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+
+
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Files)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync();
+    }
+
+    public async Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
+    {
+        if (seenSeries.Count == 0) return;
+        var ids = new List<int>();
+        foreach (var parsedSeries in seenSeries)
+        {
+            ids.Add(await _context.Series
+                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName && s.LibraryId == libraryId)
+                .Select(s => s.Id).SingleAsync());
+        }
+
+        var seriesToRemove = await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .Where(s => !ids.Contains(s.Id))
+            .ToListAsync();
+
+        _context.Series.RemoveRange(seriesToRemove);
+    }
 
     public async Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams)
     {
@@ -1319,5 +1386,54 @@ public class SeriesRepository : ISeriesRepository
             .Where(c => c.Created >= withinLastWeek && libraryIds.Contains(c.LibraryId))
             .AsEnumerable();
         return ret;
+    }
+
+    public async Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter)
+    {
+        var libraryIds = GetLibraryIdsForUser(userId);
+        var query = _context.AppUser
+            .Where(user => user.Id == userId)
+            .SelectMany(u => u.WantToRead)
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
+
+        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId)
+    {
+        var info = await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .AsNoTracking()
+            .Where(s => s.FolderPath != null)
+            .Select(s => new SeriesModified()
+            {
+                LastScanned = s.LastFolderScanned,
+                SeriesName = s.Name,
+                FolderPath = s.FolderPath,
+                Format = s.Format
+            }).ToListAsync();
+
+        var map = new Dictionary<string, IList<SeriesModified>>();
+        foreach (var series in info)
+        {
+            if (!map.ContainsKey(series.FolderPath))
+            {
+                map.Add(series.FolderPath, new List<SeriesModified>()
+                {
+                    series
+                });
+            }
+            else
+            {
+                map[series.FolderPath].Add(series);
+            }
+
+        }
+
+        return map;
     }
 }

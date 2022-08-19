@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
@@ -95,6 +96,21 @@ public static class PersonHelper
     /// <param name="metadataPeople"></param>
     /// <param name="person"></param>
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
+    {
+        var existingPerson = metadataPeople.SingleOrDefault(p =>
+            p.NormalizedName == Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
+        if (existingPerson == null)
+        {
+            metadataPeople.Add(person);
+        }
+    }
+
+    /// <summary>
+    /// Adds the person to the list if it's not already in there
+    /// </summary>
+    /// <param name="metadataPeople"></param>
+    /// <param name="person"></param>
+    public static void AddPersonIfNotExists(BlockingCollection<Person> metadataPeople, Person person)
     {
         var existingPerson = metadataPeople.SingleOrDefault(p =>
             p.NormalizedName == Parser.Parser.Normalize(person.Name) && p.Role == person.Role);

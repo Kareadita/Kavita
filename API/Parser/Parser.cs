@@ -15,11 +15,13 @@ namespace API.Parser
 
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
-        public const string BookFileExtensions = @"\.epub|\.pdf";
+        private const string BookFileExtensions = @"\.epub|\.pdf";
         public const string MacOsMetadataFileStartsWith = @"._";
 
         public const string SupportedExtensions =
             ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
+
+        public static readonly string[] SupportedGlobExtensions = new [] {@"**/*.png", @"**/*.cbz", @"**/*.pdf"};
 
         private const RegexOptions MatchOptions =
             RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;

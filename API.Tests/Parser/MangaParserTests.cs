@@ -180,6 +180,7 @@ namespace API.Tests.Parser
         [InlineData("Highschool of the Dead - Full Color Edition v02 [Uasaha] (Yen Press)", "Highschool of the Dead - Full Color Edition")]
         [InlineData("諌山創] 進撃の巨人 第23巻", "諌山創] 進撃の巨人")]
         [InlineData("(一般コミック) [奥浩哉] いぬやしき 第09巻", "いぬやしき")]
+        [InlineData("Highschool of the Dead - 02", "Highschool of the Dead")]
         public void ParseSeriesTest(string filename, string expected)
         {
             Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));

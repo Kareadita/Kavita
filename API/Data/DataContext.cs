@@ -43,6 +43,7 @@ namespace API.Data
         public DbSet<Tag> Tag { get; set; }
         public DbSet<SiteTheme> SiteTheme { get; set; }
         public DbSet<SeriesRelation> SeriesRelation { get; set; }
+        public DbSet<FolderPath> FolderPath { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

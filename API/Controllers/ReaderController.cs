@@ -60,6 +60,7 @@ namespace API.Controllers
 
             try
             {
+
                 var path = _cacheService.GetCachedFile(chapter);
                 if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
 
@@ -90,7 +91,7 @@ namespace API.Controllers
             try
             {
                 var path = _cacheService.GetCachedPagePath(chapter, page);
-                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
+                if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}. Try refreshing to allow re-cache.");
                 var format = Path.GetExtension(path).Replace(".", "");
 
                 return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);

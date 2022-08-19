@@ -111,7 +111,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   toggleNavBar() {
     this.navService.toggleSideNav();
-    //this.cdRef.markForCheck();
   }
 
 }

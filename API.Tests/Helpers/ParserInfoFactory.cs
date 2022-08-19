@@ -26,7 +26,7 @@ namespace API.Tests.Helpers
             };
         }
 
-        public static void AddToParsedInfo(IDictionary<ParsedSeries, List<ParserInfo>> collectedSeries, ParserInfo info)
+        public static void AddToParsedInfo(IDictionary<ParsedSeries, IList<ParserInfo>> collectedSeries, ParserInfo info)
         {
             var existingKey = collectedSeries.Keys.FirstOrDefault(ps =>
                 ps.Format == info.Format && ps.NormalizedName == API.Parser.Parser.Normalize(info.Series));
@@ -38,7 +38,7 @@ namespace API.Tests.Helpers
             };
             if (collectedSeries.GetType() == typeof(ConcurrentDictionary<,>))
             {
-                ((ConcurrentDictionary<ParsedSeries, List<ParserInfo>>) collectedSeries).AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
+                ((ConcurrentDictionary<ParsedSeries, IList<ParserInfo>>) collectedSeries).AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
                 {
                     oldValue ??= new List<ParserInfo>();
                     if (!oldValue.Contains(info))

@@ -841,5 +841,127 @@ namespace API.Tests.Services
             Assert.Equal(expected, DirectoryService.GetHumanReadableBytes(bytes));
         }
         #endregion
+
+        #region ScanFiles
+
+        [Fact]
+        public Task ScanFiles_ShouldFindNoFiles_AllAreIgnored()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("*.*"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(0, allFiles.Count);
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task ScanFiles_ShouldFindNoNestedFiles_IgnoreNestedFiles()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/Accel World/*"));
+            fileSystem.AddFile("C:/Data/Hello.pdf", new MockFileData(string.Empty));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(1, allFiles.Count); // Ignore files are not counted in files, only valid extensions
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task ScanFiles_NestedIgnore_IgnoreNestedFilesInOneDirectoryOnly()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddDirectory("C:/Data/Specials/");
+            fileSystem.AddDirectory("C:/Data/Specials/ArtBooks/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/Accel World/*"));
+            fileSystem.AddFile("C:/Data/Specials/.kavitaignore", new MockFileData("**/ArtBooks/*"));
+            fileSystem.AddFile("C:/Data/Specials/Hi.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Specials/ArtBooks/art book 01.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Hello.pdf", new MockFileData(string.Empty));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(2, allFiles.Count); // Ignore files are not counted in files, only valid extensions
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task ScanFiles_ShouldFindAllFiles()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.txt", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Nothing.pdf", new MockFileData(string.Empty));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(5, allFiles.Count);
+
+            return Task.CompletedTask;
+        }
+
+    #endregion
+
+    #region GetAllDirectories
+
+    [Fact]
+    public void GetAllDirectories_ShouldFindAllNestedDirectories()
+    {
+        const string testDirectory = "C:/manga/base/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 2"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "A"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "B"));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
+    }
+
+    #endregion
     }
 }

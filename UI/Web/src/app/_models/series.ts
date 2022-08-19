@@ -55,4 +55,8 @@ export interface Series {
     minHoursToRead: number;
     maxHoursToRead: number;
     avgHoursToRead: number;
+    /**
+     * Highest level folder containing this series
+     */
+    folderPath: string;
 }

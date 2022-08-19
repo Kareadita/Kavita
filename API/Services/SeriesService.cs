@@ -422,7 +422,16 @@ public class SeriesService : ISeriesService
             }
 
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
+            var libraryIds = series.Select(s => s.LibraryId);
+            var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
+            foreach (var library in libraries)
+            {
+                library.LastModified = DateTime.Now;
+                _unitOfWork.LibraryRepository.Update(library);
+            }
+
             _unitOfWork.SeriesRepository.Remove(series);
+
 
             if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync()) return true;
 
