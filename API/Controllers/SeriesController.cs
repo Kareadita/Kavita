@@ -156,6 +156,7 @@ namespace API.Controllers
             }
 
             series.Name = updateSeries.Name.Trim();
+            series.NormalizedName = Parser.Parser.Normalize(series.Name);
             if (!string.IsNullOrEmpty(updateSeries.SortName.Trim()))
             {
                 series.SortName = updateSeries.SortName.Trim();

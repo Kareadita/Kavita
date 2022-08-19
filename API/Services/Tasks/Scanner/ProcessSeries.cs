@@ -79,23 +79,39 @@ public class ProcessSeries : IProcessSeries
     {
         if (!parsedInfos.Any()) return;
 
+        var seriesAdded = false;
         var scanWatch = Stopwatch.StartNew();
         var seriesName = parsedInfos.First().Series;
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName));
         _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}", seriesName);
 
         // Check if there is a Series
-        var seriesAdded = false;
-        var series = await _unitOfWork.SeriesRepository.GetFullSeriesByName(parsedInfos.First().Series, library.Id);
+        var firstInfo = parsedInfos.First();
+        Series series = null;
+        try
+        {
+            series =
+                await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(firstInfo.Series, firstInfo.LocalizedSeries,
+                    library.Id);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception finding existing series for {SeriesName} with Localized name of {LocalizedName}. This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan", firstInfo.Series, firstInfo.LocalizedSeries);
+            return;
+        }
+
         if (series == null)
         {
             seriesAdded = true;
             series = DbFactory.Series(parsedInfos.First().Series);
         }
+
         if (series.LibraryId == 0) series.LibraryId = library.Id;
 
         try
         {
+
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
             UpdateVolumes(series, parsedInfos);
