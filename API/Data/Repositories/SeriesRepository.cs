@@ -1222,8 +1222,9 @@ public class SeriesRepository : ISeriesRepository
     {
         var localizedSeries = Parser.Parser.Normalize(seriesName);
         return _context.Series
-            .Where(s => (s.NormalizedName.Equals(localizedSeries)
-                         || (s.LocalizedName.Equals(localizedName) && localizedName != string.Empty) && s.LibraryId == libraryId))
+            .Where(s => s.NormalizedName.Equals(localizedSeries)
+                         || (s.LocalizedName.Equals(localizedName) && localizedName != string.Empty))
+            .Where(s => s.LibraryId == libraryId)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Include(s => s.Metadata)
