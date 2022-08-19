@@ -1,9 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
-import { filter, finalize, map, take, takeUntil, takeWhile } from 'rxjs/operators';
-import { Download } from 'src/app/shared/_models/download';
-import { DownloadEntityType, DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
+import { filter, map, takeUntil } from 'rxjs/operators';
+import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -166,6 +165,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.tooltipTitle === '') {
         this.tooltipTitle = vol.name;
       }
+    } else if (this.utilityService.isSeries(this.entity)) {
+      this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
     }
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
       this.user = user;
