@@ -481,12 +481,15 @@ namespace API.Controllers
                 var accessible = await _emailService.CheckIfAccessible(host);
                 if (accessible)
                 {
-                    await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+                    try
                     {
-                        EmailAddress = dto.Email,
-                        InvitingUser = adminUser.UserName,
-                        ServerConfirmationLink = emailLink
-                    });
+                        await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
+                        {
+                            EmailAddress = dto.Email,
+                            InvitingUser = adminUser.UserName,
+                            ServerConfirmationLink = emailLink
+                        });
+                    } catch(Exception) {/* Swallow exception */}
                 }
 
                 user.ConfirmationToken = token;

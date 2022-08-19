@@ -35,8 +35,14 @@ enum TabID {
 }
 
 interface HistoryPoint {
+  /**
+   * Page Number
+   */
   page: number;
-  scrollOffset: number;
+  /**
+   * XPath to scroll to
+   */
+  scrollPart: string; 
 }
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
@@ -372,7 +378,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get PageHeightForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default) {
-      return (this.readingSectionElemRef?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
+      return (this.readingHtml?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
     if (this.immersiveMode) return this.windowHeight + 'px';
@@ -714,7 +720,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
           var page = parseInt(e.target.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum) {
-            this.adhocPageHistory.push({page: this.pageNum, scrollOffset: window.pageYOffset});
+            this.adhocPageHistory.push({page: this.pageNum, scrollPart: this.lastSeenScrollPartPath});
           }
 
           var partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
@@ -862,7 +868,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const page = this.adhocPageHistory.pop();
       if (page !== undefined) {
         this.setPageNum(page.page);
-        this.loadPage(undefined, page.scrollOffset);
+        this.loadPage(page.scrollPart);
       }
     }
   }
@@ -1139,7 +1145,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.layoutMode === BookPageLayoutMode.Default) {
       const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
       // We need to use a delay as webkit browsers (aka apple devices) don't always have the document rendered by this point
-      setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10); // BUG: This is broken 
+      setTimeout(() => this.scrollService.scrollTo(fromTopOffset, this.reader.nativeElement), 10);
     } else {
       setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
     }
@@ -1207,6 +1213,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateLayoutMode(mode: BookPageLayoutMode) {
+    const layoutModeChanged = mode !== this.layoutMode;
     this.layoutMode = mode;
     this.cdRef.markForCheck();
 
@@ -1224,7 +1231,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     // When I switch layout, I might need to resume the progress point. 
-    if (mode === BookPageLayoutMode.Default) {
+    if (mode === BookPageLayoutMode.Default && layoutModeChanged) {
       const lastSelector = this.lastSeenScrollPartPath;
       setTimeout(() => this.scrollTo(lastSelector));
     }

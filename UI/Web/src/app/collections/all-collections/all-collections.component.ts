@@ -9,6 +9,7 @@ import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Tag } from 'src/app/_models/tag';
 import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
+import { ImageService } from 'src/app/_services/image.service';
 
 
 @Component({
@@ -29,7 +30,7 @@ export class AllCollectionsComponent implements OnInit {
   constructor(private collectionService: CollectionTagService, private router: Router,
     private actionFactoryService: ActionFactoryService, private modalService: NgbModal, 
     private titleService: Title, private utilityService: UtilityService, 
-    private readonly cdRef: ChangeDetectorRef) {
+    private readonly cdRef: ChangeDetectorRef, public imageSerivce: ImageService) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - Collections');
   }
