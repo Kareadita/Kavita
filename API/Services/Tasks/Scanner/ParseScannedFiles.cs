@@ -252,17 +252,14 @@ namespace API.Services.Tasks.Scanner
                         var normalizedFolder = Parser.Parser.NormalizePath(folder);
                         if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedFolder, forceCheck))
                         {
-                            if (processSeriesInfos != null) // TODO: We can remove this as it will always be there
+                            var parsedInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
                             {
-                                var parsedInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
-                                {
-                                    Series = fp.SeriesName,
-                                    Format = fp.Format,
-                                }).ToList();
-                                processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
-                                _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
-                                return;
-                            }
+                                Series = fp.SeriesName,
+                                Format = fp.Format,
+                            }).ToList();
+                            processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
+                            _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
+                            return;
                         }
                         _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
                         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));

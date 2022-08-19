@@ -364,7 +364,7 @@ public class ParseScannedFilesTests
 
     #region ProcessFiles
 
-    private MockFileSystem CreateTestFilesystem()
+    private static MockFileSystem CreateTestFilesystem()
     {
         var fileSystem = new MockFileSystem();
         fileSystem.AddDirectory("C:/Data/");
@@ -413,7 +413,7 @@ public class ParseScannedFilesTests
             return Task.CompletedTask;
         });
 
-        Assert.Equal(1, directoriesSeen.Count);
+        Assert.Single(directoriesSeen);
         directoriesSeen.TryGetValue("C:/Data/", out var actual);
         Assert.Equal("C:/Data/", actual);
     }

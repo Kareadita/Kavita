@@ -51,7 +51,7 @@ public class LibraryWatcher : ILibraryWatcher
     private readonly ILogger<LibraryWatcher> _logger;
     private readonly IScannerService _scannerService;
 
-    private IList<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
+    private readonly IList<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
 
     private readonly Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary = new ();
 

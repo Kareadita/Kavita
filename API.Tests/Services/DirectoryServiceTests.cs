@@ -862,7 +862,7 @@ namespace API.Tests.Services
 
             var allFiles = ds.ScanFiles("C:/Data/");
 
-            Assert.Equal(0, allFiles.Count());
+            Assert.Equal(0, allFiles.Count);
 
             return Task.CompletedTask;
         }
@@ -886,7 +886,7 @@ namespace API.Tests.Services
 
             var allFiles = ds.ScanFiles("C:/Data/");
 
-            Assert.Equal(1, allFiles.Count()); // Ignore files are not counted in files, only valid extensions
+            Assert.Equal(1, allFiles.Count); // Ignore files are not counted in files, only valid extensions
 
             return Task.CompletedTask;
         }
@@ -915,7 +915,7 @@ namespace API.Tests.Services
 
             var allFiles = ds.ScanFiles("C:/Data/");
 
-            Assert.Equal(2, allFiles.Count()); // Ignore files are not counted in files, only valid extensions
+            Assert.Equal(2, allFiles.Count); // Ignore files are not counted in files, only valid extensions
 
             return Task.CompletedTask;
         }
@@ -939,7 +939,7 @@ namespace API.Tests.Services
 
             var allFiles = ds.ScanFiles("C:/Data/");
 
-            Assert.Equal(5, allFiles.Count());
+            Assert.Equal(5, allFiles.Count);
 
             return Task.CompletedTask;
         }
@@ -959,7 +959,6 @@ namespace API.Tests.Services
         fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "B"));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        //Assert.Equal(4, ds.GetAllDirectories(testDirectory).Count());
         Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
     }
 
