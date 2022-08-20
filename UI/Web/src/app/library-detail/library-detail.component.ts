@@ -203,7 +203,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       lib = {id: this.libraryId, name: this.libraryName};
     }
     switch (action) {
-      case(Action.ScanLibrary):
+      case(Action.Scan):
         this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):

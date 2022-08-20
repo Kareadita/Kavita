@@ -29,7 +29,7 @@ public interface IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    Task ScanLibrary(int libraryId);
+    Task ScanLibrary(int libraryId, bool forceUpdate = false);
 
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
@@ -117,7 +117,7 @@ public class ScannerService : IScannerService
         var library = libraries.FirstOrDefault(l => l.Folders.Select(Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
-            BackgroundJob.Enqueue(() => ScanLibrary(library.Id));
+            BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
         }
     }
 
@@ -150,11 +150,19 @@ public class ScannerService : IScannerService
             }
 
             folderPath = seriesDirs.Keys.FirstOrDefault();
+
+            // We should check if folderPath is a library folder path and if so, return early and tell user to correct their setup.
+            if (libraryPaths.Contains(folderPath))
+            {
+                _logger.LogCritical("[ScannerSeries] {SeriesName} scan aborted. Files for series are not in a nested folder under library path. Correct this and rescan", series.Name);
+                await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Files for series are not in a nested folder under library path. Correct this and rescan."));
+                return;
+            }
         }
 
         if (string.IsNullOrEmpty(folderPath))
         {
-            _logger.LogCritical("Scan Series could not find a single, valid folder root for files");
+            _logger.LogCritical("[ScannerSeries] Scan Series could not find a single, valid folder root for files");
             await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Scan Series could not find a single, valid folder root for files"));
             return;
         }
@@ -393,7 +401,7 @@ public class ScannerService : IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task ScanLibrary(int libraryId)
+    public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);

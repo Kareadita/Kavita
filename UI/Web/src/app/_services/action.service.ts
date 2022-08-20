@@ -52,11 +52,21 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    * @returns 
    */
-  scanLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
+  async scanLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
     if (!library.hasOwnProperty('id') || library.id === undefined) {
       return;
     }
-    this.libraryService.scan(library?.id).pipe(take(1)).subscribe((res: any) => {
+
+    // Prompt user if we should do a force or not
+    const config = this.confirmService.defaultConfirm;
+    config.header = 'Force Scan';
+    config.buttons = [
+      {text: 'Yes', type: 'secondary'},
+      {text: 'No', type: 'primary'},
+    ];
+    const force = await this.confirmService.confirm('Do you want to force this scan? This can be expensive, it will ignore any caching logic and treat as if a fresh scan.', config)
+
+    this.libraryService.scan(library.id, force).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + library.name);
       if (callback) {
         callback(library);

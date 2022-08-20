@@ -345,7 +345,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
           this.loadSeries(series.id);
         });
         break;
-      case(Action.ScanLibrary):
+      case(Action.Scan):
         this.actionService.scanSeries(series, () => {
           this.actionInProgress = false;
           this.changeDetectionRef.markForCheck();

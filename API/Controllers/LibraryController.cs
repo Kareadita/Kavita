@@ -168,9 +168,9 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
-        public ActionResult Scan(int libraryId)
+        public ActionResult Scan(int libraryId, bool force = false)
         {
-            _taskScheduler.ScanLibrary(libraryId);
+            _taskScheduler.ScanLibrary(libraryId, force);
             return Ok();
         }
 

@@ -78,7 +78,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   handleAction(action: Action, library: Library) {
     switch (action) {
-      case(Action.ScanLibrary):
+      case(Action.Scan):
         this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
