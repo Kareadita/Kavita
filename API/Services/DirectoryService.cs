@@ -558,7 +558,6 @@ namespace API.Services
        /// <returns></returns>
        public string GetParentDirectoryName(string fileOrFolder)
        {
-            // TODO: Write Unit tests
             try
             {
                 return Parser.Parser.NormalizePath(Directory.GetParent(fileOrFolder).FullName);

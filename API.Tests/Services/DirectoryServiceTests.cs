@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
@@ -505,7 +505,7 @@ namespace API.Tests.Services
             }
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            ds.CopyFilesToDirectory(new[] { $"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip" }, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip"}, "/manga/output/");
             Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
         }
 
@@ -520,7 +520,7 @@ namespace API.Tests.Services
             }
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            ds.CopyFilesToDirectory(new[] { $"{testDirectory}file_{0}.zip", $"{testDirectory}file_{200}.zip", $"{testDirectory}file_{1}.zip" }, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{200}.zip", $"{testDirectory}file_{1}.zip"}, "/manga/output/");
             Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
         }
 
@@ -536,7 +536,7 @@ namespace API.Tests.Services
             fileSystem.AddFile($"{testDirectory}nested/file_11.zip", new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            ds.CopyFilesToDirectory(new[] { $"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip" }, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip"}, "/manga/output/");
             Assert.Equal(3, ds.GetFiles("/manga/output/").Count());
         }
 
@@ -551,7 +551,7 @@ namespace API.Tests.Services
             }
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            ds.CopyFilesToDirectory(new[] { $"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip" },
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip"},
                 "/manga/output/", "mangarocks_");
             Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
             Assert.All(ds.GetFiles("/manga/output/"), filepath => ds.FileSystem.Path.GetFileName(filepath).StartsWith("mangarocks_"));
@@ -568,7 +568,7 @@ namespace API.Tests.Services
             }
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            ds.CopyFilesToDirectory(new[] { $"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip" },
+            ds.CopyFilesToDirectory(new []{$"{testDirectory}file_{0}.zip", $"{testDirectory}file_{1}.zip", $"{testDirectory}nested/file_11.zip"},
                 "/manga/output/");
             Assert.Equal(2, ds.GetFiles("/manga/output/").Count());
         }
@@ -584,8 +584,8 @@ namespace API.Tests.Services
             fileSystem.AddFile(MockUnixSupport.Path($"/manga/output/file (2).zip"), new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            ds.CopyFilesToDirectory(new[] { MockUnixSupport.Path($"{testDirectory}file.zip") }, "/manga/output/");
-            ds.CopyFilesToDirectory(new[] { MockUnixSupport.Path($"{testDirectory}file.zip") }, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
+            ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
             var outputFiles = ds.GetFiles("/manga/output/").Select(API.Parser.Parser.NormalizePath).ToList();
             Assert.Equal(4, outputFiles.Count()); // we have 2 already there and 2 copies
             // For some reason, this has C:/ on directory even though everything is emulated (System.IO.Abstractions issue, not changing)
@@ -674,9 +674,9 @@ namespace API.Tests.Services
         #region FindHighestDirectoriesFromFiles
 
         [Theory]
-        [InlineData(new[] { "C:/Manga/" }, new[] { "C:/Manga/Love Hina/Vol. 01.cbz" }, "C:/Manga/Love Hina")]
-        [InlineData(new[] { "C:/Manga/Dir 1/", "c://Manga/Dir 2/" }, new[] { "C:/Manga/Dir 1/Love Hina/Vol. 01.cbz" }, "C:/Manga/Dir 1/Love Hina")]
-        [InlineData(new[] { "C:/Manga/Dir 1/", "c://Manga/" }, new[] { "D:/Manga/Love Hina/Vol. 01.cbz", "D:/Manga/Vol. 01.cbz" }, "")]
+        [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga/Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
+        [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/Dir 2/"}, new [] {"C:/Manga/Dir 1/Love Hina/Vol. 01.cbz"}, "C:/Manga/Dir 1/Love Hina")]
+        [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/"}, new [] {"D:/Manga/Love Hina/Vol. 01.cbz", "D:/Manga/Vol. 01.cbz"}, "")]
         public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] files, string expectedDirectory)
         {
             var fileSystem = new MockFileSystem();
@@ -694,7 +694,7 @@ namespace API.Tests.Services
             var expected = new Dictionary<string, string>();
             if (!string.IsNullOrEmpty(expectedDirectory))
             {
-                expected = new Dictionary<string, string> { { expectedDirectory, "" } };
+                expected = new Dictionary<string, string> {{expectedDirectory, ""}};
             }
 
             Assert.Equal(expected, actual);
@@ -752,7 +752,7 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             ds.RemoveNonImages($"{testDirectory}");
             Assert.False(fileSystem.FileExists($"{testDirectory}file/data-0.txt"));
-            Assert.Equal(3, ds.GetFiles($"{testDirectory}", searchOption: SearchOption.AllDirectories).Count());
+            Assert.Equal(3, ds.GetFiles($"{testDirectory}", searchOption:SearchOption.AllDirectories).Count());
         }
 
         #endregion
@@ -944,25 +944,25 @@ namespace API.Tests.Services
             return Task.CompletedTask;
         }
 
-        #endregion
+    #endregion
 
-        #region GetAllDirectories
+    #region GetAllDirectories
 
-        [Fact]
-        public void GetAllDirectories_ShouldFindAllNestedDirectories()
-        {
-            const string testDirectory = "C:/manga/base/";
-            var fileSystem = new MockFileSystem();
-            fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1"));
-            fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 2"));
-            fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "A"));
-            fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "B"));
+    [Fact]
+    public void GetAllDirectories_ShouldFindAllNestedDirectories()
+    {
+        const string testDirectory = "C:/manga/base/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 2"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "A"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "B"));
 
-            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
-        }
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
+    }
 
-        #endregion
+    #endregion
 
         #region GetParentDirectory
 
