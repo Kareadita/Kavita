@@ -58,13 +58,7 @@ export class ActionService implements OnDestroy {
     }
 
     // Prompt user if we should do a force or not
-    const config = this.confirmService.defaultConfirm;
-    config.header = 'Force Scan';
-    config.buttons = [
-      {text: 'Yes', type: 'secondary'},
-      {text: 'No', type: 'primary'},
-    ];
-    const force = await this.confirmService.confirm('Do you want to force this scan? This can be expensive, it will ignore any caching logic and treat as if a fresh scan.', config)
+    const force = await this.promptIfForce();
 
     this.libraryService.scan(library.id, force).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + library.name);
@@ -162,8 +156,11 @@ export class ActionService implements OnDestroy {
    * @param series Series, must have libraryId and name populated
    * @param callback Optional callback to perform actions after API completes
    */
-  scanSeries(series: Series, callback?: SeriesActionCallback) {
-    this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
+  async scanSeries(series: Series, callback?: SeriesActionCallback) {
+
+    const force = await this.promptIfForce();
+
+    this.seriesService.scan(series.libraryId, series.id, force).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + series.name);
       if (callback) {
         callback(series);
@@ -554,5 +551,16 @@ export class ActionService implements OnDestroy {
         callback(res);
       }
     });
+  }
+
+  private async promptIfForce() {
+    // Prompt user if we should do a force or not
+    const config = this.confirmService.defaultConfirm;
+    config.header = 'Force Scan';
+    config.buttons = [
+      {text: 'Yes', type: 'secondary'},
+      {text: 'No', type: 'primary'},
+    ];
+    return await this.confirmService.confirm('Do you want to force this scan? This can be expensive, it will ignore any caching logic and treat as if a fresh scan.', config)
   }
 }

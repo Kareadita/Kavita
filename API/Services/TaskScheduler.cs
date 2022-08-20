@@ -232,7 +232,7 @@ public class TaskScheduler : ITaskScheduler
         }
         if (RunningAnyTasksByMethod(new List<string>() {"ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"}, ScanQueue))
         {
-            _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 mins");
+            _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
             BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), TimeSpan.FromMinutes(10));
             return;
         }
