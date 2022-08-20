@@ -84,8 +84,8 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/analyze?libraryId=' + libraryId, {});
   }
 
-  refreshMetadata(libraryId: number) {
-    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata?libraryId=' + libraryId, {});
+  refreshMetadata(libraryId: number, forceUpdate = false) {
+    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata?libraryId=' + libraryId + '&force=' + forceUpdate, {});
   }
 
   create(model: {name: string, type: number, folders: string[]}) {

@@ -87,7 +87,9 @@ export class ActionService implements OnDestroy {
       return;
     }
 
-    this.libraryService.refreshMetadata(library?.id).pipe(take(1)).subscribe((res: any) => {
+    const forceUpdate = await this.promptIfForce();
+
+    this.libraryService.refreshMetadata(library?.id, forceUpdate).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + library.name);
       if (callback) {
         callback(library);
@@ -553,7 +555,7 @@ export class ActionService implements OnDestroy {
     });
   }
 
-  private async promptIfForce() {
+  private async promptIfForce(extraContent: string = '') {
     // Prompt user if we should do a force or not
     const config = this.confirmService.defaultConfirm;
     config.header = 'Force Scan';
@@ -561,6 +563,7 @@ export class ActionService implements OnDestroy {
       {text: 'Yes', type: 'secondary'},
       {text: 'No', type: 'primary'},
     ];
-    return await this.confirmService.confirm('Do you want to force this scan? This can be expensive, it will ignore any caching logic and treat as if a fresh scan.', config)
+    const msg = 'Do you want to force this scan? This is resource intense task and may be slow.' + extraContent;
+    return await this.confirmService.confirm(msg, config)
   }
 }
