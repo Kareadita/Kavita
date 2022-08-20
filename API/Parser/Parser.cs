@@ -1041,7 +1041,7 @@ namespace API.Parser
         /// <returns></returns>
         public static bool HasBlacklistedFolderInPath(string path)
         {
-            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || Path.GetFileName(path).StartsWith("._") || path.Contains(".qpkg");
+            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._") || Path.GetFileName(path).StartsWith("._") || path.Contains(".qpkg");
         }
 
 
