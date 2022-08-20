@@ -165,7 +165,7 @@
                 <li class="list-group-item dark-menu-item" *ngIf="onlineUsers.length > 1">
                     <div>{{onlineUsers.length}} Users online</div>
                 </li>
-                <li class="list-group-item dark-menu-item" *ngIf="activeEvents < 1 && onlineUsers.length <= 1">Not much going on here</li>
+                <li class="list-group-item dark-menu-item" *ngIf="activeEvents === 0 && onlineUsers.length <= 1">Not much going on here</li>
                 <li class="list-group-item dark-menu-item" *ngIf="debugMode">Active Events: {{activeEvents}}</li>
             </ng-container>
         </ul>

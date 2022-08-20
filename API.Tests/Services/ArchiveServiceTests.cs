@@ -68,6 +68,7 @@ namespace API.Tests.Services
         [InlineData("macos_none.zip", 0)]
         [InlineData("macos_one.zip", 1)]
         [InlineData("macos_native.zip", 21)]
+        [InlineData("macos_withdotunder_one.zip", 1)]
         public void GetNumberOfPagesFromArchiveTest(string archivePath, int expected)
         {
             var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");

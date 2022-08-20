@@ -8,7 +8,6 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
-using API.DTOs.Reader;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;

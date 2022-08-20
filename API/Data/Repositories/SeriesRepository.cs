@@ -121,6 +121,7 @@ public interface ISeriesRepository
     Task<int> GetSeriesIdByFolder(string folder);
     Task<Series> GetSeriesByFolderPath(string folder);
     Task<Series> GetFullSeriesByName(string series, int libraryId);
+    Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId);
     Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
 }
@@ -1168,10 +1169,65 @@ public class SeriesRepository : ISeriesRepository
         return await _context.Series.SingleOrDefaultAsync(s => s.FolderPath.Equals(normalized));
     }
 
+    /// <summary>
+    /// Finds a series by series name for a given library.
+    /// </summary>
+    /// <remarks>This pulls everything with the Series, so should be used only when needing tracking on all related tables</remarks>
+    /// <param name="series"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     public Task<Series> GetFullSeriesByName(string series, int libraryId)
     {
+        var localizedSeries = Parser.Parser.Normalize(series);
         return _context.Series
-            .Where(s => s.NormalizedName.Equals(Parser.Parser.Normalize(series)) && s.LibraryId == libraryId)
+            .Where(s => (s.NormalizedName.Equals(localizedSeries)
+                         || s.LocalizedName.Equals(series)) && s.LibraryId == libraryId)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.People)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Genres)
+            .Include(s => s.Library)
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(cm => cm.People)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+
+
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
+            .Include(s => s.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Files)
+            .AsSplitQuery()
+            .SingleOrDefaultAsync();
+    }
+
+    /// <summary>
+    /// Finds a series by series name or localized name for a given library.
+    /// </summary>
+    /// <remarks>This pulls everything with the Series, so should be used only when needing tracking on all related tables</remarks>
+    /// <param name="seriesName"></param>
+    /// <param name="localizedName"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId)
+    {
+        var localizedSeries = Parser.Parser.Normalize(seriesName);
+        var normalizedLocalized = Parser.Parser.Normalize(localizedName);
+        return _context.Series
+            .Where(s => s.NormalizedName.Equals(localizedSeries)
+                        || s.NormalizedName.Equals(normalizedLocalized)
+                        || s.NormalizedLocalizedName.Equals(localizedSeries)
+                        || s.NormalizedLocalizedName.Equals(normalizedLocalized))
+            .Where(s => s.LibraryId == libraryId)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Include(s => s.Metadata)
