@@ -1033,9 +1033,15 @@ namespace API.Parser
             return IsImage(filename) && CoverImageRegex.IsMatch(filename);
         }
 
+        /// <summary>
+        /// Validates that a Path doesn't start with certain blacklisted folders, like __MACOSX, @Recently-Snapshot, etc and that if a full path, the filename
+        /// doesn't start with ._, which is a metadata file on MACOSX.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static bool HasBlacklistedFolderInPath(string path)
         {
-            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._") || path.Contains(".qpkg");
+            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || Path.GetFileName(path).StartsWith("._") || path.Contains(".qpkg");
         }
 
 
