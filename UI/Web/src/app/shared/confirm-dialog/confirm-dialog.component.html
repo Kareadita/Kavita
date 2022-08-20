@@ -2,9 +2,7 @@
 
 <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{config.header}}</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-    
-    </button>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()" *ngIf="!config.disableEscape"></button>
 </div>
 <div class="modal-body" style="overflow-x: auto" [innerHtml]="config.content | safeHtml">
 </div>
