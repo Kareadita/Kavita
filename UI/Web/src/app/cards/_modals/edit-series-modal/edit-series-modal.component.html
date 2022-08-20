@@ -344,9 +344,10 @@
                         <div class="col-md-6">Format: <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
                     </div>
                     <div class="row g-0 mb-2">
-                        <div class="col-md-6" >Created: {{series.created | date:'shortDate'}}</div>
+                        <div class="col-md-6">Created: {{series.created | date:'shortDate'}}</div>
                         <div class="col-md-6">Last Read: {{series.latestReadDate | date:'shortDate' | defaultDate}}</div>
-                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | date:'shortDate' | defaultDate}}</div>
+                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | date:'short' | defaultDate}}</div>
+                        <div class="col-md-6">Last Scanned: {{series.lastFolderScanned | date:'short' | defaultDate}}</div>
                         <div class="col-md-6">Folder Path: {{series.folderPath | defaultValue}}</div>
                     </div>
                     <div class="row g-0 mb-2" *ngIf="metadata">
