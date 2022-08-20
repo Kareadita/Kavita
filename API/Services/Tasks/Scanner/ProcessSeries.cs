@@ -104,7 +104,8 @@ public class ProcessSeries : IProcessSeries
         if (series == null)
         {
             seriesAdded = true;
-            series = DbFactory.Series(parsedInfos.First().Series);
+            series = DbFactory.Series(firstInfo.Series);
+            series.LocalizedName = firstInfo.LocalizedSeries;
         }
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;
@@ -118,6 +119,7 @@ public class ProcessSeries : IProcessSeries
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = Parser.Parser.Normalize(series.Name);
+            series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             series.OriginalName ??= parsedInfos[0].Series;
             if (series.Format == MangaFormat.Unknown)
             {

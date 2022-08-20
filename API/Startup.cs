@@ -176,6 +176,7 @@ namespace API
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                     var themeService = serviceProvider.GetRequiredService<IThemeService>();
+                    var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
                     await MigrateBookmarks.Migrate(directoryService, unitOfWork,
                         logger, cacheService);
@@ -184,6 +185,9 @@ namespace API
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
 
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
+
+                    // Only needed for v0.5.5.x and v0.5.6
+                    await MigrateNormalizedLocalizedName.Migrate(unitOfWork, dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

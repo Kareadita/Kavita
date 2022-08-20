@@ -18,6 +18,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public string NormalizedName { get; set; }
     /// <summary>
+    /// Used internally for localized name matching. <see cref="Parser.Parser.Normalize"/>
+    /// </summary>
+    public string NormalizedLocalizedName { get; set; }
+    /// <summary>
     /// The name used to sort the Series. By default, will be the same as Name.
     /// </summary>
     public string SortName { get; set; }

@@ -163,6 +163,7 @@ namespace API.Controllers
             }
 
             series.LocalizedName = updateSeries.LocalizedName.Trim();
+            series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
 
             series.NameLocked = updateSeries.NameLocked;
             series.SortNameLocked = updateSeries.SortNameLocked;

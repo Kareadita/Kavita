@@ -1221,9 +1221,12 @@ public class SeriesRepository : ISeriesRepository
     public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId)
     {
         var localizedSeries = Parser.Parser.Normalize(seriesName);
+        var normalizedLocalized = Parser.Parser.Normalize(localizedName);
         return _context.Series
             .Where(s => s.NormalizedName.Equals(localizedSeries)
-                         || (s.LocalizedName.Equals(localizedName) && localizedName != string.Empty))
+                        || s.NormalizedName.Equals(normalizedLocalized)
+                        || s.NormalizedLocalizedName.Equals(localizedSeries)
+                        || s.NormalizedLocalizedName.Equals(normalizedLocalized))
             .Where(s => s.LibraryId == libraryId)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
