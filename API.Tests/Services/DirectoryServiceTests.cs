@@ -963,5 +963,36 @@ namespace API.Tests.Services
     }
 
     #endregion
+
+        #region GetParentDirectory
+
+        [Theory]
+        [InlineData(@"C:/file.txt", "C:/")]
+        [InlineData(@"C:/folder/file.txt", "C:/folder")]
+        [InlineData(@"C:/folder/subfolder/file.txt", "C:/folder/subfolder")]
+        public void GetParentDirectoryName_ShouldFindParentOfFiles(string path, string expected)
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+            {
+                { path, new MockFileData(string.Empty)}
+            });
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            Assert.Equal(expected, ds.GetParentDirectoryName(path));
+        }
+        [Theory]
+        [InlineData(@"C:/folder", "C:/")]
+        [InlineData(@"C:/folder/subfolder", "C:/folder")]
+        [InlineData(@"C:/folder/subfolder/another", "C:/folder/subfolder")]
+        public void GetParentDirectoryName_ShouldFindParentOfDirectories(string path, string expected)
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(path);
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            Assert.Equal(expected, ds.GetParentDirectoryName(path));
+        }
+
+        #endregion
     }
 }

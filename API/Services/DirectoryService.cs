@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -554,31 +554,18 @@ namespace API.Services
        /// <summary>
        /// Returns the parent directories name for a file or folder. Empty string is path is not valid.
        /// </summary>
-       /// <remarks>This does touch I/O with an Attribute lookup</remarks>
        /// <param name="fileOrFolder"></param>
        /// <returns></returns>
        public string GetParentDirectoryName(string fileOrFolder)
        {
-           // TODO: Write Unit tests
-           try
-           {
-               var attr = File.GetAttributes(fileOrFolder);
-               var isDirectory = attr.HasFlag(FileAttributes.Directory);
-               if (isDirectory)
-               {
-                   return Parser.Parser.NormalizePath(FileSystem.DirectoryInfo
-                       .FromDirectoryName(fileOrFolder).Parent
-                       .FullName);
-               }
-
-               return Parser.Parser.NormalizePath(FileSystem.FileInfo
-                   .FromFileName(fileOrFolder).Directory.Parent
-                   .FullName);
-           }
-           catch (Exception)
-           {
-               return string.Empty;
-           }
+            try
+            {
+                return Parser.Parser.NormalizePath(Directory.GetParent(fileOrFolder).FullName);
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
        }
 
        /// <summary>
