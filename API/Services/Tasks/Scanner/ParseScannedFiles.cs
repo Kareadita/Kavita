@@ -263,6 +263,11 @@ namespace API.Services.Tasks.Scanner
                         }
                         _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
                         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
+                        if (files.Count == 0)
+                        {
+                            _logger.LogInformation("[ScannerService] {Folder} is empty", folder);
+                            return;
+                        }
                         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
                         var infos = files.Select(file => _readingItemService.ParseFile(file, folderPath, libraryType)).Where(info => info != null).ToList();
 
