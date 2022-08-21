@@ -1224,7 +1224,8 @@ public class SeriesRepository : ISeriesRepository
         var normalizedLocalized = Parser.Parser.Normalize(localizedName);
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
-            .Where(s => s.NormalizedName.Equals(normalizedSeries));
+            .Where(s => s.NormalizedName.Equals(normalizedSeries)
+                        || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty));
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {
             query = query.Where(s =>

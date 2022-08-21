@@ -107,8 +107,7 @@ public class ProcessSeries : IProcessSeries
         if (series == null)
         {
             seriesAdded = true;
-            series = DbFactory.Series(firstInfo.Series);
-            series.LocalizedName = firstInfo.LocalizedSeries;
+            series = DbFactory.Series(firstInfo.Series, firstInfo.LocalizedSeries);
         }
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;

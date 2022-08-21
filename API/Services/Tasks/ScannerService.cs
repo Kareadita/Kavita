@@ -413,7 +413,7 @@ public class ScannerService : IScannerService
         var wasLibraryUpdatedSinceLastScan = (library.LastModified.Truncate(TimeSpan.TicksPerMinute) >
                                              library.LastScanned.Truncate(TimeSpan.TicksPerMinute))
                                              && library.LastScanned != DateTime.MinValue;
-        if (!wasLibraryUpdatedSinceLastScan)
+        if (!forceUpdate && !wasLibraryUpdatedSinceLastScan)
         {
             var haveFoldersChangedSinceLastScan = library.Folders
                 .All(f => _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute) > f.LastScanned.Truncate(TimeSpan.TicksPerMinute));

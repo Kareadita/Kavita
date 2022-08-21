@@ -563,7 +563,7 @@ export class ActionService implements OnDestroy {
       {text: 'Yes', type: 'secondary'},
       {text: 'No', type: 'primary'},
     ];
-    const msg = 'Do you want to force this scan? This is resource intense task and may be slow.' + extraContent;
-    return await this.confirmService.confirm(msg, config)
+    const msg = 'Do you want to force this scan? This is will ignore optimizations that reduce processing and I/O. ' + extraContent;
+    return !await this.confirmService.confirm(msg, config); // Not because primary is the false state
   }
 }
