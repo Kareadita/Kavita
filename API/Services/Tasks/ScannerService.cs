@@ -62,6 +62,10 @@ public enum ScanCancelReason
     /// There has been no change to the filesystem since last scan
     /// </summary>
     NoChange = 2,
+    /// <summary>
+    /// The underlying folder is missing
+    /// </summary>
+    FolderMissing = 3
 }
 
 /**
@@ -131,6 +135,7 @@ public class ScannerService : IScannerService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
         if (await ShouldScanSeries(seriesId, library, libraryPaths, series, bypassFolderOptimizationChecks) != ScanCancelReason.NoCancel) return;
+
 
 
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
@@ -302,14 +307,28 @@ public class ScannerService : IScannerService
             var allFolders = seriesFolderPaths.SelectMany(path => _directoryService.GetDirectories(path)).ToList();
             allFolders.AddRange(seriesFolderPaths);
 
-            if (allFolders.All(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
+            try
             {
-                _logger.LogInformation(
-                    "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
+                if (allFolders.All(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
+                {
+                    _logger.LogInformation(
+                        "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
+                        series.Name);
+                    await _eventHub.SendMessageAsync(MessageFactory.Info,
+                        MessageFactory.InfoEvent($"{series.Name} scan has no work to do",
+                            "All folders have not been changed since last scan. Scan will be aborted."));
+                    return ScanCancelReason.NoChange;
+                }
+            }
+            catch (IOException ex)
+            {
+                // If there is an exception it means that the folder doesn't exist. So we should delete the series
+                _logger.LogError(ex, "[ScannerService] Scan series for {SeriesName} found the folder path no longer exists. Scan will be aborted",
                     series.Name);
                 await _eventHub.SendMessageAsync(MessageFactory.Info,
-                    MessageFactory.InfoEvent($"{series.Name} scan has no work to do", "All folders have not been changed since last scan. Scan will be aborted."));
-                return ScanCancelReason.NoChange;
+                    MessageFactory.ErrorEvent($"{series.Name} scan has no work to do",
+                        "The folder the series is in is missing. Delete series manually or perform a library scan. Scan will be aborted."));
+                return ScanCancelReason.FolderMissing;
             }
         }
 
