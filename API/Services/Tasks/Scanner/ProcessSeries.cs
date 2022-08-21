@@ -120,7 +120,6 @@ public class ProcessSeries : IProcessSeries
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = Parser.Parser.Normalize(series.Name);
-            series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             series.OriginalName ??= parsedInfos[0].Series;
             if (series.Format == MangaFormat.Unknown)
             {
@@ -145,6 +144,7 @@ public class ProcessSeries : IProcessSeries
             if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
             {
                 series.LocalizedName = localizedSeries;
+                series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             }
 
             // Update series FolderPath here (TODO: Move this into it's own private method)
