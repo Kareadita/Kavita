@@ -325,7 +325,7 @@ namespace API.Services.Tasks.Scanner
         /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
         /// </example>
         /// <param name="infos">A collection of ParserInfos</param>
-        private static void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo> infos)
+        private void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo> infos)
         {
             var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
             if (!hasLocalizedSeries) return;
@@ -334,8 +334,24 @@ namespace API.Services.Tasks.Scanner
                 .FirstOrDefault(i => !string.IsNullOrEmpty(i));
             if (string.IsNullOrEmpty(localizedSeries)) return;
 
-            var nonLocalizedSeries = infos.Select(i => i.Series).Distinct()
-                .FirstOrDefault(series => !series.Equals(localizedSeries));
+            // NOTE: If we have multiple series in a folder, then this will fail. It will group into one series. User needs to fix this themselves
+            string nonLocalizedSeries;
+            var nonLocalizedSeriesFound = infos.Select(i => i.Series).Distinct().ToList();
+            if (nonLocalizedSeriesFound.Count == 1)
+            {
+                nonLocalizedSeries = nonLocalizedSeriesFound.First();
+            }
+            else
+            {
+                // There can be a case where there are multiple series in a folder that causes merging.
+                if (nonLocalizedSeriesFound.Count > 2)
+                {
+                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder:  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
+                }
+                nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
+            }
+
+            if (string.IsNullOrEmpty(nonLocalizedSeries)) return;
 
             var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
             foreach (var infoNeedingMapping in infos.Where(i =>
