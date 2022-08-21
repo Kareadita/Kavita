@@ -151,7 +151,10 @@ public class ProcessSeries : IProcessSeries
             var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(l => l.Path), parsedInfos.Select(f => f.FullFilePath).ToList());
             if (seriesDirs.Keys.Count == 0)
             {
-                _logger.LogCritical("Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are in a folder");
+                _logger.LogCritical("Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are under a single folder from library");
+                await _eventHub.SendMessageAsync(MessageFactory.Info,
+                    MessageFactory.InfoEvent($"{series.Name} has files spread outside a single series folder",
+                        "This has negative performance effects. Please ensure all series are under a single folder from library"));
             }
             else
             {
