@@ -12,7 +12,7 @@
 
 .tab-content {
   overflow: auto;
-  height: calc(40vh - 63px); // drawer height - offcanvas heading height
+  height: calc(40vh - (46px + 1rem)); // drawer height - offcanvas heading height
 }
 
 .h6 {
