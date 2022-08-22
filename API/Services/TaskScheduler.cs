@@ -176,7 +176,10 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanLibrary(int libraryId, bool force = false)
     {
-        if (HasAlreadyEnqueuedTask("ScannerService","ScanLibrary",  new object[] {libraryId}, ScanQueue))
+        var alreadyEnqueued =
+            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
+            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
+        if (alreadyEnqueued)
         {
             _logger.LogInformation("A duplicate request to scan library for library occured. Skipping");
             return;
@@ -201,7 +204,11 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshMetadata(int libraryId, bool forceUpdate = true)
     {
-        if (HasAlreadyEnqueuedTask("MetadataService","GenerateCoversForLibrary",  new object[] {libraryId, forceUpdate}))
+        var alreadyEnqueued = HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
+                                  new object[] {libraryId, true}) ||
+                              HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
+                                  new object[] {libraryId, false});
+        if (alreadyEnqueued)
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
