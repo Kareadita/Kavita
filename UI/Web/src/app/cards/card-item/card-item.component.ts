@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
@@ -125,7 +124,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   constructor(public imageService: ImageService, private libraryService: LibraryService,
     public utilityService: UtilityService, private downloadService: DownloadService,
-    private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
+    public bulkSelectionService: BulkSelectionService,
     private messageHub: MessageHubService, private accountService: AccountService, 
     private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef) {}
 
@@ -188,20 +187,22 @@ export class CardItemComponent implements OnInit, OnDestroy {
             chapter.pagesRead = updateEvent.pagesRead;
           }
         } else {
+          // Ignore
+          return;
           // re-request progress for the series
-          const s = this.utilityService.asSeries(this.entity);
-          let pagesRead = 0;
-          if (s.hasOwnProperty('volumes')) {
-            s.volumes.forEach(v => {
-              v.chapters.forEach(c => {
-                if (c.id === updateEvent.chapterId) {
-                  c.pagesRead = updateEvent.pagesRead;
-                }
-                pagesRead += c.pagesRead;
-              });
-            });
-            s.pagesRead = pagesRead;
-          }
+          // const s = this.utilityService.asSeries(this.entity);
+          // let pagesRead = 0;
+          // if (s.hasOwnProperty('volumes')) {
+          //   s.volumes.forEach(v => {
+          //     v.chapters.forEach(c => {
+          //       if (c.id === updateEvent.chapterId) {
+          //         c.pagesRead = updateEvent.pagesRead;
+          //       }
+          //       pagesRead += c.pagesRead;
+          //     });
+          //   });
+          //   s.pagesRead = pagesRead;
+          // }
         }
       }
 
