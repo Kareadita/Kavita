@@ -176,7 +176,7 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("refresh-metadata")]
-        public ActionResult RefreshMetadata(int libraryId, bool force = false)
+        public ActionResult RefreshMetadata(int libraryId, bool force = true)
         {
             _taskScheduler.RefreshMetadata(libraryId, force);
             return Ok();

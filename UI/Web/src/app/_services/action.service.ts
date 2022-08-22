@@ -87,7 +87,7 @@ export class ActionService implements OnDestroy {
       return;
     }
 
-    const forceUpdate = await this.promptIfForce();
+    const forceUpdate = true; //await this.promptIfForce();
 
     this.libraryService.refreshMetadata(library?.id, forceUpdate).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + library.name);
