@@ -134,7 +134,7 @@ public class SeriesRepositoryTests
         await _unitOfWork.CommitAsync();
     }
 
-    [Theory]
+
     [InlineData("Heion Sedai no Idaten-tachi", "", "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
     public async Task GetFullSeriesByAnyName_Should(string seriesName, string localizedName, string? expected)
     {

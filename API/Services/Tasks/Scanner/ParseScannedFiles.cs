@@ -3,10 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using API.Parser;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -66,27 +64,6 @@ namespace API.Services.Tasks.Scanner
             _directoryService = directoryService;
             _readingItemService = readingItemService;
             _eventHub = eventHub;
-        }
-
-        /// <summary>
-        /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
-        /// </summary>
-        /// TODO: This can be removed, it is no longer needed
-        /// <param name="parsedSeries"></param>
-        /// <param name="series"></param>
-        /// <returns></returns>
-        public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
-        {
-            var allKeys = parsedSeries.Keys.Where(ps =>
-                SeriesHelper.FindSeries(series, ps));
-
-            var infos = new List<ParserInfo>();
-            foreach (var key in allKeys)
-            {
-                infos.AddRange(parsedSeries[key]);
-            }
-
-            return infos;
         }
 
 

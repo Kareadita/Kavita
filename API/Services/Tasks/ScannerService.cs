@@ -172,7 +172,6 @@ public class ScannerService : IScannerService
         }
 
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        var seenSeries = new List<ParsedSeries>();
         var processTasks = new List<Task>();
 
 
@@ -181,7 +180,6 @@ public class ScannerService : IScannerService
         await _processSeries.Prime();
         void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
-            var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
             if (parsedFiles.Count == 0) return;
 
@@ -197,20 +195,6 @@ public class ScannerService : IScannerService
                 return;
             }
 
-            if (skippedScan)
-            {
-                // NOTE: I think this is problematic where scan series is skipping folders, because if the path changes, we wont know.
-                // Scan series might need to always force
-                seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
-                {
-                    Name = pf.Series,
-                    NormalizedName = Parser.Parser.Normalize(pf.Series),
-                    Format = pf.Format
-                }));
-                return;
-            }
-
-            seenSeries.Add(foundParsedSeries);
             processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
             parsedSeries.Add(foundParsedSeries, parsedFiles);
         }
@@ -220,26 +204,6 @@ public class ScannerService : IScannerService
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
         await Task.WhenAll(processTasks);
-
-
-        // At this point, we've already inserted the series into the DB OR we haven't and seenSeries has our series
-        // We now need to do any leftover work, like removing
-        //  We need to handle if parsedSeries is empty but seenSeries has our series
-        if (seenSeries.Any(s => s.NormalizedName.Equals(series.NormalizedName)) && parsedSeries.Keys.Count == 0)
-        {
-            // This basically happens when we see a series but don't do anything because there isn't anything to do
-
-            // Nothing has changed
-            _logger.LogInformation("[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan", series.Name);
-            await _eventHub.SendMessageAsync(MessageFactory.Info,
-                MessageFactory.InfoEvent($"{series.Name} scan has no work to do",
-                    "All folders have not been changed since last scan. Scan will be aborted."));
-
-
-            _processSeries.EnqueuePostSeriesProcessTasks(series.LibraryId, seriesId, false);
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
-            return;
-        }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
