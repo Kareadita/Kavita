@@ -160,9 +160,7 @@ export class ActionService implements OnDestroy {
    */
   async scanSeries(series: Series, callback?: SeriesActionCallback) {
 
-    const force = await this.promptIfForce();
-
-    this.seriesService.scan(series.libraryId, series.id, force).pipe(take(1)).subscribe((res: any) => {
+    this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + series.name);
       if (callback) {
         callback(series);
