@@ -113,6 +113,12 @@ namespace API
 
                 c.AddServer(new OpenApiServer()
                 {
+                    Description = "Custom Url",
+                    Url = "/"
+                });
+
+                c.AddServer(new OpenApiServer()
+                {
                     Description = "Local Server",
                     Url = "http://localhost:5000/",
                 });
