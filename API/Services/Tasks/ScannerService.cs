@@ -225,7 +225,6 @@ public class ScannerService : IScannerService
         // At this point, we've already inserted the series into the DB OR we haven't and seenSeries has our series
         // We now need to do any leftover work, like removing
         //  We need to handle if parsedSeries is empty but seenSeries has our series
-        // (BUG: If the series folder has been moved but the original was still there, then here is saying nothing has changed, but we actually need to either delete or update path)
         if (seenSeries.Any(s => s.NormalizedName.Equals(series.NormalizedName)) && parsedSeries.Keys.Count == 0)
         {
             // This basically happens when we see a series but don't do anything because there isn't anything to do
