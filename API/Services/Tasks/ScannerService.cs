@@ -109,6 +109,7 @@ public class ScannerService : IScannerService
             return;
         }
 
+        // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
         if (string.IsNullOrEmpty(parentDirectory)) return; // This should never happen as it's calculated before enqueing
 
