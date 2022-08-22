@@ -1,6 +1,7 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
@@ -72,7 +73,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(private seriesService: SeriesService, public utilityService: UtilityService,
     @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
-    private jumpbarService: JumpbarService) {
+    private jumpbarService: JumpbarService, private router: Router) {
     this.filter = this.seriesService.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
 
@@ -114,13 +115,13 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
 
+
     if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
-      const resumeKey = this.jumpbarService.getResumeKey(this.header);
+      const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
       if (resumeKey === '') return;
       const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
       if (keys.length < 1) return;
 
-      console.log('Scrolling to ', keys[0].key);
       this.hasResumedJumpKey = true;
       setTimeout(() => this.scrollTo(keys[0]), 100);
     }
@@ -130,7 +131,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   ngOnDestroy() {
     this.onDestory.next();
     this.onDestory.complete();
-    this.jumpbarService.saveResumeKey(this.header, '');
   }
 
   performAction(action: ActionItem<any>) {
@@ -154,7 +154,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
-    this.jumpbarService.saveResumeKey(this.header, jumpKey.key);
+    this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
     this.changeDetectionRef.markForCheck();
     return;
   }

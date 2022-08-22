@@ -75,6 +75,10 @@
         &:hover {
             color: var(--primary-color);
         }
+
+        .active {
+            font-weight: bold;
+        }
     }
 }
 
