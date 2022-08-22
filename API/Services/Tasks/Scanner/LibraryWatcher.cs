@@ -63,7 +63,7 @@ public class LibraryWatcher : ILibraryWatcher
 
     private readonly Queue<FolderScanQueueable> _scanQueue = new Queue<FolderScanQueueable>();
     private readonly TimeSpan _queueWaitTime;
-
+    private readonly FolderScanQueueableComparer _folderScanQueueableComparer = new FolderScanQueueableComparer();
 
 
     public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<LibraryWatcher> logger, IScannerService scannerService, IHostEnvironment environment)
@@ -172,21 +172,20 @@ public class LibraryWatcher : ILibraryWatcher
 
         // We need to find the library this creation belongs to
         // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
-        var libraryFolder = _libraryFolders.FirstOrDefault(f => f.Contains(parentDirectory));
-
+        var libraryFolder = _libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
         if (string.IsNullOrEmpty(libraryFolder)) return;
 
         var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
         if (!rootFolder.Any()) return;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
-        var fullPath = _directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.First());
+        var fullPath = Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.First()));
         var queueItem = new FolderScanQueueable()
         {
             FolderPath = fullPath,
             QueueTime = DateTime.Now
         };
-        if (_scanQueue.Contains(queueItem, new FolderScanQueueableComparer()))
+        if (_scanQueue.Contains(queueItem, _folderScanQueueableComparer))
         {
             ProcessQueue();
             return;
