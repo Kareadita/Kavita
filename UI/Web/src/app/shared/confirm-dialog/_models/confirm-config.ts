@@ -5,4 +5,8 @@ export class ConfirmConfig {
     header: string = 'Confirm';
     content: string = '';
     buttons: Array<ConfirmButton> = [];
+    /**
+     * If the close button shouldn't be rendered
+     */
+    disableEscape: boolean = false;
 }

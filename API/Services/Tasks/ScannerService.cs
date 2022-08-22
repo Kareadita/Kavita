@@ -29,7 +29,7 @@ public interface IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    Task ScanLibrary(int libraryId);
+    Task ScanLibrary(int libraryId, bool forceUpdate = false);
 
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
@@ -62,6 +62,10 @@ public enum ScanCancelReason
     /// There has been no change to the filesystem since last scan
     /// </summary>
     NoChange = 2,
+    /// <summary>
+    /// The underlying folder is missing
+    /// </summary>
+    FolderMissing = 3
 }
 
 /**
@@ -117,10 +121,15 @@ public class ScannerService : IScannerService
         var library = libraries.FirstOrDefault(l => l.Folders.Select(Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
-            BackgroundJob.Enqueue(() => ScanLibrary(library.Id));
+            BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="bypassFolderOptimizationChecks">Not Used. Scan series will always force</param>
     [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true)
     {
@@ -130,12 +139,7 @@ public class ScannerService : IScannerService
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
-        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, bypassFolderOptimizationChecks) != ScanCancelReason.NoCancel) return;
-
-
-        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        var seenSeries = new List<ParsedSeries>();
-        var processTasks = new List<Task>();
+        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel) return;
 
         var folderPath = series.FolderPath;
         if (string.IsNullOrEmpty(folderPath) || !_directoryService.Exists(folderPath))
@@ -150,14 +154,25 @@ public class ScannerService : IScannerService
             }
 
             folderPath = seriesDirs.Keys.FirstOrDefault();
+
+            // We should check if folderPath is a library folder path and if so, return early and tell user to correct their setup.
+            if (libraryPaths.Contains(folderPath))
+            {
+                _logger.LogCritical("[ScannerSeries] {SeriesName} scan aborted. Files for series are not in a nested folder under library path. Correct this and rescan", series.Name);
+                await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Files for series are not in a nested folder under library path. Correct this and rescan."));
+                return;
+            }
         }
 
         if (string.IsNullOrEmpty(folderPath))
         {
-            _logger.LogCritical("Scan Series could not find a single, valid folder root for files");
+            _logger.LogCritical("[ScannerSeries] Scan Series could not find a single, valid folder root for files");
             await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Scan Series could not find a single, valid folder root for files"));
             return;
         }
+
+        var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
+        var processTasks = new List<Task>();
 
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
@@ -165,7 +180,6 @@ public class ScannerService : IScannerService
         await _processSeries.Prime();
         void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
-            var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
             if (parsedFiles.Count == 0) return;
 
@@ -176,43 +190,20 @@ public class ScannerService : IScannerService
                 Format = parsedFiles.First().Format
             };
 
-            if (skippedScan)
+            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName))
             {
-                seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
-                {
-                    Name = pf.Series,
-                    NormalizedName = Parser.Parser.Normalize(pf.Series),
-                    Format = pf.Format
-                }));
                 return;
             }
 
-            seenSeries.Add(foundParsedSeries);
             processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
             parsedSeries.Add(foundParsedSeries, parsedFiles);
         }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanElapsedTime = await ScanFiles(library, new []{folderPath}, false, TrackFiles, bypassFolderOptimizationChecks);
+        var scanElapsedTime = await ScanFiles(library, new []{folderPath}, false, TrackFiles, true);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
         await Task.WhenAll(processTasks);
-
-        // At this point, we've already inserted the series into the DB OR we haven't and seenSeries has our series
-        // We now need to do any leftover work, like removing
-        //  We need to handle if parsedSeries is empty but seenSeries has our series
-        if (seenSeries.Any(s => s.NormalizedName.Equals(series.NormalizedName)) && parsedSeries.Keys.Count == 0)
-        {
-            // Nothing has changed
-            _logger.LogInformation("[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan", series.Name);
-            await _eventHub.SendMessageAsync(MessageFactory.Info,
-                MessageFactory.InfoEvent($"{series.Name} scan has no work to do",
-                    "All folders have not been changed since last scan. Scan will be aborted."));
-
-            _processSeries.EnqueuePostSeriesProcessTasks(series.LibraryId, seriesId, false);
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
-            return;
-        }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
@@ -222,8 +213,8 @@ public class ScannerService : IScannerService
          // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
          if (parsedSeries.Count == 0)
          {
-             var anyFilesExist =
-                 (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id)).Any(m => File.Exists(m.FilePath));
+             var seriesFiles = (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
+             var anyFilesExist = seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath));
 
              if (!anyFilesExist)
              {
@@ -287,21 +278,34 @@ public class ScannerService : IScannerService
         }
 
         // If all series Folder paths haven't been modified since last scan, abort
-        // NOTE: On windows, the parent folder will not update LastWriteTime if a subfolder was updated with files. Need to do a bit of light I/O.
         if (!bypassFolderChecks)
         {
 
             var allFolders = seriesFolderPaths.SelectMany(path => _directoryService.GetDirectories(path)).ToList();
             allFolders.AddRange(seriesFolderPaths);
 
-            if (allFolders.All(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
+            try
             {
-                _logger.LogInformation(
-                    "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
+                if (allFolders.All(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
+                {
+                    _logger.LogInformation(
+                        "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
+                        series.Name);
+                    await _eventHub.SendMessageAsync(MessageFactory.Info,
+                        MessageFactory.InfoEvent($"{series.Name} scan has no work to do",
+                            "All folders have not been changed since last scan. Scan will be aborted."));
+                    return ScanCancelReason.NoChange;
+                }
+            }
+            catch (IOException ex)
+            {
+                // If there is an exception it means that the folder doesn't exist. So we should delete the series
+                _logger.LogError(ex, "[ScannerService] Scan series for {SeriesName} found the folder path no longer exists",
                     series.Name);
                 await _eventHub.SendMessageAsync(MessageFactory.Info,
-                    MessageFactory.InfoEvent($"{series.Name} scan has no work to do", "All folders have not been changed since last scan. Scan will be aborted."));
-                return ScanCancelReason.NoChange;
+                    MessageFactory.ErrorEvent($"{series.Name} scan has no work to do",
+                        "The folder the series is in is missing. Delete series manually or perform a library scan."));
+                return ScanCancelReason.NoCancel;
             }
         }
 
@@ -393,7 +397,7 @@ public class ScannerService : IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task ScanLibrary(int libraryId)
+    public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
@@ -405,7 +409,7 @@ public class ScannerService : IScannerService
         var wasLibraryUpdatedSinceLastScan = (library.LastModified.Truncate(TimeSpan.TicksPerMinute) >
                                              library.LastScanned.Truncate(TimeSpan.TicksPerMinute))
                                              && library.LastScanned != DateTime.MinValue;
-        if (!wasLibraryUpdatedSinceLastScan)
+        if (!forceUpdate && !wasLibraryUpdatedSinceLastScan)
         {
             var haveFoldersChangedSinceLastScan = library.Folders
                 .All(f => _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute) > f.LastScanned.Truncate(TimeSpan.TicksPerMinute));

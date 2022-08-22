@@ -34,6 +34,9 @@ export class ConfirmService {
         config = this.defaultConfirm;
         config.content = content;
       }
+      if (content !== undefined && content !== '' && config!.content === '') {
+        config!.content = content;
+      }
 
       const modalRef = this.modalService.open(ConfirmDialogComponent);
       modalRef.componentInstance.config = config;

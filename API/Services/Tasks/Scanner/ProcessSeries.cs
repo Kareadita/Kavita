@@ -88,7 +88,7 @@ public class ProcessSeries : IProcessSeries
 
         // Check if there is a Series
         var firstInfo = parsedInfos.First();
-        Series series = null;
+        Series series;
         try
         {
             series =
@@ -97,29 +97,29 @@ public class ProcessSeries : IProcessSeries
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an exception finding existing series for {SeriesName} with Localized name of {LocalizedName}. This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan", firstInfo.Series, firstInfo.LocalizedSeries);
+            _logger.LogError(ex, "There was an exception finding existing series for {SeriesName} with Localized name of {LocalizedName} for library {LibraryId}. This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan", firstInfo.Series, firstInfo.LocalizedSeries, library.Id);
+            await _eventHub.SendMessageAsync(MessageFactory.Error,
+                MessageFactory.ErrorEvent($"There was an exception finding existing series for {firstInfo.Series} with Localized name of {firstInfo.LocalizedSeries} for library {library.Id}",
+                    "This indicates you have duplicate series with same name or localized name in the library. Correct this and rescan."));
             return;
         }
 
         if (series == null)
         {
             seriesAdded = true;
-            series = DbFactory.Series(firstInfo.Series);
-            series.LocalizedName = firstInfo.LocalizedSeries;
+            series = DbFactory.Series(firstInfo.Series, firstInfo.LocalizedSeries);
         }
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;
 
         try
         {
-
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
             UpdateVolumes(series, parsedInfos);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = Parser.Parser.Normalize(series.Name);
-            series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             series.OriginalName ??= parsedInfos[0].Series;
             if (series.Format == MangaFormat.Unknown)
             {
@@ -144,13 +144,17 @@ public class ProcessSeries : IProcessSeries
             if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
             {
                 series.LocalizedName = localizedSeries;
+                series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             }
 
             // Update series FolderPath here (TODO: Move this into it's own private method)
             var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(l => l.Path), parsedInfos.Select(f => f.FullFilePath).ToList());
             if (seriesDirs.Keys.Count == 0)
             {
-                _logger.LogCritical("Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are in a folder");
+                _logger.LogCritical("Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are under a single folder from library");
+                await _eventHub.SendMessageAsync(MessageFactory.Info,
+                    MessageFactory.InfoEvent($"{series.Name} has files spread outside a single series folder",
+                        "This has negative performance effects. Please ensure all series are under a single folder from library"));
             }
             else
             {

@@ -492,10 +492,10 @@ namespace API.Services
        {
            var stopLookingForDirectories = false;
            var dirs = new Dictionary<string, string>();
-           foreach (var folder in libraryFolders)
+           foreach (var folder in libraryFolders.Select(Parser.Parser.NormalizePath))
            {
                if (stopLookingForDirectories) break;
-               foreach (var file in filePaths)
+               foreach (var file in filePaths.Select(Parser.Parser.NormalizePath))
                {
                    if (!file.Contains(folder)) continue;
 
