@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using API.Services;
+﻿using API.Services;
 
 namespace API.DTOs.Settings
 {
@@ -43,7 +42,9 @@ namespace API.DTOs.Settings
         /// Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.
         /// </summary>
         public string InstallId { get; set; }
-
+        /// <summary>
+        /// If the server should save bookmarks as WebP encoding
+        /// </summary>
         public bool ConvertBookmarkToWebP { get; set; }
         /// <summary>
         /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
@@ -55,5 +56,9 @@ namespace API.DTOs.Settings
         /// </summary>
         /// <remarks>Value should be between 1 and 30</remarks>
         public int TotalBackups { get; set; } = 30;
+        /// <summary>
+        /// If Kavita should watch the library folders and process changes
+        /// </summary>
+        public bool EnableFolderWatching { get; set; } = true;
     }
 }

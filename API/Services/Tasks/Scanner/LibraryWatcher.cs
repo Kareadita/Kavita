@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,15 @@ namespace API.Services.Tasks.Scanner;
 
 public interface ILibraryWatcher
 {
-    Task StartWatchingLibraries();
+    /// <summary>
+    /// Start watching all library folders
+    /// </summary>
+    /// <returns></returns>
+    Task StartWatching();
+    /// <summary>
+    /// Stop watching all folders
+    /// </summary>
+    void StopWatching();
 }
 
 internal class FolderScanQueueable
@@ -51,15 +58,10 @@ public class LibraryWatcher : ILibraryWatcher
     private readonly ILogger<LibraryWatcher> _logger;
     private readonly IScannerService _scannerService;
 
-    private readonly IList<FileSystemWatcher> _watchers = new List<FileSystemWatcher>();
-
     private readonly Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary = new ();
-
     private IList<string> _libraryFolders = new List<string>();
 
-    // TODO: This needs to be blocking so we can consume from another thread
     private readonly Queue<FolderScanQueueable> _scanQueue = new Queue<FolderScanQueueable>();
-    //public readonly BlockingCollection<FolderScanQueueable> ScanQueue = new BlockingCollection<FolderScanQueueable>();
     private readonly TimeSpan _queueWaitTime;
 
 
@@ -75,41 +77,55 @@ public class LibraryWatcher : ILibraryWatcher
 
     }
 
-    public async Task StartWatchingLibraries()
+    public async Task StartWatching()
     {
         _logger.LogInformation("Starting file watchers");
-        _libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).SelectMany(l => l.Folders).ToList();
 
-        foreach (var library in await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+        _libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+            .SelectMany(l => l.Folders)
+            .Distinct()
+            .Select(Parser.Parser.NormalizePath)
+            .ToList();
+        foreach (var libraryFolder in _libraryFolders)
         {
-            foreach (var libraryFolder in library.Folders)
+            _logger.LogInformation("Watching {FolderPath}", libraryFolder);
+            var watcher = new FileSystemWatcher(libraryFolder);
+            watcher.NotifyFilter =   NotifyFilters.CreationTime
+                                     | NotifyFilters.DirectoryName
+                                     | NotifyFilters.FileName
+                                     | NotifyFilters.LastWrite
+                                     | NotifyFilters.Size;
+
+            watcher.Changed += OnChanged;
+            watcher.Created += OnCreated;
+            watcher.Deleted += OnDeleted;
+            watcher.Renamed += OnRenamed;
+
+            watcher.Filter = "*.*";
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
+            if (!_watcherDictionary.ContainsKey(libraryFolder))
             {
-                _logger.LogInformation("Watching {FolderPath}", libraryFolder);
-                var watcher = new FileSystemWatcher(libraryFolder);
-                watcher.NotifyFilter =   NotifyFilters.CreationTime
-                                       | NotifyFilters.DirectoryName
-                                       | NotifyFilters.FileName
-                                       | NotifyFilters.LastWrite
-                                       | NotifyFilters.Size;
-
-                watcher.Changed += OnChanged;
-                watcher.Created += OnCreated;
-                watcher.Deleted += OnDeleted;
-                watcher.Renamed += OnRenamed;
-
-                watcher.Filter = "*.*"; // TODO: Configure with Parser files
-                watcher.IncludeSubdirectories = true;
-                watcher.EnableRaisingEvents = true;
-                _logger.LogInformation("Watching {Folder}", libraryFolder);
-                _watchers.Add(watcher);
-                if (!_watcherDictionary.ContainsKey(libraryFolder))
-                {
-                    _watcherDictionary.Add(libraryFolder, new List<FileSystemWatcher>());
-                }
-
-                _watcherDictionary[libraryFolder].Add(watcher);
+                _watcherDictionary.Add(libraryFolder, new List<FileSystemWatcher>());
             }
+
+            _watcherDictionary[libraryFolder].Add(watcher);
         }
+    }
+
+    public void StopWatching()
+    {
+        _logger.LogInformation("Stopping watching folders");
+        foreach (var fileSystemWatcher in _watcherDictionary.Values.SelectMany(watcher => watcher))
+        {
+            fileSystemWatcher.EnableRaisingEvents = false;
+            fileSystemWatcher.Changed -= OnChanged;
+            fileSystemWatcher.Created -= OnCreated;
+            fileSystemWatcher.Deleted -= OnDeleted;
+            fileSystemWatcher.Renamed -= OnRenamed;
+            fileSystemWatcher.Dispose();
+        }
+        _watcherDictionary.Clear();
     }
 
     private void OnChanged(object sender, FileSystemEventArgs e)
@@ -156,7 +172,7 @@ public class LibraryWatcher : ILibraryWatcher
 
         // We need to find the library this creation belongs to
         // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
-        var libraryFolder = _libraryFolders.Select(Parser.Parser.NormalizePath).FirstOrDefault(f => f.Contains(parentDirectory));
+        var libraryFolder = _libraryFolders.FirstOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
 
@@ -205,7 +221,7 @@ public class LibraryWatcher : ILibraryWatcher
 
         if (_scanQueue.Count > 0)
         {
-            Task.Delay(TimeSpan.FromSeconds(10)).ContinueWith(t=> ProcessQueue());
+            Task.Delay(_queueWaitTime).ContinueWith(t=> ProcessQueue());
         }
 
     }

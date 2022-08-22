@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -560,7 +560,7 @@ namespace API.Services
        {
             try
             {
-                return Parser.Parser.NormalizePath(Directory.GetParent(fileOrFolder).FullName);
+                return Parser.Parser.NormalizePath(Directory.GetParent(fileOrFolder)?.FullName);
             }
             catch (Exception)
             {

@@ -60,6 +60,9 @@ namespace API.Helpers.Converters
                     case ServerSettingKey.InstallId:
                         destination.InstallId = row.Value;
                         break;
+                    case ServerSettingKey.EnableFolderWatching:
+                        destination.EnableFolderWatching = bool.Parse(row.Value);
+                        break;
                 }
             }
 

@@ -83,6 +83,15 @@
                 <label for="opds" class="form-check-label">Enable OPDS</label>
             </div>
         </div>
+
+        <div class="mb-3">
+            <label for="folder-watching" class="form-label" aria-describedby="folder-watching-info">Folder Watching</label>
+            <p class="accent" id="folder-watching-info">Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans.</p>
+            <div class="form-check form-switch">
+                <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
+                <label for="folder-watching" class="form-check-label">Enable Folder Watching</label>
+            </div>
+        </div>
     
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
