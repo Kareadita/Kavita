@@ -138,12 +138,13 @@ public class LibraryWatcher : ILibraryWatcher
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
         Console.WriteLine($"Created: {e.FullPath}, {e.Name}");
-        ProcessChange(e.FullPath);
+        ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name));
     }
 
     private void OnDeleted(object sender, FileSystemEventArgs e) {
         Console.WriteLine($"Deleted: {e.FullPath}, {e.Name}");
-        ProcessChange(e.FullPath);
+
+        ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name));
     }
 
 
@@ -153,12 +154,18 @@ public class LibraryWatcher : ILibraryWatcher
         Console.WriteLine($"Renamed:");
         Console.WriteLine($"    Old: {e.OldFullPath}");
         Console.WriteLine($"    New: {e.FullPath}");
-        ProcessChange(e.FullPath);
+        ProcessChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
     }
 
-    private void ProcessChange(string filePath)
+    /// <summary>
+    /// Processes the file or folder change.
+    /// </summary>
+    /// <param name="filePath">File or folder that changed</param>
+    /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
+    private void ProcessChange(string filePath, bool isDirectoryChange = false)
     {
-        if (!new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
+        // We need to check if directory or not
+        if (!isDirectoryChange &&  !new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
         // Don't do anything if a Library or ScanSeries in progress
         if (TaskScheduler.RunningAnyTasksByMethod(new[] {"MetadataService", "ScannerService"}))
         {

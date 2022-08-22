@@ -100,8 +100,6 @@ public class ScannerService : IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanFolder(string folder)
     {
-        // NOTE: I might want to move a lot of this code to the LibraryWatcher or something and just pack libraryId and seriesId
-        // Validate if we are scanning a new series (that belongs to a library) or an existing series
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
         if (seriesId > 0)
         {
