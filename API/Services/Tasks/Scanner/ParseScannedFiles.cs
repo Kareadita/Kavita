@@ -71,6 +71,7 @@ namespace API.Services.Tasks.Scanner
         /// <summary>
         /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
         /// </summary>
+        /// TODO: This can be removed, it is no longer needed
         /// <param name="parsedSeries"></param>
         /// <param name="series"></param>
         /// <returns></returns>
@@ -192,7 +193,7 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="info"></param>
         /// <returns>Series Name to group this info into</returns>
-        public string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
+        private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
@@ -230,7 +231,7 @@ namespace API.Services.Tasks.Scanner
 
 
         /// <summary>
-        /// This is a new version which will process series by folder groups.
+        /// This will process series by folder groups.
         /// </summary>
         /// <param name="libraryType"></param>
         /// <param name="folders"></param>
@@ -269,7 +270,10 @@ namespace API.Services.Tasks.Scanner
                             return;
                         }
                         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-                        var infos = files.Select(file => _readingItemService.ParseFile(file, folderPath, libraryType)).Where(info => info != null).ToList();
+                        var infos = files
+                            .Select(file => _readingItemService.ParseFile(file, folderPath, libraryType))
+                            .Where(info => info != null)
+                            .ToList();
 
 
                         MergeLocalizedSeriesWithSeries(infos);
@@ -330,13 +334,16 @@ namespace API.Services.Tasks.Scanner
             var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
             if (!hasLocalizedSeries) return;
 
-            var localizedSeries = infos.Select(i => i.LocalizedSeries).Distinct()
+            var localizedSeries = infos
+                .Where(i => !i.IsSpecial)
+                .Select(i => i.LocalizedSeries)
+                .Distinct()
                 .FirstOrDefault(i => !string.IsNullOrEmpty(i));
             if (string.IsNullOrEmpty(localizedSeries)) return;
 
-            // NOTE: If we have multiple series in a folder, then this will fail. It will group into one series. User needs to fix this themselves
+            // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
             string nonLocalizedSeries;
-            var nonLocalizedSeriesFound = infos.Select(i => i.Series).Distinct().ToList();
+            var nonLocalizedSeriesFound = infos.Where(i => !i.IsSpecial).Select(i => i.Series).Distinct().ToList();
             if (nonLocalizedSeriesFound.Count == 1)
             {
                 nonLocalizedSeries = nonLocalizedSeriesFound.First();

@@ -58,7 +58,7 @@ export class ActionService implements OnDestroy {
     }
 
     // Prompt user if we should do a force or not
-    const force = await this.promptIfForce();
+    const force = false; // await this.promptIfForce();
 
     this.libraryService.scan(library.id, force).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + library.name);
@@ -159,7 +159,6 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   async scanSeries(series: Series, callback?: SeriesActionCallback) {
-
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
       this.toastr.info('Scan queued for ' + series.name);
       if (callback) {
