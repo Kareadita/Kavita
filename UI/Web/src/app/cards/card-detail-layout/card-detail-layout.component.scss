@@ -4,6 +4,10 @@
     width: 100%;
     height: calc((var(--vh) *100) - 162px);
     margin-bottom: 10px;
+
+    &.empty {
+        height: auto;
+    }
 }
 
 .content-container {
@@ -90,6 +94,10 @@
   //background-color: red;
   //max-height: calc(var(--vh)*100 - 170px);
 }
+
+virtual-scroller.empty {
+    display: none;
+  }
 
 h2 {
     display: inline-block;
