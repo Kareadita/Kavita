@@ -455,6 +455,8 @@ public class ScannerService : IScannerService
                 Format = parsedFiles.First().Format
             };
 
+            // NOTE: Could we check if there are multiple found series (different series) and process each one? 
+
             if (skippedScan)
             {
                 seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
