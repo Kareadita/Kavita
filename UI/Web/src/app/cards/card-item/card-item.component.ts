@@ -151,8 +151,13 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     if (this.utilityService.isChapter(this.entity)) {
       const chapterTitle = this.utilityService.asChapter(this.entity).titleName;
-      if (chapterTitle === '' || chapterTitle === null) {
-        this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+      if (chapterTitle === '' || chapterTitle === null || chapterTitle === undefined) {
+        const volumeTitle = this.utilityService.asChapter(this.entity).volumeTitle
+        if (volumeTitle === '' || volumeTitle === null || volumeTitle === undefined) {
+          this.tooltipTitle = (this.title).trim();
+        } else {
+          this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+        }
       } else {
         this.tooltipTitle = chapterTitle;
       }
