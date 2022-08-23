@@ -3,10 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using API.Parser;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -66,26 +64,6 @@ namespace API.Services.Tasks.Scanner
             _directoryService = directoryService;
             _readingItemService = readingItemService;
             _eventHub = eventHub;
-        }
-
-        /// <summary>
-        /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
-        /// </summary>
-        /// <param name="parsedSeries"></param>
-        /// <param name="series"></param>
-        /// <returns></returns>
-        public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
-        {
-            var allKeys = parsedSeries.Keys.Where(ps =>
-                SeriesHelper.FindSeries(series, ps));
-
-            var infos = new List<ParserInfo>();
-            foreach (var key in allKeys)
-            {
-                infos.AddRange(parsedSeries[key]);
-            }
-
-            return infos;
         }
 
 
@@ -192,7 +170,7 @@ namespace API.Services.Tasks.Scanner
         /// </summary>
         /// <param name="info"></param>
         /// <returns>Series Name to group this info into</returns>
-        public string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
+        private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
@@ -230,7 +208,7 @@ namespace API.Services.Tasks.Scanner
 
 
         /// <summary>
-        /// This is a new version which will process series by folder groups.
+        /// This will process series by folder groups.
         /// </summary>
         /// <param name="libraryType"></param>
         /// <param name="folders"></param>
@@ -263,8 +241,16 @@ namespace API.Services.Tasks.Scanner
                         }
                         _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
                         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
+                        if (files.Count == 0)
+                        {
+                            _logger.LogInformation("[ScannerService] {Folder} is empty", folder);
+                            return;
+                        }
                         var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-                        var infos = files.Select(file => _readingItemService.ParseFile(file, folderPath, libraryType)).Where(info => info != null).ToList();
+                        var infos = files
+                            .Select(file => _readingItemService.ParseFile(file, folderPath, libraryType))
+                            .Where(info => info != null)
+                            .ToList();
 
 
                         MergeLocalizedSeriesWithSeries(infos);
@@ -320,17 +306,36 @@ namespace API.Services.Tasks.Scanner
         /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
         /// </example>
         /// <param name="infos">A collection of ParserInfos</param>
-        private static void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo> infos)
+        private void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo> infos)
         {
             var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
             if (!hasLocalizedSeries) return;
 
-            var localizedSeries = infos.Select(i => i.LocalizedSeries).Distinct()
+            var localizedSeries = infos
+                .Where(i => !i.IsSpecial)
+                .Select(i => i.LocalizedSeries)
+                .Distinct()
                 .FirstOrDefault(i => !string.IsNullOrEmpty(i));
             if (string.IsNullOrEmpty(localizedSeries)) return;
 
-            var nonLocalizedSeries = infos.Select(i => i.Series).Distinct()
-                .FirstOrDefault(series => !series.Equals(localizedSeries));
+            // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
+            string nonLocalizedSeries;
+            var nonLocalizedSeriesFound = infos.Where(i => !i.IsSpecial).Select(i => i.Series).Distinct().ToList();
+            if (nonLocalizedSeriesFound.Count == 1)
+            {
+                nonLocalizedSeries = nonLocalizedSeriesFound.First();
+            }
+            else
+            {
+                // There can be a case where there are multiple series in a folder that causes merging.
+                if (nonLocalizedSeriesFound.Count > 2)
+                {
+                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder:  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
+                }
+                nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
+            }
+
+            if (string.IsNullOrEmpty(nonLocalizedSeries)) return;
 
             var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
             foreach (var infoNeedingMapping in infos.Where(i =>

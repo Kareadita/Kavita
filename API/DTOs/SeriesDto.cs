@@ -58,5 +58,9 @@ namespace API.DTOs
         /// The highest level folder for this Series
         /// </summary>
         public string FolderPath { get; set; }
+        /// <summary>
+        /// The last time the folder for this series was scanned
+        /// </summary>
+        public DateTime LastFolderScanned { get; set; }
     }
 }

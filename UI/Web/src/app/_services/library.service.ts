@@ -76,16 +76,16 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + 'library/grant-access', {username, selectedLibraries});
   }
 
-  scan(libraryId: number) {
-    return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId, {});
+  scan(libraryId: number, force = false) {
+    return this.httpClient.post(this.baseUrl + 'library/scan?libraryId=' + libraryId + '&force=' + force, {});
   }
 
   analyze(libraryId: number) {
     return this.httpClient.post(this.baseUrl + 'library/analyze?libraryId=' + libraryId, {});
   }
 
-  refreshMetadata(libraryId: number) {
-    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata?libraryId=' + libraryId, {});
+  refreshMetadata(libraryId: number, forceUpdate = false) {
+    return this.httpClient.post(this.baseUrl + 'library/refresh-metadata?libraryId=' + libraryId + '&force=' + forceUpdate, {});
   }
 
   create(model: {name: string, type: number, folders: string[]}) {

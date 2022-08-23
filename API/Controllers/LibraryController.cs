@@ -168,17 +168,17 @@ namespace API.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("scan")]
-        public ActionResult Scan(int libraryId)
+        public ActionResult Scan(int libraryId, bool force = false)
         {
-            _taskScheduler.ScanLibrary(libraryId);
+            _taskScheduler.ScanLibrary(libraryId, force);
             return Ok();
         }
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpPost("refresh-metadata")]
-        public ActionResult RefreshMetadata(int libraryId)
+        public ActionResult RefreshMetadata(int libraryId, bool force = true)
         {
-            _taskScheduler.RefreshMetadata(libraryId);
+            _taskScheduler.RefreshMetadata(libraryId, force);
             return Ok();
         }
 

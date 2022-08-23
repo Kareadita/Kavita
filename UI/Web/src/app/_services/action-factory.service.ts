@@ -18,9 +18,9 @@ export enum Action {
    */
   MarkAsUnread = 1,
   /**
-   * Invoke a Scan Library
+   * Invoke a Scan on Series/Library
    */
-  ScanLibrary = 2,
+  Scan = 2,
   /**
    * Delete the entity
    */
@@ -129,7 +129,7 @@ export class ActionFactoryService {
         });
 
         this.seriesActions.push({
-          action: Action.ScanLibrary,
+          action: Action.Scan,
           title: 'Scan Series',
           callback: this.dummyCallback,
           requiresAdmin: true
@@ -171,7 +171,7 @@ export class ActionFactoryService {
         });
 
         this.libraryActions.push({
-          action: Action.ScanLibrary,
+          action: Action.Scan,
           title: 'Scan Library',
           callback: this.dummyCallback,
           requiresAdmin: true

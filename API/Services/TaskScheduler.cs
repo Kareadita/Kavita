@@ -19,7 +19,7 @@ public interface ITaskScheduler
     Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
-    void ScanLibrary(int libraryId);
+    void ScanLibrary(int libraryId, bool force = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
@@ -174,9 +174,12 @@ public class TaskScheduler : ITaskScheduler
         _scannerService.ScanLibraries();
     }
 
-    public void ScanLibrary(int libraryId)
+    public void ScanLibrary(int libraryId, bool force = false)
     {
-        if (HasAlreadyEnqueuedTask("ScannerService","ScanLibrary",  new object[] {libraryId}, ScanQueue))
+        var alreadyEnqueued =
+            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
+            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
+        if (alreadyEnqueued)
         {
             _logger.LogInformation("A duplicate request to scan library for library occured. Skipping");
             return;
@@ -184,12 +187,12 @@ public class TaskScheduler : ITaskScheduler
         if (RunningAnyTasksByMethod(new List<string>() {"ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"}, ScanQueue))
         {
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
-            BackgroundJob.Schedule(() => ScanLibrary(libraryId), TimeSpan.FromHours(3));
+            BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), TimeSpan.FromHours(3));
             return;
         }
 
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId));
+        BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
     }
@@ -201,7 +204,11 @@ public class TaskScheduler : ITaskScheduler
 
     public void RefreshMetadata(int libraryId, bool forceUpdate = true)
     {
-        if (HasAlreadyEnqueuedTask("MetadataService","GenerateCoversForLibrary",  new object[] {libraryId, forceUpdate}))
+        var alreadyEnqueued = HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
+                                  new object[] {libraryId, true}) ||
+                              HasAlreadyEnqueuedTask("MetadataService", "GenerateCoversForLibrary",
+                                  new object[] {libraryId, false});
+        if (alreadyEnqueued)
         {
             _logger.LogInformation("A duplicate request to refresh metadata for library occured. Skipping");
             return;
@@ -232,7 +239,7 @@ public class TaskScheduler : ITaskScheduler
         }
         if (RunningAnyTasksByMethod(new List<string>() {"ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"}, ScanQueue))
         {
-            _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 mins");
+            _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
             BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), TimeSpan.FromMinutes(10));
             return;
         }
@@ -276,7 +283,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
     /// <returns></returns>
-    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
+    private static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
         return enqueuedJobs.Any(j => j.Value.InEnqueuedState &&

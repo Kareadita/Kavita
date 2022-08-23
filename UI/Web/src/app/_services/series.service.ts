@@ -153,8 +153,8 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/refresh-metadata', {libraryId: series.libraryId, seriesId: series.id});
   }
 
-  scan(libraryId: number, seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'series/scan', {libraryId: libraryId, seriesId: seriesId});
+  scan(libraryId: number, seriesId: number, force = false) {
+    return this.httpClient.post(this.baseUrl + 'series/scan', {libraryId: libraryId, seriesId: seriesId, forceUpdate: force});
   }
 
   analyzeFiles(libraryId: number, seriesId: number) {

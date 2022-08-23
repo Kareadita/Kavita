@@ -24,6 +24,26 @@ namespace API.Data
                 OriginalName = name,
                 LocalizedName = name,
                 NormalizedName = Parser.Parser.Normalize(name),
+                NormalizedLocalizedName = Parser.Parser.Normalize(name),
+                SortName = name,
+                Volumes = new List<Volume>(),
+                Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
+            };
+        }
+
+        public static Series Series(string name, string localizedName)
+        {
+            if (string.IsNullOrEmpty(localizedName))
+            {
+                localizedName = name;
+            }
+            return new Series
+            {
+                Name = name,
+                OriginalName = name,
+                LocalizedName = localizedName,
+                NormalizedName = Parser.Parser.Normalize(name),
+                NormalizedLocalizedName = Parser.Parser.Normalize(localizedName),
                 SortName = name,
                 Volumes = new List<Volume>(),
                 Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
