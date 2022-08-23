@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -30,10 +31,11 @@ namespace API.Controllers
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEventHub _eventHub;
+        private readonly ILibraryWatcher _libraryWatcher;
 
         public LibraryController(IDirectoryService directoryService,
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
-            IUnitOfWork unitOfWork, IEventHub eventHub)
+            IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher)
         {
             _directoryService = directoryService;
             _logger = logger;
@@ -41,6 +43,7 @@ namespace API.Controllers
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
             _eventHub = eventHub;
+            _libraryWatcher = libraryWatcher;
         }
 
         /// <summary>
@@ -77,6 +80,7 @@ namespace API.Controllers
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue. Please try again.");
 
             _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
+            await _libraryWatcher.RestartWatching();
             _taskScheduler.ScanLibrary(library.Id);
             await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
                 MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
@@ -252,6 +256,8 @@ namespace API.Controllers
                     _taskScheduler.CleanupChapters(chapterIds);
                 }
 
+                await _libraryWatcher.RestartWatching();
+
                 foreach (var seriesId in seriesIds)
                 {
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
@@ -295,6 +301,7 @@ namespace API.Controllers
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
             if (originalFolders.Count != libraryForUserDto.Folders.Count() || typeUpdate)
             {
+                await _libraryWatcher.RestartWatching();
                 _taskScheduler.ScanLibrary(library.Id);
             }
 

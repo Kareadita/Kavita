@@ -22,6 +22,11 @@ public interface ILibraryWatcher
     /// Stop watching all folders
     /// </summary>
     void StopWatching();
+    /// <summary>
+    /// Essentially stops then starts watching. Useful if there is a change in folders or libraries
+    /// </summary>
+    /// <returns></returns>
+    Task RestartWatching();
 }
 
 internal class FolderScanQueueable
@@ -126,6 +131,12 @@ public class LibraryWatcher : ILibraryWatcher
             fileSystemWatcher.Dispose();
         }
         _watcherDictionary.Clear();
+    }
+
+    public async Task RestartWatching()
+    {
+        StopWatching();
+        await StartWatching();
     }
 
     private void OnChanged(object sender, FileSystemEventArgs e)
