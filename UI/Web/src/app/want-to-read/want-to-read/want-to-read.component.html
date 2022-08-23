@@ -26,9 +26,18 @@
             (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
             ></app-series-card>
         </ng-template>
+    
+        <div *ngIf="!filterActive && series.length === 0">
+            <ng-template #noData>
+                There are no items. Try adding a series.
+            </ng-template>
+        </div>
 
-        <ng-template #noData>
-            There are no items. Try adding a series.
-        </ng-template>
+        <div *ngIf="filterActive && series.length === 0">
+            <ng-template #noData>
+                No items match your current filter.
+            </ng-template>
+        </div>
+
     </app-card-detail-layout>
 </div>
