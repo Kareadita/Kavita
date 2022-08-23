@@ -46,8 +46,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   @Input() refresh!: EventEmitter<void>;
 
 
-  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels wide
-  jumpBarKeysToRender: Array<JumpKey> = []; // Original
+  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels tall, original keys
+  jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
@@ -114,8 +114,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
-
-
+    
     if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
       const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
       if (resumeKey === '') return;
@@ -156,6 +155,5 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
     this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
     this.changeDetectionRef.markForCheck();
-    return;
   }
 }
