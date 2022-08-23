@@ -116,14 +116,16 @@ public class ProcessSeries : IProcessSeries
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
+            var firstParsedInfo = parsedInfos[0];
+
             UpdateVolumes(series, parsedInfos);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = Parser.Parser.Normalize(series.Name);
-            series.OriginalName ??= parsedInfos[0].Series;
+            series.OriginalName ??= firstParsedInfo.Series;
             if (series.Format == MangaFormat.Unknown)
             {
-                series.Format = parsedInfos[0].Format;
+                series.Format = firstParsedInfo.Format;
             }
 
             if (string.IsNullOrEmpty(series.SortName))
@@ -133,9 +135,9 @@ public class ProcessSeries : IProcessSeries
             if (!series.SortNameLocked)
             {
                 series.SortName = series.Name;
-                if (!string.IsNullOrEmpty(parsedInfos[0].SeriesSort))
+                if (!string.IsNullOrEmpty(firstParsedInfo.SeriesSort))
                 {
-                    series.SortName = parsedInfos[0].SeriesSort;
+                    series.SortName = firstParsedInfo.SeriesSort;
                 }
             }
 
@@ -147,26 +149,10 @@ public class ProcessSeries : IProcessSeries
                 series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             }
 
-            // Update series FolderPath here (TODO: Move this into it's own private method)
-            var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(l => l.Path), parsedInfos.Select(f => f.FullFilePath).ToList());
-            if (seriesDirs.Keys.Count == 0)
-            {
-                _logger.LogCritical("Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are under a single folder from library");
-                await _eventHub.SendMessageAsync(MessageFactory.Info,
-                    MessageFactory.InfoEvent($"{series.Name} has files spread outside a single series folder",
-                        "This has negative performance effects. Please ensure all series are under a single folder from library"));
-            }
-            else
-            {
-                // Don't save FolderPath if it's a library Folder
-                if (!library.Folders.Select(f => f.Path).Contains(seriesDirs.Keys.First()))
-                {
-                    series.FolderPath = Parser.Parser.NormalizePath(seriesDirs.Keys.First());
-                }
-            }
-
-            series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
             UpdateSeriesMetadata(series, library.Type);
+
+            // Update series FolderPath here
+            await UpdateSeriesFolderPath(parsedInfos, library, series);
 
             series.LastFolderScanned = DateTime.Now;
             _unitOfWork.SeriesRepository.Attach(series);
@@ -200,6 +186,28 @@ public class ProcessSeries : IProcessSeries
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id, false);
     }
 
+    private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
+    {
+        var seriesDirs = _directoryService.FindHighestDirectoriesFromFiles(library.Folders.Select(l => l.Path),
+            parsedInfos.Select(f => f.FullFilePath).ToList());
+        if (seriesDirs.Keys.Count == 0)
+        {
+            _logger.LogCritical(
+                "Scan Series has files spread outside a main series folder. This has negative performance effects. Please ensure all series are under a single folder from library");
+            await _eventHub.SendMessageAsync(MessageFactory.Info,
+                MessageFactory.InfoEvent($"{series.Name} has files spread outside a single series folder",
+                    "This has negative performance effects. Please ensure all series are under a single folder from library"));
+        }
+        else
+        {
+            // Don't save FolderPath if it's a library Folder
+            if (!library.Folders.Select(f => f.Path).Contains(seriesDirs.Keys.First()))
+            {
+                series.FolderPath = Parser.Parser.NormalizePath(seriesDirs.Keys.First());
+            }
+        }
+    }
+
     public void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false)
     {
         BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
@@ -208,6 +216,7 @@ public class ProcessSeries : IProcessSeries
 
     private static void UpdateSeriesMetadata(Series series, LibraryType libraryType)
     {
+        series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
         var isBook = libraryType == LibraryType.Book;
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 

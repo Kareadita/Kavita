@@ -144,7 +144,9 @@ public class LibraryWatcher : ILibraryWatcher
     private void OnDeleted(object sender, FileSystemEventArgs e) {
         Console.WriteLine($"Deleted: {e.FullPath}, {e.Name}");
 
-        ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name));
+        // On deletion, we need another type of check. We need to check if e.Name has an extension or not
+        // NOTE: File deletion will trigger a folder change event, so this might not be needed
+        ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name)));
     }
 
 
