@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -12,7 +10,6 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Parser;
-using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using Hangfire;
@@ -41,9 +38,6 @@ public interface IScannerService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
-    [Queue(TaskScheduler.ScanQueue)]
-    [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanFolder(string folder);
 
 }
@@ -97,7 +91,6 @@ public class ScannerService : IScannerService
         _processSeries = processSeries;
     }
 
-    [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanFolder(string folder)
     {
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
@@ -455,7 +448,7 @@ public class ScannerService : IScannerService
                 Format = parsedFiles.First().Format
             };
 
-            // NOTE: Could we check if there are multiple found series (different series) and process each one? 
+            // NOTE: Could we check if there are multiple found series (different series) and process each one?
 
             if (skippedScan)
             {
