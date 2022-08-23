@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -511,7 +511,7 @@ namespace API.Services
                    var fullPath = Path.Join(folder, parts.Last());
                    if (!dirs.ContainsKey(fullPath))
                    {
-                       dirs.Add(fullPath, string.Empty);
+                       dirs.Add(Parser.Parser.NormalizePath(fullPath), string.Empty);
                    }
                }
            }
@@ -560,7 +560,7 @@ namespace API.Services
        {
             try
             {
-                return Parser.Parser.NormalizePath(Directory.GetParent(fileOrFolder).FullName);
+                return Parser.Parser.NormalizePath(Directory.GetParent(fileOrFolder)?.FullName);
             }
             catch (Exception)
             {

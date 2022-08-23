@@ -1074,7 +1074,8 @@ namespace API.Parser
         /// <returns></returns>
         public static string NormalizePath(string path)
         {
-            return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .Replace(@"//", Path.AltDirectorySeparatorChar + string.Empty);
         }
 
         /// <summary>

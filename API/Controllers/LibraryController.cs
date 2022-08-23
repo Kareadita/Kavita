@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -30,10 +31,11 @@ namespace API.Controllers
         private readonly ITaskScheduler _taskScheduler;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEventHub _eventHub;
+        private readonly ILibraryWatcher _libraryWatcher;
 
         public LibraryController(IDirectoryService directoryService,
             ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
-            IUnitOfWork unitOfWork, IEventHub eventHub)
+            IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher)
         {
             _directoryService = directoryService;
             _logger = logger;
@@ -41,6 +43,7 @@ namespace API.Controllers
             _taskScheduler = taskScheduler;
             _unitOfWork = unitOfWork;
             _eventHub = eventHub;
+            _libraryWatcher = libraryWatcher;
         }
 
         /// <summary>
@@ -77,6 +80,7 @@ namespace API.Controllers
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue. Please try again.");
 
             _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
+            await _libraryWatcher.RestartWatching();
             _taskScheduler.ScanLibrary(library.Id);
             await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
                 MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
@@ -196,6 +200,37 @@ namespace API.Controllers
             return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
         }
 
+        /// <summary>
+        /// Given a valid path, will invoke either a Scan Series or Scan Library. If the folder does not exist within Kavita, the request will be ignored
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("scan-folder")]
+        public async Task<ActionResult> ScanFolder(ScanFolderDto dto)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            // Validate user has Admin privileges
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+            if (!isAdmin) return BadRequest("API key must belong to an admin");
+            if (dto.FolderPath.Contains("..")) return BadRequest("Invalid Path");
+
+            dto.FolderPath = Parser.Parser.NormalizePath(dto.FolderPath);
+
+            var libraryFolder = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+                .SelectMany(l => l.Folders)
+                .Distinct()
+                .Select(Parser.Parser.NormalizePath);
+
+            var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder,
+                new List<string>() {dto.FolderPath});
+
+            _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath);
+
+            return Ok();
+        }
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
@@ -220,6 +255,8 @@ namespace API.Controllers
                     await _unitOfWork.CommitAsync();
                     _taskScheduler.CleanupChapters(chapterIds);
                 }
+
+                await _libraryWatcher.RestartWatching();
 
                 foreach (var seriesId in seriesIds)
                 {
@@ -264,6 +301,7 @@ namespace API.Controllers
             if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
             if (originalFolders.Count != libraryForUserDto.Folders.Count() || typeUpdate)
             {
+                await _libraryWatcher.RestartWatching();
                 _taskScheduler.ScanLibrary(library.Id);
             }
 

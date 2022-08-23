@@ -223,7 +223,7 @@ namespace API.Tests.Parser
         [InlineData("/manga/1/1/1", "/manga/1/1/1")]
         [InlineData("/manga/1/1/1.jpg", "/manga/1/1/1.jpg")]
         [InlineData(@"/manga/1/1\1.jpg", @"/manga/1/1/1.jpg")]
-        [InlineData("/manga/1/1//1", "/manga/1/1//1")]
+        [InlineData("/manga/1/1//1", "/manga/1/1/1")]
         [InlineData("/manga/1\\1\\1", "/manga/1/1/1")]
         [InlineData("C:/manga/1\\1\\1.jpg", "C:/manga/1/1/1.jpg")]
         public void NormalizePathTest(string inputPath, string expected)

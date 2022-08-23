@@ -19,6 +19,7 @@ public interface ITaskScheduler
     Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
+    void ScanFolder(string folderPath);
     void ScanLibrary(int libraryId, bool force = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
@@ -161,6 +162,12 @@ public class TaskScheduler : ITaskScheduler
         // Schedule update check between noon and 6pm local time
         RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(12, 18)), TimeZoneInfo.Local);
     }
+
+    public void ScanFolder(string folderPath)
+    {
+        _scannerService.ScanFolder(Parser.Parser.NormalizePath(folderPath));
+    }
+
     #endregion
 
     public void ScanLibraries()

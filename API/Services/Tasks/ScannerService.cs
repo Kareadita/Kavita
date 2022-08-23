@@ -100,8 +100,6 @@ public class ScannerService : IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanFolder(string folder)
     {
-        // NOTE: I might want to move a lot of this code to the LibraryWatcher or something and just pack libraryId and seriesId
-        // Validate if we are scanning a new series (that belongs to a library) or an existing series
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
         if (seriesId > 0)
         {
@@ -109,6 +107,7 @@ public class ScannerService : IScannerService
             return;
         }
 
+        // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
         if (string.IsNullOrEmpty(parentDirectory)) return; // This should never happen as it's calculated before enqueing
 
@@ -455,6 +454,8 @@ public class ScannerService : IScannerService
                 NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
                 Format = parsedFiles.First().Format
             };
+
+            // NOTE: Could we check if there are multiple found series (different series) and process each one? 
 
             if (skippedScan)
             {
