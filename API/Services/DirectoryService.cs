@@ -511,7 +511,7 @@ namespace API.Services
                    var fullPath = Path.Join(folder, parts.Last());
                    if (!dirs.ContainsKey(fullPath))
                    {
-                       dirs.Add(fullPath, string.Empty);
+                       dirs.Add(Parser.Parser.NormalizePath(fullPath), string.Empty);
                    }
                }
            }

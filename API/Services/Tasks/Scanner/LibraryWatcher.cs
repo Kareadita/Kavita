@@ -169,11 +169,12 @@ public class LibraryWatcher : ILibraryWatcher
         // We need to check if directory or not
         if (!isDirectoryChange &&  !new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
         // Don't do anything if a Library or ScanSeries in progress
-        if (TaskScheduler.RunningAnyTasksByMethod(new[] {"MetadataService", "ScannerService"}))
-        {
-            _logger.LogDebug("Suppressing Change due to scan being inprogress");
-            return;
-        }
+        // if (TaskScheduler.RunningAnyTasksByMethod(new[] {"MetadataService", "ScannerService"}))
+        // {
+        //     // NOTE: I'm not sure we need this to be honest. Now with the speed of the new loop and the queue, we should just put in queue for processing
+        //     _logger.LogDebug("Suppressing Change due to scan being inprogress");
+        //     return;
+        // }
 
 
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);

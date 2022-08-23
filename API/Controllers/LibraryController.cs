@@ -196,6 +196,37 @@ namespace API.Controllers
             return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
         }
 
+        /// <summary>
+        /// Given a valid path, will invoke either a Scan Series or Scan Library. If the folder does not exist within Kavita, the request will be ignored
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("scan-folder")]
+        public async Task<ActionResult> ScanFolder(ScanFolderDto dto)
+        {
+            var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+            // Validate user has Admin privileges
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+            if (!isAdmin) return BadRequest("API key must belong to an admin");
+            if (dto.FolderPath.Contains("..")) return BadRequest("Invalid Path");
+
+            dto.FolderPath = Parser.Parser.NormalizePath(dto.FolderPath);
+
+            var libraryFolder = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+                .SelectMany(l => l.Folders)
+                .Distinct()
+                .Select(Parser.Parser.NormalizePath);
+
+            var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder,
+                new List<string>() {dto.FolderPath});
+
+            _taskScheduler.ScanFolder(seriesFolder.Keys.Count == 1 ? seriesFolder.Keys.First() : dto.FolderPath);
+
+            return Ok();
+        }
+
         [Authorize(Policy = "RequireAdminRole")]
         [HttpDelete("delete")]
         public async Task<ActionResult<bool>> DeleteLibrary(int libraryId)
