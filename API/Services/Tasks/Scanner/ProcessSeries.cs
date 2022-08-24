@@ -93,7 +93,7 @@ public class ProcessSeries : IProcessSeries
         {
             series =
                 await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(firstInfo.Series, firstInfo.LocalizedSeries,
-                    library.Id);
+                    library.Id, firstInfo.Format);
         }
         catch (Exception ex)
         {
