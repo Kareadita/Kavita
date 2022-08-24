@@ -431,7 +431,6 @@ public class ProcessSeries : IProcessSeries
                 volume = DbFactory.Volume(volumeNumber);
                 volume.SeriesId = series.Id;
                 series.Volumes.Add(volume);
-                _unitOfWork.VolumeRepository.Add(volume);
             }
 
             volume.Name = volumeNumber;

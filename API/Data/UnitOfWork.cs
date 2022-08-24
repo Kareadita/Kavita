@@ -26,7 +26,6 @@ public interface IUnitOfWork
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
-    bool Rollback();
     Task<bool> RollbackAsync();
 }
 public class UnitOfWork : IUnitOfWork
@@ -93,16 +92,9 @@ public class UnitOfWork : IUnitOfWork
     /// <returns></returns>
     public async Task<bool> RollbackAsync()
     {
-        await _context.DisposeAsync();
-        return true;
-    }
-    /// <summary>
-    /// Rollback transaction
-    /// </summary>
-    /// <returns></returns>
-    public bool Rollback()
-    {
-        _context.Dispose();
+        //await _context.DisposeAsync();
+        await _context.Database.RollbackTransactionAsync();
+
         return true;
     }
 }
