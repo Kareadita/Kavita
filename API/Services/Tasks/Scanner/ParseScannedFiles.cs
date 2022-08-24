@@ -320,7 +320,10 @@ namespace API.Services.Tasks.Scanner
 
             // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
             string nonLocalizedSeries;
-            var nonLocalizedSeriesFound = infos.Where(i => !i.IsSpecial).Select(i => i.Series).Distinct().ToList();
+            // Normalize this as many of the cases is a capitalization difference
+            var nonLocalizedSeriesFound = infos
+                .Where(i => !i.IsSpecial)
+                .Select(i => i.Series).DistinctBy(Parser.Parser.Normalize).ToList();
             if (nonLocalizedSeriesFound.Count == 1)
             {
                 nonLocalizedSeries = nonLocalizedSeriesFound.First();
@@ -330,7 +333,7 @@ namespace API.Services.Tasks.Scanner
                 // There can be a case where there are multiple series in a folder that causes merging.
                 if (nonLocalizedSeriesFound.Count > 2)
                 {
-                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder:  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
+                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder or ensure there is only 2 potential series (localized and series):  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
                 }
                 nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
             }
