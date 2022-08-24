@@ -10,6 +10,7 @@ using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Parser;
+using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using Hangfire;
@@ -75,11 +76,12 @@ public class ScannerService : IScannerService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IProcessSeries _processSeries;
+    private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
         IDirectoryService directoryService, IReadingItemService readingItemService,
-        IProcessSeries processSeries)
+        IProcessSeries processSeries, IWordCountAnalyzerService wordCountAnalyzerService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -89,6 +91,7 @@ public class ScannerService : IScannerService
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _processSeries = processSeries;
+        _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
     public async Task ScanFolder(string folder)
@@ -131,7 +134,12 @@ public class ScannerService : IScannerService
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
-        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel) return;
+        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
+        {
+            BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
+            BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
+            return;
+        }
 
         var folderPath = series.FolderPath;
         if (string.IsNullOrEmpty(folderPath) || !_directoryService.Exists(folderPath))
@@ -413,6 +421,9 @@ public class ScannerService : IScannerService
                 await _eventHub.SendMessageAsync(MessageFactory.Info,
                     MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
                         "All folders have not been changed since last scan. Scan will be aborted."));
+
+                BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(library.Id, false));
+                BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(library.Id, false));
                 return;
             }
         }
