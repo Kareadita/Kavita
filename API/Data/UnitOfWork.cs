@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
 using AutoMapper;
@@ -92,8 +93,14 @@ public class UnitOfWork : IUnitOfWork
     /// <returns></returns>
     public async Task<bool> RollbackAsync()
     {
-        //await _context.DisposeAsync();
-        await _context.Database.RollbackTransactionAsync();
+        try
+        {
+            await _context.Database.RollbackTransactionAsync();
+        }
+        catch (Exception)
+        {
+            // Swallow exception (this might be used in places where a transaction isn't setup)
+        }
 
         return true;
     }
