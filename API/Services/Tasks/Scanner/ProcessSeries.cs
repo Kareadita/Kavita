@@ -183,7 +183,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
-        EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id, false);
+        EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
     private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
