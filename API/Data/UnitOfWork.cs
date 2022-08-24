@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using API.Data.Repositories;
 using API.Entities;
 using AutoMapper;
@@ -26,7 +27,6 @@ public interface IUnitOfWork
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
-    bool Rollback();
     Task<bool> RollbackAsync();
 }
 public class UnitOfWork : IUnitOfWork
@@ -93,16 +93,15 @@ public class UnitOfWork : IUnitOfWork
     /// <returns></returns>
     public async Task<bool> RollbackAsync()
     {
-        await _context.DisposeAsync();
-        return true;
-    }
-    /// <summary>
-    /// Rollback transaction
-    /// </summary>
-    /// <returns></returns>
-    public bool Rollback()
-    {
-        _context.Dispose();
+        try
+        {
+            await _context.Database.RollbackTransactionAsync();
+        }
+        catch (Exception)
+        {
+            // Swallow exception (this might be used in places where a transaction isn't setup)
+        }
+
         return true;
     }
 }

@@ -161,7 +161,7 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate"></param>
     private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate)
     {
-        _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
+        _logger.LogDebug("[MetadataService] Generating cover images for series: {SeriesName}", series.OriginalName);
         try
         {
             var volumeIndex = 0;

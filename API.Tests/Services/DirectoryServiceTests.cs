@@ -678,6 +678,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/Dir 2/"}, new [] {"C:/Manga/Dir 1/Love Hina/Vol. 01.cbz"}, "C:/Manga/Dir 1/Love Hina")]
         [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/"}, new [] {"D:/Manga/Love Hina/Vol. 01.cbz", "D:/Manga/Vol. 01.cbz"}, "")]
         [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga//Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
+        [InlineData(new [] {@"C:\mount\drive\Library\Test Library\Comics\"}, new [] {@"C:\mount\drive\Library\Test Library\Comics\Bruce Lee (1994)\Bruce Lee #001 (1994).cbz"}, @"C:/mount/drive/Library/Test Library/Comics/Bruce Lee (1994)")]
         public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] files, string expectedDirectory)
         {
             var fileSystem = new MockFileSystem();

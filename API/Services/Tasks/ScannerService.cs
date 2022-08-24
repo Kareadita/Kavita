@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -41,9 +39,6 @@ public interface IScannerService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
-    [Queue(TaskScheduler.ScanQueue)]
-    [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanFolder(string folder);
 
 }
@@ -81,11 +76,12 @@ public class ScannerService : IScannerService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IProcessSeries _processSeries;
+    private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
         IDirectoryService directoryService, IReadingItemService readingItemService,
-        IProcessSeries processSeries)
+        IProcessSeries processSeries, IWordCountAnalyzerService wordCountAnalyzerService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -95,9 +91,9 @@ public class ScannerService : IScannerService
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _processSeries = processSeries;
+        _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
-    [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanFolder(string folder)
     {
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
@@ -138,7 +134,12 @@ public class ScannerService : IScannerService
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
-        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel) return;
+        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
+        {
+            BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
+            BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
+            return;
+        }
 
         var folderPath = series.FolderPath;
         if (string.IsNullOrEmpty(folderPath) || !_directoryService.Exists(folderPath))
@@ -420,6 +421,9 @@ public class ScannerService : IScannerService
                 await _eventHub.SendMessageAsync(MessageFactory.Info,
                     MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
                         "All folders have not been changed since last scan. Scan will be aborted."));
+
+                BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(library.Id, false));
+                BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(library.Id, false));
                 return;
             }
         }
@@ -455,7 +459,7 @@ public class ScannerService : IScannerService
                 Format = parsedFiles.First().Format
             };
 
-            // NOTE: Could we check if there are multiple found series (different series) and process each one? 
+            // NOTE: Could we check if there are multiple found series (different series) and process each one?
 
             if (skippedScan)
             {

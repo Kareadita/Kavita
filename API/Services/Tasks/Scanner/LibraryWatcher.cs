@@ -78,7 +78,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger = logger;
         _scannerService = scannerService;
 
-        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(10) : TimeSpan.FromMinutes(5);
+        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(10) : TimeSpan.FromSeconds(30);
 
     }
 
@@ -142,18 +142,18 @@ public class LibraryWatcher : ILibraryWatcher
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
-        Console.WriteLine($"Changed: {e.FullPath}, {e.Name}");
+        _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}", e.FullPath, e.Name);
         ProcessChange(e.FullPath);
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
-        Console.WriteLine($"Created: {e.FullPath}, {e.Name}");
+        _logger.LogDebug("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
         ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name));
     }
 
     private void OnDeleted(object sender, FileSystemEventArgs e) {
-        Console.WriteLine($"Deleted: {e.FullPath}, {e.Name}");
+        _logger.LogDebug("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
 
         // On deletion, we need another type of check. We need to check if e.Name has an extension or not
         // NOTE: File deletion will trigger a folder change event, so this might not be needed
@@ -164,9 +164,9 @@ public class LibraryWatcher : ILibraryWatcher
 
     private void OnRenamed(object sender, RenamedEventArgs e)
     {
-        Console.WriteLine($"Renamed:");
-        Console.WriteLine($"    Old: {e.OldFullPath}");
-        Console.WriteLine($"    New: {e.FullPath}");
+        _logger.LogDebug($"[LibraryWatcher] Renamed:");
+        _logger.LogDebug("    Old: {OldFullPath}", e.OldFullPath);
+        _logger.LogDebug("    New: {FullPath}", e.FullPath);
         ProcessChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
     }
 
@@ -179,14 +179,6 @@ public class LibraryWatcher : ILibraryWatcher
     {
         // We need to check if directory or not
         if (!isDirectoryChange &&  !new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
-        // Don't do anything if a Library or ScanSeries in progress
-        // if (TaskScheduler.RunningAnyTasksByMethod(new[] {"MetadataService", "ScannerService"}))
-        // {
-        //     // NOTE: I'm not sure we need this to be honest. Now with the speed of the new loop and the queue, we should just put in queue for processing
-        //     _logger.LogDebug("Suppressing Change due to scan being inprogress");
-        //     return;
-        // }
-
 
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
         if (string.IsNullOrEmpty(parentDirectory)) return;
@@ -206,13 +198,11 @@ public class LibraryWatcher : ILibraryWatcher
             FolderPath = fullPath,
             QueueTime = DateTime.Now
         };
-        if (_scanQueue.Contains(queueItem, _folderScanQueueableComparer))
+        if (!_scanQueue.Contains(queueItem, _folderScanQueueableComparer))
         {
-            ProcessQueue();
-            return;
+            _logger.LogDebug("[LibraryWatcher] Queuing job for {Folder}", fullPath);
+            _scanQueue.Enqueue(queueItem);
         }
-
-        _scanQueue.Enqueue(queueItem);
 
         ProcessQueue();
     }
@@ -228,7 +218,7 @@ public class LibraryWatcher : ILibraryWatcher
             var item = _scanQueue.Peek();
             if (item.QueueTime < DateTime.Now.Subtract(_queueWaitTime))
             {
-                _logger.LogDebug("Scheduling ScanSeriesFolder for {Folder}", item.FolderPath);
+                _logger.LogDebug("[LibraryWatcher] Scheduling ScanSeriesFolder for {Folder}", item.FolderPath);
                 BackgroundJob.Enqueue(() => _scannerService.ScanFolder(item.FolderPath));
                 _scanQueue.Dequeue();
                 i++;

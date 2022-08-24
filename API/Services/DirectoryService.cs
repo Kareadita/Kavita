@@ -508,10 +508,10 @@ namespace API.Services
                        break;
                    }
 
-                   var fullPath = Path.Join(folder, parts.Last());
+                   var fullPath = Parser.Parser.NormalizePath(Path.Join(folder, parts.Last()));
                    if (!dirs.ContainsKey(fullPath))
                    {
-                       dirs.Add(Parser.Parser.NormalizePath(fullPath), string.Empty);
+                       dirs.Add(fullPath, string.Empty);
                    }
                }
            }

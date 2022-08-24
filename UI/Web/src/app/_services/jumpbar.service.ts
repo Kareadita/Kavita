@@ -31,7 +31,7 @@ export class JumpbarService {
     const jumpBarKeysToRender: Array<JumpKey> = [];
     const targetNumberOfKeys = parseInt(Math.floor(currentSize / keySize) + '', 10);
     const removeCount = jumpBarKeys.length - targetNumberOfKeys - 3;
-    if (removeCount <= 0) return jumpBarKeysToRender;
+    if (removeCount <= 0) return [...jumpBarKeys];
 
     const removalTimes = Math.ceil(removeCount / 2);
     const midPoint = Math.floor(jumpBarKeys.length / 2);
