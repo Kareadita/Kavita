@@ -82,7 +82,8 @@ public static class PersonHelper
     {
         foreach (var person in existingPeople)
         {
-            var existingPerson = removeAllExcept.FirstOrDefault(p => p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
+            var existingPerson = removeAllExcept
+                .FirstOrDefault(p => p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
             if (existingPerson == null)
             {
                 action?.Invoke(person);

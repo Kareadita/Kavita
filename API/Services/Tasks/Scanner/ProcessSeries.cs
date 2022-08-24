@@ -375,7 +375,7 @@ public class ProcessSeries : IProcessSeries
         // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
         // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();
-        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
+        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People.ToList(),
             people, person =>
             {
                 switch (person.Role)
