@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
@@ -15,6 +17,9 @@ public interface IReadingListService
     Task<bool> DeleteReadingListItem(UpdateReadingListPosition dto);
     Task<AppUser?> UserHasReadingListAccess(int readingListId, string username);
     Task<bool> DeleteReadingList(int readingListId, AppUser user);
+
+    Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
+        ReadingList readingList);
 }
 
 /// <summary>
@@ -25,6 +30,7 @@ public class ReadingListService : IReadingListService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
+    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
     public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger)
     {
@@ -117,7 +123,7 @@ public class ReadingListService : IReadingListService
     public async Task<AppUser?> UserHasReadingListAccess(int readingListId, string username)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username,
-            AppUserIncludes.ReadingLists);
+            AppUserIncludes.ReadingListsWithItems);
         if (user.ReadingLists.SingleOrDefault(rl => rl.Id == readingListId) == null && !await _unitOfWork.UserRepository.IsUserAdminAsync(user))
         {
             return null;
@@ -140,5 +146,37 @@ public class ReadingListService : IReadingListService
         if (!_unitOfWork.HasChanges()) return true;
 
         return await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Adds a list of Chapters as reading list items to the passed reading list.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="chapterIds"></param>
+    /// <param name="readingList"></param>
+    /// <returns>True if new chapters were added</returns>
+    public async Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds, ReadingList readingList)
+    {
+        readingList.Items ??= new List<ReadingListItem>();
+        var lastOrder = 0;
+        if (readingList.Items.Any())
+        {
+            lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
+        }
+
+        var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
+        var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
+            .OrderBy(c => Parser.Parser.MinNumberFromRange(c.Volume.Name))
+            .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
+
+        var index = lastOrder + 1;
+        foreach (var chapter in chaptersForSeries)
+        {
+            if (existingChapterExists.Contains(chapter.Id)) continue;
+            readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
+            index += 1;
+        }
+
+        return index > lastOrder + 1;
     }
 }

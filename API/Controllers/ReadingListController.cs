@@ -270,7 +270,7 @@ namespace API.Controllers
                 await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new [] {dto.SeriesId});
 
             // If there are adds, tell tracking this has been modified
-            if (await AddChaptersToReadingList(dto.SeriesId, chapterIdsForSeries, readingList))
+            if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, chapterIdsForSeries, readingList))
             {
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
@@ -315,7 +315,7 @@ namespace API.Controllers
             }
 
             // If there are adds, tell tracking this has been modified
-            if (await AddChaptersToReadingList(dto.SeriesId, chapterIds, readingList))
+            if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, chapterIds, readingList))
             {
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
@@ -357,7 +357,7 @@ namespace API.Controllers
             foreach (var seriesId in ids.Keys)
             {
                 // If there are adds, tell tracking this has been modified
-                if (await AddChaptersToReadingList(seriesId, ids[seriesId], readingList))
+                if (await _readingListService.AddChaptersToReadingList(seriesId, ids[seriesId], readingList))
                 {
                     _unitOfWork.ReadingListRepository.Update(readingList);
                 }
@@ -394,7 +394,7 @@ namespace API.Controllers
                 (await _unitOfWork.ChapterRepository.GetChaptersAsync(dto.VolumeId)).Select(c => c.Id).ToList();
 
             // If there are adds, tell tracking this has been modified
-            if (await AddChaptersToReadingList(dto.SeriesId, chapterIdsForVolume, readingList))
+            if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, chapterIdsForVolume, readingList))
             {
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
@@ -427,7 +427,7 @@ namespace API.Controllers
             if (readingList == null) return BadRequest("Reading List does not exist");
 
             // If there are adds, tell tracking this has been modified
-            if (await AddChaptersToReadingList(dto.SeriesId, new List<int>() { dto.ChapterId }, readingList))
+            if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, new List<int>() { dto.ChapterId }, readingList))
             {
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
@@ -448,39 +448,7 @@ namespace API.Controllers
             return Ok("Nothing to do");
         }
 
-        /// <summary>
-        /// Adds a list of Chapters as reading list items to the passed reading list.
-        /// </summary>
-        /// <param name="seriesId"></param>
-        /// <param name="chapterIds"></param>
-        /// <param name="readingList"></param>
-        /// <returns>True if new chapters were added</returns>
-        private async Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
-            ReadingList readingList)
-        {
-            // TODO: Move to ReadingListService and Unit Test
-            readingList.Items ??= new List<ReadingListItem>();
-            var lastOrder = 0;
-            if (readingList.Items.Any())
-            {
-                lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
-            }
 
-            var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
-            var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
-                .OrderBy(c => Parser.Parser.MinNumberFromRange(c.Volume.Name))
-                .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
-
-            var index = lastOrder + 1;
-            foreach (var chapter in chaptersForSeries)
-            {
-                if (existingChapterExists.Contains(chapter.Id)) continue;
-                readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
-                index += 1;
-            }
-
-            return index > lastOrder + 1;
-        }
 
         /// <summary>
         /// Returns the next chapter within the reading list
