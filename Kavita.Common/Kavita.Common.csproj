@@ -4,7 +4,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.5.5.12</AssemblyVersion>
+        <AssemblyVersion>0.5.5.13</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
