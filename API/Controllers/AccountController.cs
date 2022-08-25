@@ -477,6 +477,7 @@ namespace API.Controllers
 
                 var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
                 _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+                _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, token);
                 var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
                 var accessible = await _emailService.CheckIfAccessible(host);
                 if (accessible)
@@ -600,8 +601,10 @@ namespace API.Controllers
             if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
                 return Unauthorized("You are not permitted to this operation.");
 
-            var emailLink = GenerateEmailLink(await _userManager.GeneratePasswordResetTokenAsync(user), "confirm-reset-password", user.Email);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var emailLink = GenerateEmailLink(token, "confirm-reset-password", user.Email);
             _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+            _logger.LogCritical("[Forgot Password]: Token {UserName}: {Token}", user.UserName, token);
             var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
             if (await _emailService.CheckIfAccessible(host))
             {
@@ -654,8 +657,10 @@ namespace API.Controllers
                     "This user needs to migrate. Have them log out and login to trigger a migration flow");
             if (user.EmailConfirmed) return BadRequest("User already confirmed");
 
-            var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-email", user.Email);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var emailLink = GenerateEmailLink(token, "confirm-email", user.Email);
             _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
+            _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
             await _emailService.SendMigrationEmail(new EmailMigrationDto()
             {
                 EmailAddress = user.Email,
@@ -731,6 +736,8 @@ namespace API.Controllers
         {
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (result.Succeeded) return true;
+
+
 
             _logger.LogCritical("[Account] Email validation failed");
             if (!result.Errors.Any()) return false;

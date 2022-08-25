@@ -109,9 +109,11 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   async deleteUser(member: Member) {
     if (await this.confirmService.confirm('Are you sure you want to delete this user?')) {
       this.memberService.deleteMember(member.username).subscribe(() => {
-        this.loadMembers();
-        this.loadPendingInvites();
-        this.toastr.success(member.username + ' has been deleted.');
+        setTimeout(() => {
+          this.loadMembers();
+          this.loadPendingInvites();
+          this.toastr.success(member.username + ' has been deleted.');
+        }, 30); // SetTimeout because I've noticed this can run super fast and not give enough time for data to flush
       });
     }
   }
