@@ -200,7 +200,7 @@ public class LibraryWatcher : ILibraryWatcher
         };
         if (!_scanQueue.Contains(queueItem, _folderScanQueueableComparer))
         {
-            _logger.LogDebug("[LibraryWatcher] Queuing job for {Folder}", fullPath);
+            _logger.LogDebug("[LibraryWatcher] Queuing job for {Folder} at {TimeStamp}", fullPath, DateTime.Now);
             _scanQueue.Enqueue(queueItem);
         }
 
@@ -221,12 +221,12 @@ public class LibraryWatcher : ILibraryWatcher
                 _logger.LogDebug("[LibraryWatcher] Scheduling ScanSeriesFolder for {Folder}", item.FolderPath);
                 BackgroundJob.Enqueue(() => _scannerService.ScanFolder(item.FolderPath));
                 _scanQueue.Dequeue();
-                i++;
             }
             else
             {
-                break;
+                i++;
             }
+
         }
 
         if (_scanQueue.Count > 0)

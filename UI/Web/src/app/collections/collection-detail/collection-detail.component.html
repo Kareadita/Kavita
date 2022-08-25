@@ -29,6 +29,7 @@
         [filterSettings]="filterSettings"
         [filterOpen]="filterOpen"
         [parentScroll]="scrollingBlock"
+        [trackByIdentity]="trackByIdentity"
         [jumpBarKeys]="jumpbarKeys"
         (applyFilter)="updateFilter($event)">
         <ng-template #cardItem let-item let-position="idx">

@@ -157,18 +157,21 @@ public class ProcessSeries : IProcessSeries
             series.LastFolderScanned = DateTime.Now;
             _unitOfWork.SeriesRepository.Attach(series);
 
-            try
+            if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
-            }
-            catch (Exception ex)
-            {
-                await _unitOfWork.RollbackAsync();
-                _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the for series {@SeriesName}", series);
+                try
+                {
+                    await _unitOfWork.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await _unitOfWork.RollbackAsync();
+                    _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the for series {@SeriesName}", series);
 
-                await _eventHub.SendMessageAsync(MessageFactory.Error,
-                    MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
-                        string.Empty));
+                    await _eventHub.SendMessageAsync(MessageFactory.Error,
+                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
+                            ex.Message));
+                }
             }
         }
         catch (Exception ex)
