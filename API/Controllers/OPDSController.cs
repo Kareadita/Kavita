@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using API.Comparators;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
@@ -305,7 +306,7 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
-        var userWithLists = await _unitOfWork.UserRepository.GetUserWithReadingListsByUsernameAsync(user.UserName);
+        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName, AppUserIncludes.ReadingListsWithItems);
         var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
         if (readingList == null)
         {
