@@ -436,7 +436,7 @@ public class ScannerService : IScannerService
         var shouldUseLibraryScan = !(await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
         if (!shouldUseLibraryScan)
         {
-            _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
+            _logger.LogError("Library {LibraryName} consists of one or more Series folders, using series scan", library.Name);
         }
 
 
@@ -458,8 +458,6 @@ public class ScannerService : IScannerService
                 NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
                 Format = parsedFiles.First().Format
             };
-
-            // NOTE: Could we check if there are multiple found series (different series) and process each one?
 
             if (skippedScan)
             {
@@ -485,7 +483,6 @@ public class ScannerService : IScannerService
 
         await Task.WhenAll(processTasks);
 
-        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);

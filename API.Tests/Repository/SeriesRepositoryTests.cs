@@ -125,9 +125,12 @@ public class SeriesRepositoryTests
             }
         };
 
+        var s = DbFactory.Series("The Idaten Deities Know Only Peace", "Heion Sedai no Idaten-tachi");
+        s.Format = MangaFormat.Archive;
+
         library.Series = new List<Series>()
         {
-            DbFactory.Series("The Idaten Deities Know Only Peace", "Heion Sedai no Idaten-tachi"),
+            s,
         };
 
         _unitOfWork.LibraryRepository.Add(library);
@@ -135,13 +138,14 @@ public class SeriesRepositoryTests
     }
 
 
-    [InlineData("Heion Sedai no Idaten-tachi", "", "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
+    [InlineData("Heion Sedai no Idaten-tachi", "", MangaFormat.Archive, "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
+    [InlineData("Heion Sedai no Idaten-tachi", "", MangaFormat.Pdf, null)]
     public async Task GetFullSeriesByAnyName_Should(string seriesName, string localizedName, string? expected)
     {
         var firstSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         var series =
             await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
-                1);
+                1, MangaFormat.Unknown);
         if (expected == null)
         {
             Assert.Null(series);

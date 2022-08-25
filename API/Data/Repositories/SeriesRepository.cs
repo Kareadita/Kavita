@@ -121,7 +121,7 @@ public interface ISeriesRepository
     Task<int> GetSeriesIdByFolder(string folder);
     Task<Series> GetSeriesByFolderPath(string folder);
     Task<Series> GetFullSeriesByName(string series, int libraryId);
-    Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId);
+    Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format);
     Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
 }
@@ -1218,12 +1218,13 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="localizedName"></param>
     /// <param name="libraryId"></param>
     /// <returns></returns>
-    public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId)
+    public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format)
     {
         var normalizedSeries = Parser.Parser.Normalize(seriesName);
         var normalizedLocalized = Parser.Parser.Normalize(localizedName);
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
+            .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
                         || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty));
         if (!string.IsNullOrEmpty(normalizedLocalized))
