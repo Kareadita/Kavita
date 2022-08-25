@@ -24,6 +24,7 @@ export class AllCollectionsComponent implements OnInit {
   collections: CollectionTag[] = [];
   collectionTagActions: ActionItem<CollectionTag>[] = [];
   jumpbarKeys: Array<JumpKey> = [];
+  trackByIdentity = (index: number, item: CollectionTag) => `${item.id}_${item.title}`;
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 

@@ -23,7 +23,9 @@ public enum AppUserIncludes
     ReadingLists = 8,
     Ratings = 16,
     UserPreferences = 32,
-    WantToRead = 64
+    WantToRead = 64,
+    ReadingListsWithItems = 128,
+
 }
 
 public interface IUserRepository
@@ -36,7 +38,6 @@ public interface IUserRepository
     Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
     Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
-    Task<IEnumerable<AppUser>> GetNonAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser user);
     Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId);
     Task<AppUserPreferences> GetPreferencesAsync(string username);
@@ -51,11 +52,9 @@ public interface IUserRepository
     Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
-    Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
     Task<AppUser> GetUserByEmailAsync(string email);
     Task<IEnumerable<AppUser>> GetAllUsers();
-
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
@@ -167,6 +166,11 @@ public class UserRepository : IUserRepository
             query = query.Include(u => u.ReadingLists);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.ReadingListsWithItems))
+        {
+            query = query.Include(u => u.ReadingLists).ThenInclude(r => r.Items);
+        }
+
         if (includeFlags.HasFlag(AppUserIncludes.Ratings))
         {
             query = query.Include(u => u.Ratings);
@@ -201,19 +205,6 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync();
     }
 
-    /// <summary>
-    /// Gets an AppUser by username. Returns back Reading List and their Items.
-    /// </summary>
-    /// <param name="username"></param>
-    /// <returns></returns>
-    public async Task<AppUser> GetUserWithReadingListsByUsernameAsync(string username)
-    {
-        return await _context.Users
-            .Include(u => u.ReadingLists)
-            .ThenInclude(l => l.Items)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync(x => x.UserName == username);
-    }
 
     /// <summary>
     /// Returns all Bookmarks for a given set of Ids
@@ -265,11 +256,6 @@ public class UserRepository : IUserRepository
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
-    }
-
-    public async Task<IEnumerable<AppUser>> GetNonAdminUsersAsync()
-    {
-        return await _userManager.GetUsersInRoleAsync(PolicyConstants.PlebRole);
     }
 
     public async Task<bool> IsUserAdminAsync(AppUser user)
@@ -403,15 +389,5 @@ public class UserRepository : IUserRepository
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
-    }
-
-    public async Task<bool> ValidateUserExists(string username)
-    {
-        if (await _userManager.Users.AnyAsync(x => x.NormalizedUserName == username.ToUpper()))
-        {
-            throw new ValidationException("Username is taken.");
-        }
-
-        return true;
     }
 }

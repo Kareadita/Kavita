@@ -9,6 +9,7 @@
     [items]="collections"
     [filterOpen]="filterOpen"
     [jumpBarKeys]="jumpbarKeys"
+    [trackByIdentity]="trackByIdentity"
     >
         <ng-template #cardItem let-item let-position="idx">
             <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="imageSerivce.getCollectionCoverImage(item.id)" (clicked)="loadCollection(item)"></app-card-item>

@@ -78,7 +78,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger = logger;
         _scannerService = scannerService;
 
-        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(10) : TimeSpan.FromSeconds(30);
+        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(10) : TimeSpan.FromMinutes(1);
 
     }
 
@@ -93,7 +93,7 @@ public class LibraryWatcher : ILibraryWatcher
             .ToList();
         foreach (var libraryFolder in _libraryFolders)
         {
-            _logger.LogInformation("Watching {FolderPath}", libraryFolder);
+            _logger.LogDebug("Watching {FolderPath}", libraryFolder);
             var watcher = new FileSystemWatcher(libraryFolder);
             watcher.NotifyFilter =   NotifyFilters.CreationTime
                                      | NotifyFilters.DirectoryName
@@ -178,7 +178,7 @@ public class LibraryWatcher : ILibraryWatcher
     private void ProcessChange(string filePath, bool isDirectoryChange = false)
     {
         // We need to check if directory or not
-        if (!isDirectoryChange &&  !new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
+        if (!isDirectoryChange && !new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension)) return;
 
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
         if (string.IsNullOrEmpty(parentDirectory)) return;
@@ -231,7 +231,7 @@ public class LibraryWatcher : ILibraryWatcher
 
         if (_scanQueue.Count > 0)
         {
-            Task.Delay(_queueWaitTime).ContinueWith(t=> ProcessQueue());
+            Task.Delay(TimeSpan.FromSeconds(30)).ContinueWith(t=> ProcessQueue());
         }
 
     }
