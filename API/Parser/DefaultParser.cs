@@ -52,9 +52,9 @@ public class DefaultParser : IDefaultParser
         {
             ret = new ParserInfo()
             {
-                Chapters = type == LibraryType.Manga ? Parser.ParseChapter(fileName) : Parser.ParseComicChapter(fileName),
-                Series = type == LibraryType.Manga ? Parser.ParseSeries(fileName) : Parser.ParseComicSeries(fileName),
-                Volumes = type == LibraryType.Manga ? Parser.ParseVolume(fileName) : Parser.ParseComicVolume(fileName),
+                Chapters = type == LibraryType.Comic ? Parser.ParseComicChapter(fileName) : Parser.ParseChapter(fileName),
+                Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName),
+                Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName),
                 Filename = Path.GetFileName(filePath),
                 Format = Parser.ParseFormat(filePath),
                 Title = Path.GetFileNameWithoutExtension(fileName),

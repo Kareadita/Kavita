@@ -170,7 +170,7 @@ public class ProcessSeries : IProcessSeries
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
-                            string.Empty));
+                            ex.Message));
                 }
             }
         }
