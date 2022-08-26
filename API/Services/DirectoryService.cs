@@ -75,6 +75,7 @@ namespace API.Services
     }
     public class DirectoryService : IDirectoryService
     {
+        public const string KavitaIgnoreFile = ".kavitaignore";
         public IFileSystem FileSystem { get; }
         public string CacheDirectory { get; }
         public string CoverImageDirectory { get; }
@@ -598,7 +599,7 @@ namespace API.Services
             var files = new List<string>();
             if (!Exists(folderPath)) return files;
 
-            var potentialIgnoreFile = FileSystem.Path.Join(folderPath, ".kavitaignore");
+            var potentialIgnoreFile = FileSystem.Path.Join(folderPath, KavitaIgnoreFile);
             if (matcher == null)
             {
                 matcher = CreateMatcherFromFile(potentialIgnoreFile);

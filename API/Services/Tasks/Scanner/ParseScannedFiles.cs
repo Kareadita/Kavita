@@ -81,8 +81,7 @@ namespace API.Services.Tasks.Scanner
             if (scanDirectoryByDirectory)
             {
                 // This is used in library scan, so we should check first for a ignore file and use that here as well
-                var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, ".kavitaignore");
-
+                var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
                 var directories = _directoryService.GetDirectories(folderPath, _directoryService.CreateMatcherFromFile(potentialIgnoreFile)).ToList();
 
                 foreach (var directory in directories)

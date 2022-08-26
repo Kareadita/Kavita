@@ -239,12 +239,12 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanSeries(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        if (HasAlreadyEnqueuedTask("ScannerService", "ScanSeries", new object[] {seriesId, forceUpdate}, ScanQueue))
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, forceUpdate}, ScanQueue))
         {
             _logger.LogInformation("A duplicate request to scan series occured. Skipping");
             return;
         }
-        if (RunningAnyTasksByMethod(new List<string>() {"ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"}, ScanQueue))
+        if (RunningAnyTasksByMethod(new List<string>() {ScannerService.Name, "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"}, ScanQueue))
         {
             _logger.LogInformation("A Scan is already running, rescheduling ScanSeries in 10 minutes");
             BackgroundJob.Schedule(() => ScanSeries(libraryId, seriesId, forceUpdate), TimeSpan.FromMinutes(10));
