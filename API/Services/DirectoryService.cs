@@ -10,6 +10,7 @@ using API.DTOs.System;
 using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common.Helpers;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services
@@ -64,10 +65,12 @@ namespace API.Services
             SearchOption searchOption = SearchOption.TopDirectoryOnly);
 
         IEnumerable<string> GetDirectories(string folderPath);
+        IEnumerable<string> GetDirectories(string folderPath, GlobMatcher matcher);
         string GetParentDirectoryName(string fileOrFolder);
         #nullable enable
         IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
         DateTime GetLastWriteTime(string folderPath);
+        GlobMatcher CreateMatcherFromFile(string filePath);
 #nullable disable
     }
     public class DirectoryService : IDirectoryService
@@ -532,6 +535,21 @@ namespace API.Services
        }
 
        /// <summary>
+       /// Gets a set of directories from the folder path. Automatically excludes directories that shouldn't be in scope.
+       /// </summary>
+       /// <param name="folderPath"></param>
+       /// <param name="matcher">A set of glob rules that will filter directories out</param>
+       /// <returns>List of directory paths, empty if path doesn't exist</returns>
+       public IEnumerable<string> GetDirectories(string folderPath, GlobMatcher matcher)
+       {
+           if (matcher == null) return GetDirectories(folderPath);
+
+           return GetDirectories(folderPath)
+               .Where(folder => !matcher.ExcludeMatches(
+                                    $"{FileSystem.DirectoryInfo.FromDirectoryName(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
+       }
+
+       /// <summary>
        /// Returns all directories, including subdirectories. Automatically excludes directories that shouldn't be in scope.
        /// </summary>
        /// <param name="folderPath"></param>
@@ -591,17 +609,7 @@ namespace API.Services
             }
 
 
-            IEnumerable<string> directories;
-            if (matcher == null)
-            {
-                directories = GetDirectories(folderPath);
-            }
-            else
-            {
-                directories = GetDirectories(folderPath)
-                    .Where(folder => matcher != null &&
-                                     !matcher.ExcludeMatches($"{FileSystem.DirectoryInfo.FromDirectoryName(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
-            }
+            var directories = GetDirectories(folderPath, matcher);
 
             foreach (var directory in directories)
             {
@@ -640,8 +648,12 @@ namespace API.Services
            return directories.Max(d => FileSystem.Directory.GetLastWriteTime(d));
        }
 
-
-       private GlobMatcher CreateMatcherFromFile(string filePath)
+       /// <summary>
+       /// Generates a GlobMatcher from a .kavitaignore file found at path. Returns null otherwise.
+       /// </summary>
+       /// <param name="filePath"></param>
+       /// <returns></returns>
+       public GlobMatcher CreateMatcherFromFile(string filePath)
        {
            if (!FileSystem.File.Exists(filePath))
            {

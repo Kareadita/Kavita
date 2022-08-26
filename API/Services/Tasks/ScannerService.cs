@@ -68,6 +68,7 @@ public enum ScanCancelReason
  */
 public class ScannerService : IScannerService
 {
+    public const string Name = "ScannerService";
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ScannerService> _logger;
     private readonly IMetadataService _metadataService;
