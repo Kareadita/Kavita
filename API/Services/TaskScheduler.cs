@@ -290,7 +290,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
     /// <returns></returns>
-    private static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
+    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
         return enqueuedJobs.Any(j => j.Value.InEnqueuedState &&

@@ -29,29 +29,6 @@ public interface ILibraryWatcher
     Task RestartWatching();
 }
 
-internal class FolderScanQueueable
-{
-    public DateTime QueueTime { get; set; }
-    public string FolderPath { get; set; }
-}
-
-internal class FolderScanQueueableComparer : IEqualityComparer<FolderScanQueueable>
-{
-    public bool Equals(FolderScanQueueable x, FolderScanQueueable y)
-    {
-        if (ReferenceEquals(x, y)) return true;
-        if (ReferenceEquals(x, null)) return false;
-        if (ReferenceEquals(y, null)) return false;
-        if (x.GetType() != y.GetType()) return false;
-        return x.FolderPath == y.FolderPath;
-    }
-
-    public int GetHashCode(FolderScanQueueable obj)
-    {
-        return HashCode.Combine(obj.FolderPath);
-    }
-}
-
 /// <summary>
 /// Responsible for watching the file system and processing change events. This is mainly responsible for invoking
 /// Scanner to quickly pickup on changes.
@@ -66,9 +43,7 @@ public class LibraryWatcher : ILibraryWatcher
     private readonly Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary = new ();
     private IList<string> _libraryFolders = new List<string>();
 
-    private readonly Queue<FolderScanQueueable> _scanQueue = new Queue<FolderScanQueueable>();
     private readonly TimeSpan _queueWaitTime;
-    private readonly FolderScanQueueableComparer _folderScanQueueableComparer = new FolderScanQueueableComparer();
 
 
     public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<LibraryWatcher> logger, IScannerService scannerService, IHostEnvironment environment)
@@ -143,7 +118,7 @@ public class LibraryWatcher : ILibraryWatcher
     {
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
         _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}", e.FullPath, e.Name);
-        ProcessChange(e.FullPath);
+        ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name)));
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
@@ -171,7 +146,7 @@ public class LibraryWatcher : ILibraryWatcher
     }
 
     /// <summary>
-    /// Processes the file or folder change.
+    /// Processes the file or folder change. If the change is a file change and not from a supported extension, it will be ignored.
     /// </summary>
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
@@ -193,46 +168,15 @@ public class LibraryWatcher : ILibraryWatcher
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
         var fullPath = Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.First()));
-        var queueItem = new FolderScanQueueable()
+
+        if (!TaskScheduler.HasAlreadyEnqueuedTask("ScannerService", "ScanFolder", new object[] {fullPath}))
         {
-            FolderPath = fullPath,
-            QueueTime = DateTime.Now
-        };
-        if (!_scanQueue.Contains(queueItem, _folderScanQueueableComparer))
-        {
-            _logger.LogDebug("[LibraryWatcher] Queuing job for {Folder} at {TimeStamp}", fullPath, DateTime.Now);
-            _scanQueue.Enqueue(queueItem);
+            _logger.LogDebug("[LibraryWatcher] Scheduling ScanFolder for {Folder}", fullPath);
+            BackgroundJob.Schedule(() => _scannerService.ScanFolder(fullPath), _queueWaitTime);
         }
-
-        ProcessQueue();
-    }
-
-    /// <summary>
-    /// Instead of making things complicated with a separate thread, this service will process the queue whenever a change occurs
-    /// </summary>
-    private void ProcessQueue()
-    {
-        var i = 0;
-        while (i < _scanQueue.Count)
+        else
         {
-            var item = _scanQueue.Peek();
-            if (item.QueueTime < DateTime.Now.Subtract(_queueWaitTime))
-            {
-                _logger.LogDebug("[LibraryWatcher] Scheduling ScanSeriesFolder for {Folder}", item.FolderPath);
-                BackgroundJob.Enqueue(() => _scannerService.ScanFolder(item.FolderPath));
-                _scanQueue.Dequeue();
-            }
-            else
-            {
-                i++;
-            }
-
+            _logger.LogDebug("[LibraryWatcher] Skipped scheduling ScanFolder for {Folder} as a job already queued", fullPath);
         }
-
-        if (_scanQueue.Count > 0)
-        {
-            Task.Delay(TimeSpan.FromSeconds(30)).ContinueWith(t=> ProcessQueue());
-        }
-
     }
 }
