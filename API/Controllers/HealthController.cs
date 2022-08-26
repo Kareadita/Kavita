@@ -9,9 +9,9 @@ namespace API.Controllers;
 public class HealthController : BaseApiController
 {
 
-    [HttpGet("")]
-    public string GetHealth()
+    [HttpGet()]
+    public ActionResult GetHealth()
     {
-        return "ok";
+        return Ok("Ok");
     }
 }
