@@ -50,8 +50,8 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     public static Chapter GetFirstChapterForMetadata(Series series, bool isBookLibrary)
     {
-        return series.Volumes.OrderBy(v => v.Number, new ChapterSortComparer())
-            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()))
+        return series.Volumes.OrderBy(v => v.Number, ChapterSortComparer.Default)
+            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default))
             .FirstOrDefault();
     }
 
@@ -493,7 +493,7 @@ public class SeriesService : ISeriesService
             if (v.Number == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
-        }).OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()));
+        }).OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default));
 
         foreach (var chapter in chapters)
         {
@@ -518,11 +518,11 @@ public class SeriesService : ISeriesService
         var storylineChapters = volumes
             .Where(v => v.Number == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
+            .OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
         if (storylineChapters.Any()) {
-            retChapters = retChapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
+            retChapters = retChapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
         }
 
         return new SeriesDetailDto()

@@ -23,6 +23,8 @@ namespace API.Comparators
 
             return x.CompareTo(y);
         }
+
+        public static readonly ChapterSortComparer Default = new ChapterSortComparer();
     }
 
     /// <summary>
