@@ -520,6 +520,11 @@ public class SeriesService : ISeriesService
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
             .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
 
+        // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
+        if (storylineChapters.Any()) {
+            retChapters = retChapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
+        }
+
         return new SeriesDetailDto()
         {
             Specials = specials,
