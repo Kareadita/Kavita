@@ -3,6 +3,7 @@ import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
 import { SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
@@ -19,6 +20,10 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+
+  get TagBadgeCursor() {
+    return TagBadgeCursor;
+  }
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private modalService: NgbModal) { }
