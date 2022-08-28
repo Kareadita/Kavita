@@ -124,7 +124,6 @@ public class LibraryWatcher : ILibraryWatcher
             watcher.Changed += OnChanged;
             watcher.Created += OnCreated;
             watcher.Deleted += OnDeleted;
-            watcher.Renamed += OnRenamed;
             watcher.Error += OnError;
 
             watcher.Filter = "*.*";
@@ -149,7 +148,6 @@ public class LibraryWatcher : ILibraryWatcher
             fileSystemWatcher.Changed -= OnChanged;
             fileSystemWatcher.Created -= OnCreated;
             fileSystemWatcher.Deleted -= OnDeleted;
-            fileSystemWatcher.Renamed -= OnRenamed;
             fileSystemWatcher.Dispose();
         }
         _fileWatchers.Clear();
@@ -194,11 +192,6 @@ public class LibraryWatcher : ILibraryWatcher
         Task.Run(RestartWatching);
     }
 
-    private void OnRenamed(object sender, RenamedEventArgs e)
-    {
-        //_logger.LogDebug("[LibraryWatcher] Renamed {OldFullPath} -> {FullPath}", e.OldFullPath, e.FullPath);
-        //ProcessChange(e.FullPath, _directoryService.FileSystem.Directory.Exists(e.FullPath));
-    }
 
     /// <summary>
     /// Processes the file or folder change. If the change is a file change and not from a supported extension, it will be ignored.
@@ -211,7 +204,6 @@ public class LibraryWatcher : ILibraryWatcher
         try
         {
             // We need to check if directory or not
-            // !new Regex(Parser.Parser.SupportedExtensions).IsMatch(new FileInfo(filePath).Extension) (old code)
             if (!isDirectoryChange &&
                 !(Parser.Parser.IsArchive(filePath) || Parser.Parser.IsBook(filePath))) return;
 
@@ -248,7 +240,7 @@ public class LibraryWatcher : ILibraryWatcher
         {
             _logger.LogError(ex, "[LibraryWatcher] An error occured when processing a watch event");
         }
-        _logger.LogCritical("ProcessChange occured in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+        _logger.LogDebug("ProcessChange occured in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
 
