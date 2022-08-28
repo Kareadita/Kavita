@@ -107,6 +107,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         // Sometimes we can receive 2 started on long running scans, so better to just treat as a merge then.
         data = this.mergeOrUpdate(this.progressEventsSource.getValue(), message);
         this.progressEventsSource.next(data);
+        console.log(message.name, ' just started');
         break;
       case 'updated':
         data = this.mergeOrUpdate(this.progressEventsSource.getValue(), message);
@@ -117,6 +118,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         data = data.filter(m => m.name !== message.name);
         this.progressEventsSource.next(data);
         this.activeEvents = Math.max(this.activeEvents - 1, 0);
+        console.log(message.name, ' just ended');
         this.cdRef.markForCheck();
         break;
       default:

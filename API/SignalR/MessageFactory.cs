@@ -337,35 +337,42 @@ namespace API.SignalR
         /// Represents a file being scanned by Kavita for processing and grouping
         /// </summary>
         /// <remarks>Does not have a progress as it's unknown how many files there are. Instead sends -1 to represent indeterminate</remarks>
-        /// <param name="filename"></param>
+        /// <param name="folderPath"></param>
         /// <param name="libraryName"></param>
         /// <param name="eventType"></param>
         /// <returns></returns>
-        public static SignalRMessage FileScanProgressEvent(string filename, string libraryName, string eventType)
+        public static SignalRMessage FileScanProgressEvent(string folderPath, string libraryName, string eventType)
         {
             return new SignalRMessage()
             {
                 Name = FileScanProgress,
                 Title = $"Scanning {libraryName}",
-                SubTitle = Path.GetFileName(filename),
+                SubTitle = folderPath,
                 EventType = eventType,
                 Progress = ProgressType.Indeterminate,
                 Body = new
                 {
                     Title = $"Scanning {libraryName}",
-                    Subtitle = filename,
-                    Filename = filename,
+                    Subtitle = folderPath,
+                    Filename = folderPath,
                     EventTime = DateTime.Now,
                 }
             };
         }
 
+        /// <summary>
+        /// This informs the UI with details about what is being processed by the Scanner
+        /// </summary>
+        /// <param name="libraryName"></param>
+        /// <param name="eventType"></param>
+        /// <param name="seriesName"></param>
+        /// <returns></returns>
         public static SignalRMessage LibraryScanProgressEvent(string libraryName, string eventType, string seriesName = "")
         {
             return new SignalRMessage()
             {
                 Name = ScanProgress,
-                Title = $"Scanning {libraryName}",
+                Title = $"Processing {seriesName}",
                 SubTitle = seriesName,
                 EventType = eventType,
                 Progress = ProgressType.Indeterminate,
