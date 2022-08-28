@@ -133,7 +133,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           return;
         }
         await this.confirmService.alert(
-          'Please click this link to confirm your email. You must confirm to be able to login. You may need to log out of the current account before clicking. <br/> <a href="' + email + '" target="_blank">' + email + '</a>');
+          'Please click this link to confirm your email. You must confirm to be able to login. You may need to log out of the current account before clicking. <br/> <a href="' + email + '" target="_blank" rel="noopener noreferrer">' + email + '</a>');
 
       });
     });

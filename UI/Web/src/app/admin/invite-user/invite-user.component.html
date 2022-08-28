@@ -6,7 +6,7 @@
 </div>
 <div class="modal-body">
     <p>
-        Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can <a href="https://wiki.kavitareader.com/en/guides/misc/email" target="_blank" rel="noopener noreferrer">host your own</a> 
+        Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can <a href="https://wiki.kavitareader.com/en/guides/misc/email" rel="noopener noreferrer" target="_blank" rel="noopener noreferrer">host your own</a> 
         email service or use a fake email (Forgot User will not work). A link will be presented regardless and can be used to setup the email account manually.
     </p>
 
@@ -39,7 +39,7 @@
         <p>You can use the following link below to setup the account for your user or use the copy button. You may need to log out before using the link to register a new user.
             If your server is externally accessible, an email will have been sent to the user and the links can be used by them to finish setting up their account.
         </p>
-        <a class="email-link" href="{{emailLink}}" target="_blank">Setup user's account</a>
+        <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">Setup user's account</a>
         <app-api-key title="Invite Url" tooltipText="Copy this and paste in a new tab. You may need to log out." [showRefresh]="false" [transform]="makeLink"></app-api-key>
     </ng-container>
 

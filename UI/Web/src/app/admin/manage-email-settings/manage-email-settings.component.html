@@ -2,7 +2,7 @@
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
         <h4>Email Services (SMTP)</h4>
         <p>Kavita comes out of the box with an email service to power flows like invite user, forgot password, etc. Emails sent via our service are deleted immediately. You can use your own
-            email service. Set the url of the email service and use the Test button to ensure it works. At any time you can reset to ours. There is no way to disable emails although you are not required to use a 
+            email service, by setting up <a href="https://github.com/Kareadita/KavitaEmail" target="_blank" rel="noopener noreferrer">Kavita Email</a> service. Set the url of the email service and use the Test button to ensure it works. At any time you can reset to ours. There is no way to disable emails although you are not required to use a 
             valid email address for users. Confirmation links will always be saved to logs. Emails will not be sent if you are not accessing Kavita via a publically reachable url.
         </p>
         <div class="mb-3">
