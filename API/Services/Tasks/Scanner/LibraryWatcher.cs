@@ -115,6 +115,7 @@ public class LibraryWatcher : ILibraryWatcher
             .SelectMany(l => l.Folders)
             .Distinct()
             .Select(Parser.Parser.NormalizePath)
+            .Where(_directoryService.Exists)
             .ToList();
         foreach (var libraryFolder in _libraryFolders)
         {

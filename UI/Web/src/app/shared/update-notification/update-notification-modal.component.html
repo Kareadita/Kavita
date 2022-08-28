@@ -11,5 +11,5 @@
 
 <div class="modal-footer">
     <button type="button" class="btn {{updateData.isDocker ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">Close</button>
-    <a *ngIf="!updateData.isDocker" href="{{updateData.updateUrl}}" class="btn btn-primary" target="_blank" (click)="close()">Download</a>
+    <a *ngIf="!updateData.isDocker" href="{{updateData.updateUrl}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer" (click)="close()">Download</a>
 </div>
