@@ -493,7 +493,7 @@ public class SeriesService : ISeriesService
             if (v.Number == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
-        }).OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default));
+        }).OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)).ToList();
 
         foreach (var chapter in chapters)
         {
@@ -518,7 +518,8 @@ public class SeriesService : ISeriesService
         var storylineChapters = volumes
             .Where(v => v.Number == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
+            .OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)
+            .ToList();
 
         // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
         if (storylineChapters.Any()) {
