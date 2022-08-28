@@ -103,7 +103,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger = logger;
         _scannerService = scannerService;
 
-        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(30) : TimeSpan.FromMinutes(1);
+        _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(30) : TimeSpan.FromMinutes(5);
 
     }
 
