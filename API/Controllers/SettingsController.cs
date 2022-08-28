@@ -172,7 +172,6 @@ namespace API.Controllers
                 if (setting.Key == ServerSettingKey.ConvertBookmarkToWebP && updateSettingsDto.ConvertBookmarkToWebP + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.ConvertBookmarkToWebP + string.Empty;
-                    _logger.LogDebug("Updating Covert Bookmarks to WebP to {Value}", updateSettingsDto.ConvertBookmarkToWebP);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 
