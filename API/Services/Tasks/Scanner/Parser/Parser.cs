@@ -21,8 +21,6 @@ namespace API.Parser
         public const string SupportedExtensions =
             ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
 
-        public static readonly string[] SupportedGlobExtensions = new [] {@"**/*.png", @"**/*.cbz", @"**/*.pdf"};
-
         private const RegexOptions MatchOptions =
             RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;
 

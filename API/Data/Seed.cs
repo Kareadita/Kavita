@@ -103,7 +103,7 @@ namespace API.Data
                 new() {Key = ServerSettingKey.ConvertBookmarkToWebP, Value = "false"},
                 new() {Key = ServerSettingKey.EnableSwaggerUi, Value = "false"},
                 new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
-                new() {Key = ServerSettingKey.EnableFolderWatching, Value = "true"},
+                new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
             }.ToArray());
 
             foreach (var defaultSetting in DefaultSettings)

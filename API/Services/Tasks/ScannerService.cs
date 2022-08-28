@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -68,6 +69,7 @@ public enum ScanCancelReason
  */
 public class ScannerService : IScannerService
 {
+    public const string Name = "ScannerService";
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ScannerService> _logger;
     private readonly IMetadataService _metadataService;
@@ -277,7 +279,7 @@ public class ScannerService : IScannerService
             return ScanCancelReason.FolderMount;
         }
 
-        // If all series Folder paths haven't been modified since last scan, abort
+        // If all series Folder paths haven't been modified since last scan, abort (NOTE: This flow never happens as ScanSeries will always bypass)
         if (!bypassFolderChecks)
         {
 
@@ -293,7 +295,7 @@ public class ScannerService : IScannerService
                         series.Name);
                     await _eventHub.SendMessageAsync(MessageFactory.Info,
                         MessageFactory.InfoEvent($"{series.Name} scan has no work to do",
-                            "All folders have not been changed since last scan. Scan will be aborted."));
+                            $"All folders have not been changed since last scan ({series.LastFolderScanned.ToString(CultureInfo.CurrentCulture)}). Scan will be aborted."));
                     return ScanCancelReason.NoChange;
                 }
             }
@@ -304,7 +306,7 @@ public class ScannerService : IScannerService
                     series.Name);
                 await _eventHub.SendMessageAsync(MessageFactory.Info,
                     MessageFactory.ErrorEvent($"{series.Name} scan has no work to do",
-                        "The folder the series is in is missing. Delete series manually or perform a library scan."));
+                        "The folder the series was in is missing. Delete series manually or perform a library scan."));
                 return ScanCancelReason.NoCancel;
             }
         }
@@ -316,7 +318,7 @@ public class ScannerService : IScannerService
     private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
     {
         var keys = parsedSeries.Keys;
-        foreach (var key in keys.Where(key => !SeriesHelper.FindSeries(series, key))) // series.Format != key.Format ||
+        foreach (var key in keys.Where(key => !SeriesHelper.FindSeries(series, key)))
         {
             parsedSeries.Remove(key);
         }
@@ -420,7 +422,7 @@ public class ScannerService : IScannerService
                 _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
                 await _eventHub.SendMessageAsync(MessageFactory.Info,
                     MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
-                        "All folders have not been changed since last scan. Scan will be aborted."));
+                        $"All folders have not been changed since last scan ({library.Folders.Max(f => f.LastScanned).ToString(CultureInfo.CurrentCulture)}). Scan will be aborted."));
 
                 BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(library.Id, false));
                 BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(library.Id, false));
@@ -485,7 +487,7 @@ public class ScannerService : IScannerService
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
-        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);
+        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 
         var time = DateTime.Now;
         foreach (var folderPath in library.Folders)

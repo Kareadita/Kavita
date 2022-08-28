@@ -68,7 +68,6 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
       if (event.event === EVENTS.NotificationProgress) {
-        console.log('[Event Widget]: Event came in ', event.payload);
         this.processNotificationProgressEvent(event);
       } else if (event.event === EVENTS.Error) {
         const values = this.errorSource.getValue();

@@ -141,7 +141,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   setup(member: Member) {
     this.accountService.getInviteUrl(member.id, false).subscribe(url => {
-      console.log('Url: ', url);
+      console.log('Invite Url: ', url);
       if (url) {
         this.router.navigateByUrl(url);
       }

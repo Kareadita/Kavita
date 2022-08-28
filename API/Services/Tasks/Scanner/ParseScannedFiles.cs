@@ -80,7 +80,9 @@ namespace API.Services.Tasks.Scanner
             string normalizedPath;
             if (scanDirectoryByDirectory)
             {
-                var directories = _directoryService.GetDirectories(folderPath).ToList();
+                // This is used in library scan, so we should check first for a ignore file and use that here as well
+                var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
+                var directories = _directoryService.GetDirectories(folderPath, _directoryService.CreateMatcherFromFile(potentialIgnoreFile)).ToList();
 
                 foreach (var directory in directories)
                 {
@@ -219,7 +221,7 @@ namespace API.Services.Tasks.Scanner
             IDictionary<string, IList<SeriesModified>> seriesPaths, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos, bool forceCheck = false)
         {
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("Starting file scan", libraryName, ProgressEventType.Started));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", libraryName, ProgressEventType.Started));
 
             foreach (var folderPath in folders)
             {
@@ -284,7 +286,7 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", libraryName, ProgressEventType.Ended));
         }
 
         private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder, bool forceCheck = false)
