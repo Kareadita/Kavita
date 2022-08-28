@@ -21,11 +21,7 @@ COPY --from=copytask /files/wwwroot /kavita/wwwroot
 #Installs program dependencies
 RUN apt-get update \
   && apt-get install -y libicu-dev libssl1.1 libgdiplus curl \
-  && apt-get install -y libvips --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
-
-#Removes the libvips.so.42 file to fix the AVX CPU requirement issue
-RUN rm /kavita/libvips.so.42
 
 COPY entrypoint.sh /entrypoint.sh
 
