@@ -196,6 +196,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// <summary>
     /// Processes the file or folder change. If the change is a file change and not from a supported extension, it will be ignored.
     /// </summary>
+    /// <remarks>This will ignore image files that are added to the system. However, they may still trigger scans due to folder changes.</remarks>
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
     private void ProcessChange(string filePath, bool isDirectoryChange = false)
