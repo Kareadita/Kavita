@@ -159,7 +159,7 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate"></param>
     private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate)
     {
-        _logger.LogDebug("[MetadataService] Generating cover images for series: {SeriesName}", series.OriginalName);
+        _logger.LogDebug("[MetadataService] Processing cover image generation for series: {SeriesName}", series.OriginalName);
         try
         {
             var volumeIndex = 0;
@@ -227,7 +227,7 @@ public class MetadataService : IMetadataService
             totalTime += stopwatch.ElapsedMilliseconds;
             stopwatch.Restart();
 
-            _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
+            _logger.LogDebug("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd})",
                 chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
 
             var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
