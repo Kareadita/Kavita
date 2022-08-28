@@ -487,7 +487,7 @@ public class ScannerService : IScannerService
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
-        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);
+        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 
         var time = DateTime.Now;
         foreach (var folderPath in library.Folders)

@@ -80,8 +80,8 @@ public class MetadataService : IMetadataService
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
-        _unitOfWork.ChapterRepository.Update(chapter); // BUG: CoverImage isn't saving for Monter Masume with new scan loop
-        _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter)); // TODO: IDEA: Instead of firing here where it's not yet saved, maybe collect the ids and fire after save
+        _unitOfWork.ChapterRepository.Update(chapter);
+        _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
         return Task.FromResult(true);
     }
 
@@ -111,7 +111,6 @@ public class MetadataService : IMetadataService
         if (firstChapter == null) return Task.FromResult(false);
 
         volume.CoverImage = firstChapter.CoverImage;
-        //await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume), false);
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
 
         return Task.FromResult(true);
@@ -148,7 +147,6 @@ public class MetadataService : IMetadataService
             }
         }
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
-        //await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;
     }
@@ -195,7 +193,7 @@ public class MetadataService : IMetadataService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[MetadataService] There was an exception during updating metadata for {SeriesName} ", series.Name);
+            _logger.LogError(ex, "[MetadataService] There was an exception during cover generation for {SeriesName} ", series.Name);
         }
     }
 
@@ -211,14 +209,14 @@ public class MetadataService : IMetadataService
     public async Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
-        _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
+        _logger.LogInformation("[MetadataService] Beginning cover generation refresh of {LibraryName}", library.Name);
 
         _updateEvents.Clear();
 
         var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
-        _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
+        _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName} for cover generation. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"));
@@ -255,7 +253,7 @@ public class MetadataService : IMetadataService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
+                    _logger.LogError(ex, "[MetadataService] There was an exception during cover generation refresh for {SeriesName}", series.Name);
                 }
                 seriesIndex++;
             }
@@ -272,7 +270,7 @@ public class MetadataService : IMetadataService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 1F, ProgressEventType.Ended, $"Complete"));
 
-        _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
+        _logger.LogInformation("[MetadataService] Updated covers for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
     }
 
 
@@ -321,7 +319,7 @@ public class MetadataService : IMetadataService
         if (_unitOfWork.HasChanges())
         {
             await _unitOfWork.CommitAsync();
-            _logger.LogInformation("[MetadataService] Updated cover images for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
+            _logger.LogInformation("[MetadataService] Updated covers for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
