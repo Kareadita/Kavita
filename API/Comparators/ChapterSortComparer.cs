@@ -23,6 +23,8 @@ namespace API.Comparators
 
             return x.CompareTo(y);
         }
+
+        public static readonly ChapterSortComparer Default = new ChapterSortComparer();
     }
 
     /// <summary>
@@ -44,6 +46,8 @@ namespace API.Comparators
 
             return x.CompareTo(y);
         }
+
+        public static readonly ChapterSortComparerZeroFirst Default = new ChapterSortComparerZeroFirst();
     }
 
     public class SortComparerZeroLast : IComparer<double>
