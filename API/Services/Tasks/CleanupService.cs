@@ -127,16 +127,18 @@ namespace API.Services.Tasks
         }
 
         /// <summary>
-        /// Removes all files and directories in the cache directory
+        /// Removes all files and directories in the cache and temp directory
         /// </summary>
         public void CleanupCacheDirectory()
         {
             _logger.LogInformation("Performing cleanup of Cache directory");
             _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
+            _directoryService.ExistOrCreate(_directoryService.TempDirectory);
 
             try
             {
                 _directoryService.ClearDirectory(_directoryService.CacheDirectory);
+                _directoryService.ClearDirectory(_directoryService.TempDirectory);
             }
             catch (Exception ex)
             {

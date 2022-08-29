@@ -100,14 +100,8 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
 
     // Focus on the new typeahead
     setTimeout(() => {
-      //const typeahead = this.relations.map(item => item.typeaheadSettings).filter(setting => setting.id === `relation--${this.relations.length - 1}`);
-      //const typeahead = document.querySelector(`#relation--${this.relations.length - 1} .typeahead-input`) as HTMLInputElement;
-      //console.log('typeahead: ', typeahead);
       this.focusTypeahead.emit(`relation--${this.relations.length - 1}`);
-      
-      //if (typeahead) typeahead.focus();
     }, 10);
-
   }
 
   removeRelation(index: number) {
@@ -171,7 +165,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     const alternativeVersions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeVersion && item.series !== undefined).map(item => item.series!.id);
     const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
     
-    // TODO: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
+    // NOTE: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
     this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis).subscribe(() => {});
     
   }
