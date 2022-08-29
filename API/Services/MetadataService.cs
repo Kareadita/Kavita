@@ -44,6 +44,7 @@ public interface IMetadataService
 
 public class MetadataService : IMetadataService
 {
+    public const string Name = "MetadataService";
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<MetadataService> _logger;
     private readonly IEventHub _eventHub;
