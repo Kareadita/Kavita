@@ -16,9 +16,11 @@ using API.Services;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers
 {
@@ -133,7 +135,7 @@ namespace API.Controllers
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username);
             if (user == null) return BadRequest("Could not validate user");
 
-            var libraryString = String.Join(",", updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
+            var libraryString = string.Join(",", updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
             _logger.LogInformation("Granting user {UserName} access to: {Libraries}", updateLibraryForUserDto.Username, libraryString);
 
             var allLibraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
@@ -242,10 +244,16 @@ namespace API.Controllers
             var chapterIds =
                 await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(seriesIds);
 
-
             try
             {
                 var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
+                if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
+                {
+                    // TODO: Figure out how to cancel a job
+                    _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
+                    return BadRequest(
+                        "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");
+                }
                 _unitOfWork.LibraryRepository.Delete(library);
                 await _unitOfWork.CommitAsync();
 

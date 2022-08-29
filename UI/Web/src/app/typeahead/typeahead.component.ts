@@ -168,6 +168,10 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
    * If disabled, a user will not be able to interact with the typeahead
    */
   @Input() disabled: boolean = false;
+  /**
+   * When triggered, will focus the input if the passed string matches the id
+   */
+  @Input() focus: EventEmitter<string> | undefined;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   @Output() onUnlock = new EventEmitter<void>();
@@ -202,6 +206,13 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       this.clearSelections(resetToEmpty);
       this.init();
     });
+
+    if (this.focus) {
+      this.focus.pipe(takeUntil(this.onDestroy)).subscribe((id: string) => {
+        if (this.settings.id !== id) return;
+        this.onInputFocus();
+      });
+    }
 
     this.init();
   }

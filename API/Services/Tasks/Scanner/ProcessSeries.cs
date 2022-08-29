@@ -375,6 +375,13 @@ public class ProcessSeries : IProcessSeries
             }
         }
 
+        var genres = chapters.SelectMany(c => c.Genres).ToList();
+        GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
+        {
+            if (series.Metadata.GenresLocked) return;
+            series.Metadata.Genres.Remove(genre);
+        });
+
         // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
         // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();

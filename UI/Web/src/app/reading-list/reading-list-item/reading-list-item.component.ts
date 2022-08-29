@@ -42,7 +42,12 @@ export class ReadingListItemComponent implements OnInit {
     }
 
     if (item.seriesFormat === MangaFormat.EPUB) {
-      this.title = 'Volume ' + this.utilityService.cleanSpecialTitle(item.chapterNumber);
+      const specialTitle = this.utilityService.cleanSpecialTitle(item.chapterNumber);
+      if (specialTitle === '0') {
+        this.title = 'Volume ' + this.utilityService.cleanSpecialTitle(item.volumeNumber);
+      } else {
+        this.title = 'Volume ' + specialTitle;
+      }
     }
 
     let chapterNum = item.chapterNumber;

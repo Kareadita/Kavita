@@ -12,7 +12,7 @@
     <form>
         <div class="row g-0 mb-3" *ngFor="let relation of relations; let idx = index; let isLast = last;">
             <div class="col-sm-12 col-md-7">
-                <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}">
+                <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">
                     <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}} ({{libraryNames[item.libraryId]}})
                     </ng-template>

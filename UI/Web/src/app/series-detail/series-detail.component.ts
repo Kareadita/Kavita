@@ -504,6 +504,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         if (this.relations.length > 0) {
           this.hasRelations = true;
           this.changeDetectionRef.markForCheck();
+        } else {
+          this.hasRelations = false;
+          this.changeDetectionRef.markForCheck();
         }
       });
 
