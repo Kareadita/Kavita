@@ -273,13 +273,14 @@ namespace API
 
             app.Use(async (context, next) =>
             {
-                context.Response.GetTypedHeaders().CacheControl =
-                    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
-                    {
-                        Public = false,
-                        MaxAge = TimeSpan.FromSeconds(10),
-                    };
-                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
+                // Note: I removed this as I caught Chrome caching api responses when it shouldn't have
+                // context.Response.GetTypedHeaders().CacheControl =
+                //     new CacheControlHeaderValue()
+                //     {
+                //         Public = false,
+                //         MaxAge = TimeSpan.FromSeconds(10),
+                //     };
+                context.Response.Headers[HeaderNames.Vary] =
                     new[] { "Accept-Encoding" };
 
                 // Don't let the site be iframed outside the same origin (clickjacking)
