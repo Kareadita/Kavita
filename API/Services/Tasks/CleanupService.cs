@@ -20,6 +20,7 @@ namespace API.Services.Tasks
         Task DeleteChapterCoverImages();
         Task DeleteTagCoverImages();
         Task CleanupBackups();
+        void CleanupTemp();
     }
     /// <summary>
     /// Cleans up after operations on reoccurring basis
@@ -176,6 +177,23 @@ namespace API.Services.Tasks
                 _directoryService.DeleteFiles(expiredBackups.Select(f => f.FullName));
             }
             _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
+        }
+
+        public void CleanupTemp()
+        {
+            _logger.LogInformation("Performing cleanup of Temp directory");
+            _directoryService.ExistOrCreate(_directoryService.TempDirectory);
+
+            try
+            {
+                _directoryService.ClearDirectory(_directoryService.TempDirectory);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
+            }
+
+            _logger.LogInformation("Temp directory purged");
         }
     }
 }
