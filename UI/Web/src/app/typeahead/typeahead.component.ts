@@ -5,7 +5,6 @@ import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { auditTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
-import { ToggleService } from '../_services/toggle.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
 /**
@@ -256,6 +255,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         tap((filteredOptions) => {
           this.isLoadingOptions = false;
           this.focusedIndex = 0;
+          this.cdRef.markForCheck();
           setTimeout(() => {
             this.updateShowAddItem(filteredOptions);
             this.updateHighlight();
