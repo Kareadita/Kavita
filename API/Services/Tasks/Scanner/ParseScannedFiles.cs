@@ -289,12 +289,19 @@ namespace API.Services.Tasks.Scanner
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", libraryName, ProgressEventType.Ended));
         }
 
+        /// <summary>
+        /// Checks against all folder paths on file if the last scanned is >= the directory's last write down to the second
+        /// </summary>
+        /// <param name="seriesPaths"></param>
+        /// <param name="normalizedFolder"></param>
+        /// <param name="forceCheck"></param>
+        /// <returns></returns>
         private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder, bool forceCheck = false)
         {
             if (forceCheck) return false;
 
-            return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
-                _directoryService.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerMinute));
+            return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerSecond) >=
+                _directoryService.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerSecond));
         }
 
         /// <summary>
