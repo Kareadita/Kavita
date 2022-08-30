@@ -10,7 +10,7 @@ namespace API.Tests.Parser
         [InlineData("Faust - Volume 01 [Del Rey][Scans_Compressed]", "Faust")]
         public void ParseSeriesTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
         }
 
         [Theory]
@@ -18,7 +18,7 @@ namespace API.Tests.Parser
         [InlineData("Faust - Volume 01 [Del Rey][Scans_Compressed]", "1")]
         public void ParseVolumeTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
         }
 
         // [Theory]

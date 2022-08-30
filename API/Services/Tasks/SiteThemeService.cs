@@ -55,8 +55,8 @@ public class ThemeService : IThemeService
         _directoryService.ExistOrCreate(_directoryService.SiteThemeDirectory);
         var reservedNames = Seed.DefaultThemes.Select(t => t.NormalizedName).ToList();
         var themeFiles = _directoryService
-            .GetFilesWithExtension(Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
-            .Where(name => !reservedNames.Contains(Parser.Parser.Normalize(name))).ToList();
+            .GetFilesWithExtension(Scanner.Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
+            .Where(name => !reservedNames.Contains(Scanner.Parser.Parser.Normalize(name))).ToList();
 
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
 
@@ -64,7 +64,7 @@ public class ThemeService : IThemeService
         var userThemes = allThemes.Where(t => t.Provider == ThemeProvider.User).ToList();
         foreach (var userTheme in userThemes)
         {
-            var filepath = Parser.Parser.NormalizePath(
+            var filepath = Scanner.Parser.Parser.NormalizePath(
                 _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, userTheme.FileName));
             if (_directoryService.FileSystem.File.Exists(filepath)) continue;
 
@@ -78,7 +78,7 @@ public class ThemeService : IThemeService
         foreach (var themeFile in themeFiles)
         {
             var themeName =
-                Parser.Parser.Normalize(_directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile));
+                Scanner.Parser.Parser.Normalize(_directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile));
             if (allThemeNames.Contains(themeName)) continue;
 
             _unitOfWork.SiteThemeRepository.Add(new SiteTheme()

@@ -72,7 +72,7 @@ public static class MigrateBookmarks
                         continue;
                 }
 
-                var files = directoryService.GetFilesWithExtension(chapterExtractPath, Parser.Parser.ImageFileExtensions);
+                var files = directoryService.GetFilesWithExtension(chapterExtractPath, Services.Tasks.Scanner.Parser.Parser.ImageFileExtensions);
                 // Filter out images that aren't in bookmarks
                 Array.Sort(files, numericComparer);
                 foreach (var chapterPage in chapterPages)

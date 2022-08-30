@@ -28,7 +28,7 @@ namespace API.Tests.Extensions
                 Name = seriesInput[0],
                 LocalizedName = seriesInput[1],
                 OriginalName = seriesInput[2],
-                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Parser.Parser.Normalize(seriesInput[0]),
+                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Services.Tasks.Scanner.Parser.Parser.Normalize(seriesInput[0]),
                 Metadata = new SeriesMetadata()
             };
 
@@ -52,14 +52,14 @@ namespace API.Tests.Extensions
                 Name = seriesInput[0],
                 LocalizedName = seriesInput[1],
                 OriginalName = seriesInput[2],
-                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Parser.Parser.Normalize(seriesInput[0]),
+                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Services.Tasks.Scanner.Parser.Parser.Normalize(seriesInput[0]),
                 Metadata = new SeriesMetadata(),
             };
 
             var parserInfos = list.Select(s => new ParsedSeries()
             {
                 Name = s,
-                NormalizedName = API.Parser.Parser.Normalize(s),
+                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(s),
             }).ToList();
 
             // This doesn't do any checks against format
@@ -78,7 +78,7 @@ namespace API.Tests.Extensions
                 Name = seriesInput[0],
                 LocalizedName = seriesInput[1],
                 OriginalName = seriesInput[2],
-                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Parser.Parser.Normalize(seriesInput[0]),
+                NormalizedName = seriesInput.Length == 4 ? seriesInput[3] : API.Services.Tasks.Scanner.Parser.Parser.Normalize(seriesInput[0]),
                 Metadata = new SeriesMetadata()
             };
             var info = new ParserInfo();

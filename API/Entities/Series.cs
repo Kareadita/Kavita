@@ -14,11 +14,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public string Name { get; set; }
     /// <summary>
-    /// Used internally for name matching. <see cref="Parser.Parser.Normalize"/>
+    /// Used internally for name matching. <see cref="Services.Tasks.Scanner.Parser.Parser.Normalize"/>
     /// </summary>
     public string NormalizedName { get; set; }
     /// <summary>
-    /// Used internally for localized name matching. <see cref="Parser.Parser.Normalize"/>
+    /// Used internally for localized name matching. <see cref="Services.Tasks.Scanner.Parser.Parser.Normalize"/>
     /// </summary>
     public string NormalizedLocalizedName { get; set; }
     /// <summary>
@@ -57,7 +57,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Highest path (that is under library root) that contains the series.
     /// </summary>
-    /// <remarks><see cref="Parser.Parser.NormalizePath"/> must be used before setting</remarks>
+    /// <remarks><see cref="Services.Tasks.Scanner.Parser.Parser.NormalizePath"/> must be used before setting</remarks>
     public string FolderPath { get; set; }
     /// <summary>
     /// Last time the folder was scanned

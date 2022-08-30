@@ -168,7 +168,7 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanFolder(string folderPath)
     {
-        _scannerService.ScanFolder(Parser.Parser.NormalizePath(folderPath));
+        _scannerService.ScanFolder(Tasks.Scanner.Parser.Parser.NormalizePath(folderPath));
     }
 
     #endregion

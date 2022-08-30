@@ -107,16 +107,16 @@ namespace API.Data.Metadata
             info.SeriesSort = info.SeriesSort.Trim();
             info.LocalizedSeries = info.LocalizedSeries.Trim();
 
-            info.Writer = Parser.Parser.CleanAuthor(info.Writer);
-            info.Colorist = Parser.Parser.CleanAuthor(info.Colorist);
-            info.Editor = Parser.Parser.CleanAuthor(info.Editor);
-            info.Inker = Parser.Parser.CleanAuthor(info.Inker);
-            info.Letterer = Parser.Parser.CleanAuthor(info.Letterer);
-            info.Penciller = Parser.Parser.CleanAuthor(info.Penciller);
-            info.Publisher = Parser.Parser.CleanAuthor(info.Publisher);
-            info.Characters = Parser.Parser.CleanAuthor(info.Characters);
-            info.Translator = Parser.Parser.CleanAuthor(info.Translator);
-            info.CoverArtist = Parser.Parser.CleanAuthor(info.CoverArtist);
+            info.Writer = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Writer);
+            info.Colorist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Colorist);
+            info.Editor = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Editor);
+            info.Inker = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Inker);
+            info.Letterer = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Letterer);
+            info.Penciller = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Penciller);
+            info.Publisher = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Publisher);
+            info.Characters = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Characters);
+            info.Translator = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Translator);
+            info.CoverArtist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.CoverArtist);
         }
 
 

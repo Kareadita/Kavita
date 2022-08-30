@@ -42,7 +42,7 @@ public class PersonRepository : IPersonRepository
 
     public async Task<Person> FindByNameAsync(string name)
     {
-        var normalizedName = Parser.Parser.Normalize(name);
+        var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
         return await _context.Person
             .Where(p => normalizedName.Equals(p.NormalizedName))
             .SingleOrDefaultAsync();

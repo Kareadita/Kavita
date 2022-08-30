@@ -60,7 +60,7 @@ namespace API.Services
         /// <returns></returns>
         public virtual ArchiveLibrary CanOpen(string archivePath)
         {
-            if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
+            if (string.IsNullOrEmpty(archivePath) || !(File.Exists(archivePath) && Tasks.Scanner.Parser.Parser.IsArchive(archivePath) || Tasks.Scanner.Parser.Parser.IsEpub(archivePath))) return ArchiveLibrary.NotSupported;
 
             var ext = _directoryService.FileSystem.Path.GetExtension(archivePath).ToUpper();
             if (ext.Equals(".CBR") || ext.Equals(".RAR")) return ArchiveLibrary.SharpCompress;
@@ -100,14 +100,14 @@ namespace API.Services
                     case ArchiveLibrary.Default:
                     {
                         using var archive = ZipFile.OpenRead(archivePath);
-                        return archive.Entries.Count(e => !Parser.Parser.HasBlacklistedFolderInPath(e.FullName) && Parser.Parser.IsImage(e.FullName));
+                        return archive.Entries.Count(e => !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(e.FullName) && Tasks.Scanner.Parser.Parser.IsImage(e.FullName));
                     }
                     case ArchiveLibrary.SharpCompress:
                     {
                         using var archive = ArchiveFactory.Open(archivePath);
                         return archive.Entries.Count(entry => !entry.IsDirectory &&
-                                                              !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
-                                                              && Parser.Parser.IsImage(entry.Key));
+                                                              !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
+                                                              && Tasks.Scanner.Parser.Parser.IsImage(entry.Key));
                     }
                     case ArchiveLibrary.NotSupported:
                         _logger.LogWarning("[GetNumberOfPagesFromArchive] This archive cannot be read: {ArchivePath}. Defaulting to 0 pages", archivePath);
@@ -132,9 +132,9 @@ namespace API.Services
         public static string FindFolderEntry(IEnumerable<string> entryFullNames)
         {
             var result = entryFullNames
-                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)))
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith)))
                 .OrderByNatural(Path.GetFileNameWithoutExtension)
-                .FirstOrDefault(Parser.Parser.IsCoverImage);
+                .FirstOrDefault(Tasks.Scanner.Parser.Parser.IsCoverImage);
 
             return string.IsNullOrEmpty(result) ? null : result;
         }
@@ -150,7 +150,7 @@ namespace API.Services
             // First check if there are any files that are not in a nested folder before just comparing by filename. This is needed
             // because NaturalSortComparer does not work with paths and doesn't seem 001.jpg as before chapter 1/001.jpg.
             var fullNames = entryFullNames
-                .Where(path => !(Path.EndsInDirectorySeparator(path) || Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)) && Parser.Parser.IsImage(path))
+                .Where(path => !(Path.EndsInDirectorySeparator(path) || Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith)) && Tasks.Scanner.Parser.Parser.IsImage(path))
                 .OrderByNatural(c => c.GetFullPathWithoutExtension())
                 .ToList();
             if (fullNames.Count == 0) return null;
@@ -187,7 +187,7 @@ namespace API.Services
 
         /// <summary>
         /// Generates byte array of cover image.
-        /// Given a path to a compressed file <see cref="Parser.Parser.ArchiveFileExtensions"/>, will ensure the first image (respects directory structure) is returned unless
+        /// Given a path to a compressed file <see cref="Tasks.Scanner.Parser.Parser.ArchiveFileExtensions"/>, will ensure the first image (respects directory structure) is returned unless
         /// a folder/cover.(image extension) exists in the the compressed file (if duplicate, the first is chosen)
         ///
         /// This skips over any __MACOSX folder/file iteration.
@@ -265,7 +265,7 @@ namespace API.Services
             // Sometimes ZipArchive will list the directory and others it will just keep it in the FullName
             return archive.Entries.Count > 0 &&
                    !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
-                   archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
+                   archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
         }
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace API.Services
                 return false;
             }
 
-            if (Parser.Parser.IsArchive(archivePath) || Parser.Parser.IsEpub(archivePath)) return true;
+            if (Tasks.Scanner.Parser.Parser.IsArchive(archivePath) || Tasks.Scanner.Parser.Parser.IsEpub(archivePath)) return true;
 
             _logger.LogWarning("Archive {ArchivePath} is not a valid archive", archivePath);
             return false;
@@ -331,10 +331,10 @@ namespace API.Services
         private static bool ValidComicInfoArchiveEntry(string fullName, string name)
         {
             var filenameWithoutExtension = Path.GetFileNameWithoutExtension(name).ToLower();
-            return !Parser.Parser.HasBlacklistedFolderInPath(fullName)
+            return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
                 && filenameWithoutExtension.Equals(ComicInfoFilename, StringComparison.InvariantCultureIgnoreCase)
-                && !filenameWithoutExtension.StartsWith(Parser.Parser.MacOsMetadataFileStartsWith)
-                && Parser.Parser.IsXml(name);
+                && !filenameWithoutExtension.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith)
+                && Tasks.Scanner.Parser.Parser.IsXml(name);
         }
 
         /// <summary>
@@ -467,8 +467,8 @@ namespace API.Services
                     {
                         using var archive = ArchiveFactory.Open(archivePath);
                         ExtractArchiveEntities(archive.Entries.Where(entry => !entry.IsDirectory
-                                                                              && !Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
-                                                                              && Parser.Parser.IsImage(entry.Key)), extractPath);
+                                                                              && !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(entry.Key) ?? string.Empty)
+                                                                              && Tasks.Scanner.Parser.Parser.IsImage(entry.Key)), extractPath);
                         break;
                     }
                     case ArchiveLibrary.NotSupported:

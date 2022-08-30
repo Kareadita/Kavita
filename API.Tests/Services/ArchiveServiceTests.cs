@@ -198,7 +198,7 @@ namespace API.Tests.Services
             var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService);
             var archiveService =  Substitute.For<ArchiveService>(_logger,
                 new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService);
-            var testDirectory = API.Parser.Parser.NormalizePath(Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages")));
+            var testDirectory = API.Services.Tasks.Scanner.Parser.Parser.NormalizePath(Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages")));
 
             var outputDir = Path.Join(testDirectory, "output");
             _directoryService.ClearDirectory(outputDir);

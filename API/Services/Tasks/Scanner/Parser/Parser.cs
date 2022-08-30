@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using API.Entities.Enums;
 
-namespace API.Parser
+namespace API.Services.Tasks.Scanner.Parser
 {
     public static class Parser
     {

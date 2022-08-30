@@ -254,7 +254,7 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var normalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(tagTitle);
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
             {
@@ -295,7 +295,7 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var normalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(tagTitle);
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
             if (existingTag != null)
             {
@@ -465,7 +465,7 @@ public class SeriesService : ISeriesService
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
+            .OrderBy(v => Tasks.Scanner.Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
@@ -542,7 +542,7 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !chapter.IsSpecial && !chapter.Number.Equals(Parser.Parser.DefaultChapter);
+        return !chapter.IsSpecial && !chapter.Number.Equals(Tasks.Scanner.Parser.Parser.DefaultChapter);
     }
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType)
@@ -551,7 +551,7 @@ public class SeriesService : ISeriesService
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
-                if (firstChapter.Range.Equals(Parser.Parser.DefaultVolume)) return;
+                if (firstChapter.Range.Equals(Tasks.Scanner.Parser.Parser.DefaultVolume)) return;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
                 if (string.IsNullOrEmpty(title)) return;
                 volume.Name += $" - {title}";
@@ -572,7 +572,7 @@ public class SeriesService : ISeriesService
     {
         if (isSpecial)
         {
-            return Parser.Parser.CleanSpecialTitle(chapterTitle);
+            return Tasks.Scanner.Parser.Parser.CleanSpecialTitle(chapterTitle);
         }
 
         var hashSpot = withHash ? "#" : string.Empty;
