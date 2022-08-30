@@ -406,30 +406,6 @@ public class ScannerService : IScannerService
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
-        // If all library Folder paths haven't been modified since last scan, abort
-        // Unless the user did something on the library (delete series) and thus we can bypass this check
-        var wasLibraryUpdatedSinceLastScan = (library.LastModified.Truncate(TimeSpan.TicksPerMinute) >
-                                             library.LastScanned.Truncate(TimeSpan.TicksPerMinute))
-                                             && library.LastScanned != DateTime.MinValue;
-        if (!forceUpdate && !wasLibraryUpdatedSinceLastScan)
-        {
-            var haveFoldersChangedSinceLastScan = library.Folders
-                .All(f => _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute) > f.LastScanned.Truncate(TimeSpan.TicksPerMinute));
-
-            // If nothing changed && library folder's have all been scanned at least once
-            if (!haveFoldersChangedSinceLastScan && library.Folders.All(f => f.LastScanned > DateTime.MinValue))
-            {
-                _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
-                await _eventHub.SendMessageAsync(MessageFactory.Info,
-                    MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
-                        $"All folders have not been changed since last scan ({library.Folders.Max(f => f.LastScanned).ToString(CultureInfo.CurrentCulture)}). Scan will be aborted."));
-
-                BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForLibrary(library.Id, false));
-                BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(library.Id, false));
-                return;
-            }
-        }
-
 
         // Validations are done, now we can start actual scan
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
