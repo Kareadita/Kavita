@@ -301,7 +301,7 @@ public class SeriesRepository : ISeriesRepository
     {
         const int maxRecords = 15;
         var result = new SearchResultGroupDto();
-        var searchQueryNormalized = Parser.Parser.Normalize(searchQuery);
+        var searchQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(searchQuery);
 
         var seriesIds = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
@@ -1151,7 +1151,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<int> GetSeriesIdByFolder(string folder)
     {
-        var normalized = Parser.Parser.NormalizePath(folder);
+        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         var series = await _context.Series
             .Where(s => s.FolderPath.Equals(normalized))
             .SingleOrDefaultAsync();
@@ -1165,7 +1165,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<Series> GetSeriesByFolderPath(string folder)
     {
-        var normalized = Parser.Parser.NormalizePath(folder);
+        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         return await _context.Series.SingleOrDefaultAsync(s => s.FolderPath.Equals(normalized));
     }
 
@@ -1178,7 +1178,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public Task<Series> GetFullSeriesByName(string series, int libraryId)
     {
-        var localizedSeries = Parser.Parser.Normalize(series);
+        var localizedSeries = Services.Tasks.Scanner.Parser.Parser.Normalize(series);
         return _context.Series
             .Where(s => (s.NormalizedName.Equals(localizedSeries)
                          || s.LocalizedName.Equals(series)) && s.LibraryId == libraryId)
@@ -1221,8 +1221,8 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
     {
-        var normalizedSeries = Parser.Parser.Normalize(seriesName);
-        var normalizedLocalized = Parser.Parser.Normalize(localizedName);
+        var normalizedSeries = Services.Tasks.Scanner.Parser.Parser.Normalize(seriesName);
+        var normalizedLocalized = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName);
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)

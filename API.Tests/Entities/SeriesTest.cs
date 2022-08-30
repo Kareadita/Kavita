@@ -12,7 +12,7 @@ namespace API.Tests.Entities
         [InlineData("Darker than Black")]
         public void CreateSeries(string name)
         {
-            var key = API.Parser.Parser.Normalize(name);
+            var key = API.Services.Tasks.Scanner.Parser.Parser.Normalize(name);
             var series = DbFactory.Series(name);
             Assert.Equal(0, series.Id);
             Assert.Equal(0, series.Pages);

@@ -401,7 +401,7 @@ public class BookmarkServiceTests
 
         var files = await bookmarkService.GetBookmarkFilesById(new[] {1});
         var actualFiles = ds.GetFiles(BookmarkDirectory, searchOption: SearchOption.AllDirectories);
-        Assert.Equal(files.Select(API.Parser.Parser.NormalizePath).ToList(), actualFiles.Select(API.Parser.Parser.NormalizePath).ToList());
+        Assert.Equal(files.Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList(), actualFiles.Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList());
     }
 
 

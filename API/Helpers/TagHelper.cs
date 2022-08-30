@@ -23,7 +23,7 @@ public static class TagHelper
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
             var added = false;
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
 
             var genre = allTags.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
@@ -59,7 +59,7 @@ public static class TagHelper
     public static void AddTagIfNotExists(ICollection<Tag> metadataTags, Tag tag)
     {
         var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == Parser.Parser.Normalize(tag.Title));
+            p.NormalizedTitle == Services.Tasks.Scanner.Parser.Parser.Normalize(tag.Title));
         if (existingGenre == null)
         {
             metadataTags.Add(tag);
@@ -69,7 +69,7 @@ public static class TagHelper
     public static void AddTagIfNotExists(BlockingCollection<Tag> metadataTags, Tag tag)
     {
         var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == Parser.Parser.Normalize(tag.Title));
+            p.NormalizedTitle == Services.Tasks.Scanner.Parser.Parser.Normalize(tag.Title));
         if (existingGenre == null)
         {
             metadataTags.Add(tag);
@@ -86,7 +86,7 @@ public static class TagHelper
     /// <param name="action">Callback which will be executed for each tag removed</param>
     public static void RemoveTags(ICollection<Tag> existingTags, IEnumerable<string> tags, bool isExternal, Action<Tag> action = null)
     {
-        var normalizedTags = tags.Select(Parser.Parser.Normalize).ToList();
+        var normalizedTags = tags.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
         foreach (var person in normalizedTags)
         {
             var existingTag = existingTags.FirstOrDefault(p => p.ExternalTag == isExternal && person.Equals(p.NormalizedTitle));

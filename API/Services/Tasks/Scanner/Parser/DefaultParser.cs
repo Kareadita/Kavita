@@ -36,15 +36,15 @@ public class DefaultParser : IDefaultParser
         var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         ParserInfo ret;
 
-        if (Parser.IsEpub(filePath))
+        if (Services.Tasks.Scanner.Parser.Parser.IsEpub(filePath))
         {
             ret = new ParserInfo()
             {
-                Chapters = Parser.ParseChapter(fileName) ?? Parser.ParseComicChapter(fileName),
-                Series = Parser.ParseSeries(fileName) ?? Parser.ParseComicSeries(fileName),
-                Volumes = Parser.ParseVolume(fileName) ?? Parser.ParseComicVolume(fileName),
+                Chapters = Services.Tasks.Scanner.Parser.Parser.ParseChapter(fileName) ?? Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(fileName),
+                Series = Services.Tasks.Scanner.Parser.Parser.ParseSeries(fileName) ?? Services.Tasks.Scanner.Parser.Parser.ParseComicSeries(fileName),
+                Volumes = Services.Tasks.Scanner.Parser.Parser.ParseVolume(fileName) ?? Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(fileName),
                 Filename = Path.GetFileName(filePath),
-                Format = Parser.ParseFormat(filePath),
+                Format = Services.Tasks.Scanner.Parser.Parser.ParseFormat(filePath),
                 FullFilePath = filePath
             };
         }
@@ -52,65 +52,65 @@ public class DefaultParser : IDefaultParser
         {
             ret = new ParserInfo()
             {
-                Chapters = type == LibraryType.Comic ? Parser.ParseComicChapter(fileName) : Parser.ParseChapter(fileName),
-                Series = type == LibraryType.Comic ? Parser.ParseComicSeries(fileName) : Parser.ParseSeries(fileName),
-                Volumes = type == LibraryType.Comic ? Parser.ParseComicVolume(fileName) : Parser.ParseVolume(fileName),
+                Chapters = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(fileName) : Services.Tasks.Scanner.Parser.Parser.ParseChapter(fileName),
+                Series = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.ParseComicSeries(fileName) : Services.Tasks.Scanner.Parser.Parser.ParseSeries(fileName),
+                Volumes = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(fileName) : Services.Tasks.Scanner.Parser.Parser.ParseVolume(fileName),
                 Filename = Path.GetFileName(filePath),
-                Format = Parser.ParseFormat(filePath),
+                Format = Services.Tasks.Scanner.Parser.Parser.ParseFormat(filePath),
                 Title = Path.GetFileNameWithoutExtension(fileName),
                 FullFilePath = filePath
             };
         }
 
-        if (Parser.IsImage(filePath) && Parser.IsCoverImage(filePath)) return null;
+        if (Services.Tasks.Scanner.Parser.Parser.IsImage(filePath) && Services.Tasks.Scanner.Parser.Parser.IsCoverImage(filePath)) return null;
 
-        if (Parser.IsImage(filePath))
+        if (Services.Tasks.Scanner.Parser.Parser.IsImage(filePath))
         {
           // Reset Chapters, Volumes, and Series as images are not good to parse information out of. Better to use folders.
-          ret.Volumes = Parser.DefaultVolume;
-          ret.Chapters = Parser.DefaultChapter;
+          ret.Volumes = Services.Tasks.Scanner.Parser.Parser.DefaultVolume;
+          ret.Chapters = Services.Tasks.Scanner.Parser.Parser.DefaultChapter;
           ret.Series = string.Empty;
         }
 
-        if (ret.Series == string.Empty || Parser.IsImage(filePath))
+        if (ret.Series == string.Empty || Services.Tasks.Scanner.Parser.Parser.IsImage(filePath))
         {
             // Try to parse information out of each folder all the way to rootPath
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 
-        var edition = Parser.ParseEdition(fileName);
+        var edition = Services.Tasks.Scanner.Parser.Parser.ParseEdition(fileName);
         if (!string.IsNullOrEmpty(edition))
         {
-            ret.Series = Parser.CleanTitle(ret.Series.Replace(edition, ""), type is LibraryType.Comic);
+            ret.Series = Services.Tasks.Scanner.Parser.Parser.CleanTitle(ret.Series.Replace(edition, ""), type is LibraryType.Comic);
             ret.Edition = edition;
         }
 
-        var isSpecial = type == LibraryType.Comic ? Parser.ParseComicSpecial(fileName) : Parser.ParseMangaSpecial(fileName);
+        var isSpecial = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.ParseComicSpecial(fileName) : Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(fileName);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
-        if (ret.Chapters == Parser.DefaultChapter && ret.Volumes == Parser.DefaultVolume && !string.IsNullOrEmpty(isSpecial))
+        if (ret.Chapters == Services.Tasks.Scanner.Parser.Parser.DefaultChapter && ret.Volumes == Services.Tasks.Scanner.Parser.Parser.DefaultVolume && !string.IsNullOrEmpty(isSpecial))
         {
             ret.IsSpecial = true;
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret); // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
         }
 
         // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
-        if (Parser.HasSpecialMarker(fileName))
+        if (Services.Tasks.Scanner.Parser.Parser.HasSpecialMarker(fileName))
         {
             ret.IsSpecial = true;
-            ret.Chapters = Parser.DefaultChapter;
-            ret.Volumes = Parser.DefaultVolume;
+            ret.Chapters = Services.Tasks.Scanner.Parser.Parser.DefaultChapter;
+            ret.Volumes = Services.Tasks.Scanner.Parser.Parser.DefaultVolume;
 
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 
         if (string.IsNullOrEmpty(ret.Series))
         {
-            ret.Series = Parser.CleanTitle(fileName, type is LibraryType.Comic);
+            ret.Series = Services.Tasks.Scanner.Parser.Parser.CleanTitle(fileName, type is LibraryType.Comic);
         }
 
         // Pdfs may have .pdf in the series name, remove that
-        if (Parser.IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
+        if (Services.Tasks.Scanner.Parser.Parser.IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
         {
             ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
         }
@@ -131,18 +131,18 @@ public class DefaultParser : IDefaultParser
         for (var i = 0; i < fallbackFolders.Count; i++)
         {
             var folder = fallbackFolders[i];
-            if (!string.IsNullOrEmpty(Parser.ParseMangaSpecial(folder))) continue;
+            if (!string.IsNullOrEmpty(Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(folder))) continue;
 
-            var parsedVolume = type is LibraryType.Manga ? Parser.ParseVolume(folder) : Parser.ParseComicVolume(folder);
-            var parsedChapter = type is LibraryType.Manga ? Parser.ParseChapter(folder) : Parser.ParseComicChapter(folder);
+            var parsedVolume = type is LibraryType.Manga ? Services.Tasks.Scanner.Parser.Parser.ParseVolume(folder) : Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(folder);
+            var parsedChapter = type is LibraryType.Manga ? Services.Tasks.Scanner.Parser.Parser.ParseChapter(folder) : Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(folder);
 
-            if (!parsedVolume.Equals(Parser.DefaultVolume) || !parsedChapter.Equals(Parser.DefaultChapter))
+            if (!parsedVolume.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultVolume) || !parsedChapter.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultChapter))
             {
-              if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Parser.DefaultVolume)) && !parsedVolume.Equals(Parser.DefaultVolume))
+              if ((string.IsNullOrEmpty(ret.Volumes) || ret.Volumes.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultVolume)) && !parsedVolume.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultVolume))
               {
                 ret.Volumes = parsedVolume;
               }
-              if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter)) && !parsedChapter.Equals(Parser.DefaultChapter))
+              if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultChapter)) && !parsedChapter.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultChapter))
               {
                 ret.Chapters = parsedChapter;
               }
@@ -151,11 +151,11 @@ public class DefaultParser : IDefaultParser
             // Generally users group in series folders. Let's try to parse series from the top folder
             if (!folder.Equals(ret.Series) && i == fallbackFolders.Count - 1)
             {
-                var series = Parser.ParseSeries(folder);
+                var series = Services.Tasks.Scanner.Parser.Parser.ParseSeries(folder);
 
                 if (string.IsNullOrEmpty(series))
                 {
-                    ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
+                    ret.Series = Services.Tasks.Scanner.Parser.Parser.CleanTitle(folder, type is LibraryType.Comic);
                     break;
                 }
 

@@ -111,11 +111,11 @@ public class ScannerService : IScannerService
 
         var libraries = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
-        var libraryFolder = libraryFolders.Select(Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
+        var libraryFolder = libraryFolders.Select(Scanner.Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
 
-        var library = libraries.FirstOrDefault(l => l.Folders.Select(Parser.Parser.NormalizePath).Contains(libraryFolder));
+        var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
             BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
@@ -188,7 +188,7 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
                 Format = parsedFiles.First().Format
             };
 
@@ -457,7 +457,7 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
                 Format = parsedFiles.First().Format
             };
 
@@ -466,7 +466,7 @@ public class ScannerService : IScannerService
                 seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
                 {
                     Name = pf.Series,
-                    NormalizedName = Parser.Parser.Normalize(pf.Series),
+                    NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
                 return;

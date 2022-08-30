@@ -157,7 +157,7 @@ public class SiteThemeServiceTests
         await siteThemeService.Scan();
 
         var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
-            API.Parser.Parser.Normalize(t.Name).Equals(API.Parser.Parser.Normalize("custom")));
+            API.Services.Tasks.Scanner.Parser.Parser.Normalize(t.Name).Equals(API.Services.Tasks.Scanner.Parser.Parser.Normalize("custom")));
         Assert.Single(customThemes);
     }
 
@@ -177,7 +177,7 @@ public class SiteThemeServiceTests
         await siteThemeService.Scan();
 
         var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
-            API.Parser.Parser.Normalize(t.Name).Equals(API.Parser.Parser.Normalize("custom")));
+            API.Services.Tasks.Scanner.Parser.Parser.Normalize(t.Name).Equals(API.Services.Tasks.Scanner.Parser.Parser.Normalize("custom")));
 
         Assert.Empty(customThemes);
     }
@@ -194,7 +194,7 @@ public class SiteThemeServiceTests
         _context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
-            NormalizedName = API.Parser.Parser.Normalize("Custom"),
+            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Custom"),
             Provider = ThemeProvider.User,
             FileName = "custom.css",
             IsDefault = false
@@ -219,7 +219,7 @@ public class SiteThemeServiceTests
         _context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
-            NormalizedName = API.Parser.Parser.Normalize("Custom"),
+            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Custom"),
             Provider = ThemeProvider.User,
             FileName = "custom.css",
             IsDefault = false
@@ -247,7 +247,7 @@ public class SiteThemeServiceTests
         _context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
-            NormalizedName = API.Parser.Parser.Normalize("Custom"),
+            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Custom"),
             Provider = ThemeProvider.User,
             FileName = "custom.css",
             IsDefault = false

@@ -218,12 +218,12 @@ namespace API.Controllers
             if (!isAdmin) return BadRequest("API key must belong to an admin");
             if (dto.FolderPath.Contains("..")) return BadRequest("Invalid Path");
 
-            dto.FolderPath = Parser.Parser.NormalizePath(dto.FolderPath);
+            dto.FolderPath = Services.Tasks.Scanner.Parser.Parser.NormalizePath(dto.FolderPath);
 
             var libraryFolder = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
                 .SelectMany(l => l.Folders)
                 .Distinct()
-                .Select(Parser.Parser.NormalizePath);
+                .Select(Services.Tasks.Scanner.Parser.Parser.NormalizePath);
 
             var seriesFolder = _directoryService.FindHighestDirectoriesFromFiles(libraryFolder,
                 new List<string>() {dto.FolderPath});

@@ -59,7 +59,7 @@ public class ReaderService : IReaderService
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
     {
-        return Parser.Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
+        return Tasks.Scanner.Parser.Parser.NormalizePath(Path.Join(baseDirectory, $"{userId}", $"{seriesId}", $"{chapterId}"));
     }
 
     /// <summary>
@@ -496,7 +496,7 @@ public class ReaderService : IReaderService
         {
             var chapters = volume.Chapters
                 .OrderBy(c => float.Parse(c.Number))
-                .Where(c => !c.IsSpecial && Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber);
+                .Where(c => !c.IsSpecial && Tasks.Scanner.Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber);
             await MarkChaptersAsRead(user, volume.SeriesId, chapters);
         }
     }

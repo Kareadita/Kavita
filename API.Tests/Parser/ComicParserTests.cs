@@ -79,7 +79,7 @@ namespace API.Tests.Parser
         [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
         public void ParseComicSeriesTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseComicSeries(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicSeries(filename));
         }
 
         [Theory]
@@ -126,7 +126,7 @@ namespace API.Tests.Parser
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
         public void ParseComicVolumeTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseComicVolume(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(filename));
         }
 
         [Theory]
@@ -171,7 +171,7 @@ namespace API.Tests.Parser
         [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "0")]
         public void ParseComicChapterTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseComicChapter(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(filename));
         }
 
 
@@ -190,7 +190,7 @@ namespace API.Tests.Parser
         [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
         public void ParseComicSpecialTest(string input, bool expected)
         {
-            Assert.Equal(expected, !string.IsNullOrEmpty(API.Parser.Parser.ParseComicSpecial(input)));
+            Assert.Equal(expected, !string.IsNullOrEmpty(API.Services.Tasks.Scanner.Parser.Parser.ParseComicSpecial(input)));
         }
     }
 }

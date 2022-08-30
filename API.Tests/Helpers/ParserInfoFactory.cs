@@ -29,12 +29,12 @@ namespace API.Tests.Helpers
         public static void AddToParsedInfo(IDictionary<ParsedSeries, IList<ParserInfo>> collectedSeries, ParserInfo info)
         {
             var existingKey = collectedSeries.Keys.FirstOrDefault(ps =>
-                ps.Format == info.Format && ps.NormalizedName == API.Parser.Parser.Normalize(info.Series));
+                ps.Format == info.Format && ps.NormalizedName == API.Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series));
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
                 Name = info.Series,
-                NormalizedName = API.Parser.Parser.Normalize(info.Series)
+                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series)
             };
             if (collectedSeries.GetType() == typeof(ConcurrentDictionary<,>))
             {

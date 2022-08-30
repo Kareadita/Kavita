@@ -166,7 +166,7 @@ public class ReadingListService : IReadingListService
 
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
         var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
-            .OrderBy(c => Parser.Parser.MinNumberFromRange(c.Volume.Name))
+            .OrderBy(c => Tasks.Scanner.Parser.Parser.MinNumberFromRange(c.Volume.Name))
             .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
 
         var index = lastOrder + 1;

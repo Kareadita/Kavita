@@ -29,7 +29,7 @@ namespace API.Data
                 new()
                 {
                     Name = "Dark",
-                    NormalizedName = Parser.Parser.Normalize("Dark"),
+                    NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize("Dark"),
                     Provider = ThemeProvider.System,
                     FileName = "dark.scss",
                     IsDefault = true,

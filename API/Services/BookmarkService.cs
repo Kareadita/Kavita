@@ -51,7 +51,7 @@ public class BookmarkService : IBookmarkService
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
 
-        var bookmarkFilesToDelete = bookmarks.Select(b => Parser.Parser.NormalizePath(
+        var bookmarkFilesToDelete = bookmarks.Select(b => Tasks.Scanner.Parser.Parser.NormalizePath(
             _directoryService.FileSystem.Path.Join(bookmarkDirectory,
                 b.FileName))).ToList();
 
@@ -165,7 +165,7 @@ public class BookmarkService : IBookmarkService
 
         var bookmarks = await _unitOfWork.UserRepository.GetAllBookmarksByIds(bookmarkIds.ToList());
         return bookmarks
-            .Select(b => Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
+            .Select(b => Tasks.Scanner.Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(bookmarkDirectory,
                 b.FileName)));
     }
 

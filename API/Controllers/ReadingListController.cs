@@ -219,7 +219,7 @@ namespace API.Controllers
             if (!string.IsNullOrEmpty(dto.Title))
             {
                 readingList.Title = dto.Title; // Should I check if this is unique?
-                readingList.NormalizedTitle = Parser.Parser.Normalize(readingList.Title);
+                readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
             }
             if (!string.IsNullOrEmpty(dto.Title))
             {

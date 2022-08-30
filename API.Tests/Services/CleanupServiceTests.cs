@@ -312,13 +312,13 @@ public class CleanupServiceTests
                 new ReadingList()
                 {
                     Title = "Something",
-                    NormalizedTitle = API.Parser.Parser.Normalize("Something"),
+                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something"),
                     CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg"
                 },
                 new ReadingList()
                 {
                     Title = "Something 2",
-                    NormalizedTitle = API.Parser.Parser.Normalize("Something 2"),
+                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something 2"),
                     CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg"
                 }
             }
