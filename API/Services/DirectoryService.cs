@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -635,18 +636,23 @@ namespace API.Services
        }
 
        /// <summary>
-       /// Recursively scans a folder and returns the max last write time on any folders
+       /// Recursively scans a folder and returns the max last write time on any files
        /// </summary>
        /// <param name="folderPath"></param>
        /// <returns>Max Last Write Time</returns>
        public DateTime GetLastWriteTime(string folderPath)
        {
            if (!FileSystem.Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
+           var sw = Stopwatch.StartNew();
+           var files = ScanFiles(folderPath);
+           var max = files.Max(path => FileSystem.File.GetLastWriteTime(path));
+           _logger.LogDebug("[GetLastWriteTime] Checked max write on {FileCount} files in {Time} ms", files.Count, sw.ElapsedMilliseconds);
+           return max;
 
-           var directories = GetAllDirectories(folderPath).ToList();
-           if (directories.Count == 0) return FileSystem.Directory.GetLastWriteTime(folderPath);
-
-           return directories.Max(d => FileSystem.Directory.GetLastWriteTime(d));
+           //var directories = GetAllDirectories(folderPath).ToList();
+           // if (directories.Count == 0) return FileSystem.Directory.GetLastWriteTime(folderPath);
+           //
+           // return directories.Max(d => FileSystem.Directory.GetLastWriteTime(d));
        }
 
        /// <summary>
