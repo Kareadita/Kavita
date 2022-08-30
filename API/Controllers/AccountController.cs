@@ -472,12 +472,27 @@ namespace API.Controllers
                 }
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
+                if (string.IsNullOrEmpty(token))
+                {
+                    _logger.LogError("There was an issue generating a token for the email");
+                    return BadRequest("There was an creating the invite user");
+                }
 
+                user.ConfirmationToken = token;
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error during invite user flow, unable to create user. Deleting user for retry");
+                _unitOfWork.UserRepository.Delete(user);
+                await _unitOfWork.CommitAsync();
+            }
 
-                var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
+            try
+            {
+                var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email", dto.Email);
                 _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-                _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, token);
+                _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, user.ConfirmationToken);
                 var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
                 var accessible = await _emailService.CheckIfAccessible(host);
                 if (accessible)
@@ -490,12 +505,12 @@ namespace API.Controllers
                             InvitingUser = adminUser.UserName,
                             ServerConfirmationLink = emailLink
                         });
-                    } catch(Exception) {/* Swallow exception */}
+                    }
+                    catch (Exception)
+                    {
+                        /* Swallow exception */
+                    }
                 }
-
-                user.ConfirmationToken = token;
-
-                await _unitOfWork.CommitAsync();
 
                 return Ok(new InviteUserResponse
                 {
@@ -503,10 +518,9 @@ namespace API.Controllers
                     EmailSent = accessible
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _unitOfWork.UserRepository.Delete(user);
-                await _unitOfWork.CommitAsync();
+                _logger.LogError(ex, "There was an error during invite user flow, unable to send an email");
             }
 
             return BadRequest("There was an error setting up your account. Please check the logs");
