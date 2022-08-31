@@ -480,9 +480,18 @@ public class ScannerService : IScannerService
         _unitOfWork.LibraryRepository.Update(library);
         if (await _unitOfWork.CommitAsync())
         {
-            _logger.LogInformation(
-                "[ScannerService] Finished scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
-                totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
+            if (totalFiles == 0)
+            {
+                _logger.LogInformation(
+                    "[ScannerService] Finished library scan of {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}. There were no changes",
+                    totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
+                    totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
+            }
         }
         else
         {
