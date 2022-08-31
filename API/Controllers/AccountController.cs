@@ -579,17 +579,26 @@ namespace API.Controllers
         [HttpPost("confirm-password-reset")]
         public async Task<ActionResult<string>> ConfirmForgotPassword(ConfirmPasswordResetDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (user == null)
+            try
             {
-                return BadRequest("Invalid Details");
+                var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+                if (user == null)
+                {
+                    return BadRequest("Invalid Details");
+                }
+
+                var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
+                    "ResetPassword", dto.Token);
+                if (!result) return BadRequest("Unable to reset password, your email token is not correct.");
+
+                var errors = await _accountService.ChangeUserPassword(user, dto.Password);
+                return errors.Any() ? BadRequest(errors) : Ok("Password updated");
             }
-
-            var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "ResetPassword", dto.Token);
-            if (!result) return BadRequest("Unable to reset password, your email token is not correct.");
-
-            var errors = await _accountService.ChangeUserPassword(user, dto.Password);
-            return errors.Any() ? BadRequest(errors) : Ok("Password updated");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an unexpected error when confirming new password");
+                return BadRequest("There was an unexpected error when confirming new password");
+            }
         }
 
 
