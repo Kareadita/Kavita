@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
@@ -18,7 +18,7 @@ import { UploadService } from 'src/app/_services/upload.service';
 export class EditReadingListModalComponent implements OnInit {
 
   @Input() readingList!: ReadingList;
-  reviewGroup!: UntypedFormGroup;
+  reviewGroup!: FormGroup;
 
   coverImageIndex: number = 0;
    /**
@@ -41,9 +41,9 @@ export class EditReadingListModalComponent implements OnInit {
     private imageService: ImageService) { }
 
   ngOnInit(): void {
-    this.reviewGroup = new UntypedFormGroup({
-      title: new UntypedFormControl(this.readingList.title, [Validators.required]),
-      summary: new UntypedFormControl(this.readingList.summary, [])
+    this.reviewGroup = new FormGroup({
+      title: new FormControl(this.readingList.title, [Validators.required]),
+      summary: new FormControl(this.readingList.summary, [])
     });
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)));

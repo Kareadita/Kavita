@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ServerService } from 'src/app/_services/server.service';
@@ -14,7 +14,7 @@ import { ServerSettings } from '../_models/server-settings';
 })
 export class ManageSystemComponent implements OnInit {
 
-  settingsForm: UntypedFormGroup = new UntypedFormGroup({});
+  settingsForm: FormGroup = new FormGroup({});
   serverSettings!: ServerSettings;
   serverInfo!: ServerInfo;
 
@@ -30,12 +30,12 @@ export class ManageSystemComponent implements OnInit {
 
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
-      this.settingsForm.addControl('cacheDirectory', new UntypedFormControl(this.serverSettings.cacheDirectory, [Validators.required]));
-      this.settingsForm.addControl('taskScan', new UntypedFormControl(this.serverSettings.taskScan, [Validators.required]));
-      this.settingsForm.addControl('taskBackup', new UntypedFormControl(this.serverSettings.taskBackup, [Validators.required]));
-      this.settingsForm.addControl('port', new UntypedFormControl(this.serverSettings.port, [Validators.required]));
-      this.settingsForm.addControl('loggingLevel', new UntypedFormControl(this.serverSettings.loggingLevel, [Validators.required]));
-      this.settingsForm.addControl('allowStatCollection', new UntypedFormControl(this.serverSettings.allowStatCollection, [Validators.required]));
+      this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
+      this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
+      this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
+      this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
+      this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
     });
   }
 

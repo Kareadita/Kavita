@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -20,9 +20,9 @@ import { NavService } from '../../_services/nav.service';
 export class UserLoginComponent implements OnInit {
 
   //model: any = {username: '', password: ''};
-  loginForm: UntypedFormGroup = new UntypedFormGroup({
-      username: new UntypedFormControl('', [Validators.required]),
-      password: new UntypedFormControl('', [Validators.required])
+  loginForm: FormGroup = new FormGroup({
+      username: new FormControl('', [Validators.required]),
+      password: new FormControl('', [Validators.required])
   });
 
   /**

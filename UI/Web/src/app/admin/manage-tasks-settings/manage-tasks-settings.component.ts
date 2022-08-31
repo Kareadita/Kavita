@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { SettingsService } from '../settings.service';
@@ -28,7 +28,7 @@ interface AdhocTask {
 export class ManageTasksSettingsComponent implements OnInit {
 
   serverSettings!: ServerSettings;
-  settingsForm: UntypedFormGroup = new UntypedFormGroup({});
+  settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
 
@@ -89,8 +89,8 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.taskFrequencies = result.frequencies;
       this.logLevels = result.levels;
       this.serverSettings = result.settings;
-      this.settingsForm.addControl('taskScan', new UntypedFormControl(this.serverSettings.taskScan, [Validators.required]));
-      this.settingsForm.addControl('taskBackup', new UntypedFormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
+      this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
     });
 
     this.reoccuringTasks$ = this.serverService.getReoccuringJobs().pipe(shareReplay());

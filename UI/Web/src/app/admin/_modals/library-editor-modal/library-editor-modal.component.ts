@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -17,9 +17,9 @@ export class LibraryEditorModalComponent implements OnInit {
 
   @Input() library: Library | undefined = undefined;
 
-  libraryForm: UntypedFormGroup = new UntypedFormGroup({
-    name: new UntypedFormControl('', [Validators.required]),
-    type: new UntypedFormControl(0, [Validators.required])
+  libraryForm: FormGroup = new FormGroup({
+    name: new FormControl('', [Validators.required]),
+    type: new FormControl(0, [Validators.required])
   });
 
   selectedFolders: string[] = [];
