@@ -185,8 +185,6 @@ namespace API
                     var themeService = serviceProvider.GetRequiredService<IThemeService>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
-                    await MigrateBookmarks.Migrate(directoryService, unitOfWork,
-                        logger, cacheService);
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);

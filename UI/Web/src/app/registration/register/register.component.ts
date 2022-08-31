@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
@@ -17,10 +17,10 @@ import { MemberService } from 'src/app/_services/member.service';
 })
 export class RegisterComponent implements OnInit {
 
-  registerForm: UntypedFormGroup = new UntypedFormGroup({
-    email: new UntypedFormControl('', [Validators.required, Validators.email]),
-    username: new UntypedFormControl('', [Validators.required]),
-    password: new UntypedFormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6)]),
+  registerForm: FormGroup = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.email]),
+    username: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6)]),
   });
 
   constructor(private router: Router, private accountService: AccountService, 

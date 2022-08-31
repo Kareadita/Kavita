@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs';
 import { SettingsService, EmailTestResult } from '../settings.service';
@@ -13,14 +13,14 @@ import { ServerSettings } from '../_models/server-settings';
 export class ManageEmailSettingsComponent implements OnInit {
 
   serverSettings!: ServerSettings;
-  settingsForm: UntypedFormGroup = new UntypedFormGroup({});
+  settingsForm: FormGroup = new FormGroup({});
   
   constructor(private settingsService: SettingsService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
-      this.settingsForm.addControl('emailServiceUrl', new UntypedFormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
+      this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
     });
   }
 
