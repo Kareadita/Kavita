@@ -38,6 +38,7 @@ namespace API.SignalR.Presence
         public async Task UserConnected(string username, string connectionId)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+            if (user == null) return;
             var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
             lock (OnlineUsers)
             {
