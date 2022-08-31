@@ -12,7 +12,7 @@
         <app-side-nav-item icon="fa-list" title="Collections" link="/collections/"></app-side-nav-item>
         <app-side-nav-item icon="fa-list-ol" title="Reading Lists" link="/lists/"></app-side-nav-item>
         <app-side-nav-item icon="fa-bookmark" title="Bookmarks" link="/bookmarks/"></app-side-nav-item>
-        <app-side-nav-item icon="fa-regular fa-rectangle-list" title="All Series" link="/all-series/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-regular fa-rectangle-list" title="All Series" link="/all-series/" *ngIf="libraries.length > 0"></app-side-nav-item>
         <div class="mb-2 mt-3 ms-2 me-2" *ngIf="libraries.length > 10 && !(navService?.sideNavCollapsed$ | async)">
             <label for="filter" class="form-label visually-hidden">Filter</label>
             <div class="form-group">
