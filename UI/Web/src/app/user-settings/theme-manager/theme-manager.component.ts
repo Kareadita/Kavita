@@ -14,7 +14,7 @@ import { AccountService } from 'src/app/_services/account.service';
 })
 export class ThemeManagerComponent implements OnInit, OnDestroy {
 
-  currentTheme!: SiteTheme;
+  currentTheme: SiteTheme | undefined;
   isAdmin: boolean = false;
   user: User | undefined;
 

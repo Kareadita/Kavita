@@ -122,7 +122,7 @@ public interface ISeriesRepository
     Task<Series> GetSeriesByFolderPath(string folder);
     Task<Series> GetFullSeriesByName(string series, int libraryId);
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
-    Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
+    Task<List<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
 }
 
@@ -230,6 +230,7 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
+            .Include(s => s.Relations)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Include(s => s.Metadata)
@@ -1274,9 +1275,9 @@ public class SeriesRepository : ISeriesRepository
     /// </summary>
     /// <param name="seenSeries"></param>
     /// <param name="libraryId"></param>
-    public async Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
+    public async Task<List<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
     {
-        if (seenSeries.Count == 0) return;
+        if (seenSeries.Count == 0) return new List<Series>();
         var ids = new List<int>();
         foreach (var parsedSeries in seenSeries)
         {
@@ -1289,7 +1290,6 @@ public class SeriesRepository : ISeriesRepository
             {
                 ids.Add(series);
             }
-
         }
 
         var seriesToRemove = await _context.Series
@@ -1298,6 +1298,8 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
 
         _context.Series.RemoveRange(seriesToRemove);
+
+        return seriesToRemove;
     }
 
     public async Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams)

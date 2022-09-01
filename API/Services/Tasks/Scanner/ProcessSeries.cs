@@ -171,7 +171,16 @@ public class ProcessSeries : IProcessSeries
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
                             ex.Message));
+                    return;
                 }
+
+                if (seriesAdded)
+                {
+                    await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
+                        MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
+                }
+
+                _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
             }
         }
         catch (Exception ex)
@@ -179,13 +188,7 @@ public class ProcessSeries : IProcessSeries
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
-        if (seriesAdded)
-        {
-            await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
-                MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId));
-        }
-
-        _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
+        await _metadataService.GenerateCoversForSeries(series, false);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
@@ -213,7 +216,7 @@ public class ProcessSeries : IProcessSeries
 
     public void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
+        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 

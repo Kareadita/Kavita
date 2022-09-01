@@ -156,7 +156,7 @@ namespace API
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseSQLiteStorage());
+                .UseMemoryStorage()); // UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted
 
             // Add the processing server as IHostedService
             services.AddHangfireServer(options =>

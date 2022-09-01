@@ -51,6 +51,7 @@ public class ThemeController : BaseApiController
     /// Returns css content to the UI. UI is expected to escape the content
     /// </summary>
     /// <returns></returns>
+    [AllowAnonymous]
     [HttpGet("download-content")]
     public async Task<ActionResult<string>> GetThemeContent(int themeId)
     {

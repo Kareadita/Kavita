@@ -57,7 +57,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
             this.recentlyAddedSeries.unshift(series);
-            this.cdRef.markForCheck();
+            this.cdRef.detectChanges();
           });
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;

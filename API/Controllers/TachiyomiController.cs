@@ -50,7 +50,7 @@ public class TachiyomiController : BaseApiController
         if (prevChapterId == -1)
         {
             var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-            var userHasProgress = series.PagesRead == 0 || series.PagesRead < series.Pages;
+            var userHasProgress = series.PagesRead != 0 && series.PagesRead < series.Pages;
 
             // If the user doesn't have progress, then return null, which the extension will catch as 204 (no content) and report nothing as read
             if (!userHasProgress) return null;
