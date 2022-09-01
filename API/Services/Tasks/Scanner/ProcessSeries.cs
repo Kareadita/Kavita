@@ -182,7 +182,7 @@ public class ProcessSeries : IProcessSeries
         if (seriesAdded)
         {
             await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
-                MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId));
+                MessageFactory.SeriesAddedEvent(series.Id, series.Name, series.LibraryId), false);
         }
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);

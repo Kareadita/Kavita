@@ -475,7 +475,7 @@ public class ScannerService : IScannerService
 
         // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
         // NOTE: This implementation is expensive
-        await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
+        var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
 
         _unitOfWork.LibraryRepository.Update(library);
         if (await _unitOfWork.CommitAsync())
@@ -491,6 +491,12 @@ public class ScannerService : IScannerService
                 _logger.LogInformation(
                     "[ScannerService] Finished library scan of {TotalFiles} files and {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}",
                     totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
+            }
+
+            foreach (var s in removedSeries)
+            {
+                await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                    MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false);
             }
         }
         else
