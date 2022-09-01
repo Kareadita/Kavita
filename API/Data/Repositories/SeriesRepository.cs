@@ -230,6 +230,7 @@ public class SeriesRepository : ISeriesRepository
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
+            .Include(s => s.Relations)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
             .Include(s => s.Metadata)

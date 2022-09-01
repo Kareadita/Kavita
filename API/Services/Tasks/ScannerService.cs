@@ -205,7 +205,7 @@ public class ScannerService : IScannerService
         var scanElapsedTime = await ScanFiles(library, new []{folderPath}, false, TrackFiles, true);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
-        await Task.WhenAll(processTasks);
+        //await Task.WhenAll(processTasks);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 

@@ -36,8 +36,8 @@ public interface IMetadataService
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
-    Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
 
+    Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
     Task GenerateCoversForSeries(Series series, bool forceUpdate = false);
     Task RemoveAbandonedMetadataKeys();
 }
