@@ -284,6 +284,7 @@ public class MangaParserTests
     [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
     [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
     [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
+    [InlineData("Chobits_Omnibus_Edition_v01_[Dark_Horse]", "Omnibus Edition")]
     [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "")]
     [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "")]
     [InlineData("Love Hina Omnibus v05 (2015) (Digital-HD) (Asgard-Empire).cbz", "Omnibus")]

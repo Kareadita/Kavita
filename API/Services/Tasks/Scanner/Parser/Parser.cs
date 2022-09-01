@@ -569,19 +569,15 @@ public static class Parser
             MatchOptions, RegexTimeout),
     };
 
-    private static readonly Regex[] MangaEditionRegex = {
+    private static readonly Regex MangaEditionRegex = new Regex(
         // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
-        new Regex(
-            @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
-            MatchOptions, RegexTimeout),
         // To Love Ru v01 Uncensored (Ch.001-007)
-        new Regex(
-            @"(\b|_)(?<Edition>Uncensored)(\b|_)",
-            MatchOptions, RegexTimeout),
-    };
+        @"\b(?:Omnibus(?:\s?Edition)?|Uncensored)\b",
+        MatchOptions, RegexTimeout
+    );
 
     // Matches [Complete], release tags like [kmts] but not [ Complete ] or [kmts ]
-    private static string TagsInBrackets = $@"\[(?!\s){BalancedBrack}(?<!\s)\]";
+    private const string TagsInBrackets = $@"\[(?!\s){BalancedBrack}(?<!\s)\]";
 
     // Matches anything between balanced parenthesis, tags between brackets, {} and {Complete}
     private static readonly Regex CleanupRegex = new Regex(
@@ -644,20 +640,9 @@ public static class Parser
 
     public static string ParseEdition(string filePath)
     {
-        foreach (var regex in MangaEditionRegex)
-        {
-            var matches = regex.Matches(filePath);
-            foreach (var group in matches.Select(match => match.Groups["Edition"])
-                         .Where(group => group.Success && group != Match.Empty))
-            {
-                return group.Value
-                    .Replace("{", "").Replace("}", "")
-                    .Replace("[", "").Replace("]", "")
-                    .Replace("(", "").Replace(")", "");
-            }
-        }
-
-        return string.Empty;
+        filePath = ReplaceUnderscores(filePath);
+        var match = MangaEditionRegex.Match(filePath);
+        return match.Success ? match.Value : string.Empty;
     }
 
     /// <summary>
@@ -833,17 +818,7 @@ public static class Parser
     {
         title = CleanupRegex.Replace(title, string.Empty);
 
-        foreach (var regex in MangaEditionRegex)
-        {
-            var matches = regex.Matches(title);
-            foreach (Match match in matches)
-            {
-                if (match.Success)
-                {
-                    title = title.Replace(match.Value, string.Empty);
-                }
-            }
-        }
+        title = MangaEditionRegex.Replace(title, string.Empty);
 
         return title;
     }
