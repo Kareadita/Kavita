@@ -484,6 +484,7 @@ public class SeriesRepository : ISeriesRepository
             .Include(s => s.Volumes)
             .Include(s => s.Metadata)
             .ThenInclude(m => m.CollectionTags)
+            .Include(s => s.Relations)
             .Where(s => seriesIds.Contains(s.Id))
             .AsSplitQuery()
             .ToListAsync();
