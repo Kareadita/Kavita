@@ -72,7 +72,9 @@ namespace API.Data
             builder.Entity<SeriesRelation>()
                 .HasOne(pt => pt.TargetSeries)
                 .WithMany(t => t.RelationOf)
-                .HasForeignKey(pt => pt.TargetSeriesId);
+                .HasForeignKey(pt => pt.TargetSeriesId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+
 
             builder.Entity<AppUserPreferences>()
                 .Property(b => b.BookThemeName)
