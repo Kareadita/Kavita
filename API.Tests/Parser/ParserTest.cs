@@ -1,6 +1,6 @@
 using System.Linq;
 using Xunit;
-using static API.Parser.Parser;
+using static API.Services.Tasks.Scanner.Parser.Parser;
 
 namespace API.Tests.Parser
 {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { UntypedFormGroup, UntypedFormControl } from '@angular/forms';
+import { FormGroup, FormControl } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -26,7 +26,7 @@ export class BulkAddToCollectionComponent implements OnInit {
    */
   lists: Array<CollectionTag> = [];
   loading: boolean = false;
-  listForm: UntypedFormGroup = new UntypedFormGroup({});
+  listForm: FormGroup = new FormGroup({});
 
   collectionTitleTrackby = (index: number, item: CollectionTag) => `${item.title}`;
 
@@ -38,8 +38,8 @@ export class BulkAddToCollectionComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.listForm.addControl('title', new UntypedFormControl(this.title, []));
-    this.listForm.addControl('filterQuery', new UntypedFormControl('', []));
+    this.listForm.addControl('title', new FormControl(this.title, []));
+    this.listForm.addControl('filterQuery', new FormControl('', []));
     
     this.loading = true;
     this.cdRef.markForCheck();

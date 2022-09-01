@@ -1,10 +1,9 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -41,9 +40,6 @@ public interface IScannerService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
-    [Queue(TaskScheduler.ScanQueue)]
-    [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ScanFolder(string folder);
 
 }
@@ -73,6 +69,7 @@ public enum ScanCancelReason
  */
 public class ScannerService : IScannerService
 {
+    public const string Name = "ScannerService";
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ScannerService> _logger;
     private readonly IMetadataService _metadataService;
@@ -81,11 +78,12 @@ public class ScannerService : IScannerService
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IProcessSeries _processSeries;
+    private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
     public ScannerService(IUnitOfWork unitOfWork, ILogger<ScannerService> logger,
         IMetadataService metadataService, ICacheService cacheService, IEventHub eventHub,
         IDirectoryService directoryService, IReadingItemService readingItemService,
-        IProcessSeries processSeries)
+        IProcessSeries processSeries, IWordCountAnalyzerService wordCountAnalyzerService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -95,9 +93,9 @@ public class ScannerService : IScannerService
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _processSeries = processSeries;
+        _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
-    [Queue(TaskScheduler.ScanQueue)]
     public async Task ScanFolder(string folder)
     {
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
@@ -113,11 +111,11 @@ public class ScannerService : IScannerService
 
         var libraries = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
-        var libraryFolder = libraryFolders.Select(Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
+        var libraryFolder = libraryFolders.Select(Scanner.Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
 
-        var library = libraries.FirstOrDefault(l => l.Folders.Select(Parser.Parser.NormalizePath).Contains(libraryFolder));
+        var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
             BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
@@ -138,7 +136,12 @@ public class ScannerService : IScannerService
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
-        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel) return;
+        if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
+        {
+            BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
+            BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
+            return;
+        }
 
         var folderPath = series.FolderPath;
         if (string.IsNullOrEmpty(folderPath) || !_directoryService.Exists(folderPath))
@@ -185,7 +188,7 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
                 Format = parsedFiles.First().Format
             };
 
@@ -276,7 +279,7 @@ public class ScannerService : IScannerService
             return ScanCancelReason.FolderMount;
         }
 
-        // If all series Folder paths haven't been modified since last scan, abort
+        // If all series Folder paths haven't been modified since last scan, abort (NOTE: This flow never happens as ScanSeries will always bypass)
         if (!bypassFolderChecks)
         {
 
@@ -292,7 +295,7 @@ public class ScannerService : IScannerService
                         series.Name);
                     await _eventHub.SendMessageAsync(MessageFactory.Info,
                         MessageFactory.InfoEvent($"{series.Name} scan has no work to do",
-                            "All folders have not been changed since last scan. Scan will be aborted."));
+                            $"All folders have not been changed since last scan ({series.LastFolderScanned.ToString(CultureInfo.CurrentCulture)}). Scan will be aborted."));
                     return ScanCancelReason.NoChange;
                 }
             }
@@ -303,7 +306,7 @@ public class ScannerService : IScannerService
                     series.Name);
                 await _eventHub.SendMessageAsync(MessageFactory.Info,
                     MessageFactory.ErrorEvent($"{series.Name} scan has no work to do",
-                        "The folder the series is in is missing. Delete series manually or perform a library scan."));
+                        "The folder the series was in is missing. Delete series manually or perform a library scan."));
                 return ScanCancelReason.NoCancel;
             }
         }
@@ -315,7 +318,7 @@ public class ScannerService : IScannerService
     private static void RemoveParsedInfosNotForSeries(Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries, Series series)
     {
         var keys = parsedSeries.Keys;
-        foreach (var key in keys.Where(key => !SeriesHelper.FindSeries(series, key))) // series.Format != key.Format ||
+        foreach (var key in keys.Where(key => !SeriesHelper.FindSeries(series, key)))
         {
             parsedSeries.Remove(key);
         }
@@ -403,27 +406,6 @@ public class ScannerService : IScannerService
         var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
-        // If all library Folder paths haven't been modified since last scan, abort
-        // Unless the user did something on the library (delete series) and thus we can bypass this check
-        var wasLibraryUpdatedSinceLastScan = (library.LastModified.Truncate(TimeSpan.TicksPerMinute) >
-                                             library.LastScanned.Truncate(TimeSpan.TicksPerMinute))
-                                             && library.LastScanned != DateTime.MinValue;
-        if (!forceUpdate && !wasLibraryUpdatedSinceLastScan)
-        {
-            var haveFoldersChangedSinceLastScan = library.Folders
-                .All(f => _directoryService.GetLastWriteTime(f.Path).Truncate(TimeSpan.TicksPerMinute) > f.LastScanned.Truncate(TimeSpan.TicksPerMinute));
-
-            // If nothing changed && library folder's have all been scanned at least once
-            if (!haveFoldersChangedSinceLastScan && library.Folders.All(f => f.LastScanned > DateTime.MinValue))
-            {
-                _logger.LogInformation("[ScannerService] {LibraryName} scan has no work to do. All folders have not been changed since last scan", library.Name);
-                await _eventHub.SendMessageAsync(MessageFactory.Info,
-                    MessageFactory.InfoEvent($"{library.Name} scan has no work to do",
-                        "All folders have not been changed since last scan. Scan will be aborted."));
-                return;
-            }
-        }
-
 
         // Validations are done, now we can start actual scan
         _logger.LogInformation("[ScannerService] Beginning file scan on {LibraryName}", library.Name);
@@ -432,7 +414,7 @@ public class ScannerService : IScannerService
         var shouldUseLibraryScan = !(await _unitOfWork.LibraryRepository.DoAnySeriesFoldersMatch(libraryFolderPaths));
         if (!shouldUseLibraryScan)
         {
-            _logger.LogInformation("Library {LibraryName} consists of one ore more Series folders, using series scan", library.Name);
+            _logger.LogError("Library {LibraryName} consists of one or more Series folders, using series scan", library.Name);
         }
 
 
@@ -451,18 +433,16 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
                 Format = parsedFiles.First().Format
             };
-
-            // NOTE: Could we check if there are multiple found series (different series) and process each one? 
 
             if (skippedScan)
             {
                 seenSeries.AddRange(parsedFiles.Select(pf => new ParsedSeries()
                 {
                     Name = pf.Series,
-                    NormalizedName = Parser.Parser.Normalize(pf.Series),
+                    NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
                 return;
@@ -481,10 +461,9 @@ public class ScannerService : IScannerService
 
         await Task.WhenAll(processTasks);
 
-        //await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, string.Empty));
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
-        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime}. Updating database", scanElapsedTime);
+        _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 
         var time = DateTime.Now;
         foreach (var folderPath in library.Folders)

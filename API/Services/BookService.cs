@@ -167,7 +167,7 @@ namespace API.Services
             // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
             var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
             var importBuilder = new StringBuilder();
-            foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+            foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
             {
                 if (!match.Success) continue;
 
@@ -218,7 +218,7 @@ namespace API.Services
 
         private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
         {
-            foreach (Match match in Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+            foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
             {
                 if (!match.Success) continue;
                 var importFile = match.Groups["Filename"].Value;
@@ -228,7 +228,7 @@ namespace API.Services
 
         private static void EscapeFontFamilyReferences(ref string stylesheetHtml, string apiBase, string prepend)
         {
-            foreach (Match match in Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
+            foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
             {
                 if (!match.Success) continue;
                 var importFile = match.Groups["Filename"].Value;
@@ -238,7 +238,7 @@ namespace API.Services
 
         private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
         {
-            var matches = Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
+            var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
             foreach (Match match in matches)
             {
                 if (!match.Success) continue;
@@ -394,7 +394,7 @@ namespace API.Services
 
         public ComicInfo GetComicInfo(string filePath)
         {
-            if (!IsValidFile(filePath) || Parser.Parser.IsPdf(filePath)) return null;
+            if (!IsValidFile(filePath) || Tasks.Scanner.Parser.Parser.IsPdf(filePath)) return null;
 
             try
             {
@@ -425,7 +425,7 @@ namespace API.Services
                 var info =  new ComicInfo()
                 {
                     Summary = epubBook.Schema.Package.Metadata.Description,
-                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.Parser.CleanAuthor(c.Creator))),
+                    Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Tasks.Scanner.Parser.Parser.CleanAuthor(c.Creator))),
                     Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                     Month = month,
                     Day = day,
@@ -468,7 +468,7 @@ namespace API.Services
                 return false;
             }
 
-            if (Parser.Parser.IsBook(filePath)) return true;
+            if (Tasks.Scanner.Parser.Parser.IsBook(filePath)) return true;
 
             _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB/PDF", filePath);
             return false;
@@ -480,7 +480,7 @@ namespace API.Services
 
             try
             {
-               if (Parser.Parser.IsPdf(filePath))
+               if (Tasks.Scanner.Parser.Parser.IsPdf(filePath))
                {
                    using var docReader = DocLib.Instance.GetDocReader(filePath, new PageDimensions(1080, 1920));
                    return docReader.GetPageCount();
@@ -536,7 +536,7 @@ namespace API.Services
         /// <returns></returns>
         public ParserInfo ParseInfo(string filePath)
         {
-           if (!Parser.Parser.IsEpub(filePath)) return null;
+           if (!Tasks.Scanner.Parser.Parser.IsEpub(filePath)) return null;
 
            try
            {
@@ -601,7 +601,7 @@ namespace API.Services
                         }
                         var info = new ParserInfo()
                         {
-                            Chapters = Parser.Parser.DefaultChapter,
+                            Chapters = Tasks.Scanner.Parser.Parser.DefaultChapter,
                             Edition = string.Empty,
                             Format = MangaFormat.Epub,
                             Filename = Path.GetFileName(filePath),
@@ -628,7 +628,7 @@ namespace API.Services
 
                 return new ParserInfo()
                 {
-                    Chapters = Parser.Parser.DefaultChapter,
+                    Chapters = Tasks.Scanner.Parser.Parser.DefaultChapter,
                     Edition = string.Empty,
                     Format = MangaFormat.Epub,
                     Filename = Path.GetFileName(filePath),
@@ -636,7 +636,7 @@ namespace API.Services
                     FullFilePath = filePath,
                     IsSpecial = false,
                     Series = epubBook.Title.Trim(),
-                    Volumes = Parser.Parser.DefaultVolume,
+                    Volumes = Tasks.Scanner.Parser.Parser.DefaultVolume,
                 };
            }
            catch (Exception ex)
@@ -876,7 +876,7 @@ namespace API.Services
         {
             if (!IsValidFile(fileFilePath)) return string.Empty;
 
-            if (Parser.Parser.IsPdf(fileFilePath))
+            if (Tasks.Scanner.Parser.Parser.IsPdf(fileFilePath))
             {
                 return GetPdfCoverImage(fileFilePath, fileName, outputDirectory);
             }
@@ -887,7 +887,7 @@ namespace API.Services
             {
                 // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
                 var coverImageContent = epubBook.Content.Cover
-                                        ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.Parser.IsCoverImage(file.FileName))
+                                        ?? epubBook.Content.Images.Values.FirstOrDefault(file => Tasks.Scanner.Parser.Parser.IsCoverImage(file.FileName))
                                         ?? epubBook.Content.Images.Values.FirstOrDefault();
 
                 if (coverImageContent == null) return string.Empty;

@@ -49,9 +49,8 @@ public class TachiyomiController : BaseApiController
         // If prevChapterId is -1, this means either nothing is read or everything is read.
         if (prevChapterId == -1)
         {
-            var userWithProgress = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
-            var userHasProgress =
-                userWithProgress.Progresses.Any(x => x.SeriesId == seriesId);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+            var userHasProgress = series.PagesRead == 0 || series.PagesRead < series.Pages;
 
             // If the user doesn't have progress, then return null, which the extension will catch as 204 (no content) and report nothing as read
             if (!userHasProgress) return null;
@@ -61,21 +60,22 @@ public class TachiyomiController : BaseApiController
             var looseLeafChapterVolume = volumes.FirstOrDefault(v => v.Number == 0);
             if (looseLeafChapterVolume == null)
             {
-                var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparerZeroFirst()).Last());
+                var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparerZeroFirst.Default).Last());
                 return Ok(new ChapterDto()
                 {
                     Number = $"{int.Parse(volumeChapter.Number) / 100f}"
                 });
             }
 
-            var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()).Last();
+            var lastChapter = looseLeafChapterVolume.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default).Last();
             return Ok(_mapper.Map<ChapterDto>(lastChapter));
         }
 
         // There is progress, we now need to figure out the highest volume or chapter and return that.
         var prevChapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId);
         var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
-        if (volumeWithProgress.Number != 0)
+        // We only encode for single-file volumes
+        if (volumeWithProgress.Number != 0 && volumeWithProgress.Chapters.Count == 1)
         {
             // The progress is on a volume, encode it as a fake chapterDTO
             return Ok(new ChapterDto()

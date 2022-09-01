@@ -93,7 +93,7 @@ public class ProcessSeries : IProcessSeries
         {
             series =
                 await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(firstInfo.Series, firstInfo.LocalizedSeries,
-                    library.Id);
+                    library.Id, firstInfo.Format);
         }
         catch (Exception ex)
         {
@@ -157,18 +157,21 @@ public class ProcessSeries : IProcessSeries
             series.LastFolderScanned = DateTime.Now;
             _unitOfWork.SeriesRepository.Attach(series);
 
-            try
+            if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync();
-            }
-            catch (Exception ex)
-            {
-                await _unitOfWork.RollbackAsync();
-                _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the for series {@SeriesName}", series);
+                try
+                {
+                    await _unitOfWork.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await _unitOfWork.RollbackAsync();
+                    _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the for series {@SeriesName}", series);
 
-                await _eventHub.SendMessageAsync(MessageFactory.Error,
-                    MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
-                        string.Empty));
+                    await _eventHub.SendMessageAsync(MessageFactory.Error,
+                        MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
+                            ex.Message));
+                }
             }
         }
         catch (Exception ex)
@@ -183,7 +186,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         _logger.LogInformation("[ScannerService] Finished series update on {SeriesName} in {Milliseconds} ms", seriesName, scanWatch.ElapsedMilliseconds);
-        EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id, false);
+        EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
     private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
@@ -372,10 +375,17 @@ public class ProcessSeries : IProcessSeries
             }
         }
 
+        var genres = chapters.SelectMany(c => c.Genres).ToList();
+        GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
+        {
+            if (series.Metadata.GenresLocked) return;
+            series.Metadata.Genres.Remove(genre);
+        });
+
         // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
         // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();
-        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People,
+        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People.ToList(),
             people, person =>
             {
                 switch (person.Role)
@@ -431,7 +441,6 @@ public class ProcessSeries : IProcessSeries
                 volume = DbFactory.Volume(volumeNumber);
                 volume.SeriesId = series.Id;
                 series.Volumes.Add(volume);
-                _unitOfWork.VolumeRepository.Add(volume);
             }
 
             volume.Name = volumeNumber;

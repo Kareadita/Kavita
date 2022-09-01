@@ -76,7 +76,7 @@ namespace API.Controllers
 
             existingTag.Promoted = updatedTag.Promoted;
             existingTag.Title = updatedTag.Title.Trim();
-            existingTag.NormalizedTitle = Parser.Parser.Normalize(updatedTag.Title).ToUpper();
+            existingTag.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(updatedTag.Title).ToUpper();
             existingTag.Summary = updatedTag.Summary.Trim();
 
             if (_unitOfWork.HasChanges())

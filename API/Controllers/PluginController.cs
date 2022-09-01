@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Services;
@@ -24,12 +25,13 @@ namespace API.Controllers
         /// <summary>
         /// Authenticate with the Server given an apiKey. This will log you in by returning the user object and the JWT token.
         /// </summary>
-        /// <param name="apiKey"></param>
+        /// <remarks>This API is not fully built out and may require more information in later releases</remarks>
+        /// <param name="apiKey">API key which will be used to authenticate and return a valid user token back</param>
         /// <param name="pluginName">Name of the Plugin</param>
         /// <returns></returns>
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public async Task<ActionResult<UserDto>> Authenticate(string apiKey, string pluginName)
+        public async Task<ActionResult<UserDto>> Authenticate([Required] string apiKey, [Required] string pluginName)
         {
             // NOTE: In order to log information about plugins, we need some Plugin Description information for each request
             // Should log into access table so we can tell the user

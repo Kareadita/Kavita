@@ -17,6 +17,7 @@ using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.Storage.SQLite;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
@@ -155,7 +156,7 @@ namespace API
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseMemoryStorage());
+                .UseSQLiteStorage());
 
             // Add the processing server as IHostedService
             services.AddHangfireServer(options =>
@@ -184,8 +185,6 @@ namespace API
                     var themeService = serviceProvider.GetRequiredService<IThemeService>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
-                    await MigrateBookmarks.Migrate(directoryService, unitOfWork,
-                        logger, cacheService);
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
@@ -272,13 +271,14 @@ namespace API
 
             app.Use(async (context, next) =>
             {
-                context.Response.GetTypedHeaders().CacheControl =
-                    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
-                    {
-                        Public = false,
-                        MaxAge = TimeSpan.FromSeconds(10),
-                    };
-                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
+                // Note: I removed this as I caught Chrome caching api responses when it shouldn't have
+                // context.Response.GetTypedHeaders().CacheControl =
+                //     new CacheControlHeaderValue()
+                //     {
+                //         Public = false,
+                //         MaxAge = TimeSpan.FromSeconds(10),
+                //     };
+                context.Response.Headers[HeaderNames.Vary] =
                     new[] { "Accept-Encoding" };
 
                 // Don't let the site be iframed outside the same origin (clickjacking)

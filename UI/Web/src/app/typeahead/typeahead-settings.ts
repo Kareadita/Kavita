@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { UntypedFormControl } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 
 export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
 
@@ -48,7 +48,7 @@ export class TypeaheadSettings<T> {
     /**
      * Optional form Control to tie model to. 
      */
-    formControl?: UntypedFormControl;
+    formControl?: FormControl;
     /**
      * If true, typeahead will remove already selected items from fetchFn results. Only appies when multiple=true
      */

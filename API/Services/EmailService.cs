@@ -82,8 +82,15 @@ public class EmailService : IEmailService
     public async Task<bool> CheckIfAccessible(string host)
     {
         // This is the only exception for using the default because we need an external service to check if the server is accessible for emails
-        if (IsLocalIpAddress(host)) return false;
-        return await SendEmailWithGet(DefaultApiUrl + "/api/email/reachable?host=" + host);
+        try
+        {
+            if (IsLocalIpAddress(host)) return false;
+            return await SendEmailWithGet(DefaultApiUrl + "/api/email/reachable?host=" + host);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
     public async Task<bool> SendMigrationEmail(EmailMigrationDto data)

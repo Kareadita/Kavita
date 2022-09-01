@@ -11,6 +11,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -178,17 +179,17 @@ namespace API.Controllers
                 info.Title += " - " + info.ChapterTitle;
             }
 
-            if (info.IsSpecial && dto.VolumeNumber.Equals(Parser.Parser.DefaultVolume))
+            if (info.IsSpecial && dto.VolumeNumber.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultVolume))
             {
                 info.Subtitle = info.FileName;
-            } else if (!info.IsSpecial && info.VolumeNumber.Equals(Parser.Parser.DefaultVolume))
+            } else if (!info.IsSpecial && info.VolumeNumber.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultVolume))
             {
                 info.Subtitle = _readerService.FormatChapterName(info.LibraryType, true, true) + info.ChapterNumber;
             }
             else
             {
                 info.Subtitle = "Volume " + info.VolumeNumber;
-                if (!info.ChapterNumber.Equals(Parser.Parser.DefaultChapter))
+                if (!info.ChapterNumber.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultChapter))
                 {
                     info.Subtitle += " " + _readerService.FormatChapterName(info.LibraryType, true, true) +
                                      info.ChapterNumber;

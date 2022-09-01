@@ -34,7 +34,7 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             var files = new List<string>();
             var fileCount = ds.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
-                API.Parser.Parser.ArchiveFileExtensions, _logger);
+                API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions, _logger);
 
             Assert.Equal(28, fileCount);
             Assert.Equal(28, files.Count);
@@ -59,7 +59,7 @@ namespace API.Tests.Services
             try
             {
                 var fileCount = ds.TraverseTreeParallelForEach("/manga/", s => files.Add(s),
-                    API.Parser.Parser.ImageFileExtensions, _logger);
+                    API.Services.Tasks.Scanner.Parser.Parser.ImageFileExtensions, _logger);
                 Assert.Equal(1, fileCount);
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             var files = new List<string>();
             var fileCount = ds.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
-                API.Parser.Parser.ArchiveFileExtensions, _logger);
+                API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions, _logger);
 
             Assert.Equal(28, fileCount);
             Assert.Equal(28, files.Count);
@@ -111,7 +111,7 @@ namespace API.Tests.Services
             fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            var files = ds.GetFilesWithExtension(testDirectory, API.Parser.Parser.ArchiveFileExtensions);
+            var files = ds.GetFilesWithExtension(testDirectory, API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions);
 
             Assert.Equal(10, files.Length);
             Assert.All(files, s => fileSystem.Path.GetExtension(s).Equals(".zip"));
@@ -150,7 +150,7 @@ namespace API.Tests.Services
             fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            var files = ds.GetFiles(testDirectory, API.Parser.Parser.ArchiveFileExtensions).ToList();
+            var files = ds.GetFiles(testDirectory, API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions).ToList();
 
             Assert.Equal(10, files.Count());
             Assert.All(files, s => fileSystem.Path.GetExtension(s).Equals(".zip"));
@@ -586,12 +586,12 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
             ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
-            var outputFiles = ds.GetFiles("/manga/output/").Select(API.Parser.Parser.NormalizePath).ToList();
+            var outputFiles = ds.GetFiles("/manga/output/").Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList();
             Assert.Equal(4, outputFiles.Count()); // we have 2 already there and 2 copies
             // For some reason, this has C:/ on directory even though everything is emulated (System.IO.Abstractions issue, not changing)
             // https://github.com/TestableIO/System.IO.Abstractions/issues/831
-            Assert.True(outputFiles.Contains(API.Parser.Parser.NormalizePath("/manga/output/file (3).zip"))
-                        || outputFiles.Contains(API.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
+            Assert.True(outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("/manga/output/file (3).zip"))
+                        || outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
         }
 
         #endregion
@@ -678,6 +678,7 @@ namespace API.Tests.Services
         [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/Dir 2/"}, new [] {"C:/Manga/Dir 1/Love Hina/Vol. 01.cbz"}, "C:/Manga/Dir 1/Love Hina")]
         [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/"}, new [] {"D:/Manga/Love Hina/Vol. 01.cbz", "D:/Manga/Vol. 01.cbz"}, "")]
         [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga//Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
+        [InlineData(new [] {@"C:\mount\drive\Library\Test Library\Comics\"}, new [] {@"C:\mount\drive\Library\Test Library\Comics\Bruce Lee (1994)\Bruce Lee #001 (1994).cbz"}, @"C:/mount/drive/Library/Test Library/Comics/Bruce Lee (1994)")]
         public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] files, string expectedDirectory)
         {
             var fileSystem = new MockFileSystem();

@@ -121,7 +121,7 @@ public interface ISeriesRepository
     Task<int> GetSeriesIdByFolder(string folder);
     Task<Series> GetSeriesByFolderPath(string folder);
     Task<Series> GetFullSeriesByName(string series, int libraryId);
-    Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId);
+    Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
 }
@@ -301,7 +301,7 @@ public class SeriesRepository : ISeriesRepository
     {
         const int maxRecords = 15;
         var result = new SearchResultGroupDto();
-        var searchQueryNormalized = Parser.Parser.Normalize(searchQuery);
+        var searchQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(searchQuery);
 
         var seriesIds = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
@@ -1152,7 +1152,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<int> GetSeriesIdByFolder(string folder)
     {
-        var normalized = Parser.Parser.NormalizePath(folder);
+        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         var series = await _context.Series
             .Where(s => s.FolderPath.Equals(normalized))
             .SingleOrDefaultAsync();
@@ -1166,7 +1166,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<Series> GetSeriesByFolderPath(string folder)
     {
-        var normalized = Parser.Parser.NormalizePath(folder);
+        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         return await _context.Series.SingleOrDefaultAsync(s => s.FolderPath.Equals(normalized));
     }
 
@@ -1179,7 +1179,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public Task<Series> GetFullSeriesByName(string series, int libraryId)
     {
-        var localizedSeries = Parser.Parser.Normalize(series);
+        var localizedSeries = Services.Tasks.Scanner.Parser.Parser.Normalize(series);
         return _context.Series
             .Where(s => (s.NormalizedName.Equals(localizedSeries)
                          || s.LocalizedName.Equals(series)) && s.LibraryId == libraryId)
@@ -1218,19 +1218,26 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="seriesName"></param>
     /// <param name="localizedName"></param>
     /// <param name="libraryId"></param>
+    /// <param name="withFullIncludes">Defaults to true. This will query against all foreign keys (deep). If false, just the series will come back</param>
     /// <returns></returns>
-    public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId)
+    public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
     {
-        var normalizedSeries = Parser.Parser.Normalize(seriesName);
-        var normalizedLocalized = Parser.Parser.Normalize(localizedName);
+        var normalizedSeries = Services.Tasks.Scanner.Parser.Parser.Normalize(seriesName);
+        var normalizedLocalized = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName);
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
+            .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
                         || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty));
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {
             query = query.Where(s =>
                 s.NormalizedName.Equals(normalizedLocalized) || s.NormalizedLocalizedName.Equals(normalizedLocalized));
+        }
+
+        if (!withFullIncludes)
+        {
+            return query.SingleOrDefaultAsync();
         }
 
         return query.Include(s => s.Metadata)
@@ -1261,15 +1268,28 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
+
+    /// <summary>
+    /// Removes series that are not in the seenSeries list. Does not commit.
+    /// </summary>
+    /// <param name="seenSeries"></param>
+    /// <param name="libraryId"></param>
     public async Task RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
     {
         if (seenSeries.Count == 0) return;
         var ids = new List<int>();
         foreach (var parsedSeries in seenSeries)
         {
-            ids.Add(await _context.Series
-                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName && s.LibraryId == libraryId)
-                .Select(s => s.Id).SingleAsync());
+            var series = await _context.Series
+                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
+                            s.LibraryId == libraryId)
+                .Select(s => s.Id)
+                .SingleOrDefaultAsync();
+            if (series > 0)
+            {
+                ids.Add(series);
+            }
+
         }
 
         var seriesToRemove = await _context.Series

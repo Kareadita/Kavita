@@ -20,7 +20,7 @@ COPY --from=copytask /files/wwwroot /kavita/wwwroot
 
 #Installs program dependencies
 RUN apt-get update \
-  && apt-get install -y libicu-dev libssl1.1 libgdiplus curl\
+  && apt-get install -y libicu-dev libssl1.1 libgdiplus curl \
   && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh

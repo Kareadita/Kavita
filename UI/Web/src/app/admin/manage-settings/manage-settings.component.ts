@@ -3,6 +3,7 @@ import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
 import { SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
@@ -19,6 +20,10 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+
+  get TagBadgeCursor() {
+    return TagBadgeCursor;
+  }
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private modalService: NgbModal) { }
@@ -45,6 +50,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableSwaggerUi', new FormControl(this.serverSettings.enableSwaggerUi, [Validators.required]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
+      this.settingsForm.addControl('convertBookmarkToWebP', new FormControl(this.serverSettings.convertBookmarkToWebP, []));
     });
   }
 
@@ -62,6 +68,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('enableSwaggerUi')?.setValue(this.serverSettings.enableSwaggerUi);
     this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups);
     this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching);
+    this.settingsForm.get('convertBookmarkToWebP')?.setValue(this.serverSettings.convertBookmarkToWebP);
     this.settingsForm.markAsPristine();
   }
 

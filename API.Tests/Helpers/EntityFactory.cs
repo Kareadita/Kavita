@@ -18,7 +18,7 @@ namespace API.Tests.Helpers
                 Name = name,
                 SortName = name,
                 LocalizedName = name,
-                NormalizedName = API.Parser.Parser.Normalize(name),
+                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(name),
                 Volumes = new List<Volume>(),
                 Metadata = new SeriesMetadata()
             };
@@ -31,7 +31,7 @@ namespace API.Tests.Helpers
             return new Volume()
             {
                 Name = volumeNumber,
-                Number = (int) API.Parser.Parser.MinNumberFromRange(volumeNumber),
+                Number = (int) API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
                 Pages = pages,
                 Chapters = chaps
             };
@@ -43,7 +43,7 @@ namespace API.Tests.Helpers
             {
                 IsSpecial = isSpecial,
                 Range = range,
-                Number = API.Parser.Parser.MinNumberFromRange(range) + string.Empty,
+                Number = API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(range) + string.Empty,
                 Files = files ?? new List<MangaFile>(),
                 Pages = pageCount,
 
@@ -73,7 +73,7 @@ namespace API.Tests.Helpers
             return new CollectionTag()
             {
                 Id = id,
-                NormalizedTitle = API.Parser.Parser.Normalize(title).ToUpper(),
+                NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize(title).ToUpper(),
                 Title = title,
                 Summary = summary,
                 Promoted = promoted

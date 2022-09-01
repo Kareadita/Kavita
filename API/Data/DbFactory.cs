@@ -23,8 +23,8 @@ namespace API.Data
                 Name = name,
                 OriginalName = name,
                 LocalizedName = name,
-                NormalizedName = Parser.Parser.Normalize(name),
-                NormalizedLocalizedName = Parser.Parser.Normalize(name),
+                NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+                NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
                 SortName = name,
                 Volumes = new List<Volume>(),
                 Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
@@ -42,8 +42,8 @@ namespace API.Data
                 Name = name,
                 OriginalName = name,
                 LocalizedName = localizedName,
-                NormalizedName = Parser.Parser.Normalize(name),
-                NormalizedLocalizedName = Parser.Parser.Normalize(localizedName),
+                NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+                NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName),
                 SortName = name,
                 Volumes = new List<Volume>(),
                 Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
@@ -55,7 +55,7 @@ namespace API.Data
             return new Volume()
             {
                 Name = volumeNumber,
-                Number = (int) Parser.Parser.MinNumberFromRange(volumeNumber),
+                Number = (int) Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
                 Chapters = new List<Chapter>()
             };
         }
@@ -66,7 +66,7 @@ namespace API.Data
             var specialTitle = specialTreatment ? info.Filename : info.Chapters;
             return new Chapter()
             {
-                Number = specialTreatment ? "0" : Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty,
+                Number = specialTreatment ? "0" : Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty,
                 Range = specialTreatment ? info.Filename : info.Chapters,
                 Title = (specialTreatment && info.Format == MangaFormat.Epub)
                     ? info.Title
@@ -95,7 +95,7 @@ namespace API.Data
             return new CollectionTag()
             {
                 Id = id,
-                NormalizedTitle = API.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+                NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
                 Title = title?.Trim(),
                 Summary = summary?.Trim(),
                 Promoted = promoted
@@ -106,7 +106,7 @@ namespace API.Data
         {
             return new ReadingList()
             {
-                NormalizedTitle = API.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+                NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
                 Title = title?.Trim(),
                 Summary = summary?.Trim(),
                 Promoted = promoted,
@@ -130,7 +130,7 @@ namespace API.Data
             return new Genre()
             {
                 Title = name.Trim().SentenceCase(),
-                NormalizedTitle = Parser.Parser.Normalize(name),
+                NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
                 ExternalTag = external
             };
         }
@@ -140,7 +140,7 @@ namespace API.Data
             return new Tag()
             {
                 Title = name.Trim().SentenceCase(),
-                NormalizedTitle = Parser.Parser.Normalize(name),
+                NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
                 ExternalTag = external
             };
         }
@@ -150,7 +150,7 @@ namespace API.Data
             return new Person()
             {
                 Name = name.Trim(),
-                NormalizedName = Parser.Parser.Normalize(name),
+                NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
                 Role = role
             };
         }

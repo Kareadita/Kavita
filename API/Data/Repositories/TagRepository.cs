@@ -43,7 +43,7 @@ public class TagRepository : ITagRepository
 
     public async Task<Tag> FindByNameAsync(string tagName)
     {
-        var normalizedName = Parser.Parser.Normalize(tagName);
+        var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(tagName);
         return await _context.Tag
             .FirstOrDefaultAsync(g => g.NormalizedTitle.Equals(normalizedName));
     }

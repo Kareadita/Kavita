@@ -11,18 +11,17 @@ using API.Services;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
-namespace API.Tests.Repository;
+namespace API.Tests.Services;
 
-public class SeriesRepositoryTests
+public class ReadingListServiceTests
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IReadingListService _readingListService;
 
-    private readonly DbConnection _connection;
     private readonly DataContext _context;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";
@@ -30,10 +29,9 @@ public class SeriesRepositoryTests
     private const string BackupDirectory = "C:/kavita/config/backups/";
     private const string DataDirectory = "C:/data/";
 
-    public SeriesRepositoryTests()
+    public ReadingListServiceTests()
     {
         var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
 
         _context = new DataContext(contextOptions);
         Task.Run(SeedDb).GetAwaiter().GetResult();
@@ -41,9 +39,11 @@ public class SeriesRepositoryTests
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, mapper, null);
+
+        _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>());
     }
 
-     #region Setup
+    #region Setup
 
     private static DbConnection CreateInMemoryDatabase()
     {
@@ -70,30 +70,16 @@ public class SeriesRepositoryTests
 
         _context.ServerSetting.Update(setting);
 
-        var lib = new Library()
+        _context.Library.Add(new Library()
         {
             Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        };
-
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            Libraries = new List<Library>()
-            {
-                lib
-            }
         });
-
         return await _context.SaveChangesAsync() > 0;
     }
 
     private async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
-        _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
-        _context.Genre.RemoveRange(_context.Genre.ToList());
-        _context.CollectionTag.RemoveRange(_context.CollectionTag.ToList());
-        _context.Person.RemoveRange(_context.Person.ToList());
 
         await _context.SaveChangesAsync();
     }
@@ -113,48 +99,11 @@ public class SeriesRepositoryTests
 
     #endregion
 
-    private async Task SetupSeriesData()
-    {
-        var library = new Library()
-        {
-            Name = "Manga",
-            Type = LibraryType.Manga,
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath() {Path = "C:/data/manga/"}
-            }
-        };
 
-        var s = DbFactory.Series("The Idaten Deities Know Only Peace", "Heion Sedai no Idaten-tachi");
-        s.Format = MangaFormat.Archive;
+    #region RemoveFullyReadItems
 
-        library.Series = new List<Series>()
-        {
-            s,
-        };
+    // TODO: Implement all methods here
 
-        _unitOfWork.LibraryRepository.Add(library);
-        await _unitOfWork.CommitAsync();
-    }
-
-
-    [InlineData("Heion Sedai no Idaten-tachi", "", MangaFormat.Archive, "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
-    [InlineData("Heion Sedai no Idaten-tachi", "", MangaFormat.Pdf, null)]
-    public async Task GetFullSeriesByAnyName_Should(string seriesName, string localizedName, string? expected)
-    {
-        var firstSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
-        var series =
-            await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
-                1, MangaFormat.Unknown);
-        if (expected == null)
-        {
-            Assert.Null(series);
-        }
-        else
-        {
-            Assert.NotNull(series);
-            Assert.Equal(expected, series.Name);
-        }
-    }
+    #endregion
 
 }

@@ -80,7 +80,9 @@ namespace API.Services.Tasks.Scanner
             string normalizedPath;
             if (scanDirectoryByDirectory)
             {
-                var directories = _directoryService.GetDirectories(folderPath).ToList();
+                // This is used in library scan, so we should check first for a ignore file and use that here as well
+                var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
+                var directories = _directoryService.GetDirectories(folderPath, _directoryService.CreateMatcherFromFile(potentialIgnoreFile)).ToList();
 
                 foreach (var directory in directories)
                 {
@@ -219,7 +221,7 @@ namespace API.Services.Tasks.Scanner
             IDictionary<string, IList<SeriesModified>> seriesPaths, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos, bool forceCheck = false)
         {
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("Starting file scan", libraryName, ProgressEventType.Started));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", libraryName, ProgressEventType.Started));
 
             foreach (var folderPath in folders)
             {
@@ -284,15 +286,22 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, libraryName, ProgressEventType.Ended));
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", libraryName, ProgressEventType.Ended));
         }
 
+        /// <summary>
+        /// Checks against all folder paths on file if the last scanned is >= the directory's last write down to the second
+        /// </summary>
+        /// <param name="seriesPaths"></param>
+        /// <param name="normalizedFolder"></param>
+        /// <param name="forceCheck"></param>
+        /// <returns></returns>
         private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder, bool forceCheck = false)
         {
             if (forceCheck) return false;
 
-            return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerMinute) >=
-                _directoryService.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerMinute));
+            return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerSecond) >=
+                _directoryService.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerSecond));
         }
 
         /// <summary>
@@ -320,7 +329,10 @@ namespace API.Services.Tasks.Scanner
 
             // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
             string nonLocalizedSeries;
-            var nonLocalizedSeriesFound = infos.Where(i => !i.IsSpecial).Select(i => i.Series).Distinct().ToList();
+            // Normalize this as many of the cases is a capitalization difference
+            var nonLocalizedSeriesFound = infos
+                .Where(i => !i.IsSpecial)
+                .Select(i => i.Series).DistinctBy(Parser.Parser.Normalize).ToList();
             if (nonLocalizedSeriesFound.Count == 1)
             {
                 nonLocalizedSeries = nonLocalizedSeriesFound.First();
@@ -330,7 +342,7 @@ namespace API.Services.Tasks.Scanner
                 // There can be a case where there are multiple series in a folder that causes merging.
                 if (nonLocalizedSeriesFound.Count > 2)
                 {
-                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder:  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
+                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder or ensure there is only 2 potential series (localized and series):  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
                 }
                 nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
             }

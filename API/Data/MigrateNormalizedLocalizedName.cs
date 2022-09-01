@@ -21,7 +21,7 @@ public static class MigrateNormalizedLocalizedName
 
         foreach (var series in await dataContext.Series.ToListAsync())
         {
-            series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName ?? string.Empty);
+            series.NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(series.LocalizedName ?? string.Empty);
             logger.LogInformation("Updated {SeriesName} normalized localized name: {LocalizedName}", series.Name, series.NormalizedLocalizedName);
             unitOfWork.SeriesRepository.Update(series);
         }

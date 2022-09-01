@@ -147,7 +147,7 @@ public class BackupServiceTests
 
         var backupLogFiles = backupService.GetLogFiles(0, LogDirectory).ToList();
         Assert.Single(backupLogFiles);
-        Assert.Equal(API.Parser.Parser.NormalizePath($"{LogDirectory}kavita.log"), API.Parser.Parser.NormalizePath(backupLogFiles.First()));
+        Assert.Equal(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath($"{LogDirectory}kavita.log"), API.Services.Tasks.Scanner.Parser.Parser.NormalizePath(backupLogFiles.First()));
     }
 
     [Fact]
@@ -168,8 +168,8 @@ public class BackupServiceTests
 
         var backupService = new BackupService(_logger, _unitOfWork, ds, configuration, _messageHub);
 
-        var backupLogFiles = backupService.GetLogFiles(1, LogDirectory).Select(API.Parser.Parser.NormalizePath).ToList();
-        Assert.NotEmpty(backupLogFiles.Where(file => file.Equals(API.Parser.Parser.NormalizePath($"{LogDirectory}kavita.log")) || file.Equals(API.Parser.Parser.NormalizePath($"{LogDirectory}kavita1.log"))));
+        var backupLogFiles = backupService.GetLogFiles(1, LogDirectory).Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList();
+        Assert.NotEmpty(backupLogFiles.Where(file => file.Equals(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath($"{LogDirectory}kavita.log")) || file.Equals(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath($"{LogDirectory}kavita1.log"))));
     }
 
 

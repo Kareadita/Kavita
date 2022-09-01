@@ -26,7 +26,7 @@ public static class PersonHelper
 
         foreach (var name in names)
         {
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
             var person = allPeopleTypeRole.FirstOrDefault(p =>
                 p.NormalizedName.Equals(normalizedName));
             if (person == null)
@@ -49,7 +49,7 @@ public static class PersonHelper
     /// <param name="action">Callback which will be executed for each person removed</param>
     public static void RemovePeople(ICollection<Person> existingPeople, IEnumerable<string> people, PersonRole role, Action<Person> action = null)
     {
-        var normalizedPeople = people.Select(Parser.Parser.Normalize).ToList();
+        var normalizedPeople = people.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
         if (normalizedPeople.Count == 0)
         {
             var peopleToRemove = existingPeople.Where(p => p.Role == role).ToList();
@@ -82,7 +82,8 @@ public static class PersonHelper
     {
         foreach (var person in existingPeople)
         {
-            var existingPerson = removeAllExcept.FirstOrDefault(p => p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
+            var existingPerson = removeAllExcept
+                .FirstOrDefault(p => p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
             if (existingPerson == null)
             {
                 action?.Invoke(person);
@@ -98,7 +99,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
     {
         var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
+            p.NormalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
         if (existingPerson == null)
         {
             metadataPeople.Add(person);
@@ -113,7 +114,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(BlockingCollection<Person> metadataPeople, Person person)
     {
         var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
+            p.NormalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
         if (existingPerson == null)
         {
             metadataPeople.Add(person);

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -19,7 +19,7 @@ export class InviteUserComponent implements OnInit {
    * Maintains if the backend is sending an email
    */
   isSending: boolean = false;
-  inviteForm: UntypedFormGroup = new UntypedFormGroup({});
+  inviteForm: FormGroup = new FormGroup({});
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
   emailLink: string = '';
@@ -32,7 +32,7 @@ export class InviteUserComponent implements OnInit {
     private confirmService: ConfirmService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
-    this.inviteForm.addControl('email', new UntypedFormControl('', [Validators.required]));
+    this.inviteForm.addControl('email', new FormControl('', [Validators.required]));
   }
 
   close() {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using API.Entities.Enums;
 
-namespace API.Parser
+namespace API.Services.Tasks.Scanner.Parser
 {
     public static class Parser
     {
@@ -20,8 +20,6 @@ namespace API.Parser
 
         public const string SupportedExtensions =
             ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
-
-        public static readonly string[] SupportedGlobExtensions = new [] {@"**/*.png", @"**/*.cbz", @"**/*.pdf"};
 
         private const RegexOptions MatchOptions =
             RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;

@@ -472,11 +472,27 @@ namespace API.Controllers
                 }
 
                 var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue sending email");
+                if (string.IsNullOrEmpty(token))
+                {
+                    _logger.LogError("There was an issue generating a token for the email");
+                    return BadRequest("There was an creating the invite user");
+                }
 
+                user.ConfirmationToken = token;
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error during invite user flow, unable to create user. Deleting user for retry");
+                _unitOfWork.UserRepository.Delete(user);
+                await _unitOfWork.CommitAsync();
+            }
 
-                var emailLink = GenerateEmailLink(token, "confirm-email", dto.Email);
+            try
+            {
+                var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email", dto.Email);
                 _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+                _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, user.ConfirmationToken);
                 var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
                 var accessible = await _emailService.CheckIfAccessible(host);
                 if (accessible)
@@ -489,12 +505,12 @@ namespace API.Controllers
                             InvitingUser = adminUser.UserName,
                             ServerConfirmationLink = emailLink
                         });
-                    } catch(Exception) {/* Swallow exception */}
+                    }
+                    catch (Exception)
+                    {
+                        /* Swallow exception */
+                    }
                 }
-
-                user.ConfirmationToken = token;
-
-                await _unitOfWork.CommitAsync();
 
                 return Ok(new InviteUserResponse
                 {
@@ -502,10 +518,9 @@ namespace API.Controllers
                     EmailSent = accessible
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _unitOfWork.UserRepository.Delete(user);
-                await _unitOfWork.CommitAsync();
+                _logger.LogError(ex, "There was an error during invite user flow, unable to send an email");
             }
 
             return BadRequest("There was an error setting up your account. Please check the logs");
@@ -564,17 +579,26 @@ namespace API.Controllers
         [HttpPost("confirm-password-reset")]
         public async Task<ActionResult<string>> ConfirmForgotPassword(ConfirmPasswordResetDto dto)
         {
-            var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (user == null)
+            try
             {
-                return BadRequest("Invalid Details");
+                var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+                if (user == null)
+                {
+                    return BadRequest("Invalid Details");
+                }
+
+                var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
+                    "ResetPassword", dto.Token);
+                if (!result) return BadRequest("Unable to reset password, your email token is not correct.");
+
+                var errors = await _accountService.ChangeUserPassword(user, dto.Password);
+                return errors.Any() ? BadRequest(errors) : Ok("Password updated");
             }
-
-            var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "ResetPassword", dto.Token);
-            if (!result) return BadRequest("Unable to reset password, your email token is not correct.");
-
-            var errors = await _accountService.ChangeUserPassword(user, dto.Password);
-            return errors.Any() ? BadRequest(errors) : Ok("Password updated");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an unexpected error when confirming new password");
+                return BadRequest("There was an unexpected error when confirming new password");
+            }
         }
 
 
@@ -600,8 +624,10 @@ namespace API.Controllers
             if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
                 return Unauthorized("You are not permitted to this operation.");
 
-            var emailLink = GenerateEmailLink(await _userManager.GeneratePasswordResetTokenAsync(user), "confirm-reset-password", user.Email);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var emailLink = GenerateEmailLink(token, "confirm-reset-password", user.Email);
             _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+            _logger.LogCritical("[Forgot Password]: Token {UserName}: {Token}", user.UserName, token);
             var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
             if (await _emailService.CheckIfAccessible(host))
             {
@@ -654,8 +680,10 @@ namespace API.Controllers
                     "This user needs to migrate. Have them log out and login to trigger a migration flow");
             if (user.EmailConfirmed) return BadRequest("User already confirmed");
 
-            var emailLink = GenerateEmailLink(await _userManager.GenerateEmailConfirmationTokenAsync(user), "confirm-email", user.Email);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var emailLink = GenerateEmailLink(token, "confirm-email", user.Email);
             _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
+            _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
             await _emailService.SendMigrationEmail(new EmailMigrationDto()
             {
                 EmailAddress = user.Email,
@@ -731,6 +759,8 @@ namespace API.Controllers
         {
             var result = await _userManager.ConfirmEmailAsync(user, token);
             if (result.Succeeded) return true;
+
+
 
             _logger.LogCritical("[Account] Email validation failed");
             if (!result.Errors.Any()) return false;

@@ -109,9 +109,11 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   async deleteUser(member: Member) {
     if (await this.confirmService.confirm('Are you sure you want to delete this user?')) {
       this.memberService.deleteMember(member.username).subscribe(() => {
-        this.loadMembers();
-        this.loadPendingInvites();
-        this.toastr.success(member.username + ' has been deleted.');
+        setTimeout(() => {
+          this.loadMembers();
+          this.loadPendingInvites();
+          this.toastr.success(member.username + ' has been deleted.');
+        }, 30); // SetTimeout because I've noticed this can run super fast and not give enough time for data to flush
       });
     }
   }
@@ -131,7 +133,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
           return;
         }
         await this.confirmService.alert(
-          'Please click this link to confirm your email. You must confirm to be able to login. You may need to log out of the current account before clicking. <br/> <a href="' + email + '" target="_blank">' + email + '</a>');
+          'Please click this link to confirm your email. You must confirm to be able to login. You may need to log out of the current account before clicking. <br/> <a href="' + email + '" target="_blank" rel="noopener noreferrer">' + email + '</a>');
 
       });
     });
@@ -139,7 +141,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   setup(member: Member) {
     this.accountService.getInviteUrl(member.id, false).subscribe(url => {
-      console.log('Url: ', url);
+      console.log('Invite Url: ', url);
       if (url) {
         this.router.navigateByUrl(url);
       }
