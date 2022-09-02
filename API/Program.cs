@@ -18,6 +18,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
 
 namespace API
 {
@@ -33,6 +35,15 @@ namespace API
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.Console()
+                .CreateBootstrapLogger();
+
+            // Log.Logger = new LoggerConfiguration()
+            //     .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            //     .Enrich.FromLogContext()
+            //     .WriteTo.Console()
+            //     .CreateLogger();
 
 
             var directoryService = new DirectoryService(null, new FileSystem());
@@ -47,57 +58,66 @@ namespace API
                 Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
             }
 
-            var host = CreateHostBuilder(args).Build();
-
-            using var scope = host.Services.CreateScope();
-            var services = scope.ServiceProvider;
-
             try
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                var context = services.GetRequiredService<DataContext>();
-                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
-                {
-                    logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
-                    var migrationDirectory = await GetMigrationDirectory(context, directoryService);
-                    directoryService.ExistOrCreate(migrationDirectory);
+                var host = CreateHostBuilder(args).Build();
 
-                    if (!directoryService.FileSystem.File.Exists(
-                            directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db")))
+                using var scope = host.Services.CreateScope();
+                var services = scope.ServiceProvider;
+
+                try
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    var context = services.GetRequiredService<DataContext>();
+                    var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                    if (pendingMigrations.Any())
                     {
-                        directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
-                        logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
+                        logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
+                        var migrationDirectory = await GetMigrationDirectory(context, directoryService);
+                        directoryService.ExistOrCreate(migrationDirectory);
+
+                        if (!directoryService.FileSystem.File.Exists(
+                                directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db")))
+                        {
+                            directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
+                            logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
+                        }
+                    }
+
+                    await context.Database.MigrateAsync();
+
+                    await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
+                    await Seed.SeedSettings(context, directoryService);
+                    await Seed.SeedThemes(context);
+                    await Seed.SeedUserApiKeys(context);
+
+
+                    if (isDocker && new FileInfo("data/appsettings.json").Exists)
+                    {
+                        logger.LogCritical("WARNING! Mount point is incorrect, nothing here will persist. Please change your container mount from /kavita/data to /kavita/config");
+                        return;
                     }
                 }
-
-                await context.Database.MigrateAsync();
-
-                await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
-                await Seed.SeedSettings(context, directoryService);
-                await Seed.SeedThemes(context);
-                await Seed.SeedUserApiKeys(context);
-
-
-                if (isDocker && new FileInfo("data/appsettings.json").Exists)
+                catch (Exception ex)
                 {
-                    logger.LogCritical("WARNING! Mount point is incorrect, nothing here will persist. Please change your container mount from /kavita/data to /kavita/config");
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    var context = services.GetRequiredService<DataContext>();
+                    var migrationDirectory = await GetMigrationDirectory(context, directoryService);
+
+                    logger.LogCritical(ex, "A migration failed during startup. Restoring backup from {MigrationDirectory} and exiting", migrationDirectory);
+                    directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db"), directoryService.ConfigDirectory);
+
                     return;
                 }
-            }
-            catch (Exception ex)
+
+                await host.RunAsync();
+            } catch (Exception ex)
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                var context = services.GetRequiredService<DataContext>();
-                var migrationDirectory = await GetMigrationDirectory(context, directoryService);
-
-                logger.LogCritical(ex, "A migration failed during startup. Restoring backup from {MigrationDirectory} and exiting", migrationDirectory);
-                directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db"), directoryService.ConfigDirectory);
-
-                return;
+                Log.Fatal(ex, "Host terminated unexpectedly");
+            } finally
+            {
+                Log.CloseAndFlush();
             }
-
-            await host.RunAsync();
         }
 
         private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
@@ -127,6 +147,14 @@ namespace API
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSerilog((context, services, configuration) =>
+                {
+                    configuration
+                        .ReadFrom.Configuration(context.Configuration)
+                        .ReadFrom.Services(services)
+                        .Enrich.FromLogContext()
+                        .WriteTo.Console();
+                })
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     config.Sources.Clear();

@@ -35,6 +35,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API
@@ -268,6 +269,8 @@ namespace API
                     ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + durationInSeconds;
                 }
             });
+
+            app.UseSerilogRequestLogging();
 
             app.Use(async (context, next) =>
             {
