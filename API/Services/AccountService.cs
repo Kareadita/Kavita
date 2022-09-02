@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Errors;
@@ -17,6 +18,8 @@ namespace API.Services
         Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password);
         Task<IEnumerable<ApiException>> ValidateUsername(string username);
         Task<IEnumerable<ApiException>> ValidateEmail(string email);
+        Task<bool> HasBookmarkPermission(AppUser user);
+        Task<bool> HasDownloadPermission(AppUser appuser);
     }
 
     public class AccountService : IAccountService
@@ -92,5 +95,28 @@ namespace API.Services
                 new ApiException(400, "Email is already registered")
             };
         }
+
+        /// <summary>
+        /// Does the user have the Bookmark permission or admin rights
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<bool> HasBookmarkPermission(AppUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            return roles.Contains(PolicyConstants.BookmarkRole) || roles.Contains(PolicyConstants.AdminRole);
+        }
+
+        /// <summary>
+        /// Does the user have the Download permission or admin rights
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task<bool> HasDownloadPermission(AppUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
+        }
+
     }
 }

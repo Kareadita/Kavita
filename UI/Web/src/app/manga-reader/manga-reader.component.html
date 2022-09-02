@@ -18,8 +18,7 @@
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
-
-                <button *ngIf="!bookmarkMode" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
+                <button *ngIf="!bookmarkMode && hasBookmarkRights" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                         title="{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()">
                     <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
                     <span class="visually-hidden">{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span>

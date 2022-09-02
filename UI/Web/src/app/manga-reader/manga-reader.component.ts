@@ -122,6 +122,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   layoutModes = layoutModes;
 
   isLoading = true;
+  hasBookmarkRights: boolean = false;
 
   private ctx!: CanvasRenderingContext2D;
   /**
@@ -153,7 +154,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Responsible to hold current page -2 2. Used to know if we should render 
    * @remarks Used solely for LayoutMode.DoubleReverse rendering. 
    */
-   canvasImageBehindBy2 = new Image();
+  canvasImageBehindBy2 = new Image();
   /**
    * Dictates if we use render with canvas or with image. 
    * @remarks This is only for Splitting.
@@ -174,16 +175,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * An event emitter when a page change occurs. Used solely by the webtoon reader.
    */
-   goToPageEvent!: BehaviorSubject<number>;
+  goToPageEvent!: BehaviorSubject<number>;
 
    /**
    * An event emitter when a bookmark on a page change occurs. Used solely by the webtoon reader.
    */
-   showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
+  showBookmarkEffectEvent: ReplaySubject<number> = new ReplaySubject<number>();
    /**
    * An event emitter when fullscreen mode is toggled. Used solely by the webtoon reader.
    */
-   fullscreenEvent: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+  fullscreenEvent: ReplaySubject<boolean> = new ReplaySubject<boolean>();
   /**
    * If the menu is open/visible.
    */
@@ -467,6 +468,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.user = user;
+      this.hasBookmarkRights = this.accountService.hasBookmarkRole(user);
       this.readingDirection = this.user.preferences.readingDirection;
       this.scalingOption = this.user.preferences.scalingOption;
       this.pageSplitOption = this.user.preferences.pageSplitOption;
