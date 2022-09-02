@@ -58,6 +58,10 @@ export class AccountService implements OnDestroy {
     return user && user.roles.includes('Download');
   }
 
+  hasBookmarkRole(user: User) {
+    return user && user.roles.includes('Bookmark');
+  }
+
   getRoles() {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }

@@ -29,17 +29,20 @@ namespace API.Controllers
         private readonly ILogger<ReaderController> _logger;
         private readonly IReaderService _readerService;
         private readonly IBookmarkService _bookmarkService;
+        private readonly IAccountService _accountService;
 
         /// <inheritdoc />
         public ReaderController(ICacheService cacheService,
             IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
-            IReaderService readerService, IBookmarkService bookmarkService)
+            IReaderService readerService, IBookmarkService bookmarkService,
+            IAccountService accountService)
         {
             _cacheService = cacheService;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _readerService = readerService;
             _bookmarkService = bookmarkService;
+            _accountService = accountService;
         }
 
         /// <summary>
@@ -657,8 +660,13 @@ namespace API.Controllers
         public async Task<ActionResult> BookmarkPage(BookmarkDto bookmarkDto)
         {
             // Don't let user save past total pages.
-            bookmarkDto.Page = await _readerService.CapPageToChapter(bookmarkDto.ChapterId, bookmarkDto.Page);
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+            if (user == null) return new UnauthorizedResult();
+
+            if (!await _accountService.HasBookmarkPermission(user))
+                return BadRequest("You do not have permission to bookmark");
+
+            bookmarkDto.Page = await _readerService.CapPageToChapter(bookmarkDto.ChapterId, bookmarkDto.Page);
             var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
             if (chapter == null) return BadRequest("Could not find cached image. Reload and try again.");
             var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
@@ -681,7 +689,11 @@ namespace API.Controllers
         public async Task<ActionResult> UnBookmarkPage(BookmarkDto bookmarkDto)
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+            if (user == null) return new UnauthorizedResult();
             if (user.Bookmarks == null) return Ok();
+
+            if (!await _accountService.HasBookmarkPermission(user))
+                return BadRequest("You do not have permission to unbookmark");
 
             if (await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
             {

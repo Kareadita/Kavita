@@ -31,10 +31,12 @@ namespace API.Controllers
         private readonly IEventHub _eventHub;
         private readonly ILogger<DownloadController> _logger;
         private readonly IBookmarkService _bookmarkService;
+        private readonly IAccountService _accountService;
         private const string DefaultContentType = "application/octet-stream";
 
         public DownloadController(IUnitOfWork unitOfWork, IArchiveService archiveService, IDirectoryService directoryService,
-            IDownloadService downloadService, IEventHub eventHub, ILogger<DownloadController> logger, IBookmarkService bookmarkService)
+            IDownloadService downloadService, IEventHub eventHub, ILogger<DownloadController> logger, IBookmarkService bookmarkService,
+            IAccountService accountService)
         {
             _unitOfWork = unitOfWork;
             _archiveService = archiveService;
@@ -43,6 +45,7 @@ namespace API.Controllers
             _eventHub = eventHub;
             _logger = logger;
             _bookmarkService = bookmarkService;
+            _accountService = accountService;
         }
 
         /// <summary>
@@ -109,7 +112,7 @@ namespace API.Controllers
         private async Task<bool> HasDownloadPermission()
         {
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-            return await _downloadService.HasDownloadPermission(user);
+            return await _accountService.HasDownloadPermission(user);
         }
 
         private ActionResult GetFirstFileDownload(IEnumerable<MangaFile> files)

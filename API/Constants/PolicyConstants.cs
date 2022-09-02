@@ -23,8 +23,12 @@ namespace API.Constants
         /// Used to give a user ability to change their own password
         /// </summary>
         public const string ChangePasswordRole = "Change Password";
+        /// <summary>
+        /// Used to give a user ability to bookmark files on the server
+        /// </summary>
+        public const string BookmarkRole = "Bookmark";
 
         public static readonly ImmutableArray<string> ValidRoles =
-            ImmutableArray.Create(AdminRole, PlebRole, DownloadRole, ChangePasswordRole);
+            ImmutableArray.Create(AdminRole, PlebRole, DownloadRole, ChangePasswordRole, BookmarkRole);
     }
 }
