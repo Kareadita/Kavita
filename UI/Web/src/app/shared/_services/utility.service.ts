@@ -140,6 +140,12 @@ export class UtilityService {
   }
 
   deepEqual(object1: any, object2: any) {
+    if ((object1 === null || object1 === undefined) && (object2 !== null || object2 !== undefined)) return false;
+    if ((object2 === null || object2 === undefined) && (object1 !== null || object1 !== undefined)) return false;
+    if (object1 === null && object2 === null) return true;
+    if (object1 === undefined && object2 === undefined) return true;
+    
+
     const keys1 = Object.keys(object1);
     const keys2 = Object.keys(object2);
     if (keys1.length !== keys2.length) {

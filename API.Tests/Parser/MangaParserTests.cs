@@ -75,7 +75,7 @@ namespace API.Tests.Parser
         [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
         public void ParseVolumeTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseVolume(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
         }
 
         [Theory]
@@ -180,9 +180,10 @@ namespace API.Tests.Parser
         [InlineData("Highschool of the Dead - Full Color Edition v02 [Uasaha] (Yen Press)", "Highschool of the Dead - Full Color Edition")]
         [InlineData("諌山創] 進撃の巨人 第23巻", "諌山創] 進撃の巨人")]
         [InlineData("(一般コミック) [奥浩哉] いぬやしき 第09巻", "いぬやしき")]
+        [InlineData("Highschool of the Dead - 02", "Highschool of the Dead")]
         public void ParseSeriesTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseSeries(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
         }
 
         [Theory]
@@ -260,7 +261,7 @@ namespace API.Tests.Parser
         [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
         public void ParseChaptersTest(string filename, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseChapter(filename));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));
         }
 
 
@@ -276,7 +277,7 @@ namespace API.Tests.Parser
         [InlineData("Love Hina Omnibus v05 (2015) (Digital-HD) (Asgard-Empire).cbz", "Omnibus")]
         public void ParseEditionTest(string input, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseEdition(input));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseEdition(input));
         }
         [Theory]
         [InlineData("Beelzebub Special OneShot - Minna no Kochikame x Beelzebub (2016) [Mangastream].cbz", true)]
@@ -295,7 +296,7 @@ namespace API.Tests.Parser
         [InlineData("The League of Extra-ordinary Gentlemen", false)]
         public void ParseMangaSpecialTest(string input, bool expected)
         {
-            Assert.Equal(expected,  !string.IsNullOrEmpty(API.Parser.Parser.ParseMangaSpecial(input)));
+            Assert.Equal(expected,  !string.IsNullOrEmpty(API.Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(input)));
         }
 
         [Theory]
@@ -304,14 +305,14 @@ namespace API.Tests.Parser
         [InlineData("image.txt", MangaFormat.Unknown)]
         public void ParseFormatTest(string inputFile, MangaFormat expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseFormat(inputFile));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseFormat(inputFile));
         }
 
         [Theory]
         [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", "Side Stories")]
         public void ParseSpecialTest(string inputFile, string expected)
         {
-            Assert.Equal(expected, API.Parser.Parser.ParseMangaSpecial(inputFile));
+            Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(inputFile));
         }
 
 

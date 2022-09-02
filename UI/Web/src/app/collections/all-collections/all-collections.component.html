@@ -9,8 +9,13 @@
     [items]="collections"
     [filterOpen]="filterOpen"
     [jumpBarKeys]="jumpbarKeys"
+    [trackByIdentity]="trackByIdentity"
     >
         <ng-template #cardItem let-item let-position="idx">
-            <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="item.coverImage" (clicked)="loadCollection(item)"></app-card-item>
+            <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="imageSerivce.getCollectionCoverImage(item.id)" (clicked)="loadCollection(item)"></app-card-item>
+        </ng-template>
+
+        <ng-template #noData>
+            There are no collections. Try creating <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a>.
         </ng-template>
 </app-card-detail-layout>

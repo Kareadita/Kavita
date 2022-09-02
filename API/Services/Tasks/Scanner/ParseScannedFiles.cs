@@ -1,37 +1,53 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data.Metadata;
-using API.Entities;
 using API.Entities.Enums;
-using API.Helpers;
+using API.Extensions;
 using API.Parser;
 using API.SignalR;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner
 {
     public class ParsedSeries
     {
+        /// <summary>
+        /// Name of the Series
+        /// </summary>
         public string Name { get; init; }
+        /// <summary>
+        /// Normalized Name of the Series
+        /// </summary>
         public string NormalizedName { get; init; }
+        /// <summary>
+        /// Format of the Series
+        /// </summary>
         public MangaFormat Format { get; init; }
+    }
+
+    public enum Modified
+    {
+        Modified = 1,
+        NotModified = 2
+    }
+
+    public class SeriesModified
+    {
+        public string FolderPath { get; set; }
+        public string SeriesName { get; set; }
+        public DateTime LastScanned { get; set; }
+        public MangaFormat Format { get; set; }
     }
 
 
     public class ParseScannedFiles
     {
-        private readonly ConcurrentDictionary<ParsedSeries, List<ParserInfo>> _scannedSeries;
         private readonly ILogger _logger;
         private readonly IDirectoryService _directoryService;
         private readonly IReadingItemService _readingItemService;
         private readonly IEventHub _eventHub;
-        private readonly DefaultParser _defaultParser;
 
         /// <summary>
         /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -47,108 +63,51 @@ namespace API.Services.Tasks.Scanner
             _logger = logger;
             _directoryService = directoryService;
             _readingItemService = readingItemService;
-            _scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-            _defaultParser = new DefaultParser(_directoryService);
             _eventHub = eventHub;
         }
 
-        /// <summary>
-        /// Gets the list of all parserInfos given a Series (Will match on Name, LocalizedName, OriginalName). If the series does not exist within, return empty list.
-        /// </summary>
-        /// <param name="parsedSeries"></param>
-        /// <param name="series"></param>
-        /// <returns></returns>
-        public static IList<ParserInfo> GetInfosByName(Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries, Series series)
-        {
-            var allKeys = parsedSeries.Keys.Where(ps =>
-                SeriesHelper.FindSeries(series, ps));
-
-            var infos = new List<ParserInfo>();
-            foreach (var key in allKeys)
-            {
-                infos.AddRange(parsedSeries[key]);
-            }
-
-            return infos;
-        }
 
         /// <summary>
-        /// Processes files found during a library scan.
-        /// Populates a collection of <see cref="ParserInfo"/> for DB updates later.
+        /// This will Scan all files in a folder path. For each folder within the folderPath, FolderAction will be invoked for all files contained
         /// </summary>
-        /// <param name="path">Path of a file</param>
-        /// <param name="rootPath"></param>
-        /// <param name="type">Library type to determine parsing to perform</param>
-        private void ProcessFile(string path, string rootPath, LibraryType type)
+        /// <param name="scanDirectoryByDirectory">Scan directory by directory and for each, call folderAction</param>
+        /// <param name="folderPath">A library folder or series folder</param>
+        /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
+        /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
+        public async Task ProcessFiles(string folderPath, bool scanDirectoryByDirectory,
+            IDictionary<string, IList<SeriesModified>> seriesPaths, Func<IList<string>, string,Task> folderAction, bool forceCheck = false)
         {
-            var info = _readingItemService.Parse(path, rootPath, type);
-            if (info == null)
+            string normalizedPath;
+            if (scanDirectoryByDirectory)
             {
-                // If the file is an image and literally a cover image, skip processing.
-                if (!(Parser.Parser.IsImage(path) && Parser.Parser.IsCoverImage(path)))
+                // This is used in library scan, so we should check first for a ignore file and use that here as well
+                var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
+                var directories = _directoryService.GetDirectories(folderPath, _directoryService.CreateMatcherFromFile(potentialIgnoreFile)).ToList();
+
+                foreach (var directory in directories)
                 {
-                    _logger.LogWarning("[Scanner] Could not parse series from {Path}", path);
+                    normalizedPath = Parser.Parser.NormalizePath(directory);
+                    if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
+                    {
+                        await folderAction(new List<string>(), directory);
+                    }
+                    else
+                    {
+                        // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
+                        await folderAction(_directoryService.ScanFiles(directory), directory);
+                    }
                 }
+
                 return;
             }
 
-
-            // This catches when original library type is Manga/Comic and when parsing with non
-            if (Parser.Parser.IsEpub(path) && Parser.Parser.ParseVolume(info.Series) != Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
+            normalizedPath = Parser.Parser.NormalizePath(folderPath);
+            if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedPath, forceCheck))
             {
-                info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
-                var info2 = _readingItemService.Parse(path, rootPath, type);
-                info.Merge(info2);
+                await folderAction(new List<string>(), folderPath);
+                return;
             }
-
-            info.ComicInfo = _readingItemService.GetComicInfo(path);
-            if (info.ComicInfo != null)
-            {
-                if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
-                {
-                    info.Volumes = info.ComicInfo.Volume;
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Series))
-                {
-                    info.Series = info.ComicInfo.Series.Trim();
-                }
-                if (!string.IsNullOrEmpty(info.ComicInfo.Number))
-                {
-                    info.Chapters = info.ComicInfo.Number;
-                }
-
-                // Patch is SeriesSort from ComicInfo
-                if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
-                {
-                    info.SeriesSort = info.ComicInfo.TitleSort.Trim();
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
-                {
-                    info.IsSpecial = true;
-                    info.Chapters = Parser.Parser.DefaultChapter;
-                    info.Volumes = Parser.Parser.DefaultVolume;
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
-                {
-                    info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
-                }
-
-                if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
-                {
-                    info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
-                }
-            }
-
-            try
-            {
-                TrackSeries(info);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
-            }
+            await folderAction(_directoryService.ScanFiles(folderPath), folderPath);
         }
 
 
@@ -156,13 +115,14 @@ namespace API.Services.Tasks.Scanner
         /// Attempts to either add a new instance of a show mapping to the _scannedSeries bag or adds to an existing.
         /// This will check if the name matches an existing series name (multiple fields) <see cref="MergeName"/>
         /// </summary>
+        /// <param name="scannedSeries">A localized list of a series' parsed infos</param>
         /// <param name="info"></param>
-        private void TrackSeries(ParserInfo info)
+        private void TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
         {
             if (info.Series == string.Empty) return;
 
             // Check if normalized info.Series already exists and if so, update info to use that name instead
-            info.Series = MergeName(info);
+            info.Series = MergeName(scannedSeries, info);
 
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedSortSeries = Parser.Parser.Normalize(info.SeriesSort);
@@ -170,7 +130,7 @@ namespace API.Services.Tasks.Scanner
 
             try
             {
-                var existingKey = _scannedSeries.Keys.SingleOrDefault(ps =>
+                var existingKey = scannedSeries.Keys.SingleOrDefault(ps =>
                     ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
                                                  || ps.NormalizedName.Equals(normalizedLocalizedSeries)
                                                  || ps.NormalizedName.Equals(normalizedSortSeries)));
@@ -181,7 +141,7 @@ namespace API.Services.Tasks.Scanner
                     NormalizedName = normalizedSeries
                 };
 
-                _scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
+                scannedSeries.AddOrUpdate(existingKey, new List<ParserInfo>() {info}, (_, oldValue) =>
                 {
                     oldValue ??= new List<ParserInfo>();
                     if (!oldValue.Contains(info))
@@ -195,7 +155,7 @@ namespace API.Services.Tasks.Scanner
             catch (Exception ex)
             {
                 _logger.LogCritical(ex, "{SeriesName} matches against multiple series in the parsed series. This indicates a critical kavita issue. Key will be skipped", info.Series);
-                foreach (var seriesKey in _scannedSeries.Keys.Where(ps =>
+                foreach (var seriesKey in scannedSeries.Keys.Where(ps =>
                              ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
                                                           || ps.NormalizedName.Equals(normalizedLocalizedSeries)
                                                           || ps.NormalizedName.Equals(normalizedSortSeries))))
@@ -205,23 +165,24 @@ namespace API.Services.Tasks.Scanner
             }
         }
 
+
         /// <summary>
         /// Using a normalized name from the passed ParserInfo, this checks against all found series so far and if an existing one exists with
         /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
         /// </summary>
         /// <param name="info"></param>
         /// <returns>Series Name to group this info into</returns>
-        public string MergeName(ParserInfo info)
+        private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
         {
             var normalizedSeries = Parser.Parser.Normalize(info.Series);
             var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
-            // We use FirstOrDefault because this was introduced late in development and users might have 2 series with both names
+
             try
             {
                 var existingName =
-                    _scannedSeries.SingleOrDefault(p =>
-                            (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
-                             Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                    scannedSeries.SingleOrDefault(p =>
+                            (Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedSeries) ||
+                             Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedLocalSeries)) &&
                             p.Key.Format == info.Format)
                         .Key;
 
@@ -233,7 +194,7 @@ namespace API.Services.Tasks.Scanner
             catch (Exception ex)
             {
                 _logger.LogCritical(ex, "Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
-                var values = _scannedSeries.Where(p =>
+                var values = scannedSeries.Where(p =>
                     (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
                      Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
                     p.Key.Format == info.Format);
@@ -247,34 +208,77 @@ namespace API.Services.Tasks.Scanner
             return info.Series;
         }
 
+
         /// <summary>
-        ///
+        /// This will process series by folder groups.
         /// </summary>
-        /// <param name="libraryType">Type of library. Used for selecting the correct file extensions to search for and parsing files</param>
-        /// <param name="folders">The folders to scan. By default, this should be library.Folders, however it can be overwritten to restrict folders</param>
-        /// <param name="libraryName">Name of the Library</param>
+        /// <param name="libraryType"></param>
+        /// <param name="folders"></param>
+        /// <param name="libraryName"></param>
         /// <returns></returns>
-        public async Task<Dictionary<ParsedSeries, List<ParserInfo>>> ScanLibrariesForSeries(LibraryType libraryType, IEnumerable<string> folders, string libraryName)
+        public async Task ScanLibrariesForSeries(LibraryType libraryType,
+            IEnumerable<string> folders, string libraryName, bool isLibraryScan,
+            IDictionary<string, IList<SeriesModified>> seriesPaths, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos, bool forceCheck = false)
         {
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Started));
+
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", libraryName, ProgressEventType.Started));
+
             foreach (var folderPath in folders)
             {
                 try
                 {
-                    async void Action(string f)
+                    await ProcessFiles(folderPath, isLibraryScan, seriesPaths, async (files, folder) =>
                     {
-                        try
+                        var normalizedFolder = Parser.Parser.NormalizePath(folder);
+                        if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedFolder, forceCheck))
                         {
-                            ProcessFile(f, folderPath, libraryType);
-                            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(f, libraryName, ProgressEventType.Updated));
+                            var parsedInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
+                            {
+                                Series = fp.SeriesName,
+                                Format = fp.Format,
+                            }).ToList();
+                            processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
+                            _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
+                            return;
                         }
-                        catch (FileNotFoundException exception)
+                        _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
+                        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
+                        if (files.Count == 0)
                         {
-                            _logger.LogError(exception, "The file {Filename} could not be found", f);
+                            _logger.LogInformation("[ScannerService] {Folder} is empty", folder);
+                            return;
                         }
-                    }
+                        var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+                        var infos = files
+                            .Select(file => _readingItemService.ParseFile(file, folderPath, libraryType))
+                            .Where(info => info != null)
+                            .ToList();
 
-                    _directoryService.TraverseTreeParallelForEach(folderPath, Action, Parser.Parser.SupportedExtensions, _logger);
+
+                        MergeLocalizedSeriesWithSeries(infos);
+
+                        foreach (var info in infos)
+                        {
+                            try
+                            {
+                                TrackSeries(scannedSeries, info);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
+                            }
+                        }
+
+                        // It would be really cool if we can emit an event when a folder hasn't been changed so we don't parse everything, but the first item to ensure we don't delete it
+                        // Otherwise, we can do a last step in the DB where we validate all files on disk exist and if not, delete them. (easy but slow)
+                        foreach (var series in scannedSeries.Keys)
+                        {
+                            if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
+                            {
+                                processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
+                            }
+                        }
+                    }, forceCheck);
                 }
                 catch (ArgumentException ex)
                 {
@@ -282,20 +286,76 @@ namespace API.Services.Tasks.Scanner
                 }
             }
 
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("", libraryName, ProgressEventType.Ended));
-
-            return SeriesWithInfos();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Done", libraryName, ProgressEventType.Ended));
         }
 
         /// <summary>
-        /// Returns any series where there were parsed infos
+        /// Checks against all folder paths on file if the last scanned is >= the directory's last write down to the second
         /// </summary>
+        /// <param name="seriesPaths"></param>
+        /// <param name="normalizedFolder"></param>
+        /// <param name="forceCheck"></param>
         /// <returns></returns>
-        private Dictionary<ParsedSeries, List<ParserInfo>> SeriesWithInfos()
+        private bool HasSeriesFolderNotChangedSinceLastScan(IDictionary<string, IList<SeriesModified>> seriesPaths, string normalizedFolder, bool forceCheck = false)
         {
-            var filtered = _scannedSeries.Where(kvp => kvp.Value.Count > 0);
-            var series = filtered.ToDictionary(v => v.Key, v => v.Value);
-            return series;
+            if (forceCheck) return false;
+
+            return seriesPaths.ContainsKey(normalizedFolder) && seriesPaths[normalizedFolder].All(f => f.LastScanned.Truncate(TimeSpan.TicksPerSecond) >=
+                _directoryService.GetLastWriteTime(normalizedFolder).Truncate(TimeSpan.TicksPerSecond));
+        }
+
+        /// <summary>
+        /// Checks if there are any ParserInfos that have a Series that matches the LocalizedSeries field in any other info. If so,
+        /// rewrites the infos with series name instead of the localized name, so they stack.
+        /// </summary>
+        /// <example>
+        /// Accel World v01.cbz has Series "Accel World" and Localized Series "World of Acceleration"
+        /// World of Acceleration v02.cbz has Series "World of Acceleration"
+        /// After running this code, we'd have:
+        /// World of Acceleration v02.cbz having Series "Accel World" and Localized Series of "World of Acceleration"
+        /// </example>
+        /// <param name="infos">A collection of ParserInfos</param>
+        private void MergeLocalizedSeriesWithSeries(IReadOnlyCollection<ParserInfo> infos)
+        {
+            var hasLocalizedSeries = infos.Any(i => !string.IsNullOrEmpty(i.LocalizedSeries));
+            if (!hasLocalizedSeries) return;
+
+            var localizedSeries = infos
+                .Where(i => !i.IsSpecial)
+                .Select(i => i.LocalizedSeries)
+                .Distinct()
+                .FirstOrDefault(i => !string.IsNullOrEmpty(i));
+            if (string.IsNullOrEmpty(localizedSeries)) return;
+
+            // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
+            string nonLocalizedSeries;
+            // Normalize this as many of the cases is a capitalization difference
+            var nonLocalizedSeriesFound = infos
+                .Where(i => !i.IsSpecial)
+                .Select(i => i.Series).DistinctBy(Parser.Parser.Normalize).ToList();
+            if (nonLocalizedSeriesFound.Count == 1)
+            {
+                nonLocalizedSeries = nonLocalizedSeriesFound.First();
+            }
+            else
+            {
+                // There can be a case where there are multiple series in a folder that causes merging.
+                if (nonLocalizedSeriesFound.Count > 2)
+                {
+                    _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder or ensure there is only 2 potential series (localized and series):  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
+                }
+                nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
+            }
+
+            if (string.IsNullOrEmpty(nonLocalizedSeries)) return;
+
+            var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
+            foreach (var infoNeedingMapping in infos.Where(i =>
+                         !Parser.Parser.Normalize(i.Series).Equals(normalizedNonLocalizedSeries)))
+            {
+                infoNeedingMapping.Series = nonLocalizedSeries;
+                infoNeedingMapping.LocalizedSeries = localizedSeries;
+            }
         }
     }
 }

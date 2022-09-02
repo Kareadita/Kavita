@@ -7,6 +7,7 @@ import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { UtilityService, KEY_CODES } from 'src/app/shared/_services/utility.service';
+import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
@@ -35,6 +36,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
   seriesPagination!: Pagination;
   filter: SeriesFilter | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
+  refresh: EventEmitter<void> = new EventEmitter();
 
   filterActiveCheck!: SeriesFilter;
   filterActive: boolean = false;
@@ -43,7 +45,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
-  private onDestory: Subject<void> = new Subject<void>();
+  private onDestroy: Subject<void> = new Subject<void>();
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
   bulkActionCallback = (action: Action, data: any) => {
@@ -77,7 +79,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     private seriesService: SeriesService, private titleService: Title, 
     public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
     private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-    private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService) {
+    private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Want To Read');
 
@@ -85,12 +87,26 @@ export class WantToReadComponent implements OnInit, OnDestroy {
       [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
       this.filterActiveCheck = this.seriesService.createSeriesFilter();
       this.cdRef.markForCheck();
+
+      this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
+        if (event.event === EVENTS.SeriesRemoved) {
+          const seriesRemoved = event.payload as SeriesRemovedEvent;
+          if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
+            this.loadPage();
+            return;
+          }
+  
+          this.series = this.series.filter(s => s.id != seriesRemoved.seriesId);
+          this.seriesPagination.totalItems--;
+          this.cdRef.markForCheck();
+          this.refresh.emit();
+        }
+      });
       
   }
 
   ngOnInit(): void {
-    
-    this.messageHub.messages$.pipe(takeUntil(this.onDestory), debounceTime(2000)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), debounceTime(2000)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
         this.loadPage();
       }
@@ -102,8 +118,8 @@ export class WantToReadComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.onDestory.next();
-    this.onDestory.complete();
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -118,6 +134,13 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     if (event.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
     }
+  }
+
+  removeSeries(seriesId: number) {
+    this.series = this.series.filter(s => s.id != seriesId);
+    this.seriesPagination.totalItems--;
+    this.cdRef.markForCheck();
+    this.refresh.emit();
   }
 
   loadPage() {

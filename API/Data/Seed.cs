@@ -29,7 +29,7 @@ namespace API.Data
                 new()
                 {
                     Name = "Dark",
-                    NormalizedName = Parser.Parser.Normalize("Dark"),
+                    NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize("Dark"),
                     Provider = ThemeProvider.System,
                     FileName = "dark.scss",
                     IsDefault = true,
@@ -103,6 +103,7 @@ namespace API.Data
                 new() {Key = ServerSettingKey.ConvertBookmarkToWebP, Value = "false"},
                 new() {Key = ServerSettingKey.EnableSwaggerUi, Value = "false"},
                 new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
+                new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
             }.ToArray());
 
             foreach (var defaultSetting in DefaultSettings)

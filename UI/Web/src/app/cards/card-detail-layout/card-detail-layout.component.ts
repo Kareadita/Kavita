@@ -1,8 +1,9 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
-import { first, Subject, takeUntil, takeWhile } from 'rxjs';
+import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -13,15 +14,13 @@ import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
-const keySize = 25; // Height of the JumpBar button
-
 @Component({
   selector: 'app-card-detail-layout',
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
+export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
@@ -47,8 +46,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
   @Input() refresh!: EventEmitter<void>;
 
 
-  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels wide
-  jumpBarKeysToRender: Array<JumpKey> = []; // Original
+  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels tall, original keys
+  jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
@@ -74,9 +73,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
 
   constructor(private seriesService: SeriesService, public utilityService: UtilityService,
     @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
-    private jumpbarService: JumpbarService) {
+    private jumpbarService: JumpbarService, private router: Router) {
     this.filter = this.seriesService.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
+
   }
 
   @HostListener('window:resize', ['$event'])
@@ -110,27 +110,20 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
     }
   }
 
-  ngAfterViewInit(): void {
-    // NOTE: I can't seem to figure out a way to resume the JumpKey with the scroller. 
-    // this.virtualScroller.vsUpdate.pipe(takeWhile(() => this.hasResumedJumpKey), takeUntil(this.onDestory)).subscribe(() => {
-    //   const resumeKey = this.jumpbarService.getResumeKey(this.header);
-    //   console.log('Resume key:', resumeKey);
-    //   if (resumeKey !== '') {
-    //       const keys = this.jumpBarKeys.filter(k => k.key === resumeKey);
-    //       if (keys.length >= 1) {
-    //         console.log('Scrolling to ', keys[0].key);
-    //         this.scrollTo(keys[0]);
-    //         this.hasResumedJumpKey = true;
-    //       }
-    //   }
-    //   this.hasResumedJumpKey = true;
-    // });
-  }
 
   ngOnChanges(): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
     
+    if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
+      const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
+      if (resumeKey === '') return;
+      const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
+      if (keys.length < 1) return;
+
+      this.hasResumedJumpKey = true;
+      setTimeout(() => this.scrollTo(keys[0]), 100);
+    }
   }
 
 
@@ -160,8 +153,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges, 
     }
 
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
-    this.jumpbarService.saveResumeKey(this.header, jumpKey.key);
+    this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
     this.changeDetectionRef.markForCheck();
-    return;
   }
 }

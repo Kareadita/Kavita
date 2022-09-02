@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
@@ -21,7 +22,7 @@ public static class GenreHelper
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
             var genre = allGenres.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)
@@ -33,6 +34,7 @@ public static class GenreHelper
             action(genre);
         }
     }
+
 
     public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre> action = null)
     {
@@ -55,7 +57,17 @@ public static class GenreHelper
     public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
     {
         var existingGenre = metadataGenres.FirstOrDefault(p =>
-            p.NormalizedTitle == Parser.Parser.Normalize(genre.Title));
+            p.NormalizedTitle == Services.Tasks.Scanner.Parser.Parser.Normalize(genre.Title));
+        if (existingGenre == null)
+        {
+            metadataGenres.Add(genre);
+        }
+    }
+
+    public static void AddGenreIfNotExists(BlockingCollection<Genre> metadataGenres, Genre genre)
+    {
+        var existingGenre = metadataGenres.FirstOrDefault(p =>
+            p.NormalizedTitle == Services.Tasks.Scanner.Parser.Parser.Normalize(genre.Title));
         if (existingGenre == null)
         {
             metadataGenres.Add(genre);

@@ -16,8 +16,8 @@ namespace API.Extensions
         /// <returns></returns>
         public static bool NameInList(this Series series, IEnumerable<string> list)
         {
-            return list.Any(name => Parser.Parser.Normalize(name) == series.NormalizedName || Parser.Parser.Normalize(name) == Parser.Parser.Normalize(series.Name)
-                || name == series.Name || name == series.LocalizedName || name == series.OriginalName  || Parser.Parser.Normalize(name) == Parser.Parser.Normalize(series.OriginalName));
+            return list.Any(name => Services.Tasks.Scanner.Parser.Parser.Normalize(name) == series.NormalizedName || Services.Tasks.Scanner.Parser.Parser.Normalize(name) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name)
+                || name == series.Name || name == series.LocalizedName || name == series.OriginalName  || Services.Tasks.Scanner.Parser.Parser.Normalize(name) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.OriginalName));
         }
 
         /// <summary>
@@ -28,8 +28,8 @@ namespace API.Extensions
         /// <returns></returns>
         public static bool NameInList(this Series series, IEnumerable<ParsedSeries> list)
         {
-            return list.Any(name => Parser.Parser.Normalize(name.Name) == series.NormalizedName || Parser.Parser.Normalize(name.Name) == Parser.Parser.Normalize(series.Name)
-                || name.Name == series.Name || name.Name == series.LocalizedName || name.Name == series.OriginalName  || Parser.Parser.Normalize(name.Name) == Parser.Parser.Normalize(series.OriginalName) && series.Format == name.Format);
+            return list.Any(name => Services.Tasks.Scanner.Parser.Parser.Normalize(name.Name) == series.NormalizedName || Services.Tasks.Scanner.Parser.Parser.Normalize(name.Name) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name)
+                || name.Name == series.Name || name.Name == series.LocalizedName || name.Name == series.OriginalName  || Services.Tasks.Scanner.Parser.Parser.Normalize(name.Name) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.OriginalName) && series.Format == name.Format);
         }
 
         /// <summary>
@@ -41,9 +41,9 @@ namespace API.Extensions
         public static bool NameInParserInfo(this Series series, ParserInfo info)
         {
             if (info == null) return false;
-            return Parser.Parser.Normalize(info.Series) == series.NormalizedName || Parser.Parser.Normalize(info.Series) == Parser.Parser.Normalize(series.Name)
-                || info.Series == series.Name || info.Series == series.LocalizedName || info.Series == series.OriginalName
-                || Parser.Parser.Normalize(info.Series) == Parser.Parser.Normalize(series.OriginalName);
+            return Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series) == series.NormalizedName || Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name)
+                                                                          || info.Series == series.Name || info.Series == series.LocalizedName || info.Series == series.OriginalName
+                                                                          || Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.OriginalName);
         }
     }
 }

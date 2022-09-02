@@ -7,6 +7,7 @@ import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { ErrorEvent } from 'src/app/_models/events/error-event';
+import { InfoEvent } from 'src/app/_models/events/info-event';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
 import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event';
 import { User } from 'src/app/_models/user';
@@ -37,6 +38,9 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
 
   errorSource = new BehaviorSubject<ErrorEvent[]>([]);
   errors$ = this.errorSource.asObservable();
+
+  infoSource = new BehaviorSubject<InfoEvent[]>([]);
+  infos$ = this.infoSource.asObservable();
 
   private updateNotificationModalRef: NgbModalRef | null = null;
 
@@ -69,6 +73,12 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         const values = this.errorSource.getValue();
         values.push(event.payload as ErrorEvent);
         this.errorSource.next(values);
+        this.activeEvents += 1;
+        this.cdRef.markForCheck();
+      } else if (event.event === EVENTS.Info) {
+        const values = this.infoSource.getValue();
+        values.push(event.payload as InfoEvent);
+        this.infoSource.next(values);
         this.activeEvents += 1;
         this.cdRef.markForCheck();
       }
@@ -139,28 +149,50 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     });
   }
 
-  async seeMoreError(error: ErrorEvent) {
+  async seeMore(event: ErrorEvent | InfoEvent) {
     const config = new ConfirmConfig();
-    config.buttons = [
-      {text: 'Dismiss', type: 'primary'},
-      {text: 'Ok', type: 'secondary'},
-    ];
-    config.header = error.title;
-    config.content = error.subTitle;
-    var result = await this.confirmService.alert(error.subTitle || error.title, config);
+    if (event.name === EVENTS.Error) {
+      config.buttons = [
+        {text: 'Ok', type: 'secondary'},
+        {text: 'Dismiss', type: 'primary'}
+      ];
+    } else {
+      config.buttons = [
+        {text: 'Ok', type: 'primary'},
+      ];
+    }
+    config.header = event.title;
+    config.content = event.subTitle;
+    var result = await this.confirmService.alert(event.subTitle || event.title, config);
     if (result) {
-      this.removeError(error);
+      this.removeErrorOrInfo(event);
     }
   }
 
-  removeError(error: ErrorEvent, event?: MouseEvent) {
+  clearAllErrorOrInfos() {
+    const infoCount = this.infoSource.getValue().length;
+    const errorCount = this.errorSource.getValue().length;
+    this.infoSource.next([]);
+    this.errorSource.next([]);
+    this.activeEvents -= Math.max(infoCount + errorCount, 0);
+    this.cdRef.markForCheck();
+  }
+
+  removeErrorOrInfo(messageEvent: ErrorEvent | InfoEvent, event?: MouseEvent) {
     if (event) {
       event.stopPropagation();
       event.preventDefault();
     }
-    let data = this.errorSource.getValue();
-    data = data.filter(m => m !== error); 
-    this.errorSource.next(data);
+    let data = [];
+    if (messageEvent.name === EVENTS.Info) {
+      data = this.infoSource.getValue();
+      data = data.filter(m => m !== messageEvent); 
+      this.infoSource.next(data);
+    } else {
+      data = this.errorSource.getValue();
+      data = data.filter(m => m !== messageEvent); 
+      this.errorSource.next(data);
+    }
     this.activeEvents = Math.max(this.activeEvents - 1, 0);
     this.cdRef.markForCheck();
   }

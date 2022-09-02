@@ -12,4 +12,5 @@ export interface ServerSettings {
     convertBookmarkToWebP: boolean;
     enableSwaggerUi: boolean;
     totalBackups: number;
+    enableFolderWatching: boolean;
 }

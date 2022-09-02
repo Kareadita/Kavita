@@ -3,5 +3,5 @@ export interface ConfirmButton {
     /**
      * Type for css class. ie) primary, secondary
      */
-    type: string;
+    type: 'secondary' | 'primary';
 }

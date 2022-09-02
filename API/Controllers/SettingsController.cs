@@ -10,6 +10,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
 using API.Services;
+using API.Services.Tasks.Scanner;
 using AutoMapper;
 using Flurl.Http;
 using Kavita.Common;
@@ -29,9 +30,10 @@ namespace API.Controllers
         private readonly IDirectoryService _directoryService;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
+        private readonly ILibraryWatcher _libraryWatcher;
 
         public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
-            IDirectoryService directoryService, IMapper mapper, IEmailService emailService)
+            IDirectoryService directoryService, IMapper mapper, IEmailService emailService, ILibraryWatcher libraryWatcher)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -39,6 +41,7 @@ namespace API.Controllers
             _directoryService = directoryService;
             _mapper = mapper;
             _emailService = emailService;
+            _libraryWatcher = libraryWatcher;
         }
 
         [AllowAnonymous]
@@ -226,6 +229,21 @@ namespace API.Controllers
                         cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
 
                     _unitOfWork.SettingsRepository.Update(setting);
+                }
+
+                if (setting.Key == ServerSettingKey.EnableFolderWatching && updateSettingsDto.EnableFolderWatching + string.Empty != setting.Value)
+                {
+                    setting.Value = updateSettingsDto.EnableFolderWatching + string.Empty;
+                    _unitOfWork.SettingsRepository.Update(setting);
+
+                    if (updateSettingsDto.EnableFolderWatching)
+                    {
+                        await _libraryWatcher.StartWatching();
+                    }
+                    else
+                    {
+                        _libraryWatcher.StopWatching();
+                    }
                 }
             }
 

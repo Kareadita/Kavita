@@ -43,6 +43,7 @@ namespace API.Data
         public DbSet<Tag> Tag { get; set; }
         public DbSet<SiteTheme> SiteTheme { get; set; }
         public DbSet<SeriesRelation> SeriesRelation { get; set; }
+        public DbSet<FolderPath> FolderPath { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -71,7 +72,9 @@ namespace API.Data
             builder.Entity<SeriesRelation>()
                 .HasOne(pt => pt.TargetSeries)
                 .WithMany(t => t.RelationOf)
-                .HasForeignKey(pt => pt.TargetSeriesId);
+                .HasForeignKey(pt => pt.TargetSeriesId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+
 
             builder.Entity<AppUserPreferences>()
                 .Property(b => b.BookThemeName)

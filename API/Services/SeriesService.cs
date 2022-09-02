@@ -8,7 +8,6 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
-using API.DTOs.Reader;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
@@ -51,8 +50,8 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     public static Chapter GetFirstChapterForMetadata(Series series, bool isBookLibrary)
     {
-        return series.Volumes.OrderBy(v => v.Number, new ChapterSortComparer())
-            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()))
+        return series.Volumes.OrderBy(v => v.Number, ChapterSortComparer.Default)
+            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default))
             .FirstOrDefault();
     }
 
@@ -255,7 +254,7 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var normalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(tagTitle);
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
             {
@@ -296,7 +295,7 @@ public class SeriesService : ISeriesService
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var normalizedTitle = Parser.Parser.Normalize(tagTitle);
+            var normalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(tagTitle);
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
             if (existingTag != null)
             {
@@ -422,7 +421,16 @@ public class SeriesService : ISeriesService
             }
 
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds);
+            var libraryIds = series.Select(s => s.LibraryId);
+            var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
+            foreach (var library in libraries)
+            {
+                library.LastModified = DateTime.Now;
+                _unitOfWork.LibraryRepository.Update(library);
+            }
+
             _unitOfWork.SeriesRepository.Remove(series);
+
 
             if (!_unitOfWork.HasChanges() || !await _unitOfWork.CommitAsync()) return true;
 
@@ -457,7 +465,7 @@ public class SeriesService : ISeriesService
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
-            .OrderBy(v => Parser.Parser.MinNumberFromRange(v.Name))
+            .OrderBy(v => Tasks.Scanner.Parser.Parser.MinNumberFromRange(v.Name))
             .ToList();
 
         // For books, the Name of the Volume is remapped to the actual name of the book, rather than Volume number.
@@ -485,7 +493,7 @@ public class SeriesService : ISeriesService
             if (v.Number == 0) return c;
             c.VolumeTitle = v.Name;
             return c;
-        }).OrderBy(c => float.Parse(c.Number), new ChapterSortComparer()));
+        }).OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)).ToList();
 
         foreach (var chapter in chapters)
         {
@@ -510,7 +518,13 @@ public class SeriesService : ISeriesService
         var storylineChapters = volumes
             .Where(v => v.Number == 0)
             .SelectMany(v => v.Chapters.Where(c => !c.IsSpecial))
-            .OrderBy(c => float.Parse(c.Number), new ChapterSortComparer());
+            .OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)
+            .ToList();
+
+        // When there's chapters without a volume number revert to chapter sorting only as opposed to volume then chapter
+        if (storylineChapters.Any()) {
+            retChapters = retChapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
+        }
 
         return new SeriesDetailDto()
         {
@@ -528,7 +542,7 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     private static bool ShouldIncludeChapter(ChapterDto chapter)
     {
-        return !chapter.IsSpecial && !chapter.Number.Equals(Parser.Parser.DefaultChapter);
+        return !chapter.IsSpecial && !chapter.Number.Equals(Tasks.Scanner.Parser.Parser.DefaultChapter);
     }
 
     public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType)
@@ -537,7 +551,7 @@ public class SeriesService : ISeriesService
         {
             if (string.IsNullOrEmpty(firstChapter.TitleName))
             {
-                if (firstChapter.Range.Equals(Parser.Parser.DefaultVolume)) return;
+                if (firstChapter.Range.Equals(Tasks.Scanner.Parser.Parser.DefaultVolume)) return;
                 var title = Path.GetFileNameWithoutExtension(firstChapter.Range);
                 if (string.IsNullOrEmpty(title)) return;
                 volume.Name += $" - {title}";
@@ -558,7 +572,7 @@ public class SeriesService : ISeriesService
     {
         if (isSpecial)
         {
-            return Parser.Parser.CleanSpecialTitle(chapterTitle);
+            return Tasks.Scanner.Parser.Parser.CleanSpecialTitle(chapterTitle);
         }
 
         var hashSpot = withHash ? "#" : string.Empty;

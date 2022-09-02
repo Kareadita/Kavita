@@ -2,7 +2,8 @@ import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { map, ReplaySubject, Subject, takeUntil } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { map, ReplaySubject, Subject, takeUntil, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../shared/confirm.service';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
@@ -35,7 +36,7 @@ export class ThemeService implements OnDestroy {
 
 
   constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient,
-  messageHub: MessageHubService, private domSantizer: DomSanitizer, private confirmService: ConfirmService) {
+  messageHub: MessageHubService, private domSantizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
     this.getThemes();
@@ -47,7 +48,9 @@ export class ThemeService implements OnDestroy {
       if (notificationEvent.name !== EVENTS.SiteThemeProgress) return;
 
       if (notificationEvent.eventType === 'ended') {
-        if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe(() => {});
+        if (notificationEvent.name === EVENTS.SiteThemeProgress) this.getThemes().subscribe(() => {
+
+        });
       }
     });
   }
@@ -73,6 +76,12 @@ export class ThemeService implements OnDestroy {
     return this.httpClient.get<SiteTheme[]>(this.baseUrl + 'theme').pipe(map(themes => {
       this.themeCache = themes;
       this.themesSource.next(themes);
+      this.currentTheme$.pipe(take(1)).subscribe(theme => {
+        if (!themes.includes(theme)) {
+          this.setTheme(this.defaultTheme);
+          this.toastr.info('The active theme no longer exists. Please refresh the page.');
+        }
+      });
       return themes;
     }));
   }

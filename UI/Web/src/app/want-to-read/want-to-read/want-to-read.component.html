@@ -20,15 +20,25 @@
         [filterOpen]="filterOpen"
         [jumpBarKeys]="jumpbarKeys"
         [trackByIdentity]="trackByIdentity"
+        [refresh]="refresh"
         (applyFilter)="updateFilter($event)">
         <ng-template #cardItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="removeSeries(item.id)" 
             (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
             ></app-series-card>
         </ng-template>
+    
+        <div *ngIf="!filterActive && series.length === 0">
+            <ng-template #noData>
+                There are no items. Try adding a series.
+            </ng-template>
+        </div>
 
-        <ng-template #noData>
-            No Series match your filter or exist in your list.
-        </ng-template>
+        <div *ngIf="filterActive && series.length === 0">
+            <ng-template #noData>
+                No items match your current filter.
+            </ng-template>
+        </div>
+
     </app-card-detail-layout>
 </div>

@@ -10,15 +10,15 @@
 </div>
 
 <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="collectionTag !== undefined" #scrollingBlock>
-    <div class="row mb-3">
+    <div class="row mb-3" *ngIf="(collectionTag.coverImage !== '' && collectionTag.coverImage !== undefined && collectionTag.coverImage !== null) || summary.length > 0">
         <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block" *ngIf="collectionTag.coverImage !== '' && collectionTag.coverImage !== undefined && collectionTag.coverImage !== null">            
             <app-image maxWidth="481px" [imageUrl]="tagImage"></app-image>
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
             <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
         </div>
+        <hr>
     </div>
-    <hr>
     <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
     <app-card-detail-layout
@@ -29,6 +29,7 @@
         [filterSettings]="filterSettings"
         [filterOpen]="filterOpen"
         [parentScroll]="scrollingBlock"
+        [trackByIdentity]="trackByIdentity"
         [jumpBarKeys]="jumpbarKeys"
         (applyFilter)="updateFilter($event)">
         <ng-template #cardItem let-item let-position="idx">
@@ -36,5 +37,17 @@
             (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
             ></app-series-card>
         </ng-template>
+
+        <div *ngIf="!filterActive && series.length === 0">
+            <ng-template #noData>
+                There are no items. Try adding a series.
+            </ng-template>
+        </div>
+
+        <div *ngIf="filterActive && series.length === 0">
+            <ng-template #noData>
+                No items match your current filter.
+            </ng-template>
+        </div>
     </app-card-detail-layout>
 </div>

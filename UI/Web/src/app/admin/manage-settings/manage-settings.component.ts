@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
+import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
 import { SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
@@ -16,9 +17,13 @@ import { ServerSettings } from '../_models/server-settings';
 export class ManageSettingsComponent implements OnInit {
 
   serverSettings!: ServerSettings;
-  settingsForm: UntypedFormGroup = new UntypedFormGroup({});
+  settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+
+  get TagBadgeCursor() {
+    return TagBadgeCursor;
+  }
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService, 
     private modalService: NgbModal) { }
@@ -32,18 +37,20 @@ export class ManageSettingsComponent implements OnInit {
     });
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
-      this.settingsForm.addControl('cacheDirectory', new UntypedFormControl(this.serverSettings.cacheDirectory, [Validators.required]));
-      this.settingsForm.addControl('bookmarksDirectory', new UntypedFormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
-      this.settingsForm.addControl('taskScan', new UntypedFormControl(this.serverSettings.taskScan, [Validators.required]));
-      this.settingsForm.addControl('taskBackup', new UntypedFormControl(this.serverSettings.taskBackup, [Validators.required]));
-      this.settingsForm.addControl('port', new UntypedFormControl(this.serverSettings.port, [Validators.required]));
-      this.settingsForm.addControl('loggingLevel', new UntypedFormControl(this.serverSettings.loggingLevel, [Validators.required]));
-      this.settingsForm.addControl('allowStatCollection', new UntypedFormControl(this.serverSettings.allowStatCollection, [Validators.required]));
-      this.settingsForm.addControl('enableOpds', new UntypedFormControl(this.serverSettings.enableOpds, [Validators.required]));
-      this.settingsForm.addControl('baseUrl', new UntypedFormControl(this.serverSettings.baseUrl, [Validators.required]));
-      this.settingsForm.addControl('emailServiceUrl', new UntypedFormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
-      this.settingsForm.addControl('enableSwaggerUi', new UntypedFormControl(this.serverSettings.enableSwaggerUi, [Validators.required]));
-      this.settingsForm.addControl('totalBackups', new UntypedFormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
+      this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
+      this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
+      this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
+      this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
+      this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
+      this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
+      this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
+      this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
+      this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
+      this.settingsForm.addControl('enableSwaggerUi', new FormControl(this.serverSettings.enableSwaggerUi, [Validators.required]));
+      this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
+      this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
+      this.settingsForm.addControl('convertBookmarkToWebP', new FormControl(this.serverSettings.convertBookmarkToWebP, []));
     });
   }
 
@@ -60,6 +67,8 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
     this.settingsForm.get('enableSwaggerUi')?.setValue(this.serverSettings.enableSwaggerUi);
     this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups);
+    this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching);
+    this.settingsForm.get('convertBookmarkToWebP')?.setValue(this.serverSettings.convertBookmarkToWebP);
     this.settingsForm.markAsPristine();
   }
 

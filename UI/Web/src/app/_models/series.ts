@@ -49,10 +49,18 @@ export interface Series {
      */
     lastChapterAdded: string;
     /**
+     * DateTime representing last time the series folder was scanned
+     */
+    lastFolderScanned: string;
+    /**
      * Number of words in the series
      */
     wordCount: number;
     minHoursToRead: number;
     maxHoursToRead: number;
     avgHoursToRead: number;
+    /**
+     * Highest level folder containing this series
+     */
+    folderPath: string;
 }

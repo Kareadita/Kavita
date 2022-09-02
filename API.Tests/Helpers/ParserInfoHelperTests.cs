@@ -16,7 +16,7 @@ public class ParserInfoHelperTests
     [Fact]
     public void SeriesHasMatchingParserInfoFormat_ShouldBeFalse()
     {
-        var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
+        var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
         //AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
@@ -34,7 +34,7 @@ public class ParserInfoHelperTests
                     Name = "1"
                 }
             },
-            NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
             Metadata = new SeriesMetadata(),
             Format = MangaFormat.Epub
         };
@@ -45,7 +45,7 @@ public class ParserInfoHelperTests
     [Fact]
     public void SeriesHasMatchingParserInfoFormat_ShouldBeTrue()
     {
-        var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
+        var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
         ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
@@ -63,7 +63,7 @@ public class ParserInfoHelperTests
                     Name = "1"
                 }
             },
-            NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
             Metadata = new SeriesMetadata(),
             Format = MangaFormat.Epub
         };

@@ -36,11 +36,15 @@ public interface IMetadataService
     /// <param name="libraryId"></param>
     /// <param name="seriesId"></param>
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
+
     Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
+    Task GenerateCoversForSeries(Series series, bool forceUpdate = false);
+    Task RemoveAbandonedMetadataKeys();
 }
 
 public class MetadataService : IMetadataService
 {
+    public const string Name = "MetadataService";
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<MetadataService> _logger;
     private readonly IEventHub _eventHub;
@@ -77,9 +81,7 @@ public class MetadataService : IMetadataService
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
-
-        // await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-        //     MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter), false);
+        _unitOfWork.ChapterRepository.Update(chapter);
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
         return Task.FromResult(true);
     }
@@ -110,7 +112,6 @@ public class MetadataService : IMetadataService
         if (firstChapter == null) return Task.FromResult(false);
 
         volume.CoverImage = firstChapter.CoverImage;
-        //await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume), false);
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume));
 
         return Task.FromResult(true);
@@ -147,7 +148,6 @@ public class MetadataService : IMetadataService
             }
         }
         series.CoverImage = firstCover?.CoverImage ?? coverImage;
-        //await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;
     }
@@ -160,7 +160,7 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate"></param>
     private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate)
     {
-        _logger.LogDebug("[MetadataService] Processing series {SeriesName}", series.OriginalName);
+        _logger.LogDebug("[MetadataService] Processing cover image generation for series: {SeriesName}", series.OriginalName);
         try
         {
             var volumeIndex = 0;
@@ -194,7 +194,7 @@ public class MetadataService : IMetadataService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[MetadataService] There was an exception during updating metadata for {SeriesName} ", series.Name);
+            _logger.LogError(ex, "[MetadataService] There was an exception during cover generation for {SeriesName} ", series.Name);
         }
     }
 
@@ -210,14 +210,14 @@ public class MetadataService : IMetadataService
     public async Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
-        _logger.LogInformation("[MetadataService] Beginning metadata refresh of {LibraryName}", library.Name);
+        _logger.LogInformation("[MetadataService] Beginning cover generation refresh of {LibraryName}", library.Name);
 
         _updateEvents.Clear();
 
         var chunkInfo = await _unitOfWork.SeriesRepository.GetChunkInfo(library.Id);
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
-        _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
+        _logger.LogInformation("[MetadataService] Refreshing Library {LibraryName} for cover generation. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"));
@@ -228,7 +228,7 @@ public class MetadataService : IMetadataService
             totalTime += stopwatch.ElapsedMilliseconds;
             stopwatch.Restart();
 
-            _logger.LogInformation("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd}",
+            _logger.LogDebug("[MetadataService] Processing chunk {ChunkNumber} / {TotalChunks} with size {ChunkSize}. Series ({SeriesStart} - {SeriesEnd})",
                 chunk, chunkInfo.TotalChunks, chunkInfo.ChunkSize, chunk * chunkInfo.ChunkSize, (chunk + 1) * chunkInfo.ChunkSize);
 
             var nonLibrarySeries = await _unitOfWork.SeriesRepository.GetFullSeriesForLibraryIdAsync(library.Id,
@@ -254,7 +254,7 @@ public class MetadataService : IMetadataService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "[MetadataService] There was an exception during metadata refresh for {SeriesName}", series.Name);
+                    _logger.LogError(ex, "[MetadataService] There was an exception during cover generation refresh for {SeriesName}", series.Name);
                 }
                 seriesIndex++;
             }
@@ -271,17 +271,18 @@ public class MetadataService : IMetadataService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 1F, ProgressEventType.Ended, $"Complete"));
 
-        await RemoveAbandonedMetadataKeys();
-
-        _logger.LogInformation("[MetadataService] Updated metadata for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
+        _logger.LogInformation("[MetadataService] Updated covers for {SeriesNumber} series in library {LibraryName} in {ElapsedMilliseconds} milliseconds total", chunkInfo.TotalSize, library.Name, totalTime);
     }
 
 
-    private async Task RemoveAbandonedMetadataKeys()
+    public async Task RemoveAbandonedMetadataKeys()
     {
         await _unitOfWork.TagRepository.RemoveAllTagNoLongerAssociated();
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
+        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
+
     }
 
     /// <summary>
@@ -292,7 +293,6 @@ public class MetadataService : IMetadataService
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
     public async Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true)
     {
-        var sw = Stopwatch.StartNew();
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
         if (series == null)
         {
@@ -300,8 +300,19 @@ public class MetadataService : IMetadataService
             return;
         }
 
+        await GenerateCoversForSeries(series, forceUpdate);
+    }
+
+    /// <summary>
+    /// Generate Cover for a Series. This is used by Scan Loop and should not be invoked directly via User Interaction.
+    /// </summary>
+    /// <param name="series">A full Series, with metadata, chapters, etc</param>
+    /// <param name="forceUpdate"></param>
+    public async Task GenerateCoversForSeries(Series series, bool forceUpdate = false)
+    {
+        var sw = Stopwatch.StartNew();
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.CoverUpdateProgressEvent(libraryId, 0F, ProgressEventType.Started, series.Name));
+            MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 0F, ProgressEventType.Started, series.Name));
 
         await ProcessSeriesCoverGen(series, forceUpdate);
 
@@ -309,17 +320,14 @@ public class MetadataService : IMetadataService
         if (_unitOfWork.HasChanges())
         {
             await _unitOfWork.CommitAsync();
+            _logger.LogInformation("[MetadataService] Updated covers for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.CoverUpdateProgressEvent(libraryId, 1F, ProgressEventType.Ended, series.Name));
-
-        await RemoveAbandonedMetadataKeys();
+            MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 1F, ProgressEventType.Ended, series.Name));
 
         await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate, MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false);
         await FlushEvents();
-
-        _logger.LogInformation("[MetadataService] Updated metadata for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
     }
 
     private async Task FlushEvents()

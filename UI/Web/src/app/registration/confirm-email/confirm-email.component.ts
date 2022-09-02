@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ThemeService } from 'src/app/_services/theme.service';
@@ -18,10 +18,10 @@ export class ConfirmEmailComponent {
    */
   token: string = '';
 
-  registerForm: UntypedFormGroup = new UntypedFormGroup({
-    email: new UntypedFormControl('', [Validators.required, Validators.email]),
-    username: new UntypedFormControl('', [Validators.required]),
-    password: new UntypedFormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6)]),
+  registerForm: FormGroup = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.email]),
+    username: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6)]),
   });
 
   /**
@@ -56,7 +56,7 @@ export class ConfirmEmailComponent {
       this.toastr.success('Account registration complete');
       this.router.navigateByUrl('login');
     }, err => {
-      console.log('error: ', err);
+      console.error('Error from Confirming Email: ', err);
       this.errors = err;
       this.cdRef.markForCheck();
     });

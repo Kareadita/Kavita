@@ -344,11 +344,14 @@
                         <div class="col-md-6">Format: <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
                     </div>
                     <div class="row g-0 mb-2">
-                        <div class="col-md-6" >Created: {{series.created | date:'shortDate'}}</div>
-                        <div class="col-md-6">Last Read: {{series.latestReadDate | date:'shortDate'}}</div>
-                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | date:'shortDate'}}</div>
+                        <div class="col-md-6">Created: {{series.created | date:'shortDate'}}</div>
+                        <div class="col-md-6">Last Read: {{series.latestReadDate | date:'shortDate' | defaultDate}}</div>
+                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | date:'short' | defaultDate}}</div>
+                        <div class="col-md-6">Last Scanned: {{series.lastFolderScanned | date:'short' | defaultDate}}</div>
+                        <div class="col-md-6">Folder Path: {{series.folderPath | defaultValue}}</div>
                     </div>
                     <div class="row g-0 mb-2" *ngIf="metadata">
+                        <!-- TODO: Put tooltips in here to explain to the user what these are (ComicInfo tags) -->
                         <div class="col-md-6">Max Items: {{metadata.maxCount}}</div>
                         <div class="col-md-6">Total Items: {{metadata.totalCount}}</div>
                         <div class="col-md-6">Publication Status: {{metadata.publicationStatus | publicationStatus}}</div>

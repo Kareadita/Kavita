@@ -1,11 +1,10 @@
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import { auditTime, distinctUntilChanged, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { KEY_CODES } from '../shared/_services/utility.service';
-import { ToggleService } from '../_services/toggle.service';
 import { SelectionCompareFn, TypeaheadSettings } from './typeahead-settings';
 
 /**
@@ -169,6 +168,10 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
    * If disabled, a user will not be able to interact with the typeahead
    */
   @Input() disabled: boolean = false;
+  /**
+   * When triggered, will focus the input if the passed string matches the id
+   */
+  @Input() focus: EventEmitter<string> | undefined;
   @Output() selectedData = new EventEmitter<any[] | any>();
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   @Output() onUnlock = new EventEmitter<void>();
@@ -186,8 +189,8 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
   showAddItem: boolean = false;
   filteredOptions!: Observable<string[]>;
   isLoadingOptions: boolean = false;
-  typeaheadControl!: UntypedFormControl;
-  typeaheadForm!: UntypedFormGroup;
+  typeaheadControl!: FormControl;
+  typeaheadForm!: FormGroup;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -203,6 +206,13 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
       this.clearSelections(resetToEmpty);
       this.init();
     });
+
+    if (this.focus) {
+      this.focus.pipe(takeUntil(this.onDestroy)).subscribe((id: string) => {
+        if (this.settings.id !== id) return;
+        this.onInputFocus();
+      });
+    }
 
     this.init();
   }
@@ -220,9 +230,9 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     if (this.settings.hasOwnProperty('formControl') && this.settings.formControl) {
       this.typeaheadControl = this.settings.formControl;
     } else {
-      this.typeaheadControl = new UntypedFormControl('');
+      this.typeaheadControl = new FormControl('');
     }
-    this.typeaheadForm = new UntypedFormGroup({
+    this.typeaheadForm = new FormGroup({
       'typeahead': this.typeaheadControl
     });
 
@@ -256,6 +266,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
         tap((filteredOptions) => {
           this.isLoadingOptions = false;
           this.focusedIndex = 0;
+          this.cdRef.markForCheck();
           setTimeout(() => {
             this.updateShowAddItem(filteredOptions);
             this.updateHighlight();

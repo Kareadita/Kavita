@@ -9,11 +9,11 @@
 .collection {
     overflow: auto;
     .modal-body {
-    height: calc(100vh - 235px);
+    max-height: calc(100vh - 235px);
     min-height: 150px;
         .list-group {
             overflow: auto;
-            height: calc(100vh - 355px);
+            max-height: calc(100vh - 355px);
             min-height: 32px;
         }
     }

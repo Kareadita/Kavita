@@ -63,7 +63,7 @@ public class ImageService : IImageService
         else
         {
             _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(fileFilePath), targetDirectory,
-                Parser.Parser.ImageFileExtensions);
+                Tasks.Scanner.Parser.Parser.ImageFileExtensions);
         }
     }
 

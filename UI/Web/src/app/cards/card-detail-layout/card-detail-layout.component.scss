@@ -2,8 +2,12 @@
     display: flex;
     flex-direction: row;
     width: 100%;
-    height: calc((var(--vh) *100) - 162px);
+    height: calc((var(--vh) *100) - 173px);
     margin-bottom: 10px;
+
+    &.empty {
+        height: auto;
+    }
 }
 
 .content-container {
@@ -75,17 +79,25 @@
         &:hover {
             color: var(--primary-color);
         }
+
+        .active {
+            font-weight: bold;
+        }
     }
 }
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
   //height: calc(100vh - 160px); // 64 is a random number, 523 for me. 
-  height: calc(var(--vh) * 100 - 160px);
+  height: calc(var(--vh) * 100 - 173px);
   //height: calc(100vh - 160px);
   //background-color: red;
   //max-height: calc(var(--vh)*100 - 170px);
 }
+
+virtual-scroller.empty {
+    display: none;
+  }
 
 h2 {
     display: inline-block;

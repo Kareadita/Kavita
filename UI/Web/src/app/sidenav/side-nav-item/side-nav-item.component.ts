@@ -37,6 +37,7 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
         this.updateHightlight(evt.url.split('?')[0]);
+        
       });
   }
 

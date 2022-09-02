@@ -12,6 +12,7 @@ public interface IReadingItemService
     string GetCoverImage(string filePath, string fileName, MangaFormat format);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
     ParserInfo Parse(string path, string rootPath, LibraryType type);
+    ParserInfo ParseFile(string path, string rootPath, LibraryType type);
 }
 
 public class ReadingItemService : IReadingItemService
@@ -20,7 +21,7 @@ public class ReadingItemService : IReadingItemService
     private readonly IBookService _bookService;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
-    private readonly DefaultParser _defaultParser;
+    private readonly IDefaultParser _defaultParser;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService, IDirectoryService directoryService)
     {
@@ -39,17 +40,82 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     public ComicInfo? GetComicInfo(string filePath)
     {
-        if (Parser.Parser.IsEpub(filePath))
+        if (Tasks.Scanner.Parser.Parser.IsEpub(filePath))
         {
             return _bookService.GetComicInfo(filePath);
         }
 
-        if (Parser.Parser.IsComicInfoExtension(filePath))
+        if (Tasks.Scanner.Parser.Parser.IsComicInfoExtension(filePath))
         {
             return _archiveService.GetComicInfo(filePath);
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Processes files found during a library scan.
+    /// </summary>
+    /// <param name="path">Path of a file</param>
+    /// <param name="rootPath"></param>
+    /// <param name="type">Library type to determine parsing to perform</param>
+    public ParserInfo ParseFile(string path, string rootPath, LibraryType type)
+    {
+        var info = Parse(path, rootPath, type);
+        if (info == null)
+        {
+            return null;
+        }
+
+
+        // This catches when original library type is Manga/Comic and when parsing with non
+        if (Tasks.Scanner.Parser.Parser.IsEpub(path) && Tasks.Scanner.Parser.Parser.ParseVolume(info.Series) != Tasks.Scanner.Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
+        {
+            info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
+            var info2 = Parse(path, rootPath, type);
+            info.Merge(info2);
+        }
+
+        info.ComicInfo = GetComicInfo(path);
+        if (info.ComicInfo == null) return info;
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.Volume))
+        {
+            info.Volumes = info.ComicInfo.Volume;
+        }
+        if (!string.IsNullOrEmpty(info.ComicInfo.Series))
+        {
+            info.Series = info.ComicInfo.Series.Trim();
+        }
+        if (!string.IsNullOrEmpty(info.ComicInfo.Number))
+        {
+            info.Chapters = info.ComicInfo.Number;
+        }
+
+        // Patch is SeriesSort from ComicInfo
+        if (!string.IsNullOrEmpty(info.ComicInfo.TitleSort))
+        {
+            info.SeriesSort = info.ComicInfo.TitleSort.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Tasks.Scanner.Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+        {
+            info.IsSpecial = true;
+            info.Chapters = Tasks.Scanner.Parser.Parser.DefaultChapter;
+            info.Volumes = Tasks.Scanner.Parser.Parser.DefaultVolume;
+        }
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
+        {
+            info.SeriesSort = info.ComicInfo.SeriesSort.Trim();
+        }
+
+        if (!string.IsNullOrEmpty(info.ComicInfo.LocalizedSeries))
+        {
+            info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
+        }
+
+        return info;
     }
 
     /// <summary>
@@ -134,6 +200,6 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     public ParserInfo Parse(string path, string rootPath, LibraryType type)
     {
-        return Parser.Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
+        return Tasks.Scanner.Parser.Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
     }
 }

@@ -16,7 +16,7 @@ namespace API.Tests.Services
         [Fact]
         public void FindSeriesNotOnDisk_Should_Remove1()
         {
-            var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
+            var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
             ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
             //AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
@@ -36,7 +36,7 @@ namespace API.Tests.Services
                             Name = "1"
                         }
                     },
-                    NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+                    NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
                     Metadata = new SeriesMetadata(),
                     Format = MangaFormat.Epub
                 }
@@ -48,7 +48,7 @@ namespace API.Tests.Services
         [Fact]
         public void FindSeriesNotOnDisk_Should_RemoveNothing_Test()
         {
-            var infos = new Dictionary<ParsedSeries, List<ParserInfo>>();
+            var infos = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
             ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Format = MangaFormat.Archive});
             ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Cage of Eden", Volumes = "1", Format = MangaFormat.Archive});
@@ -61,7 +61,7 @@ namespace API.Tests.Services
                     Name = "Cage of Eden",
                     LocalizedName = "Cage of Eden",
                     OriginalName = "Cage of Eden",
-                    NormalizedName = API.Parser.Parser.Normalize("Cage of Eden"),
+                    NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Cage of Eden"),
                     Metadata = new SeriesMetadata(),
                     Format = MangaFormat.Archive
                 },
@@ -70,7 +70,7 @@ namespace API.Tests.Services
                     Name = "Darker Than Black",
                     LocalizedName = "Darker Than Black",
                     OriginalName = "Darker Than Black",
-                    NormalizedName = API.Parser.Parser.Normalize("Darker Than Black"),
+                    NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
                     Metadata = new SeriesMetadata(),
                     Format = MangaFormat.Archive
                 }
@@ -125,6 +125,8 @@ namespace API.Tests.Services
         // }
 
 
+        // TODO: I want a test for UpdateSeries where if I have chapter 10 and now it's mapping into Vol 2 Chapter 10,
+        // if I can do it without deleting the underlying chapter (aka id change)
 
     }
 }

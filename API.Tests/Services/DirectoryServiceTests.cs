@@ -34,7 +34,7 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             var files = new List<string>();
             var fileCount = ds.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
-                API.Parser.Parser.ArchiveFileExtensions, _logger);
+                API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions, _logger);
 
             Assert.Equal(28, fileCount);
             Assert.Equal(28, files.Count);
@@ -59,7 +59,7 @@ namespace API.Tests.Services
             try
             {
                 var fileCount = ds.TraverseTreeParallelForEach("/manga/", s => files.Add(s),
-                    API.Parser.Parser.ImageFileExtensions, _logger);
+                    API.Services.Tasks.Scanner.Parser.Parser.ImageFileExtensions, _logger);
                 Assert.Equal(1, fileCount);
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             var files = new List<string>();
             var fileCount = ds.TraverseTreeParallelForEach(testDirectory, s => files.Add(s),
-                API.Parser.Parser.ArchiveFileExtensions, _logger);
+                API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions, _logger);
 
             Assert.Equal(28, fileCount);
             Assert.Equal(28, files.Count);
@@ -111,7 +111,7 @@ namespace API.Tests.Services
             fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            var files = ds.GetFilesWithExtension(testDirectory, API.Parser.Parser.ArchiveFileExtensions);
+            var files = ds.GetFilesWithExtension(testDirectory, API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions);
 
             Assert.Equal(10, files.Length);
             Assert.All(files, s => fileSystem.Path.GetExtension(s).Equals(".zip"));
@@ -150,7 +150,7 @@ namespace API.Tests.Services
             fileSystem.AddFile($"{testDirectory}file_{29}.jpg", new MockFileData(""));
 
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-            var files = ds.GetFiles(testDirectory, API.Parser.Parser.ArchiveFileExtensions).ToList();
+            var files = ds.GetFiles(testDirectory, API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions).ToList();
 
             Assert.Equal(10, files.Count());
             Assert.All(files, s => fileSystem.Path.GetExtension(s).Equals(".zip"));
@@ -586,12 +586,12 @@ namespace API.Tests.Services
             var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
             ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
             ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
-            var outputFiles = ds.GetFiles("/manga/output/").Select(API.Parser.Parser.NormalizePath).ToList();
+            var outputFiles = ds.GetFiles("/manga/output/").Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList();
             Assert.Equal(4, outputFiles.Count()); // we have 2 already there and 2 copies
             // For some reason, this has C:/ on directory even though everything is emulated (System.IO.Abstractions issue, not changing)
             // https://github.com/TestableIO/System.IO.Abstractions/issues/831
-            Assert.True(outputFiles.Contains(API.Parser.Parser.NormalizePath("/manga/output/file (3).zip"))
-                        || outputFiles.Contains(API.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
+            Assert.True(outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("/manga/output/file (3).zip"))
+                        || outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
         }
 
         #endregion
@@ -677,6 +677,8 @@ namespace API.Tests.Services
         [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga/Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
         [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/Dir 2/"}, new [] {"C:/Manga/Dir 1/Love Hina/Vol. 01.cbz"}, "C:/Manga/Dir 1/Love Hina")]
         [InlineData(new [] {"C:/Manga/Dir 1/", "c://Manga/"}, new [] {"D:/Manga/Love Hina/Vol. 01.cbz", "D:/Manga/Vol. 01.cbz"}, "")]
+        [InlineData(new [] {"C:/Manga/"}, new [] {"C:/Manga//Love Hina/Vol. 01.cbz"}, "C:/Manga/Love Hina")]
+        [InlineData(new [] {@"C:\mount\drive\Library\Test Library\Comics\"}, new [] {@"C:\mount\drive\Library\Test Library\Comics\Bruce Lee (1994)\Bruce Lee #001 (1994).cbz"}, @"C:/mount/drive/Library/Test Library/Comics/Bruce Lee (1994)")]
         public void FindHighestDirectoriesFromFilesTest(string[] rootDirectories, string[] files, string expectedDirectory)
         {
             var fileSystem = new MockFileSystem();
@@ -840,6 +842,159 @@ namespace API.Tests.Services
         {
             Assert.Equal(expected, DirectoryService.GetHumanReadableBytes(bytes));
         }
+        #endregion
+
+        #region ScanFiles
+
+        [Fact]
+        public Task ScanFiles_ShouldFindNoFiles_AllAreIgnored()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("*.*"));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(0, allFiles.Count);
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task ScanFiles_ShouldFindNoNestedFiles_IgnoreNestedFiles()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/Accel World/*"));
+            fileSystem.AddFile("C:/Data/Hello.pdf", new MockFileData(string.Empty));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(1, allFiles.Count); // Ignore files are not counted in files, only valid extensions
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task ScanFiles_NestedIgnore_IgnoreNestedFilesInOneDirectoryOnly()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddDirectory("C:/Data/Specials/");
+            fileSystem.AddDirectory("C:/Data/Specials/ArtBooks/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/.kavitaignore", new MockFileData("**/Accel World/*"));
+            fileSystem.AddFile("C:/Data/Specials/.kavitaignore", new MockFileData("**/ArtBooks/*"));
+            fileSystem.AddFile("C:/Data/Specials/Hi.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Specials/ArtBooks/art book 01.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Hello.pdf", new MockFileData(string.Empty));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(2, allFiles.Count); // Ignore files are not counted in files, only valid extensions
+
+            return Task.CompletedTask;
+        }
+
+
+        [Fact]
+        public Task ScanFiles_ShouldFindAllFiles()
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory("C:/Data/");
+            fileSystem.AddDirectory("C:/Data/Accel World");
+            fileSystem.AddDirectory("C:/Data/Accel World/Specials/");
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v1.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Accel World v2.pdf", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.cbz", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Accel World/Specials/Accel World SP01.txt", new MockFileData(string.Empty));
+            fileSystem.AddFile("C:/Data/Nothing.pdf", new MockFileData(string.Empty));
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+
+            var allFiles = ds.ScanFiles("C:/Data/");
+
+            Assert.Equal(5, allFiles.Count);
+
+            return Task.CompletedTask;
+        }
+
+    #endregion
+
+    #region GetAllDirectories
+
+    [Fact]
+    public void GetAllDirectories_ShouldFindAllNestedDirectories()
+    {
+        const string testDirectory = "C:/manga/base/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 2"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "A"));
+        fileSystem.AddDirectory(fileSystem.Path.Join(testDirectory, "folder 1", "B"));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        Assert.Equal(2, ds.GetAllDirectories(fileSystem.Path.Join(testDirectory, "folder 1")).Count());
+    }
+
+    #endregion
+
+        #region GetParentDirectory
+
+        [Theory]
+        [InlineData(@"C:/file.txt", "C:/")]
+        [InlineData(@"C:/folder/file.txt", "C:/folder")]
+        [InlineData(@"C:/folder/subfolder/file.txt", "C:/folder/subfolder")]
+        public void GetParentDirectoryName_ShouldFindParentOfFiles(string path, string expected)
+        {
+            var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
+            {
+                { path, new MockFileData(string.Empty)}
+            });
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            Assert.Equal(expected, ds.GetParentDirectoryName(path));
+        }
+        [Theory]
+        [InlineData(@"C:/folder", "C:/")]
+        [InlineData(@"C:/folder/subfolder", "C:/folder")]
+        [InlineData(@"C:/folder/subfolder/another", "C:/folder/subfolder")]
+        public void GetParentDirectoryName_ShouldFindParentOfDirectories(string path, string expected)
+        {
+            var fileSystem = new MockFileSystem();
+            fileSystem.AddDirectory(path);
+
+            var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+            Assert.Equal(expected, ds.GetParentDirectoryName(path));
+        }
+
         #endregion
     }
 }

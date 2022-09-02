@@ -16,20 +16,20 @@ public static class ParserInfoHelpers
     /// <param name="parsedSeries"></param>
     /// <returns></returns>
     public static bool SeriesHasMatchingParserInfoFormat(Series series,
-        Dictionary<ParsedSeries, List<ParserInfo>> parsedSeries)
+        Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
     {
         var format = MangaFormat.Unknown;
         foreach (var pSeries in parsedSeries.Keys)
         {
             var name = pSeries.Name;
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
 
             //if (series.NameInParserInfo(pSeries.))
             if (normalizedName == series.NormalizedName ||
-                normalizedName == Parser.Parser.Normalize(series.Name) ||
+                normalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name) ||
                 name == series.Name || name == series.LocalizedName ||
                 name == series.OriginalName ||
-                normalizedName == Parser.Parser.Normalize(series.OriginalName))
+                normalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(series.OriginalName))
             {
                 format = pSeries.Format;
                 if (format == series.Format)

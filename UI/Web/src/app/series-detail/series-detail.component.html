@@ -11,42 +11,44 @@
             </ng-container>
 
             <ng-template #extrasDrawer let-offcanvas>
-                <div class="offcanvas-header">
-                    <h4 class="offcanvas-title" id="offcanvas-basic-title">Page Settings</h4>
-                    <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss()"></button>
-                </div>
-                <div class="offcanvas-body">
-                    <form [formGroup]="pageExtrasGroup">
-                        <!-- <div class="row g-0">
-                            <div class="col-md-12 col-sm-12 pe-2 mb-3">
-                                <label for="settings-book-reading-direction" class="form-label">Sort Order</label>
-                                <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
-                                    <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
-                                    <ng-template #descSort>
-                                        <i class="fa fa-arrow-down" title="Descending"></i>
-                                    </ng-template>
-                                </button>
-
-                                <select class="form-select" aria-describedby="settings-reading-direction-help" formControlName="sortingOption">
-                                    <option *ngFor="let opt of sortingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
-                                </select>
-                            </div>
-                        </div> -->
-                        <div class="row g-0">
-                            <div class="col-md-12 col-sm-12 pe-2 mb-3">
-                                <label id="list-layout-mode-label" class="form-label">Layout Mode</label>
-                                <br/>
-                                <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
-                                    <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="layout-mode-default">Card</label>
-                                
-                                    <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
-                                    <label class="btn btn-outline-primary" for="layout-mode-col1">List</label>
-                                
+                <div style="margin-top: 56px">
+                    <div class="offcanvas-header">
+                        <h4 class="offcanvas-title" id="offcanvas-basic-title">Page Settings</h4>
+                        <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss()"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <form [formGroup]="pageExtrasGroup">
+                            <!-- <div class="row g-0">
+                                <div class="col-md-12 col-sm-12 pe-2 mb-3">
+                                    <label for="settings-book-reading-direction" class="form-label">Sort Order</label>
+                                    <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;">
+                                        <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
+                                        <ng-template #descSort>
+                                            <i class="fa fa-arrow-down" title="Descending"></i>
+                                        </ng-template>
+                                    </button>
+    
+                                    <select class="form-select" aria-describedby="settings-reading-direction-help" formControlName="sortingOption">
+                                        <option *ngFor="let opt of sortingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                    </select>
+                                </div>
+                            </div> -->
+                            <div class="row g-0">
+                                <div class="col-md-12 col-sm-12 pe-2 mb-3">
+                                    <label id="list-layout-mode-label" class="form-label">Layout Mode</label>
+                                    <br/>
+                                    <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
+                                        <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="layout-mode-default">Card</label>
+                                    
+                                        <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
+                                        <label class="btn btn-outline-primary" for="layout-mode-col1">List</label>
+                                    
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </ng-template>
 
@@ -56,8 +58,8 @@
 
 <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-3 info-container">
-        <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
-            <app-image maxWidth="300px" maxHeight="400px" [imageUrl]="seriesImage"></app-image>
+        <div class="image-container col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
+            <app-image height="100%" maxHeight="100%" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
             <!-- NOTE: We can put continue point here as Vol X Ch Y or just Ch Y or Book Z ?-->
         </div>
         <div class="col-md-10 col-xs-8 col-sm-6 mt-2">

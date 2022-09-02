@@ -57,7 +57,7 @@ namespace API.Services
         {
             // Calculate what chapter the page belongs to
             var path = GetBookmarkCachePath(seriesId);
-            var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
+            var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions);
             files = files
                 .AsEnumerable()
                 .OrderByNatural(Path.GetFileNameWithoutExtension)
@@ -100,11 +100,9 @@ namespace API.Services
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
             var extractPath = GetCachePath(chapterId);
 
-            if (!_directoryService.Exists(extractPath))
-            {
-                var files = chapter.Files.ToList();
-                ExtractChapterFiles(extractPath, files);
-            }
+            if (_directoryService.Exists(extractPath)) return chapter;
+            var files = chapter.Files.ToList();
+            ExtractChapterFiles(extractPath, files);
 
             return  chapter;
         }
@@ -215,9 +213,8 @@ namespace API.Services
         {
             // Calculate what chapter the page belongs to
             var path = GetCachePath(chapter.Id);
-            var files = _directoryService.GetFilesWithExtension(path, Parser.Parser.ImageFileExtensions);
-            files = files
-                .AsEnumerable()
+            // TODO: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
+            var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
                 .OrderByNatural(Path.GetFileNameWithoutExtension)
                 .ToArray();
 

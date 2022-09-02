@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using API.Entities.Enums;
 
-namespace API.Parser
+namespace API.Services.Tasks.Scanner.Parser
 {
     public static class Parser
     {
@@ -15,7 +15,7 @@ namespace API.Parser
 
         public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
         public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
-        public const string BookFileExtensions = @"\.epub|\.pdf";
+        private const string BookFileExtensions = @"\.epub|\.pdf";
         public const string MacOsMetadataFileStartsWith = @"._";
 
         public const string SupportedExtensions =
@@ -1031,9 +1031,15 @@ namespace API.Parser
             return IsImage(filename) && CoverImageRegex.IsMatch(filename);
         }
 
+        /// <summary>
+        /// Validates that a Path doesn't start with certain blacklisted folders, like __MACOSX, @Recently-Snapshot, etc and that if a full path, the filename
+        /// doesn't start with ._, which is a metadata file on MACOSX.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public static bool HasBlacklistedFolderInPath(string path)
         {
-            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._") || path.Contains(".qpkg");
+            return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle") || path.StartsWith("._") || Path.GetFileName(path).StartsWith("._") || path.Contains(".qpkg");
         }
 
 
@@ -1066,7 +1072,8 @@ namespace API.Parser
         /// <returns></returns>
         public static string NormalizePath(string path)
         {
-            return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .Replace(@"//", Path.AltDirectorySeparatorChar + string.Empty);
         }
 
         /// <summary>

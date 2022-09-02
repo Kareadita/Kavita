@@ -19,6 +19,12 @@
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
+    <!-- Ignore XML comments -->
+    <PropertyGroup>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+
     <PropertyGroup>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
@@ -48,6 +54,7 @@
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.30" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
+    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.3.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.7" />

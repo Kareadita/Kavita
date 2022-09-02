@@ -40,6 +40,14 @@ export class ImageComponent implements OnChanges, OnDestroy {
    * Border Radius of the image. If not defined, will not be applied
    */
    @Input() borderRadius: string = '';
+     /**
+   * Object fit of the image. If not defined, will not be applied
+   */
+   @Input() objectFit: string = '';
+  /**
+   * Background of the image. If not defined, will not be applied
+   */
+   @Input() background: string = '';
    /**
     * If the image component should respond to cover updates
     */
@@ -92,6 +100,14 @@ export class ImageComponent implements OnChanges, OnDestroy {
 
     if (this.borderRadius != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'border-radius', this.borderRadius);
+    }
+
+    if (this.objectFit != '') {
+      this.renderer.setStyle(this.imgElem.nativeElement, 'object-fit', this.objectFit);
+    }
+
+    if (this.background != '') {
+      this.renderer.setStyle(this.imgElem.nativeElement, 'background', this.background);
     }
   }
 

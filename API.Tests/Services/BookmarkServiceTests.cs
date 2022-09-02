@@ -401,9 +401,79 @@ public class BookmarkServiceTests
 
         var files = await bookmarkService.GetBookmarkFilesById(new[] {1});
         var actualFiles = ds.GetFiles(BookmarkDirectory, searchOption: SearchOption.AllDirectories);
-        Assert.Equal(files.Select(API.Parser.Parser.NormalizePath).ToList(), actualFiles.Select(API.Parser.Parser.NormalizePath).ToList());
+        Assert.Equal(files.Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList(), actualFiles.Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList());
     }
 
+
+    #endregion
+
+    #region Misc
+
+    [Fact]
+    public async Task ShouldNotDeleteBookmarkOnChapterDeletion()
+    {
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{CacheDirectory}1/0001.jpg", new MockFileData("123"));
+        filesystem.AddFile($"{BookmarkDirectory}1/1/0001.jpg", new MockFileData("123"));
+
+        // Delete all Series to reset state
+        await ResetDB();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+
+                        }
+                    }
+                }
+            }
+        });
+
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "Joe",
+            Bookmarks = new List<AppUserBookmark>()
+            {
+                new AppUserBookmark()
+                {
+                    Page = 1,
+                    ChapterId = 1,
+                    FileName = $"1/1/0001.jpg",
+                    SeriesId = 1,
+                    VolumeId = 1
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var bookmarkService = Create(ds);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
+
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeAsync(1);
+        vol.Chapters = new List<Chapter>();
+        _unitOfWork.VolumeRepository.Update(vol);
+        await _unitOfWork.CommitAsync();
+
+
+        Assert.Equal(1, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
+        Assert.NotNull(await _unitOfWork.UserRepository.GetBookmarkAsync(1));
+    }
 
     #endregion
 }

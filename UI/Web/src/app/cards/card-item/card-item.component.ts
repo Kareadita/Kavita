@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { Observable, Subject } from 'rxjs';
-import { filter, finalize, map, take, takeUntil, takeWhile } from 'rxjs/operators';
-import { Download } from 'src/app/shared/_models/download';
-import { DownloadEntityType, DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
+import { filter, map, takeUntil } from 'rxjs/operators';
+import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -126,7 +124,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   constructor(public imageService: ImageService, private libraryService: LibraryService,
     public utilityService: UtilityService, private downloadService: DownloadService,
-    private toastr: ToastrService, public bulkSelectionService: BulkSelectionService,
+    public bulkSelectionService: BulkSelectionService,
     private messageHub: MessageHubService, private accountService: AccountService, 
     private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef) {}
 
@@ -153,8 +151,13 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
     if (this.utilityService.isChapter(this.entity)) {
       const chapterTitle = this.utilityService.asChapter(this.entity).titleName;
-      if (chapterTitle === '' || chapterTitle === null) {
-        this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+      if (chapterTitle === '' || chapterTitle === null || chapterTitle === undefined) {
+        const volumeTitle = this.utilityService.asChapter(this.entity).volumeTitle
+        if (volumeTitle === '' || volumeTitle === null || volumeTitle === undefined) {
+          this.tooltipTitle = (this.title).trim();
+        } else {
+          this.tooltipTitle = (this.utilityService.asChapter(this.entity).volumeTitle + ' ' + this.title).trim();
+        }
       } else {
         this.tooltipTitle = chapterTitle;
       }
@@ -166,6 +169,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.tooltipTitle === '') {
         this.tooltipTitle = vol.name;
       }
+    } else if (this.utilityService.isSeries(this.entity)) {
+      this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
     }
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
       this.user = user;
@@ -187,20 +192,22 @@ export class CardItemComponent implements OnInit, OnDestroy {
             chapter.pagesRead = updateEvent.pagesRead;
           }
         } else {
+          // Ignore
+          return;
           // re-request progress for the series
-          const s = this.utilityService.asSeries(this.entity);
-          let pagesRead = 0;
-          if (s.hasOwnProperty('volumes')) {
-            s.volumes.forEach(v => {
-              v.chapters.forEach(c => {
-                if (c.id === updateEvent.chapterId) {
-                  c.pagesRead = updateEvent.pagesRead;
-                }
-                pagesRead += c.pagesRead;
-              });
-            });
-            s.pagesRead = pagesRead;
-          }
+          // const s = this.utilityService.asSeries(this.entity);
+          // let pagesRead = 0;
+          // if (s.hasOwnProperty('volumes')) {
+          //   s.volumes.forEach(v => {
+          //     v.chapters.forEach(c => {
+          //       if (c.id === updateEvent.chapterId) {
+          //         c.pagesRead = updateEvent.pagesRead;
+          //       }
+          //       pagesRead += c.pagesRead;
+          //     });
+          //   });
+          //   s.pagesRead = pagesRead;
+          // }
         }
       }
 

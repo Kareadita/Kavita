@@ -55,6 +55,11 @@ namespace API.Tests.Services
         {
             throw new System.NotImplementedException();
         }
+
+        public ParserInfo ParseFile(string path, string rootPath, LibraryType type)
+        {
+            throw new System.NotImplementedException();
+        }
     }
     public class CacheServiceTests
     {

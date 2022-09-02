@@ -165,7 +165,7 @@ export class AccountService implements OnDestroy {
   }
 
   confirmResetPasswordEmail(model: {email: string, token: string, password: string}) {
-    return this.httpClient.post(this.baseUrl + 'account/confirm-password-reset', model);
+    return this.httpClient.post(this.baseUrl + 'account/confirm-password-reset', model, {responseType: 'json' as 'text'});
   }
 
   resetPassword(username: string, password: string, oldPassword: string) {
@@ -228,8 +228,7 @@ export class AccountService implements OnDestroy {
 
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
-    //console.log('refreshing token and updating user account');
-
+    
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token', {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {
         this.currentUser.token = user.token;

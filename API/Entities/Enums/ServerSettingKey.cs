@@ -91,5 +91,10 @@ namespace API.Entities.Enums
         /// </summary>
         [Description("TotalBackups")]
         TotalBackups = 16,
+        /// <summary>
+        /// If Kavita should watch the library folders and process changes
+        /// </summary>
+        [Description("EnableFolderWatching")]
+        EnableFolderWatching = 17,
     }
 }

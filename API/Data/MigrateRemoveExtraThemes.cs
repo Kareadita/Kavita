@@ -13,15 +13,14 @@ public static class MigrateRemoveExtraThemes
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, IThemeService themeService)
     {
-        Console.WriteLine("Removing Dark and E-Ink themes");
-
         var themes = (await unitOfWork.SiteThemeRepository.GetThemes()).ToList();
 
         if (themes.FirstOrDefault(t => t.Name.Equals("Light")) == null)
         {
-            Console.WriteLine("Done. Nothing to do");
             return;
         }
+
+        Console.WriteLine("Removing Dark and E-Ink themes");
 
         var darkTheme = themes.Single(t => t.Name.Equals("Dark"));
         var lightTheme = themes.Single(t => t.Name.Equals("Light"));

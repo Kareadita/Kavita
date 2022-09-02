@@ -17,6 +17,7 @@ using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.Storage.SQLite;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
@@ -113,6 +114,12 @@ namespace API
 
                 c.AddServer(new OpenApiServer()
                 {
+                    Description = "Custom Url",
+                    Url = "/"
+                });
+
+                c.AddServer(new OpenApiServer()
+                {
                     Description = "Local Server",
                     Url = "http://localhost:5000/",
                 });
@@ -149,11 +156,13 @@ namespace API
             services.AddHangfire(configuration => configuration
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseMemoryStorage());
+                .UseMemoryStorage()); // UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted
 
             // Add the processing server as IHostedService
-            services.AddHangfireServer();
-
+            services.AddHangfireServer(options =>
+            {
+                options.Queues = new[] {TaskScheduler.ScanQueue, TaskScheduler.DefaultQueue};
+            });
             // Add IHostedService for startup tasks
             // Any services that should be bootstrapped go here
             services.AddHostedService<StartupTasksHostedService>();
@@ -174,14 +183,16 @@ namespace API
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                     var themeService = serviceProvider.GetRequiredService<IThemeService>();
+                    var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
-                    await MigrateBookmarks.Migrate(directoryService, unitOfWork,
-                        logger, cacheService);
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
 
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
+
+                    // Only needed for v0.5.5.x and v0.5.6
+                    await MigrateNormalizedLocalizedName.Migrate(unitOfWork, dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
@@ -260,13 +271,14 @@ namespace API
 
             app.Use(async (context, next) =>
             {
-                context.Response.GetTypedHeaders().CacheControl =
-                    new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
-                    {
-                        Public = false,
-                        MaxAge = TimeSpan.FromSeconds(10),
-                    };
-                context.Response.Headers[Microsoft.Net.Http.Headers.HeaderNames.Vary] =
+                // Note: I removed this as I caught Chrome caching api responses when it shouldn't have
+                // context.Response.GetTypedHeaders().CacheControl =
+                //     new CacheControlHeaderValue()
+                //     {
+                //         Public = false,
+                //         MaxAge = TimeSpan.FromSeconds(10),
+                //     };
+                context.Response.Headers[HeaderNames.Vary] =
                     new[] { "Accept-Encoding" };
 
                 // Don't let the site be iframed outside the same origin (clickjacking)

@@ -57,7 +57,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
             this.recentlyAddedSeries.unshift(series);
-            this.cdRef.markForCheck();
+            this.cdRef.detectChanges();
           });
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
@@ -79,7 +79,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       );
 
       this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntil(this.onDestroy)).subscribe(() => {
-        this.loadRecentlyAdded();
+        this.loadRecentlyUpdated();
+        this.loadRecentlyAddedSeries();
         this.cdRef.markForCheck();
       });
   }
@@ -104,7 +105,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   reloadSeries() {
     this.loadOnDeck();
-    this.loadRecentlyAdded();
+    this.loadRecentlyUpdated();
     this.loadRecentlyAddedSeries();
   }
 
@@ -144,7 +145,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
 
-  loadRecentlyAdded() {
+  loadRecentlyUpdated() {
     let api = this.seriesService.getRecentlyUpdatedSeries();
     if (this.libraryId > 0) {
       api = this.seriesService.getRecentlyUpdatedSeries();

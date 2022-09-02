@@ -9,13 +9,13 @@ namespace API.Entities.Enums
     {
         /// <summary>
         /// Image file
-        /// See <see cref="Parser.Parser.ImageFileExtensions"/> for supported extensions
+        /// See <see cref="Services.Tasks.Scanner.Parser.Parser.ImageFileExtensions"/> for supported extensions
         /// </summary>
         [Description("Image")]
         Image = 0,
         /// <summary>
         /// Archive based file
-        /// See <see cref="Parser.Parser.ArchiveFileExtensions"/> for supported extensions
+        /// See <see cref="Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions"/> for supported extensions
         /// </summary>
         [Description("Archive")]
         Archive = 1,

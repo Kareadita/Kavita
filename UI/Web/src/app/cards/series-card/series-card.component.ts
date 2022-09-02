@@ -82,7 +82,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       case(Action.MarkAsUnread):
         this.markAsUnread(series);
         break;
-      case(Action.ScanLibrary):
+      case(Action.Scan):
         this.scanLibrary(series);
         break;
       case(Action.RefreshMetadata):

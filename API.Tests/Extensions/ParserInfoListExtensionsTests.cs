@@ -14,7 +14,7 @@ namespace API.Tests.Extensions
 {
     public class ParserInfoListExtensions
     {
-        private readonly DefaultParser _defaultParser;
+        private readonly IDefaultParser _defaultParser;
         public ParserInfoListExtensions()
         {
             _defaultParser =
