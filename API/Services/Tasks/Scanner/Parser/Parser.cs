@@ -652,18 +652,16 @@ public static class Parser
         return SpecialMarkerRegex.IsMatch(filePath);
     }
 
-    public static string ParseMangaSpecial(string filePath)
+    public static bool IsMangaSpecial(string filePath)
     {
         filePath = ReplaceUnderscores(filePath);
-        var match = MangaSpecialRegex.Match(filePath);
-        return match.Success ? match.Value : string.Empty;
+        return  MangaSpecialRegex.IsMatch(filePath);
     }
 
-    public static string ParseComicSpecial(string filePath)
+    public static bool IsComicSpecial(string filePath)
     {
         filePath = ReplaceUnderscores(filePath);
-        var match = ComicSpecialRegex.Match(filePath);
-        return match.Success ? match.Value : string.Empty;
+        return ComicSpecialRegex.IsMatch(filePath);
     }
 
     public static string ParseSeries(string filename)

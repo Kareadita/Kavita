@@ -307,9 +307,10 @@ public class MangaParserTests
     [InlineData("Beastars SP01", false)]
     [InlineData("The League of Extraordinary Gentlemen", false)]
     [InlineData("The League of Extra-ordinary Gentlemen", false)]
-    public void ParseMangaSpecialTest(string input, bool expected)
+    [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", true)]
+    public void IsMangaSpecialTest(string input, bool expected)
     {
-        Assert.Equal(expected,  !string.IsNullOrEmpty(API.Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(input)));
+        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(input));
     }
 
     [Theory]
@@ -320,14 +321,6 @@ public class MangaParserTests
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseFormat(inputFile));
     }
-
-    [Theory]
-    [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", "Side Stories")]
-    public void ParseSpecialTest(string inputFile, string expected)
-    {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(inputFile));
-    }
-
 
 
 }
