@@ -6,6 +6,7 @@
         <Product>Kavita</Product>
         <AssemblyVersion>0.5.6.1</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
+        <TieredPGO>true</TieredPGO>
     </PropertyGroup>
 
     <ItemGroup>
