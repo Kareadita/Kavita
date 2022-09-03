@@ -23,6 +23,8 @@ public class ComicInfo
     /// <summary>
     /// The total number of items in the series.
     /// </summary>
+    // This should really be -1 according to anansi-project spec
+    [System.ComponentModel.DefaultValueAttribute(0)]
     public int Count { get; set; } = 0;
     public string Volume { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
@@ -37,8 +39,14 @@ public class ComicInfo
     /// This is the link to where the data was scraped from
     /// </summary>
     public string Web { get; set; } = string.Empty;
+    // This should really be -1 according to anansi-project spec
+    [System.ComponentModel.DefaultValueAttribute(0)]
     public int Day { get; set; } = 0;
+    // This should really be -1 according to anansi-project spec
+    [System.ComponentModel.DefaultValueAttribute(0)]
     public int Month { get; set; } = 0;
+    // This should really be -1 according to anansi-project spec
+    [System.ComponentModel.DefaultValueAttribute(0)]
     public int Year { get; set; } = 0;
 
 
@@ -54,6 +62,8 @@ public class ComicInfo
     public string StoryArc { get; set; } = string.Empty;
     public string SeriesGroup { get; set; } = string.Empty;
     public string AlternateNumber { get; set; } = string.Empty;
+    // This should really be -1 according to anansi-project spec
+    [System.ComponentModel.DefaultValueAttribute(0)]
     public int AlternateCount { get; set; } = 0;
     public string AlternateSeries { get; set; } = string.Empty;
 

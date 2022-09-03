@@ -291,8 +291,27 @@ public class ArchiveServiceTests
             Web = "https://www.comixology.com/BTOOOM/digital-comic/450184"
         };
 
+        // XXX: This is not doing anything useful
         Assert.NotStrictEqual(expected, actual);
+        // XXX: This also works
+        Assert.NotStrictEqual(null, actual);
     }
+
+    [Fact]
+    public void CanParseComicInfo2()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+        var archive = Path.Join(testDirectory, "ComicInfo2.zip");
+        var comicInfo = _archiveService.GetComicInfo(archive);
+
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Hellboy", comicInfo.Series);
+        Assert.Equal("The Right Hand of Doom", comicInfo.Title);
+        Assert.Equal("", comicInfo.Number);
+        Assert.Equal(0, comicInfo.Count);
+        Assert.Equal("4", comicInfo.Volume);
+    }
+
 
     #endregion
 
