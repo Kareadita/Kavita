@@ -334,7 +334,7 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
               <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
               <a ngbDropdownItem routerLink="/preferences/">Settings</a>
               <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">Help</a>
-              <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">Annoucements</a>
+              <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">Announcements</a>
               <a ngbDropdownItem (click)="logout()">Logout</a>
             </div>
           </div>
