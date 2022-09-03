@@ -647,7 +647,7 @@ public class ProcessSeries : IProcessSeries
         {
             var day = Math.Max(comicInfo.Day, 1);
             var month = Math.Max(comicInfo.Month, 1);
-            chapter.ReleaseDate = DateTime.Parse($"{month}/{day}/{comicInfo.Year}");
+            chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
         var people = GetTagValues(comicInfo.Colorist);
