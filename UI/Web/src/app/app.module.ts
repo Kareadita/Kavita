@@ -14,6 +14,10 @@ import { SidenavModule } from './sidenav/sidenav.module';
 import { NavModule } from './nav/nav.module';
 
 
+// Disable Animations for older iOS devices (f.animate is not defined).
+const disableAnimations =
+  !('animate' in document.documentElement)
+  || (navigator && /iPhone OS (8|9|10|11|12|13)_/.test(navigator.userAgent));
 
 
 @NgModule({
@@ -24,7 +28,7 @@ import { NavModule } from './nav/nav.module';
         HttpClientModule,
         BrowserModule,
         AppRoutingModule,
-        BrowserAnimationsModule,
+        BrowserAnimationsModule.withConfig({ disableAnimations }),
         SidenavModule,
         NavModule,
         ToastrModule.forRoot({
