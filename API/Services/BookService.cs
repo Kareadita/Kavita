@@ -447,6 +447,10 @@ public class BookService : IBookService
                     case "calibre:title_sort":
                         info.TitleSort = metadataItem.Content;
                         break;
+                    case "calibre:series":
+                        info.Series = metadataItem.Content;
+                        info.SeriesSort = metadataItem.Content;
+                        break;
                 }
             }
 
@@ -609,14 +613,9 @@ public class BookService : IBookService
                         FullFilePath = filePath,
                         IsSpecial = false,
                         Series = series.Trim(),
+                        SeriesSort = series.Trim(),
                         Volumes = seriesIndex
                     };
-
-                    // Don't set titleSort if the book belongs to a group
-                    if (!string.IsNullOrEmpty(titleSort) && string.IsNullOrEmpty(seriesIndex) && (groupPosition.Equals("series") || groupPosition.Equals("set")))
-                    {
-                        info.SeriesSort = titleSort;
-                    }
 
                     return info;
                 }
