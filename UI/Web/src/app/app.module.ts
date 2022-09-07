@@ -14,10 +14,8 @@ import { SidenavModule } from './sidenav/sidenav.module';
 import { NavModule } from './nav/nav.module';
 
 
-// Disable Animations for older iOS devices (f.animate is not defined).
-const disableAnimations =
-  !('animate' in document.documentElement)
-  || (navigator && /iPhone OS (8|9|10|11|12|13)_/.test(navigator.userAgent));
+// Disable Web Animations if the user's browser (such as iOS 12.5.5) does not support this.
+const disableAnimations = !('animate' in document.documentElement);
 
 
 @NgModule({
