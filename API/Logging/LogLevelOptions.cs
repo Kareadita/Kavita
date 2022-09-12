@@ -68,7 +68,7 @@ public static class LogLevelOptions
                 MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 break;
-            case "Verbose":
+            case "Trace":
                 LogLevelSwitch.MinimumLevel = LogEventLevel.Verbose;
                 MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
@@ -78,12 +78,7 @@ public static class LogLevelOptions
                 MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 break;
-            case "Fatal":
-                LogLevelSwitch.MinimumLevel = LogEventLevel.Fatal;
-                MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
-                AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
-                break;
-            case "Error":
+            case "Critical":
                 LogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
