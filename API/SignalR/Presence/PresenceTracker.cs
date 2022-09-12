@@ -4,112 +4,111 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 
-namespace API.SignalR.Presence
+namespace API.SignalR.Presence;
+
+public interface IPresenceTracker
 {
-    public interface IPresenceTracker
-    {
-        Task UserConnected(string username, string connectionId);
-        Task UserDisconnected(string username, string connectionId);
-        Task<string[]> GetOnlineAdmins();
-        Task<List<string>> GetConnectionsForUser(string username);
+    Task UserConnected(string username, string connectionId);
+    Task UserDisconnected(string username, string connectionId);
+    Task<string[]> GetOnlineAdmins();
+    Task<List<string>> GetConnectionsForUser(string username);
 
+}
+
+internal class ConnectionDetail
+{
+    public List<string> ConnectionIds { get; set; }
+    public bool IsAdmin { get; set; }
+}
+
+// TODO: This can respond to UserRoleUpdate events to handle online users
+/// <summary>
+/// This is a singleton service for tracking what users have a SignalR connection and their difference connectionIds
+/// </summary>
+public class PresenceTracker : IPresenceTracker
+{
+    private readonly IUnitOfWork _unitOfWork;
+    private static readonly Dictionary<string, ConnectionDetail> OnlineUsers = new Dictionary<string, ConnectionDetail>();
+
+    public PresenceTracker(IUnitOfWork unitOfWork)
+    {
+        _unitOfWork = unitOfWork;
     }
 
-    internal class ConnectionDetail
+    public async Task UserConnected(string username, string connectionId)
     {
-        public List<string> ConnectionIds { get; set; }
-        public bool IsAdmin { get; set; }
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+        if (user == null) return;
+        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        lock (OnlineUsers)
+        {
+            if (OnlineUsers.ContainsKey(username))
+            {
+                OnlineUsers[username].ConnectionIds.Add(connectionId);
+            }
+            else
+            {
+                OnlineUsers.Add(username, new ConnectionDetail()
+                {
+                    ConnectionIds = new List<string>() {connectionId},
+                    IsAdmin = isAdmin
+                });
+            }
+        }
+
+        // Update the last active for the user
+        user.LastActive = DateTime.Now;
+        await _unitOfWork.CommitAsync();
     }
 
-    // TODO: This can respond to UserRoleUpdate events to handle online users
-    /// <summary>
-    /// This is a singleton service for tracking what users have a SignalR connection and their difference connectionIds
-    /// </summary>
-    public class PresenceTracker : IPresenceTracker
+    public Task UserDisconnected(string username, string connectionId)
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private static readonly Dictionary<string, ConnectionDetail> OnlineUsers = new Dictionary<string, ConnectionDetail>();
-
-        public PresenceTracker(IUnitOfWork unitOfWork)
+        lock (OnlineUsers)
         {
-            _unitOfWork = unitOfWork;
-        }
+            if (!OnlineUsers.ContainsKey(username)) return Task.CompletedTask;
 
-        public async Task UserConnected(string username, string connectionId)
-        {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
-            if (user == null) return;
-            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-            lock (OnlineUsers)
+            OnlineUsers[username].ConnectionIds.Remove(connectionId);
+
+            if (OnlineUsers[username].ConnectionIds.Count == 0)
             {
-                if (OnlineUsers.ContainsKey(username))
-                {
-                    OnlineUsers[username].ConnectionIds.Add(connectionId);
-                }
-                else
-                {
-                    OnlineUsers.Add(username, new ConnectionDetail()
-                    {
-                        ConnectionIds = new List<string>() {connectionId},
-                        IsAdmin = isAdmin
-                    });
-                }
+                OnlineUsers.Remove(username);
             }
-
-            // Update the last active for the user
-            user.LastActive = DateTime.Now;
-            await _unitOfWork.CommitAsync();
         }
+        return Task.CompletedTask;
+    }
 
-        public Task UserDisconnected(string username, string connectionId)
+    public static Task<string[]> GetOnlineUsers()
+    {
+        string[] onlineUsers;
+        lock (OnlineUsers)
         {
-            lock (OnlineUsers)
-            {
-                if (!OnlineUsers.ContainsKey(username)) return Task.CompletedTask;
-
-                OnlineUsers[username].ConnectionIds.Remove(connectionId);
-
-                if (OnlineUsers[username].ConnectionIds.Count == 0)
-                {
-                    OnlineUsers.Remove(username);
-                }
-            }
-            return Task.CompletedTask;
+            onlineUsers = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
         }
 
-        public static Task<string[]> GetOnlineUsers()
+        return Task.FromResult(onlineUsers);
+    }
+
+    public Task<string[]> GetOnlineAdmins()
+    {
+        // TODO: This might end in stale data, we want to get the online users, query against DB to check if they are admins then return
+        string[] onlineUsers;
+        lock (OnlineUsers)
         {
-            string[] onlineUsers;
-            lock (OnlineUsers)
-            {
-                onlineUsers = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
-            }
-
-            return Task.FromResult(onlineUsers);
+            onlineUsers = OnlineUsers.Where(pair => pair.Value.IsAdmin).OrderBy(k => k.Key).Select(k => k.Key).ToArray();
         }
 
-        public Task<string[]> GetOnlineAdmins()
+
+        return Task.FromResult(onlineUsers);
+    }
+
+    public Task<List<string>> GetConnectionsForUser(string username)
+    {
+        List<string> connectionIds;
+        lock (OnlineUsers)
         {
-            // TODO: This might end in stale data, we want to get the online users, query against DB to check if they are admins then return
-            string[] onlineUsers;
-            lock (OnlineUsers)
-            {
-                onlineUsers = OnlineUsers.Where(pair => pair.Value.IsAdmin).OrderBy(k => k.Key).Select(k => k.Key).ToArray();
-            }
-
-
-            return Task.FromResult(onlineUsers);
+            connectionIds = OnlineUsers.GetValueOrDefault(username)?.ConnectionIds;
         }
 
-        public Task<List<string>> GetConnectionsForUser(string username)
-        {
-            List<string> connectionIds;
-            lock (OnlineUsers)
-            {
-                connectionIds = OnlineUsers.GetValueOrDefault(username)?.ConnectionIds;
-            }
-
-            return Task.FromResult(connectionIds ?? new List<string>());
-        }
+        return Task.FromResult(connectionIds ?? new List<string>());
     }
 }

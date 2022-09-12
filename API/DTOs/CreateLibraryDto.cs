@@ -2,16 +2,15 @@
 using System.ComponentModel.DataAnnotations;
 using API.Entities.Enums;
 
-namespace API.DTOs
+namespace API.DTOs;
+
+public class CreateLibraryDto
 {
-    public class CreateLibraryDto
-    {
-        [Required]
-        public string Name { get; init; }
-        [Required]
-        public LibraryType Type { get; init; }
-        [Required]
-        [MinLength(1)]
-        public IEnumerable<string> Folders { get; init; }
-    }
+    [Required]
+    public string Name { get; init; }
+    [Required]
+    public LibraryType Type { get; init; }
+    [Required]
+    [MinLength(1)]
+    public IEnumerable<string> Folders { get; init; }
 }

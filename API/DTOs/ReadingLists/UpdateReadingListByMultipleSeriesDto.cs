@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs.ReadingLists
+namespace API.DTOs.ReadingLists;
+
+public class UpdateReadingListByMultipleSeriesDto
 {
-    public class UpdateReadingListByMultipleSeriesDto
-    {
-        public int ReadingListId { get; init; }
-        public IReadOnlyList<int> SeriesIds { get; init; }
-    }
+    public int ReadingListId { get; init; }
+    public IReadOnlyList<int> SeriesIds { get; init; }
 }

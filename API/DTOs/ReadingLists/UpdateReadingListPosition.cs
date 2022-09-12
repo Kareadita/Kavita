@@ -14,5 +14,4 @@ namespace API.DTOs.ReadingLists
         public int FromPosition { get; set; }
         [Required]
         public int ToPosition { get; set; }
-    }
 }

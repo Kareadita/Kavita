@@ -1,10 +1,9 @@
-﻿namespace API.Entities.Enums
+﻿namespace API.Entities.Enums;
+
+public enum PageSplitOption
 {
-    public enum PageSplitOption
-    {
-        SplitLeftToRight = 0,
-        SplitRightToLeft = 1,
-        NoSplit = 2,
-        FitSplit = 3
-    }
+    SplitLeftToRight = 0,
+    SplitRightToLeft = 1,
+    NoSplit = 2,
+    FitSplit = 3
 }

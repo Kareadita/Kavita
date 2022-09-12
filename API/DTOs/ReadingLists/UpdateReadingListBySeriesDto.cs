@@ -1,8 +1,7 @@
-﻿namespace API.DTOs.ReadingLists
+﻿namespace API.DTOs.ReadingLists;
+
+public class UpdateReadingListBySeriesDto
 {
-    public class UpdateReadingListBySeriesDto
-    {
-        public int SeriesId { get; init; }
-        public int ReadingListId { get; init; }
-    }
+    public int SeriesId { get; init; }
+    public int ReadingListId { get; init; }
 }

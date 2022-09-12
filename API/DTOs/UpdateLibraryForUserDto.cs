@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs
+namespace API.DTOs;
+
+public class UpdateLibraryForUserDto
 {
-    public class UpdateLibraryForUserDto
-    {
-        public string Username { get; init; }
-        public IEnumerable<LibraryDto> SelectedLibraries { get; init; }
-    }
+    public string Username { get; init; }
+    public IEnumerable<LibraryDto> SelectedLibraries { get; init; }
 }

@@ -24,7 +24,7 @@ public interface IBackupService
     /// </summary>
     /// <param name="rollFiles">If file rolling is enabled. Defaults to True.</param>
     /// <returns></returns>
-    IEnumerable<string> GetLogFiles(bool rollFiles = true);
+    IEnumerable<string> GetLogFiles(bool rollFiles = LogLevelOptions.LogRollingEnabled);
 }
 public class BackupService : IBackupService
 {
@@ -59,7 +59,7 @@ public class BackupService : IBackupService
     /// </summary>
     /// <param name="rollFiles">If file rolling is enabled. Defaults to True.</param>
     /// <returns></returns>
-    public IEnumerable<string> GetLogFiles(bool rollFiles = true)
+    public IEnumerable<string> GetLogFiles(bool rollFiles = LogLevelOptions.LogRollingEnabled)
     {
         var multipleFileRegex = rollFiles ? @"\d*" : string.Empty;
         var fi = _directoryService.FileSystem.FileInfo.FromFileName(LogLevelOptions.LogFile);

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs.Reader
+namespace API.DTOs.Reader;
+
+public class MarkMultipleSeriesAsReadDto
 {
-    public class MarkMultipleSeriesAsReadDto
-    {
-        public IReadOnlyList<int> SeriesIds { get; init; }
-    }
+    public IReadOnlyList<int> SeriesIds { get; init; }
 }
