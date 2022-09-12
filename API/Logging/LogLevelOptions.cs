@@ -35,18 +35,18 @@ public static class LogLevelOptions
     /// </summary>
     private static readonly LoggingLevelSwitch AspNetCoreLogLevelSwitch = new (LogEventLevel.Error);
 
-    public static LoggerConfiguration Configuration = Configuration = new LoggerConfiguration()
-        .MinimumLevel
-        .ControlledBy(LogLevelSwitch)
-        .MinimumLevel.Override("Microsoft", MicrosoftLogLevelSwitch)
-        .MinimumLevel.Override("Microsoft.Hosting.Lifetime", MicrosoftHostingLifetimeLogLevelSwitch)
-        .MinimumLevel.Override("Hangfire", HangfireLogLevelSwitch)
-        .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Internal.WebHost", AspNetCoreLogLevelSwitch)
-        .WriteTo.Console()
-        .WriteTo.File(Path.Join("config/logs", "kavita.log"),
-            shared: true,
-            rollingInterval: RollingInterval.Day,
-            outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {Level}] {Message:lj}{NewLine}{Exception}");
+    // public static LoggerConfiguration Configuration = Configuration = new LoggerConfiguration()
+    //     .MinimumLevel
+    //     .ControlledBy(LogLevelSwitch)
+    //     .MinimumLevel.Override("Microsoft", MicrosoftLogLevelSwitch)
+    //     .MinimumLevel.Override("Microsoft.Hosting.Lifetime", MicrosoftHostingLifetimeLogLevelSwitch)
+    //     .MinimumLevel.Override("Hangfire", HangfireLogLevelSwitch)
+    //     .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Internal.WebHost", AspNetCoreLogLevelSwitch)
+    //     .WriteTo.Console()
+    //     .WriteTo.File(Path.Join("config/logs", "kavita.log"),
+    //         shared: true,
+    //         rollingInterval: RollingInterval.Day,
+    //         outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {Level}] {Message:lj}{NewLine}{Exception}");
 
 
     public static LoggerConfiguration CreateConfig(LoggerConfiguration configuration)
@@ -58,6 +58,7 @@ public static class LogLevelOptions
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", MicrosoftHostingLifetimeLogLevelSwitch)
             .MinimumLevel.Override("Hangfire", HangfireLogLevelSwitch)
             .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Internal.WebHost", AspNetCoreLogLevelSwitch)
+            .Enrich.FromLogContext()
             .WriteTo.Console()
             .WriteTo.File(Path.Join("config/logs", "kavita.log"),
                 shared: true,

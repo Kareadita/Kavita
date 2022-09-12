@@ -266,8 +266,7 @@ namespace API
                 HttpsCompression = HttpsCompressionMode.Compress,
                 OnPrepareResponse = ctx =>
                 {
-                    const int durationInSeconds = 60 * 60 * 24;
-                    ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + durationInSeconds;
+                    ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
                 }
             });
 
@@ -299,6 +298,7 @@ namespace API
             {
                 endpoints.MapControllers();
                 endpoints.MapHub<MessageHub>("hubs/messages");
+                endpoints.MapHub<LogHub>("hubs/logs");
                 endpoints.MapHangfireDashboard();
                 endpoints.MapFallbackToController("Index", "Fallback");
             });

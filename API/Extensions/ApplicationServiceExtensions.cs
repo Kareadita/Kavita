@@ -55,8 +55,6 @@ namespace API.Extensions
             services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
             services.AddScoped<ILibraryWatcher, LibraryWatcher>();
 
-
-
             services.AddScoped<IPresenceTracker, PresenceTracker>();
             services.AddScoped<IEventHub, EventHub>();
 

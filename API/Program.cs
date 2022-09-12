@@ -9,6 +9,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Logging;
 using API.Services;
+using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -21,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.AspNetCore.SignalR.Extensions;
 
 namespace API
 {
@@ -153,9 +155,17 @@ namespace API
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseSerilog((context, services, configuration) =>
+                .UseSerilog((_, services, configuration) =>
                 {
-                    LogLevelOptions.CreateConfig(configuration);
+                    LogLevelOptions.CreateConfig(configuration)
+                        .WriteTo.SignalRSink<LogHub, ILogHub>(
+                            LogEventLevel.Information,
+                            services,
+                            null, // can be null
+                            null,        // can be null
+                            null,        // can be null
+                            null,        // can be null
+                            false);                 // false is the default value
                 })
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
