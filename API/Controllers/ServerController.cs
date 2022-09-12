@@ -8,6 +8,7 @@ using API.DTOs.Jobs;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Extensions;
+using API.Logging;
 using API.Services;
 using API.Services.Tasks;
 using Hangfire;
@@ -114,7 +115,7 @@ namespace API.Controllers
         [HttpGet("logs")]
         public ActionResult GetLogs()
         {
-            var files = _backupService.GetLogFiles(_config.GetMaxRollingFiles(), _config.GetLoggingFileName());
+            var files = _backupService.GetLogFiles(LogLevelOptions.LogRollingEnabled);
             try
             {
                 var zipPath =  _archiveService.CreateZipForDownload(files, "logs");

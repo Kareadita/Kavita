@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Logging;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.SignalR;
@@ -19,30 +20,27 @@ public interface IBackupService
 {
     Task BackupDatabase();
     /// <summary>
-    /// Returns a list of full paths of the logs files detailed in <see cref="IConfiguration"/>.
+    /// Returns a list of all log files for Kavita
     /// </summary>
-    /// <param name="maxRollingFiles"></param>
-    /// <param name="logFileName"></param>
+    /// <param name="rollFiles">If file rolling is enabled. Defaults to True.</param>
     /// <returns></returns>
-    IEnumerable<string> GetLogFiles(int maxRollingFiles, string logFileName);
+    IEnumerable<string> GetLogFiles(bool rollFiles = true);
 }
 public class BackupService : IBackupService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<BackupService> _logger;
     private readonly IDirectoryService _directoryService;
-    private readonly IConfiguration _config;
     private readonly IEventHub _eventHub;
 
     private readonly IList<string> _backupFiles;
 
     public BackupService(ILogger<BackupService> logger, IUnitOfWork unitOfWork,
-        IDirectoryService directoryService, IConfiguration config, IEventHub eventHub)
+        IDirectoryService directoryService, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _directoryService = directoryService;
-        _config = config;
         _eventHub = eventHub;
 
         _backupFiles = new List<string>()
@@ -56,12 +54,17 @@ public class BackupService : IBackupService
         };
     }
 
-    public IEnumerable<string> GetLogFiles(int maxRollingFiles, string logFileName)
+    /// <summary>
+    /// Returns a list of all log files for Kavita
+    /// </summary>
+    /// <param name="rollFiles">If file rolling is enabled. Defaults to True.</param>
+    /// <returns></returns>
+    public IEnumerable<string> GetLogFiles(bool rollFiles = true)
     {
-        var multipleFileRegex = maxRollingFiles > 0 ? @"\d*" : string.Empty;
-        var fi = _directoryService.FileSystem.FileInfo.FromFileName(logFileName);
+        var multipleFileRegex = rollFiles ? @"\d*" : string.Empty;
+        var fi = _directoryService.FileSystem.FileInfo.FromFileName(LogLevelOptions.LogFile);
 
-        var files = maxRollingFiles > 0
+        var files = rollFiles
             ? _directoryService.GetFiles(_directoryService.LogDirectory,
                 $@"{_directoryService.FileSystem.Path.GetFileNameWithoutExtension(fi.Name)}{multipleFileRegex}\.log")
             : new[] {_directoryService.FileSystem.Path.Join(_directoryService.LogDirectory, "kavita.log")};
@@ -137,9 +140,7 @@ public class BackupService : IBackupService
 
     private void CopyLogsToBackupDirectory(string tempDirectory)
     {
-        var maxRollingFiles = _config.GetMaxRollingFiles();
-        var loggingSection = _config.GetLoggingFileName();
-        var files = GetLogFiles(maxRollingFiles, loggingSection);
+        var files = GetLogFiles();
         _directoryService.CopyFilesToDirectory(files, _directoryService.FileSystem.Path.Join(tempDirectory, "logs"));
     }
 
