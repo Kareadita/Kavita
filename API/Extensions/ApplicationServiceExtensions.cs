@@ -70,7 +70,7 @@ public static class ApplicationServiceExtensions
         {
             options.UseSqlite(config.GetConnectionString("DefaultConnection"));
             options.EnableDetailedErrors();
-            options.EnableSensitiveDataLogging(env.IsDevelopment() || Configuration.LogLevel.Equals("Debug"));
+            options.EnableSensitiveDataLogging(env.IsDevelopment());
         });
     }
 

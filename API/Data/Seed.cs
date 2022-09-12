@@ -120,8 +120,6 @@ public static class Seed
         // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
         context.ServerSetting.First(s => s.Key == ServerSettingKey.Port).Value =
             Configuration.Port + string.Empty;
-        context.ServerSetting.First(s => s.Key == ServerSettingKey.LoggingLevel).Value =
-            Configuration.LogLevel + string.Empty;
         context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
             directoryService.CacheDirectory + string.Empty;
         context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =

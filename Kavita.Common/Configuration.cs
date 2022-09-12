@@ -29,17 +29,6 @@ public static class Configuration
         set => SetJwtToken(GetAppSettingFilename(), value);
     }
 
-    public static string LogLevel
-    {
-        get => GetLogLevel(GetAppSettingFilename());
-        set => SetLogLevel(GetAppSettingFilename(), value);
-    }
-
-    public static string LogPath
-    {
-        get => GetLoggingFile(GetAppSettingFilename());
-        set => SetLoggingFile(GetAppSettingFilename(), value);
-    }
 
     public static string DatabasePath
     {
@@ -249,58 +238,6 @@ public static class Configuration
         }
     }
 
-    private static string GetLoggingFile(string filePath)
-    {
-        const string defaultFile = "config/logs/kavita.log";
-
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
-
-            if (jsonObj.TryGetProperty("Logging", out JsonElement tokenElement))
-            {
-                foreach (var property in tokenElement.EnumerateObject())
-                {
-                    if (!property.Name.Equals("File")) continue;
-                    foreach (var logProperty in property.Value.EnumerateObject())
-                    {
-                        if (logProperty.Name.Equals("Path"))
-                        {
-                            return logProperty.Value.GetString();
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error writing app settings: " + ex.Message);
-        }
-
-        return defaultFile;
-    }
-
-    /// <summary>
-    /// This should NEVER be called except by <see cref="MigrateConfigFiles"/>
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <param name="directory"></param>
-    private static void SetLoggingFile(string filePath, string directory)
-    {
-        try
-        {
-            var currentFile = GetLoggingFile(filePath);
-            var json = File.ReadAllText(filePath)
-                .Replace("\"Path\": \"" + currentFile + "\"", "\"Path\": \"" + directory + "\"");
-            File.WriteAllText(filePath, json);
-        }
-        catch (Exception ex)
-        {
-            /* Swallow Exception */
-            Console.WriteLine(ex);
-        }
-    }
 
     private static string GetDatabasePath(string filePath)
     {
