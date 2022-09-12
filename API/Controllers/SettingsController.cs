@@ -9,6 +9,7 @@ using API.DTOs.Settings;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Converters;
+using API.Logging;
 using API.Services;
 using API.Services.Tasks.Scanner;
 using AutoMapper;
@@ -159,7 +160,7 @@ namespace API.Controllers
                 if (setting.Key == ServerSettingKey.LoggingLevel && updateSettingsDto.LoggingLevel + string.Empty != setting.Value)
                 {
                     setting.Value = updateSettingsDto.LoggingLevel + string.Empty;
-                    Configuration.LogLevel = updateSettingsDto.LoggingLevel;
+                    LogLevelOptions.SwitchLogLevel(updateSettingsDto.LoggingLevel);
                     _unitOfWork.SettingsRepository.Update(setting);
                 }
 

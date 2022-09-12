@@ -10,6 +10,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Logging;
 using API.Middleware;
 using API.Services;
 using API.Services.HostedServices;
@@ -270,7 +271,8 @@ namespace API
                 }
             });
 
-            app.UseSerilogRequestLogging();
+            app.UseSerilogRequestLogging(opts
+                => opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest);
 
             app.Use(async (context, next) =>
             {

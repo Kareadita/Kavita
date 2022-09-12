@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Logging;
 using API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -110,6 +111,11 @@ namespace API
                     return;
                 }
 
+                // Update the logger with the log level
+                var unitOfWork = services.GetRequiredService<IUnitOfWork>();
+                var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+                LogLevelOptions.SwitchLogLevel(settings.LoggingLevel); // TODO: I can move this to an int/enum
+
                 await host.RunAsync();
             } catch (Exception ex)
             {
@@ -149,11 +155,7 @@ namespace API
             Host.CreateDefaultBuilder(args)
                 .UseSerilog((context, services, configuration) =>
                 {
-                    configuration
-                        .ReadFrom.Configuration(context.Configuration)
-                        .ReadFrom.Services(services)
-                        .Enrich.FromLogContext()
-                        .WriteTo.Console();
+                    LogLevelOptions.CreateConfig(configuration);
                 })
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {

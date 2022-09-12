@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <p class="text-warning pt-2">Port, Logging Level, and Swagger require a manual restart of Kavita to take effect.</p>
+        <p class="text-warning pt-2">Port and Swagger require a manual restart of Kavita to take effect.</p>
         <div class="mb-3">
             <label for="settings-cachedir" class="form-label">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
             <ng-template #cacheDirectoryTooltip>Where the server place temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
@@ -48,8 +48,8 @@
     
             <div class="col-md-4 col-sm-12">
                 <label for="logging-level-port" class="form-label">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
-                <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space. Requires restart to take effect.</ng-template>
-                <span class="visually-hidden" id="logging-level-port-help">Port the server listens on. Requires restart to take effect.</span>
+                <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space.</ng-template>
+                <span class="visually-hidden" id="logging-level-port-help">Port the server listens on.</span>
                 <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-select" aria-describedby="settings-tasks-scan-help" formControlName="loggingLevel">
                     <option *ngFor="let level of logLevels" [value]="level">{{level | titlecase}}</option>
                 </select>
