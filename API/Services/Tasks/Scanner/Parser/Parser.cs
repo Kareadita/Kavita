@@ -58,7 +58,7 @@ public static class Parser
     private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
         MatchOptions, RegexTimeout);
 
-    private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+]",
+    private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+!]",
         MatchOptions, RegexTimeout);
 
     /// <summary>
