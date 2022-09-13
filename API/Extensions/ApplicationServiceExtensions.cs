@@ -68,7 +68,7 @@ public static class ApplicationServiceExtensions
     {
         services.AddDbContext<DataContext>(options =>
         {
-            options.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            options.UseSqlite("Data source=config/kavita.db");
             options.EnableDetailedErrors();
             options.EnableSensitiveDataLogging(env.IsDevelopment());
         });
