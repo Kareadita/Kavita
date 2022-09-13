@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Ev
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
+import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from '../typeahead/typeahead-settings';
 import { CollectionTag } from '../_models/collection-tag';
@@ -17,7 +18,6 @@ import { Tag } from '../_models/tag';
 import { CollectionTagService } from '../_services/collection-tag.service';
 import { LibraryService } from '../_services/library.service';
 import { MetadataService } from '../_services/metadata.service';
-import { SeriesService } from '../_services/series.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 
@@ -86,9 +86,9 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     return SortField;
   }
 
-  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
-    private utilityService: UtilityService, private collectionTagService: CollectionTagService, public toggleService: ToggleService,
-    private readonly cdRef: ChangeDetectorRef) {
+  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private utilityService: UtilityService, 
+    private collectionTagService: CollectionTagService, public toggleService: ToggleService,
+    private readonly cdRef: ChangeDetectorRef, private filterUtilitySerivce: FilterUtilitiesService) {
   }
 
   ngOnInit(): void {
@@ -105,7 +105,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       });
     }
     
-    this.filter = this.seriesService.createSeriesFilter();
+    this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
       notRead: new FormControl({value: this.filter.readStatus.notRead, disabled: this.filterSettings.readProgressDisabled}, []),
@@ -601,7 +601,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   clear() {
-    this.filter = this.seriesService.createSeriesFilter();
+    this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.readProgressGroup.get('read')?.setValue(true);
     this.readProgressGroup.get('notRead')?.setValue(true);
     this.readProgressGroup.get('inProgress')?.setValue(true);

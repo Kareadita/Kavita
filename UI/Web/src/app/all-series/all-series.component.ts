@@ -13,7 +13,6 @@ import { Series } from '../_models/series';
 import { FilterEvent, SeriesFilter } from '../_models/series-filter';
 import { Action } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
-import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -86,14 +85,14 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     private titleService: Title, private actionService: ActionService, 
     public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
     private utilityService: UtilityService, private route: ActivatedRoute, 
-    private filterUtilityService: FilterUtilitiesService, private libraryService: LibraryService) {
+    private filterUtilityService: FilterUtilitiesService) {
     
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - All Series');
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-    this.filterActiveCheck = this.seriesService.createSeriesFilter();
+    this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
   }
 
   ngOnInit(): void {

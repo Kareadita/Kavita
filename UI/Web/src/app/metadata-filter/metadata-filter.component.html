@@ -99,7 +99,7 @@
                 <div class="mb-3">
                     <label for="cover-artist" class="form-label">Cover Artists</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)"
-                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.CoverArtist)">
+                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.CoverArtist) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -114,7 +114,7 @@
                 <div class="mb-3">
                     <label for="writers" class="form-label">Writers</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)" 
-                    [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Writer)">
+                    [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Writer) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -129,7 +129,7 @@
                 <div class="mb-3">
                     <label for="publisher" class="form-label">Publisher</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)" 
-                    [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Publisher)">
+                    [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Publisher) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -144,7 +144,7 @@
                 <div class="mb-3">
                     <label for="penciller" class="form-label">Penciller</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)"
-                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Penciller)">
+                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Penciller) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -159,7 +159,7 @@
                 <div class="mb-3">
                     <label for="letterer" class="form-label">Letterer</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)"
-                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Letterer)">
+                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Letterer) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -174,7 +174,7 @@
                 <div class="mb-3">
                     <label for="inker" class="form-label">Inker</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)"
-                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Inker)">
+                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Inker) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -189,7 +189,7 @@
                 <div class="mb-3">
                     <label for="editor" class="form-label">Editor</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)" 
-                    [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Editor)">
+                    [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Editor) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -204,7 +204,7 @@
                 <div class="mb-3">
                     <label for="colorist" class="form-label">Colorist</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)"
-                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Colorist)">
+                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Colorist) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -219,7 +219,7 @@
                 <div class="mb-3">
                     <label for="character" class="form-label">Character</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)"
-                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Character)">
+                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Character) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
@@ -234,7 +234,7 @@
                 <div class="mb-3">
                     <label for="translators" class="form-label">Translators</label>
                     <app-typeahead (selectedData)="updatePersonFilters($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)"
-                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Translator)">
+                     [reset]="resetTypeaheads" [disabled]="!peopleSettings.hasOwnProperty(PersonRole.Translator) || filterSettings.peopleDisabled">
                         <ng-template #badgeItem let-item let-position="idx">
                             {{item.name}}
                         </ng-template>
