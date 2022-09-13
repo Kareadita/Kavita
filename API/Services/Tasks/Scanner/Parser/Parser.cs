@@ -67,6 +67,8 @@ public static class Parser
     private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
         MatchOptions, RegexTimeout);
 
+    private const string Number = @"\d+(\.\d)?";
+    private const string NumberRange = Number + @"(-" + Number + @")?";
 
     private static readonly Regex[] MangaVolumeRegex = new[]
     {
@@ -78,9 +80,10 @@ public static class Parser
         new Regex(
             @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
             MatchOptions, RegexTimeout),
+        // TODO: In .NET 7, update this to use raw literal strings and apply the NumberRange everywhere
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
         new Regex(
-            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>\d+(-\d+)?)(?!\])",
+            @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])",
             MatchOptions, RegexTimeout),
         // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
         new Regex(

@@ -27,7 +27,7 @@ public class MangaParserTests
     [InlineData("vol_356-1", "356")] // Mangapy syntax
     [InlineData("No Volume", "0")]
     [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
-    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
+    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1.1")]
     [InlineData("Tonikaku Cawaii [Volume 11].cbz", "11")]
     [InlineData("[WS]_Ichiban_Ushiro_no_Daimaou_v02_ch10.zip", "2")]
     [InlineData("[xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]", "1")]
@@ -39,7 +39,6 @@ public class MangaParserTests
     [InlineData("Ichinensei_ni_Nacchattara_v02_ch11_[Taruby]_v1.3.zip", "2")]
     [InlineData("Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", "1")]
     [InlineData("Dorohedoro v11 (2013) (Digital) (LostNerevarine-Empire).cbz", "11")]
-    [InlineData("Dorohedoro v12 (2013) (Digital) (LostNerevarine-Empire).cbz", "12")]
     [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
     [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "0")]
     [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1")]
@@ -73,6 +72,7 @@ public class MangaParserTests
     [InlineData("시즌34삽화2", "34")]
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1巻", "1")]
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
+    [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "3.5")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
