@@ -468,7 +468,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.user = user;
-      this.hasBookmarkRights = this.accountService.hasBookmarkRole(user);
+      this.hasBookmarkRights = this.accountService.hasBookmarkRole(user) || this.accountService.hasAdminRole(user);
       this.readingDirection = this.user.preferences.readingDirection;
       this.scalingOption = this.user.preferences.scalingOption;
       this.pageSplitOption = this.user.preferences.pageSplitOption;
