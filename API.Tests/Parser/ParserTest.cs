@@ -162,7 +162,7 @@ public class ParserTests
     [InlineData("Darker Than_Black", "darkerthanblack")]
     [InlineData("Citrus", "citrus")]
     [InlineData("Citrus+", "citrus+")]
-    [InlineData("Again!!!!", "again")]
+    [InlineData("Again", "again")]
     [InlineData("카비타", "카비타")]
     [InlineData("06", "06")]
     [InlineData("", "")]
