@@ -59,7 +59,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IEventHub, EventHub>();
 
         services.AddSqLite(config, env);
-        services.AddLogging(config);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
     }
 
@@ -71,15 +70,6 @@ public static class ApplicationServiceExtensions
             options.UseSqlite("Data source=config/kavita.db");
             options.EnableDetailedErrors();
             options.EnableSensitiveDataLogging(env.IsDevelopment());
-        });
-    }
-
-    private static void AddLogging(this IServiceCollection services, IConfiguration config)
-    {
-        services.AddLogging(loggingBuilder =>
-        {
-            var loggingSection = config.GetSection("Logging");
-            loggingBuilder.AddFile(loggingSection);
         });
     }
 }

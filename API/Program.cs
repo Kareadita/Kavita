@@ -37,7 +37,6 @@ public class Program
     public static async Task Main(string[] args)
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
-        var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
             .CreateBootstrapLogger();
@@ -87,7 +86,8 @@ public class Program
                 await Seed.SeedThemes(context);
                 await Seed.SeedUserApiKeys(context);
 
-
+                // NOTE: This check is from v0.4.8 (Nov 04, 2021). We can likely remove this
+                var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
                 if (isDocker && new FileInfo("data/appsettings.json").Exists)
                 {
                     logger.LogCritical("WARNING! Mount point is incorrect, nothing here will persist. Please change your container mount from /kavita/data to /kavita/config");
