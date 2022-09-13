@@ -297,8 +297,12 @@ public class ArchiveServiceTests
         Assert.NotStrictEqual(null, actual);
     }
 
+    #endregion
+
+    #region CanParseComicInfo_DefaultNumberIsBlank
+
     [Fact]
-    public void CanParseComicInfo2()
+    public void CanParseComicInfo_DefaultNumberIsBlank()
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
         var archive = Path.Join(testDirectory, "ComicInfo2.zip");
