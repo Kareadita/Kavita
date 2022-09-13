@@ -118,5 +118,4 @@ public class ServerInfoDto
     /// </summary>
     /// <remarks>Introduced in v0.5.4</remarks>
     public bool UsingSeriesRelationships { get; set; }
-
 }

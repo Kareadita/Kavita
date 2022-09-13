@@ -9,10 +9,23 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 export class CircularLoaderComponent {
 
   @Input() currentValue: number = 0;
-  @Input() maxValue: number = 0;
+  /**
+   * If an animation should be used
+   */
   @Input() animation: boolean = true;
+  /**
+   * Color of an inner bar
+   */
   @Input() innerStrokeColor: string = 'transparent';
+  /**
+   * Color of the Downloader bar
+   */
+  @Input() outerStrokeColor: string = '#4ac694';
+  @Input() backgroundColor: string = '#000';
   @Input() fontSize: string = '36px';
+  /**
+   * Show the icon inside the downloader
+   */
   @Input() showIcon: boolean = true;
   /**
    * The width in pixels of the loader
