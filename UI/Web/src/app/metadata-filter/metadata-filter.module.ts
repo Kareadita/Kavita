@@ -18,7 +18,7 @@ import { TypeaheadModule } from '../typeahead/typeahead.module';
     NgbRatingModule,
     NgbCollapseModule,
     SharedModule,
-    TypeaheadModule
+    TypeaheadModule,
   ],
   exports: [
     MetadataFilterComponent
