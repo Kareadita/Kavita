@@ -125,4 +125,18 @@ public class ComicInfo
     }
 
 
+    // TODO: Example of Equals() implementation. This currently only
+    // covers enough fields to cover the unit tests
+	public override bool Equals(object obj)
+	{
+		return obj is ComicInfo info &&
+				this.Count == info.Count &&
+				this.Genre == info.Genre &&
+				this.Number == info.Number &&
+				this.PageCount == info.PageCount &&
+				this.Series == info.Series &&
+				this.Summary.Trim() == info.Summary.Trim() &&
+				this.Title == info.Title &&
+				this.Volume == info.Volume;
+	}
 }

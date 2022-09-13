@@ -291,10 +291,7 @@ public class ArchiveServiceTests
             Web = "https://www.comixology.com/BTOOOM/digital-comic/450184"
         };
 
-        // XXX: This is not doing anything useful
-        Assert.NotStrictEqual(expected, actual);
-        // XXX: This also works
-        Assert.NotStrictEqual(null, actual);
+        Assert.StrictEqual(expected, actual);
     }
 
     #endregion
@@ -306,14 +303,25 @@ public class ArchiveServiceTests
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
         var archive = Path.Join(testDirectory, "ComicInfo2.zip");
-        var comicInfo = _archiveService.GetComicInfo(archive);
+        var actual = _archiveService.GetComicInfo(archive);
+        var expected = new ComicInfo()
+        {
+            Publisher = "Dark Horse Comics",
+            Genre = "Supernatural/Occult, Horror, Action/Adventure",
+            Summary = "When strangeness threatens to engulf the world, a strange man will come to save it. Sent to investigate a mystery with supernatural overtones, Hellboy discovers the secrets of his own origins, and his link to the Nazi occultists who promised Hitler a final solution in the form of a demonic avatar.",
+            PageCount = 147,
+            LanguageISO = "en",
+            Notes = "Scraped metadata from Comixology [CMXDB450184]",
+            Series = "Hellboy",
+            Title = "The Right Hand of Doom",
+            Number = "",
+            Count = 0,
+            Volume = "4",
+            Web = "https://comicvine.gamespot.com/hellboy-the-right-hand-of-doom-1-volume-4/4000-194124/"
 
-        Assert.NotNull(comicInfo);
-        Assert.Equal("Hellboy", comicInfo.Series);
-        Assert.Equal("The Right Hand of Doom", comicInfo.Title);
-        Assert.Equal("", comicInfo.Number);
-        Assert.Equal(0, comicInfo.Count);
-        Assert.Equal("4", comicInfo.Volume);
+        };
+
+        Assert.StrictEqual(expected, actual);
     }
 
 
