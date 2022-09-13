@@ -1,12 +1,11 @@
 ﻿using System.Xml.Serialization;
 
-namespace API.DTOs.OPDS
+namespace API.DTOs.OPDS;
+
+public class FeedAuthor
 {
-    public class FeedAuthor
-    {
-        [XmlElement("name")]
-        public string Name { get; set; }
-        [XmlElement("uri")]
-        public string Uri { get; set; }
-    }
+    [XmlElement("name")]
+    public string Name { get; set; }
+    [XmlElement("uri")]
+    public string Uri { get; set; }
 }

@@ -1,10 +1,9 @@
-﻿namespace API.Entities.Enums
+﻿namespace API.Entities.Enums;
+
+public enum ScalingOption
 {
-    public enum ScalingOption
-    {
-        FitToHeight = 0,
-        FitToWidth = 1,
-        Original = 2,
-        Automatic = 3
-    }
+    FitToHeight = 0,
+    FitToWidth = 1,
+    Original = 2,
+    Automatic = 3
 }

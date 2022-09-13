@@ -23,6 +23,8 @@ import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageMediaSettingsComponent } from './manage-media-settings/manage-media-settings.component';
 import { ManageEmailSettingsComponent } from './manage-email-settings/manage-email-settings.component';
 import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tasks-settings.component';
+import { ManageLogsComponent } from './manage-logs/manage-logs.component';
+import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 
 
 
@@ -45,6 +47,7 @@ import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tas
     ManageMediaSettingsComponent,
     ManageEmailSettingsComponent,
     ManageTasksSettingsComponent,
+    ManageLogsComponent,
   ],
   imports: [
     CommonModule,
@@ -59,6 +62,7 @@ import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tas
     PipeModule,
     SidenavModule,
     UserSettingsModule, // API-key componet
+    VirtualScrollerModule
   ],
   providers: []
 })

@@ -1,0 +1,9 @@
+<ng-container *ngIf="logs$ | async as items">
+    <virtual-scroller #scroll [items]="items" [bufferAmount]="1">
+        <div class="grid row g-0" #container>
+            <div class="card col-auto mt-2 mb-2" *ngFor="let item of scroll.viewPortItems; index as i">
+                {{item.timestamp | date}} [{{item.level}}] {{item.message}}
+            </div>
+        </div>
+    </virtual-scroller>
+</ng-container>

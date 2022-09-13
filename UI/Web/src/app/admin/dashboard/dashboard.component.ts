@@ -13,7 +13,8 @@ enum TabID {
   Libraries = 'libraries',
   System = 'system',
   Plugins = 'plugins',
-  Tasks = 'tasks'
+  Tasks = 'tasks',
+  Logs = 'logs'
 }
 
 @Component({
@@ -27,6 +28,7 @@ export class DashboardComponent implements OnInit {
     {title: 'General', fragment: TabID.General},
     {title: 'Users', fragment: TabID.Users},
     {title: 'Libraries', fragment: TabID.Libraries},
+    //{title: 'Logs', fragment: TabID.Logs},
     {title: 'Media', fragment: TabID.Media},
     {title: 'Email', fragment: TabID.Email},
     //{title: 'Plugins', fragment: TabID.Plugins},

@@ -1,8 +1,7 @@
-﻿namespace API.DTOs.Reader
+﻿namespace API.DTOs.Reader;
+
+public class MarkVolumeReadDto
 {
-    public class MarkVolumeReadDto
-    {
-        public int SeriesId { get; init; }
-        public int VolumeId { get; init; }
-    }
+    public int SeriesId { get; init; }
+    public int VolumeId { get; init; }
 }

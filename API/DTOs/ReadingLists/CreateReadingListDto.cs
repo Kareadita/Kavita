@@ -1,7 +1,6 @@
-﻿namespace API.DTOs.ReadingLists
+﻿namespace API.DTOs.ReadingLists;
+
+public class CreateReadingListDto
 {
-    public class CreateReadingListDto
-    {
-        public string Title { get; init; }
-    }
+    public string Title { get; init; }
 }

@@ -1,11 +1,10 @@
-﻿namespace API.DTOs.ReadingLists
+﻿namespace API.DTOs.ReadingLists;
+
+public class UpdateReadingListDto
 {
-    public class UpdateReadingListDto
-    {
-        public int ReadingListId { get; set; }
-        public string Title { get; set; }
-        public string Summary { get; set; }
-        public bool Promoted { get; set; }
-        public bool CoverImageLocked { get; set; }
-    }
+    public int ReadingListId { get; set; }
+    public string Title { get; set; }
+    public string Summary { get; set; }
+    public bool Promoted { get; set; }
+    public bool CoverImageLocked { get; set; }
 }

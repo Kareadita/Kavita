@@ -1,8 +1,7 @@
-﻿namespace API.Entities.Enums
+﻿namespace API.Entities.Enums;
+
+public enum ReadingDirection
 {
-    public enum ReadingDirection
-    {
-        LeftToRight = 0,
-        RightToLeft = 1
-    }
+    LeftToRight = 0,
+    RightToLeft = 1
 }

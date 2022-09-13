@@ -1,9 +1,8 @@
-﻿namespace API.DTOs.ReadingLists
+﻿namespace API.DTOs.ReadingLists;
+
+public class UpdateReadingListByVolumeDto
 {
-    public class UpdateReadingListByVolumeDto
-    {
-        public int VolumeId { get; init; }
-        public int SeriesId { get; init; }
-        public int ReadingListId { get; init; }
-    }
+    public int VolumeId { get; init; }
+    public int SeriesId { get; init; }
+    public int ReadingListId { get; init; }
 }

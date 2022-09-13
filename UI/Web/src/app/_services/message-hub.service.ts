@@ -142,6 +142,12 @@ export class MessageHubService {
       this.onlineUsersSource.next(usernames);
     });
 
+    this.hubConnection.on("LogObject", resp => {
+      console.log(resp);
+    });
+    this.hubConnection.on("LogString", resp => {
+      console.log(resp);
+    });
 
     this.hubConnection.on(EVENTS.ScanSeries, resp => {
       this.messagesSource.next({

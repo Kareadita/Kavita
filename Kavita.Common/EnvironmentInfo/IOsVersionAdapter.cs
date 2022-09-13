@@ -1,8 +1,7 @@
-﻿namespace Kavita.Common.EnvironmentInfo
+﻿namespace Kavita.Common.EnvironmentInfo;
+
+public interface IOsVersionAdapter
 {
-    public interface IOsVersionAdapter
-    {
-        bool Enabled { get; }
-        OsVersionModel Read();
-    }
+    bool Enabled { get; }
+    OsVersionModel Read();
 }

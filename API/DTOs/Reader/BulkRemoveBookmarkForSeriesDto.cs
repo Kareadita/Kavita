@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs.Reader
+namespace API.DTOs.Reader;
+
+public class BulkRemoveBookmarkForSeriesDto
 {
-    public class BulkRemoveBookmarkForSeriesDto
-    {
-        public ICollection<int> SeriesIds { get; init; }
-    }
+    public ICollection<int> SeriesIds { get; init; }
 }
