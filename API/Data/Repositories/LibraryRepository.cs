@@ -44,6 +44,7 @@ public interface ILibraryRepository
     IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
+    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync();
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
     Library GetLibraryByFolder(string folder);
@@ -294,6 +295,26 @@ public class LibraryRepository : ILibraryRepository
     {
         var ret = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.Language)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Distinct()
+            .ToListAsync();
+
+        return ret
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(s => new LanguageDto()
+            {
+                Title = CultureInfo.GetCultureInfo(s).DisplayName,
+                IsoCode = s
+            })
+            .OrderBy(s => s.Title)
+            .ToList();
+    }
+
+    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync()
+    {
+        var ret = await _context.Series
             .Select(s => s.Metadata.Language)
             .AsSplitQuery()
             .AsNoTracking()

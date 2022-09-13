@@ -128,15 +128,8 @@ public class MetadataController : BaseApiController
             return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
         }
 
-        var englishTag = CultureInfo.GetCultureInfo("en");
-        return Ok(new List<LanguageDto>()
-        {
-            new ()
-            {
-                Title = englishTag.DisplayName,
-                IsoCode = englishTag.IetfLanguageTag
-            }
-        });
+
+        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync());
     }
 
     [HttpGet("all-languages")]
