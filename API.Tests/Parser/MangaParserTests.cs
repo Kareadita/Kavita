@@ -195,7 +195,7 @@ public class MangaParserTests
     [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "1-8")]
     [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "0")]
     [InlineData("c001", "1")]
-    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", "12")]
+    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", "0")]
     [InlineData("Adding volume 1 with File: Ana Satsujin Vol. 1 Ch. 5 - Manga Box (gb).cbz", "5")]
     [InlineData("Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz", "18")]
     [InlineData("Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip", "0-6")]
@@ -233,8 +233,7 @@ public class MangaParserTests
     [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", "0")]
     [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
     [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
-    [InlineData("Transferred to another world magical swordsman v1.1", "1")]
-    [InlineData("Transferred to another world magical swordsman v1.2", "2")]
+    [InlineData("Transferred to another world magical swordsman v1.1", "0")]
     [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
     [InlineData("Kiss x Sis - Ch.12 - 1 , 2 , 3P!.cbz", "12")]
     [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
@@ -259,6 +258,7 @@ public class MangaParserTests
     [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
     [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
     [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
+    [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "0")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));

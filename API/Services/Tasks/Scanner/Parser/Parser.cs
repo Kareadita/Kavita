@@ -462,7 +462,7 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
         new Regex(
-            @"v\d+\.(?<Chapter>\d+(?:.\d+|-\d+)?)",
+            @"v\d+\.(\s|_)(?<Chapter>\d+(?:.\d+|-\d+)?)",
             MatchOptions, RegexTimeout),
         // Umineko no Naku Koro ni - Episode 3 - Banquet of the Golden Witch #02.cbz (Rare case, if causes issue remove)
         new Regex(
