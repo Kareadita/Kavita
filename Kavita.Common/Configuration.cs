@@ -154,52 +154,6 @@ public static class Configuration
 
     #endregion
 
-    #region LogLevel
-
-    private static void SetLogLevel(string filePath, string logLevel)
-    {
-        try
-        {
-            var currentLevel = GetLogLevel(filePath);
-            var json = File.ReadAllText(filePath)
-                .Replace($"\"Default\": \"{currentLevel}\"", $"\"Default\": \"{logLevel}\"");
-            File.WriteAllText(filePath, json);
-        }
-        catch (Exception)
-        {
-            /* Swallow Exception */
-        }
-    }
-
-    private static string GetLogLevel(string filePath)
-    {
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
-
-            if (jsonObj.TryGetProperty("Logging", out JsonElement tokenElement))
-            {
-                foreach (var property in tokenElement.EnumerateObject())
-                {
-                    if (!property.Name.Equals("LogLevel")) continue;
-                    foreach (var logProperty in property.Value.EnumerateObject().Where(logProperty => logProperty.Name.Equals("Default")))
-                    {
-                        return logProperty.Value.GetString();
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error writing app settings: " + ex.Message);
-        }
-
-        return "Information";
-    }
-
-    #endregion
-
     private static string GetBranch(string filePath)
     {
         const string defaultBranch = "main";
