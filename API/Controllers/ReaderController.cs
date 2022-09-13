@@ -529,7 +529,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    [HttpGet("get-bookmarks")]
+    [HttpGet("chapter-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
@@ -541,7 +541,7 @@ public class ReaderController : BaseApiController
     /// Returns a list of all bookmarked pages for a User
     /// </summary>
     /// <returns></returns>
-    [HttpGet("get-all-bookmarks")]
+    [HttpGet("all-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
@@ -629,7 +629,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    [HttpGet("get-volume-bookmarks")]
+    [HttpGet("volume-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
@@ -642,7 +642,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpGet("get-series-bookmarks")]
+    [HttpGet("series-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);

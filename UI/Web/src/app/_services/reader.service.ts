@@ -51,19 +51,19 @@ export class ReaderService {
   }
 
   getAllBookmarks() {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-all-bookmarks');
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks');
   }
 
   getBookmarks(chapterId: number) {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-bookmarks?chapterId=' + chapterId);
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/chapter-bookmarks?chapterId=' + chapterId);
   }
 
   getBookmarksForVolume(volumeId: number) {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-volume-bookmarks?volumeId=' + volumeId);
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/volume-bookmarks?volumeId=' + volumeId);
   }
 
   getBookmarksForSeries(seriesId: number) {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-series-bookmarks?seriesId=' + seriesId);
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/series-bookmarks?seriesId=' + seriesId);
   }
 
   clearBookmarks(seriesId: number) {
