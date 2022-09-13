@@ -133,10 +133,34 @@ public static class Parser
         new Regex(
             @"(?<Volume>\d+(?:(\-)\d+)?)巻",
             MatchOptions, RegexTimeout),
+        // Russian Volume: Том n -> Volume n, Тома n -> Volume
+        new Regex(
+            @"Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: n Том -> Volume n
+        new Regex(
+            @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
+            MatchOptions, RegexTimeout),
     };
 
     private static readonly Regex[] MangaSeriesRegex = new[]
     {
+        // Russian Volume: Том n -> Volume n, Тома n -> Volume
+        new Regex(
+            @"(?<Series>.+?)Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: n Том -> Volume n
+        new Regex(
+            @"(?<Series>.+?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: n Главa -> Chapter n
+        new Regex(
+            @"(?<Series>.+?)(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: Главы n -> Chapter n
+        new Regex(
+            @"(?<Series>.+?)(Глава|глава|Главы|Глава)(\.?)(\s|_)?(?<Chapter>\d+(?:.\d+|-\d+)?)",
+            MatchOptions, RegexTimeout),
         // Grand Blue Dreaming - SP02
         new Regex(
             @"(?<Series>.*)(\b|_|-|\s)(?:sp)\d",
@@ -283,10 +307,27 @@ public static class Parser
         new Regex(
             @"(?<Series>.+?)第(?<Volume>\d+(?:(\-)\d+)?)巻",
             MatchOptions, RegexTimeout),
+
     };
 
     private static readonly Regex[] ComicSeriesRegex = new[]
     {
+        // Russian Volume: Том n -> Volume n, Тома n -> Volume
+        new Regex(
+            @"(?<Series>.+?)Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: n Том -> Volume n
+        new Regex(
+            @"(?<Series>.+?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: n Главa -> Chapter n
+        new Regex(
+            @"(?<Series>.+?)(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: Главы n -> Chapter n
+        new Regex(
+            @"(?<Series>.+?)(Глава|глава|Главы|Глава)(\.?)(\s|_)?(?<Chapter>\d+(?:.\d+|-\d+)?)",
+            MatchOptions, RegexTimeout),
         // Tintin - T22 Vol 714 pour Sydney
         new Regex(
             @"(?<Series>.+?)\s?(\b|_|-)\s?((vol|tome|t)\.?)(?<Volume>\d+(-\d+)?)",
@@ -383,6 +424,14 @@ public static class Parser
         new Regex(
             @"(?<Volume>\d+(?:(\-)\d+)?)巻",
             MatchOptions, RegexTimeout),
+        // Russian Volume: Том n -> Volume n, Тома n -> Volume
+        new Regex(
+            @"Том(а?)(\.?)(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Volume: n Том -> Volume n
+        new Regex(
+            @"(\s|_)?(?<Volume>\d+(?:(\-)\d+)?)(\s|_)Том(а?)",
+            MatchOptions, RegexTimeout),
     };
 
     private static readonly Regex[] ComicChapterRegex = new[]
@@ -420,11 +469,18 @@ public static class Parser
             @"^(?<Series>.+?)(?:vol\.?\d+)\s#(?<Chapter>\d+)",
             MatchOptions,
             RegexTimeout),
+        // Russian Chapter: Главы n -> Chapter n
+        new Regex(
+            @"(Глава|глава|Главы|Глава)(\.?)(\s|_)?(?<Chapter>\d+(?:.\d+|-\d+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: n Главa -> Chapter n
+        new Regex(
+            @"(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
+            MatchOptions, RegexTimeout),
         // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
         new Regex(
             @"^(?<Series>.+?)(?: (?<Chapter>\d+))",
             MatchOptions, RegexTimeout),
-
         // Saga 001 (2012) (Digital) (Empire-Zone)
         new Regex(
             @"(?<Series>.+?)(?: |_)(c? ?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)\s\(\d{4}",
@@ -441,7 +497,6 @@ public static class Parser
         new Regex(
             @"^(?<Series>.+?)-(chapter-)?(?<Chapter>\d+)",
             MatchOptions, RegexTimeout),
-
     };
 
     private static readonly Regex[] ReleaseGroupRegex = new[]
@@ -471,6 +526,10 @@ public static class Parser
         // Green Worldz - Chapter 027, Kimi no Koto ga Daidaidaidaidaisuki na 100-nin no Kanojo Chapter 11-10
         new Regex(
             @"^(?!Vol)(?<Series>.*)\s?(?<!vol\. )\sChapter\s(?<Chapter>\d+(?:\.?[\d-]+)?)",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: Главы n -> Chapter n
+        new Regex(
+            @"(Глава|глава|Главы|Глава)(\.?)(\s|_)?(?<Chapter>\d+(?:.\d+|-\d+)?)",
             MatchOptions, RegexTimeout),
         // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
         new Regex(
@@ -506,9 +565,14 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // Korean Chapter: 第10話 -> Chapter n, [ハレム]ナナとカオル ～高校生のSMごっこ～　第1話
         new Regex(
-            @"第?(?<Chapter>\d+(?:.\d+|-\d+)?)話",
+            @"第?(?<Chapter>\d+(?:\.\d+|-\d+)?)話",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: n Главa -> Chapter n
+        new Regex(
+            @"(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
             MatchOptions, RegexTimeout),
     };
+
     private static readonly Regex[] MangaEditionRegex = {
         // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
         new Regex(
@@ -763,12 +827,10 @@ public static class Parser
             var matches = regex.Matches(filename);
             foreach (Match match in matches)
             {
-                if (match.Groups["Chapter"].Success && match.Groups["Chapter"] != Match.Empty)
-                {
-                    var value = match.Groups["Chapter"].Value;
-                    var hasPart = match.Groups["Part"].Success;
-                    return FormatValue(value, hasPart);
-                }
+                if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
+                var value = match.Groups["Chapter"].Value;
+                var hasPart = match.Groups["Part"].Success;
+                return FormatValue(value, hasPart);
 
             }
         }

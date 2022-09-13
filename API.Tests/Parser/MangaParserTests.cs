@@ -73,6 +73,10 @@ public class MangaParserTests
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1巻", "1")]
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
     [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "3.5")]
+    [InlineData("Kebab Том 1 Глава 3", "1")]
+    [InlineData("Манга Глава 2", "0")]
+    [InlineData("Манга Тома 1-4", "1-4")]
+    [InlineData("Манга Том 1-4", "1-4")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
@@ -181,6 +185,10 @@ public class MangaParserTests
     [InlineData("諌山創] 進撃の巨人 第23巻", "諌山創] 進撃の巨人")]
     [InlineData("(一般コミック) [奥浩哉] いぬやしき 第09巻", "いぬやしき")]
     [InlineData("Highschool of the Dead - 02", "Highschool of the Dead")]
+    [InlineData("Kebab Том 1 Глава 3", "Kebab")]
+    [InlineData("Манга Глава 2", "Манга")]
+    [InlineData("Манга Глава 2-2", "Манга")]
+    [InlineData("Манга Том 1 3-4 Глава", "Манга")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
@@ -259,6 +267,10 @@ public class MangaParserTests
     [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
     [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
     [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "0")]
+    [InlineData("Kebab Том 1 Глава 3", "3")]
+    [InlineData("Манга Глава 2", "2")]
+    [InlineData("Манга 2 Глава", "2")]
+    [InlineData("Манга Том 1 2 Глава", "2")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));
