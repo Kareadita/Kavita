@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
@@ -10,6 +10,9 @@ import { MangaFormat } from '../_models/manga-format';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/page-bookmark';
 import { ProgressBookmark } from '../_models/progress-bookmark';
+import { SeriesFilter } from '../_models/series-filter';
+import { UtilityService } from '../shared/_services/utility.service';
+import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -24,7 +27,9 @@ export class ReaderService {
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
-  constructor(private httpClient: HttpClient, private router: Router, private location: Location) { }
+  constructor(private httpClient: HttpClient, private router: Router, 
+    private location: Location, private utilityService: UtilityService,
+    private filterUtilitySerivce: FilterUtilitiesService) { }
 
   getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
     if (format === undefined) format = MangaFormat.ARCHIVE;
@@ -50,20 +55,24 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page});
   }
 
-  getAllBookmarks() {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-all-bookmarks');
+  getAllBookmarks(filter: SeriesFilter | undefined) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, undefined, undefined);
+    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
+
+    return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', data);
   }
 
   getBookmarks(chapterId: number) {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-bookmarks?chapterId=' + chapterId);
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/chapter-bookmarks?chapterId=' + chapterId);
   }
 
   getBookmarksForVolume(volumeId: number) {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-volume-bookmarks?volumeId=' + volumeId);
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/volume-bookmarks?volumeId=' + volumeId);
   }
 
   getBookmarksForSeries(seriesId: number) {
-    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/get-series-bookmarks?seriesId=' + seriesId);
+    return this.httpClient.get<PageBookmark[]>(this.baseUrl + 'reader/series-bookmarks?seriesId=' + seriesId);
   }
 
   clearBookmarks(seriesId: number) {

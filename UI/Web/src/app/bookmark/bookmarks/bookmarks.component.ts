@@ -1,13 +1,17 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take, Subject } from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
+import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { DownloadService } from 'src/app/shared/_services/download.service';
+import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
+import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
+import { FilterEvent, SeriesFilter } from 'src/app/_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -29,6 +33,13 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   clearingSeries: {[id: number]: boolean} = {};
   actions: ActionItem<Series>[] = [];
 
+  pagination!: Pagination;
+  filter: SeriesFilter | undefined = undefined;
+  filterSettings: FilterSettings = new FilterSettings();
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
+  filterActive: boolean = false;
+  filterActiveCheck!: SeriesFilter;
+
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
 
@@ -38,12 +49,25 @@ export class BookmarksComponent implements OnInit, OnDestroy {
     private downloadService: DownloadService, private toastr: ToastrService,
     private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService, 
     public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-    private router: Router, private readonly cdRef: ChangeDetectorRef) { }
+    private router: Router, private readonly cdRef: ChangeDetectorRef, 
+    private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute) {
+      this.filterSettings.ageRatingDisabled = true;
+      this.filterSettings.collectionDisabled = true;
+      this.filterSettings.formatDisabled = true;
+      this.filterSettings.genresDisabled = true;
+      this.filterSettings.languageDisabled = true;
+      this.filterSettings.libraryDisabled = true;
+      this.filterSettings.peopleDisabled = true;
+      this.filterSettings.publicationStatusDisabled = true;
+      this.filterSettings.ratingDisabled = true;
+      this.filterSettings.readProgressDisabled = true;
+      this.filterSettings.tagsDisabled = true;
+      this.filterSettings.sortDisabled = true;
+    }
 
   ngOnInit(): void {
-    this.loadBookmarks();
-
     this.actions = this.actionFactoryService.getBookmarkActions(this.handleAction.bind(this));
+    this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
   }
 
   ngOnDestroy() {
@@ -111,9 +135,15 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   }
 
   loadBookmarks() {
+    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
+    if (this.filter == undefined) {
+      this.filter = this.filterUtilityService.createSeriesFilter();
+      this.cdRef.markForCheck();
+    }
     this.loadingBookmarks = true;
     this.cdRef.markForCheck();
-    this.readerService.getAllBookmarks().pipe(take(1)).subscribe(bookmarks => {
+
+    this.readerService.getAllBookmarks(this.filter).pipe(take(1)).subscribe(bookmarks => {
       this.bookmarks = bookmarks;
       this.seriesIds = {};
       this.bookmarks.forEach(bmk => {
@@ -172,6 +202,13 @@ export class BookmarksComponent implements OnInit, OnDestroy {
         this.cdRef.markForCheck();
       }
     });
+  }
+
+  updateFilter(data: FilterEvent) {
+    this.filter = data.filter;
+
+    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    this.loadBookmarks();
   }
 
 }

@@ -29,13 +29,6 @@ public static class Configuration
         set => SetJwtToken(GetAppSettingFilename(), value);
     }
 
-
-    public static string DatabasePath
-    {
-        get => GetDatabasePath(GetAppSettingFilename());
-        set => SetDatabasePath(GetAppSettingFilename(), value);
-    }
-
     private static string GetAppSettingFilename()
     {
         if (!string.IsNullOrEmpty(AppSettingsFilename))
@@ -184,54 +177,6 @@ public static class Configuration
             var currentBranch = GetBranch(filePath);
             var json = File.ReadAllText(filePath)
                 .Replace("\"Branch\": " + currentBranch, "\"Branch\": " + updatedBranch);
-            File.WriteAllText(filePath, json);
-        }
-        catch (Exception)
-        {
-            /* Swallow Exception */
-        }
-    }
-
-
-    private static string GetDatabasePath(string filePath)
-    {
-        const string defaultFile = "config/kavita.db";
-
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
-
-            if (jsonObj.TryGetProperty("ConnectionStrings", out JsonElement tokenElement))
-            {
-                foreach (var property in tokenElement.EnumerateObject())
-                {
-                    if (!property.Name.Equals("DefaultConnection")) continue;
-                    return property.Value.GetString();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error writing app settings: " + ex.Message);
-        }
-
-        return defaultFile;
-    }
-
-    /// <summary>
-    /// This should NEVER be called except by MigrateConfigFiles
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <param name="updatedPath"></param>
-    private static void SetDatabasePath(string filePath, string updatedPath)
-    {
-        try
-        {
-            var existingString = GetDatabasePath(filePath);
-            var json = File.ReadAllText(filePath)
-                .Replace(existingString,
-                    "Data source=" + updatedPath);
             File.WriteAllText(filePath, json);
         }
         catch (Exception)

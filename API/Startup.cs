@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
@@ -18,12 +17,10 @@ using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Hangfire.Storage.SQLite;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -193,8 +190,8 @@ public class Startup
 
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
 
-                    // Only needed for v0.5.5.x and v0.5.6
-                    await MigrateNormalizedLocalizedName.Migrate(unitOfWork, dataContext, logger);
+                    // only needed for v0.5.4 and v0.6.0
+                    await MigrateNormalizedEverything.Migrate(unitOfWork, dataContext, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
+import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
@@ -71,10 +72,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     return Breakpoint;
   }
 
-  constructor(private seriesService: SeriesService, public utilityService: UtilityService,
+  constructor(private filterUtilitySerivce: FilterUtilitiesService, public utilityService: UtilityService,
     @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
     private jumpbarService: JumpbarService, private router: Router) {
-    this.filter = this.seriesService.createSeriesFilter();
+    this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
 
   }

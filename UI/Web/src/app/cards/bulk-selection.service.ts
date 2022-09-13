@@ -1,5 +1,5 @@
-import { ChangeDetectorRef, Injectable } from '@angular/core';
-import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { Injectable } from '@angular/core';
+import { NavigationStart, Router } from '@angular/router';
 import { ReplaySubject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
@@ -23,7 +23,6 @@ export class BulkSelectionService {
   private selectedCards: { [key: string]: {[key: number]: boolean} } = {};
   private dataSourceMax: { [key: string]: number} = {};
   public isShiftDown: boolean = false;
-  private activeRoute: string = '';
 
   private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
   public actions$ = this.actionsSource.asObservable();
@@ -34,14 +33,13 @@ export class BulkSelectionService {
    */
   public selections$ = this.selectionsSource.asObservable();
 
-  constructor(private router: Router, private actionFactory: ActionFactoryService, private route: ActivatedRoute) {
+  constructor(router: Router, private actionFactory: ActionFactoryService) {
     router.events
       .pipe(filter(event => event instanceof NavigationStart))
-      .subscribe((event) => {
+      .subscribe(() => {
         this.deselectAll();
         this.dataSourceMax = {};
         this.prevIndex = 0;
-        this.activeRoute = this.router.url;
       });
 
   }
@@ -53,7 +51,7 @@ export class BulkSelectionService {
         this.debugLog('Selecting ' + dataSource + ' cards from ' + this.prevIndex + ' to ' + index);
         this.selectCards(dataSource, this.prevIndex, index, !wasSelected);  
       } else {
-        const isForwardSelection = index < this.prevIndex;
+        const isForwardSelection = index > this.prevIndex;
 
         if (isForwardSelection) {
           this.debugLog('Selecting ' + this.prevDataSource + ' cards from ' + this.prevIndex + ' to ' + this.dataSourceMax[this.prevDataSource]);

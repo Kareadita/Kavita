@@ -115,8 +115,9 @@ public class MetadataController : BaseApiController
     }
 
     /// <summary>
-    /// Fetches all age ratings from the instance
+    /// Fetches all age languages from the libraries passed (or if none passed, all in the server)
     /// </summary>
+    /// <remarks>This does not perform RBS for the user if they have Library access due to the non-sensitive nature of languages</remarks>
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <returns></returns>
     [HttpGet("languages")]
@@ -128,15 +129,8 @@ public class MetadataController : BaseApiController
             return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
         }
 
-        var englishTag = CultureInfo.GetCultureInfo("en");
-        return Ok(new List<LanguageDto>()
-        {
-            new ()
-            {
-                Title = englishTag.DisplayName,
-                IsoCode = englishTag.IetfLanguageTag
-            }
-        });
+
+        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync());
     }
 
     [HttpGet("all-languages")]

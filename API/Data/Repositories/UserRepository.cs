@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.DTOs.Reader;
 using API.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace API.Data.Repositories;
 
@@ -44,7 +46,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
-    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
+    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter);
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
     Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId);
@@ -309,12 +311,63 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId)
+    /// <summary>
+    /// Get all bookmarks for the user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="filter">Only supports SeriesNameQuery</param>
+    /// <returns></returns>
+    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter)
     {
-        return await _context.AppUserBookmark
+        var query = _context.AppUserBookmark
             .Where(x => x.AppUserId == userId)
             .OrderBy(x => x.Page)
-            .AsNoTracking()
+            .AsNoTracking();
+
+        if (!string.IsNullOrEmpty(filter.SeriesNameQuery))
+        {
+            var seriesNameQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(filter.SeriesNameQuery);
+            var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
+                {
+                    bookmark,
+                    series
+                })
+                .Where(o => EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%")
+                            || EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%")
+                            || EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%")
+                            || EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%")
+                );
+
+            // This doesn't work on bookmarks themselves, only the series. For now, I don't think there is much value add
+            // if (filter.SortOptions != null)
+            // {
+            //     if (filter.SortOptions.IsAscending)
+            //     {
+            //         filterSeriesQuery = filter.SortOptions.SortField switch
+            //         {
+            //             SortField.SortName => filterSeriesQuery.OrderBy(s => s.series.SortName),
+            //             SortField.CreatedDate => filterSeriesQuery.OrderBy(s => s.bookmark.Created),
+            //             SortField.LastModifiedDate => filterSeriesQuery.OrderBy(s => s.bookmark.LastModified),
+            //             _ => filterSeriesQuery
+            //         };
+            //     }
+            //     else
+            //     {
+            //         filterSeriesQuery = filter.SortOptions.SortField switch
+            //         {
+            //             SortField.SortName => filterSeriesQuery.OrderByDescending(s => s.series.SortName),
+            //             SortField.CreatedDate => filterSeriesQuery.OrderByDescending(s => s.bookmark.Created),
+            //             SortField.LastModifiedDate => filterSeriesQuery.OrderByDescending(s => s.bookmark.LastModified),
+            //             _ => filterSeriesQuery
+            //         };
+            //     }
+            // }
+
+            query = filterSeriesQuery.Select(o => o.bookmark);
+        }
+
+
+        return await query
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

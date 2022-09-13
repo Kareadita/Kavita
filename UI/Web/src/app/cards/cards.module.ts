@@ -29,7 +29,6 @@ import { DownloadIndicatorComponent } from './download-indicator/download-indica
 
 
 
-
 @NgModule({
   declarations: [
     CardItemComponent,
@@ -67,7 +66,6 @@ import { DownloadIndicatorComponent } from './download-indicator/download-indica
     NgbRatingModule,
     
     VirtualScrollerModule,
-
 
     NgbOffcanvasModule, // Series Detail, action of cards
     NgbNavModule, //Series Detail

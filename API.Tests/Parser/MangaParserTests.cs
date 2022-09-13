@@ -27,7 +27,7 @@ public class MangaParserTests
     [InlineData("vol_356-1", "356")] // Mangapy syntax
     [InlineData("No Volume", "0")]
     [InlineData("U12 (Under 12) Vol. 0001 Ch. 0001 - Reiwa Scans (gb)", "1")]
-    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1")]
+    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip", "1.1")]
     [InlineData("Tonikaku Cawaii [Volume 11].cbz", "11")]
     [InlineData("[WS]_Ichiban_Ushiro_no_Daimaou_v02_ch10.zip", "2")]
     [InlineData("[xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]", "1")]
@@ -39,7 +39,6 @@ public class MangaParserTests
     [InlineData("Ichinensei_ni_Nacchattara_v02_ch11_[Taruby]_v1.3.zip", "2")]
     [InlineData("Dorohedoro v01 (2010) (Digital) (LostNerevarine-Empire).cbz", "1")]
     [InlineData("Dorohedoro v11 (2013) (Digital) (LostNerevarine-Empire).cbz", "11")]
-    [InlineData("Dorohedoro v12 (2013) (Digital) (LostNerevarine-Empire).cbz", "12")]
     [InlineData("Yumekui_Merry_v01_c01[Bakayarou-Kuu].rar", "1")]
     [InlineData("Yumekui-Merry_DKThias_Chapter11v2.zip", "0")]
     [InlineData("Itoshi no Karin - c001-006x1 (v01) [Renzokusei Scans]", "1")]
@@ -73,6 +72,11 @@ public class MangaParserTests
     [InlineData("시즌34삽화2", "34")]
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1巻", "1")]
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
+    [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "3.5")]
+    [InlineData("Kebab Том 1 Глава 3", "1")]
+    [InlineData("Манга Глава 2", "0")]
+    [InlineData("Манга Тома 1-4", "1-4")]
+    [InlineData("Манга Том 1-4", "1-4")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
@@ -181,6 +185,10 @@ public class MangaParserTests
     [InlineData("諌山創] 進撃の巨人 第23巻", "諌山創] 進撃の巨人")]
     [InlineData("(一般コミック) [奥浩哉] いぬやしき 第09巻", "いぬやしき")]
     [InlineData("Highschool of the Dead - 02", "Highschool of the Dead")]
+    [InlineData("Kebab Том 1 Глава 3", "Kebab")]
+    [InlineData("Манга Глава 2", "Манга")]
+    [InlineData("Манга Глава 2-2", "Манга")]
+    [InlineData("Манга Том 1 3-4 Глава", "Манга")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
@@ -195,7 +203,7 @@ public class MangaParserTests
     [InlineData("Gokukoku no Brynhildr - c001-008 (v01) [TrinityBAKumA]", "1-8")]
     [InlineData("Dance in the Vampire Bund v16-17 (Digital) (NiceDragon)", "0")]
     [InlineData("c001", "1")]
-    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", "12")]
+    [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.12.zip", "0")]
     [InlineData("Adding volume 1 with File: Ana Satsujin Vol. 1 Ch. 5 - Manga Box (gb).cbz", "5")]
     [InlineData("Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz", "18")]
     [InlineData("Cynthia The Mission - c000-006 (v06) [Desudesu&Brolen].zip", "0-6")]
@@ -233,8 +241,7 @@ public class MangaParserTests
     [InlineData("Corpse Party -The Anthology- Sachikos game of love Hysteric Birthday 2U Extra Chapter.rar", "0")]
     [InlineData("Beelzebub_153b_RHS.zip", "153.5")]
     [InlineData("Beelzebub_150-153b_RHS.zip", "150-153.5")]
-    [InlineData("Transferred to another world magical swordsman v1.1", "1")]
-    [InlineData("Transferred to another world magical swordsman v1.2", "2")]
+    [InlineData("Transferred to another world magical swordsman v1.1", "0")]
     [InlineData("Kiss x Sis - Ch.15 - The Angst of a 15 Year Old Boy.cbz", "15")]
     [InlineData("Kiss x Sis - Ch.12 - 1 , 2 , 3P!.cbz", "12")]
     [InlineData("Umineko no Naku Koro ni - Episode 1 - Legend of the Golden Witch #1", "1")]
@@ -259,6 +266,11 @@ public class MangaParserTests
     [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
     [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
     [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
+    [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "0")]
+    [InlineData("Kebab Том 1 Глава 3", "3")]
+    [InlineData("Манга Глава 2", "2")]
+    [InlineData("Манга 2 Глава", "2")]
+    [InlineData("Манга Том 1 2 Глава", "2")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));

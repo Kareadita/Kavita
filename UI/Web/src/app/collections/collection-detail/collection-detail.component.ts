@@ -140,7 +140,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
       this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
       [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
       this.filterSettings.presets.collectionTags = [tagId];
-      this.filterActiveCheck = this.seriesService.createSeriesFilter();
+      this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
       this.filterActiveCheck.collectionTags = [tagId];
       this.cdRef.markForCheck();
       

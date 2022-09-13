@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
@@ -529,7 +530,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    [HttpGet("get-bookmarks")]
+    [HttpGet("chapter-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
@@ -540,13 +541,15 @@ public class ReaderController : BaseApiController
     /// <summary>
     /// Returns a list of all bookmarked pages for a User
     /// </summary>
+    /// <param name="filterDto">Only supports SeriesNameQuery</param>
     /// <returns></returns>
-    [HttpGet("get-all-bookmarks")]
-    public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks()
+    [HttpPost("all-bookmarks")]
+    public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(FilterDto filterDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
-        return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id));
+
+        return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id, filterDto));
     }
 
     /// <summary>
@@ -629,7 +632,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    [HttpGet("get-volume-bookmarks")]
+    [HttpGet("volume-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
@@ -642,7 +645,7 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpGet("get-series-bookmarks")]
+    [HttpGet("series-bookmarks")]
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);

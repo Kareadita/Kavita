@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar [hasFilter]="false">
+<app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
     <h2 title>
         Bookmarks
     </h2>
@@ -8,9 +8,10 @@
 <app-card-detail-layout 
     [isLoading]="loadingBookmarks"
     [items]="series"
+    [filterSettings]="filterSettings"
     [trackByIdentity]="trackByIdentity"
     [refresh]="refresh"
-    
+    (applyFilter)="updateFilter($event)"
     >
     <ng-template #cardItem let-item let-position="idx">
         <app-card-item [entity]="item" (reload)="loadBookmarks()" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"

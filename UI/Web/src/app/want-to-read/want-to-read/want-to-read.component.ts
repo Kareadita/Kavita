@@ -85,7 +85,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
 
       this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
       [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-      this.filterActiveCheck = this.seriesService.createSeriesFilter();
+      this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
       this.cdRef.markForCheck();
 
       this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {

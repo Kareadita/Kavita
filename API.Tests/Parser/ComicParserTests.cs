@@ -77,6 +77,8 @@ public class ComicParserTests
     [InlineData("Bd Fr-Aldebaran-Antares-t6", "Aldebaran-Antares")]
     [InlineData("Tintin - T22 Vol 714 pour Sydney", "Tintin")]
     [InlineData("Fables 2010 Vol. 1 Legends in Exile", "Fables 2010")]
+    [InlineData("Kebab Том 1 Глава 1", "Kebab")]
+    [InlineData("Манга Глава 1", "Манга")]
     public void ParseComicSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicSeries(filename));
@@ -124,6 +126,9 @@ public class ComicParserTests
     [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "3")]
     [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "0")]
     [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "1")]
+    // Russian Tests
+    [InlineData("Kebab Том 1 Глава 3", "1")]
+    [InlineData("Манга Глава 2", "0")]
     public void ParseComicVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(filename));
@@ -169,6 +174,10 @@ public class ComicParserTests
     [InlineData("Batman Beyond 2016 - Chapter 001.cbz", "1")]
     [InlineData("Adventure Time (2012)/Adventure Time #1 (2012)", "1")]
     [InlineData("Adventure Time TPB (2012)/Adventure Time v01 (2012).cbz", "0")]
+    [InlineData("Kebab Том 1 Глава 3", "3")]
+    [InlineData("Манга Глава 2", "2")]
+    [InlineData("Манга 2 Глава", "2")]
+    [InlineData("Манга Том 1 2 Глава", "2")]
     public void ParseComicChapterTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(filename));

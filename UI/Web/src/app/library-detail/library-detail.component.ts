@@ -134,7 +134,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
     // Setup filterActiveCheck to check filter against
-    this.filterActiveCheck = this.seriesService.createSeriesFilter();
+    this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
     this.filterActiveCheck.libraries = [this.libraryId];
 
     this.filterSettings.libraryDisabled = true;
@@ -230,7 +230,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   loadPage() {
     // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
     if (this.filter == undefined) {
-      this.filter = this.seriesService.createSeriesFilter();
+      this.filter = this.filterUtilityService.createSeriesFilter();
       this.filter.libraries.push(this.libraryId);
       this.cdRef.markForCheck();
     }

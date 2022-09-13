@@ -78,6 +78,8 @@ public class UsersController : BaseApiController
             AppUserIncludes.UserPreferences);
         var existingPreferences = user.UserPreferences;
 
+        preferencesDto.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+
         existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
         existingPreferences.ScalingOption = preferencesDto.ScalingOption;
         existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
@@ -92,7 +94,6 @@ public class UsersController : BaseApiController
         existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
         existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
         existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
-        preferencesDto.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         existingPreferences.BookThemeName = preferencesDto.BookReaderThemeName;
         existingPreferences.BookReaderLayoutMode = preferencesDto.BookReaderLayoutMode;
         existingPreferences.BookReaderImmersiveMode = preferencesDto.BookReaderImmersiveMode;

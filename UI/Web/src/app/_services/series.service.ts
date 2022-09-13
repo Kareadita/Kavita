@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { ChapterMetadata } from '../_models/chapter-metadata';
@@ -26,12 +27,13 @@ export class SeriesService {
   paginatedResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
   paginatedSeriesForTagsResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
 
-  constructor(private httpClient: HttpClient, private imageService: ImageService, private utilityService: UtilityService) { }
+  constructor(private httpClient: HttpClient, private imageService: ImageService,
+    private utilityService: UtilityService, private filterUtilitySerivce: FilterUtilitiesService) { }
 
   getAllSeries(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    const data = this.createSeriesFilter(filter);
+    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
 
     return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all', data, {observe: 'response', params}).pipe(
       map((response: any) => {
@@ -43,7 +45,7 @@ export class SeriesService {
   getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    const data = this.createSeriesFilter(filter);
+    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
 
     return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map((response: any) => {
@@ -109,7 +111,7 @@ export class SeriesService {
   }
 
   getRecentlyAdded(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
-    const data = this.createSeriesFilter(filter);
+    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
@@ -125,7 +127,7 @@ export class SeriesService {
   }
 
   getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter): Observable<PaginatedResult<Series[]>> {
-    const data = this.createSeriesFilter(filter);
+    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
 
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
@@ -137,7 +139,7 @@ export class SeriesService {
   }
 
   getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
-    const data = this.createSeriesFilter(filter);
+    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
 
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
@@ -203,42 +205,5 @@ export class SeriesService {
 
   getSeriesDetail(seriesId: number) {
     return this.httpClient.get<SeriesDetail>(this.baseUrl + 'series/series-detail?seriesId=' + seriesId);
-  }
-
-  
-
-  createSeriesFilter(filter?: SeriesFilter) {
-    if (filter !== undefined) return filter;
-    const data: SeriesFilter = {
-      formats: [],
-      libraries: [],
-      genres: [],
-      writers: [],
-      artists: [],
-      penciller: [],
-      inker: [],
-      colorist: [],
-      letterer: [],
-      coverArtist: [],
-      editor: [],
-      publisher: [],
-      character: [],
-      translators: [],
-      collectionTags: [],
-      rating: 0,
-      readStatus: {
-        read: true,
-        inProgress: true,
-        notRead: true
-      },
-      sortOptions: null,
-      ageRating: [],
-      tags: [],
-      languages: [],
-      publicationStatus: [],
-      seriesNameQuery: '',
-    };
-
-    return data;
   }
 }
