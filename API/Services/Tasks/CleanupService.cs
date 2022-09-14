@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
+using API.DTOs.Filtering;
+using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.SignalR;
@@ -21,6 +26,11 @@ public interface ICleanupService
     Task DeleteTagCoverImages();
     Task CleanupBackups();
     void CleanupTemp();
+    /// <summary>
+    /// Responsible to remove Series from Want To Read when user's have fully read the series and the series has Publication Status of Completed.
+    /// </summary>
+    /// <returns></returns>
+    Task CleanupWantToRead();
 }
 /// <summary>
 /// Cleans up after operations on reoccurring basis
@@ -194,5 +204,43 @@ public class CleanupService : ICleanupService
         }
 
         _logger.LogInformation("Temp directory purged");
+    }
+
+    public async Task CleanupWantToRead()
+    {
+        _logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list");
+
+        var libraryIds = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Select(l => l.Id).ToList();
+        var filter = new FilterDto()
+        {
+            PublicationStatus = new List<PublicationStatus>()
+            {
+                PublicationStatus.Completed
+            },
+            Libraries = libraryIds,
+            ReadStatus = new ReadStatus()
+            {
+                Read = true,
+                InProgress = false,
+                NotRead = false
+            }
+        };
+        foreach (var user in await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead))
+        {
+            var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id, new UserParams(), filter);
+            var seriesIds = series.Select(s => s.Id).ToList();
+            if (seriesIds.Count == 0) continue;
+
+            user.WantToRead ??= new List<Series>();
+            user.WantToRead = user.WantToRead.Where(s => !seriesIds.Contains(s.Id)).ToList();
+            _unitOfWork.UserRepository.Update(user);
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync();
+        }
+
+        _logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list, completed");
     }
 }

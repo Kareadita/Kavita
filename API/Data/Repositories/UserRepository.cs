@@ -235,7 +235,8 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<AppUser>> GetAllUsers()
     {
-        return await _context.AppUser.ToListAsync();
+        return await _context.AppUser
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId)
