@@ -155,7 +155,6 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
-
     #endregion
 
     #region UpdateTasks

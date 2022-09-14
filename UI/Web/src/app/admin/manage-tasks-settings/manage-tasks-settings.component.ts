@@ -46,6 +46,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'Cache has been cleared'
     },
     {
+      name: 'Clean up Want to Read', 
+      description: 'Removes any series that users have fully read that are within want to read and have a publication status of Completed. Runs every 24 hours.',
+      api: this.serverService.cleanupWantToRead(), 
+      successMessage: 'Want to Read has been cleaned up'
+    },
+    {
       name: 'Backup Database', 
       description: 'Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files',
       api: this.serverService.backupDatabase(), 

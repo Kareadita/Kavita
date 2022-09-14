@@ -26,6 +26,10 @@ export class ServerService {
     return this.httpClient.post(this.baseUrl + 'server/clear-cache', {});
   }
 
+  cleanupWantToRead() {
+    return this.httpClient.post(this.baseUrl + 'server/cleanup-want-to-read', {});
+  }
+
   backupDatabase() {
     return this.httpClient.post(this.baseUrl + 'server/backup-db', {});
   }
