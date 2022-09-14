@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <h4>Reoccuring Tasks</h4>
+        <h4>Recurring Tasks</h4>
         <div class="mb-3">
             <label for="settings-tasks-scan" class="form-label">Library Scan</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>
             <ng-template #taskScanTooltip>How often Kavita will scan and refresh metadata around manga files.</ng-template>
@@ -43,7 +43,7 @@
             </tbody>
         </table>
 
-        <h4>Reoccuring Tasks</h4>
+        <h4>Recurring Tasks</h4>
         <table class="table table-striped">
             <thead>
             <tr>
@@ -53,7 +53,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr *ngFor="let task of reoccuringTasks$ | async; index as i">
+            <tr *ngFor="let task of recurringTasks$ | async; index as i">
               <td>
                 {{task.title | titlecase}}
               </td>

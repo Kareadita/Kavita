@@ -42,7 +42,7 @@ export class ServerService {
     return this.httpClient.get<boolean>(this.baseUrl + 'server/accessible');
   }
 
-  getReoccuringJobs() {
+  getRecurringJobs() {
     return this.httpClient.get<Job[]>(this.baseUrl + 'server/jobs');
   }
 
