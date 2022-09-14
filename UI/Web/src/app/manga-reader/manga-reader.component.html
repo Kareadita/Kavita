@@ -32,7 +32,7 @@
         </div>
     </ng-container>
 
-    <div (click)="toggleMenu()" class="reading-area" 
+    <div class="reading-area" 
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div class="image-container" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
@@ -65,7 +65,7 @@
                     'fit-to-width-double-offset' : FittingOption === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
                     'fit-to-height-double-offset': FittingOption === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
                     'original-double-offset' : FittingOption === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage}"
-                    [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle" [dblClick]="bookmarkPageHandler">
+                    [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle" (dblclick)="bookmarkPage($event)">
                 <img #image [src]="canvasImage.src" id="image-1"
                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 

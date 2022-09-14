@@ -513,7 +513,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       });
 
       this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
-        this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value; // TODO: Do I need cd check here? 
+        this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
         const needsSplitting = this.isWideImage();
         // If we need to split on a menu change, then we need to re-render.
         if (needsSplitting) {
@@ -542,6 +542,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       this.rightPaginationOffset = 0;
       this.cdRef.markForCheck();
+    });
+
+    fromEvent(this.readingArea.nativeElement, 'click').pipe(debounceTime(200)).subscribe((event: MouseEvent | any) => {
+      if (event.detail > 1) return;
+      this.toggleMenu();
     });
 
     if (this.canvas) {
@@ -1526,7 +1531,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Bookmarks the current page for the chapter
    */
-  bookmarkPage() {
+  bookmarkPage(event: MouseEvent | undefined = undefined) {
+    if (event) {
+      event.stopPropagation();
+      event.preventDefault();
+    }
     const pageNum = this.pageNum;
     const isDouble = this.layoutMode === LayoutMode.Double || this.layoutMode === LayoutMode.DoubleReversed;
 
