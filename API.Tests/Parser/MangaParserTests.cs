@@ -308,6 +308,7 @@ public class MangaParserTests
     [InlineData("The League of Extraordinary Gentlemen", false)]
     [InlineData("The League of Extra-ordinary Gentlemen", false)]
     [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", true)]
+    [InlineData("Dr. Ramune - Mysterious Disease Specialist v01 (2020) (Digital) (danke-Empire).cbz", false)]
     public void IsMangaSpecialTest(string input, bool expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(input));

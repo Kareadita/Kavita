@@ -586,17 +586,17 @@ public static class Parser
     );
 
     // Common regex patterns present in both Comics and Mangas
-    private const string CommonSpecial = @"Specials?|One-?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
+    private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
 
     private static readonly Regex MangaSpecialRegex = new Regex(
     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"(?:{CommonSpecial}|Omake)",
+        $@"\b(?:{CommonSpecial}|Omake)\b",
         MatchOptions, RegexTimeout
     );
 
     private static readonly Regex ComicSpecialRegex = new Regex(
     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"(?:{CommonSpecial}|\d.+?\WAnnual|Annual\W\d.+?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Hors Série|(?<=[-\s])(?:TPB|HS|THS)(?=[-\s]))",
+        $@"\b(?:{CommonSpecial}|\d.+?\WAnnual|Annual\W\d.+?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
         MatchOptions, RegexTimeout
     );
 

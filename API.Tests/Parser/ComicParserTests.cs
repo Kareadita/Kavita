@@ -197,6 +197,10 @@ public class ComicParserTests
     [InlineData("Adventure Time 2013 Annual #001 (2013)", true)]
     [InlineData("Adventure Time 2013_Annual_#001 (2013)", true)]
     [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
+    [InlineData("G.I. Joe - A Real American Hero Yearbook 004 Reprint (2021)", false)]
+    [InlineData("Mazebook 001", false)]
+    [InlineData("X-23 One Shot (2010)", true)]
+    [InlineData("Casus Belli v1 Hors-Série 21 - Mousquetaires et Sorcellerie", true)]
     public void IsComicSpecialTest(string input, bool expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsComicSpecial(input));
