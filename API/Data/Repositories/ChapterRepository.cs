@@ -63,7 +63,7 @@ public class ChapterRepository : IChapterRepository
             .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new
             {
                 ChapterNumber = chapter.Range,
-                VolumeNumber = volume.Number,
+                VolumeNumber = volume.Name,
                 VolumeId = volume.Id,
                 chapter.IsSpecial,
                 chapter.TitleName,
