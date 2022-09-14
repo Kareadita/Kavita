@@ -25,6 +25,7 @@ public interface IReaderService
     Task MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
     Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
     Task<int> CapPageToChapter(int chapterId, int page);
+    int CapPageToChapter(Chapter chapter, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
@@ -263,6 +264,21 @@ public class ReaderService : IReaderService
         if (page > totalPages)
         {
             page = totalPages;
+        }
+
+        if (page < 0)
+        {
+            page = 0;
+        }
+
+        return page;
+    }
+
+    public int CapPageToChapter(Chapter chapter, int page)
+    {
+        if (page > chapter.Pages)
+        {
+            page = chapter.Pages;
         }
 
         if (page < 0)

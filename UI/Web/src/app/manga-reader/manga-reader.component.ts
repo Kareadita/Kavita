@@ -289,6 +289,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   rightPaginationOffset = 0;
 
+  bookmarkPageHandler = this.bookmarkPage.bind(this);
+
   getPageUrl = (pageNum: number) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(this.chapterId, pageNum);
@@ -1533,40 +1535,42 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (isDouble) apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       forkJoin(apis).pipe(take(1)).subscribe(() => {
         delete this.bookmarks[pageNum];
+        if (isDouble) delete this.bookmarks[pageNum + 1];
       });
     } else {
       let apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
       if (isDouble) apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       forkJoin(apis).pipe(take(1)).subscribe(() => {
         this.bookmarks[pageNum] = 1;
+        if (isDouble) this.bookmarks[pageNum + 1] = 1;
       });
     }
 
     // Show an effect on the image to show that it was bookmarked
     this.showBookmarkEffectEvent.next(pageNum);
-    if (this.readerMode != ReaderMode.Webtoon) {
+    if (this.readerMode === ReaderMode.Webtoon) return;
 
-      let elements:Array<Element | ElementRef> = [];
-      if (this.renderWithCanvas && this.canvas) {
-        elements.push(this.canvas?.nativeElement);
-      } else {
-        const image1 = this.document.querySelector('#image-1');
-        if (image1 != null) elements.push(image1);
+    let elements:Array<Element | ElementRef> = [];
+    if (this.renderWithCanvas && this.canvas) {
+      elements.push(this.canvas?.nativeElement);
+    } else {
+      const image1 = this.document.querySelector('#image-1');
+      if (image1 != null) elements.push(image1);
 
-        if (this.layoutMode === LayoutMode.Double) {
-          const image2 = this.document.querySelector('#image-2');
-          if (image2 != null) elements.push(image2);
-        }
-      }
-
-
-      if (elements.length > 0) {
-        elements.forEach(elem => this.renderer.addClass(elem, 'bookmark-effect'));
-        setTimeout(() => {
-          elements.forEach(elem => this.renderer.removeClass(elem, 'bookmark-effect'));
-        }, 1000);
+      if (this.layoutMode !== LayoutMode.Single) {
+        const image2 = this.document.querySelector('#image-2');
+        if (image2 != null) elements.push(image2);
       }
     }
+
+
+    if (elements.length > 0) {
+      elements.forEach(elem => this.renderer.addClass(elem, 'bookmark-effect'));
+      setTimeout(() => {
+        elements.forEach(elem => this.renderer.removeClass(elem, 'bookmark-effect'));
+      }, 1000);
+    }
+
   }
 
   /**

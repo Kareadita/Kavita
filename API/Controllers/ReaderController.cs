@@ -17,6 +17,7 @@ using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Controllers;
 
@@ -657,6 +658,7 @@ public class ReaderController : BaseApiController
     /// <summary>
     /// Bookmarks a page against a Chapter
     /// </summary>
+    /// <remarks>This has a side effect of caching the chapter files to disk</remarks>
     /// <param name="bookmarkDto"></param>
     /// <returns></returns>
     [HttpPost("bookmark")]
@@ -669,18 +671,16 @@ public class ReaderController : BaseApiController
         if (!await _accountService.HasBookmarkPermission(user))
             return BadRequest("You do not have permission to bookmark");
 
-        bookmarkDto.Page = await _readerService.CapPageToChapter(bookmarkDto.ChapterId, bookmarkDto.Page);
         var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
         if (chapter == null) return BadRequest("Could not find cached image. Reload and try again.");
+
+        bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
         var path = _cacheService.GetCachedPagePath(chapter, bookmarkDto.Page);
 
-        if (await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
-        {
-            BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
-            return Ok();
-        }
+        if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path)) return BadRequest("Could not save bookmark");
 
-        return BadRequest("Could not save bookmark");
+        BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
+        return Ok();
     }
 
     /// <summary>
@@ -693,18 +693,15 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return new UnauthorizedResult();
-        if (user.Bookmarks == null) return Ok();
+        if (user.Bookmarks.IsNullOrEmpty()) return Ok();
 
         if (!await _accountService.HasBookmarkPermission(user))
             return BadRequest("You do not have permission to unbookmark");
 
-        if (await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
-        {
-            BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
-            return Ok();
-        }
-
-        return BadRequest("Could not remove bookmark");
+        if (!await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
+            return BadRequest("Could not remove bookmark");
+        BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
+        return Ok();
     }
 
     /// <summary>
