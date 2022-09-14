@@ -14,9 +14,9 @@ public static class MigrateNormalizedEverything
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)
     {
-        // if current version is > 0.5.6.3, then we can exit and not perform
+        // if current version is > 0.5.6.5, then we can exit and not perform
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (Version.Parse(settings.InstallVersion) > new Version(0, 5, 6, 3))
+        if (Version.Parse(settings.InstallVersion) > new Version(0, 5, 6, 5))
         {
             return;
         }
