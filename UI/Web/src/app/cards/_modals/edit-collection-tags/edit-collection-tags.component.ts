@@ -94,6 +94,7 @@ export class EditCollectionTagsComponent implements OnInit {
 
       this.pagination = series.pagination;
       this.series = series.result;
+      this.imageUrls.push(...this.series.map(s => this.imageService.getSeriesCoverImage(s.id)));
       this.selections = new SelectionModel<Series>(true, this.series);
       this.isLoading = false;
 
