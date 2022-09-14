@@ -276,23 +276,39 @@ public class ArchiveServiceTests
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
         var archive = Path.Join(testDirectory, "ComicInfo.zip");
-        var actual = _archiveService.GetComicInfo(archive);
-        var expected = new ComicInfo()
-        {
-            Publisher = "Yen Press",
-            Genre = "Manga, Movies & TV",
-            Summary =
-                "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?",
-            PageCount = 194,
-            LanguageISO = "en",
-            Notes = "Scraped metadata from Comixology [CMXDB450184]",
-            Series = "BTOOOM!",
-            Title = "v01",
-            Web = "https://www.comixology.com/BTOOOM/digital-comic/450184"
-        };
+        var comicInfo = _archiveService.GetComicInfo(archive);
 
-        Assert.NotStrictEqual(expected, actual);
+        Assert.NotNull(comicInfo);
+        Assert.Equal(comicInfo.Publisher, "Yen Press");
+        Assert.Equal(comicInfo.Genre, "Manga, Movies & TV");
+        Assert.Equal(comicInfo.Summary, "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?");
+        Assert.Equal(comicInfo.PageCount, 194);
+        Assert.Equal(comicInfo.LanguageISO, "en");
+        Assert.Equal(comicInfo.Notes, "Scraped metadata from Comixology [CMXDB450184]");
+        Assert.Equal(comicInfo.Series, "BTOOOM!");
+        Assert.Equal(comicInfo.Title, "v01");
+        Assert.Equal(comicInfo.Web, "https://www.comixology.com/BTOOOM/digital-comic/450184");
     }
+
+    #endregion
+
+    #region CanParseComicInfo_DefaultNumberIsBlank
+
+    [Fact]
+    public void CanParseComicInfo_DefaultNumberIsBlank()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+        var archive = Path.Join(testDirectory, "ComicInfo2.zip");
+        var comicInfo = _archiveService.GetComicInfo(archive);
+
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Hellboy", comicInfo.Series);
+        Assert.Equal("The Right Hand of Doom", comicInfo.Title);
+        Assert.Equal("", comicInfo.Number);
+        Assert.Equal(0, comicInfo.Count);
+        Assert.Equal("4", comicInfo.Volume);
+    }
+
 
     #endregion
 
