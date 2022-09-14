@@ -14,7 +14,9 @@ import { SidenavModule } from './sidenav/sidenav.module';
 import { NavModule } from './nav/nav.module';
 
 
-
+// Disable Web Animations if the user's browser (such as iOS 12.5.5) does not support this.
+const disableAnimations = !('animate' in document.documentElement);
+if (disableAnimations) console.error("Web Animations have been disabled as your current browser does not support this.");
 
 @NgModule({
     declarations: [
@@ -24,7 +26,7 @@ import { NavModule } from './nav/nav.module';
         HttpClientModule,
         BrowserModule,
         AppRoutingModule,
-        BrowserAnimationsModule,
+        BrowserAnimationsModule.withConfig({ disableAnimations }),
         SidenavModule,
         NavModule,
         ToastrModule.forRoot({
