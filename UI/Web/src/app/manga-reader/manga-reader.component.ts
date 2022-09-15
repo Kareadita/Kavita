@@ -1296,7 +1296,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Maintains a circular array of images (that are requested from backend) around the user's current page. This allows for quick loading (seemless to user)
+   * Maintains an array of images (that are requested from backend) around the user's current page. This allows for quick loading (seemless to user)
    * and also maintains page info (wide image, etc) due to onload event.
    */
   prefetch() {
