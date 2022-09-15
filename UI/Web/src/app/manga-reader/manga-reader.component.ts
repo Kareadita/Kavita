@@ -13,7 +13,6 @@ import { PageSplitOption } from '../_models/preferences/page-split-option';
 import { BehaviorSubject, forkJoin, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { Breakpoint, KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { CircularArray } from '../shared/data-structures/circular-array';
 import { MemberService } from '../_services/member.service';
 import { Stack } from '../shared/data-structures/stack';
 import { ChangeContext, LabelType, Options } from '@angular-slider/ngx-slider';
@@ -27,7 +26,7 @@ import { ShortcutsModalComponent } from '../reader-shared/_modals/shortcuts-moda
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
 
-const PREFETCH_PAGES = 8;
+const PREFETCH_PAGES = 10;
 
 const CHAPTER_ID_NOT_FETCHED = -2;
 const CHAPTER_ID_DOESNT_EXIST = -1;
@@ -162,10 +161,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   renderWithCanvas: boolean = false;
 
   /**
-   * A circular array of size PREFETCH_PAGES + 2. Maintains prefetched Images around the current page to load from to avoid loading animation.
+   * A circular array of size PREFETCH_PAGES. Maintains prefetched Images around the current page to load from to avoid loading animation.
    * @see CircularArray
    */
-  cachedImages!: CircularArray<HTMLImageElement>;
+  cachedImages!: Array<HTMLImageElement>;
   /**
    * A stack of the chapter ids we come across during continuous reading mode. When we traverse a boundary, we use this to avoid extra API calls.
    * @see Stack
@@ -330,7 +329,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const result =  !(
       this.isCoverImage() 
-      || this.isCoverImage(this.pageNum - 1) 
+      || this.isCoverImage(this.pageNum - 1)  // This is because we use prev page and hence the cover will re-show
       || this.isWideImage(this.canvasImage) 
       || this.isWideImage(this.canvasImageNext)
       );
@@ -685,12 +684,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.inSetup = false;
         this.cdRef.markForCheck();
 
-        const images = [];
-        for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
-          images.push(new Image());
+        this.cachedImages = [];
+        for (let i = 0; i < PREFETCH_PAGES; i++) {
+          this.cachedImages.push(new Image())
         }
 
-        this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
         this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
         this.render();
@@ -758,13 +756,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-
-      const images = [];
-      for (let i = 0; i < PREFETCH_PAGES + 2; i++) {
-        images.push(new Image());
+      this.cachedImages = [];
+      for (let i = 0; i < PREFETCH_PAGES; i++) {
+        this.cachedImages.push(new Image());
       }
-
-      this.cachedImages = new CircularArray<HTMLImageElement>(images, 0);
 
 
       this.render();
@@ -1078,7 +1073,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   setCanvasImage() {
     if (this.layoutMode === LayoutMode.Single) {
-      const img = this.cachedImages.arr.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
+      const img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
       if (img) {
         this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
       } else {
@@ -1305,85 +1300,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * and also maintains page info (wide image, etc) due to onload event.
    */
   prefetch() {
-    // let index = 1;
-    // console.log('----------Prefetch called----------------');
-    // this.cachedImages.applyFor((item, _) => {
-    //   const offsetIndex = this.pageNum + index;
-    //   const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
-
-    //   if (urlPageNum === offsetIndex || urlPageNum === this.pageNum) {
-    //     index += 1;
-    //     return;
-    //   }
-      
-    //   if (offsetIndex < this.maxPages - 1) {
-    //     item.src = this.getPageUrl(offsetIndex);
-    //     console.log('Prefetching ', offsetIndex);
-    //     index += 1;
-    //   }
-    // }, this.cachedImages.size() - 3);
-    // console.log(this.pageNum, ' Prefetched pages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)));
-
-    // TODO: Refactor cachedImages to a single array
-    console.log('this.cachedImages.size() - 3: ', this.cachedImages.size() - 3);
-    for(let i = 1; i <= this.cachedImages.size() - 3; i++) {
+    for(let i = 1; i <= PREFETCH_PAGES - 3; i++) {
       const numOffset = this.pageNum + i;
       if (numOffset > this.maxPages - 1) continue;
 
-      const index = numOffset % this.cachedImages.size();
-      console.log('Index: ', index);
-      if (this.readerService.imageUrlToPageNum(this.cachedImages.arr[index].src) !== numOffset) {
-        this.cachedImages.arr[index].src = this.getPageUrl(numOffset);
-        console.log('Prefetching ', numOffset);
+      const index = numOffset % this.cachedImages.length;
+      if (this.readerService.imageUrlToPageNum(this.cachedImages[index].src) !== numOffset) {
+        this.cachedImages[index].src = this.getPageUrl(numOffset);
       }
-    
     }
 
-    console.log(this.pageNum, ' Prefetched pages: ', this.cachedImages.arr.map(img => this.readerService.imageUrlToPageNum(img.src)));
-
-    // let index = 1;
-    // const indexOfCurrentPage = this.cachedImages.arr.findIndex(item => this.readerService.imageUrlToPageNum(item.src) === this.pageNum);
-    // // Another way to find the internal index is to use a modules, so:
-    // //const indexOfCurrentPage = this.pageNum % this.cachedImages.arr.length;
-    // if (indexOfCurrentPage === (this.pageNum % this.cachedImages.arr.length)) {
-    //   console.log('Match');
-    // } else {
-    //   console.log('internal index: ', indexOfCurrentPage);
-    //   console.log('modulus: ', (this.pageNum % this.cachedImages.arr.length));
-    // }
-
-    // console.log('----------Prefetch called----------------');
-    // console.log('Before: Internal Index: ', indexOfCurrentPage);
-    // let firstPass = false;
-    // this.cachedImages.applyFor((item, internalIndex) => {
-
-
-    //   if (internalIndex <= indexOfCurrentPage && !firstPass) {
-    //     console.log('Skipping index ', internalIndex, ' until ', indexOfCurrentPage);
-    //     firstPass = true;
-    //     return;
-    //   }
-
-    //   const offsetIndex = this.pageNum + index; // This is essentially the page to prefetch
-    //   const urlPageNum = this.readerService.imageUrlToPageNum(item.src);
-
-    //   if (urlPageNum === offsetIndex) {  //|| urlPageNum === this.pageNum
-    //     console.log('Skipping ', offsetIndex, ' already prefetched');  
-    //     index += 1;
-    //     return;
-    //   }
-
-    //   if (offsetIndex >= this.maxPages - 1) {
-    //     console.log('Hit end of pages to request')
-    //     return;
-    //   }
-      
-    //   console.log('Prefetching ', offsetIndex);
-    //   item.src = this.getPageUrl(offsetIndex);
-    //   index += 1;
-    // }, this.cachedImages.size()); //  - 3
-    
-    // console.log('After: Internal Index: ', this.cachedImages.arr.findIndex(item => this.readerService.imageUrlToPageNum(item.src) === this.pageNum));
+    console.log(this.pageNum, ' Prefetched pages: ', this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src)));
   }
 
 
@@ -1560,7 +1487,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // We must set this here because loadPage from render doesn't call if we aren't page splitting
     if (this.readerMode !== ReaderMode.Webtoon) {
-      this.canvasImage = this.cachedImages.current();
+      this.canvasImage = this.cachedImages[this.pageNum & this.cachedImages.length];
       this.isLoading = true;
     }
 
