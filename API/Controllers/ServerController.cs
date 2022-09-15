@@ -85,7 +85,7 @@ public class ServerController : BaseApiController
     public ActionResult CleanupWantToRead()
     {
         _logger.LogInformation("{UserName} is clearing running want to read cleanup from admin dashboard", User.GetUsername());
-        BackgroundJob.Enqueue(() => _cleanupService.CleanupWantToRead());
+        RecurringJob.TriggerJob(API.Services.TaskScheduler.RemoveFromWantToReadTaskId);
 
         return Ok();
     }
@@ -98,7 +98,7 @@ public class ServerController : BaseApiController
     public ActionResult BackupDatabase()
     {
         _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
-        RecurringJob.TriggerJob("backup");
+        RecurringJob.TriggerJob(API.Services.TaskScheduler.BackupTaskId);
         return Ok();
     }
 
