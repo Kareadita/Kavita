@@ -484,7 +484,7 @@ public class ScannerService : IScannerService
             {
                 _logger.LogInformation(
                     "[ScannerService] Finished library scan of {ParsedSeriesCount} series in {ElapsedScanTime} milliseconds for {LibraryName}. There were no changes",
-                    totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
+                    seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
             }
             else
             {
