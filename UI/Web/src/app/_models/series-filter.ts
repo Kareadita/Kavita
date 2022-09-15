@@ -6,6 +6,11 @@ export interface FilterItem<T> {
     selected: boolean;
 }
 
+export interface Range<T> {
+  min: T;
+  max: T;
+}
+
 export interface SeriesFilter {
     formats: Array<MangaFormat>;
     libraries: Array<number>,
@@ -30,6 +35,7 @@ export interface SeriesFilter {
     languages: Array<string>;
     publicationStatus: Array<number>;
     seriesNameQuery: string;
+    releaseYearRange: Range<number> | null;
 }
 
 export interface SortOptions {

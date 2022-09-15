@@ -605,7 +605,7 @@ public class SeriesRepository : ISeriesRepository
     private IList<MangaFormat> ExtractFilters(int libraryId, int userId, FilterDto filter, ref List<int> userLibraries,
         out List<int> allPeopleIds, out bool hasPeopleFilter, out bool hasGenresFilter, out bool hasCollectionTagFilter,
         out bool hasRatingFilter, out bool hasProgressFilter, out IList<int> seriesIds, out bool hasAgeRating, out bool hasTagsFilter,
-        out bool hasLanguageFilter, out bool hasPublicationFilter, out bool hasSeriesNameFilter)
+        out bool hasLanguageFilter, out bool hasPublicationFilter, out bool hasSeriesNameFilter, out bool hasReleaseYearMinFilter, out bool hasReleaseYearMaxFilter)
     {
         var formats = filter.GetSqlFilter();
 
@@ -639,6 +639,9 @@ public class SeriesRepository : ISeriesRepository
         hasTagsFilter = filter.Tags.Count > 0;
         hasLanguageFilter = filter.Languages.Count > 0;
         hasPublicationFilter = filter.PublicationStatus.Count > 0;
+
+        hasReleaseYearMinFilter = filter.ReleaseYearRange != null && filter.ReleaseYearRange.Min != 0;
+        hasReleaseYearMaxFilter = filter.ReleaseYearRange != null && filter.ReleaseYearRange.Max != 0;
 
 
         bool ProgressComparison(int pagesRead, int totalPages)
@@ -731,7 +734,8 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter, out var hasSeriesNameFilter);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter,
+            out var hasPublicationFilter, out var hasSeriesNameFilter, out var hasReleaseYearMinFilter, out var hasReleaseYearMaxFilter);
 
         var query = _context.Series
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -745,6 +749,8 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
+                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
+                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
                         && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
             .Where(s => !hasSeriesNameFilter ||
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
@@ -793,7 +799,8 @@ public class SeriesRepository : ISeriesRepository
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
-            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter, out var hasPublicationFilter, out var hasSeriesNameFilter);
+            out var seriesIds, out var hasAgeRating, out var hasTagsFilter, out var hasLanguageFilter,
+            out var hasPublicationFilter, out var hasSeriesNameFilter, out var hasReleaseYearMinFilter, out var hasReleaseYearMaxFilter);
 
         var query = sQuery
             .Where(s => userLibraries.Contains(s.LibraryId)
@@ -807,6 +814,8 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
+                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
+                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
                         && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
             .Where(s => !hasSeriesNameFilter ||
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
@@ -1379,7 +1388,7 @@ public class SeriesRepository : ISeriesRepository
     {
         return _context.AppUser
             .Where(u => u.Id == userId)
-            .SelectMany(l => l.Libraries.Where(l => l.Id == libraryId || libraryId == 0).Select(lib => lib.Id));
+            .SelectMany(l => l.Libraries.Where(lib => lib.Id == libraryId || libraryId == 0).Select(lib => lib.Id));
     }
 
     public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId)

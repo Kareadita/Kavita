@@ -336,6 +336,7 @@ export class FilterUtilitiesService {
       languages: [],
       publicationStatus: [],
       seriesNameQuery: '',
+      releaseYearRange: null
     };
 
     return data;
