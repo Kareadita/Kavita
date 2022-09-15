@@ -233,4 +233,52 @@ public class ParserTests
     {
         Assert.Equal(expected, NormalizePath(inputPath));
     }
+
+    [Theory]
+    [InlineData("The quick brown fox jumps over the lazy dog")]
+    [InlineData("(The quick brown fox jumps over the lazy dog)")]
+    [InlineData("()The quick brown fox jumps over the lazy dog")]
+    [InlineData("The ()quick brown fox jumps over the lazy dog")]
+    [InlineData("The (quick (brown)) fox jumps over the lazy dog")]
+    [InlineData("The (quick (brown) fox jumps over the lazy dog)")]
+    public void BalancedParenTestMatches(string input)
+    {
+        Assert.Matches($@"^{BalancedParen}$", input);
+    }
+
+    [Theory]
+    [InlineData("(The quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick brown fox jumps over the lazy dog)")]
+    [InlineData("The )(quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick (brown)) fox jumps over the lazy dog")]
+    [InlineData("The quick (brown) fox jumps over the lazy dog)")]
+    [InlineData("(The ))(quick (brown) fox jumps over the lazy dog")]
+    public void BalancedParenTestDoesNotMatch(string input)
+    {
+        Assert.DoesNotMatch($@"^{BalancedParen}$", input);
+    }
+
+    [Theory]
+    [InlineData("The quick brown fox jumps over the lazy dog")]
+    [InlineData("[The quick brown fox jumps over the lazy dog]")]
+    [InlineData("[]The quick brown fox jumps over the lazy dog")]
+    [InlineData("The []quick brown fox jumps over the lazy dog")]
+    [InlineData("The [quick [brown]] fox jumps over the lazy dog")]
+    [InlineData("The [quick [brown] fox jumps over the lazy dog]")]
+    public void BalancedBrackTestMatches(string input)
+    {
+        Assert.Matches($@"^{BalancedBrack}$", input);
+    }
+
+    [Theory]
+    [InlineData("[The quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick brown fox jumps over the lazy dog]")]
+    [InlineData("The ][quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick [brown]] fox jumps over the lazy dog")]
+    [InlineData("The quick [brown] fox jumps over the lazy dog]")]
+    [InlineData("[The ]][quick [brown] fox jumps over the lazy dog")]
+    public void BalancedBrackTestDoesNotMatch(string input)
+    {
+        Assert.DoesNotMatch($@"^{BalancedBrack}$", input);
+    }
 }

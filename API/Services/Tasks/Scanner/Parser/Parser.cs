@@ -72,9 +72,9 @@ public static class Parser
 
     // Some generic reusage regex patterns:
     // - non greedy matching of a string where parenthesis are balanced
-    private const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
-    // - non greedy matching of a string where parenthesis are balanced
-    private const string BalancedBrack = @"(?:[^\[\]]|(?<open>\[)|(?<-open>\]))*?(?(open)(?!))";
+    public const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
+    // - non greedy matching of a string where square brackets are balanced
+    public const string BalancedBrack = @"(?:[^\[\]]|(?<open>\[)|(?<-open>\]))*?(?(open)(?!))";
 
     private static readonly Regex[] MangaVolumeRegex = new[]
     {
@@ -1033,8 +1033,5 @@ public static class Parser
         return FormatTagSpecialKeywords.Contains(comicInfoFormat);
     }
 
-    private static string ReplaceUnderscores(string name) {
-        if (string.IsNullOrEmpty(name)) return name;
-        return name.Replace("_", " ");
-    }
+    private static string ReplaceUnderscores(string name) => name?.Replace("_", " ");
 }

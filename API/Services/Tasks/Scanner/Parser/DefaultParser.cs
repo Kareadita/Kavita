@@ -85,7 +85,7 @@ public class DefaultParser : IDefaultParser
             ret.Edition = edition;
         }
 
-        bool isSpecial = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.IsComicSpecial(fileName) : Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(fileName);
+        var isSpecial = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.IsComicSpecial(fileName) : Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(fileName);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
         if (ret.Chapters == Services.Tasks.Scanner.Parser.Parser.DefaultChapter && ret.Volumes == Services.Tasks.Scanner.Parser.Parser.DefaultVolume && isSpecial)
