@@ -330,6 +330,7 @@ public class ArchiveService : IArchiveService
 
     private static bool ValidComicInfoArchiveEntry(string fullName, string name)
     {
+        // TODO: Write Unit test that ensures only Root level ComicInfo.xml validate
         var filenameWithoutExtension = Path.GetFileNameWithoutExtension(name).ToLower();
         return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
                && filenameWithoutExtension.Equals(ComicInfoFilename, StringComparison.InvariantCultureIgnoreCase)

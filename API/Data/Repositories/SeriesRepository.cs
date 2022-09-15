@@ -774,6 +774,7 @@ public class SeriesRepository : ISeriesRepository
                 SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
                 SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
+                SortField.ReleaseYear => query.OrderBy(s => s.Metadata.ReleaseYear),
                 _ => query
             };
         }
@@ -786,6 +787,7 @@ public class SeriesRepository : ISeriesRepository
                 SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
                 SortField.TimeToRead => query.OrderByDescending(s => s.AvgHoursToRead),
+                SortField.ReleaseYear => query.OrderByDescending(s => s.Metadata.ReleaseYear),
                 _ => query
             };
         }
@@ -1220,6 +1222,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="seriesName"></param>
     /// <param name="localizedName"></param>
     /// <param name="libraryId"></param>
+    /// <param name="format"></param>
     /// <param name="withFullIncludes">Defaults to true. This will query against all foreign keys (deep). If false, just the series will come back</param>
     /// <returns></returns>
     public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)

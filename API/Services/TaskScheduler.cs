@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
-using API.Services.Tasks.Scanner;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -50,8 +49,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ScanQueue = "scan";
     public const string DefaultQueue = "default";
 
-    public static readonly IList<string> ScanTasks = new List<string>()
-        {"ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"};
+    private static readonly ImmutableArray<string> ScanTasks = ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
 
     private static readonly Random Rnd = new Random();
 

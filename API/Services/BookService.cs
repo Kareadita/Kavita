@@ -965,7 +965,7 @@ public class BookService : IBookService
         }
         catch (Exception)
         {
-            /* Swallow exception. Some css doesn't have style rules ending in ; */
+            /* Swallow exception. Some css don't have style rules ending in ; */
         }
 
         body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1");

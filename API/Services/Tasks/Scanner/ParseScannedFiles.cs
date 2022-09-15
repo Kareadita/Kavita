@@ -215,6 +215,10 @@ public class ParseScannedFiles
     /// <param name="libraryType"></param>
     /// <param name="folders"></param>
     /// <param name="libraryName"></param>
+    /// <param name="isLibraryScan">If true, does a directory scan first (resulting in folders being tackled in parallel), else does an immediate scan files</param>
+    /// <param name="seriesPaths">A map of Series names -> existing folder paths to handle skipping folders</param>
+    /// <param name="processSeriesInfos">Action which returns if the folder was skipped and the infos from said folder</param>
+    /// <param name="forceCheck">Defaults to false</param>
     /// <returns></returns>
     public async Task ScanLibrariesForSeries(LibraryType libraryType,
         IEnumerable<string> folders, string libraryName, bool isLibraryScan,

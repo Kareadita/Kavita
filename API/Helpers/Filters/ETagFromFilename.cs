@@ -82,11 +82,11 @@ namespace API.Helpers.Filters;
 // }
 
 [AttributeUsage(AttributeTargets.Method)]
-public class ETagFilter : Attribute, IActionFilter
+public class ETagFilterAttribute : Attribute, IActionFilter
 {
     private readonly int[] _statusCodes;
 
-    public ETagFilter(params int[] statusCodes)
+    public ETagFilterAttribute(params int[] statusCodes)
     {
         _statusCodes = statusCodes;
         if (statusCodes.Length == 0) _statusCodes = new[] { 200 };

@@ -128,7 +128,7 @@ public class ImageService : IImageService
 
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             /* Swallow Exception */
         }

@@ -48,7 +48,8 @@ export enum SortField {
   Created = 2,
   LastModified = 3,
   LastChapterAdded = 4,
-  TimeToRead = 5
+  TimeToRead = 5,
+  ReleaseYear = 6,
 }
 
 export interface ReadStatus {
