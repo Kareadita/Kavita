@@ -1310,7 +1310,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    console.log(this.pageNum, ' Prefetched pages: ', this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src)));
+    //console.log(this.pageNum, ' Prefetched pages: ', this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src)));
   }
 
 
