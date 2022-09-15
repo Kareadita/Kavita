@@ -98,7 +98,7 @@ public class ServerController : BaseApiController
     public ActionResult BackupDatabase()
     {
         _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
-        RecurringJob.Trigger("backup");
+        RecurringJob.TriggerJob("backup");
         return Ok();
     }
 
