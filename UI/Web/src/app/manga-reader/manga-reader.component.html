@@ -14,11 +14,11 @@
             </div>
 
             <div style="margin-left: auto; padding-right: 3%;">
-                <button class="btn btn-icon btn-small" title="Shortcuts" (click)="openShortcutModal()">
+                <button class="btn btn-icon btn-sm" title="Shortcuts" (click)="openShortcutModal()">
                     <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
                     <span class="visually-hidden">Keyboard Shortcuts Modal</span>
                 </button>
-                <button *ngIf="!bookmarkMode && hasBookmarkRights" class="btn btn-icon btn-small" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
+                <button *ngIf="!bookmarkMode && hasBookmarkRights" class="btn btn-icon btn-sm" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                         title="{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()">
                     <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
                     <span class="visually-hidden">{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span>
@@ -98,8 +98,8 @@
         <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
             <span class="visually-hidden" id="slider-info"></span>
             <div class="row g-0">
-                <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-                <button class="btn btn-small btn-icon col-1" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-icon col-1" [disabled]="prevPageDisabled || pageNum === 0" (click)="goToPage(0);resetMenuCloseTimer();" title="First Page"><i class="fa fa-step-backward" aria-hidden="true"></i></button>
                 <div class="col custom-slider" *ngIf="pageOptions.ceil > 0; else noSlider">
                     <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" [manualRefresh]="refreshSlider" (userChangeEnd)="sliderPageUpdate($event);startMenuCloseTimer()" (userChange)="sliderDragUpdate($event)" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
                 </div>
@@ -108,8 +108,8 @@
                         <ngx-slider [options]="pageOptions" [value]="pageNum" aria-describedby="slider-info" (userChangeEnd)="startMenuCloseTimer()" (userChangeStart)="cancelMenuCloseTimer();"></ngx-slider>
                     </div>
                 </ng-template>
-                <button class="btn btn-small btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
-                <button class="btn btn-small btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-icon col-2" [disabled]="nextPageDisabled || pageNum >= maxPages - 1" (click)="goToPage(this.maxPages);resetMenuCloseTimer();" title="Last Page"><i class="fa fa-step-forward" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-icon col-1" [disabled]="nextChapterDisabled" (click)="loadNextChapter();resetMenuCloseTimer();" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
             </div>
         </div>
         <div class="row pt-4 ms-2 me-2">
@@ -217,10 +217,9 @@
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-6 col-sm-12">
-                        <label for="darkness" class="form-label range-label">Brightness</label>
+                        <label for="darkness" class="form-label range-label">Brightness</label><span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
                         <input type="range" class="form-range" id="darkness" 
                                 min="10" max="100" step="1" formControlName="darkness">
-                        <span class="range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
                     </div>
                 </div>
             </form>
