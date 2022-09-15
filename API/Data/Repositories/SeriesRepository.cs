@@ -1078,14 +1078,6 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    private IQueryable<int> GetLibraryIdsForUser(int userId)
-    {
-        return _context.AppUser
-            .Where(u => u.Id == userId)
-            .AsSplitQuery()
-            .SelectMany(l => l.Libraries.Select(lib => lib.Id));
-    }
-
     public async Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams)
     {
         var libraryIds = GetLibraryIdsForUser(userId, libraryId);
@@ -1384,11 +1376,20 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userId"></param>
     /// <param name="libraryId">0 for no library filter</param>
     /// <returns></returns>
-    private IQueryable<int> GetLibraryIdsForUser(int userId, int libraryId)
+    private IQueryable<int> GetLibraryIdsForUser(int userId, int libraryId = 0)
     {
-        return _context.AppUser
-            .Where(u => u.Id == userId)
-            .SelectMany(l => l.Libraries.Where(lib => lib.Id == libraryId || libraryId == 0).Select(lib => lib.Id));
+        var query = _context.AppUser
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Where(u => u.Id == userId);
+
+        if (libraryId == 0)
+        {
+            return query.SelectMany(l => l.Libraries.Select(lib => lib.Id));
+        }
+
+        return query.SelectMany(l =>
+            l.Libraries.Where(lib => lib.Id == libraryId).Select(lib => lib.Id));
     }
 
     public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId)

@@ -94,6 +94,7 @@ public class ETagFilter : Attribute, IActionFilter
 
     public void OnActionExecuting(ActionExecutingContext context)
     {
+        /* Nothing needs to be done here */
     }
 
     public void OnActionExecuted(ActionExecutedContext context)
@@ -101,16 +102,13 @@ public class ETagFilter : Attribute, IActionFilter
         if (context.HttpContext.Request.Method != "GET" || context.HttpContext.Request.Method != "HEAD") return;
         if (!_statusCodes.Contains(context.HttpContext.Response.StatusCode)) return;
 
-        var etag = string.Empty;;
+        var etag = string.Empty;
         //I just serialize the result to JSON, could do something less costly
-        if (context.Result is PhysicalFileResult)
+        if (context.Result is PhysicalFileResult fileResult)
         {
             // Do a cheap LastWriteTime etag gen
-            if (context.Result is PhysicalFileResult fileResult)
-            {
-                etag = ETagGenerator.GenerateEtagFromFilename(fileResult.FileName);
-                context.HttpContext.Response.Headers.LastModified = File.GetLastWriteTimeUtc(fileResult.FileName).ToLongDateString();
-            }
+            etag = ETagGenerator.GenerateEtagFromFilename(fileResult.FileName);
+            context.HttpContext.Response.Headers.LastModified = File.GetLastWriteTimeUtc(fileResult.FileName).ToLongDateString();
         }
 
         if (string.IsNullOrEmpty(etag))
