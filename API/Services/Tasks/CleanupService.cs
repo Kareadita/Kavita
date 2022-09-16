@@ -27,7 +27,7 @@ public interface ICleanupService
     Task CleanupBackups();
     void CleanupTemp();
     /// <summary>
-    /// Responsible to remove Series from Want To Read when user's have fully read the series and the series has Publication Status of Completed.
+    /// Responsible to remove Series from Want To Read when user's have fully read the series and the series has Publication Status of Completed or Cancelled.
     /// </summary>
     /// <returns></returns>
     Task CleanupWantToRead();
@@ -215,7 +215,8 @@ public class CleanupService : ICleanupService
         {
             PublicationStatus = new List<PublicationStatus>()
             {
-                PublicationStatus.Completed
+                PublicationStatus.Completed,
+                PublicationStatus.Cancelled
             },
             Libraries = libraryIds,
             ReadStatus = new ReadStatus()
