@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
@@ -69,6 +69,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   readProgressGroup!: FormGroup;
   sortGroup!: FormGroup;
   seriesNameGroup!: FormGroup;
+  releaseYearRange!: FormGroup;
   isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
@@ -120,6 +121,11 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       seriesNameQuery: new FormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
     });
 
+    this.releaseYearRange = new FormGroup({
+      min: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)]),
+      max: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)])
+    });
+
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
       this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
       this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
@@ -160,6 +166,15 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     )
     .subscribe(changes => {
       this.filter.seriesNameQuery = changes; // TODO: See if we can make this into observable
+      this.cdRef.markForCheck();
+    });
+
+    this.releaseYearRange.valueChanges.pipe(
+      distinctUntilChanged(), 
+      takeUntil(this.onDestroy)
+    )
+    .subscribe(changes => {
+      this.filter.releaseYearRange = {min: this.releaseYearRange.get('min')?.value, max: this.releaseYearRange.get('max')?.value};
       this.cdRef.markForCheck();
     });
 

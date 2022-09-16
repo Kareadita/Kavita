@@ -326,6 +326,21 @@
                 </form>
             </div>
             <div class="col-md-2 me-3">
+                <form [formGroup]="releaseYearRange" class="d-flex justify-content-between">
+                    <div class="mb-3">
+                        <label for="release-year-min" class="form-label">Release Year</label>
+                        <input type="text" id="release-year-min" formControlName="min" class="form-control" style="width: 62px" placeholder="Min">
+                    </div>
+                    <div style="margin-top: 37px !important">
+                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                    </div>
+                    <div class="mb-3" style="margin-top: 0.5rem">
+                        <label for="release-year-max" class="form-label"><span class="visually-hidden">Max</span></label>
+                        <input type="text" id="release-year-max" formControlName="max" class="form-control" style="width: 62px" placeholder="Max">
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-2 me-3">
                 <form [formGroup]="sortGroup">
                     <div class="mb-3">
                         <label for="sort-options" class="form-label">Sort By</label>
@@ -341,11 +356,11 @@
                             <option [value]="SortField.LastModified">Last Modified</option> 
                             <option [value]="SortField.LastChapterAdded">Item Added</option> 
                             <option [value]="SortField.TimeToRead">Time to Read</option> 
+                            <option [value]="SortField.ReleaseYear">Release Year</option> 
                         </select>
                     </div>
                 </form>
             </div>  
-            <div class="col-md-2 me-3"></div>
             <div class="col-md-2 me-3 mt-4">
                 <button class="btn btn-secondary col-12" (click)="clear()">Clear</button>
             </div>

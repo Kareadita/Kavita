@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
-using API.Services.Tasks.Scanner;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -49,9 +48,13 @@ public class TaskScheduler : ITaskScheduler
     public static BackgroundJobServer Client => new BackgroundJobServer();
     public const string ScanQueue = "scan";
     public const string DefaultQueue = "default";
+    public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
+    public const string CleanupDbTaskId = "cleanup-db";
+    public const string CleanupTaskId = "cleanup";
+    public const string BackupTaskId = "backup";
+    public const string ScanLibrariesTaskId = "scan-libraries";
 
-    public static readonly IList<string> ScanTasks = new List<string>()
-        {"ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"};
+    private static readonly ImmutableArray<string> ScanTasks = ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
 
     private static readonly Random Rnd = new Random();
 
@@ -83,27 +86,28 @@ public class TaskScheduler : ITaskScheduler
         {
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
-            RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(),
                 () => CronConverter.ConvertToCronNotation(scanLibrarySetting), TimeZoneInfo.Local);
         }
         else
         {
-            RecurringJob.AddOrUpdate("scan-libraries", () => ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
         if (setting != null)
         {
             _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), TimeZoneInfo.Local);
         }
         else
         {
-            RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), Cron.Weekly, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), Cron.Weekly, TimeZoneInfo.Local);
         }
 
-        RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
-        RecurringJob.AddOrUpdate("cleanup-db", () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, TimeZoneInfo.Local);
     }
 
     #region StatsTasks
@@ -153,7 +157,6 @@ public class TaskScheduler : ITaskScheduler
         _logger.LogInformation("Starting Site Theme scan");
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
-
 
     #endregion
 

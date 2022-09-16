@@ -64,7 +64,7 @@ public static class LogLevelOptions
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
                 break;
             case "Information":
-                LogLevelSwitch.MinimumLevel = LogEventLevel.Information;
+                LogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 break;
@@ -79,7 +79,7 @@ public static class LogLevelOptions
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 break;
             case "Critical":
-                LogLevelSwitch.MinimumLevel = LogEventLevel.Error;
+                LogLevelSwitch.MinimumLevel = LogEventLevel.Fatal;
                 MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Error;
                 break;

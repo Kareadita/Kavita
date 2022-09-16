@@ -78,6 +78,19 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
+    /// Performs an ad-hoc cleanup of Want To Read, by removing want to read series for users, where the series are fully read and in Completed publication status.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("cleanup-want-to-read")]
+    public ActionResult CleanupWantToRead()
+    {
+        _logger.LogInformation("{UserName} is clearing running want to read cleanup from admin dashboard", User.GetUsername());
+        RecurringJob.TriggerJob(API.Services.TaskScheduler.RemoveFromWantToReadTaskId);
+
+        return Ok();
+    }
+
+    /// <summary>
     /// Performs an ad-hoc backup of the Database
     /// </summary>
     /// <returns></returns>
@@ -85,7 +98,7 @@ public class ServerController : BaseApiController
     public ActionResult BackupDatabase()
     {
         _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
-        RecurringJob.Trigger("backup");
+        RecurringJob.TriggerJob(API.Services.TaskScheduler.BackupTaskId);
         return Ok();
     }
 

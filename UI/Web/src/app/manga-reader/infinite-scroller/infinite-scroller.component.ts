@@ -157,7 +157,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService,
     private readonly cdRef: ChangeDetectorRef) {
     // This will always exist at this point in time since this is used within manga reader
-    const reader = document.querySelector('.reader');
+    const reader = document.querySelector('.reading-area');
     if (reader !== null) {
       this.readerElemRef = new ElementRef(reader as HTMLDivElement);
     }
@@ -182,7 +182,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * gets promoted to fullscreen.
    */
   initScrollHandler() {
+    console.log('Setting up Scroll handler on ', this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body);
     fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
+    //fromEvent(this.document.body, 'scroll')
     .pipe(debounceTime(20), takeUntil(this.onDestroy))
     .subscribe((event) => this.handleScrollEvent(event));
   }
@@ -263,6 +265,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    */
   handleScrollEvent(event?: any) {
     const verticalOffset = this.getVerticalOffset();
+    console.log('offset: ', verticalOffset);
 
     if (verticalOffset > this.prevScrollPosition) {
       this.scrollingDirection = PAGING_DIRECTION.FORWARD;

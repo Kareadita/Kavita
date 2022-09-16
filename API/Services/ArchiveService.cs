@@ -44,7 +44,7 @@ public class ArchiveService : IArchiveService
     private readonly ILogger<ArchiveService> _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
-    private const string ComicInfoFilename = "comicinfo";
+    private const string ComicInfoFilename = "ComicInfo.xml";
 
     public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService, IImageService imageService)
     {
@@ -332,9 +332,8 @@ public class ArchiveService : IArchiveService
     {
         var filenameWithoutExtension = Path.GetFileNameWithoutExtension(name).ToLower();
         return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
-               && filenameWithoutExtension.Equals(ComicInfoFilename, StringComparison.InvariantCultureIgnoreCase)
-               && !filenameWithoutExtension.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith)
-               && Tasks.Scanner.Parser.Parser.IsXml(name);
+               && fullName.Equals(ComicInfoFilename)
+               && !filenameWithoutExtension.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
     }
 
     /// <summary>

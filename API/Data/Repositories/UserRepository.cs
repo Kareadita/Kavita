@@ -35,6 +35,7 @@ public interface IUserRepository
     void Update(AppUser user);
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
+    void Add(AppUserBookmark bookmark);
     public void Delete(AppUser user);
     void Delete(AppUserBookmark bookmark);
     Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
@@ -88,6 +89,11 @@ public class UserRepository : IUserRepository
     public void Update(AppUserBookmark bookmark)
     {
         _context.Entry(bookmark).State = EntityState.Modified;
+    }
+
+    public void Add(AppUserBookmark bookmark)
+    {
+        _context.AppUserBookmark.Add(bookmark);
     }
 
     public void Delete(AppUser user)
@@ -229,7 +235,8 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<AppUser>> GetAllUsers()
     {
-        return await _context.AppUser.ToListAsync();
+        return await _context.AppUser
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId)

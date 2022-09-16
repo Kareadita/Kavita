@@ -61,13 +61,10 @@ public class BookController : BaseApiController
                 break;
             }
             case MangaFormat.Image:
-                break;
             case MangaFormat.Archive:
-                break;
             case MangaFormat.Unknown:
-                break;
             default:
-                throw new ArgumentOutOfRangeException();
+                break;
         }
 
         return Ok(new BookInfoDto()

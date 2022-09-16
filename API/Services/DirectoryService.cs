@@ -368,15 +368,22 @@ public class DirectoryService : IDirectoryService
     {
         var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
         if (!di.Exists) return;
+        try
+        {
+            foreach (var file in di.EnumerateFiles())
+            {
+                file.Delete();
+            }
+            foreach (var dir in di.EnumerateDirectories())
+            {
+                dir.Delete(true);
+            }
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogError(ex, "[ClearDirectory] Could not delete {DirectoryPath} due to permission issue", directoryPath);
+        }
 
-        foreach (var file in di.EnumerateFiles())
-        {
-            file.Delete();
-        }
-        foreach (var dir in di.EnumerateDirectories())
-        {
-            dir.Delete(true);
-        }
     }
 
     /// <summary>

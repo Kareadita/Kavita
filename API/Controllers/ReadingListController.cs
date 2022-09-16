@@ -46,6 +46,7 @@ public class ReadingListController : BaseApiController
     /// Returns reading lists (paginated) for a given user.
     /// </summary>
     /// <param name="includePromoted">Defaults to true</param>
+    /// <param name="userParams">Pagination parameters</param>
     /// <returns></returns>
     [HttpPost("lists")]
     public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, [FromQuery] bool includePromoted = true)

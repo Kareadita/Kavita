@@ -252,4 +252,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   transformKeyToOpdsUrl(key: string) {
     return `${location.origin}/api/opds/${key}`;
   }
+
+  handleBackgroundColorChange() {
+    this.settingsForm.markAsDirty();
+    this.settingsForm.markAsTouched();
+    this.cdRef.markForCheck();
+  }
 }

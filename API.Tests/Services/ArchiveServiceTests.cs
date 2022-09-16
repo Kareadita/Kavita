@@ -39,7 +39,7 @@ public class ArchiveServiceTests
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/Archives");
         var file = Path.Join(testDirectory, archivePath);
-        using ZipArchive archive = ZipFile.OpenRead(file);
+        using var archive = ZipFile.OpenRead(file);
         Assert.Equal(expected, _archiveService.ArchiveNeedsFlattening(archive));
     }
 
@@ -279,15 +279,16 @@ public class ArchiveServiceTests
         var comicInfo = _archiveService.GetComicInfo(archive);
 
         Assert.NotNull(comicInfo);
-        Assert.Equal(comicInfo.Publisher, "Yen Press");
-        Assert.Equal(comicInfo.Genre, "Manga, Movies & TV");
-        Assert.Equal(comicInfo.Summary, "By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?");
-        Assert.Equal(comicInfo.PageCount, 194);
-        Assert.Equal(comicInfo.LanguageISO, "en");
-        Assert.Equal(comicInfo.Notes, "Scraped metadata from Comixology [CMXDB450184]");
-        Assert.Equal(comicInfo.Series, "BTOOOM!");
-        Assert.Equal(comicInfo.Title, "v01");
-        Assert.Equal(comicInfo.Web, "https://www.comixology.com/BTOOOM/digital-comic/450184");
+        Assert.Equal("Yen Press", comicInfo.Publisher);
+        Assert.Equal("Manga, Movies & TV", comicInfo.Genre);
+        Assert.Equal("By all counts, Ryouta Sakamoto is a loser when he's not holed up in his room, bombing things into oblivion in his favorite online action RPG. But his very own uneventful life is blown to pieces when he's abducted and taken to an uninhabited island, where he soon learns the hard way that he's being pitted against others just like him in a explosives-riddled death match! How could this be happening? Who's putting them up to this? And why!? The name, not to mention the objective, of this very real survival game is eerily familiar to Ryouta, who has mastered its virtual counterpart-BTOOOM! Can Ryouta still come out on top when he's playing for his life!?",
+            comicInfo.Summary);
+        Assert.Equal(194, comicInfo.PageCount);
+        Assert.Equal("en", comicInfo.LanguageISO);
+        Assert.Equal("Scraped metadata from Comixology [CMXDB450184]", comicInfo.Notes);
+        Assert.Equal("BTOOOM!", comicInfo.Series);
+        Assert.Equal("v01", comicInfo.Title);
+        Assert.Equal("https://www.comixology.com/BTOOOM/digital-comic/450184", comicInfo.Web);
     }
 
     #endregion

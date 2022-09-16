@@ -210,13 +210,13 @@ public class ProcessSeries : IProcessSeries
             if (!library.Folders.Select(f => f.Path).Contains(seriesDirs.Keys.First()))
             {
                 series.FolderPath = Parser.Parser.NormalizePath(seriesDirs.Keys.First());
+                _logger.LogDebug("Updating {Series} FolderPath to {FolderPath}", series.Name, series.FolderPath);
             }
         }
     }
 
     public void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
