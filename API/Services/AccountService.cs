@@ -19,7 +19,7 @@ public interface IAccountService
     Task<IEnumerable<ApiException>> ValidateUsername(string username);
     Task<IEnumerable<ApiException>> ValidateEmail(string email);
     Task<bool> HasBookmarkPermission(AppUser user);
-    Task<bool> HasDownloadPermission(AppUser appuser);
+    Task<bool> HasDownloadPermission(AppUser user);
 }
 
 public class AccountService : IAccountService

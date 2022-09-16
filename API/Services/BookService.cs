@@ -561,8 +561,6 @@ public class BookService : IBookService
                 var seriesIndex = string.Empty;
                 var series = string.Empty;
                 var specialName = string.Empty;
-                var groupPosition = string.Empty;
-                var titleSort = string.Empty;
 
 
                 foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
@@ -578,7 +576,6 @@ public class BookService : IBookService
                             break;
                         case "calibre:title_sort":
                             specialName = metadataItem.Content;
-                            titleSort = metadataItem.Content;
                             break;
                     }
 
@@ -592,7 +589,7 @@ public class BookService : IBookService
                             series = metadataItem.Content;
                             break;
                         case "collection-type":
-                            groupPosition = metadataItem.Content;
+                            // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html
                             break;
                     }
                 }
