@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "prod": "ng build --configuration production",
+    "prod": "ng build --configuration production --aot --output-hashing=all",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "test": "jest",
     "test:watch": "jest --watch",
