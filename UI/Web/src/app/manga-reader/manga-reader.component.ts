@@ -358,7 +358,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isWideImage() || this.FittingOption === FITTING_OPTION.WIDTH) {
       return this.WindowHeight;
     }
-    return this.image?.nativeElement.height + 'px';
+    return Math.max(this.readingArea?.nativeElement?.clientHeight, this.image?.nativeElement.height) + 'px';
   }
 
   get RightPaginationOffset() {
