@@ -126,7 +126,7 @@
                                             <label for="settings-backgroundcolor-option" class="form-label">Background Color</label>
                                             <input [value]="user.preferences.backgroundColor"
                                                 class="form-control"
-                                                (colorPickerChange)="settingsForm.markAsTouched()"
+                                                (colorPickerChange)="handleBackgroundColorChange()"
                                                 [style.background]="user.preferences.backgroundColor"
                                                 [cpAlphaChannel]="'disabled'"
                                                 [(colorPicker)]="user.preferences.backgroundColor"/>
