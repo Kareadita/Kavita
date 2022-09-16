@@ -1,8 +1,10 @@
-﻿using API.DTOs;
+﻿using System;
+using API.DTOs;
 using System.Threading.Tasks;
 using API.Data;
 using System.Collections.Immutable;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
@@ -21,6 +23,7 @@ public class TachiyomiService : ITachiyomiService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReaderService _readerService;
     private readonly IMapper _mapper;
+    private readonly CultureInfo _englishCulture = CultureInfo.CreateSpecificCulture("en-US");
 
     public TachiyomiService(IUnitOfWork unitOfWork,IMapper mapper,IReaderService readerService)
     {
@@ -56,7 +59,8 @@ public class TachiyomiService : ITachiyomiService
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparerZeroFirst.Default).Last());
                 return new ChapterDto()
                 {
-                    Number = $"{int.Parse(volumeChapter.Number) / 100f}"
+                    Number = $"{int.Parse(volumeChapter.Number) / 100f}".ToString(_englishCulture)
+                    //Number = $"{int.Parse(volumeChapter.Number) / 100f}"
                 };
             }
 
@@ -73,7 +77,10 @@ public class TachiyomiService : ITachiyomiService
             // The progress is on a volume, encode it as a fake chapterDTO
             return new ChapterDto()
             {
-                Number = $"{volumeWithProgress.Number / 100f}"
+                // Use R to ensure that localization of underlying system doesn't affect the stringification
+                // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
+                Number = (volumeWithProgress.Number / 100f).ToString("R", _englishCulture)
+
             };
         }
 
@@ -95,7 +102,9 @@ public class TachiyomiService : ITachiyomiService
             case < 1.0f:
             {
                 // This is a hack to track volume number. We need to map it back by x100
-                var volumeNumber = int.Parse($"{chapterNumber * 100f}");
+                var chapterString = $"{chapterNumber}";
+                var volumeNumber = int.Parse($"{chapterNumber * 100F}", _englishCulture);
+                //var volumeNumber = int.Parse($"{float.Parse(chapterString.Substring(0, Math.Min(7, chapterString.Length))) * 100f}");
                 await _readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
                 break;
             }
