@@ -10,12 +10,5 @@ namespace API.Benchmark;
 /// </summary>
 public static class Program
 {
-    private static void Main(string[] args)
-    {
-        //BenchmarkRunner.Run<ParseScannedFilesBenchmarks>();
-        //BenchmarkRunner.Run<TestBenchmark>();
-        //BenchmarkRunner.Run<ParserBenchmarks>();
-        BenchmarkRunner.Run<EpubBenchmark>();
-
-    }
+    private static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }

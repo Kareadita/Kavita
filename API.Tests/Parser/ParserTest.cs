@@ -67,6 +67,7 @@ public class ParserTests
     [InlineData("Witchblade 089 (2005) (Bittertek-DCP) (Top Cow (Image Comics))", true, "Witchblade 089")]
     [InlineData("(C99) Kami-sama Hiroimashita. (SSSS.GRIDMAN)", false, "Kami-sama Hiroimashita.")]
     [InlineData("Dr. Ramune - Mysterious Disease Specialist v01 (2020) (Digital) (danke-Empire)", false, "Dr. Ramune - Mysterious Disease Specialist v01")]
+    [InlineData("Magic Knight Rayearth {Omnibus Edition}", false, "Magic Knight Rayearth {}")]
     public void CleanTitleTest(string input, bool isComic, string expected)
     {
         Assert.Equal(expected, CleanTitle(input, isComic));
