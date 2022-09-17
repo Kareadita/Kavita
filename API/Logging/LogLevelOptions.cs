@@ -51,7 +51,7 @@ public static class LogLevelOptions
             .WriteTo.File(LogFile,
                 shared: true,
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {Level}] {Message:lj}{NewLine}{Exception}");
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId}] [{Level}] {Message:lj}{NewLine}{Exception}");
     }
 
     public static void SwitchLogLevel(string level)
