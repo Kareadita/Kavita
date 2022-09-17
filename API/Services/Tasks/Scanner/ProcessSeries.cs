@@ -479,7 +479,7 @@ public class ProcessSeries : IProcessSeries
             var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
             foreach (var volume in deletedVolumes)
             {
-                var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? "";
+                var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
                 if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
                 {
                     _logger.LogError(

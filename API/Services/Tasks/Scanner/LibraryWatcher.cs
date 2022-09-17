@@ -165,13 +165,15 @@ public class LibraryWatcher : ILibraryWatcher
     {
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
         _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}", e.FullPath, e.Name);
-        ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name)));
+        //ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name)));
+        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name))));
     }
 
     private void OnCreated(object sender, FileSystemEventArgs e)
     {
         _logger.LogDebug("[LibraryWatcher] Created: {FullPath}, {Name}", e.FullPath, e.Name);
-        ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name));
+        //ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name));
+        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, !_directoryService.FileSystem.File.Exists(e.Name)));
     }
 
     /// <summary>
@@ -183,7 +185,8 @@ public class LibraryWatcher : ILibraryWatcher
         var isDirectory = string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name));
         if (!isDirectory) return;
         _logger.LogDebug("[LibraryWatcher] Deleted: {FullPath}, {Name}", e.FullPath, e.Name);
-        ProcessChange(e.FullPath, true);
+        //ProcessChange(e.FullPath, true);
+        BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, true));
     }
 
 
@@ -198,35 +201,35 @@ public class LibraryWatcher : ILibraryWatcher
     /// Processes the file or folder change. If the change is a file change and not from a supported extension, it will be ignored.
     /// </summary>
     /// <remarks>This will ignore image files that are added to the system. However, they may still trigger scans due to folder changes.</remarks>
+    /// <remarks>This is public only because Hangfire will invoke it. Do not call external to this class.</remarks>
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
-    private void ProcessChange(string filePath, bool isDirectoryChange = false)
+    public void ProcessChange(string filePath, bool isDirectoryChange = false)
     {
         var sw = Stopwatch.StartNew();
+        _logger.LogDebug("[LibraryWatcher] Processing change of {FilePath}", filePath);
         try
         {
-            // We need to check if directory or not
+            // If not a directory change AND file is not an archive or book, ignore
             if (!isDirectoryChange &&
-                !(Parser.Parser.IsArchive(filePath) || Parser.Parser.IsBook(filePath))) return;
+                !(Parser.Parser.IsArchive(filePath) || Parser.Parser.IsBook(filePath)))
+            {
+                _logger.LogDebug("[LibraryWatcher] Change from {FilePath} is not an archive or book, ignoring change", filePath);
+                return;
+            }
 
-            var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
-            if (string.IsNullOrEmpty(parentDirectory)) return;
+            var fullPath = GetFolder(filePath);
+            if (string.IsNullOrEmpty(fullPath))
+            {
+                _logger.LogDebug("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", filePath);
+                return;
+            }
 
-            // We need to find the library this creation belongs to
-            // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
-            var libraryFolder = _libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
-            if (string.IsNullOrEmpty(libraryFolder)) return;
-
-            var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
-            if (!rootFolder.Any()) return;
-
-            // Select the first folder and join with library folder, this should give us the folder to scan.
-            var fullPath =
-                Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.First()));
+            // Check if this task has already enqueued or is being processed, before enquing
 
             var alreadyScheduled =
                 TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {fullPath});
-            _logger.LogDebug("{FullPath} already enqueued: {Value}", fullPath, alreadyScheduled);
+            _logger.LogDebug("[LibraryWatcher] {FullPath} already enqueued: {Value}", fullPath, alreadyScheduled);
             if (!alreadyScheduled)
             {
                 _logger.LogDebug("[LibraryWatcher] Scheduling ScanFolder for {Folder}", fullPath);
@@ -242,9 +245,30 @@ public class LibraryWatcher : ILibraryWatcher
         {
             _logger.LogError(ex, "[LibraryWatcher] An error occured when processing a watch event");
         }
-        _logger.LogDebug("ProcessChange occured in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+        _logger.LogDebug("[LibraryWatcher] ProcessChange ran in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
+    private string GetFolder(string filePath)
+    {
+        var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
+        string libraryFolder;
+        if (string.IsNullOrEmpty(parentDirectory))
+        {
+            libraryFolder = _libraryFolders.FirstOrDefault(filePath.Contains);
+            if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
+            //return string.Empty;
+        }
+        if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
 
+        // We need to find the library this creation belongs to
+        // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
+        libraryFolder = _libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
+        if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
 
+        var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
+        if (!rootFolder.Any()) return string.Empty;
+
+        // Select the first folder and join with library folder, this should give us the folder to scan.
+        return  Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.First()));
+    }
 }
