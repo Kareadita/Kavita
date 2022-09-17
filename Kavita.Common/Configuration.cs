@@ -11,12 +11,6 @@ public static class Configuration
 {
     public static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
-    public static string Branch
-    {
-        get => GetBranch(GetAppSettingFilename());
-        set => SetBranch(GetAppSettingFilename(), value);
-    }
-
     public static int Port
     {
         get => GetPort(GetAppSettingFilename());
@@ -146,42 +140,4 @@ public static class Configuration
     }
 
     #endregion
-
-    private static string GetBranch(string filePath)
-    {
-        const string defaultBranch = "main";
-
-        try
-        {
-            var json = File.ReadAllText(filePath);
-            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
-            const string key = "Branch";
-
-            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
-            {
-                return tokenElement.GetString();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error reading app settings: " + ex.Message);
-        }
-
-        return defaultBranch;
-    }
-
-    private static void SetBranch(string filePath, string updatedBranch)
-    {
-        try
-        {
-            var currentBranch = GetBranch(filePath);
-            var json = File.ReadAllText(filePath)
-                .Replace("\"Branch\": " + currentBranch, "\"Branch\": " + updatedBranch);
-            File.WriteAllText(filePath, json);
-        }
-        catch (Exception)
-        {
-            /* Swallow Exception */
-        }
-    }
 }
