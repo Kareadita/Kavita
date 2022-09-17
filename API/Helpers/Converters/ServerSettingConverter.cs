@@ -63,6 +63,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.EnableFolderWatching:
                     destination.EnableFolderWatching = bool.Parse(row.Value);
                     break;
+                case ServerSettingKey.TotalLogs:
+                    destination.TotalLogs = int.Parse(row.Value);
+                    break;
             }
         }
 

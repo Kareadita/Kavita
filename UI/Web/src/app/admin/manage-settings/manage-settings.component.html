@@ -21,14 +21,14 @@
         </div>
 
         <div class="row g-0 mb-2">
-            <div class="col-md-4 col-sm-12 pe-2">
+            <div class="col-md-3 col-sm-12 pe-2">
                 <label for="settings-port" class="form-label">Port</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="portTooltip" role="button" tabindex="0"></i>
                 <ng-template #portTooltip>Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</ng-template>
                 <span class="visually-hidden" id="settings-port-help">Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</span>
                 <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
             </div>
 
-            <div class="col-md-4 col-sm-12 pe-2">
+            <div class="col-md-3 col-sm-12 pe-2">
                 <label for="backup-tasks" class="form-label">Days of Backups</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="backupTasksTooltip" role="button" tabindex="0"></i>
                 <ng-template #backupTasksTooltip>The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
                 <span class="visually-hidden" id="backup-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
@@ -45,8 +45,26 @@
                     </p>
                 </ng-container>
             </div>
+
+            <div class="col-md-3 col-sm-12 pe-2">
+                <label for="log-tasks" class="form-label">Days of Logs</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="logTasksTooltip" role="button" tabindex="0"></i>
+                <ng-template #logTasksTooltip>The number of logs to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
+                <span class="visually-hidden" id="log-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
+                <input id="log-tasks" aria-describedby="log-tasks-help" class="form-control" formControlName="totalLogs" type="number" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                <ng-container *ngIf="settingsForm.get('totalLogs')?.errors as errors">
+                    <p class="invalid-feedback" *ngIf="errors.min">
+                        You must have at least 1 log
+                    </p>
+                    <p class="invalid-feedback" *ngIf="errors.max">
+                        You cannot have more than {{errors.max.max}} logs
+                    </p>
+                    <p class="invalid-feedback" *ngIf="errors.required">
+                        This field is required
+                    </p>
+                </ng-container>
+            </div>
     
-            <div class="col-md-4 col-sm-12">
+            <div class="col-md-3 col-sm-12">
                 <label for="logging-level-port" class="form-label">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
                 <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space.</ng-template>
                 <span class="visually-hidden" id="logging-level-port-help">Port the server listens on.</span>

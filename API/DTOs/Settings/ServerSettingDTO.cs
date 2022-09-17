@@ -1,4 +1,5 @@
-﻿using API.Services;
+﻿using System.ComponentModel.DataAnnotations;
+using API.Services;
 
 namespace API.DTOs.Settings;
 
@@ -50,7 +51,6 @@ public class ServerSettingDto
     /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
     /// </summary>
     public bool EnableSwaggerUi { get; set; }
-
     /// <summary>
     /// The amount of Backups before cleanup
     /// </summary>
@@ -60,4 +60,9 @@ public class ServerSettingDto
     /// If Kavita should watch the library folders and process changes
     /// </summary>
     public bool EnableFolderWatching { get; set; } = true;
+    /// <summary>
+    /// Total number of days worth of logs to keep at a given time.
+    /// </summary>
+    /// <remarks>Value should be between 1 and 30</remarks>
+    public int TotalLogs { get; set; }
 }

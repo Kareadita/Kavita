@@ -116,7 +116,7 @@ public class ProcessSeries : IProcessSeries
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
-            // parsedInfos[0] is not the first volume or chapter. We need to find it. Using a ComicInfo check
+            // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, parsedInfos[0]);
 
             UpdateVolumes(series, parsedInfos);

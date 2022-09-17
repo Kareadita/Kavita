@@ -103,6 +103,7 @@ public static class Seed
             new() {Key = ServerSettingKey.ConvertBookmarkToWebP, Value = "false"},
             new() {Key = ServerSettingKey.EnableSwaggerUi, Value = "false"},
             new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
+            new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
         }.ToArray());
 

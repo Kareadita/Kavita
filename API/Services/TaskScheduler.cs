@@ -53,6 +53,7 @@ public class TaskScheduler : ITaskScheduler
     public const string CleanupTaskId = "cleanup";
     public const string BackupTaskId = "backup";
     public const string ScanLibrariesTaskId = "scan-libraries";
+    public const string ReportStatsTaskId = "report-stats";
 
     private static readonly ImmutableArray<string> ScanTasks = ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
 
@@ -123,7 +124,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogDebug("Scheduling stat collection daily");
-        RecurringJob.AddOrUpdate("report-stats", () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
     }
 
     public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
@@ -131,11 +132,14 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
     }
 
+    /// <summary>
+    /// Upon cancelling stat, we do report to the Stat service that we are no longer going to be reporting
+    /// </summary>
     public void CancelStatsTasks()
     {
-        _logger.LogDebug("Cancelling/Removing StatsTasks");
-
-        RecurringJob.RemoveIfExists("report-stats");
+        _logger.LogDebug("Stopping Stat collection as user has opted out");
+        RecurringJob.RemoveIfExists(ReportStatsTaskId);
+        _statsService.SendCancellation();
     }
 
     /// <summary>

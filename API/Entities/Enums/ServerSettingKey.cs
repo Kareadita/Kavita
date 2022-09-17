@@ -96,4 +96,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("EnableFolderWatching")]
     EnableFolderWatching = 17,
+    /// <summary>
+    /// Total number of days worth of logs to keep
+    /// </summary>
+    [Description("TotalLogs")]
+    TotalLogs = 18,
 }
