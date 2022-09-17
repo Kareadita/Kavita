@@ -116,7 +116,8 @@ public class ProcessSeries : IProcessSeries
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
-            var firstParsedInfo = parsedInfos[0];
+            // parsedInfos[0] is not the first volume or chapter. We need to find it. Using a ComicInfo check
+            var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, parsedInfos[0]);
 
             UpdateVolumes(series, parsedInfos);
             series.Pages = series.Volumes.Sum(v => v.Pages);
@@ -482,7 +483,7 @@ public class ProcessSeries : IProcessSeries
                 var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
                 if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
                 {
-                    _logger.LogError(
+                    _logger.LogInformation(
                         "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
                         file);
                 }
