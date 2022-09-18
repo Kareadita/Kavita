@@ -104,43 +104,6 @@ public class TachiyomiServiceTests
     #endregion
 
 
-
-
-    /*
-     * Cases to be tested:
-     * Case             | Returns:
-     * Nothing read     -> null
-     * Everything read  -> max chapter
-     * Progress         -> Highest chapter until read
-     * Progress volume  -> Encoded volume as chapterdto
-     */
-
-    /*
-     *  Logic 1 -> nothing read returns 0
-     */
-/*
-    _context.Series.Add();
-
-    var user = new AppUser()
-    {
-        UserName = "majora2007",
-    };
-
-    _context.AppUser.Add(user);
-
-    await _context.SaveChangesAsync();
-
-
-    var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-
-
-
-    await readerService.MarkChaptersUntilAsRead(user, 1, 3);
-
-
-    Assert.Equal("1", nextChapter);
-        */
-
     #region GetLatestChapter
 
     [Fact]
@@ -383,6 +346,320 @@ public class TachiyomiServiceTests
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10000F);
+
+        await _context.SaveChangesAsync();
+
+
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        Assert.Equal("0.0001",latestChapter.Number);
+    }
+    [Fact]
+    public async Task GetLatestChapter_ShouldReturnEncodedYearlyVolume_Progress()
+    {
+        await ResetDb();
+
+        var series = new Series()
+        {
+            Name = "Test",
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1997", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2002", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2005", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
+                }),
+            }
+        };
+        series.Pages = 7;
+        var library = new Library()
+        {
+            Name = "Test LIb",
+            Type = LibraryType.Comic,
+            Series = new List<Series>() { series }
+        };
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = new List<Library>()
+            {
+                library
+            }
+
+        });
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, readerService);
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10000F);
+
+        await _context.SaveChangesAsync();
+
+
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        Assert.Equal("0.2002",latestChapter.Number);
+    }
+
+    #endregion
+
+
+    #region MarkChaptersUntilAsRead
+
+    //[Fact]
+    public async Task MarkChaptersUntilAsRead_ShouldReturnChapter_NoProgress()
+    {
+        await ResetDb();
+
+        var series = new Series()
+        {
+            Name = "Test",
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("4", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
+                }),
+            }
+        };
+        series.Pages = 7;
+        var library = new Library()
+        {
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>() { series }
+        };
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = new List<Library>()
+            {
+                library
+            }
+
+        });
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, readerService);
+
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+
+        Assert.Null(latestChapter);
+    }
+    //[Fact]
+    public async Task MarkChaptersUntilAsRead_ShouldReturnMaxChapter_CompletelyRead()
+    {
+        await ResetDb();
+
+        var series = new Series()
+        {
+            Name = "Test",
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("4", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
+                }),
+            }
+        };
+        series.Pages = 7;
+        var library = new Library()
+        {
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>() { series }
+        };
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = new List<Library>()
+            {
+                library
+            }
+
+        });
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, readerService);
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkSeriesAsRead(user,1);
+
+        await _context.SaveChangesAsync();
+
+
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+
+        Assert.Equal("96",latestChapter.Number);
+    }
+
+    //[Fact]
+    public async Task MarkChaptersUntilAsRead_ShouldReturnHighestChapter_Progress()
+    {
+        await ResetDb();
+
+        var series = new Series()
+        {
+            Name = "Test",
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("23", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
+                }),
+            }
+        };
+        series.Pages = 7;
+        var library = new Library()
+        {
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>() { series }
+        };
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = new List<Library>()
+            {
+                library
+            }
+
+        });
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, readerService);
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
+
+        await _context.SaveChangesAsync();
+
+
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+
+        Assert.Equal("21",latestChapter.Number);
+    }
+    //[Fact]
+    public async Task MarkChaptersUntilAsRead_ShouldReturnEncodedVolume_Progress()
+    {
+        await ResetDb();
+
+        var series = new Series()
+        {
+            Name = "Test",
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("23", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
+                }),
+            }
+        };
+        series.Pages = 7;
+        var library = new Library()
+        {
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>() { series }
+        };
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = new List<Library>()
+            {
+                library
+            }
+
+        });
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, readerService);
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+
         await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/100F);
 
         await _context.SaveChangesAsync();
@@ -393,6 +670,5 @@ public class TachiyomiServiceTests
     }
 
     #endregion
-
 
 }

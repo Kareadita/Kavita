@@ -59,8 +59,8 @@ public class TachiyomiService : ITachiyomiService
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparerZeroFirst.Default).Last());
                 return new ChapterDto()
                 {
-                    Number = $"{int.Parse(volumeChapter.Number) / 100f}".ToString(_englishCulture)
-                    //Number = $"{int.Parse(volumeChapter.Number) / 100f}"
+                    Number = $"{int.Parse(volumeChapter.Number) / 10000f}".ToString(_englishCulture)
+                    //Number = $"{int.Parse(volumeChapter.Number) / 1000f}"
                 };
             }
 
@@ -79,7 +79,7 @@ public class TachiyomiService : ITachiyomiService
             {
                 // Use R to ensure that localization of underlying system doesn't affect the stringification
                 // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                Number = (volumeWithProgress.Number / 100f).ToString("R", _englishCulture)
+                Number = (volumeWithProgress.Number / 10000f).ToString("R", _englishCulture)
 
             };
         }
@@ -103,7 +103,7 @@ public class TachiyomiService : ITachiyomiService
             {
                 // This is a hack to track volume number. We need to map it back by x100
                 var chapterString = $"{chapterNumber}";
-                var volumeNumber = int.Parse($"{chapterNumber * 100F}", _englishCulture);
+                var volumeNumber = int.Parse($"{(int)(chapterNumber * 10000)}", _englishCulture);
                 //var volumeNumber = int.Parse($"{float.Parse(chapterString.Substring(0, Math.Min(7, chapterString.Length))) * 100f}");
                 await _readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
                 break;
