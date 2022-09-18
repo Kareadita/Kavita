@@ -38,6 +38,7 @@ public interface ILibraryRepository
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
+    Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
@@ -111,12 +112,25 @@ public class LibraryRepository : ILibraryRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
+    /// <summary>
+    /// This does not track
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId)
     {
         return await _context.Library
             .Include(l => l.AppUsers)
             .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
             .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId)
+    {
+        return await _context.Library
+            .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
+            .Select(l => l.Id)
             .ToListAsync();
     }
 

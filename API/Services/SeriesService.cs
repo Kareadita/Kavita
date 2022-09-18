@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.SignalR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -462,6 +463,9 @@ public class SeriesService : ISeriesService
     public async Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var libraryIds = (await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId));
+        if (!libraryIds.Contains(series.LibraryId))
+            throw new UnauthorizedAccessException("User does not have access to the library this series belongs to");
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))

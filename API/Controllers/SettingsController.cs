@@ -223,6 +223,16 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.TotalLogs && updateSettingsDto.TotalLogs + string.Empty != setting.Value)
+            {
+                if (updateSettingsDto.TotalLogs > 30 || updateSettingsDto.TotalLogs < 1)
+                {
+                    return BadRequest("Total Logs must be between 1 and 30");
+                }
+                setting.Value = updateSettingsDto.TotalLogs + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.EmailServiceUrl && updateSettingsDto.EmailServiceUrl + string.Empty != setting.Value)
             {
                 setting.Value = string.IsNullOrEmpty(updateSettingsDto.EmailServiceUrl) ? EmailService.DefaultApiUrl : updateSettingsDto.EmailServiceUrl;

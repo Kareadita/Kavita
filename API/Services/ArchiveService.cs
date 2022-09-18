@@ -332,7 +332,7 @@ public class ArchiveService : IArchiveService
     {
         var filenameWithoutExtension = Path.GetFileNameWithoutExtension(name).ToLower();
         return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
-               && fullName.Equals(ComicInfoFilename)
+               && (fullName.Equals(ComicInfoFilename) || (string.IsNullOrEmpty(fullName) && name.Equals(ComicInfoFilename)))
                && !filenameWithoutExtension.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
     }
 

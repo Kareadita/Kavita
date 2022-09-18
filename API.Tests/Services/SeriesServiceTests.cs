@@ -85,19 +85,19 @@ public class SeriesServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        var lib = new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        };
-
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            Libraries = new List<Library>()
-            {
-                lib
-            }
-        });
+        // var lib = new Library()
+        // {
+        //     Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
+        // };
+        //
+        // _context.AppUser.Add(new AppUser()
+        // {
+        //     UserName = "majora2007",
+        //     Libraries = new List<Library>()
+        //     {
+        //         lib
+        //     }
+        // });
 
         return await _context.SaveChangesAsync() > 0;
     }
@@ -109,6 +109,7 @@ public class SeriesServiceTests
         _context.Genre.RemoveRange(_context.Genre.ToList());
         _context.CollectionTag.RemoveRange(_context.CollectionTag.ToList());
         _context.Person.RemoveRange(_context.Person.ToList());
+        _context.Library.RemoveRange(_context.Library.ToList());
 
         await _context.SaveChangesAsync();
     }
@@ -135,32 +136,44 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
+                new AppUser()
                 {
-                    EntityFactory.CreateChapter("Omake", true, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("Something SP02", true, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
                 {
-                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
-                }),
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("0", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("Omake", true, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("Something SP02", true, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("3", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
             }
         });
+
 
         await _context.SaveChangesAsync();
 
@@ -177,30 +190,41 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
+                new AppUser()
                 {
-                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
                 {
-                    EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
-                }),
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("0", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("3", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
             }
         });
 
@@ -220,28 +244,39 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
+                new AppUser()
                 {
-                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
                 {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
-                }),
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("0", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("3", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
             }
         });
 
@@ -261,28 +296,39 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
+                new AppUser()
                 {
-                    EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
-                    EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
                 {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
-                }),
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("0", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("3", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
             }
         });
 
@@ -305,25 +351,37 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Book,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                EntityFactory.CreateVolume("2", new List<Chapter>()
+                new AppUser()
                 {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
                 {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
-                }),
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("3", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
             }
         });
+
 
         await _context.SaveChangesAsync();
 
@@ -339,25 +397,38 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Book,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
+                new AppUser()
                 {
-                    EntityFactory.CreateChapter("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", true, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
                 {
-                    EntityFactory.CreateChapter("Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub", false, new List<MangaFile>()),
-                }),
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("0", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", true, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("Ano Orokamono ni mo Kyakkou wo! - Volume 2.epub", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
             }
         });
+
+
 
         await _context.SaveChangesAsync();
 
@@ -379,36 +450,48 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Book,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                EntityFactory.CreateVolume("2", new List<Chapter>()
+                new AppUser()
                 {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("1.2", new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
                 {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
-                }),
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("1.2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("1", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
             }
         });
+
 
         await _context.SaveChangesAsync();
 
         var detail = await _seriesService.GetSeriesDetail(1, 1);
-        Assert.Equal("1", detail.Volumes.ElementAt(0).Name);
-        Assert.Equal("1.2", detail.Volumes.ElementAt(1).Name);
-        Assert.Equal("2", detail.Volumes.ElementAt(2).Name);
+        Assert.Equal("Volume 1", detail.Volumes.ElementAt(0).Name);
+        Assert.Equal("Volume 1.2", detail.Volumes.ElementAt(1).Name);
+        Assert.Equal("Volume 2", detail.Volumes.ElementAt(2).Name);
     }
 
 
@@ -422,27 +505,33 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                new Volume()
+                new AppUser()
                 {
-                    Chapters = new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test",
+                    Volumes = new List<Volume>()
                     {
-                        new Chapter()
+                        EntityFactory.CreateVolume("1", new List<Chapter>()
                         {
-                            Pages = 1
-                        }
+                            EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                        }),
                     }
                 }
             }
         });
+
 
         await _context.SaveChangesAsync();
 
@@ -470,23 +559,28 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                new Volume()
+                new AppUser()
                 {
-                    Chapters = new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test",
+                    Volumes = new List<Volume>()
                     {
-                        new Chapter()
+                        EntityFactory.CreateVolume("1", new List<Chapter>()
                         {
-                            Pages = 1
-                        }
+                            EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                        }),
                     }
                 }
             }
@@ -536,23 +630,28 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                new Volume()
+                new AppUser()
                 {
-                    Chapters = new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test",
+                    Volumes = new List<Volume>()
                     {
-                        new Chapter()
+                        EntityFactory.CreateVolume("1", new List<Chapter>()
                         {
-                            Pages = 1
-                        }
+                            EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                        }),
                     }
                 }
             }
@@ -583,23 +682,28 @@ public class SeriesServiceTests
     {
         await ResetDb();
 
-        _context.Series.Add(new Series()
+        _context.Library.Add(new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
+            AppUsers = new List<AppUser>()
             {
-                new Volume()
+                new AppUser()
                 {
-                    Chapters = new List<Chapter>()
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test",
+                    Volumes = new List<Volume>()
                     {
-                        new Chapter()
+                        EntityFactory.CreateVolume("1", new List<Chapter>()
                         {
-                            Pages = 1
-                        }
+                            EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                        }),
                     }
                 }
             }
@@ -625,18 +729,6 @@ public class SeriesServiceTests
     #endregion
 
     #region UpdateSeriesMetadata
-
-    private void SetupUpdateSeriesMetadataDb()
-    {
-        _context.Series.Add(new Series()
-        {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Book,
-            }
-        });
-    }
 
     [Fact]
     public async Task UpdateSeriesMetadata_ShouldCreateEmptyMetadata_IfDoesntExist()

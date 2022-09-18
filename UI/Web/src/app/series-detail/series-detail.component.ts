@@ -3,7 +3,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, Subject } from 'rxjs';
+import { catchError, forkJoin, of, Subject } from 'rxjs';
 import { take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { EditSeriesModalComponent } from '../cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -511,7 +511,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         }
       });
 
-      this.seriesService.getSeriesDetail(this.seriesId).subscribe(detail => {
+      this.seriesService.getSeriesDetail(this.seriesId).pipe(catchError(err => {
+        this.router.navigateByUrl('/libraries');
+        return of(null);
+      })).subscribe(detail => {
+        if (detail == null) return;
         this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
 

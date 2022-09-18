@@ -25,6 +25,7 @@ public interface ICleanupService
     Task DeleteChapterCoverImages();
     Task DeleteTagCoverImages();
     Task CleanupBackups();
+    Task CleanupLogs();
     void CleanupTemp();
     /// <summary>
     /// Responsible to remove Series from Want To Read when user's have fully read the series and the series has Publication Status of Completed or Cancelled.
@@ -76,6 +77,8 @@ public class CleanupService : ICleanupService
         await SendProgress(0.7F, "Cleaning deleted cover images");
         await DeleteTagCoverImages();
         await DeleteReadingListCoverImages();
+        await SendProgress(0.8F, "Cleaning old logs");
+        await CleanupLogs();
         await SendProgress(1F, "Cleanup finished");
         _logger.LogInformation("Cleanup finished");
     }
@@ -187,6 +190,29 @@ public class CleanupService : ICleanupService
             _directoryService.DeleteFiles(expiredBackups.Select(f => f.FullName));
         }
         _logger.LogInformation("Finished cleanup of Database backups at {Time}", DateTime.Now);
+    }
+
+    public async Task CleanupLogs()
+    {
+        _logger.LogInformation("Performing cleanup of logs directory");
+        var dayThreshold = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalLogs;
+        var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
+        var allLogs = _directoryService.GetFiles(_directoryService.LogDirectory).ToList();
+        var expiredLogs = allLogs.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+            .Where(f => f.CreationTime < deltaTime)
+            .ToList();
+
+        if (expiredLogs.Count == allLogs.Count)
+        {
+            _logger.LogInformation("All expired backups are older than {Threshold} days. Removing all but last backup", dayThreshold);
+            var toDelete = expiredLogs.OrderBy(f => f.CreationTime).ToList();
+            _directoryService.DeleteFiles(toDelete.Take(toDelete.Count - 1).Select(f => f.FullName));
+        }
+        else
+        {
+            _directoryService.DeleteFiles(expiredLogs.Select(f => f.FullName));
+        }
+        _logger.LogInformation("Finished cleanup of logs at {Time}", DateTime.Now);
     }
 
     public void CleanupTemp()

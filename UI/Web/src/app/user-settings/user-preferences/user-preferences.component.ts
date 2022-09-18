@@ -210,7 +210,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       readerMode: parseInt(modelSettings.readerMode, 10),
       layoutMode: parseInt(modelSettings.layoutMode, 10),
       showScreenHints: modelSettings.showScreenHints,
-      backgroundColor: modelSettings.backgroundColor,
+      backgroundColor: this.user.preferences.backgroundColor,
       bookReaderFontFamily: modelSettings.bookReaderFontFamily,
       bookReaderLineSpacing: modelSettings.bookReaderLineSpacing,
       bookReaderFontSize: modelSettings.bookReaderFontSize,

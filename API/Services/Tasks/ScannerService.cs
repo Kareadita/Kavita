@@ -458,7 +458,7 @@ public class ScannerService : IScannerService
         }
 
 
-        var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles);
+        var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
 
 
         await Task.WhenAll(processTasks);

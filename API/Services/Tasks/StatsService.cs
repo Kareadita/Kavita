@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -21,6 +23,7 @@ public interface IStatsService
 {
     Task Send();
     Task<ServerInfoDto> GetServerInfo();
+    Task SendCancellation();
 }
 public class StatsService : IStatsService
 {
@@ -127,6 +130,10 @@ public class StatsService : IStatsService
             MaxSeriesInALibrary = await MaxSeriesInAnyLibrary(),
             MaxVolumesInASeries = await MaxVolumesInASeries(),
             MaxChaptersInASeries = await MaxChaptersInASeries(),
+            MangaReaderBackgroundColors = await AllMangaReaderBackgroundColors(),
+            MangaReaderPageSplittingModes = await AllMangaReaderPageSplitting(),
+            MangaReaderLayoutModes = await AllMangaReaderLayoutModes(),
+            FileFormats = AllFormats(),
         };
 
         var usersWithPref = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences)).ToList();
@@ -147,6 +154,39 @@ public class StatsService : IStatsService
         }
 
         return serverInfo;
+    }
+
+    public async Task SendCancellation()
+    {
+        _logger.LogInformation("Informing KavitaStats that this instance is no longer sending stats");
+        var installId = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).InstallId;
+
+        var responseContent = string.Empty;
+
+        try
+        {
+            var response = await (ApiUrl + "/api/v2/stats/opt-out?installId=" + installId)
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(30))
+                .PostAsync();
+
+            if (response.StatusCode != StatusCodes.Status200OK)
+            {
+                _logger.LogError("KavitaStats did not respond successfully. {Content}", response);
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError(e, "KavitaStats did not respond successfully. {Response}", responseContent);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error happened during the request to KavitaStats");
+        }
     }
 
     private Task<bool> GetIfUsingSeriesRelationship()
@@ -189,5 +229,36 @@ public class StatsService : IStatsService
                 .Where(v => v.Number == 0)
                 .SelectMany(v => v.Chapters)
                 .Count());
+    }
+
+    private async Task<IEnumerable<string>> AllMangaReaderBackgroundColors()
+    {
+        return await _context.AppUserPreferences.Select(p => p.BackgroundColor).Distinct().ToListAsync();
+    }
+
+    private async Task<IEnumerable<PageSplitOption>> AllMangaReaderPageSplitting()
+    {
+        return await _context.AppUserPreferences.Select(p => p.PageSplitOption).Distinct().ToListAsync();
+    }
+
+    private async Task<IEnumerable<LayoutMode>> AllMangaReaderLayoutModes()
+    {
+        return await _context.AppUserPreferences.Select(p => p.LayoutMode).Distinct().ToListAsync();
+    }
+
+    private IEnumerable<FileFormatDto> AllFormats()
+    {
+        var results =  _context.MangaFile
+            .AsNoTracking()
+            .AsEnumerable()
+            .Select(m => new FileFormatDto()
+            {
+                Format = m.Format,
+                Extension = Path.GetExtension(m.FilePath)?.ToLowerInvariant()
+            })
+            .DistinctBy(f => f.Extension)
+            .ToList();
+
+        return results;
     }
 }
