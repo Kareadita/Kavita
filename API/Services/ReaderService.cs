@@ -389,6 +389,15 @@ public class ReaderService : IReaderService
             if (chapterId > 0) return chapterId;
         }
 
+        var maxDiff = 0;
+        for (var i = 0; i < volumes.Count - 1; i++)
+        {
+            var diff = volumes[i].Number - volumes[i + 1].Number;
+            if (diff > maxDiff)
+            {
+                maxDiff = diff;
+            }
+        }
         foreach (var volume in volumes)
         {
             if (volume.Number == currentVolume.Number)

@@ -1,4 +1,6 @@
-﻿using API.Entities.Enums;
+﻿using System.Collections.Generic;
+using API.Entities.Enums;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace API.DTOs.Stats;
 
@@ -118,4 +120,24 @@ public class ServerInfoDto
     /// </summary>
     /// <remarks>Introduced in v0.5.4</remarks>
     public bool UsingSeriesRelationships { get; set; }
+    /// <summary>
+    /// A list of background colors set on the instance
+    /// </summary>
+    /// <remarks>Introduced in v0.6.0</remarks>
+    public IEnumerable<string> MangaReaderBackgroundColors { get; set; }
+    /// <summary>
+    /// A list of Page Split defaults being used on the instance
+    /// </summary>
+    /// <remarks>Introduced in v0.6.0</remarks>
+    public IEnumerable<PageSplitOption> MangaReaderPageSplittingModes { get; set; }
+    /// <summary>
+    /// A list of Layout Mode defaults being used on the instance
+    /// </summary>
+    /// <remarks>Introduced in v0.6.0</remarks>
+    public IEnumerable<LayoutMode> MangaReaderLayoutModes { get; set; }
+    /// <summary>
+    /// A list of file formats existing in the instance
+    /// </summary>
+    /// <remarks>Introduced in v0.6.0</remarks>
+    public IEnumerable<FileFormatDto> FileFormats { get; set; }
 }
