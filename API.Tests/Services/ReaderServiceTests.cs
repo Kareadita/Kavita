@@ -2226,4 +2226,133 @@ public class ReaderServiceTests
     }
 
     #endregion
+
+    #region MarkVolumesUntilAsRead
+    [Fact]
+    public async Task MarkVolumesUntilAsRead_ShouldMarkVolumesAsRead()
+    {
+        await ResetDb();
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("10", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("20", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("30", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("Some Special Title", true, new List<MangaFile>(), 1),
+                }),
+
+                EntityFactory.CreateVolume("1997", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2002", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2003", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkVolumesUntilAsRead(user, 1, 2002);
+        await _context.SaveChangesAsync();
+
+        // Validate loose leaf chapters don't get marked as read
+        Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)));
+        Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)));
+        Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
+
+        // Validate volumes chapter 0 have read status
+        //Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(0, 1)).PagesRead);
+        Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)).PagesRead);
+        Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1)).PagesRead);
+        // Validate next volume (2003) is not read
+        Assert.Null(await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(7, 1));
+
+    }
+    [Fact]
+    public async Task MarkVolumesUntilAsRead_ShouldMarkVolumesAsRead_2()
+    {
+        await ResetDb();
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("10", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("20", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("30", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("Some Special Title", true, new List<MangaFile>(), 1),
+                }),
+
+                EntityFactory.CreateVolume("1997", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2002", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2003", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkVolumesUntilAsRead(user, 1, 2002);
+        await _context.SaveChangesAsync();
+
+        // Validate loose leaf chapters don't get marked as read
+        Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)));
+        Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)));
+        Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
+
+        // Validate volumes chapter 0 have read status
+        //Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(0, 1)).PagesRead);
+        Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)).PagesRead);
+        Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1)).PagesRead);
+        Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
+    }
+
+    #endregion
+
 }
