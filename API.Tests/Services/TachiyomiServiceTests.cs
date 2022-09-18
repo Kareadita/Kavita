@@ -354,6 +354,65 @@ public class TachiyomiServiceTests
         var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.0001",latestChapter.Number);
     }
+
+    [Fact]
+    public async Task GetLatestChapter_ShouldReturnEncodedVolume_Progress2()
+    {
+        await ResetDb();
+
+        var series = new Series()
+        {
+            Name = "Test",
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 199),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 192),
+                }),
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 255),
+                }),
+            }
+        };
+        series.Pages = 7;
+        var library = new Library()
+        {
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+            Series = new List<Series>() { series }
+        };
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            Libraries = new List<Library>()
+            {
+                library
+            }
+
+        });
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, readerService);
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+
+        await readerService.MarkSeriesAsRead(user, 1);
+
+        await _context.SaveChangesAsync();
+
+
+        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        Assert.Equal("0.0003",latestChapter.Number);
+    }
+
+
     [Fact]
     public async Task GetLatestChapter_ShouldReturnEncodedYearlyVolume_Progress()
     {
@@ -421,7 +480,7 @@ public class TachiyomiServiceTests
 
     #region MarkChaptersUntilAsRead
 
-    //[Fact]
+    [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnChapter_NoProgress()
     {
         await ResetDb();
@@ -478,7 +537,7 @@ public class TachiyomiServiceTests
 
         Assert.Null(latestChapter);
     }
-    //[Fact]
+    [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnMaxChapter_CompletelyRead()
     {
         await ResetDb();
@@ -542,7 +601,7 @@ public class TachiyomiServiceTests
         Assert.Equal("96",latestChapter.Number);
     }
 
-    //[Fact]
+    [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnHighestChapter_Progress()
     {
         await ResetDb();
@@ -605,7 +664,7 @@ public class TachiyomiServiceTests
 
         Assert.Equal("21",latestChapter.Number);
     }
-    //[Fact]
+    [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldReturnEncodedVolume_Progress()
     {
         await ResetDb();
@@ -660,13 +719,13 @@ public class TachiyomiServiceTests
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/100F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10000F);
 
         await _context.SaveChangesAsync();
 
 
         var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
-        Assert.Equal("0.01",latestChapter.Number);
+        Assert.Equal("0.0001",latestChapter.Number);
     }
 
     #endregion

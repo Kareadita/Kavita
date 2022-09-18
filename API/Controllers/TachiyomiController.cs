@@ -1,12 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading.Tasks;
-using API.Comparators;
+﻿using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.Entities;
 using API.Extensions;
 using API.Services;
 using AutoMapper;
