@@ -45,7 +45,8 @@ public static class LogLevelOptions
             .MinimumLevel.Override("Microsoft", MicrosoftLogLevelSwitch)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", MicrosoftHostingLifetimeLogLevelSwitch)
             .MinimumLevel.Override("Hangfire", HangfireLogLevelSwitch)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Internal.WebHost", AspNetCoreLogLevelSwitch)
+            //.MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Internal.WebHost", AspNetCoreLogLevelSwitch)
+            .MinimumLevel.Override("Microsoft.AspNetCore", AspNetCoreLogLevelSwitch)
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .WriteTo.File(LogFile,
