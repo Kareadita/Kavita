@@ -313,6 +313,7 @@ public class ReaderService : IReaderService
             if (chapterId > 0) return chapterId;
         }
 
+        var next = false;
         foreach (var volume in volumes)
         {
             if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
@@ -322,10 +323,17 @@ public class ReaderService : IReaderService
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
-
+                next = true;
+                continue;
             }
 
-            if (volume.Number != currentVolume.Number + 1) continue;
+            if (volume.Number == currentVolume.Number)
+            {
+                next = true;
+                continue;
+            }
+
+            if (!next) continue;
 
             // Handle Chapters within next Volume
             // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
@@ -389,15 +397,7 @@ public class ReaderService : IReaderService
             if (chapterId > 0) return chapterId;
         }
 
-        var maxDiff = 0;
-        for (var i = 0; i < volumes.Count - 1; i++)
-        {
-            var diff = volumes[i].Number - volumes[i + 1].Number;
-            if (diff > maxDiff)
-            {
-                maxDiff = diff;
-            }
-        }
+        var next = false;
         foreach (var volume in volumes)
         {
             if (volume.Number == currentVolume.Number)
@@ -405,8 +405,10 @@ public class ReaderService : IReaderService
                 var chapterId = GetNextChapterId(currentVolume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting).Reverse(),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
+                next = true; // When the diff between volumes is more than 1, we need to explicitly tell that next volume is our use case
+                continue;
             }
-            if (volume.Number == currentVolume.Number - 1)
+            if (next)
             {
                 if (currentVolume.Number - 1 == 0) break; // If we have walked all the way to chapter volume, then we should break so logic outside can work
                 var lastChapter = volume.Chapters.MaxBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);

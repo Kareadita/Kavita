@@ -896,6 +896,60 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetPrevChapterIdAsync_ShouldGetPrevVolume_2()
+    {
+        await ResetDb();
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("40", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("50", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("60", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("Some Special Title", true, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1997", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2001", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("2005", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+
+       _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
+        // prevChapter should be id from ch.21 from volume 2001
+        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 4, 7, 1);
+
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
+        Assert.NotNull(actualChapter);
+        Assert.Equal("21", actualChapter.Range);
+    }
+
+    [Fact]
     public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume()
     {
         await ResetDb();
