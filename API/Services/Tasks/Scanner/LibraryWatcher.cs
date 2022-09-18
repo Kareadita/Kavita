@@ -11,52 +11,6 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
 
-/// <summary>
-/// Change information
-/// </summary>
-public class Change
-{
-    /// <summary>
-    /// Gets or sets the type of the change.
-    /// </summary>
-    /// <value>
-    /// The type of the change.
-    /// </value>
-    public WatcherChangeTypes ChangeType { get; set; }
-
-    /// <summary>
-    /// Gets or sets the full path.
-    /// </summary>
-    /// <value>
-    /// The full path.
-    /// </value>
-    public string FullPath { get; set; }
-
-    /// <summary>
-    /// Gets or sets the name.
-    /// </summary>
-    /// <value>
-    /// The name.
-    /// </value>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// Gets or sets the old full path.
-    /// </summary>
-    /// <value>
-    /// The old full path.
-    /// </value>
-    public string OldFullPath { get; set; }
-
-    /// <summary>
-    /// Gets or sets the old name.
-    /// </summary>
-    /// <value>
-    /// The old name.
-    /// </value>
-    public string OldName { get; set; }
-}
-
 public interface ILibraryWatcher
 {
     /// <summary>
@@ -91,7 +45,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// This is just here to prevent GC from Disposing our watchers
     /// </summary>
     private readonly IList<FileSystemWatcher> _fileWatchers = new List<FileSystemWatcher>();
-    private static IList<string> _libraryFolders = new List<string>();
+    private IList<string> _libraryFolders = new List<string>();
     /// <summary>
     /// The amount of time until the Schedule ScanFolder task should be executed
     /// </summary>
@@ -219,13 +173,6 @@ public class LibraryWatcher : ILibraryWatcher
                 _logger.LogDebug("[LibraryWatcher] Change from {FilePath} is not an archive or book, ignoring change", filePath);
                 return;
             }
-
-            // var libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
-            //     .SelectMany(l => l.Folders)
-            //     .Distinct()
-            //     .Select(Parser.Parser.NormalizePath)
-            //     .Where(_directoryService.Exists)
-            //     .ToList();
 
             var fullPath = GetFolder(filePath, _libraryFolders);
             if (string.IsNullOrEmpty(fullPath))
