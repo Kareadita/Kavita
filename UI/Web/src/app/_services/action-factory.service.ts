@@ -127,6 +127,7 @@ export class ActionFactoryService {
           title: 'Edit',
           callback: this.dummyCallback,
           requiresAdmin: true,
+          children: []
         });
 
         this.seriesActions.push({
@@ -157,7 +158,7 @@ export class ActionFactoryService {
           requiresAdmin: true,
         });
 
-        this.seriesActions.push({
+        this.seriesActions.find(a => a.action === Action.AddTo)?.children?.push({
           action: Action.AddToCollection,
           title: 'Add to Collection',
           callback: this.dummyCallback,
@@ -222,7 +223,7 @@ export class ActionFactoryService {
     const actions = this.libraryActions.map((a) => {
       return { ...a };
     });
-    actions.forEach((action) => (action.callback = callback));
+    actions.forEach((action) => (this.appyCallback(action, callback)));
     return actions;
   }
 
@@ -230,7 +231,7 @@ export class ActionFactoryService {
     const actions = this.seriesActions.map((a) => {
       return { ...a };
     });
-    actions.forEach((action) => (action.callback = callback));
+    actions.forEach((action) => (this.appyCallback(action, callback)));
     return actions;
   }
 
@@ -238,7 +239,7 @@ export class ActionFactoryService {
     const actions = this.volumeActions.map((a) => {
       return { ...a };
     });
-    actions.forEach((action) => (action.callback = callback));
+    actions.forEach((action) => (this.appyCallback(action, callback)));
     return actions;
   }
 
@@ -246,7 +247,7 @@ export class ActionFactoryService {
     const actions = this.chapterActions.map((a) => {
       return { ...a };
     });
-    actions.forEach((action) => (action.callback = callback));
+    actions.forEach((action) => (this.appyCallback(action, callback)));
     return actions;
   }
 
@@ -256,7 +257,7 @@ export class ActionFactoryService {
     const actions = this.collectionTagActions.map((a) => {
       return { ...a };
     });
-    actions.forEach((action) => (action.callback = callback));
+    actions.forEach((action) => (this.appyCallback(action, callback)));
     return actions;
   }
 
@@ -266,7 +267,7 @@ export class ActionFactoryService {
     const actions = this.readingListActions.map((a) => {
       return { ...a };
     });
-    actions.forEach((action) => (action.callback = callback));
+    actions.forEach((action) => (this.appyCallback(action, callback)));
     return actions;
   }
 
@@ -274,7 +275,7 @@ export class ActionFactoryService {
     const actions = this.bookmarkActions.map((a) => {
       return { ...a };
     });
-    actions.forEach((action) => (action.callback = callback));
+    actions.forEach((action) => (this.appyCallback(action, callback)));
     return actions;
   }
 
@@ -286,6 +287,18 @@ export class ActionFactoryService {
     this.collectionTagActions = [];
 
     this.seriesActions = [
+      // {
+      //   action: Action.MarkAsRead,
+      //   title: 'Mark as Read',
+      //   callback: this.dummyCallback,
+      //   requiresAdmin: false
+      // },
+      // {
+      //   action: Action.MarkAsUnread,
+      //   title: 'Mark as Unread',
+      //   callback: this.dummyCallback,
+      //   requiresAdmin: false
+      // },
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
@@ -314,14 +327,7 @@ export class ActionFactoryService {
             title: 'Add to Want To Read',
             callback: (action, data) => {console.log('Add to Want to Read List Works!')},
             requiresAdmin: false,
-            children: [
-              {
-                action: Action.AddToReadingList,
-                title: 'Add to Reading List',
-                callback: (action, data) => {console.log('Add to Reading List Works!')},
-                requiresAdmin: false,
-              },
-            ]
+            children: []
           },
         ],
       },
@@ -440,5 +446,15 @@ export class ActionFactoryService {
         requiresAdmin: false,
       },
     ];
+  }
+
+  private appyCallback(action: ActionItem<any>, callback: (action: Action, data: any) => void) {
+    action.callback = callback;
+
+    if (action.children === null || action.children?.length === 0) return;
+
+    action.children?.forEach((childAction) => {
+      this.appyCallback(childAction, callback);
+    });
   }
 }

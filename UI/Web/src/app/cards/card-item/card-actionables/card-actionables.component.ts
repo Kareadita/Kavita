@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { take } from 'rxjs';
+import { AccountService } from 'src/app/_services/account.service';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 
 @Component({
@@ -19,12 +21,21 @@ export class CardActionablesComponent implements OnInit {
   adminActions: ActionItem<any>[] = [];
   nonAdminActions: ActionItem<any>[] = [];
 
+  isAdmin: boolean = false;
+  canDownload: boolean = false;
 
-  constructor(private readonly cdRef: ChangeDetectorRef) { }
+  constructor(private readonly cdRef: ChangeDetectorRef, private accountService: AccountService) { }
 
   ngOnInit(): void {
     this.nonAdminActions = this.actions.filter(item => !item.requiresAdmin);
     this.adminActions = this.actions.filter(item => item.requiresAdmin);
+
+    this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
+      if (!user) return;
+      this.isAdmin = this.accountService.hasAdminRole(user);
+      this.canDownload = this.accountService.hasDownloadRole(user);
+    });
+
     this.cdRef.markForCheck();
   }
 
@@ -39,6 +50,18 @@ export class CardActionablesComponent implements OnInit {
     if (typeof action.callback === 'function') {
       this.actionHandler.emit(action);
     }
+  }
+
+  getNonAdminActions(actionsList: ActionItem<any>[]): ActionItem<any>[] {
+    return actionsList.filter(item => !item.requiresAdmin);
+  }
+
+  getAdminActions(actionsList: ActionItem<any>[]): ActionItem<any>[] {
+    return actionsList.filter(item => item.requiresAdmin);
+  }
+
+  getDivider(actionsList: ActionItem<any>[]): Boolean {
+    return actionsList.filter(item => !item.requiresAdmin).length > 0 && actionsList.filter(item => item.requiresAdmin).length > 0;
   }
 
 }
