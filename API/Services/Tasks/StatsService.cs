@@ -30,7 +30,7 @@ public class StatsService : IStatsService
     private readonly ILogger<StatsService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly DataContext _context;
-    private const string ApiUrl = "http://localhost:5001"; // "https://stats.kavitareader.com"
+    private const string ApiUrl = "https://stats.kavitareader.com";
 
     public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context)
     {
