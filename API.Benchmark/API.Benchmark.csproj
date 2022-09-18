@@ -16,9 +16,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Data\SeriesNamesForNormalization.txt">
+      <Content Include="Data/*.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      </Content>
     </ItemGroup>
 
 </Project>

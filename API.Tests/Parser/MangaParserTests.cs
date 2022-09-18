@@ -284,6 +284,7 @@ public class MangaParserTests
     [InlineData("Wotakoi - Love is Hard for Otaku Omnibus v01 (2018) (Digital) (danke-Empire)", "Omnibus")]
     [InlineData("To Love Ru v01 Uncensored (Ch.001-007)", "Uncensored")]
     [InlineData("Chobits Omnibus Edition v01 [Dark Horse]", "Omnibus Edition")]
+    [InlineData("Chobits_Omnibus_Edition_v01_[Dark_Horse]", "Omnibus Edition")]
     [InlineData("[dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz", "")]
     [InlineData("AKIRA - c003 (v01) [Full Color] [Darkhorse].cbz", "")]
     [InlineData("Love Hina Omnibus v05 (2015) (Digital-HD) (Asgard-Empire).cbz", "Omnibus")]
@@ -306,9 +307,11 @@ public class MangaParserTests
     [InlineData("Beastars SP01", false)]
     [InlineData("The League of Extraordinary Gentlemen", false)]
     [InlineData("The League of Extra-ordinary Gentlemen", false)]
-    public void ParseMangaSpecialTest(string input, bool expected)
+    [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", true)]
+    [InlineData("Dr. Ramune - Mysterious Disease Specialist v01 (2020) (Digital) (danke-Empire).cbz", false)]
+    public void IsMangaSpecialTest(string input, bool expected)
     {
-        Assert.Equal(expected,  !string.IsNullOrEmpty(API.Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(input)));
+        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(input));
     }
 
     [Theory]
@@ -319,14 +322,6 @@ public class MangaParserTests
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseFormat(inputFile));
     }
-
-    [Theory]
-    [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", "Side Stories")]
-    public void ParseSpecialTest(string inputFile, string expected)
-    {
-        Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(inputFile));
-    }
-
 
 
 }
