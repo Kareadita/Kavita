@@ -33,6 +33,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
+using Ng.Services;
 using Serilog;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -53,6 +54,8 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddApplicationServices(_config, _env);
+        services.AddUserAgentService();
+
         services.AddControllers(options =>
         {
             options.CacheProfiles.Add("Images",

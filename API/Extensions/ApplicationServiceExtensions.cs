@@ -49,6 +49,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ISeriesService, SeriesService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
         services.AddScoped<IReadingListService, ReadingListService>();
+        services.AddScoped<IDeviceService, DeviceService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();

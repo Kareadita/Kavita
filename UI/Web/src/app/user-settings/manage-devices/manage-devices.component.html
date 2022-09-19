@@ -1,0 +1,23 @@
+<div class="container-fluid">
+    <div class="row mb-2">
+        <h3>Device Manager</h3>
+    </div>
+
+    <p> 
+        This section is for you to setup devices that cannot connect to Kavita via a web browser and instead have an email address that accepts files. 
+    </p>
+
+    <div class="row g-0">
+        <ng-container *ngFor="let device of (devices$ | async)">
+            <div class="card col-auto me-3 mb-3" style="width: 18rem;">
+                <div class="card-body">
+                  <h5 class="card-title">{{device.name | sentenceCase}}</h5>
+                  PLATFORM: <h6 class="card-subtitle mb-2 text-muted">{{device.platform}}</h6>
+                  Email: <h6 class="card-subtitle mb-2 text-muted">{{device.emailAddress}}</h6>
+                  <button class="btn btn-danger" (click)="deleteDevice(device)">Delete</button>
+                </div>
+              </div>
+        </ng-container>
+    </div>
+</div>
+

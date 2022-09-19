@@ -10,6 +10,7 @@ import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
+import { DeviceService } from './device.service';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +34,8 @@ export class AccountService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(private httpClient: HttpClient, private router: Router, 
-    private messageHub: MessageHubService, private themeService: ThemeService) {
+    private messageHub: MessageHubService, private themeService: ThemeService,
+    private deviceService: DeviceService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate), 
         map(evt => evt.payload as UserUpdateEvent),
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),  
@@ -66,12 +68,13 @@ export class AccountService implements OnDestroy {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  login(model: {username: string, password: string}): Observable<any> {
+  login(model: {username: string, password: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
+          this.deviceService.createDevice('').subscribe(() => {});
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
       }),

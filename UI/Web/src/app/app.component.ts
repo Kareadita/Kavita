@@ -8,6 +8,7 @@ import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT } from '@angular/common';
+import { DeviceService } from './_services/device.service';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,7 @@ export class AppComponent implements OnInit {
   constructor(private accountService: AccountService, public navService: NavService, 
     private messageHub: MessageHubService, private libraryService: LibraryService, 
     router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig, 
-    @Inject(DOCUMENT) private document: Document) {
+    @Inject(DOCUMENT) private document: Document, private deviceService: DeviceService) {
 
     // Setup default rating config
     ratingConfig.max = 5;
@@ -56,6 +57,7 @@ export class AppComponent implements OnInit {
     if (user) {
       this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
       this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
+      this.deviceService.createDevice('').subscribe(() => {});
     } 
   }
 }

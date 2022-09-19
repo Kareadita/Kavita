@@ -44,6 +44,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<SiteTheme> SiteTheme { get; set; }
     public DbSet<SeriesRelation> SeriesRelation { get; set; }
     public DbSet<FolderPath> FolderPath { get; set; }
+    public DbSet<Device> Device { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder builder)
