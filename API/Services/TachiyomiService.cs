@@ -32,6 +32,15 @@ public class TachiyomiService : ITachiyomiService
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// Gets the latest chapter/volume read.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="userId"></param>
+    /// <returns>Due to how Tachiyomi works we need a hack to properly return both chapters and volumes.
+    /// If its a chapter, return the chapterDto as is.
+    /// If it's a volume, the volume number gets returned in the 'Number' attribute of a chapterDto encoded.
+    /// The volume number gets divided by 10,000 because that's how Tachiyomi interprets volumes</returns>
     public async Task<ChapterDto> GetLatestChapter(int seriesId,int userId)
     {
 
@@ -61,13 +70,13 @@ public class TachiyomiService : ITachiyomiService
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
                     return new ChapterDto()
                     {
-                        Number = (volume.Number / 10000f).ToString("R", _englishCulture)
+                        Number = (volume.Number / 10_000f).ToString("R", _englishCulture)
                     };
                 }
 
                 return new ChapterDto()
                 {
-                    Number = (int.Parse(volumeChapter.Number) / 10000f).ToString("R", _englishCulture)
+                    Number = (int.Parse(volumeChapter.Number) / 10_000f).ToString("R", _englishCulture)
                 };
             }
 
@@ -86,7 +95,7 @@ public class TachiyomiService : ITachiyomiService
             {
                 // Use R to ensure that localization of underlying system doesn't affect the stringification
                 // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                Number = (volumeWithProgress.Number / 10000f).ToString("R", _englishCulture)
+                Number = (volumeWithProgress.Number / 10_000f).ToString("R", _englishCulture)
 
             };
         }
@@ -95,6 +104,13 @@ public class TachiyomiService : ITachiyomiService
         return prevChapter;
     }
 
+    /// <summary>
+    /// Marks every chapter and volume that is sorted below the passed number as Read. This will not mark any specials as read.
+    /// Passed number will also be marked as read
+    /// </summary>
+    /// <param name="userWithProgress"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="chapterNumber">Can also be a Tachiyomi encoded volume number</param>
     public async Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber)
     {
         userWithProgress.Progresses ??= new List<AppUserProgress>();
@@ -108,9 +124,8 @@ public class TachiyomiService : ITachiyomiService
                 return true;
             case < 1.0f:
             {
-                // This is a hack to track volume number. We need to map it back by x100
-                var chapterString = $"{chapterNumber}";
-                var volumeNumber = int.Parse($"{(int)(chapterNumber * 10000)}", _englishCulture);
+                // This is a hack to track volume number. We need to map it back by x10,000
+                var volumeNumber = int.Parse($"{(int)(chapterNumber * 10_000)}", _englishCulture);
                 await _readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
                 break;
             }

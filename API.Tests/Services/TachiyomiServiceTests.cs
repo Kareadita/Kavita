@@ -346,7 +346,7 @@ public class TachiyomiServiceTests
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
 
         await _context.SaveChangesAsync();
 
@@ -466,7 +466,7 @@ public class TachiyomiServiceTests
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10_000F);
 
         await _context.SaveChangesAsync();
 
@@ -719,7 +719,7 @@ public class TachiyomiServiceTests
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
 
         await _context.SaveChangesAsync();
 
