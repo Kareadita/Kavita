@@ -2292,7 +2292,7 @@ public class ReaderServiceTests
     }
 
     [Fact]
-    public async Task MarkVolumesUntilAsRead_ShouldMarkVolumesAsRead_2()
+    public async Task MarkVolumesUntilAsRead_ShouldMarkChapterBasedVolumesAsRead()
     {
         await ResetDb();
         _context.Series.Add(new Series()

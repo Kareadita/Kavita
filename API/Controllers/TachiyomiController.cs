@@ -32,7 +32,7 @@ public class TachiyomiController : BaseApiController
     [HttpGet("latest-chapter")]
     public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
     {
-        if (seriesId < 1) return BadRequest("SeriesId must be greater than 1");
+        if (seriesId < 1) return BadRequest("A seriesId must be greater than 0.");
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _tachiyomiService.GetLatestChapter(seriesId,userId));
     }
