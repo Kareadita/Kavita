@@ -9,6 +9,8 @@ using System.Linq;
 using API.Comparators;
 using API.Entities;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
+
 namespace API.Services;
 
 public interface ITachiyomiService
@@ -17,19 +19,25 @@ public interface ITachiyomiService
     Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber);
 }
 
-
+/// <summary>
+/// All APIs are for Tachiyomi extension and app. They have hacks for our implementation and should not be used for any
+/// other purposes.
+/// </summary>
 public class TachiyomiService : ITachiyomiService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IReaderService _readerService;
     private readonly IMapper _mapper;
-    private readonly CultureInfo _englishCulture = CultureInfo.CreateSpecificCulture("en-US");
+    private readonly ILogger<ReaderService> _logger;
+    private readonly IReaderService _readerService;
 
-    public TachiyomiService(IUnitOfWork unitOfWork,IMapper mapper,IReaderService readerService)
+    private static readonly CultureInfo EnglishCulture = CultureInfo.CreateSpecificCulture("en-US");
+
+    public TachiyomiService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ReaderService> logger, IReaderService readerService)
     {
         _unitOfWork = unitOfWork;
         _readerService = readerService;
         _mapper = mapper;
+        _logger = logger;
     }
 
     /// <summary>
@@ -41,7 +49,7 @@ public class TachiyomiService : ITachiyomiService
     /// If its a chapter, return the chapterDto as is.
     /// If it's a volume, the volume number gets returned in the 'Number' attribute of a chapterDto encoded.
     /// The volume number gets divided by 10,000 because that's how Tachiyomi interprets volumes</returns>
-    public async Task<ChapterDto> GetLatestChapter(int seriesId,int userId)
+    public async Task<ChapterDto> GetLatestChapter(int seriesId, int userId)
     {
 
 
@@ -70,13 +78,15 @@ public class TachiyomiService : ITachiyomiService
                     var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
                     return new ChapterDto()
                     {
-                        Number = (volume.Number / 10_000f).ToString("R", _englishCulture)
+                        // Use R to ensure that localization of underlying system doesn't affect the stringification
+                        // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
+                        Number = (volume.Number / 10_000f).ToString("R", EnglishCulture)
                     };
                 }
 
                 return new ChapterDto()
                 {
-                    Number = (int.Parse(volumeChapter.Number) / 10_000f).ToString("R", _englishCulture)
+                    Number = (int.Parse(volumeChapter.Number) / 10_000f).ToString("R", EnglishCulture)
                 };
             }
 
@@ -95,7 +105,7 @@ public class TachiyomiService : ITachiyomiService
             {
                 // Use R to ensure that localization of underlying system doesn't affect the stringification
                 // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-                Number = (volumeWithProgress.Number / 10_000f).ToString("R", _englishCulture)
+                Number = (volumeWithProgress.Number / 10_000f).ToString("R", EnglishCulture)
 
             };
         }
@@ -125,7 +135,7 @@ public class TachiyomiService : ITachiyomiService
             case < 1.0f:
             {
                 // This is a hack to track volume number. We need to map it back by x10,000
-                var volumeNumber = int.Parse($"{(int)(chapterNumber * 10_000)}", _englishCulture);
+                var volumeNumber = int.Parse($"{(int)(chapterNumber * 10_000)}", EnglishCulture);
                 await _readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
                 break;
             }
@@ -134,13 +144,15 @@ public class TachiyomiService : ITachiyomiService
                 break;
         }
 
+        try {
+            _unitOfWork.UserRepository.Update(userWithProgress);
 
-        _unitOfWork.UserRepository.Update(userWithProgress);
-
-        if (!_unitOfWork.HasChanges()) return true;
-        if (await _unitOfWork.CommitAsync()) return true;
-
-        await _unitOfWork.RollbackAsync();
+            if (!_unitOfWork.HasChanges()) return true;
+            if (await _unitOfWork.CommitAsync()) return true;
+        } catch (Exception ex) {
+            _logger.LogError(ex, "There was an error saving progress from tachiyomi.");
+            await _unitOfWork.RollbackAsync();
+        }
         return false;
     }
 }
