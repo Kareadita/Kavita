@@ -8,15 +8,15 @@ using BenchmarkDotNet.Order;
 namespace API.Benchmark;
 
 [MemoryDiagnoser]
-public class CleanTitleBenchmarks
+public static class CleanTitleBenchmarks
 {
     private static IList<string> _names;
 
     [GlobalSetup]
-    public void LoadData() => _names = File.ReadAllLines("Data/Comics.txt");
+    public static void LoadData() => _names = File.ReadAllLines("Data/Comics.txt");
 
     [Benchmark]
-    public void TestCleanTitle()
+    public static void TestCleanTitle()
     {
         foreach (var name in _names)
         {

@@ -58,12 +58,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPresenceTracker, PresenceTracker>();
         services.AddScoped<IEventHub, EventHub>();
 
-        services.AddSqLite(config, env);
+        services.AddSqLite(env);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
     }
 
-    private static void AddSqLite(this IServiceCollection services, IConfiguration config,
-        IHostEnvironment env)
+    private static void AddSqLite(this IServiceCollection services, IHostEnvironment env)
     {
         services.AddDbContext<DataContext>(options =>
         {

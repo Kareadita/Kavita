@@ -181,7 +181,6 @@ public class LibraryWatcher : ILibraryWatcher
                 .Select(Parser.Parser.NormalizePath)
                 .Where(_directoryService.Exists)
                 .ToList();
-            ;
 
             var fullPath = GetFolder(filePath, libraryFolders);
             _logger.LogDebug("Folder path: {FolderPath}", fullPath);
