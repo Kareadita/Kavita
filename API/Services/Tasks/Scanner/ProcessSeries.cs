@@ -44,9 +44,9 @@ public class ProcessSeries : IProcessSeries
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
-    private IList<Genre> _genres;
-    private IList<Person> _people;
-    private IList<Tag> _tags;
+    private volatile IList<Genre> _genres;
+    private volatile IList<Person> _people;
+    private volatile IList<Tag> _tags;
 
 
 
@@ -167,7 +167,7 @@ public class ProcessSeries : IProcessSeries
                 catch (Exception ex)
                 {
                     await _unitOfWork.RollbackAsync();
-                    _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the for series {@SeriesName}", series);
+                    _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the database for series {@SeriesName}", series.Name);
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
