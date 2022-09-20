@@ -328,12 +328,11 @@ public class ArchiveService : IArchiveService
         return false;
     }
 
-    private static bool ValidComicInfoArchiveEntry(string fullName, string name)
+    private static bool BackupComicInfoArchiveEntry(string fullName, string name)
     {
-        var filenameWithoutExtension = Path.GetFileNameWithoutExtension(name).ToLower();
         return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
-               && (fullName.Equals(ComicInfoFilename) || (string.IsNullOrEmpty(fullName) && name.Equals(ComicInfoFilename)))
-               && !filenameWithoutExtension.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
+               && name.Equals(ComicInfoFilename, StringComparison.OrdinalIgnoreCase)
+               && !name.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
     }
 
     /// <summary>
@@ -356,7 +355,8 @@ public class ArchiveService : IArchiveService
                 {
                     using var archive = ZipFile.OpenRead(archivePath);
 
-                    var entry = archive.Entries.FirstOrDefault(x => ValidComicInfoArchiveEntry(x.FullName, x.Name));
+                    var entry = archive.Entries.FirstOrDefault(x => x.FullName == ComicInfoFilename) ??
+                        archive.Entries.FirstOrDefault(x => BackupComicInfoArchiveEntry(x.FullName, x.Name));
                     if (entry != null)
                     {
                         using var stream = entry.Open();
@@ -371,8 +371,9 @@ public class ArchiveService : IArchiveService
                 case ArchiveLibrary.SharpCompress:
                 {
                     using var archive = ArchiveFactory.Open(archivePath);
-                    var entry = archive.Entries.FirstOrDefault(entry =>
-                        ValidComicInfoArchiveEntry(Path.GetDirectoryName(entry.Key), entry.Key));
+                    var entry = archive.Entries.FirstOrDefault(entry => entry.Key == ComicInfoFilename) ??
+                        archive.Entries.FirstOrDefault(entry =>
+                        BackupComicInfoArchiveEntry(Path.GetDirectoryName(entry.Key), entry.Key));
 
                     if (entry != null)
                     {
