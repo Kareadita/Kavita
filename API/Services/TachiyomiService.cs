@@ -57,9 +57,18 @@ public class TachiyomiService : ITachiyomiService
             if (looseLeafChapterVolume == null)
             {
                 var volumeChapter = _mapper.Map<ChapterDto>(volumes.Last().Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparerZeroFirst.Default).Last());
+                if (volumeChapter.Number == "0")
+                {
+                    var volume = volumes.First(v => v.Id == volumeChapter.VolumeId);
+                    return new ChapterDto()
+                    {
+                        Number = (volume.Number / 10000f).ToString("R", _englishCulture)
+                    };
+                }
+
                 return new ChapterDto()
                 {
-                    Number = $"{int.Parse(volumeChapter.Number) / 10000f}".ToString(_englishCulture)
+                    Number = (int.Parse(volumeChapter.Number) / 10000f).ToString("R", _englishCulture)
                     //Number = $"{int.Parse(volumeChapter.Number) / 1000f}"
                 };
             }
