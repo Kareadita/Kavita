@@ -18,18 +18,12 @@ export class CardActionablesComponent implements OnInit {
   @Input() disabled: boolean = false;
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 
-  adminActions: ActionItem<any>[] = [];
-  nonAdminActions: ActionItem<any>[] = [];
-
   isAdmin: boolean = false;
   canDownload: boolean = false;
 
   constructor(private readonly cdRef: ChangeDetectorRef, private accountService: AccountService) { }
 
   ngOnInit(): void {
-    this.nonAdminActions = this.actions.filter(item => !item.requiresAdmin);
-    this.adminActions = this.actions.filter(item => item.requiresAdmin);
-
     this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
       if (!user) return;
       this.isAdmin = this.accountService.hasAdminRole(user);
@@ -50,18 +44,6 @@ export class CardActionablesComponent implements OnInit {
     if (typeof action.callback === 'function') {
       this.actionHandler.emit(action);
     }
-  }
-
-  getNonAdminActions(actionsList: ActionItem<any>[]): ActionItem<any>[] {
-    return actionsList.filter(item => !item.requiresAdmin);
-  }
-
-  getAdminActions(actionsList: ActionItem<any>[]): ActionItem<any>[] {
-    return actionsList.filter(item => item.requiresAdmin);
-  }
-
-  getDivider(actionsList: ActionItem<any>[]): Boolean {
-    return actionsList.filter(item => !item.requiresAdmin).length > 0 && actionsList.filter(item => item.requiresAdmin).length > 0;
   }
 
 }

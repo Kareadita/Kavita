@@ -11,10 +11,21 @@
     border: 0;
     color: var(--dropdown-item-text-color);
     background-color: var(--dropdown-item-bg-color);
+    &:hover {
+      color: var(--dropdown-item-text-color);
+      background-color: var(--dropdown-item-hover-bg-color);
+      cursor: pointer;
+    }
+    &:focus {
+      background-color: var(--dropdown-item-hover-bg-color);
+    }
 }
 
-.submenu-toggle:hover {
-    color: var(--dropdown-item-text-color);
-    background-color: var(--dropdown-item-hover-bg-color);
-    cursor: pointer;
+.submenu-icon {
+    float: right;
+    padding: var(--bs-dropdown-item-padding-y) 0;
+}
+
+.submenu-menu {
+  margin-left: -5px;
 }

@@ -2,20 +2,18 @@
     <div ngbDropdown container="body" class="d-inline-block">
       <button [disabled]="disabled" class="btn {{btnClass}}" id="actions-{{labelBy}}" ngbDropdownToggle (click)="preventClick($event)"><i class="fa {{iconClass}}" aria-hidden="true"></i></button>
       <div ngbDropdownMenu attr.aria-labelledby="actions-{{labelBy}}">
-			  <ng-container *ngTemplateOutlet="submenu; context: { list: nonAdminActions }"></ng-container>
-        <div class="dropdown-divider" *ngIf="nonAdminActions.length > 1 && adminActions.length > 1"></div>
-			  <ng-container *ngTemplateOutlet="submenu; context: { list: adminActions }"></ng-container>
+			  <ng-container *ngTemplateOutlet="submenu; context: { list: actions }"></ng-container>
       </div>
     </div>
 	<ng-template #submenu let-list="list">
 		<ng-container *ngFor="let action of list">
       <ng-container *ngIf="action.children === undefined || action?.children?.length === 0 else submenuDropdown">
-        <button ngbDropdownItem *ngIf="(action.requiresAdmin && isAdmin) || (action.title === 'Download' && canDownload)" (click)="performAction($event, action)">{{action.title}}</button>
+        <button ngbDropdownItem *ngIf="(action.requiresAdmin && isAdmin) || (action.title === 'Download' && canDownload) || (!action.requiresAdmin && action.title !== 'Download')" (click)="performAction($event, action)">{{action.title}}</button>
       </ng-container>
       <ng-template #submenuDropdown>
-        <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseenter)="$event.stopPropagation(); subMenuHover.toggle();" (mouseleave)="$event.stopPropagation(); subMenuHover.toggle();">
-          <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{action.title}} &#8227;</button>
-          <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
+        <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseover)="preventClick($event); subMenuHover.open();" (mouseleave)="preventClick($event); subMenuHover.close();">
+          <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{action.title}} <i class="fa-solid fa-play submenu-icon"></i></button>
+          <div ngbDropdownMenu class="submenu-menu" attr.aria-labelledby="actions-{{action.title}}">
             <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }"></ng-container>
           </div>
         </div>
