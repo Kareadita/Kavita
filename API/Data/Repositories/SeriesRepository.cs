@@ -56,6 +56,7 @@ internal class RecentlyAddedSeries
 
 public interface ISeriesRepository
 {
+    void Add(Series series);
     void Attach(Series series);
     void Update(Series series);
     void Remove(Series series);
@@ -134,6 +135,11 @@ public class SeriesRepository : ISeriesRepository
     {
         _context = context;
         _mapper = mapper;
+    }
+
+    public void Add(Series series)
+    {
+        _context.Series.Add(series);
     }
 
     public void Attach(Series series)

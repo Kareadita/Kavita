@@ -46,12 +46,16 @@ public static class LogLevelOptions
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", MicrosoftHostingLifetimeLogLevelSwitch)
             .MinimumLevel.Override("Hangfire", HangfireLogLevelSwitch)
             .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Internal.WebHost", AspNetCoreLogLevelSwitch)
+            // Suppress noisy loggers that add no value
+            .MinimumLevel.Override("Microsoft.AspNetCore.ResponseCaching.ResponseCachingMiddleware", LogEventLevel.Error)
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
             .Enrich.FromLogContext()
+            .Enrich.WithThreadId()
             .WriteTo.Console()
             .WriteTo.File(LogFile,
                 shared: true,
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId}] [{Level}] {Message:lj}{NewLine}{Exception}");
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {ThreadId}] [{Level}] {SourceContext} {Message:lj}{NewLine}{Exception}");
     }
 
     public static void SwitchLogLevel(string level)
@@ -60,9 +64,9 @@ public static class LogLevelOptions
         {
             case "Debug":
                 LogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
-                MicrosoftLogLevelSwitch.MinimumLevel = LogEventLevel.Information;
-                MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
-                AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
+                MicrosoftLogLevelSwitch.MinimumLevel = LogEventLevel.Warning; // This is DB output information, Inf shows the SQL
+                MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Information;
+                AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Warning;
                 break;
             case "Information":
                 LogLevelSwitch.MinimumLevel = LogEventLevel.Error;
@@ -74,7 +78,7 @@ public static class LogLevelOptions
                 LogLevelSwitch.MinimumLevel = LogEventLevel.Verbose;
                 MicrosoftLogLevelSwitch.MinimumLevel = LogEventLevel.Information;
                 MicrosoftHostingLifetimeLogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
-                AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Debug;
+                AspNetCoreLogLevelSwitch.MinimumLevel = LogEventLevel.Information;
                 break;
             case "Warning":
                 LogLevelSwitch.MinimumLevel = LogEventLevel.Warning;
