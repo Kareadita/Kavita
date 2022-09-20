@@ -40,12 +40,11 @@ public class LibraryWatcher : ILibraryWatcher
     private readonly ILogger<LibraryWatcher> _logger;
     private readonly IScannerService _scannerService;
 
-    private readonly Dictionary<string, IList<FileSystemWatcher>> _watcherDictionary = new ();
+    private static readonly Dictionary<string, IList<FileSystemWatcher>> WatcherDictionary = new ();
     /// <summary>
     /// This is just here to prevent GC from Disposing our watchers
     /// </summary>
-    private readonly IList<FileSystemWatcher> _fileWatchers = new List<FileSystemWatcher>();
-    private IList<string> _libraryFolders = new List<string>();
+    private static readonly IList<FileSystemWatcher> FileWatchers = new List<FileSystemWatcher>();
     /// <summary>
     /// The amount of time until the Schedule ScanFolder task should be executed
     /// </summary>
@@ -68,13 +67,14 @@ public class LibraryWatcher : ILibraryWatcher
     {
         _logger.LogInformation("[LibraryWatcher] Starting file watchers");
 
-        _libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+        var libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
             .SelectMany(l => l.Folders)
             .Distinct()
             .Select(Parser.Parser.NormalizePath)
             .Where(_directoryService.Exists)
             .ToList();
-        foreach (var libraryFolder in _libraryFolders)
+
+        foreach (var libraryFolder in libraryFolders)
         {
             _logger.LogDebug("[LibraryWatcher] Watching {FolderPath}", libraryFolder);
             var watcher = new FileSystemWatcher(libraryFolder);
@@ -87,21 +87,21 @@ public class LibraryWatcher : ILibraryWatcher
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
-            _fileWatchers.Add(watcher);
-            if (!_watcherDictionary.ContainsKey(libraryFolder))
+            FileWatchers.Add(watcher);
+            if (!WatcherDictionary.ContainsKey(libraryFolder))
             {
-                _watcherDictionary.Add(libraryFolder, new List<FileSystemWatcher>());
+                WatcherDictionary.Add(libraryFolder, new List<FileSystemWatcher>());
             }
 
-            _watcherDictionary[libraryFolder].Add(watcher);
+            WatcherDictionary[libraryFolder].Add(watcher);
         }
-        _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", _fileWatchers.Count);
+        _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", FileWatchers.Count);
     }
 
     public void StopWatching()
     {
         _logger.LogInformation("[LibraryWatcher] Stopping watching folders");
-        foreach (var fileSystemWatcher in _watcherDictionary.Values.SelectMany(watcher => watcher))
+        foreach (var fileSystemWatcher in WatcherDictionary.Values.SelectMany(watcher => watcher))
         {
             fileSystemWatcher.EnableRaisingEvents = false;
             fileSystemWatcher.Changed -= OnChanged;
@@ -110,12 +110,13 @@ public class LibraryWatcher : ILibraryWatcher
             fileSystemWatcher.Error -= OnError;
             fileSystemWatcher.Dispose();
         }
-        _fileWatchers.Clear();
-        _watcherDictionary.Clear();
+        FileWatchers.Clear();
+        WatcherDictionary.Clear();
     }
 
     public async Task RestartWatching()
     {
+        _logger.LogDebug("[LibraryWatcher] Restarting watcher");
         StopWatching();
         await StartWatching();
     }
@@ -160,7 +161,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// <remarks>This is public only because Hangfire will invoke it. Do not call external to this class.</remarks>
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
-    public void ProcessChange(string filePath, bool isDirectoryChange = false)
+    public async Task ProcessChange(string filePath, bool isDirectoryChange = false)
     {
         var sw = Stopwatch.StartNew();
         _logger.LogDebug("[LibraryWatcher] Processing change of {FilePath}", filePath);
@@ -174,26 +175,34 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            var fullPath = GetFolder(filePath, _libraryFolders);
+            var libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+                .SelectMany(l => l.Folders)
+                .Distinct()
+                .Select(Parser.Parser.NormalizePath)
+                .Where(_directoryService.Exists)
+                .ToList();
+            ;
+
+            var fullPath = GetFolder(filePath, libraryFolders);
+            _logger.LogDebug("Folder path: {FolderPath}", fullPath);
             if (string.IsNullOrEmpty(fullPath))
             {
                 _logger.LogDebug("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", filePath);
                 return;
             }
 
-            // Check if this task has already enqueued or is being processed, before enquing
+            // Check if this task has already enqueued or is being processed, before enqueing
 
             var alreadyScheduled =
                 TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {fullPath});
-            _logger.LogDebug("[LibraryWatcher] {FullPath} already enqueued: {Value}", fullPath, alreadyScheduled);
             if (!alreadyScheduled)
             {
-                _logger.LogDebug("[LibraryWatcher] Scheduling ScanFolder for {Folder}", fullPath);
+                _logger.LogInformation("[LibraryWatcher] Scheduling ScanFolder for {Folder}", fullPath);
                 BackgroundJob.Schedule(() => _scannerService.ScanFolder(fullPath), _queueWaitTime);
             }
             else
             {
-                _logger.LogDebug("[LibraryWatcher] Skipped scheduling ScanFolder for {Folder} as a job already queued",
+                _logger.LogInformation("[LibraryWatcher] Skipped scheduling ScanFolder for {Folder} as a job already queued",
                     fullPath);
             }
         }
@@ -207,18 +216,17 @@ public class LibraryWatcher : ILibraryWatcher
     private string GetFolder(string filePath, IList<string> libraryFolders)
     {
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
-        if (string.IsNullOrEmpty(parentDirectory))
-        {
-            return string.Empty;
-        }
+        _logger.LogDebug("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
 
         // We need to find the library this creation belongs to
         // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
         var libraryFolder = libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
+        _logger.LogDebug("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
         if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
 
         var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
+        _logger.LogDebug("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
         if (!rootFolder.Any()) return string.Empty;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
