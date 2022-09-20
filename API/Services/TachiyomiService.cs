@@ -150,7 +150,7 @@ public class TachiyomiService : ITachiyomiService
             if (!_unitOfWork.HasChanges()) return true;
             if (await _unitOfWork.CommitAsync()) return true;
         } catch (Exception ex) {
-            _logger.LogError(ex, "There was an error saving progress from tachiyomi.");
+            _logger.LogError(ex, "There was an error saving progress from tachiyomi");
             await _unitOfWork.RollbackAsync();
         }
         return false;

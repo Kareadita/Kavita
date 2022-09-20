@@ -31,7 +31,7 @@ public class TachiyomiController : BaseApiController
     [HttpGet("latest-chapter")]
     public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
     {
-        if (seriesId < 1) return BadRequest("SeriesId must be greater than 0");
+        if (seriesId < 1) return BadRequest("seriesId must be greater than 0");
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _tachiyomiService.GetLatestChapter(seriesId, userId));
     }
@@ -45,7 +45,6 @@ public class TachiyomiController : BaseApiController
     public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-
         return Ok(await _tachiyomiService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber));
     }
 }
