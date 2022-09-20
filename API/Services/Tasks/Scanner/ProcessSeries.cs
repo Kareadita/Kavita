@@ -108,6 +108,7 @@ public class ProcessSeries : IProcessSeries
         {
             seriesAdded = true;
             series = DbFactory.Series(firstInfo.Series, firstInfo.LocalizedSeries);
+            _unitOfWork.SeriesRepository.Add(series);
         }
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;
@@ -156,7 +157,6 @@ public class ProcessSeries : IProcessSeries
             await UpdateSeriesFolderPath(parsedInfos, library, series);
 
             series.LastFolderScanned = DateTime.Now;
-            _unitOfWork.SeriesRepository.Attach(series);
 
             if (_unitOfWork.HasChanges())
             {
