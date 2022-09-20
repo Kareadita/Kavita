@@ -2283,14 +2283,14 @@ public class ReaderServiceTests
         Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(2, 1)));
         Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
 
-        // Validate volumes chapter 0 have read status
-        //Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(0, 1)).PagesRead);
+        // Validate that volumes 1997 and 2002 both have their respective chapter 0 marked as read
         Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)).PagesRead);
         Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1)).PagesRead);
-        // Validate next volume (2003) is not read
+        // Validate that the chapter 0 of the following volume (2003) is not read
         Assert.Null(await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(7, 1));
 
     }
+
     [Fact]
     public async Task MarkVolumesUntilAsRead_ShouldMarkVolumesAsRead_2()
     {
@@ -2347,7 +2347,6 @@ public class ReaderServiceTests
         Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));
 
         // Validate volumes chapter 0 have read status
-        //Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(0, 1)).PagesRead);
         Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(5, 1)).PagesRead);
         Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(6, 1)).PagesRead);
         Assert.Null((await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(3, 1)));

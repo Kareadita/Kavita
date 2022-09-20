@@ -33,7 +33,6 @@ public class TachiyomiService : ITachiyomiService
     }
 
     public async Task<ChapterDto> GetLatestChapter(int seriesId,int userId)
-//    public async Task<ChapterDto> GetLatestChapter(int seriesId, int userId)
     {
 
 
@@ -69,7 +68,6 @@ public class TachiyomiService : ITachiyomiService
                 return new ChapterDto()
                 {
                     Number = (int.Parse(volumeChapter.Number) / 10000f).ToString("R", _englishCulture)
-                    //Number = $"{int.Parse(volumeChapter.Number) / 1000f}"
                 };
             }
 
@@ -113,7 +111,6 @@ public class TachiyomiService : ITachiyomiService
                 // This is a hack to track volume number. We need to map it back by x100
                 var chapterString = $"{chapterNumber}";
                 var volumeNumber = int.Parse($"{(int)(chapterNumber * 10000)}", _englishCulture);
-                //var volumeNumber = int.Parse($"{float.Parse(chapterString.Substring(0, Math.Min(7, chapterString.Length))) * 100f}");
                 await _readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
                 break;
             }
