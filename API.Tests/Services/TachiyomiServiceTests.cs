@@ -379,7 +379,7 @@ public class TachiyomiServiceTests
                 }),
             }
         };
-        series.Pages = 7;
+        series.Pages = 646;
         var library = new Library()
         {
             Name = "Test LIb",
