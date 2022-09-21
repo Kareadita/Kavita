@@ -328,7 +328,7 @@ public class ArchiveService : IArchiveService
         return false;
     }
 
-    private static bool BackupComicInfoArchiveEntry(string fullName, string name)
+    private static bool IsComicInfoArchiveEntry(string fullName, string name)
     {
         return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
                && name.Equals(ComicInfoFilename, StringComparison.OrdinalIgnoreCase)
@@ -355,8 +355,8 @@ public class ArchiveService : IArchiveService
                 {
                     using var archive = ZipFile.OpenRead(archivePath);
 
-                    var entry = archive.Entries.FirstOrDefault(x => x.FullName == ComicInfoFilename) ??
-                        archive.Entries.FirstOrDefault(x => BackupComicInfoArchiveEntry(x.FullName, x.Name));
+                    var entry = archive.Entries.FirstOrDefault(x => (x.FullName ?? x.Name) == ComicInfoFilename) ??
+                        archive.Entries.FirstOrDefault(x => IsComicInfoArchiveEntry(x.FullName, x.Name));
                     if (entry != null)
                     {
                         using var stream = entry.Open();
@@ -373,7 +373,7 @@ public class ArchiveService : IArchiveService
                     using var archive = ArchiveFactory.Open(archivePath);
                     var entry = archive.Entries.FirstOrDefault(entry => entry.Key == ComicInfoFilename) ??
                         archive.Entries.FirstOrDefault(entry =>
-                        BackupComicInfoArchiveEntry(Path.GetDirectoryName(entry.Key), entry.Key));
+                        IsComicInfoArchiveEntry(Path.GetDirectoryName(entry.Key), entry.Key));
 
                     if (entry != null)
                     {

@@ -256,15 +256,28 @@ public class ArchiveServiceTests
         Assert.Equal("Junya Inoue", comicInfo.Writer);
     }
 
-    [Fact]
-    public void ShouldHaveComicInfo_TopLevelFileOnly()
+    [Theory]
+    [InlineData("ComicInfo_duplicateInfos.zip")]
+    [InlineData("ComicInfo_duplicateInfos_reversed.zip")]
+    public void ShouldHaveComicInfo_TopLevelFileOnly(string filename)
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
-        var archive = Path.Join(testDirectory, "ComicInfo_duplicateInfos.zip");
+        var archive = Path.Join(testDirectory, filename);
 
         var comicInfo = _archiveService.GetComicInfo(archive);
         Assert.NotNull(comicInfo);
         Assert.Equal("BTOOOM!", comicInfo.Series);
+    }
+
+    [Fact]
+    public void ShouldHaveComicInfo_OutsideRoot()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+        var archive = Path.Join(testDirectory, "ComicInfo_outside_root.zip");
+
+        var comicInfo = _archiveService.GetComicInfo(archive);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("BTOOOM! - Duplicate", comicInfo.Series);
     }
 
     #endregion
