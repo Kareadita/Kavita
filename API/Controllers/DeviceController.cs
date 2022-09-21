@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Device;
 using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Ng.Services;
 
 namespace API.Controllers;
 
@@ -17,42 +18,41 @@ public class DeviceController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDeviceService _deviceService;
-    private readonly IUserAgentService _userAgentService;
 
-    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService, IUserAgentService userAgentService)
+    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService)
     {
         _unitOfWork = unitOfWork;
         _deviceService = deviceService;
-        _userAgentService = userAgentService;
     }
 
-    [HttpPost("create-web")]
-    public async Task<ActionResult> CreateOrUpdateDevice()
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        var details = _userAgentService.Parse(Request.Headers.UserAgent);
-        //var device = await _deviceService.CreateDevice(details.Browser);
-        var device = DbFactory.Device(details.Browser);
-
-        // I can use JWT to tie with the User
-        device.Platform = details.Platform;
-        device.Version = details.BrowserVersion;
-        device.IsBrowser = details.IsBrowser;
-        device.IsMobile = details.IsMobile;
-        device.IsRobot = details.IsRobot;
-        device.IsManaged = false;
-        if (Request.HttpContext.Connection.RemoteIpAddress != null)
-            device.IpAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-
-
-        return Ok();
-    }
 
     [HttpPost("create")]
     public async Task<ActionResult> CreateOrUpdateDevice(CreateDeviceDto dto)
     {
-        var device = await _deviceService.CreateDevice(dto.Name);
-        return Ok();
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        var device = await _deviceService.Create(dto, user);
+
+        if (device == null) return BadRequest("There was an error when creating the device");
+
+        return Ok(device);
+    }
+
+    [HttpPost("edit")]
+    public async Task<ActionResult> UpdateDevice(UpdateDeviceDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        var device = await _deviceService.Update(dto, user);
+
+        if (device == null) return BadRequest("There was an error when creating the device");
+
+        return Ok(device);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<DeviceDto>>> GetDevices()
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(userId));
     }
 
 

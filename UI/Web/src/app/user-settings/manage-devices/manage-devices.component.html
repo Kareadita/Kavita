@@ -8,7 +8,11 @@
     </p>
 
     <div class="row g-0">
-        <ng-container *ngFor="let device of (devices$ | async)">
+        <button class="btn btn-primary">Add</button>
+    </div>
+
+    <div class="row g-0">
+        <ng-container *ngFor="let device of devices">
             <div class="card col-auto me-3 mb-3" style="width: 18rem;">
                 <div class="card-body">
                   <h5 class="card-title">{{device.name | sentenceCase}}</h5>

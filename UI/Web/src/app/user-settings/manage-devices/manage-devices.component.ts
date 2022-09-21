@@ -20,11 +20,14 @@ export class ManageDevicesComponent implements OnInit {
     private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.devices$ = this.deviceService.getDevices();
+    this.deviceService.getDevices().subscribe(devices => {
+      this.devices = devices;
+      this.cdRef.markForCheck();
+    });
   }
   
   deleteDevice(device: Device) {
-    
+
   }
 
 }

@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
 using API.Entities.Enums.Device;
 
 namespace API.DTOs.Device;
 
-public class CreateDeviceDto
+public class UpdateDeviceDto
 {
+    [Required]
+    public int Id { get; set; }
     [Required]
     public string Name { get; set; }
     /// <summary>
@@ -15,6 +16,4 @@ public class CreateDeviceDto
     public DevicePlatform Platform { get; set; }
     [Required]
     public string EmailAddress { get; set; }
-
-
 }

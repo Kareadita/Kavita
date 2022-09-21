@@ -1,6 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using API.DTOs.Device;
 using API.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 
@@ -9,6 +14,7 @@ public interface IDeviceRepository
     void Attach(Device device);
     void Remove(Device device);
     Task<Device> FindByNameAsync(string name);
+    Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId);
 }
 
 public class DeviceRepository : IDeviceRepository
@@ -35,5 +41,13 @@ public class DeviceRepository : IDeviceRepository
     public Task<Device?> FindByNameAsync(string name)
     {
         return null;
+    }
+
+    public async Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId)
+    {
+        return await _context.Device
+            .Where(d => d.AppUserId == userId)
+            .ProjectTo<DeviceDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 }

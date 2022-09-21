@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { of, ReplaySubject, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
@@ -34,8 +34,7 @@ export class AccountService implements OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(private httpClient: HttpClient, private router: Router, 
-    private messageHub: MessageHubService, private themeService: ThemeService,
-    private deviceService: DeviceService) {
+    private messageHub: MessageHubService, private themeService: ThemeService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate), 
         map(evt => evt.payload as UserUpdateEvent),
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),  
@@ -74,7 +73,6 @@ export class AccountService implements OnDestroy {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
-          this.deviceService.createDevice('').subscribe(() => {});
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
       }),

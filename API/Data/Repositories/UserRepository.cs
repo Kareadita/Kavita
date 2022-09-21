@@ -27,6 +27,7 @@ public enum AppUserIncludes
     UserPreferences = 32,
     WantToRead = 64,
     ReadingListsWithItems = 128,
+    Devices = 256,
 
 }
 
@@ -192,6 +193,11 @@ public class UserRepository : IUserRepository
         if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
         {
             query = query.Include(u => u.WantToRead);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.Devices))
+        {
+            query = query.Include(u => u.Devices);
         }
 
 

@@ -2,6 +2,7 @@ import { DevicePlatform } from "./device-platform";
 
 export interface Device {
     name: string;
-    devicePlatform: DevicePlatform;
+    platform: DevicePlatform;
     emailAddress: string;
+    lastUsed: string;
 }
