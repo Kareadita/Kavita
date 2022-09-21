@@ -13,7 +13,7 @@
       <ng-template #submenuDropdown>
         <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseover)="preventClick($event); subMenuHover.open();" (mouseleave)="preventClick($event); subMenuHover.close();">
           <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{action.title}} <i class="fa-solid fa-play submenu-icon"></i></button>
-          <div ngbDropdownMenu class="submenu-menu" attr.aria-labelledby="actions-{{action.title}}">
+          <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
             <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }"></ng-container>
           </div>
         </div>
