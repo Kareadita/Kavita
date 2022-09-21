@@ -117,7 +117,7 @@ public class Program
             Log.Fatal(ex, "Host terminated unexpectedly");
         } finally
         {
-            Log.CloseAndFlush();
+            await Log.CloseAndFlushAsync();
         }
     }
 

@@ -58,7 +58,7 @@ public class EmailService : IEmailService
                 result.Successful = false;
                 result.ErrorMessage = "This is a local IP address";
             }
-            result.Successful = await SendEmailWithGet(emailUrl + "/api/email/test");
+            result.Successful = await SendEmailWithGet(emailUrl + "/api/test");
         }
         catch (KavitaException ex)
         {
@@ -72,7 +72,7 @@ public class EmailService : IEmailService
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
     {
         var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        var success = await SendEmailWithPost(emailLink + "/api/email/confirm", data);
+        var success = await SendEmailWithPost(emailLink + "/api/invite/confirm", data);
         if (!success)
         {
             _logger.LogError("There was a critical error sending Confirmation email");
@@ -85,7 +85,7 @@ public class EmailService : IEmailService
         try
         {
             if (IsLocalIpAddress(host)) return false;
-            return await SendEmailWithGet(DefaultApiUrl + "/api/email/reachable?host=" + host);
+            return await SendEmailWithGet(DefaultApiUrl + "/api/reachable?host=" + host);
         }
         catch (Exception)
         {
@@ -96,13 +96,13 @@ public class EmailService : IEmailService
     public async Task<bool> SendMigrationEmail(EmailMigrationDto data)
     {
         var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return await SendEmailWithPost(emailLink + "/api/email/email-migration", data);
+        return await SendEmailWithPost(emailLink + "/api/invite/email-migration", data);
     }
 
     public async Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data)
     {
         var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
-        return await SendEmailWithPost(emailLink + "/api/email/email-password-reset", data);
+        return await SendEmailWithPost(emailLink + "/api/invite/email-password-reset", data);
     }
 
     private static async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)
