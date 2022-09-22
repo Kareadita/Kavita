@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
-import { NgbAccordionModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbCollapseModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
@@ -11,6 +11,7 @@ import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageDevicesComponent } from './manage-devices/manage-devices.component';
+import { DevicePlatformPipe } from './device-platform.pipe';
 
 
 
@@ -21,6 +22,7 @@ import { ManageDevicesComponent } from './manage-devices/manage-devices.componen
     ThemeManagerComponent,
     SiteThemeProviderPipe,
     ManageDevicesComponent,
+    DevicePlatformPipe,
   ],
   imports: [
     CommonModule,
@@ -29,6 +31,7 @@ import { ManageDevicesComponent } from './manage-devices/manage-devices.componen
     NgbAccordionModule,
     NgbNavModule,
     NgbTooltipModule,
+    NgbCollapseModule,
 
     ColorPickerModule, // User prefernces background color
     
