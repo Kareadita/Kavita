@@ -11,17 +11,15 @@
     border: 0;
     color: var(--dropdown-item-text-color);
     background-color: var(--dropdown-item-bg-color);
-}
-
-.submenu-toggle:hover {
-    color: var(--dropdown-item-text-color);
-    background-color: var(--dropdown-item-hover-bg-color);
-    cursor: pointer;
-}
-
-.submenu-toggle:focus {
-    color: var(--dropdown-item-text-color);
-    background-color: var(--dropdown-item-hover-bg-color);
+    &:hover {
+        color: var(--dropdown-item-text-color);
+        background-color: var(--dropdown-item-hover-bg-color);
+        cursor: pointer;
+    }
+    &:focus-visible {
+        color: var(--dropdown-item-text-color);
+        background-color: var(--dropdown-item-hover-bg-color);
+    }
 }
 
 .submenu-icon {

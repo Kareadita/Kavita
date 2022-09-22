@@ -8,7 +8,7 @@
 	<ng-template #submenu let-list="list">
 		<ng-container *ngFor="let action of list">
       <ng-container *ngIf="action.children === undefined || action?.children?.length === 0 else submenuDropdown">
-        <button ngbDropdownItem *ngIf="(action.requiresAdmin && isAdmin) || (action.title === 'Download' && canDownload) || (!action.requiresAdmin && action.title !== 'Download')" (click)="performAction($event, action)">{{action.title}}</button>
+        <button ngbDropdownItem *ngIf="(action.requiresAdmin && isAdmin) || (action.title === 'Download' && (canDownload || isAdmin)) || (!action.requiresAdmin && action.title !== 'Download')" (click)="performAction($event, action)">{{action.title}}</button>
       </ng-container>
       <ng-template #submenuDropdown>
         <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseover)="preventClick($event); subMenuHover.open();" (mouseleave)="preventClick($event); subMenuHover.close();">
