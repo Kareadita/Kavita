@@ -259,6 +259,7 @@ public class ArchiveServiceTests
     [Theory]
     [InlineData("ComicInfo_duplicateInfos.zip")]
     [InlineData("ComicInfo_duplicateInfos_reversed.zip")]
+    [InlineData("ComicInfo_duplicateInfos.rar")]
     public void ShouldHaveComicInfo_TopLevelFileOnly(string filename)
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
