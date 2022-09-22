@@ -9,6 +9,10 @@ namespace API.DTOs.Device;
 public class DeviceDto
 {
     /// <summary>
+    /// The device Id
+    /// </summary>
+    public int Id { get; set; }
+    /// <summary>
     /// A name given to this device
     /// </summary>
     /// <remarks>If this device is web, this will be the browser name</remarks>

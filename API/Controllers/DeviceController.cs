@@ -34,7 +34,7 @@ public class DeviceController : BaseApiController
 
         if (device == null) return BadRequest("There was an error when creating the device");
 
-        return Ok(device);
+        return Ok();
     }
 
     [HttpPost("edit")]
@@ -43,9 +43,24 @@ public class DeviceController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
         var device = await _deviceService.Update(dto, user);
 
-        if (device == null) return BadRequest("There was an error when creating the device");
+        if (device == null) return BadRequest("There was an error when updating the device");
 
         return Ok(device);
+    }
+
+    /// <summary>
+    /// Deletes the device from the user
+    /// </summary>
+    /// <param name="deviceId"></param>
+    /// <returns></returns>
+    [HttpDelete]
+    public async Task<ActionResult> DeleteDevice(int deviceId)
+    {
+        if (deviceId <= 0) return BadRequest("Not a valid deviceId");
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        if (await _deviceService.Delete(user, deviceId)) return Ok();
+
+        return BadRequest("Could not delete device");
     }
 
     [HttpGet]

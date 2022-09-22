@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    <div class="row g-0">
+    <div class="row g-0 mt-2">
         <h4>Devices</h4>
         <p *ngIf="devices.length == 0">
             There are no devices setup yet
@@ -73,7 +73,8 @@
                   <h5 class="card-title">{{device.name | sentenceCase}}</h5>
                   Platform: <h6 class="card-subtitle mb-2 text-muted">{{device.platform | devicePlatform}}</h6>
                   Email: <h6 class="card-subtitle mb-2 text-muted">{{device.emailAddress}}</h6>
-                  <button class="btn btn-danger" (click)="deleteDevice(device)">Delete</button>
+                  <button class="btn btn-danger me-2" (click)="deleteDevice(device)">Delete</button>
+                  <button class="btn btn-primary" (click)="editDevice(device)">Edit</button>
                 </div>
               </div>
         </ng-container>

@@ -27,13 +27,8 @@ export class ManageDevicesComponent implements OnInit {
 
   ngOnInit(): void {
     this.settingsForm.addControl('name', new FormControl('', [Validators.required]));
-    this.settingsForm.addControl('platform', new FormControl(DevicePlatform.Custom, [Validators.required]));
     this.settingsForm.addControl('email', new FormControl('', [Validators.required, Validators.email]));
-
-    this.deviceService.getDevices().subscribe(devices => {
-      this.devices = devices;
-      this.cdRef.markForCheck();
-    });
+    this.settingsForm.addControl('platform', new FormControl(DevicePlatform.Custom, [Validators.required]));
 
     // If user has filled in email and the platform hasn't been explicitly updated, try to update it for them
     this.settingsForm.get('email')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(email => {
@@ -44,15 +39,33 @@ export class ManageDevicesComponent implements OnInit {
       else this.settingsForm.get('platform')?.setValue(DevicePlatform.Custom);
       this.cdRef.markForCheck();
     });
+
+    this.loadDevices();
+  }
+
+  loadDevices() {
+    this.deviceService.getDevices().subscribe(devices => {
+      this.devices = devices;
+      this.cdRef.markForCheck();
+    });
   }
   
   deleteDevice(device: Device) {
+    this.deviceService.deleteDevice(device.id).subscribe(() => {
+      const index = this.devices.indexOf(device);
+      this.devices.splice(index, 1);
+      this.cdRef.markForCheck();
+    });
+  }
 
+  editDevice(device: Device) {
+    
   }
 
   addDevice() {
     this.deviceService.createDevice(this.settingsForm.value.name, this.settingsForm.value.platform, this.settingsForm.value.email).subscribe(() => {
       this.settingsForm.reset();
+      this.loadDevices();
       this.toastr.success('Device created');
       this.cdRef.markForCheck();
     })

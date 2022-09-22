@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -13,6 +14,7 @@ public interface IDeviceService
 {
     Task<Device> Create(CreateDeviceDto dto, AppUser userWithDevices);
     Task<Device> Update(UpdateDeviceDto dto, AppUser userWithDevices);
+    Task<bool> Delete(AppUser userWithDevices, int deviceId);
 }
 
 public class DeviceService : IDeviceService
@@ -30,12 +32,17 @@ public class DeviceService : IDeviceService
     {
         try
         {
+            userWithDevices.Devices ??= new List<Device>();
             var existingDevice = userWithDevices.Devices.SingleOrDefault(d => d.Name.Equals(dto.Name));
             if (existingDevice != null) throw new KavitaException("A device with this name already exists");
 
             existingDevice = DbFactory.Device(dto.Name);
             existingDevice.Platform = dto.Platform;
             existingDevice.EmailAddress = dto.EmailAddress;
+
+
+            userWithDevices.Devices.Add(existingDevice);
+            _unitOfWork.UserRepository.Update(userWithDevices);
 
             if (!_unitOfWork.HasChanges()) return existingDevice;
             if (await _unitOfWork.CommitAsync()) return existingDevice;
@@ -70,5 +77,22 @@ public class DeviceService : IDeviceService
         }
 
         return null;
+    }
+
+    public async Task<bool> Delete(AppUser userWithDevices, int deviceId)
+    {
+        try
+        {
+            userWithDevices.Devices = userWithDevices.Devices.Where(d => d.Id != deviceId).ToList();
+            _unitOfWork.UserRepository.Update(userWithDevices);
+            if (!_unitOfWork.HasChanges()) return true;
+            if (await _unitOfWork.CommitAsync()) return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue with deleting the device, {DeviceId} for user {UserName}", deviceId, userWithDevices.UserName);
+        }
+
+        return false;
     }
 }

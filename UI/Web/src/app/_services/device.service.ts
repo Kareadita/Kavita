@@ -17,6 +17,10 @@ export class DeviceService {
     return this.httpClient.post(this.baseUrl + 'device/create', {name, platform, emailAddress}, {responseType: 'text' as 'json'});
   }
 
+  deleteDevice(id: number) {
+    return this.httpClient.delete(this.baseUrl + 'device?deviceId=' + id);
+  }
+
   getDevices() {
     return this.httpClient.get<Device[]>(this.baseUrl + 'device', {});
   }
