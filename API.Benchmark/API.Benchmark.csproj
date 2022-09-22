@@ -20,5 +20,11 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
+    <ItemGroup>
+      <Content Include="../API.Tests/Services/Test Data/ArchiveService/ComicInfos/*.zip">
+        <LinkBase>Data</LinkBase>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
 
 </Project>
