@@ -75,7 +75,9 @@ public class DeviceController : BaseApiController
     [HttpPost("send-to")]
     public async Task<ActionResult> SendToDevice(SendToDeviceDto dto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        if (dto.ChapterId < 0) return BadRequest("ChapterId must be greater than 0");
+        if (dto.DeviceId < 0) return BadRequest("DeviceId must be greater than 0");
+
         if (await _emailService.IsDefaultEmailService())
             return BadRequest("Send to device cannot be used with Kavita's email service. Please configure your own.");
 

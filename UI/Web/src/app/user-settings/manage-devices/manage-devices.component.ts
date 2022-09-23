@@ -71,10 +71,4 @@ export class ManageDevicesComponent implements OnInit {
     })
   }
 
-  test() {
-    this.deviceService.sendTo(27483, 2).subscribe(() => {
-      
-    });
-  }
-
 }

@@ -89,8 +89,8 @@ export class BookmarksComponent implements OnInit, OnDestroy {
     }
   }
 
-  async handleAction(action: Action, series: Series) {
-    switch (action) {
+  async handleAction(action: ActionItem<Series>, series: Series) {
+    switch (action.action) {
       case(Action.Delete):
         this.clearBookmarks(series);
         break;
@@ -105,12 +105,12 @@ export class BookmarksComponent implements OnInit, OnDestroy {
     }
   }
 
-  bulkActionCallback = async (action: Action, data: any) => {
+  bulkActionCallback = async (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('bookmark');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
     const seriesIds = selectedSeries.map(item => item.id);
 
-    switch (action) {
+    switch (action.action) {
       case Action.DownloadBookmark:
         this.downloadService.download('bookmark', this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId)), (d) => {
           if (!d) {

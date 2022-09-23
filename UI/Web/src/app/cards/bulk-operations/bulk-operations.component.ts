@@ -11,7 +11,7 @@ import { BulkSelectionService } from '../bulk-selection.service';
 })
 export class BulkOperationsComponent implements OnInit, OnDestroy {
 
-  @Input() actionCallback!: (action: Action, data: any) => void;
+  @Input() actionCallback!: (action: ActionItem<any>, data: any) => void;
 
   topOffset: number = 56;
   hasMarkAsRead: boolean = false;
@@ -41,13 +41,13 @@ export class BulkOperationsComponent implements OnInit, OnDestroy {
     this.onDestory.complete();
   }
 
-  handleActionCallback(action: Action, data: any) {
+  handleActionCallback(action: ActionItem<any>, data: any) {
     this.actionCallback(action, data);
   }
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, null);
+      action.callback(action, null);
     }
   }
 

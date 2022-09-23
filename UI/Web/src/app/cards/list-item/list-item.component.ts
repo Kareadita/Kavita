@@ -134,7 +134,7 @@ export class ListItemComponent implements OnInit, OnDestroy {
     }
 
     if (typeof action.callback === 'function') {
-      action.callback(action.action, this.entity);
+      action.callback(action, this.entity);
     }
   }
 }

@@ -280,12 +280,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {
-
-      // if (this.download$ !== null) {
-      //   this.toastr.info('Download is already in progress. Please wait.');
-      //   return;
-      // }
-
       if (this.utilityService.isVolume(this.entity)) {
         const volume = this.utilityService.asVolume(this.entity);
         this.downloadService.download('volume', volume);
@@ -300,7 +294,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     }
 
     if (typeof action.callback === 'function') {
-      action.callback(action.action, this.entity);
+      action.callback(action, this.entity);
     }
   }
 

@@ -58,11 +58,11 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
 
   private onDestory: Subject<void> = new Subject<void>();
 
-  bulkActionCallback = (action: Action, data: any) => {
+  bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
 
-    switch (action) {
+    switch (action.action) {
       case Action.AddToReadingList:
         this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
           if (success) this.bulkSelectionService.deselectAll();
@@ -224,8 +224,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
     this.loadPage();
   }
 
-  handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
-    switch (action) {
+  handleCollectionActionCallback(action: ActionItem<CollectionTag>, collectionTag: CollectionTag) {
+    switch (action.action) {
       case(Action.Edit):
         this.openEditCollectionTagModal(this.collectionTag);
         break;
@@ -236,7 +236,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, this.collectionTag);
+      action.callback(action, this.collectionTag);
     }
   }
 

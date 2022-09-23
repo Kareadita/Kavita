@@ -139,7 +139,7 @@ export class BulkSelectionService {
     return ret;
   }
 
-  getActions(callback: (action: Action, data: any) => void) {
+  getActions(callback: (action: ActionItem<any>, data: any) => void) {
     // checks if series is present. If so, returns only series actions
     // else returns volume/chapter items
     const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection, Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList];
