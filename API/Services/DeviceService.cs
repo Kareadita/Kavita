@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Device;
+using API.DTOs.Email;
 using API.Entities;
+using API.Entities.Enums;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
@@ -15,17 +17,25 @@ public interface IDeviceService
     Task<Device> Create(CreateDeviceDto dto, AppUser userWithDevices);
     Task<Device> Update(UpdateDeviceDto dto, AppUser userWithDevices);
     Task<bool> Delete(AppUser userWithDevices, int deviceId);
+    Task<bool> SendTo(int chapterId, int deviceId);
 }
 
 public class DeviceService : IDeviceService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeviceService> _logger;
+    private readonly IEmailService _emailService;
 
-    public DeviceService(IUnitOfWork unitOfWork, ILogger<DeviceService> logger)
+    /// <summary>
+    /// Size Limit, 25 MB
+    /// </summary>
+    private const int SizeLimit = 26_214_400;
+
+    public DeviceService(IUnitOfWork unitOfWork, ILogger<DeviceService> logger, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _emailService = emailService;
     }
 
     public async Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices)
@@ -94,5 +104,20 @@ public class DeviceService : IDeviceService
         }
 
         return false;
+    }
+
+    public async Task<bool> SendTo(int chapterId, int deviceId)
+    {
+        var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
+        if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)))
+            throw new KavitaException("Cannot Send non Epub or Pdf to devices as not supported");
+
+        var device = await _unitOfWork.DeviceRepository.GetDeviceDtoById(deviceId);
+        var success = await _emailService.SendFilesToEmail(new SendToDto()
+        {
+            DestinationEmail = device.EmailAddress,
+            FilePaths = files.Select(m => m.FilePath)
+        });
+        return success;
     }
 }

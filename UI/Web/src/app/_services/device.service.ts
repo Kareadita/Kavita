@@ -25,5 +25,9 @@ export class DeviceService {
     return this.httpClient.get<Device[]>(this.baseUrl + 'device', {});
   }
 
+  sendTo(chapterId: number, deviceId: number) {
+    return this.httpClient.post(this.baseUrl + 'device/send-to', {deviceId, chapterId}, {responseType: 'text' as 'json'});
+  }
+
   
 }

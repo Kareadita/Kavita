@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DevicePlatform } from '../_models/device/device-platform';
+import { DevicePlatform } from 'src/app/_models/device/device-platform';
 
 @Pipe({
   name: 'devicePlatform'

@@ -11,8 +11,7 @@ import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { ColorPickerModule } from 'ngx-color-picker';
 import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageDevicesComponent } from './manage-devices/manage-devices.component';
-import { DevicePlatformPipe } from './device-platform.pipe';
-
+import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
 
 
 @NgModule({

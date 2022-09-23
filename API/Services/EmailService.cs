@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
@@ -11,6 +14,7 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 
 namespace API.Services;
 
@@ -20,23 +24,29 @@ public interface IEmailService
     Task<bool> CheckIfAccessible(string host);
     Task<bool> SendMigrationEmail(EmailMigrationDto data);
     Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
+    Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> TestConnectivity(string emailUrl);
+    Task<bool> IsDefaultEmailService();
 }
 
 public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDirectoryService _directoryService;
+    private readonly IDownloadService _downloadService;
 
     /// <summary>
     /// This is used to initially set or reset the ServerSettingKey. Do not access from the code, access via UnitOfWork
     /// </summary>
     public const string DefaultApiUrl = "https://email.kavitareader.com";
 
-    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork)
+    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService, IDownloadService downloadService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _directoryService = directoryService;
+        _downloadService = downloadService;
 
         FlurlHttp.ConfigureClient(DefaultApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -67,6 +77,12 @@ public class EmailService : IEmailService
         }
 
         return result;
+    }
+
+    public async Task<bool> IsDefaultEmailService()
+    {
+        return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value
+            .Equals(DefaultApiUrl);
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
@@ -103,6 +119,13 @@ public class EmailService : IEmailService
     {
         var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
         return await SendEmailWithPost(emailLink + "/api/invite/email-password-reset", data);
+    }
+
+    public async Task<bool> SendFilesToEmail(SendToDto data)
+    {
+        if (await IsDefaultEmailService()) return false;
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        return await SendEmailWithFiles(emailLink + "/api/sendto", data.FilePaths, data.DestinationEmail);
     }
 
     private static async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)
@@ -151,6 +174,41 @@ public class EmailService : IEmailService
         }
         catch (Exception)
         {
+            return false;
+        }
+        return true;
+    }
+
+
+    private async Task<bool> SendEmailWithFiles(string url, IEnumerable<string> filePaths, string destEmail, int timeoutSecs = 30)
+    {
+        try
+        {
+            var response = await (url)
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
+                .PostMultipartAsync(mp =>
+                {
+                    mp.AddString("email", destEmail);
+                    var index = 1;
+                    foreach (var filepath in filePaths)
+                    {
+                        mp.AddFile("file" + index, filepath, _downloadService.GetContentTypeFromFile(filepath));
+                        index++;
+                    }
+                }
+                );
+
+            if (response.StatusCode != StatusCodes.Status200OK)
+            {
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an exception when sending Email for SendTo");
             return false;
         }
         return true;

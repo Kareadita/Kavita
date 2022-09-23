@@ -59,7 +59,7 @@ export class ManageDevicesComponent implements OnInit {
   }
 
   editDevice(device: Device) {
-    
+
   }
 
   addDevice() {
@@ -69,6 +69,12 @@ export class ManageDevicesComponent implements OnInit {
       this.toastr.success('Device created');
       this.cdRef.markForCheck();
     })
+  }
+
+  test() {
+    this.deviceService.sendTo(27483, 2).subscribe(() => {
+      
+    });
   }
 
 }

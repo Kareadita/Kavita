@@ -15,6 +15,7 @@ public interface IDeviceRepository
     void Remove(Device device);
     Task<Device> FindByNameAsync(string name);
     Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId);
+    Task<DeviceDto> GetDeviceDtoById(int deviceId);
 }
 
 public class DeviceRepository : IDeviceRepository
@@ -49,5 +50,13 @@ public class DeviceRepository : IDeviceRepository
             .Where(d => d.AppUserId == userId)
             .ProjectTo<DeviceDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<DeviceDto> GetDeviceDtoById(int deviceId)
+    {
+        return await _context.Device
+            .Where(d => d.Id == deviceId)
+            .ProjectTo<DeviceDto>(_mapper.ConfigurationProvider)
+            .SingleOrDefaultAsync();
     }
 }

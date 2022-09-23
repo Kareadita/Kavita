@@ -18,11 +18,13 @@ public class DeviceController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDeviceService _deviceService;
+    private readonly IEmailService _emailService;
 
-    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService)
+    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
         _deviceService = deviceService;
+        _emailService = emailService;
     }
 
 
@@ -68,6 +70,18 @@ public class DeviceController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(userId));
+    }
+
+    [HttpPost("send-to")]
+    public async Task<ActionResult> SendToDevice(SendToDeviceDto dto)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        if (await _emailService.IsDefaultEmailService())
+            return BadRequest("Send to device cannot be used with Kavita's email service. Please configure your own.");
+
+        if (await _deviceService.SendTo(dto.ChapterId, dto.DeviceId)) return Ok();
+
+        return BadRequest("There was an error sending the file to the device");
     }
 
 
