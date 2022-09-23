@@ -255,7 +255,7 @@ public class CacheHelperTests
             FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
-        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+        Assert.True(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
     }
 
     [Fact]
@@ -285,7 +285,7 @@ public class CacheHelperTests
             FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
-        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+        Assert.True(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
     }
 
 }

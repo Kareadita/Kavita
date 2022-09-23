@@ -19,7 +19,7 @@ public class DeviceServiceTests : BasicTest
 
     public DeviceServiceTests() : base()
     {
-        _deviceService = new DeviceService(_unitOfWork, _logger);
+        _deviceService = new DeviceService(_unitOfWork, _logger, Substitute.For<IEmailService>());
     }
 
     protected void ResetDB()
