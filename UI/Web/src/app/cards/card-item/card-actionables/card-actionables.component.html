@@ -8,11 +8,11 @@
 	<ng-template #submenu let-list="list">
 		<ng-container *ngFor="let action of list">
       <ng-container *ngIf="action.children === undefined || action?.children?.length === 0 else submenuDropdown">
-        <button ngbDropdownItem *ngIf="(action.requiresAdmin && isAdmin) || (action.title === 'Download' && (canDownload || isAdmin)) || (!action.requiresAdmin && action.title !== 'Download')" (click)="performAction($event, action)">{{action.title}}</button>
+        <button ngbDropdownItem *ngIf="willRenderAction(action)" (click)="performAction($event, action)">{{action.title}}</button>
       </ng-container>
       <ng-template #submenuDropdown>
-        <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseover)="preventClick($event); subMenuHover.open();" (mouseleave)="preventClick($event); subMenuHover.close();">
-          <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{action.title}} <i class="fa-solid fa-play submenu-icon"></i></button>
+        <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseover)="preventClick($event); openSubmenu(action.title, subMenuHover)" (mouseleave)="preventClick($event)">
+          <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{action.title}} <i class="fa-solid fa-angle-right submenu-icon"></i></button>
           <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
             <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }"></ng-container>
           </div>

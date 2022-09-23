@@ -124,63 +124,31 @@ export class ActionFactoryService {
   }
 
   getLibraryActions(callback: (action: Action, library: Library) => void) {
-    const actions = this.libraryActions.map((a) => {
-      return { ...a };
-    });
-    actions.forEach((action) => (this.appyCallback(action, callback)));
-    return actions;
+		return this.applyCallbackToList(this.libraryActions, callback);
   }
 
   getSeriesActions(callback: (action: Action, series: Series) => void) {
-    const actions = this.seriesActions.map((a) => {
-      return { ...a };
-    });
-    actions.forEach((action) => (this.appyCallback(action, callback)));
-    return actions;
+		return this.applyCallbackToList(this.seriesActions, callback);
   }
 
   getVolumeActions(callback: (action: Action, volume: Volume) => void) {
-    const actions = this.volumeActions.map((a) => {
-      return { ...a };
-    });
-    actions.forEach((action) => (this.appyCallback(action, callback)));
-    return actions;
+		return this.applyCallbackToList(this.volumeActions, callback);
   }
 
   getChapterActions(callback: (action: Action, chapter: Chapter) => void) {
-    const actions = this.chapterActions.map((a) => {
-      return { ...a };
-    });
-    actions.forEach((action) => (this.appyCallback(action, callback)));
-    return actions;
+    return this.applyCallbackToList(this.chapterActions, callback);
   }
 
-  getCollectionTagActions(
-    callback: (action: Action, collectionTag: CollectionTag) => void
-  ) {
-    const actions = this.collectionTagActions.map((a) => {
-      return { ...a };
-    });
-    actions.forEach((action) => (this.appyCallback(action, callback)));
-    return actions;
+  getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
+		return this.applyCallbackToList(this.collectionTagActions, callback);
   }
 
-  getReadingListActions(
-    callback: (action: Action, readingList: ReadingList) => void
-  ) {
-    const actions = this.readingListActions.map((a) => {
-      return { ...a };
-    });
-    actions.forEach((action) => (this.appyCallback(action, callback)));
-    return actions;
+  getReadingListActions(callback: (action: Action, readingList: ReadingList) => void) {
+    return this.applyCallbackToList(this.readingListActions, callback);
   }
 
   getBookmarkActions(callback: (action: Action, series: Series) => void) {
-    const actions = this.bookmarkActions.map((a) => {
-      return { ...a };
-    });
-    actions.forEach((action) => (this.appyCallback(action, callback)));
-    return actions;
+    return this.applyCallbackToList(this.bookmarkActions, callback);
   }
 
   dummyCallback(action: Action, data: any) {}
@@ -191,23 +159,31 @@ export class ActionFactoryService {
         action: Action.Scan,
         title: 'Scan Library',
         callback: this.dummyCallback,
-        requiresAdmin: true,
-        children: []
+        requiresAdmin: false,
+        children: [],
       },
       {
-        action: Action.RefreshMetadata,
-        title: 'Refresh Covers',
+        action: Action.Others,
+        title: 'Others',
         callback: this.dummyCallback,
         requiresAdmin: true,
-        children: []
+        children: [
+          {
+            action: Action.RefreshMetadata,
+            title: 'Refresh Covers',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.AnalyzeFiles,
+            title: 'Analyze Files',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+        ],
       },
-      {
-        action: Action.AnalyzeFiles,
-        title: 'Analyze Files',
-        callback: this.dummyCallback,
-        requiresAdmin: true,
-        children: []
-      }
     ];
 
     this.collectionTagActions = [
@@ -216,8 +192,8 @@ export class ActionFactoryService {
         title: 'Edit',
         callback: this.dummyCallback,
         requiresAdmin: true,
-        children: []
-      }
+        children: [],
+      },
     ];
 
     this.seriesActions = [
@@ -226,14 +202,14 @@ export class ActionFactoryService {
         title: 'Mark as Read',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.AddTo,
@@ -241,49 +217,49 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
         requiresAdmin: false,
         children: [
-          {
+        	{
             action: Action.AddToWantToReadList,
             title: 'Add to Want To Read',
             callback: this.dummyCallback,
             requiresAdmin: false,
-            children: []
+            children: [],
           },
           {
             action: Action.RemoveFromWantToReadList,
             title: 'Remove from Want To Read',
             callback: this.dummyCallback,
             requiresAdmin: false,
-            children: []
+            children: [],
           },
           {
             action: Action.AddToReadingList,
             title: 'Add to Reading List',
             callback: this.dummyCallback,
             requiresAdmin: false,
-            children: []
+            children: [],
           },
           {
             action: Action.AddToCollection,
             title: 'Add to Collection',
             callback: this.dummyCallback,
             requiresAdmin: true,
-            children: []
-          }
+            children: [],
+          },
         ],
       },
       {
         action: Action.Scan,
         title: 'Scan Series',
         callback: this.dummyCallback,
-        requiresAdmin: true,
-        children: []
+        requiresAdmin: false,
+        children: [],
       },
       {
         action: Action.Edit,
         title: 'Edit',
         callback: this.dummyCallback,
         requiresAdmin: true,
-        children: []
+        children: [],
       },
       {
         action: Action.Others,
@@ -296,114 +272,131 @@ export class ActionFactoryService {
             title: 'Refresh Covers',
             callback: this.dummyCallback,
             requiresAdmin: true,
-            children: []
+            children: [],
           },
           {
             action: Action.AnalyzeFiles,
             title: 'Analyze Files',
             callback: this.dummyCallback,
             requiresAdmin: true,
-            children: []
+            children: [],
           },
           {
             action: Action.Delete,
             title: 'Delete',
             callback: this.dummyCallback,
             requiresAdmin: true,
-            children: []
-          }
-        ]
-      }
+            children: [],
+          },
+        ],
+      },
     ];
 
     this.volumeActions = [
       {
         action: Action.IncognitoRead,
-        title: '(Read Incognito)',
+        title: 'Read Incognito',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
-      {
-        action: Action.AddToReadingList,
-        title: 'Add to Reading List',
-        callback: this.dummyCallback,
-        requiresAdmin: false,
-        children: []
-      },
+			{
+				action: Action.AddTo,
+				title: 'Add to',
+				callback: this.dummyCallback,
+				requiresAdmin: false,
+				children: [
+					{
+						action: Action.AddToReadingList,
+						title: 'Add to Reading List',
+						callback: this.dummyCallback,
+						requiresAdmin: false,
+						children: [],
+					}
+				]
+			},
       {
         action: Action.Edit,
         title: 'Details',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.Download,
         title: 'Download',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
-      }
+        children: [],
+      },
     ];
 
     this.chapterActions = [
       {
         action: Action.IncognitoRead,
-        title: '(Read Incognito)',
+        title: 'Read Incognito',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
-      {
-        action: Action.AddToReadingList,
-        title: 'Add to Reading List',
-        callback: this.dummyCallback,
-        requiresAdmin: false,
-        children: []
-      },
+			{
+				action: Action.AddTo,
+				title: 'Add to',
+				callback: this.dummyCallback,
+				requiresAdmin: false,
+				children: [
+					{
+						action: Action.AddToReadingList,
+						title: 'Add to Reading List',
+						callback: this.dummyCallback,
+						requiresAdmin: false,
+						children: [],
+					}
+				]
+			},
       {
         action: Action.Edit,
         title: 'Details',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
+			// RBS will handle rendering this, so non-admins with download are appicable
       {
         action: Action.Download,
         title: 'Download',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
-      }
+        children: [],
+      },
     ];
 
     this.readingListActions = [
@@ -412,14 +405,14 @@ export class ActionFactoryService {
         title: 'Edit',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.Delete,
         title: 'Delete',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
     ];
 
@@ -429,32 +422,40 @@ export class ActionFactoryService {
         title: 'View Series',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.DownloadBookmark,
         title: 'Download',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
       {
         action: Action.Delete,
         title: 'Clear',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        children: []
+        children: [],
       },
     ];
   }
 
-  private appyCallback(action: ActionItem<any>, callback: (action: Action, data: any) => void) {
+  private applyCallback(action: ActionItem<any>, callback: (action: Action, data: any) => void) {
     action.callback = callback;
 
     if (action.children === null || action.children?.length === 0) return;
 
     action.children?.forEach((childAction) => {
-      this.appyCallback(childAction, callback);
+      this.applyCallback(childAction, callback);
     });
   }
+
+	private applyCallbackToList(list: Array<ActionItem<any>>, callback: (action: Action, data: any) => void): Array<ActionItem<any>> {
+		const actions = list.map((a) => {
+			return { ...a };
+		});
+		actions.forEach((action) => this.applyCallback(action, callback));
+		return actions;
+	}
 }
