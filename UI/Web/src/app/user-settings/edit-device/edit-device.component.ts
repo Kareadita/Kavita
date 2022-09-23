@@ -63,7 +63,7 @@ export class EditDeviceComponent implements OnInit, OnChanges, OnDestroy {
     if (this.device !== undefined) {
       this.deviceService.updateDevice(this.device.id, this.settingsForm.value.name, this.settingsForm.value.platform, this.settingsForm.value.email).subscribe(() => {
         this.settingsForm.reset();
-        this.toastr.success('Device created');
+        this.toastr.success('Device updated');
         this.cdRef.markForCheck();
         this.deviceUpdated.emit();
       })
