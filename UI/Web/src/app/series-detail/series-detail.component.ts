@@ -482,7 +482,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
       this.seriesActions = this.actionFactoryService.getSeriesActions(this.handleSeriesActionCallback.bind(this))
               .filter(action => action.action !== Action.Edit);
-      this.seriesActions.push({action: Action.Download, callback: this.seriesActions[0].callback, requiresAdmin: false, title: 'Download'});
 
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));

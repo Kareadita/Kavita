@@ -1,3 +1,28 @@
 .dropdown-toggle:after {
     content: none !important;
 }
+
+.submenu-toggle {
+    display: block;
+    width: 100%;
+    padding: var(--bs-dropdown-item-padding-y) var(--bs-dropdown-item-padding-x);
+    font-weight: 400;
+    text-align: inherit;
+    border: 0;
+    color: var(--dropdown-item-text-color);
+    background-color: var(--dropdown-item-bg-color);
+    &:hover {
+        color: var(--dropdown-item-text-color);
+        background-color: var(--dropdown-item-hover-bg-color);
+        cursor: pointer;
+    }
+    &:focus-visible {
+        color: var(--dropdown-item-text-color);
+        background-color: var(--dropdown-item-hover-bg-color);
+    }
+}
+
+.submenu-icon {
+    float: right;
+    padding: var(--bs-dropdown-item-padding-y) 0;
+}
