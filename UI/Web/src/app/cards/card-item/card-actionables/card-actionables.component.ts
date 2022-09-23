@@ -30,9 +30,8 @@ export class CardActionablesComponent implements OnInit {
       if (!user) return;
       this.isAdmin = this.accountService.hasAdminRole(user);
       this.canDownload = this.accountService.hasDownloadRole(user);
+      this.cdRef.markForCheck();
     });
-
-    this.cdRef.markForCheck();
   }
 
   preventClick(event: any) {
