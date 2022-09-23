@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using API.Entities.Enums;
 using Xunit;
 using Xunit.Abstractions;
@@ -77,6 +78,9 @@ public class MangaParserTests
     [InlineData("Манга Глава 2", "0")]
     [InlineData("Манга Тома 1-4", "1-4")]
     [InlineData("Манга Том 1-4", "1-4")]
+    [InlineData("조선왕조실톡 106화", "106")]
+    [InlineData("죽음 13회", "13")]
+    [InlineData("동의보감 13장", "13")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
@@ -265,6 +269,7 @@ public class MangaParserTests
     [InlineData("Kaiju No. 8 036 (2021) (Digital)", "36")]
     [InlineData("Samurai Jack Vol. 01 - The threads of Time", "0")]
     [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画第25话", "25")]
+    [InlineData("자유록 13회#2", "13")]
     [InlineData("이세계에서 고아원을 열었지만, 어째서인지 아무도 독립하려 하지 않는다 38-1화 ", "38")]
     [InlineData("[ハレム]ナナとカオル ～高校生のSMごっこ～　第10話", "10")]
     [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "0")]
