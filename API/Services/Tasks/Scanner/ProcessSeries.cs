@@ -458,7 +458,7 @@ public class ProcessSeries : IProcessSeries
             foreach (var chapter in volume.Chapters)
             {
                 var firstFile = chapter.Files.MinBy(x => x.Chapter);
-                if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
+                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
                 try
                 {
                     var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
@@ -583,7 +583,7 @@ public class ProcessSeries : IProcessSeries
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
-            _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) return;
+            _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) return;
 
         var comicInfo = info;
         if (info == null)
