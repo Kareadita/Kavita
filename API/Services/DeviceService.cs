@@ -26,18 +26,13 @@ public class DeviceService : IDeviceService
     private readonly ILogger<DeviceService> _logger;
     private readonly IEmailService _emailService;
 
-    /// <summary>
-    /// Size Limit, 25 MB
-    /// </summary>
-    private const int SizeLimit = 26_214_400;
-
     public DeviceService(IUnitOfWork unitOfWork, ILogger<DeviceService> logger, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _emailService = emailService;
     }
-
+    #nullable enable
     public async Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices)
     {
         try
@@ -88,6 +83,7 @@ public class DeviceService : IDeviceService
 
         return null;
     }
+    #nullable disable
 
     public async Task<bool> Delete(AppUser userWithDevices, int deviceId)
     {
@@ -112,7 +108,11 @@ public class DeviceService : IDeviceService
         if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)))
             throw new KavitaException("Cannot Send non Epub or Pdf to devices as not supported");
 
-        var device = await _unitOfWork.DeviceRepository.GetDeviceDtoById(deviceId);
+        var device = await _unitOfWork.DeviceRepository.GetDeviceById(deviceId);
+        if (device == null) throw new KavitaException("Device doesn't exist");
+        device.LastUsed = DateTime.Now;
+        _unitOfWork.DeviceRepository.Update(device);
+        await _unitOfWork.CommitAsync();
         var success = await _emailService.SendFilesToEmail(new SendToDto()
         {
             DestinationEmail = device.EmailAddress,

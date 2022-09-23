@@ -11,11 +11,9 @@ namespace API.Data.Repositories;
 
 public interface IDeviceRepository
 {
-    void Attach(Device device);
-    void Remove(Device device);
-    Task<Device> FindByNameAsync(string name);
+    void Update(Device device);
     Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId);
-    Task<DeviceDto> GetDeviceDtoById(int deviceId);
+    Task<Device> GetDeviceById(int deviceId);
 }
 
 public class DeviceRepository : IDeviceRepository
@@ -29,34 +27,24 @@ public class DeviceRepository : IDeviceRepository
         _mapper = mapper;
     }
 
-    public void Attach(Device device)
+    public void Update(Device device)
     {
-        throw new System.NotImplementedException();
-    }
-
-    public void Remove(Device device)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public Task<Device?> FindByNameAsync(string name)
-    {
-        return null;
+        _context.Entry(device).State = EntityState.Modified;
     }
 
     public async Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId)
     {
         return await _context.Device
             .Where(d => d.AppUserId == userId)
+            .OrderBy(d => d.LastUsed)
             .ProjectTo<DeviceDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 
-    public async Task<DeviceDto> GetDeviceDtoById(int deviceId)
+    public async Task<Device> GetDeviceById(int deviceId)
     {
         return await _context.Device
             .Where(d => d.Id == deviceId)
-            .ProjectTo<DeviceDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }
 }

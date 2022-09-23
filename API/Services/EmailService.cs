@@ -33,7 +33,6 @@ public class EmailService : IEmailService
 {
     private readonly ILogger<EmailService> _logger;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IDirectoryService _directoryService;
     private readonly IDownloadService _downloadService;
 
     /// <summary>
@@ -41,11 +40,10 @@ public class EmailService : IEmailService
     /// </summary>
     public const string DefaultApiUrl = "https://email.kavitareader.com";
 
-    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDirectoryService directoryService, IDownloadService downloadService)
+    public EmailService(ILogger<EmailService> logger, IUnitOfWork unitOfWork, IDownloadService downloadService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
-        _directoryService = directoryService;
         _downloadService = downloadService;
 
         FlurlHttp.ConfigureClient(DefaultApiUrl, cli =>
