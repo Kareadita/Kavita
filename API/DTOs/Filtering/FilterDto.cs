@@ -99,8 +99,10 @@ public class FilterDto
     /// An optional name string to filter by. Empty string will ignore.
     /// </summary>
     public string SeriesNameQuery { get; init; } = string.Empty;
+    #nullable enable
     /// <summary>
     /// An optional release year to filter by. Null will ignore. You can pass 0 for an individual field to ignore it.
     /// </summary>
     public Range<int>? ReleaseYearRange { get; init; } = null;
+    #nullable disable
 }

@@ -70,6 +70,12 @@ public static class Parser
     private const string Number = @"\d+(\.\d)?";
     private const string NumberRange = Number + @"(-" + Number + @")?";
 
+    // Some generic reusage regex patterns:
+    // - non greedy matching of a string where parenthesis are balanced
+    public const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
+    // - non greedy matching of a string where square brackets are balanced
+    public const string BalancedBrack = @"(?:[^\[\]]|(?<open>\[)|(?<-open>\]))*?(?(open)(?!))";
+
     private static readonly Regex[] MangaVolumeRegex = new[]
     {
         // Dance in the Vampire Bund v16-17
@@ -499,16 +505,6 @@ public static class Parser
             MatchOptions, RegexTimeout),
     };
 
-    private static readonly Regex[] ReleaseGroupRegex = new[]
-    {
-        // [TrinityBAKumA Finella&anon], [BAA]_, [SlowManga&OverloadScans], [batoto]
-        new Regex(@"(?:\[(?<subgroup>(?!\s).+?(?<!\s))\](?:_|-|\s|\.)?)",
-            MatchOptions, RegexTimeout),
-        // (Shadowcat-Empire),
-        // new Regex(@"(?:\[(?<subgroup>(?!\s).+?(?<!\s))\](?:_|-|\s|\.)?)",
-        //     MatchOptions),
-    };
-
     private static readonly Regex[] MangaChapterRegex = new[]
     {
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
@@ -573,65 +569,51 @@ public static class Parser
             MatchOptions, RegexTimeout),
     };
 
-    private static readonly Regex[] MangaEditionRegex = {
+    private static readonly Regex MangaEditionRegex = new Regex(
         // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
-        new Regex(
-            @"(\b|_)(?<Edition>Omnibus(( |_)?Edition)?)(\b|_)?",
-            MatchOptions, RegexTimeout),
         // To Love Ru v01 Uncensored (Ch.001-007)
-        new Regex(
-            @"(\b|_)(?<Edition>Uncensored)(\b|_)",
-            MatchOptions, RegexTimeout),
-    };
+        @"\b(?:Omnibus(?:\s?Edition)?|Uncensored)\b",
+        MatchOptions, RegexTimeout
+    );
 
-    private static readonly Regex[] CleanupRegex =
-    {
-        // (), {}, []
-        new Regex(
-            @"(?<Cleanup>(\{\}|\[\]|\(\)))",
-            MatchOptions, RegexTimeout),
-        // (Complete)
-        new Regex(
-            @"(?<Cleanup>(\{Complete\}|\[Complete\]|\(Complete\)))",
-            MatchOptions, RegexTimeout),
-        // Anything in parenthesis
-        new Regex(
-            @"\(.*\)",
-            MatchOptions, RegexTimeout),
-    };
+    // Matches [Complete], release tags like [kmts] but not [ Complete ] or [kmts ]
+    private const string TagsInBrackets = $@"\[(?!\s){BalancedBrack}(?<!\s)\]";
 
-    private static readonly Regex[] MangaSpecialRegex =
-    {
+    // Matches anything between balanced parenthesis, tags between brackets, {} and {Complete}
+    private static readonly Regex CleanupRegex = new Regex(
+        $@"(?:\({BalancedParen}\)|{TagsInBrackets}|\{{\}}|\{{Complete\}})",
+        MatchOptions, RegexTimeout
+    );
+
+    // Common regex patterns present in both Comics and Mangas
+    private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
+
+    private static readonly Regex MangaSpecialRegex = new Regex(
+    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+        $@"\b(?:{CommonSpecial}|Omake)\b",
+        MatchOptions, RegexTimeout
+    );
+
+    private static readonly Regex ComicSpecialRegex = new Regex(
+    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+        $@"\b(?:{CommonSpecial}|\d.+?\WAnnual|Annual\W\d.+?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
+        MatchOptions, RegexTimeout
+    );
+
+    private static readonly Regex EuropeanComicRegex = new Regex(
         // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        new Regex(
-            @"(?<Special>Specials?|OneShot|One\-Shot|Omake|Extra(?:(\sChapter)?[^\S])|Art Collection|Side( |_)Stories|Bonus)",
-            MatchOptions, RegexTimeout),
-    };
-
-    private static readonly Regex[] ComicSpecialRegex =
-    {
-        // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        new Regex(
-            @"(?<Special>Specials?|OneShot|One\-Shot|\d.+?(\W|_|-)Annual|Annual(\W|_|-)\d.+?|Extra(?:(\sChapter)?[^\S])|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|[_\s\-]TPB[_\s\-]|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Art Collection|Side(\s|_)Stories|Bonus|Hors Série|(\W|_|-)HS(\W|_|-)|(\W|_|-)THS(\W|_|-))",
-            MatchOptions, RegexTimeout),
-    };
-
-    private static readonly Regex[] EuropeanComicRegex =
-    {
-        // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        new Regex(
-            @"(?<Special>Bd(\s|_|-)Fr)",
-            MatchOptions, RegexTimeout),
-    };
+        @"\b(?:Bd[-\s]Fr)\b",
+        MatchOptions, RegexTimeout
+    );
 
     // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
     private static readonly Regex SpecialMarkerRegex = new Regex(
-        @"(?<Special>SP\d+)",
+        @"SP\d+",
         MatchOptions, RegexTimeout
     );
 
     private static readonly Regex EmptySpaceRegex = new Regex(
-        @"(?!=.+)(\s{2,})(?!=.+)",
+        @"\s{2,}",
         MatchOptions, RegexTimeout
     );
 
@@ -641,6 +623,8 @@ public static class Parser
         "GN", "FCBD");
 
     private static readonly char[] LeadingZeroesTrimChars = new[] { '0' };
+
+    private static readonly char[] SpacesAndSeparators = { '\0', '\t', '\r', ' ', '-', ','};
 
     public static MangaFormat ParseFormat(string filePath)
     {
@@ -653,20 +637,9 @@ public static class Parser
 
     public static string ParseEdition(string filePath)
     {
-        foreach (var regex in MangaEditionRegex)
-        {
-            var matches = regex.Matches(filePath);
-            foreach (var group in matches.Select(match => match.Groups["Edition"])
-                         .Where(group => group.Success && group != Match.Empty))
-            {
-                return group.Value
-                    .Replace("{", "").Replace("}", "")
-                    .Replace("[", "").Replace("]", "")
-                    .Replace("(", "").Replace(")", "");
-            }
-        }
-
-        return string.Empty;
+        filePath = ReplaceUnderscores(filePath);
+        var match = MangaEditionRegex.Match(filePath);
+        return match.Success ? match.Value : string.Empty;
     }
 
     /// <summary>
@@ -676,39 +649,19 @@ public static class Parser
     /// <returns></returns>
     public static bool HasSpecialMarker(string filePath)
     {
-        var matches = SpecialMarkerRegex.Matches(filePath);
-        return matches.Select(match => match.Groups["Special"])
-            .Any(group => group.Success && group != Match.Empty);
+        return SpecialMarkerRegex.IsMatch(filePath);
     }
 
-    public static string ParseMangaSpecial(string filePath)
+    public static bool IsMangaSpecial(string filePath)
     {
-        foreach (var regex in MangaSpecialRegex)
-        {
-            var matches = regex.Matches(filePath);
-            foreach (var group in matches.Select(match => match.Groups["Special"])
-                         .Where(group => group.Success && group != Match.Empty))
-            {
-                return group.Value;
-            }
-        }
-
-        return string.Empty;
+        filePath = ReplaceUnderscores(filePath);
+        return  MangaSpecialRegex.IsMatch(filePath);
     }
 
-    public static string ParseComicSpecial(string filePath)
+    public static bool IsComicSpecial(string filePath)
     {
-        foreach (var regex in ComicSpecialRegex)
-        {
-            var matches = regex.Matches(filePath);
-            foreach (var group in matches.Select(match => match.Groups["Special"])
-                         .Where(group => group.Success && group != Match.Empty))
-            {
-                return group.Value;
-            }
-        }
-
-        return string.Empty;
+        filePath = ReplaceUnderscores(filePath);
+        return ComicSpecialRegex.IsMatch(filePath);
     }
 
     public static string ParseSeries(string filename)
@@ -840,73 +793,26 @@ public static class Parser
 
     private static string RemoveEditionTagHolders(string title)
     {
-        foreach (var regex in CleanupRegex)
-        {
-            var matches = regex.Matches(title);
-            foreach (Match match in matches)
-            {
-                if (match.Success)
-                {
-                    title = title.Replace(match.Value, string.Empty).Trim();
-                }
-            }
-        }
+        title = CleanupRegex.Replace(title, string.Empty);
 
-        foreach (var regex in MangaEditionRegex)
-        {
-            var matches = regex.Matches(title);
-            foreach (Match match in matches)
-            {
-                if (match.Success)
-                {
-                    title = title.Replace(match.Value, string.Empty).Trim();
-                }
-            }
-        }
+        title = MangaEditionRegex.Replace(title, string.Empty);
 
         return title;
     }
 
     private static string RemoveMangaSpecialTags(string title)
     {
-        foreach (var regex in MangaSpecialRegex)
-        {
-            var matches = regex.Matches(title);
-            foreach (var match in matches.Where(m => m.Success))
-            {
-                title = title.Replace(match.Value, string.Empty).Trim();
-            }
-        }
-
-        return title;
+        return MangaSpecialRegex.Replace(title, string.Empty);
     }
 
     private static string RemoveEuropeanTags(string title)
     {
-        foreach (var regex in EuropeanComicRegex)
-        {
-            var matches = regex.Matches(title);
-            foreach (var match in matches.Where(m => m.Success))
-            {
-                title = title.Replace(match.Value, string.Empty).Trim();
-            }
-        }
-
-        return title;
+        return EuropeanComicRegex.Replace(title, string.Empty);
     }
 
     private static string RemoveComicSpecialTags(string title)
     {
-        foreach (var regex in ComicSpecialRegex)
-        {
-            var matches = regex.Matches(title);
-            foreach (var match in matches.Where(m => m.Success))
-            {
-                title = title.Replace(match.Value, string.Empty).Trim();
-            }
-        }
-
-        return title;
+        return ComicSpecialRegex.Replace(title, string.Empty);
     }
 
 
@@ -920,13 +826,13 @@ public static class Parser
     /// <param name="title"></param>
     /// <param name="isComic"></param>
     /// <returns></returns>
+
     public static string CleanTitle(string title, bool isComic = false)
     {
-        title = RemoveReleaseGroup(title);
+
+        title = ReplaceUnderscores(title);
 
         title = RemoveEditionTagHolders(title);
-
-        title = isComic ? RemoveComicSpecialTags(title) : RemoveMangaSpecialTags(title);
 
         if (isComic)
         {
@@ -938,33 +844,9 @@ public static class Parser
             title = RemoveMangaSpecialTags(title);
         }
 
-
-        title = title.Replace("_", " ").Trim();
-        if (title.EndsWith("-") || title.EndsWith(","))
-        {
-            title = title.Substring(0, title.Length - 1);
-        }
-
-        if (title.StartsWith("-") || title.StartsWith(","))
-        {
-            title = title.Substring(1);
-        }
+        title = title.Trim(SpacesAndSeparators);
 
         title = EmptySpaceRegex.Replace(title, " ");
-
-        return title.Trim();
-    }
-
-    private static string RemoveReleaseGroup(string title)
-    {
-        foreach (var regex in ReleaseGroupRegex)
-        {
-            var matches = regex.Matches(title);
-            foreach (var match in matches.Where(m => m.Success))
-            {
-                title = title.Replace(match.Value, string.Empty);
-            }
-        }
 
         return title;
     }
@@ -1150,4 +1032,6 @@ public static class Parser
     {
         return FormatTagSpecialKeywords.Contains(comicInfoFormat);
     }
+
+    private static string ReplaceUnderscores(string name) => name?.Replace("_", " ");
 }

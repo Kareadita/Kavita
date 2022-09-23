@@ -8,6 +8,8 @@ import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
 
 export enum Action {
+  AddTo = -2,
+  Others = -1,
   /**
    * Mark entity as read
    */
@@ -83,13 +85,13 @@ export interface ActionItem<T> {
   action: Action;
   callback: (action: Action, data: T) => void;
   requiresAdmin: boolean;
+  children: Array<ActionItem<T>>;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ActionFactoryService {
-
   libraryActions: Array<ActionItem<Library>> = [];
 
   seriesActions: Array<ActionItem<Series>> = [];
@@ -108,7 +110,7 @@ export class ActionFactoryService {
   hasDownloadRole = false;
 
   constructor(private accountService: AccountService) {
-    this.accountService.currentUser$.subscribe(user => {
+    this.accountService.currentUser$.subscribe((user) => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
         this.hasDownloadRole = this.accountService.hasDownloadRole(user);
@@ -118,243 +120,282 @@ export class ActionFactoryService {
       }
 
       this._resetActions();
-
-      if (this.isAdmin) {
-        this.collectionTagActions.push({
-          action: Action.Edit,
-          title: 'Edit',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.seriesActions.push({
-          action: Action.Scan,
-          title: 'Scan Series',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.seriesActions.push({
-          action: Action.RefreshMetadata,
-          title: 'Refresh Covers',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.seriesActions.push({
-          action: Action.AnalyzeFiles,
-          title: 'Analyze Files',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.seriesActions.push({
-          action: Action.Delete,
-          title: 'Delete',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.seriesActions.push({
-          action: Action.AddToCollection,
-          title: 'Add to Collection',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.seriesActions.push({
-          action: Action.Edit,
-          title: 'Edit',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.libraryActions.push({
-          action: Action.Scan,
-          title: 'Scan Library',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.libraryActions.push({
-          action: Action.RefreshMetadata,
-          title: 'Refresh Covers',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-
-        this.libraryActions.push({
-          action: Action.AnalyzeFiles,
-          title: 'Analyze Files',
-          callback: this.dummyCallback,
-          requiresAdmin: true
-        });
-    
-        this.chapterActions.push({
-          action: Action.Edit,
-          title: 'Details',
-          callback: this.dummyCallback,
-          requiresAdmin: false
-        });
-      }
-
-      if (this.hasDownloadRole || this.isAdmin) {
-        this.volumeActions.push({
-          action: Action.Download,
-          title: 'Download',
-          callback: this.dummyCallback,
-          requiresAdmin: false
-        });
-
-        this.chapterActions.push({
-          action: Action.Download,
-          title: 'Download',
-          callback: this.dummyCallback,
-          requiresAdmin: false
-        });
-      }
     });
   }
 
   getLibraryActions(callback: (action: Action, library: Library) => void) {
-    const actions = this.libraryActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
-    return actions;
+		return this.applyCallbackToList(this.libraryActions, callback);
   }
 
   getSeriesActions(callback: (action: Action, series: Series) => void) {
-    const actions = this.seriesActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
-    return actions;
+		return this.applyCallbackToList(this.seriesActions, callback);
   }
 
   getVolumeActions(callback: (action: Action, volume: Volume) => void) {
-    const actions = this.volumeActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
-    return actions;
+		return this.applyCallbackToList(this.volumeActions, callback);
   }
 
   getChapterActions(callback: (action: Action, chapter: Chapter) => void) {
-    const actions = this.chapterActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
-    return actions;
+    return this.applyCallbackToList(this.chapterActions, callback);
   }
 
   getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
-    const actions = this.collectionTagActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
-    return actions;
+		return this.applyCallbackToList(this.collectionTagActions, callback);
   }
 
   getReadingListActions(callback: (action: Action, readingList: ReadingList) => void) {
-    const actions = this.readingListActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
-    return actions;
+    return this.applyCallbackToList(this.readingListActions, callback);
   }
 
   getBookmarkActions(callback: (action: Action, series: Series) => void) {
-    const actions = this.bookmarkActions.map(a => {return {...a}});
-    actions.forEach(action => action.callback = callback);
-    return actions;
+    return this.applyCallbackToList(this.bookmarkActions, callback);
   }
 
   dummyCallback(action: Action, data: any) {}
 
   _resetActions() {
-    this.libraryActions = [];
+    this.libraryActions = [
+      {
+        action: Action.Scan,
+        title: 'Scan Library',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.Others,
+        title: 'Others',
+        callback: this.dummyCallback,
+        requiresAdmin: true,
+        children: [
+          {
+            action: Action.RefreshMetadata,
+            title: 'Refresh Covers',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.AnalyzeFiles,
+            title: 'Analyze Files',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+        ],
+      },
+    ];
 
-    this.collectionTagActions = [];
-    
+    this.collectionTagActions = [
+      {
+        action: Action.Edit,
+        title: 'Edit',
+        callback: this.dummyCallback,
+        requiresAdmin: true,
+        children: [],
+      },
+    ];
+
     this.seriesActions = [
       {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
-        requiresAdmin: false
-      }, 
-      {
-        action: Action.AddToReadingList,
-        title: 'Add to Reading List',
-        callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
       {
-        action: Action.AddToWantToReadList,
-        title: 'Add to Want To Read',
+        action: Action.AddTo,
+        title: 'Add to',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [
+        	{
+            action: Action.AddToWantToReadList,
+            title: 'Add to Want To Read',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            children: [],
+          },
+          {
+            action: Action.RemoveFromWantToReadList,
+            title: 'Remove from Want To Read',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            children: [],
+          },
+          {
+            action: Action.AddToReadingList,
+            title: 'Add to Reading List',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            children: [],
+          },
+          {
+            action: Action.AddToCollection,
+            title: 'Add to Collection',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+        ],
       },
       {
-        action: Action.RemoveFromWantToReadList,
-        title: 'Remove from Want To Read',
+        action: Action.Scan,
+        title: 'Scan Series',
         callback: this.dummyCallback,
-        requiresAdmin: false
-      }
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.Edit,
+        title: 'Edit',
+        callback: this.dummyCallback,
+        requiresAdmin: true,
+        children: [],
+      },
+      {
+        action: Action.Others,
+        title: 'Others',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [
+          {
+            action: Action.RefreshMetadata,
+            title: 'Refresh Covers',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.AnalyzeFiles,
+            title: 'Analyze Files',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+          {
+            action: Action.Delete,
+            title: 'Delete',
+            callback: this.dummyCallback,
+            requiresAdmin: true,
+            children: [],
+          },
+        ],
+      },
     ];
 
     this.volumeActions = [
       {
+        action: Action.IncognitoRead,
+        title: 'Read Incognito',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
-          requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
-      {
-        action: Action.AddToReadingList,
-        title: 'Add to Reading List',
-        callback: this.dummyCallback,
-        requiresAdmin: false
-      },
-      {
-        action: Action.IncognitoRead,
-        title: 'Read Incognito',
-        callback: this.dummyCallback,
-        requiresAdmin: false
-      },
+			{
+				action: Action.AddTo,
+				title: 'Add to',
+				callback: this.dummyCallback,
+				requiresAdmin: false,
+				children: [
+					{
+						action: Action.AddToReadingList,
+						title: 'Add to Reading List',
+						callback: this.dummyCallback,
+						requiresAdmin: false,
+						children: [],
+					}
+				]
+			},
       {
         action: Action.Edit,
         title: 'Details',
         callback: this.dummyCallback,
-        requiresAdmin: false
-      }
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.Download,
+        title: 'Download',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
     ];
 
     this.chapterActions = [
       {
+        action: Action.IncognitoRead,
+        title: 'Read Incognito',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
         action: Action.MarkAsRead,
         title: 'Mark as Read',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
       {
         action: Action.MarkAsUnread,
         title: 'Mark as Unread',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
+			{
+				action: Action.AddTo,
+				title: 'Add to',
+				callback: this.dummyCallback,
+				requiresAdmin: false,
+				children: [
+					{
+						action: Action.AddToReadingList,
+						title: 'Add to Reading List',
+						callback: this.dummyCallback,
+						requiresAdmin: false,
+						children: [],
+					}
+				]
+			},
       {
-        action: Action.IncognitoRead,
-        title: 'Read Incognito',
+        action: Action.Edit,
+        title: 'Details',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
+			// RBS will handle rendering this, so non-admins with download are appicable
       {
-        action: Action.AddToReadingList,
-        title: 'Add to Reading List',
+        action: Action.Download,
+        title: 'Download',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
     ];
 
@@ -363,13 +404,15 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'Edit',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
       {
         action: Action.Delete,
         title: 'Delete',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
     ];
 
@@ -378,20 +421,41 @@ export class ActionFactoryService {
         action: Action.ViewSeries,
         title: 'View Series',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
       {
         action: Action.DownloadBookmark,
         title: 'Download',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
       {
         action: Action.Delete,
         title: 'Clear',
         callback: this.dummyCallback,
-        requiresAdmin: false
+        requiresAdmin: false,
+        children: [],
       },
-    ]
+    ];
   }
+
+  private applyCallback(action: ActionItem<any>, callback: (action: Action, data: any) => void) {
+    action.callback = callback;
+
+    if (action.children === null || action.children?.length === 0) return;
+
+    action.children?.forEach((childAction) => {
+      this.applyCallback(childAction, callback);
+    });
+  }
+
+	private applyCallbackToList(list: Array<ActionItem<any>>, callback: (action: Action, data: any) => void): Array<ActionItem<any>> {
+		const actions = list.map((a) => {
+			return { ...a };
+		});
+		actions.forEach((action) => this.applyCallback(action, callback));
+		return actions;
+	}
 }

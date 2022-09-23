@@ -85,10 +85,10 @@ public class DefaultParser : IDefaultParser
             ret.Edition = edition;
         }
 
-        var isSpecial = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.ParseComicSpecial(fileName) : Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(fileName);
+        var isSpecial = type == LibraryType.Comic ? Services.Tasks.Scanner.Parser.Parser.IsComicSpecial(fileName) : Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(fileName);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
-        if (ret.Chapters == Services.Tasks.Scanner.Parser.Parser.DefaultChapter && ret.Volumes == Services.Tasks.Scanner.Parser.Parser.DefaultVolume && !string.IsNullOrEmpty(isSpecial))
+        if (ret.Chapters == Services.Tasks.Scanner.Parser.Parser.DefaultChapter && ret.Volumes == Services.Tasks.Scanner.Parser.Parser.DefaultVolume && isSpecial)
         {
             ret.IsSpecial = true;
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret); // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
@@ -131,7 +131,7 @@ public class DefaultParser : IDefaultParser
         for (var i = 0; i < fallbackFolders.Count; i++)
         {
             var folder = fallbackFolders[i];
-            if (!string.IsNullOrEmpty(Services.Tasks.Scanner.Parser.Parser.ParseMangaSpecial(folder))) continue;
+            if (Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(folder)) continue;
 
             var parsedVolume = type is LibraryType.Manga ? Services.Tasks.Scanner.Parser.Parser.ParseVolume(folder) : Services.Tasks.Scanner.Parser.Parser.ParseComicVolume(folder);
             var parsedChapter = type is LibraryType.Manga ? Services.Tasks.Scanner.Parser.Parser.ParseChapter(folder) : Services.Tasks.Scanner.Parser.Parser.ParseComicChapter(folder);

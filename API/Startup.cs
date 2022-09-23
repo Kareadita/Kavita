@@ -269,7 +269,10 @@ public class Startup
         });
 
         app.UseSerilogRequestLogging(opts
-            => opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest);
+            =>
+        {
+            opts.EnrichDiagnosticContext = LogEnricher.EnrichFromRequest;
+        });
 
         app.Use(async (context, next) =>
         {

@@ -1,13 +1,13 @@
 <div #companionBar>
     <app-side-nav-companion-bar *ngIf="series !== undefined" [hasExtras]="true" [extraDrawer]="extrasDrawer">
             <ng-container title>
-                <h2 class="title">
+                <h2 class="title text-break">
                     <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
                     <span>{{series.name}}</span>
                 </h2>
             </ng-container>
             <ng-container subtitle *ngIf="series.localizedName !== series.name">
-                <h6 class="subtitle-with-actionables" title="Localized Name">{{series.localizedName}}</h6>
+                <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
             </ng-container>
 
             <ng-template #extrasDrawer let-offcanvas>

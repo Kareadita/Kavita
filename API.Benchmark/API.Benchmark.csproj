@@ -16,9 +16,15 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Data\SeriesNamesForNormalization.txt">
+      <Content Include="Data/*.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      </Content>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="../API.Tests/Services/Test Data/ArchiveService/ComicInfos/*.zip">
+        <LinkBase>Data</LinkBase>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

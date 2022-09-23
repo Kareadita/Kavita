@@ -64,6 +64,10 @@ public class ParserTests
     [InlineData("[Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1", false, "Kasumi Otoko no Ko v1.1")]
     [InlineData("Batman - Detective Comics - Rebirth Deluxe Edition Book 04 (2019) (digital) (Son of Ultron-Empire)", true, "Batman - Detective Comics - Rebirth Deluxe Edition")]
     [InlineData("Something - Full Color Edition", false, "Something - Full Color Edition")]
+    [InlineData("Witchblade 089 (2005) (Bittertek-DCP) (Top Cow (Image Comics))", true, "Witchblade 089")]
+    [InlineData("(C99) Kami-sama Hiroimashita. (SSSS.GRIDMAN)", false, "Kami-sama Hiroimashita.")]
+    [InlineData("Dr. Ramune - Mysterious Disease Specialist v01 (2020) (Digital) (danke-Empire)", false, "Dr. Ramune - Mysterious Disease Specialist v01")]
+    [InlineData("Magic Knight Rayearth {Omnibus Edition}", false, "Magic Knight Rayearth {}")]
     public void CleanTitleTest(string input, bool isComic, string expected)
     {
         Assert.Equal(expected, CleanTitle(input, isComic));
@@ -235,5 +239,53 @@ public class ParserTests
     public void NormalizePathTest(string inputPath, string expected)
     {
         Assert.Equal(expected, NormalizePath(inputPath));
+    }
+
+    [Theory]
+    [InlineData("The quick brown fox jumps over the lazy dog")]
+    [InlineData("(The quick brown fox jumps over the lazy dog)")]
+    [InlineData("()The quick brown fox jumps over the lazy dog")]
+    [InlineData("The ()quick brown fox jumps over the lazy dog")]
+    [InlineData("The (quick (brown)) fox jumps over the lazy dog")]
+    [InlineData("The (quick (brown) fox jumps over the lazy dog)")]
+    public void BalancedParenTestMatches(string input)
+    {
+        Assert.Matches($@"^{BalancedParen}$", input);
+    }
+
+    [Theory]
+    [InlineData("(The quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick brown fox jumps over the lazy dog)")]
+    [InlineData("The )(quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick (brown)) fox jumps over the lazy dog")]
+    [InlineData("The quick (brown) fox jumps over the lazy dog)")]
+    [InlineData("(The ))(quick (brown) fox jumps over the lazy dog")]
+    public void BalancedParenTestDoesNotMatch(string input)
+    {
+        Assert.DoesNotMatch($@"^{BalancedParen}$", input);
+    }
+
+    [Theory]
+    [InlineData("The quick brown fox jumps over the lazy dog")]
+    [InlineData("[The quick brown fox jumps over the lazy dog]")]
+    [InlineData("[]The quick brown fox jumps over the lazy dog")]
+    [InlineData("The []quick brown fox jumps over the lazy dog")]
+    [InlineData("The [quick [brown]] fox jumps over the lazy dog")]
+    [InlineData("The [quick [brown] fox jumps over the lazy dog]")]
+    public void BalancedBrackTestMatches(string input)
+    {
+        Assert.Matches($@"^{BalancedBrack}$", input);
+    }
+
+    [Theory]
+    [InlineData("[The quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick brown fox jumps over the lazy dog]")]
+    [InlineData("The ][quick brown fox jumps over the lazy dog")]
+    [InlineData("The quick [brown]] fox jumps over the lazy dog")]
+    [InlineData("The quick [brown] fox jumps over the lazy dog]")]
+    [InlineData("[The ]][quick [brown] fox jumps over the lazy dog")]
+    public void BalancedBrackTestDoesNotMatch(string input)
+    {
+        Assert.DoesNotMatch($@"^{BalancedBrack}$", input);
     }
 }
