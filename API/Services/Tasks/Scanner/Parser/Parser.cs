@@ -119,6 +119,10 @@ public static class Parser
         new Regex(
             @"(卷|册)(?<Volume>\d+)",
             MatchOptions, RegexTimeout),
+        // Korean Volume: 제n화 -> Volume n, n화 -> Volume n
+        new Regex(
+            @"제?(?<Chapter>\d+)(회|화|장)",
+            MatchOptions, RegexTimeout),
         // Korean Volume: 제n권 -> Volume n, n권  -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
         new Regex(
             @"제?(?<Volume>\d+)권",
@@ -557,7 +561,7 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // Korean Chapter: 제n화 -> Chapter n, 가디언즈 오브 갤럭시 죽음의 보석.E0008.7화#44
         new Regex(
-            @"제?(?<Chapter>\d+\.?\d+)(화|장)",
+            @"제?(?<Chapter>\d+\.?\d+)(회|화|장)",
             MatchOptions, RegexTimeout),
         // Korean Chapter: 第10話 -> Chapter n, [ハレム]ナナとカオル ～高校生のSMごっこ～　第1話
         new Regex(
