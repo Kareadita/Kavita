@@ -165,7 +165,7 @@ public class CacheHelperTests
             FilePath = TestCoverArchive,
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
-        Assert.True(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+        Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public class CacheHelperTests
             FilePath = TestCoverArchive,
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
-        Assert.True(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+        Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 
     [Fact]
@@ -225,15 +225,16 @@ public class CacheHelperTests
             FilePath = TestCoverArchive,
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
-        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, true, file));
+        Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, true, file));
     }
 
     [Fact]
-    public void HasFileNotChangedSinceCreationOrLastScan_ModifiedSinceLastScan()
+    public void IsFileUnmodifiedSinceCreationOrLastScan_ModifiedSinceLastScan()
     {
         var filesystemFile = new MockFileData("")
         {
-            LastWriteTime = DateTimeOffset.Now
+            LastWriteTime = DateTimeOffset.Now,
+            CreationTime = DateTimeOffset.Now
         };
         var fileSystem = new MockFileSystem(new Dictionary<string, MockFileData>
         {
@@ -246,8 +247,8 @@ public class CacheHelperTests
 
         var chapter = new Chapter()
         {
-            Created = filesystemFile.LastWriteTime.DateTime.Subtract(TimeSpan.FromMinutes(10)),
-            LastModified = filesystemFile.LastWriteTime.DateTime.Subtract(TimeSpan.FromMinutes(10))
+            Created = DateTime.Now.Subtract(TimeSpan.FromMinutes(10)),
+            LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(10))
         };
 
         var file = new MangaFile()
@@ -255,7 +256,7 @@ public class CacheHelperTests
             FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
-        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+        Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 
     [Fact]
@@ -276,8 +277,8 @@ public class CacheHelperTests
 
         var chapter = new Chapter()
         {
-            Created = filesystemFile.LastWriteTime.DateTime.Subtract(TimeSpan.FromMinutes(10)),
-            LastModified = filesystemFile.LastWriteTime.DateTime
+            Created = DateTime.Now.Subtract(TimeSpan.FromMinutes(10)),
+            LastModified = DateTime.Now
         };
 
         var file = new MangaFile()
@@ -285,7 +286,7 @@ public class CacheHelperTests
             FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
-        Assert.False(cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, file));
+        Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 
 }

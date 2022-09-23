@@ -40,6 +40,8 @@ import { PageLayoutMode } from '../_models/page-layout-mode';
 import { DOCUMENT } from '@angular/common';
 import { User } from '../_models/user';
 import { ScrollService } from '../_services/scroll.service';
+import { DeviceService } from '../_services/device.service';
+import { Device } from '../_models/device/device';
 
 interface RelatedSeris {
   series: Series;
@@ -158,7 +160,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   isAscendingSort: boolean = false; // TODO: Get this from User preferences
   user: User | undefined;
 
-  bulkActionCallback = (action: Action, data: any) => {
+  bulkActionCallback = (action: ActionItem<any>, data: any) => {
     if (this.series === undefined) {
       return;
     }
@@ -177,7 +179,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
     const chapters = [...selectedChapterIds, ...selectedSpecials];
 
-    switch (action) {
+    switch (action.action) {
       case Action.AddToReadingList:
         this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, (success) => {
           this.actionInProgress = false;
@@ -250,7 +252,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
               public imageSerivce: ImageService, private messageHub: MessageHubService,
               private readingListService: ReadingListService, public navService: NavService,
               private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document, 
-              private changeDetectionRef: ChangeDetectorRef, private scrollService: ScrollService
+              private changeDetectionRef: ChangeDetectorRef, private scrollService: ScrollService,
+              private deviceSerivce: DeviceService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -330,10 +333,10 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     this.changeDetectionRef.markForCheck();
   }
 
-  handleSeriesActionCallback(action: Action, series: Series) {
+  handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
     this.actionInProgress = true;
     this.changeDetectionRef.markForCheck();
-    switch(action) {
+    switch(action.action) {
       case(Action.MarkAsRead):
         this.actionService.markSeriesAsRead(series, (series: Series) => {
           this.actionInProgress = false;
@@ -400,8 +403,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     }
   }
 
-  handleVolumeActionCallback(action: Action, volume: Volume) {
-    switch(action) {
+  handleVolumeActionCallback(action: ActionItem<Volume>, volume: Volume) {
+    switch(action.action) {
       case(Action.MarkAsRead):
         this.markVolumeAsRead(volume);
         break;
@@ -424,8 +427,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     }
   }
 
-  handleChapterActionCallback(action: Action, chapter: Chapter) {
-    switch (action) {
+  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+    switch (action.action) {
       case(Action.MarkAsRead):
         this.markChapterAsRead(chapter);
         break;
@@ -441,6 +444,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       case(Action.IncognitoRead):
         this.openChapter(chapter, true);
         break;
+      case (Action.SendTo):
+        {
+          const device = (action._extra.data as Device);
+          this.deviceSerivce.sendTo(chapter.id, device.id).subscribe(() => {
+            this.toastr.success('File emailed to ' + device.name);
+          });
+          break;
+        }
       default:
         break;
     }
@@ -748,7 +759,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, this.series);
+      action.callback(action, this.series);
     }
   }
 

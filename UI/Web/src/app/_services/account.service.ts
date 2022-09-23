@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { of, ReplaySubject, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
@@ -10,6 +10,7 @@ import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
+import { DeviceService } from './device.service';
 
 @Injectable({
   providedIn: 'root'
@@ -66,7 +67,7 @@ export class AccountService implements OnDestroy {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  login(model: {username: string, password: string}): Observable<any> {
+  login(model: {username: string, password: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
         const user = response;

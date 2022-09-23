@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "6.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.9");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -440,6 +440,43 @@ namespace API.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("CollectionTag");
+                });
+
+            modelBuilder.Entity("API.Entities.Device", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("EmailAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastUsed")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Platform")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("Device");
                 });
 
             modelBuilder.Entity("API.Entities.FolderPath", b =>
@@ -1262,6 +1299,17 @@ namespace API.Data.Migrations
                     b.Navigation("Volume");
                 });
 
+            modelBuilder.Entity("API.Entities.Device", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("Devices")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("API.Entities.FolderPath", b =>
                 {
                     b.HasOne("API.Entities.Library", "Library")
@@ -1306,7 +1354,7 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.Series", "TargetSeries")
                         .WithMany("RelationOf")
                         .HasForeignKey("TargetSeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Series");
@@ -1550,6 +1598,8 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.AppUser", b =>
                 {
                     b.Navigation("Bookmarks");
+
+                    b.Navigation("Devices");
 
                     b.Navigation("Progresses");
 

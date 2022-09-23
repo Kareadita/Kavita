@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
+import { map, Observable, shareReplay } from 'rxjs';
 import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
+import { Device } from '../_models/device/device';
 import { Library } from '../_models/library';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
+import { DeviceService } from './device.service';
 
 export enum Action {
-  AddTo = -2,
-  Others = -1,
+  Submenu = -1,
   /**
    * Mark entity as read
    */
@@ -78,14 +80,26 @@ export enum Action {
    * Remove from user's Want to Read List
    */
   RemoveFromWantToReadList = 16,
+  /**
+   * Send to a device
+   */
+  SendTo = 17,
 }
 
 export interface ActionItem<T> {
   title: string;
   action: Action;
-  callback: (action: Action, data: T) => void;
+  callback: (action: ActionItem<T>, data: T) => void;
   requiresAdmin: boolean;
   children: Array<ActionItem<T>>;
+  /**
+   * Indicates that there exists a separate list will be loaded from an API
+   */
+  dynamicList?: Observable<{title: string, data: any}[]> | undefined;
+  /**
+   * Extra data that needs to be sent back from the card item. Used mainly for dynamicList. This will be the item from dyanamicList return
+   */
+  _extra?: any;
 }
 
 @Injectable({
@@ -109,7 +123,7 @@ export class ActionFactoryService {
   isAdmin = false;
   hasDownloadRole = false;
 
-  constructor(private accountService: AccountService) {
+  constructor(private accountService: AccountService, private deviceService: DeviceService) {
     this.accountService.currentUser$.subscribe((user) => {
       if (user) {
         this.isAdmin = this.accountService.hasAdminRole(user);
@@ -123,35 +137,35 @@ export class ActionFactoryService {
     });
   }
 
-  getLibraryActions(callback: (action: Action, library: Library) => void) {
+  getLibraryActions(callback: (action: ActionItem<Library>, library: Library) => void) {
 		return this.applyCallbackToList(this.libraryActions, callback);
   }
 
-  getSeriesActions(callback: (action: Action, series: Series) => void) {
+  getSeriesActions(callback: (action: ActionItem<Series>, series: Series) => void) {
 		return this.applyCallbackToList(this.seriesActions, callback);
   }
 
-  getVolumeActions(callback: (action: Action, volume: Volume) => void) {
+  getVolumeActions(callback: (action: ActionItem<Volume>, volume: Volume) => void) {
 		return this.applyCallbackToList(this.volumeActions, callback);
   }
 
-  getChapterActions(callback: (action: Action, chapter: Chapter) => void) {
+  getChapterActions(callback: (action: ActionItem<Chapter>, chapter: Chapter) => void) {
     return this.applyCallbackToList(this.chapterActions, callback);
   }
 
-  getCollectionTagActions(callback: (action: Action, collectionTag: CollectionTag) => void) {
+  getCollectionTagActions(callback: (action: ActionItem<CollectionTag>, collectionTag: CollectionTag) => void) {
 		return this.applyCallbackToList(this.collectionTagActions, callback);
   }
 
-  getReadingListActions(callback: (action: Action, readingList: ReadingList) => void) {
+  getReadingListActions(callback: (action: ActionItem<ReadingList>, readingList: ReadingList) => void) {
     return this.applyCallbackToList(this.readingListActions, callback);
   }
 
-  getBookmarkActions(callback: (action: Action, series: Series) => void) {
+  getBookmarkActions(callback: (action: ActionItem<Series>, series: Series) => void) {
     return this.applyCallbackToList(this.bookmarkActions, callback);
   }
 
-  dummyCallback(action: Action, data: any) {}
+  dummyCallback(action: ActionItem<any>, data: any) {}
 
   _resetActions() {
     this.libraryActions = [
@@ -163,7 +177,7 @@ export class ActionFactoryService {
         children: [],
       },
       {
-        action: Action.Others,
+        action: Action.Submenu,
         title: 'Others',
         callback: this.dummyCallback,
         requiresAdmin: true,
@@ -212,7 +226,7 @@ export class ActionFactoryService {
         children: [],
       },
       {
-        action: Action.AddTo,
+        action: Action.Submenu,
         title: 'Add to',
         callback: this.dummyCallback,
         requiresAdmin: false,
@@ -262,7 +276,7 @@ export class ActionFactoryService {
         children: [],
       },
       {
-        action: Action.Others,
+        action: Action.Submenu,
         title: 'Others',
         callback: this.dummyCallback,
         requiresAdmin: false,
@@ -315,7 +329,7 @@ export class ActionFactoryService {
         children: [],
       },
 			{
-				action: Action.AddTo,
+				action: Action.Submenu,
 				title: 'Add to',
 				callback: this.dummyCallback,
 				requiresAdmin: false,
@@ -368,7 +382,7 @@ export class ActionFactoryService {
         children: [],
       },
 			{
-				action: Action.AddTo,
+				action: Action.Submenu,
 				title: 'Add to',
 				callback: this.dummyCallback,
 				requiresAdmin: false,
@@ -396,6 +410,24 @@ export class ActionFactoryService {
         callback: this.dummyCallback,
         requiresAdmin: false,
         children: [],
+      },
+      {
+        action: Action.Submenu,
+        title: 'Send To',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [
+          {
+            action: Action.SendTo,
+            title: '',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            dynamicList: this.deviceService.devices$.pipe(map(devices => devices.map(d => {
+              return {'title': d.name, 'data': d};
+            }), shareReplay())),
+            children: []
+          }
+        ],
       },
     ];
 
@@ -441,7 +473,7 @@ export class ActionFactoryService {
     ];
   }
 
-  private applyCallback(action: ActionItem<any>, callback: (action: Action, data: any) => void) {
+  private applyCallback(action: ActionItem<any>, callback: (action: ActionItem<any>, data: any) => void) {
     action.callback = callback;
 
     if (action.children === null || action.children?.length === 0) return;
@@ -451,7 +483,7 @@ export class ActionFactoryService {
     });
   }
 
-	private applyCallbackToList(list: Array<ActionItem<any>>, callback: (action: Action, data: any) => void): Array<ActionItem<any>> {
+	private applyCallbackToList(list: Array<ActionItem<any>>, callback: (action: ActionItem<any>, data: any) => void): Array<ActionItem<any>> {
 		const actions = list.map((a) => {
 			return { ...a };
 		});

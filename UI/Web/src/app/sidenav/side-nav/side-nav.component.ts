@@ -76,8 +76,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  handleAction(action: Action, library: Library) {
-    switch (action) {
+  handleAction(action: ActionItem<Library>, library: Library) {
+    switch (action.action) {
       case(Action.Scan):
         this.actionService.scanLibrary(library);
         break;
@@ -95,7 +95,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, library);
+      action.callback(action, library);
     }
   }
 

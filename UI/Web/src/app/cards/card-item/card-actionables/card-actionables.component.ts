@@ -34,13 +34,13 @@ export class CardActionablesComponent implements OnInit {
     });
   }
 
-  preventClick(event: any) {
+  preventEvent(event: any) {
     event.stopPropagation();
     event.preventDefault();
   }
 
   performAction(event: any, action: ActionItem<any>) {
-    this.preventClick(event);
+    this.preventEvent(event);
 
     if (typeof action.callback === 'function') {
       this.actionHandler.emit(action);
@@ -64,6 +64,11 @@ export class CardActionablesComponent implements OnInit {
     }
     this.submenu[actionTitle] = subMenu;
     subMenu.open();
+  }
+
+  performDynamicClick(event: any, action: ActionItem<any>, dynamicItem: any) {
+    action._extra = dynamicItem;
+    this.performAction(event, action);
   }
 
 }

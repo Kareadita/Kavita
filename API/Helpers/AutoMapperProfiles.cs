@@ -2,6 +2,7 @@
 using System.Linq;
 using API.DTOs;
 using API.DTOs.CollectionTags;
+using API.DTOs.Device;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
@@ -97,11 +98,6 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
-        // CreateMap<SeriesRelation, RelatedSeriesDto>()
-        //     .ForMember(dest => dest.Adaptations,
-        //         opt =>
-        //             opt.MapFrom(src => src.Where(p => p.Role == PersonRole.Writer)))
-
         CreateMap<AppUser, UserDto>();
         CreateMap<SiteTheme, SiteThemeDto>();
         CreateMap<AppUserPreferences, UserPreferencesDto>()
@@ -143,6 +139,8 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<IEnumerable<ServerSetting>, ServerSettingDto>()
             .ConvertUsing<ServerSettingConverter>();
+
+        CreateMap<Device, DeviceDto>();
 
     }
 }
