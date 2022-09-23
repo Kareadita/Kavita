@@ -12,6 +12,7 @@ import { ColorPickerModule } from 'ngx-color-picker';
 import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageDevicesComponent } from './manage-devices/manage-devices.component';
 import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
+import { EditDeviceComponent } from './edit-device/edit-device.component';
 
 
 @NgModule({
@@ -22,6 +23,7 @@ import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
     SiteThemeProviderPipe,
     ManageDevicesComponent,
     DevicePlatformPipe,
+    EditDeviceComponent,
   ],
   imports: [
     CommonModule,

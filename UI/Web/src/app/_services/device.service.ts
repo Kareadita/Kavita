@@ -26,6 +26,10 @@ export class DeviceService {
     return this.httpClient.post(this.baseUrl + 'device/create', {name, platform, emailAddress}, {responseType: 'text' as 'json'});
   }
 
+  updateDevice(id: number, name: string, platform: DevicePlatform, emailAddress: string) {
+    return this.httpClient.post(this.baseUrl + 'device/update', {id, name, platform, emailAddress}, {responseType: 'text' as 'json'});
+  }
+
   deleteDevice(id: number) {
     return this.httpClient.delete(this.baseUrl + 'device?deviceId=' + id);
   }

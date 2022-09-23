@@ -39,7 +39,7 @@ public class DeviceController : BaseApiController
         return Ok();
     }
 
-    [HttpPost("edit")]
+    [HttpPost("update")]
     public async Task<ActionResult> UpdateDevice(UpdateDeviceDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
@@ -47,7 +47,7 @@ public class DeviceController : BaseApiController
 
         if (device == null) return BadRequest("There was an error when updating the device");
 
-        return Ok(device);
+        return Ok();
     }
 
     /// <summary>
@@ -85,9 +85,6 @@ public class DeviceController : BaseApiController
 
         return BadRequest("There was an error sending the file to the device");
     }
-
-
-
 
 
 }
