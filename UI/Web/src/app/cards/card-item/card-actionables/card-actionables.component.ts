@@ -19,6 +19,7 @@ export class CardActionablesComponent implements OnInit {
   @Input() disabled: boolean = false;
   @Output() actionHandler = new EventEmitter<ActionItem<any>>();
 
+
   isAdmin: boolean = false;
   canDownload: boolean = false;
   submenu: {[key: string]: NgbDropdown} = {};
@@ -73,10 +74,5 @@ export class CardActionablesComponent implements OnInit {
   performDynamicClick(event: any, action: ActionItem<any>, dynamicItem: any) {
     action._extra = dynamicItem;
     this.performAction(event, action);
-  }
-
-  toDList(d: any) {
-    if (d === undefined || d === null) return [];
-    return d as {title: string, data: any}[];
   }
 }
