@@ -89,7 +89,7 @@ public class MetadataService : IMetadataService
     private void UpdateChapterLastModified(Chapter chapter, bool forceUpdate)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
-        if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
+        if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
         firstFile.UpdateLastModified();
     }

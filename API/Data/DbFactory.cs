@@ -162,7 +162,15 @@ public static class DbFactory
             FilePath = filePath,
             Format = format,
             Pages = pages,
-            LastModified = File.GetLastWriteTime(filePath) // NOTE: Changed this from DateTime.Now
+            LastModified = File.GetLastWriteTime(filePath)
+        };
+    }
+
+    public static Device Device(string name)
+    {
+        return new Device()
+        {
+            Name = name,
         };
     }
 

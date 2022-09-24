@@ -44,14 +44,14 @@ export class ReadingListsComponent implements OnInit {
       .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
   }
 
-  performAction(action: ActionItem<any>, readingList: ReadingList) {
+  performAction(action: ActionItem<ReadingList>, readingList: ReadingList) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, readingList);
+      action.callback(action, readingList);
     }
   }
 
-  handleReadingListActionCallback(action: Action, readingList: ReadingList) {
-    switch(action) {
+  handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
+    switch(action.action) {
       case Action.Delete:
         this.readingListService.delete(readingList.id).subscribe(() => {
           this.toastr.success('Reading list deleted');

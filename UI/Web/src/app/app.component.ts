@@ -8,6 +8,7 @@ import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT } from '@angular/common';
+import { DeviceService } from './_services/device.service';
 
 @Component({
   selector: 'app-root',

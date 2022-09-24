@@ -64,7 +64,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: any) {
     if (this.data) {
-      this.actions = this.actionFactoryService.getSeriesActions((action: Action, series: Series) => this.handleSeriesActionCallback(action, series));
+      this.actions = this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series));
       this.cdRef.markForCheck();
     }
   }
@@ -74,8 +74,8 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     this.onDestroy.complete();
   }
 
-  handleSeriesActionCallback(action: Action, series: Series) {
-    switch (action) {
+  handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
+    switch (action.action) {
       case(Action.MarkAsRead):
         this.markAsRead(series);
         break;

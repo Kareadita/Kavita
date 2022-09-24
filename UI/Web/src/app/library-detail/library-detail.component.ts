@@ -52,11 +52,11 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   active = this.tabs[0];
 
 
-  bulkActionCallback = (action: Action, data: any) => {
+  bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
 
-    switch (action) {
+    switch (action.action) {
       case Action.AddToReadingList:
         this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
           if (success) this.bulkSelectionService.deselectAll();
@@ -197,12 +197,12 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleAction(action: Action, library: Library) {
+  handleAction(action: ActionItem<Library>, library: Library) {
     let lib: Partial<Library> = library;
     if (library === undefined) {
       lib = {id: this.libraryId, name: this.libraryName};
     }
-    switch (action) {
+    switch (action.action) {
       case(Action.Scan):
         this.actionService.scanLibrary(lib);
         break;
@@ -216,7 +216,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, undefined);
+      action.callback(action, undefined);
     }
   }
 

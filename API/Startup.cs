@@ -53,6 +53,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddApplicationServices(_config, _env);
+
         services.AddControllers(options =>
         {
             options.CacheProfiles.Add("Images",

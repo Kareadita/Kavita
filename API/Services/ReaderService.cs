@@ -40,8 +40,8 @@ public class ReaderService : IReaderService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReaderService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
-    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
+    private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
+    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
 
     private const float MinWordsPerHour = 10260F;
     private const float MaxWordsPerHour = 30000F;

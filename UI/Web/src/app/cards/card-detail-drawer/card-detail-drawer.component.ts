@@ -8,6 +8,7 @@ import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
+import { Device } from 'src/app/_models/device/device';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
@@ -16,6 +17,7 @@ import { Volume } from 'src/app/_models/volume';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
+import { DeviceService } from 'src/app/_services/device.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
@@ -100,7 +102,8 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
     private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
     private actionService: ActionService, private router: Router, private libraryService: LibraryService,
     private seriesService: SeriesService, private readerService: ReaderService, public metadataService: MetadataService, 
-    public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService, private readonly cdRef: ChangeDetectorRef) {
+    public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService, private readonly cdRef: ChangeDetectorRef,
+    private deviceSerivce: DeviceService) {
       this.isAdmin$ = this.accountService.currentUser$.pipe(
         takeUntil(this.onDestroy), 
         map(user => (user && this.accountService.hasAdminRole(user)) || false), 
@@ -130,7 +133,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this))
                                 .filter(item => item.action !== Action.Edit);
-    this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false});    
+    this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});    
 
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
@@ -166,7 +169,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
 
   performAction(action: ActionItem<any>, chapter: Chapter) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, chapter);
+      action.callback(action, chapter);
     }
   }
 
@@ -196,8 +199,8 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
     this.actionService.markChapterAsUnread(this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
   }
 
-  handleChapterActionCallback(action: Action, chapter: Chapter) {
-    switch (action) {
+  handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {
+    switch (action.action) {
       case(Action.MarkAsRead):
         this.markChapterAsRead(chapter);
         break;
@@ -216,6 +219,14 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       case (Action.Read):
         this.readChapter(chapter, false);
         break;
+      case (Action.SendTo):
+      {
+        const device = (action._extra!.data as Device);
+        this.deviceSerivce.sendTo(chapter.id, device.id).subscribe(() => {
+          this.toastr.success('File emailed to ' + device.name);
+        });
+        break;
+      }
       default:
         break;
     }

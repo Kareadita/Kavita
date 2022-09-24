@@ -135,7 +135,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, undefined);
+      action.callback(action, undefined);
     }
   }
 

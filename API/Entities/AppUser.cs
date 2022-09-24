@@ -16,6 +16,9 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     public ICollection<AppUserProgress> Progresses { get; set; }
     public ICollection<AppUserRating> Ratings { get; set; }
     public AppUserPreferences UserPreferences { get; set; }
+    /// <summary>
+    /// Bookmarks associated with this User
+    /// </summary>
     public ICollection<AppUserBookmark> Bookmarks { get; set; }
     /// <summary>
     /// Reading lists associated with this user
@@ -25,6 +28,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// A list of Series the user want's to read
     /// </summary>
     public ICollection<Series> WantToRead { get; set; }
+    /// <summary>
+    /// A list of Devices which allows the user to send files to
+    /// </summary>
+    public ICollection<Device> Devices { get; set; }
     /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>

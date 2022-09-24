@@ -83,6 +83,8 @@ public class LibraryWatcher : ILibraryWatcher
             watcher.Created += OnCreated;
             watcher.Deleted += OnDeleted;
             watcher.Error += OnError;
+            watcher.Disposed += (sender, args) =>
+                _logger.LogError("[LibraryWatcher] watcher was disposed when it shouldn't have been");
 
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;
@@ -108,7 +110,6 @@ public class LibraryWatcher : ILibraryWatcher
             fileSystemWatcher.Created -= OnCreated;
             fileSystemWatcher.Deleted -= OnDeleted;
             fileSystemWatcher.Error -= OnError;
-            fileSystemWatcher.Dispose();
         }
         FileWatchers.Clear();
         WatcherDictionary.Clear();
