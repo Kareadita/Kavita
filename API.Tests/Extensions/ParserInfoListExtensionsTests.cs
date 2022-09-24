@@ -5,6 +5,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Parser;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using API.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
