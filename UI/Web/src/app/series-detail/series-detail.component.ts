@@ -446,7 +446,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         break;
       case (Action.SendTo):
         {
-          const device = (action._extra.data as Device);
+          const device = (action._extra!.data as Device);
           this.deviceSerivce.sendTo(chapter.id, device.id).subscribe(() => {
             this.toastr.success('File emailed to ' + device.name);
           });
