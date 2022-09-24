@@ -119,7 +119,7 @@ public static class Parser
         new Regex(
             @"(卷|册)(?<Volume>\d+)",
             MatchOptions, RegexTimeout),
-        // Korean Volume: 제n화 -> Volume n, n화 -> Volume n
+        // Korean Volume: 제n화|권|회|장 -> Volume n, n화|권|회|장 -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
         new Regex(
             @"제?(?<Volume>\d+(\.\d)?)(권|회|화|장)",
             MatchOptions, RegexTimeout),
