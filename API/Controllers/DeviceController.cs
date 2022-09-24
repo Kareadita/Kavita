@@ -6,6 +6,7 @@ using API.Data.Repositories;
 using API.DTOs.Device;
 using API.Extensions;
 using API.Services;
+using Kavita.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -81,7 +82,15 @@ public class DeviceController : BaseApiController
         if (await _emailService.IsDefaultEmailService())
             return BadRequest("Send to device cannot be used with Kavita's email service. Please configure your own.");
 
-        if (await _deviceService.SendTo(dto.ChapterId, dto.DeviceId)) return Ok();
+        try
+        {
+            var success = await _deviceService.SendTo(dto.ChapterId, dto.DeviceId);
+            if (success) return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         return BadRequest("There was an error sending the file to the device");
     }

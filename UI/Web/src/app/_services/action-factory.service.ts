@@ -93,13 +93,14 @@ export interface ActionItem<T> {
   requiresAdmin: boolean;
   children: Array<ActionItem<T>>;
   /**
-   * Indicates that there exists a separate list will be loaded from an API
+   * Indicates that there exists a separate list will be loaded from an API.
+   * Rule: If using this, only one child should exist in children with the Action for dynamicList.
    */
   dynamicList?: Observable<{title: string, data: any}[]> | undefined;
   /**
    * Extra data that needs to be sent back from the card item. Used mainly for dynamicList. This will be the item from dyanamicList return
    */
-  _extra?: any;
+  _extra?: {title: string, data: any};
 }
 
 @Injectable({
@@ -416,13 +417,16 @@ export class ActionFactoryService {
         title: 'Send To',
         callback: this.dummyCallback,
         requiresAdmin: false,
+        // dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
+        //   return {'title': d.name, 'data': d};
+        // }), shareReplay())),
         children: [
           {
             action: Action.SendTo,
             title: '',
             callback: this.dummyCallback,
             requiresAdmin: false,
-            dynamicList: this.deviceService.devices$.pipe(map(devices => devices.map(d => {
+            dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
               return {'title': d.name, 'data': d};
             }), shareReplay())),
             children: []

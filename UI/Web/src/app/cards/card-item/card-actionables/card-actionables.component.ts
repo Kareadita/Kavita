@@ -47,10 +47,14 @@ export class CardActionablesComponent implements OnInit {
     }
   }
 
-  willRenderAction(action: ActionItem<any>): boolean {
+  willRenderAction(action: ActionItem<any>) {
     return (action.requiresAdmin && this.isAdmin) 
         || (action.action === Action.Download && (this.canDownload || this.isAdmin))
-        || (!action.requiresAdmin && action.action !== Action.Download)
+        || (!action.requiresAdmin && action.action !== Action.Download);
+  }
+
+  shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | Array<any>) {
+    return (action.children[0].dynamicList === undefined || action.children[0].dynamicList === null) || (dynamicList !== null && dynamicList.length > 0);
   }
 
   openSubmenu(actionTitle: string, subMenu: NgbDropdown) {
@@ -71,4 +75,9 @@ export class CardActionablesComponent implements OnInit {
     this.performAction(event, action);
   }
 
+  toDList(d: any) {
+    console.log('d: ', d);
+    if (d === undefined || d === null) return [];
+    return d as {title: string, data: any}[];
+  }
 }
