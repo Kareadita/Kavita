@@ -180,7 +180,10 @@ export class CardItemComponent implements OnInit, OnDestroy {
     } else if (this.utilityService.isSeries(this.entity)) {
       this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
       if (this.actions && this.actions.length > 0) {
-        this.actions = this.actionFactoryService.filterSendToAction(this.actions, (this.entity as Series).volumes[0].chapters[0]);
+        const series = (this.entity as Series);
+        if (series.hasOwnProperty('volumes') && series.volumes.length > 0 && series.volumes[0].chapters.length > 0) {
+          this.actions = this.actionFactoryService.filterSendToAction(this.actions, series.volumes[0].chapters[0]);
+        }
       }
     }
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
