@@ -163,9 +163,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
       } else {
         this.tooltipTitle = chapterTitle;
       }
-      if (this.actions && this.actions.length > 0) {
-        this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.entity as Chapter);
-      } 
     } else if (this.utilityService.isVolume(this.entity)) {
       const vol = this.utilityService.asVolume(this.entity);
       if (vol.chapters !== undefined && vol.chapters.length > 0) {
@@ -174,18 +171,11 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.tooltipTitle === '') {
         this.tooltipTitle = vol.name;
       }
-      if (this.actions && this.actions.length > 0) {
-        this.actions = this.actionFactoryService.filterSendToAction(this.actions, (this.entity as Volume).chapters[0]);
-      } 
     } else if (this.utilityService.isSeries(this.entity)) {
       this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
-      if (this.actions && this.actions.length > 0) {
-        const series = (this.entity as Series);
-        if (series.hasOwnProperty('volumes') && series.volumes.length > 0 && series.volumes[0].chapters.length > 0) {
-          this.actions = this.actionFactoryService.filterSendToAction(this.actions, series.volumes[0].chapters[0]);
-        }
-      }
     }
+
+    this.filterSendTo();
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
       this.user = user;
     });
@@ -206,25 +196,9 @@ export class CardItemComponent implements OnInit, OnDestroy {
             chapter.pagesRead = updateEvent.pagesRead;
           }
         } else {
-          // Ignore
           return;
-          // re-request progress for the series
-          // const s = this.utilityService.asSeries(this.entity);
-          // let pagesRead = 0;
-          // if (s.hasOwnProperty('volumes')) {
-          //   s.volumes.forEach(v => {
-          //     v.chapters.forEach(c => {
-          //       if (c.id === updateEvent.chapterId) {
-          //         c.pagesRead = updateEvent.pagesRead;
-          //       }
-          //       pagesRead += c.pagesRead;
-          //     });
-          //   });
-          //   s.pagesRead = pagesRead;
-          // }
         }
       }
-
 
       this.read = updateEvent.pagesRead;
       this.cdRef.detectChanges();
@@ -325,5 +299,21 @@ export class CardItemComponent implements OnInit, OnDestroy {
     }
     this.selection.emit(this.selected);
     this.cdRef.detectChanges();
+  }
+
+  filterSendTo() {
+    if (!this.actions || this.actions.length === 0) return;
+
+    if (this.utilityService.isChapter(this.entity)) {
+      this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.entity as Chapter);
+    } else if (this.utilityService.isVolume(this.entity)) {
+      const vol = this.utilityService.asVolume(this.entity);
+      this.actions = this.actionFactoryService.filterSendToAction(this.actions, vol.chapters[0]);
+    } else if (this.utilityService.isSeries(this.entity)) {
+      const series = (this.entity as Series);
+      if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
+        this.actions = this.actions.filter(a => a.title !== 'Send To');
+      }
+    }
   }
 }
