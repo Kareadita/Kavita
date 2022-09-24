@@ -76,7 +76,6 @@ export class CardActionablesComponent implements OnInit {
   }
 
   toDList(d: any) {
-    console.log('d: ', d);
     if (d === undefined || d === null) return [];
     return d as {title: string, data: any}[];
   }

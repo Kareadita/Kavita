@@ -4,6 +4,7 @@ import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Device } from '../_models/device/device';
 import { Library } from '../_models/library';
+import { MangaFormat } from '../_models/manga-format';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
@@ -93,6 +94,10 @@ export interface ActionItem<T> {
   requiresAdmin: boolean;
   children: Array<ActionItem<T>>;
   /**
+   * An optional class which applies to an item. ie) danger on a delete action
+   */
+  class?: string;
+  /**
    * Indicates that there exists a separate list will be loaded from an API.
    * Rule: If using this, only one child should exist in children with the Action for dynamicList.
    */
@@ -168,7 +173,15 @@ export class ActionFactoryService {
 
   dummyCallback(action: ActionItem<any>, data: any) {}
 
-  _resetActions() {
+  filterSendToAction(actions: Array<ActionItem<Chapter>>, chapter: Chapter) {
+    if (chapter.files.filter(f => f.format === MangaFormat.EPUB || f.format === MangaFormat.PDF).length !== chapter.files.length) {
+      // Remove Send To as it doesn't apply
+      return actions.filter(item => item.title !== 'Send To');
+    }
+    return actions;
+  }
+
+  private _resetActions() {
     this.libraryActions = [
       {
         action: Action.Scan,
@@ -270,11 +283,22 @@ export class ActionFactoryService {
         children: [],
       },
       {
-        action: Action.Edit,
-        title: 'Edit',
+        action: Action.Submenu,
+        title: 'Send To',
         callback: this.dummyCallback,
-        requiresAdmin: true,
-        children: [],
+        requiresAdmin: false,
+        children: [
+          {
+            action: Action.SendTo,
+            title: '',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
+              return {'title': d.name, 'data': d};
+            }), shareReplay())),
+            children: []
+          }
+        ],
       },
       {
         action: Action.Submenu,
@@ -301,9 +325,24 @@ export class ActionFactoryService {
             title: 'Delete',
             callback: this.dummyCallback,
             requiresAdmin: true,
+            class: 'danger',
             children: [],
           },
         ],
+      },
+      {
+        action: Action.Download,
+        title: 'Download',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.Edit,
+        title: 'Edit',
+        callback: this.dummyCallback,
+        requiresAdmin: true,
+        children: [],
       },
     ];
 
@@ -345,15 +384,15 @@ export class ActionFactoryService {
 				]
 			},
       {
-        action: Action.Edit,
-        title: 'Details',
+        action: Action.Download,
+        title: 'Download',
         callback: this.dummyCallback,
         requiresAdmin: false,
         children: [],
       },
       {
-        action: Action.Download,
-        title: 'Download',
+        action: Action.Edit,
+        title: 'Details',
         callback: this.dummyCallback,
         requiresAdmin: false,
         children: [],
@@ -398,28 +437,10 @@ export class ActionFactoryService {
 				]
 			},
       {
-        action: Action.Edit,
-        title: 'Details',
-        callback: this.dummyCallback,
-        requiresAdmin: false,
-        children: [],
-      },
-			// RBS will handle rendering this, so non-admins with download are appicable
-      {
-        action: Action.Download,
-        title: 'Download',
-        callback: this.dummyCallback,
-        requiresAdmin: false,
-        children: [],
-      },
-      {
         action: Action.Submenu,
         title: 'Send To',
         callback: this.dummyCallback,
         requiresAdmin: false,
-        // dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
-        //   return {'title': d.name, 'data': d};
-        // }), shareReplay())),
         children: [
           {
             action: Action.SendTo,
@@ -432,6 +453,21 @@ export class ActionFactoryService {
             children: []
           }
         ],
+      },
+      // RBS will handle rendering this, so non-admins with download are appicable
+      {
+        action: Action.Download,
+        title: 'Download',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.Edit,
+        title: 'Details',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
       },
     ];
 
@@ -448,6 +484,7 @@ export class ActionFactoryService {
         title: 'Delete',
         callback: this.dummyCallback,
         requiresAdmin: false,
+        class: 'danger',
         children: [],
       },
     ];
@@ -471,6 +508,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'Clear',
         callback: this.dummyCallback,
+        class: 'danger',
         requiresAdmin: false,
         children: [],
       },
@@ -494,4 +532,5 @@ export class ActionFactoryService {
 		actions.forEach((action) => this.applyCallback(action, callback));
 		return actions;
 	}
+  
 }

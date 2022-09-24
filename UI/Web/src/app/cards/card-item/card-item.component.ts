@@ -13,7 +13,7 @@ import { Series } from 'src/app/_models/series';
 import { User } from 'src/app/_models/user';
 import { Volume } from 'src/app/_models/volume';
 import { AccountService } from 'src/app/_services/account.service';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
+import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
@@ -126,9 +126,11 @@ export class CardItemComponent implements OnInit, OnDestroy {
     public utilityService: UtilityService, private downloadService: DownloadService,
     public bulkSelectionService: BulkSelectionService,
     private messageHub: MessageHubService, private accountService: AccountService, 
-    private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef) {}
+    private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef,
+    private actionFactoryService: ActionFactoryService) {}
 
   ngOnInit(): void {
+
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
       this.suppressArchiveWarning = true;
       this.cdRef.markForCheck();
@@ -161,6 +163,9 @@ export class CardItemComponent implements OnInit, OnDestroy {
       } else {
         this.tooltipTitle = chapterTitle;
       }
+      if (this.actions && this.actions.length > 0) {
+        this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.entity as Chapter);
+      } 
     } else if (this.utilityService.isVolume(this.entity)) {
       const vol = this.utilityService.asVolume(this.entity);
       if (vol.chapters !== undefined && vol.chapters.length > 0) {
@@ -169,8 +174,14 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.tooltipTitle === '') {
         this.tooltipTitle = vol.name;
       }
+      if (this.actions && this.actions.length > 0) {
+        this.actions = this.actionFactoryService.filterSendToAction(this.actions, (this.entity as Volume).chapters[0]);
+      } 
     } else if (this.utilityService.isSeries(this.entity)) {
       this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
+      if (this.actions && this.actions.length > 0) {
+        this.actions = this.actionFactoryService.filterSendToAction(this.actions, (this.entity as Series).volumes[0].chapters[0]);
+      }
     }
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
       this.user = user;

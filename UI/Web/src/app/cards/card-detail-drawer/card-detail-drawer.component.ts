@@ -134,6 +134,12 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this))
                                 .filter(item => item.action !== Action.Edit);
     this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});    
+    if (this.isChapter) {
+      const chapter = this.utilityService.asChapter(this.data);
+      this.chapterActions = this.actionFactoryService.filterSendToAction(this.chapterActions, chapter);
+    } else {
+      this.chapterActions = this.actionFactoryService.filterSendToAction(this.chapterActions, this.chapters[0]);
+    }
 
     this.libraryService.getLibraryType(this.libraryId).subscribe(type => {
       this.libraryType = type;
