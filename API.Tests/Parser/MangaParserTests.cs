@@ -69,8 +69,6 @@ public class MangaParserTests
     [InlineData("幽游白书完全版 第03卷 天下", "3")]
     [InlineData("阿衰online 第1册", "1")]
     [InlineData("【TFO汉化&Petit汉化】迷你偶像漫画卷2第25话", "2")]
-    [InlineData("63권#200", "63")]
-    [InlineData("시즌34삽화2", "34")]
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1巻", "1")]
     [InlineData("スライム倒して300年、知らないうちにレベルMAXになってました 1-3巻", "1-3")]
     [InlineData("Dance in the Vampire Bund {Special Edition} v03.5 (2019) (Digital) (KG Manga)", "3.5")]
@@ -82,6 +80,8 @@ public class MangaParserTests
     [InlineData("죽음 13회", "13")]
     [InlineData("동의보감 13장", "13")]
     [InlineData("몰?루 아카이브 7.5권", "7.5")]
+    [InlineData("63권#200", "63")]
+    [InlineData("시즌34삽화2", "34")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));

@@ -121,7 +121,7 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // Korean Volume: 제n화 -> Volume n, n화 -> Volume n
         new Regex(
-            @"제?(?<Volume>\d+\.\d*)(권|회|화|장)",
+            @"제?(?<Volume>\d+(\.\d)?)(권|회|화|장)",
             MatchOptions, RegexTimeout),
         // Korean Season: 시즌n -> Season n,
         new Regex(
@@ -698,12 +698,12 @@ public static class Parser
         foreach (var regex in MangaVolumeRegex)
         {
             var matches = regex.Matches(filename);
-            foreach (Match match in matches)
+            foreach (var group in matches.Select(match => match.Groups))
             {
-                if (!match.Groups["Volume"].Success || match.Groups["Volume"] == Match.Empty) continue;
+                if (!group["Volume"].Success || group["Volume"] == Match.Empty) continue;
 
-                var value = match.Groups["Volume"].Value;
-                var hasPart = match.Groups["Part"].Success;
+                var value = group["Volume"].Value;
+                var hasPart = group["Part"].Success;
                 return FormatValue(value, hasPart);
             }
         }
