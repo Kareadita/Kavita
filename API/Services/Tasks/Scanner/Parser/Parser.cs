@@ -121,11 +121,7 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // Korean Volume: 제n화 -> Volume n, n화 -> Volume n
         new Regex(
-            @"제?(?<Volume>\d+)(회|화|장)",
-            MatchOptions, RegexTimeout),
-        // Korean Volume: 제n권 -> Volume n, n권  -> Volume n, 63권#200.zip -> Volume 63 (no chapter, #200 is just files inside)
-        new Regex(
-            @"제?(?<Volume>\d+)권",
+            @"제?(?<Volume>\d+\.\d*)(권|회|화|장)",
             MatchOptions, RegexTimeout),
         // Korean Season: 시즌n -> Season n,
         new Regex(

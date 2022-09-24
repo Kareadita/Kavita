@@ -81,6 +81,7 @@ public class MangaParserTests
     [InlineData("조선왕조실톡 106화", "106")]
     [InlineData("죽음 13회", "13")]
     [InlineData("동의보감 13장", "13")]
+    [InlineData("몰?루 아카이브 7.5권", "7.5")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
