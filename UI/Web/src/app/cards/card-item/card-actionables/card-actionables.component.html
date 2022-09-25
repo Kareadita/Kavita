@@ -23,7 +23,7 @@
       <ng-template #submenuDropdown>
         <!-- Submenu items -->
         <ng-container *ngIf="shouldRenderSubMenu(action, action.children[0].dynamicList | async)">
-          <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseover)="preventEvent($event); openSubmenu(action.title, subMenuHover)" (mouseleave)="preventEvent($event)">
+          <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (click)="preventEvent($event); openSubmenu(action.title, subMenuHover)" (mouseover)="preventEvent($event); openSubmenu(action.title, subMenuHover)" (mouseleave)="preventEvent($event)">
             <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{action.title}} <i class="fa-solid fa-angle-right submenu-icon"></i></button>
             <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
               <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }"></ng-container>
