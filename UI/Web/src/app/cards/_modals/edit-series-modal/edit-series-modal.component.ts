@@ -209,6 +209,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       this.seriesVolumes = volumes;
       this.isLoadingVolumes = false;
 
+      if (this.seriesVolumes.length === 1) {
+        this.imageUrls.push(...this.seriesVolumes[0].chapters.map((c: Chapter) => this.imageService.getChapterCoverImage(c.id)));
+      } else {
+        this.imageUrls.push(...this.seriesVolumes.map(v => this.imageService.getVolumeCoverImage(v.id)));
+      }
+
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
       });
