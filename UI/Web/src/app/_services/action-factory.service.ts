@@ -240,6 +240,13 @@ export class ActionFactoryService {
         children: [],
       },
       {
+        action: Action.Scan,
+        title: 'Scan Series',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
         action: Action.Submenu,
         title: 'Add to',
         callback: this.dummyCallback,
@@ -274,13 +281,6 @@ export class ActionFactoryService {
             children: [],
           },
         ],
-      },
-      {
-        action: Action.Scan,
-        title: 'Scan Series',
-        callback: this.dummyCallback,
-        requiresAdmin: false,
-        children: [],
       },
       {
         action: Action.Submenu,

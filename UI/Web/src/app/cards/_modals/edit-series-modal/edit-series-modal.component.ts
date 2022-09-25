@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -126,9 +126,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
       summary: new FormControl('', []),
-      name: new FormControl(this.series.name, []),
+      name: new FormControl(this.series.name, [Validators.required]),
       localizedName: new FormControl(this.series.localizedName, []),
-      sortName: new FormControl(this.series.sortName, []),
+      sortName: new FormControl(this.series.sortName, [Validators.required]),
       rating: new FormControl(this.series.userRating, []),
 
       coverImageIndex: new FormControl(0, []),
