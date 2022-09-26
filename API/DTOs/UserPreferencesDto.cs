@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using API.Data;
-using API.DTOs.Theme;
+﻿using System.ComponentModel.DataAnnotations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
@@ -117,4 +114,9 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public bool PromptForDownloadSize { get; set; } = true;
+    /// <summary>
+    /// UI Site Global Setting: Should Kavita disable CSS transitions
+    /// </summary>
+    [Required]
+    public bool NoTransitions { get; set; } = false;
 }

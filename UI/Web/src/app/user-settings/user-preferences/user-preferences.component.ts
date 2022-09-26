@@ -134,6 +134,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('globalPageLayoutMode', new FormControl(this.user.preferences.globalPageLayoutMode, []));
       this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
       this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
+      this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
 
       this.cdRef.markForCheck();
     });
@@ -188,6 +189,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('globalPageLayoutMode')?.setValue(this.user.preferences.globalPageLayoutMode);
     this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
     this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
+    this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -225,6 +227,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       globalPageLayoutMode: parseInt(modelSettings.globalPageLayoutMode, 10),
       blurUnreadSummaries: modelSettings.blurUnreadSummaries,
       promptForDownloadSize: modelSettings.promptForDownloadSize,
+      noTransitions: modelSettings.noTransitions,
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

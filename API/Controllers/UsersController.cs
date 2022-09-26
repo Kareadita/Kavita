@@ -102,6 +102,7 @@ public class UsersController : BaseApiController
         existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
         existingPreferences.LayoutMode = preferencesDto.LayoutMode;
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
+        existingPreferences.NoTransitions = preferencesDto.NoTransitions;
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 

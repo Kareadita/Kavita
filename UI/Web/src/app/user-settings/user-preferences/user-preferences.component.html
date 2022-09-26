@@ -60,6 +60,18 @@
                                         </div>
                                     </div>
 
+                                    <div class="row g-0">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <div class="form-check form-switch">
+                                                <input type="checkbox" id="no-transitions" role="switch" formControlName="noTransitions" class="form-check-input" aria-describedby="settings-global-noTransitions-help" [value]="true" aria-labelledby="auto-close-label">
+                                                <label class="form-check-label" for="no-transitions">Disable Animations</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="noTransitionsTooltip" role="button" tabindex="0"></i>
+                                            </div>
+
+                                            <ng-template #noTransitionsTooltip>Turns off animations in the site. Useful for e-ink readers</ng-template>
+                                            <span class="visually-hidden" id="settings-global-noTransitions-help">Turns off animations in the site. Useful for e-ink readers</span>
+                                        </div>
+                                    </div>
+
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                                         <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
                                         <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">Save</button>
