@@ -1092,8 +1092,8 @@ public class SeriesServiceTests
     {
         await generate_UpdateRelatedSeries_library();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
-        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         var relation = new SeriesRelation()
         {
             Series = series1,
@@ -1114,8 +1114,8 @@ public class SeriesServiceTests
     {
         await generate_UpdateRelatedSeries_library();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
-        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         var relation = new SeriesRelation()
         {
             Series = series1,
@@ -1142,8 +1142,8 @@ public class SeriesServiceTests
     {
         await generate_UpdateRelatedSeries_library();
 
-        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
-        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         var relation = new SeriesRelation()
         {
             Series = series1,

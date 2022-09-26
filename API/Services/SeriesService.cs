@@ -613,6 +613,11 @@ public class SeriesService : ISeriesService
         };
     }
 
+    /// <summary>
+    /// Update the relations attached to the Series. Does not generate associated Sequel/Prequel pairs on target series.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     public async Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related);
@@ -630,15 +635,12 @@ public class SeriesService : ISeriesService
         UpdateRelationForKind(dto.Sequels, series.Relations.Where(r => r.RelationKind == RelationKind.Sequel).ToList(), series, RelationKind.Sequel);
 
         if (!_unitOfWork.HasChanges()) return true;
-        if (await _unitOfWork.CommitAsync()) return true;
-
-
-        return false;
+        return await _unitOfWork.CommitAsync();
     }
 
 
     /// <summary>
-    ///
+    /// Applies the provided list to the series. Adds new relations and removes deleted relations.
     /// </summary>
     /// <param name="dtoTargetSeriesIds"></param>
     /// <param name="adaptations"></param>
