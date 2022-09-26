@@ -8,9 +8,10 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
-using API.DTOs.Reader;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -22,10 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.Extensions;
-using NSubstitute.ReceivedExtensions;
 using Xunit;
-using Xunit.Sdk;
 
 namespace API.Tests.Services;
 
@@ -1083,5 +1081,175 @@ public class SeriesServiceTests
         Assert.Same("1.1", firstChapter.Range);
     }
 
+    #endregion
+
+    #region SeriesRelation
+
+    /// <summary>
+    /// Template test.
+    /// </summary>
+    public async Task UpdateRelatedSeries()
+    {
+        await generate_UpdateRelatedSeries_library();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var relation = new SeriesRelation()
+        {
+            Series = series1,
+            SeriesId = series1.Id,
+            TargetSeriesId = seriesTargetPrequel.Id,
+            RelationKind = RelationKind.Prequel
+
+        };
+
+        series1.Relations.Add(relation);
+        _unitOfWork.SeriesRepository.Update(series1);
+
+        Assert.True(series1.Relations.Contains(relation));
+    }
+
+    [Fact]
+    public async Task UpdateRelatedSeries_ShouldDeletePrequelRelation()
+    {
+        await generate_UpdateRelatedSeries_library();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var relation = new SeriesRelation()
+        {
+            Series = series1,
+            SeriesId = series1.Id,
+            TargetSeriesId = seriesTargetPrequel.Id,
+            RelationKind = RelationKind.Prequel
+
+        };
+
+        series1.Relations.Add(relation);
+        _unitOfWork.SeriesRepository.Update(series1);
+
+        Assert.True(series1.Relations.Contains(relation));
+
+        var relationDto = instantiate_relations_dto(series1);
+
+        await _seriesService.UpdateRelatedSeries(relationDto);
+
+        Assert.False(series1.Relations.Contains(relation));
+    }
+
+    [Fact]
+    public async Task UpdateRelatedSeries_ShouldNotAllowDuplicates()
+    {
+        await generate_UpdateRelatedSeries_library();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var seriesTargetPrequel = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1,SeriesIncludes.Related);
+        var relation = new SeriesRelation()
+        {
+            Series = series1,
+            SeriesId = series1.Id,
+            TargetSeriesId = seriesTargetPrequel.Id,
+            RelationKind = RelationKind.Prequel
+
+        };
+        // Manually add a relation to our series1 marking seriesTargetPrequel as prequel
+        series1.Relations.Add(relation);
+        _unitOfWork.SeriesRepository.Update(series1);
+
+        var relationDto = instantiate_relations_dto(series1);
+        relationDto.Prequels.Add(relation.SeriesId);
+
+        await _seriesService.UpdateRelatedSeries(relationDto);
+        // Assert that there's only one single relationship that points to our target series id
+        Assert.False(
+            series1.Relations.Count(seriesRelation => seriesRelation.TargetSeriesId.Equals(relation.SeriesId)) == 2);
+    }
+
+    private static UpdateRelatedSeriesDto instantiate_relations_dto(Series series)
+    {
+        return new UpdateRelatedSeriesDto()
+        {
+            SeriesId = series.Id,
+            Prequels = new List<int>(),
+            Adaptations = new List<int>(),
+            Characters = new List<int>(),
+            Contains = new List<int>(),
+            Doujinshis = new List<int>(),
+            Others = new List<int>(),
+            Sequels = new List<int>(),
+            AlternativeSettings = new List<int>(),
+            AlternativeVersions = new List<int>(),
+            SideStories = new List<int>(),
+            SpinOffs = new List<int>(),
+        };
+    }
+
+    private async Task<bool> generate_UpdateRelatedSeries_library()
+    {
+        await ResetDb();
+
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("0", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("Omake", true, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("Something SP02", true, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("3", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                        }),
+                    }
+                },
+                new Series()
+                {
+                    Name = "Test_series_prequel",
+                    Volumes = new List<Volume>()
+                    {
+                        EntityFactory.CreateVolume("0", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("Omake", true, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("Something SP02", true, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("2", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
+                        }),
+                        EntityFactory.CreateVolume("3", new List<Chapter>()
+                        {
+                            EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
+                        }),
+                    }
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
     #endregion
 }

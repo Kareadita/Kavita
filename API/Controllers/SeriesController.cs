@@ -449,10 +449,9 @@ public class SeriesController : BaseApiController
         if (await _seriesService.UpdateRelatedSeries(dto))
         {
             return Ok();
-        } else
-        {
-            return BadRequest("There was an issue updating relationships");
         }
+
+        return BadRequest("There was an issue updating relationships");
     }
 
 }
