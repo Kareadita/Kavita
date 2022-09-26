@@ -22,9 +22,10 @@ public class DeviceServiceTests : BasicTest
         _deviceService = new DeviceService(_unitOfWork, _logger, Substitute.For<IEmailService>());
     }
 
-    protected void ResetDB()
+    protected new Task ResetDb()
     {
         _context.Users.RemoveRange(_context.Users.ToList());
+        return Task.CompletedTask;
     }
 
 

@@ -16,9 +16,13 @@
                     <div class="row g-0">
                         <div class="mb-3" style="width: 100%">
                             <label for="name" class="form-label">Name</label>
-                            <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
-                                <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }"></ng-container>
-                                <input id="name" class="form-control" formControlName="name" type="text">
+                            <div class="input-group">
+                                <input id="name" class="form-control" formControlName="name" type="text" [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
+                                <ng-container *ngIf="editSeriesForm.get('name')?.errors as errors">
+                                    <div class="invalid-feedback" *ngIf="errors.required">
+                                        This field is required
+                                    </div>
+                                </ng-container>
                             </div>
                         </div>
                     </div>
@@ -26,9 +30,15 @@
                     <div class="row g-0">
                         <div class="mb-3" style="width: 100%">
                             <label for="sort-name" class="form-label">Sort Name</label>
-                            <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
+                            <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
+                                [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
                                 <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
                                 <input id="sort-name" class="form-control" formControlName="sortName" type="text">
+                                <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
+                                    <div class="invalid-feedback" *ngIf="errors.required">
+                                        This field is required
+                                    </div>
+                                </ng-container>
                             </div>
                         </div>
                     </div>
@@ -418,7 +428,7 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
-        <button type="submit" class="btn btn-primary" (click)="save()">Save</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">Save</button>
     </div>
 </div>
 

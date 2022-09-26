@@ -46,6 +46,7 @@ public class EmailService : IEmailService
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
 
+
         FlurlHttp.ConfigureClient(DefaultApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
@@ -126,15 +127,17 @@ public class EmailService : IEmailService
         return await SendEmailWithFiles(emailLink + "/api/sendto", data.FilePaths, data.DestinationEmail);
     }
 
-    private static async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)
+    private async Task<bool> SendEmailWithGet(string url, int timeoutSecs = 30)
     {
         try
         {
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var response = await (url)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("x-kavita-installId", settings.InstallId)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
                 .GetStringAsync();
@@ -152,15 +155,17 @@ public class EmailService : IEmailService
     }
 
 
-    private static async Task<bool> SendEmailWithPost(string url, object data, int timeoutSecs = 30)
+    private async Task<bool> SendEmailWithPost(string url, object data, int timeoutSecs = 30)
     {
         try
         {
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var response = await (url)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("x-kavita-installId", settings.InstallId)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
                 .PostJsonAsync(data);
@@ -182,10 +187,12 @@ public class EmailService : IEmailService
     {
         try
         {
+            var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var response = await (url)
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("x-kavita-installId", settings.InstallId)
                 .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
                 .PostMultipartAsync(mp =>
                 {

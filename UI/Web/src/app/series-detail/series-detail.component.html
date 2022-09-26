@@ -58,11 +58,11 @@
 
 <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-3 info-container">
-        <div class="image-container col-xl-1 col-lg-2 col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
+        <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block">
             <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
             <!-- NOTE: We can put continue point here as Vol X Ch Y or just Ch Y or Book Z ?-->
         </div>
-        <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
+        <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
             <div class="row g-0">
                 <div class="col-auto">
                     <button class="btn btn-primary" (click)="read()">

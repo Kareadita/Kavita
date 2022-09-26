@@ -102,6 +102,10 @@ public class AppUserPreferences
     /// UI Site Global Setting: Should Kavita prompt user to confirm downloads that are greater than 100 MB.
     /// </summary>
     public bool PromptForDownloadSize { get; set; } = true;
+    /// <summary>
+    /// UI Site Global Setting: Should Kavita disable CSS transitions
+    /// </summary>
+    public bool NoTransitions { get; set; } = false;
 
     public AppUser AppUser { get; set; }
     public int AppUserId { get; set; }

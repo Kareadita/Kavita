@@ -1526,6 +1526,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
+    if (this.bookmarkMode) return;
+
     const pageNum = this.pageNum;
     const isDouble = this.layoutMode === LayoutMode.Double || this.layoutMode === LayoutMode.DoubleReversed;
 

@@ -633,13 +633,11 @@ public class ProcessSeries : IProcessSeries
 
         void AddGenre(Genre genre)
         {
-            //chapter.Genres.Add(genre);
             GenreHelper.AddGenreIfNotExists(chapter.Genres, genre);
         }
 
         void AddTag(Tag tag, bool added)
         {
-            //chapter.Tags.Add(tag);
             TagHelper.AddTagIfNotExists(chapter.Tags, tag);
         }
 

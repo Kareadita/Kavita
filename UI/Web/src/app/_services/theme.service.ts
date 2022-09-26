@@ -3,11 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
-import { map, ReplaySubject, Subject, takeUntil, take } from 'rxjs';
+import { map, ReplaySubject, Subject, takeUntil, take, distinctUntilChanged, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../shared/confirm.service';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
 import { SiteTheme, ThemeProvider } from '../_models/preferences/site-theme';
+import { AccountService } from './account.service';
 import { EVENTS, MessageHubService } from './message-hub.service';
 
 
@@ -24,7 +25,7 @@ export class ThemeService implements OnDestroy {
 
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();
-
+  
   /**
    * Maintain a cache of themes. SignalR will inform us if we need to refresh cache
    */

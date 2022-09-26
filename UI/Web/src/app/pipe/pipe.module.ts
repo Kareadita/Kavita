@@ -34,7 +34,7 @@ import { DefaultDatePipe } from './default-date.pipe';
     MangaFormatIconPipe,
     LibraryTypePipe,
     SafeStylePipe,
-    DefaultDatePipe
+    DefaultDatePipe,
   ],
   imports: [
     CommonModule,
@@ -54,7 +54,7 @@ import { DefaultDatePipe } from './default-date.pipe';
     MangaFormatIconPipe,
     LibraryTypePipe,
     SafeStylePipe,
-    DefaultDatePipe
+    DefaultDatePipe,
   ]
 })
 export class PipeModule { }

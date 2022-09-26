@@ -12,6 +12,7 @@ using API.Entities.Enums;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;

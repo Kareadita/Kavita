@@ -351,31 +351,6 @@ public class UserRepository : IUserRepository
                             || EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%")
                 );
 
-            // This doesn't work on bookmarks themselves, only the series. For now, I don't think there is much value add
-            // if (filter.SortOptions != null)
-            // {
-            //     if (filter.SortOptions.IsAscending)
-            //     {
-            //         filterSeriesQuery = filter.SortOptions.SortField switch
-            //         {
-            //             SortField.SortName => filterSeriesQuery.OrderBy(s => s.series.SortName),
-            //             SortField.CreatedDate => filterSeriesQuery.OrderBy(s => s.bookmark.Created),
-            //             SortField.LastModifiedDate => filterSeriesQuery.OrderBy(s => s.bookmark.LastModified),
-            //             _ => filterSeriesQuery
-            //         };
-            //     }
-            //     else
-            //     {
-            //         filterSeriesQuery = filter.SortOptions.SortField switch
-            //         {
-            //             SortField.SortName => filterSeriesQuery.OrderByDescending(s => s.series.SortName),
-            //             SortField.CreatedDate => filterSeriesQuery.OrderByDescending(s => s.bookmark.Created),
-            //             SortField.LastModifiedDate => filterSeriesQuery.OrderByDescending(s => s.bookmark.LastModified),
-            //             _ => filterSeriesQuery
-            //         };
-            //     }
-            // }
-
             query = filterSeriesQuery.Select(o => o.bookmark);
         }
 

@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using API.Entities.Enums;
 using API.Parser;
 using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -65,6 +66,21 @@ public class DefaultParserTests
     [InlineData("/manga/Foo 50 (kiraa)/Specials/Foo 50 SP01.cbz", "Foo 50")]
     [InlineData("/manga/Btooom!/Specials/Just a special SP01.cbz", "Btooom!")]
     public void ParseFromFallbackFolders_ShouldUseExistingSeriesName(string inputFile, string expectedParseInfo)
+    {
+        const string rootDirectory = "/manga/";
+        var fs = new MockFileSystem();
+        fs.AddDirectory(rootDirectory);
+        fs.AddFile(inputFile, new MockFileData(""));
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+        var parser = new DefaultParser(ds);
+        var actual = parser.Parse(inputFile, rootDirectory);
+        _defaultParser.ParseFromFallbackFolders(inputFile, rootDirectory, LibraryType.Manga, ref actual);
+        Assert.Equal(expectedParseInfo, actual.Series);
+    }
+
+    [Theory]
+    [InlineData("/manga/Btooom!/Specials/Art Book.cbz", "Btooom!")]
+    public void ParseFromFallbackFolders_ShouldUseExistingSeriesName_NewScanLoop(string inputFile, string expectedParseInfo)
     {
         const string rootDirectory = "/manga/";
         var fs = new MockFileSystem();

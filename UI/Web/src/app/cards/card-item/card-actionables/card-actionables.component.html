@@ -10,7 +10,7 @@
       <!-- Non Submenu items -->
       <ng-container *ngIf="action.children === undefined || action?.children?.length === 0 || action.dynamicList != undefined; else submenuDropdown">
 
-        <ng-container *ngIf="action.dynamicList != undefined && toDList(action.dynamicList | async) as dList; else justItem">
+        <ng-container *ngIf="action.dynamicList != undefined && (action.dynamicList | async | dynamicList) as dList; else justItem">
           <ng-container *ngFor="let dynamicItem of dList">
             <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
           </ng-container>
@@ -23,7 +23,7 @@
       <ng-template #submenuDropdown>
         <!-- Submenu items -->
         <ng-container *ngIf="shouldRenderSubMenu(action, action.children[0].dynamicList | async)">
-          <div ngbDropdown #subMenuHover="ngbDropdown" placement="right" (mouseover)="preventEvent($event); openSubmenu(action.title, subMenuHover)" (mouseleave)="preventEvent($event)">
+          <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left" (click)="preventEvent($event); openSubmenu(action.title, subMenuHover)" (mouseover)="preventEvent($event); openSubmenu(action.title, subMenuHover)" (mouseleave)="preventEvent($event)">
             <button id="actions-{{action.title}}" class="submenu-toggle" ngbDropdownToggle>{{action.title}} <i class="fa-solid fa-angle-right submenu-icon"></i></button>
             <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
               <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }"></ng-container>

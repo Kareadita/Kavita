@@ -12,7 +12,7 @@ public class Library : IEntityDate
     public int Id { get; set; }
     public string Name { get; set; }
     /// <summary>
-    /// Update this summary with a way it's used, else let's remove it.
+    /// This is not used, but planned once we build out a Library detail page
     /// </summary>
     [Obsolete("This has never been coded for. Likely we can remove it.")]
     public string CoverImage { get; set; }

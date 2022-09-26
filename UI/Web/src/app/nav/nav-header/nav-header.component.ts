@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { fromEvent, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -68,6 +68,13 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
         fromEvent(elem.nativeElement, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(elem.nativeElement));
       }
     })).subscribe();
+
+    // Sometimes the top event emitter can be slow, so let's also check when a navigation occurs and recalculate
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      this.checkBackToTopNeeded(this.scrollElem);
+    });
   }
 
   checkBackToTopNeeded(elem: HTMLElement) {

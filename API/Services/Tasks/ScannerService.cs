@@ -206,8 +206,6 @@ public class ScannerService : IScannerService
         var scanElapsedTime = await ScanFiles(library, new []{folderPath}, false, TrackFiles, true);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
-        //await Task.WhenAll(processTasks);
-
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
