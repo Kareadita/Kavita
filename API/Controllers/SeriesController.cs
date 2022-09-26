@@ -446,52 +446,13 @@ public class SeriesController : BaseApiController
     [HttpPost("update-related")]
     public async Task<ActionResult> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related);
-
-        UpdateRelationForKind(dto.Adaptations, series.Relations.Where(r => r.RelationKind == RelationKind.Adaptation).ToList(), series, RelationKind.Adaptation);
-        UpdateRelationForKind(dto.Characters, series.Relations.Where(r => r.RelationKind == RelationKind.Character).ToList(), series, RelationKind.Character);
-        UpdateRelationForKind(dto.Contains, series.Relations.Where(r => r.RelationKind == RelationKind.Contains).ToList(), series, RelationKind.Contains);
-        UpdateRelationForKind(dto.Others, series.Relations.Where(r => r.RelationKind == RelationKind.Other).ToList(), series, RelationKind.Other);
-        UpdateRelationForKind(dto.SideStories, series.Relations.Where(r => r.RelationKind == RelationKind.SideStory).ToList(), series, RelationKind.SideStory);
-        UpdateRelationForKind(dto.SpinOffs, series.Relations.Where(r => r.RelationKind == RelationKind.SpinOff).ToList(), series, RelationKind.SpinOff);
-        UpdateRelationForKind(dto.AlternativeSettings, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeSetting).ToList(), series, RelationKind.AlternativeSetting);
-        UpdateRelationForKind(dto.AlternativeVersions, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeVersion).ToList(), series, RelationKind.AlternativeVersion);
-        UpdateRelationForKind(dto.Doujinshis, series.Relations.Where(r => r.RelationKind == RelationKind.Doujinshi).ToList(), series, RelationKind.Doujinshi);
-        UpdateRelationForKind(dto.Prequels, series.Relations.Where(r => r.RelationKind == RelationKind.Prequel).ToList(), series, RelationKind.Prequel);
-        UpdateRelationForKind(dto.Sequels, series.Relations.Where(r => r.RelationKind == RelationKind.Sequel).ToList(), series, RelationKind.Sequel);
-
-        if (!_unitOfWork.HasChanges()) return Ok();
-        if (await _unitOfWork.CommitAsync()) return Ok();
-
-
-        return BadRequest("There was an issue updating relationships");
-    }
-
-    // TODO: Move this to a Service and Unit Test it
-    private void UpdateRelationForKind(ICollection<int> dtoTargetSeriesIds, IEnumerable<SeriesRelation> adaptations, Series series, RelationKind kind)
-    {
-        foreach (var adaptation in adaptations.Where(adaptation => !dtoTargetSeriesIds.Contains(adaptation.TargetSeriesId)))
+        if (await _seriesService.UpdateRelatedSeries(dto))
         {
-            // If the seriesId isn't in dto, it means we've removed or reclassified
-            series.Relations.Remove(adaptation);
-        }
-
-        // At this point, we only have things to add
-        foreach (var targetSeriesId in dtoTargetSeriesIds)
+            return Ok();
+        } else
         {
-            // This ensures we don't allow any duplicates to be added
-            if (series.Relations.SingleOrDefault(r =>
-                    r.RelationKind == kind && r.TargetSeriesId == targetSeriesId) !=
-                null) continue;
-
-            series.Relations.Add(new SeriesRelation()
-            {
-                Series = series,
-                SeriesId = series.Id,
-                TargetSeriesId = targetSeriesId,
-                RelationKind = kind
-            });
-            _unitOfWork.SeriesRepository.Update(series);
+            return BadRequest("There was an issue updating relationships");
         }
     }
+
 }
