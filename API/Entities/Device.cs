@@ -33,9 +33,6 @@ public class Device : IEntityDate
     /// </summary>
     public DevicePlatform Platform { get; set; }
 
-
-    //public ICollection<string> SupportedExtensions { get; set; } // TODO: This requires some sort of information at mangaFile level (unless i repack)
-
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; }
 
