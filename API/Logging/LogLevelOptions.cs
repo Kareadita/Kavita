@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Formatting.Display;
 
 namespace API.Logging;
 
@@ -39,6 +40,7 @@ public static class LogLevelOptions
 
     public static LoggerConfiguration CreateConfig(LoggerConfiguration configuration)
     {
+        const string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {ThreadId}] [{Level}] {SourceContext} {Message:lj}{NewLine}{Exception}";
         return configuration
             .MinimumLevel
             .ControlledBy(LogLevelSwitch)
@@ -51,11 +53,11 @@ public static class LogLevelOptions
             .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Error)
             .Enrich.FromLogContext()
             .Enrich.WithThreadId()
-            .WriteTo.Console()
+            .WriteTo.Console(new MessageTemplateTextFormatter(outputTemplate))
             .WriteTo.File(LogFile,
                 shared: true,
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {ThreadId}] [{Level}] {SourceContext} {Message:lj}{NewLine}{Exception}");
+                outputTemplate: outputTemplate);
     }
 
     public static void SwitchLogLevel(string level)
