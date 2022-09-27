@@ -27,7 +27,6 @@ public interface ISeriesService
     Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto);
     Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
-
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
 }
 
