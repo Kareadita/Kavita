@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -76,7 +77,7 @@ public class DeviceController : BaseApiController
     [HttpPost("send-to")]
     public async Task<ActionResult> SendToDevice(SendToDeviceDto dto)
     {
-        if (dto.ChapterId < 0) return BadRequest("ChapterId must be greater than 0");
+        if (dto.ChapterIds.Any(i => i < 0)) return BadRequest("ChapterIds must be greater than 0");
         if (dto.DeviceId < 0) return BadRequest("DeviceId must be greater than 0");
 
         if (await _emailService.IsDefaultEmailService())
@@ -84,7 +85,7 @@ public class DeviceController : BaseApiController
 
         try
         {
-            var success = await _deviceService.SendTo(dto.ChapterId, dto.DeviceId);
+            var success = await _deviceService.SendTo(dto.ChapterIds, dto.DeviceId);
             if (success) return Ok();
         }
         catch (KavitaException ex)
@@ -94,6 +95,7 @@ public class DeviceController : BaseApiController
 
         return BadRequest("There was an error sending the file to the device");
     }
+
 
 
 }

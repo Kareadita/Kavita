@@ -228,7 +228,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       case (Action.SendTo):
       {
         const device = (action._extra!.data as Device);
-        this.deviceSerivce.sendTo(chapter.id, device.id).subscribe(() => {
+        this.deviceSerivce.sendTo([chapter.id], device.id).subscribe(() => {
           this.toastr.success('File emailed to ' + device.name);
         });
         break;

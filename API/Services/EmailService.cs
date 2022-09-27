@@ -172,11 +172,13 @@ public class EmailService : IEmailService
 
             if (response.StatusCode != StatusCodes.Status200OK)
             {
-                return false;
+                var errorMessage = await response.GetStringAsync();
+                throw new KavitaException(errorMessage);
             }
         }
-        catch (Exception)
+        catch (FlurlHttpException ex)
         {
+            _logger.LogError(ex, "There was an exception when interacting with Email Service");
             return false;
         }
         return true;
@@ -193,7 +195,8 @@ public class EmailService : IEmailService
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
+                .WithTimeout(TimeSpan.FromSeconds(60 * 2))
+                .AllowHttpStatus("4xx")
                 .PostMultipartAsync(mp =>
                 {
                     mp.AddString("email", destEmail);
@@ -208,10 +211,11 @@ public class EmailService : IEmailService
 
             if (response.StatusCode != StatusCodes.Status200OK)
             {
-                return false;
+                var errorMessage = await response.GetStringAsync();
+                throw new KavitaException(errorMessage);
             }
         }
-        catch (Exception ex)
+        catch (FlurlHttpException ex)
         {
             _logger.LogError(ex, "There was an exception when sending Email for SendTo");
             return false;

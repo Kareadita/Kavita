@@ -17,7 +17,7 @@ public interface IDeviceService
     Task<Device> Create(CreateDeviceDto dto, AppUser userWithDevices);
     Task<Device> Update(UpdateDeviceDto dto, AppUser userWithDevices);
     Task<bool> Delete(AppUser userWithDevices, int deviceId);
-    Task<bool> SendTo(int chapterId, int deviceId);
+    Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId);
 }
 
 public class DeviceService : IDeviceService
@@ -102,9 +102,9 @@ public class DeviceService : IDeviceService
         return false;
     }
 
-    public async Task<bool> SendTo(int chapterId, int deviceId)
+    public async Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId)
     {
-        var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
+        var files = await _unitOfWork.ChapterRepository.GetFilesForChaptersAsync(chapterIds);
         if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)))
             throw new KavitaException("Cannot Send non Epub or Pdf to devices as not supported");
 
