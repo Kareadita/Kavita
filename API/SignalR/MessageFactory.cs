@@ -112,6 +112,10 @@ public static class MessageFactory
     /// A generic message that can occur in background processing to inform user, but no direct action is needed
     /// </summary>
     public const string Info = "Info";
+    /// <summary>
+    /// When files are being emailed to a device
+    /// </summary>
+    public const string SendingToDevice = "SendingToDevice";
 
 
     public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
@@ -246,6 +250,19 @@ public static class MessageFactory
             EventType = ProgressEventType.Single,
             Progress = ProgressType.None,
             Body = update
+        };
+    }
+
+    public static SignalRMessage SendingToDeviceEvent(string subtitle, string eventType)
+    {
+        return new SignalRMessage
+        {
+            Name = SendingToDevice,
+            Title = "Sending files to Device",
+            SubTitle = subtitle,
+            EventType = eventType,
+            Progress = ProgressType.Indeterminate,
+            Body = new { }
         };
     }
 

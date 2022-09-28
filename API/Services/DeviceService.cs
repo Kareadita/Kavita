@@ -7,6 +7,7 @@ using API.DTOs.Device;
 using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
+using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
@@ -118,6 +119,7 @@ public class DeviceService : IDeviceService
             DestinationEmail = device.EmailAddress,
             FilePaths = files.Select(m => m.FilePath)
         });
+
         return success;
     }
 }

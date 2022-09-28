@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Device;
 using API.Extensions;
 using API.Services;
+using API.SignalR;
+using ExCSS;
 using Kavita.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,12 +24,14 @@ public class DeviceController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDeviceService _deviceService;
     private readonly IEmailService _emailService;
+    private readonly IEventHub _eventHub;
 
-    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService, IEmailService emailService)
+    public DeviceController(IUnitOfWork unitOfWork, IDeviceService deviceService, IEmailService emailService, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _deviceService = deviceService;
         _emailService = emailService;
+        _eventHub = eventHub;
     }
 
 
@@ -83,6 +88,8 @@ public class DeviceController : BaseApiController
         if (await _emailService.IsDefaultEmailService())
             return BadRequest("Send to device cannot be used with Kavita's email service. Please configure your own.");
 
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress, MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "started"), userId);
         try
         {
             var success = await _deviceService.SendTo(dto.ChapterIds, dto.DeviceId);
@@ -91,6 +98,10 @@ public class DeviceController : BaseApiController
         catch (KavitaException ex)
         {
             return BadRequest(ex.Message);
+        }
+        finally
+        {
+            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice, MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "ended"), userId);
         }
 
         return BadRequest("There was an error sending the file to the device");
