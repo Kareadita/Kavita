@@ -256,6 +256,7 @@ public class AccountController : BaseApiController
     [HttpGet("roles")]
     public ActionResult<IList<string>> GetRoles()
     {
+        // TODO: This should be moved to ServerController
         return typeof(PolicyConstants)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(string))
@@ -316,6 +317,7 @@ public class AccountController : BaseApiController
             var errors = await _accountService.ValidateEmail(dto.Email);
             if (errors.Any()) return BadRequest("Email already registered");
             // NOTE: This needs to be handled differently, like save it in a temp variable in DB until email is validated. For now, I wont allow it
+
         }
 
         // Update roles
@@ -619,15 +621,15 @@ public class AccountController : BaseApiController
         }
 
         var roles = await _userManager.GetRolesAsync(user);
-
-
         if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
             return Unauthorized("You are not permitted to this operation.");
+
+        if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
+            return BadRequest("You do not have an email on account or it has not been confirmed");
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var emailLink = GenerateEmailLink(token, "confirm-reset-password", user.Email);
         _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-        _logger.LogCritical("[Forgot Password]: Token {UserName}: {Token}", user.UserName, token);
         var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
         if (await _emailService.CheckIfAccessible(host))
         {
