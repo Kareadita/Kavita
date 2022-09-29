@@ -286,6 +286,32 @@ public class AccountController : BaseApiController
 
     }
 
+
+    [HttpPost("update/email")]
+    public async Task<ActionResult> UpdateEmail(string email)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized("You do not have permission");
+
+        // Validate no other users exist with this email
+        if (user.Email.Equals(email)) return Ok("Nothing to do");
+
+        // Check if email is used by another user
+        var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+        if (existingUserEmail != null)
+        {
+            return BadRequest("You cannot share emails across multiple accounts");
+        }
+
+        user.Email = email;
+        user.EmailConfirmed = false;
+        await _userManager.UpdateAsync(user);
+
+        // NOTE: This needs to be handled differently, like save it in a temp variable in DB until email is validated. For now, I wont allow it
+
+        return Ok();
+    }
+
     /// <summary>
     /// Update the user account. This can only affect Username, Email (will require confirming), Roles, and Library access.
     /// </summary>
@@ -313,7 +339,7 @@ public class AccountController : BaseApiController
 
         if (!user.Email.Equals(dto.Email))
         {
-            // Validate username change
+            // Validate email change
             var errors = await _accountService.ValidateEmail(dto.Email);
             if (errors.Any()) return BadRequest("Email already registered");
             // NOTE: This needs to be handled differently, like save it in a temp variable in DB until email is validated. For now, I wont allow it
@@ -407,6 +433,7 @@ public class AccountController : BaseApiController
     {
         var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (adminUser == null) return Unauthorized("You need to login");
+
         _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
         // Check if there is an existing invite

@@ -13,6 +13,7 @@ import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageDevicesComponent } from './manage-devices/manage-devices.component';
 import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
 import { EditDeviceComponent } from './edit-device/edit-device.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
 
 
 @NgModule({
@@ -24,6 +25,7 @@ import { EditDeviceComponent } from './edit-device/edit-device.component';
     ManageDevicesComponent,
     DevicePlatformPipe,
     EditDeviceComponent,
+    ChangePasswordComponent,
   ],
   imports: [
     CommonModule,
