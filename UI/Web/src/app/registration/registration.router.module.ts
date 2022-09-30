@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { ConfirmEmailChangeComponent } from './confirm-email-change/confirm-email-change.component';
 import { ConfirmEmailComponent } from './confirm-email/confirm-email.component';
 import { ConfirmMigrationEmailComponent } from './confirm-migration-email/confirm-migration-email.component';
 import { ConfirmResetPasswordComponent } from './confirm-reset-password/confirm-reset-password.component';
@@ -23,6 +24,10 @@ const routes: Routes = [
   {
       path: 'confirm-migration-email',
       component: ConfirmMigrationEmailComponent,
+  },
+  {
+      path: 'confirm-email-update',
+      component: ConfirmEmailChangeComponent,
   },
   {
     path: 'register',

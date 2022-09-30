@@ -62,6 +62,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
+    Task<AppUser> GetUserByConfirmationToken(string token);
 }
 
 public class UserRepository : IUserRepository
@@ -266,6 +267,11 @@ public class UserRepository : IUserRepository
     {
         var query = AddIncludesToQuery(_context.Users.AsQueryable(), includeFlags);
         return await query.ToListAsync();
+    }
+
+    public async Task<AppUser> GetUserByConfirmationToken(string token)
+    {
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.ConfirmationToken.Equals(token));
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
@@ -14,7 +12,6 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 
 namespace API.Services;
 
@@ -27,6 +24,7 @@ public interface IEmailService
     Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> TestConnectivity(string emailUrl);
     Task<bool> IsDefaultEmailService();
+    Task SendEmailChangeEmail(ConfirmationEmailDto data);
 }
 
 public class EmailService : IEmailService
@@ -82,6 +80,16 @@ public class EmailService : IEmailService
     {
         return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value
             .Equals(DefaultApiUrl);
+    }
+
+    public async Task SendEmailChangeEmail(ConfirmationEmailDto data)
+    {
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        var success = await SendEmailWithPost(emailLink + "/api/account/email-change", data);
+        if (!success)
+        {
+            _logger.LogError("There was a critical error sending Confirmation email");
+        }
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)

@@ -11,6 +11,7 @@ import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { DeviceService } from './device.service';
+import { UpdateEmailResponse } from '../_models/email/update-email-response';
 
 @Injectable({
   providedIn: 'root'
@@ -152,6 +153,10 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email', model);
   }
 
+  confirmEmailUpdate(model: {email: string, token: string}) {
+    return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email-update', model);
+  }
+
   /**
    * Given a user id, returns a full url for setting up the user account
    * @param userId 
@@ -179,6 +184,10 @@ export class AccountService implements OnDestroy {
 
   update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
+  }
+
+  updateEmail(email: string) {
+    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email});
   }
 
   /**

@@ -9,6 +9,7 @@
             <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
             <ng-template ngbNavContent>
               <ng-container *ngIf="tab.fragment === FragmentID.Account">
+                  <app-change-email></app-change-email>
                   <app-change-password></app-change-password>
               </ng-container>
               <ng-container *ngIf="tab.fragment === FragmentID.Prefernces">

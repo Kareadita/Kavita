@@ -20,8 +20,8 @@ enum AccordionPanelID {
 }
 
 enum FragmentID {
-  Account = '',
-  Prefernces = 'preferences',
+  Account = 'account',
+  Prefernces = '',
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',

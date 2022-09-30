@@ -1,0 +1,19 @@
+
+<app-splash-container>
+    <ng-container title><h2>Validate Email Change</h2></ng-container>
+    <ng-container body>
+        <p *ngIf="!confirmed; else confirmedMessage">Please wait while your email update is validated.</p>
+
+        <ng-template #confirmedMessage>
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title">
+                        <i class="fa-regular fa-circle-check" style="font-size: 2rem" aria-hidden="true"></i>
+                        <h4>Success!</h4>
+                    </div>
+                    <p>Your email has been validated and is now changed within Kavita. You will be redirected to login.</p>
+                </div>
+            </div>
+        </ng-template>
+    </ng-container>
+</app-splash-container>

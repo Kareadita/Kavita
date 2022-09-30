@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { map, Observable, of, shareReplay, Subject, takeUntil } from 'rxjs';
@@ -11,7 +11,7 @@ import { AccountService } from 'src/app/_services/account.service';
   styleUrls: ['./change-password.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChangePasswordComponent implements OnInit {
+export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -69,8 +69,14 @@ export class ChangePasswordComponent implements OnInit {
     this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
       this.toastr.success('Password has been updated');
       this.resetPasswordForm();
+      this.isViewMode = true;
     }, err => {
       this.resetPasswordErrors = err;
     }));
+  }
+
+  toggleViewMode() {
+    this.isViewMode = !this.isViewMode;
+    this.resetPasswordForm();
   }
 }

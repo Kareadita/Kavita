@@ -14,6 +14,7 @@ import { ManageDevicesComponent } from './manage-devices/manage-devices.componen
 import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
 import { EditDeviceComponent } from './edit-device/edit-device.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
+import { ChangeEmailComponent } from './change-email/change-email.component';
 
 
 @NgModule({
@@ -26,6 +27,7 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
     DevicePlatformPipe,
     EditDeviceComponent,
     ChangePasswordComponent,
+    ChangeEmailComponent,
   ],
   imports: [
     CommonModule,

@@ -51,35 +51,35 @@ export enum EVENTS {
   /**
    * A subtype of NotificationProgress that represents a file being processed for cover image extraction
    */
-   CoverUpdateProgress = 'CoverUpdateProgress',
+  CoverUpdateProgress = 'CoverUpdateProgress',
    /**
     * A library is created or removed from the instance
     */
-   LibraryModified = 'LibraryModified',
+  LibraryModified = 'LibraryModified',
    /**
     * A user updates an entities read progress
     */
-   UserProgressUpdate = 'UserProgressUpdate',
+  UserProgressUpdate = 'UserProgressUpdate',
    /**
     * A user updates account or preferences
     */
-   UserUpdate = 'UserUpdate',
+  UserUpdate = 'UserUpdate',
    /**
     * When bulk bookmarks are being converted
     */
-   ConvertBookmarksProgress = 'ConvertBookmarksProgress',
+  ConvertBookmarksProgress = 'ConvertBookmarksProgress',
    /**
     * When files are being scanned to calculate word count
     */
-   WordCountAnalyzerProgress = 'WordCountAnalyzerProgress',
+  WordCountAnalyzerProgress = 'WordCountAnalyzerProgress',
    /**
     * When the user needs to be informed, but it's not a big deal
     */
-   Info = 'Info',
+  Info = 'Info',
    /**
     * A user is sending files to their device
     */
-   SendingToDevice = 'SendingToDevice',
+  SendingToDevice = 'SendingToDevice',
 }
 
 export interface Message<T> {

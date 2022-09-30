@@ -8,4 +8,5 @@ export interface User {
     roles: string[];
     preferences: Preferences;
     apiKey: string;
+    email: string;
 }
