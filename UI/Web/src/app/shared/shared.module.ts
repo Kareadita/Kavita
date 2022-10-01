@@ -7,7 +7,6 @@ import { ReadMoreComponent } from './read-more/read-more.component';
 import { RouterModule } from '@angular/router';
 import { DrawerComponent } from './drawer/drawer.component';
 import { TagBadgeComponent } from './tag-badge/tag-badge.component';
-import { ShowIfScrollbarDirective } from './show-if-scrollbar.directive';
 import { A11yClickDirective } from './a11y-click.directive';
 import { SeriesFormatComponent } from './series-format/series-format.component';
 import { UpdateNotificationModalComponent } from './update-notification/update-notification-modal.component';
@@ -25,7 +24,6 @@ import { IconAndTitleComponent } from './icon-and-title/icon-and-title.component
     ReadMoreComponent,
     DrawerComponent,
     TagBadgeComponent,
-    ShowIfScrollbarDirective,
     A11yClickDirective,
     SeriesFormatComponent,
     UpdateNotificationModalComponent,
@@ -50,16 +48,12 @@ import { IconAndTitleComponent } from './icon-and-title/icon-and-title.component
     A11yClickDirective, // Used globally
     SeriesFormatComponent, // Used globally
     TagBadgeComponent, // Used globally
-    CircularLoaderComponent, // Used in Cards only
+    CircularLoaderComponent, // Used in Cards and Series Detail
     ImageComponent, // Used globally
-
-    ShowIfScrollbarDirective, // Used book reader only?
 
     PersonBadgeComponent,  // Used Series Detail
     BadgeExpanderComponent, // Used Series Detail/Metadata
-
     IconAndTitleComponent, // Used in Series Detail/Metadata
-    
   ],
 })
 export class SharedModule { }
