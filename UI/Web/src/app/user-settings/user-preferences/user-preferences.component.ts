@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { BookService } from 'src/app/book-reader/book.service';
 import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes, pageLayoutModes } from 'src/app/_models/preferences/preferences';
@@ -11,12 +11,21 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
 import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
-import { forkJoin, Observable, of, Subject } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
   BookReader = 'book-reader',
   GlobalSettings = 'global-settings'
+}
+
+enum FragmentID {
+  Account = 'account',
+  Prefernces = '',
+  Clients = 'clients',
+  Theme = 'theme',
+  Devices = 'devices',
+
 }
 
 @Component({
@@ -37,9 +46,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   pageLayoutModes = pageLayoutModes;
 
   settingsForm: FormGroup = new FormGroup({});
-  passwordChangeForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
-  hasChangePasswordAbility: Observable<boolean> = of(false);
 
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
@@ -48,11 +55,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   fontFamilies: Array<string> = [];
 
   tabs: Array<{title: string, fragment: string}> = [
-    {title: 'Preferences', fragment: ''},
-    {title: 'Password', fragment: 'password'},
-    {title: '3rd Party Clients', fragment: 'clients'},
-    {title: 'Theme', fragment: 'theme'},
-    {title: 'Devices', fragment: 'devices'},
+    {title: 'Account', fragment: FragmentID.Account},
+    {title: 'Preferences', fragment: FragmentID.Prefernces},
+    {title: '3rd Party Clients', fragment: FragmentID.Clients},
+    {title: 'Theme', fragment: FragmentID.Theme},
+    {title: 'Devices', fragment: FragmentID.Devices},
   ];
   active = this.tabs[0];
   opdsEnabled: boolean = false;
@@ -64,8 +71,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     return AccordionPanelID;
   }
 
-  public get password() { return this.passwordChangeForm.get('password'); }
-  public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
+  get FragmentID() {
+    return FragmentID;
+  }
+
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
     private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
@@ -91,11 +100,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita - User Preferences');
-
-    this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), map(user => {
-      return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
-    }));
-    this.cdRef.markForCheck();
 
     forkJoin({
       user: this.accountService.currentUser$.pipe(take(1)),
@@ -138,18 +142,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
       this.cdRef.markForCheck();
     });
-
-    this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
-    this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
-    this.passwordChangeForm.addControl('oldPassword', new FormControl('', [Validators.required]));
-
-    
-
-    this.observableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
-      const values = this.passwordChangeForm.value;
-      this.passwordsMatch = values.password === values.confirmPassword;
-      this.cdRef.markForCheck();
-    }));
 
     this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(mode => {
       if (mode) {
@@ -194,14 +186,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.markAsPristine();
   }
 
-  resetPasswordForm() {
-    this.passwordChangeForm.get('password')?.setValue('');
-    this.passwordChangeForm.get('confirmPassword')?.setValue('');
-    this.passwordChangeForm.get('oldPassword')?.setValue('');
-    this.resetPasswordErrors = [];
-    this.cdRef.markForCheck();
-  }
-
   save() {
     if (this.user === undefined) return;
     const modelSettings = this.settingsForm.value;
@@ -240,18 +224,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     }));
   }
 
-  savePasswordForm() {
-    if (this.user === undefined) { return; }
-
-    const model = this.passwordChangeForm.value;
-    this.resetPasswordErrors = [];
-    this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
-      this.toastr.success('Password has been updated');
-      this.resetPasswordForm();
-    }, err => {
-      this.resetPasswordErrors = err;
-    }));
-  }
 
   transformKeyToOpdsUrl(key: string) {
     return `${location.origin}/api/opds/${key}`;

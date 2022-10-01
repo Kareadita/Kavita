@@ -32,7 +32,7 @@ public static class IdentityServiceExtensions
                 opt.Password.RequireNonAlphanumeric = false;
                 opt.Password.RequiredLength = 6;
 
-                opt.SignIn.RequireConfirmedEmail = true;
+                opt.SignIn.RequireConfirmedEmail = false;
 
                 opt.Lockout.AllowedForNewUsers = true;
                 opt.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);

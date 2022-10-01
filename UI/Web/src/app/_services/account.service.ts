@@ -11,6 +11,7 @@ import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { DeviceService } from './device.service';
+import { UpdateEmailResponse } from '../_models/email/update-email-response';
 
 @Injectable({
   providedIn: 'root'
@@ -132,6 +133,10 @@ export class AccountService implements OnDestroy {
     );
   }
 
+  isEmailConfirmed() {
+    return this.httpClient.get<boolean>(this.baseUrl + 'account/email-confirmed');
+  }
+
   migrateUser(model: {email: string, username: string, password: string, sendEmail: boolean}) {
     return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, {responseType: 'text' as 'json'});
   }
@@ -150,6 +155,10 @@ export class AccountService implements OnDestroy {
 
   confirmEmail(model: {email: string, username: string, password: string, token: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email', model);
+  }
+
+  confirmEmailUpdate(model: {email: string, token: string}) {
+    return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email-update', model);
   }
 
   /**
@@ -179,6 +188,10 @@ export class AccountService implements OnDestroy {
 
   update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
+  }
+
+  updateEmail(email: string) {
+    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email});
   }
 
   /**

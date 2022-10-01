@@ -82,7 +82,8 @@ public class ParseScannedFiles
         {
             // This is used in library scan, so we should check first for a ignore file and use that here as well
             var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
-            var directories = _directoryService.GetDirectories(folderPath, _directoryService.CreateMatcherFromFile(potentialIgnoreFile)).ToList();
+            var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
+            var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
 
             foreach (var directory in directories)
             {
@@ -94,7 +95,7 @@ public class ParseScannedFiles
                 else
                 {
                     // For a scan, this is doing everything in the directory loop before the folder Action is called...which leads to no progress indication
-                    await folderAction(_directoryService.ScanFiles(directory), directory);
+                    await folderAction(_directoryService.ScanFiles(directory, matcher), directory);
                 }
             }
 

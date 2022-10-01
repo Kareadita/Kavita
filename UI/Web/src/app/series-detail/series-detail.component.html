@@ -2,7 +2,7 @@
     <app-side-nav-companion-bar *ngIf="series !== undefined" [hasExtras]="true" [extraDrawer]="extrasDrawer">
             <ng-container title>
                 <h2 class="title text-break">
-                    <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
                     <span>{{series.name}}</span>
                 </h2>
             </ng-container>
@@ -81,7 +81,7 @@
                 </div>
                 <div class="col-auto ms-2 d-none d-sm-block">
                     <div class="card-actions">
-                        <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
                     </div>
                 </div>
 

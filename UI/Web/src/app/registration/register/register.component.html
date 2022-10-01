@@ -16,7 +16,7 @@
 
             <div class="mb-3" style="width:100%">
                 <label for="email" class="form-label">Email</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
-                <ng-template #emailTooltip>Email does not have to be valid, it is used for forgot password flow. It is not sent outside the server unless forgot password is used without a custom email service host.</ng-template>
+                <ng-template #emailTooltip>Email is optional and provides acccess to forgot password. It is not sent outside the server unless forgot password is used without a custom email service host.</ng-template>
                 <span class="visually-hidden" id="email-help">
                     <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
                 </span>

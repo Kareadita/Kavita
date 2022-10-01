@@ -40,8 +40,8 @@ export class DeviceService {
     }));
   }
 
-  sendTo(chapterId: number, deviceId: number) {
-    return this.httpClient.post(this.baseUrl + 'device/send-to', {deviceId, chapterId}, {responseType: 'text' as 'json'});
+  sendTo(chapterIds: Array<number>, deviceId: number) {
+    return this.httpClient.post(this.baseUrl + 'device/send-to', {deviceId, chapterIds}, {responseType: 'text' as 'json'});
   }
 
   

@@ -13,9 +13,7 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
   imports: [
     CommonModule,
     AllSeriesRoutingModule,
-
     SharedSideNavCardsModule
-
   ]
 })
 export class AllSeriesModule { }

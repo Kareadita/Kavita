@@ -113,11 +113,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   seriesImage: string = '';
   downloadInProgress: boolean = false;
 
-  /**
-   * If an action is currently being done, don't let the user kick off another action
-   */
-  actionInProgress: boolean = false;
-
   itemSize: number = 10; // when 10 done, 16 loads
 
   /**
@@ -182,7 +177,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     switch (action.action) {
       case Action.AddToReadingList:
         this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, (success) => {
-          this.actionInProgress = false;
           if (success) this.bulkSelectionService.deselectAll();
           this.changeDetectionRef.markForCheck();
         });
@@ -190,7 +184,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       case Action.MarkAsRead:
         this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
-          this.actionInProgress = false;
           this.bulkSelectionService.deselectAll();
           this.changeDetectionRef.markForCheck();
         });
@@ -199,7 +192,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       case Action.MarkAsUnread:
         this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
-          this.actionInProgress = false;
           this.bulkSelectionService.deselectAll();
           this.changeDetectionRef.markForCheck();
         });
@@ -334,70 +326,53 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
-    this.actionInProgress = true;
     this.changeDetectionRef.markForCheck();
     switch(action.action) {
       case(Action.MarkAsRead):
         this.actionService.markSeriesAsRead(series, (series: Series) => {
-          this.actionInProgress = false;
           this.loadSeries(series.id);
         });
         break;
       case(Action.MarkAsUnread):
         this.actionService.markSeriesAsUnread(series, (series: Series) => {
-          this.actionInProgress = false;
           this.loadSeries(series.id);
         });
         break;
       case(Action.Scan):
-        this.actionService.scanSeries(series, () => {
-          this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        });
+        this.actionService.scanSeries(series);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetdata(series, () => {
-          this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        });
+        this.actionService.refreshMetdata(series);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
         break;
       case(Action.AddToReadingList):
-        this.actionService.addSeriesToReadingList(series, () => {
-          this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        });
+        this.actionService.addSeriesToReadingList(series);
         break;
       case(Action.AddToCollection):
-        this.actionService.addMultipleSeriesToCollectionTag([series], () => {
-          this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        });
+        this.actionService.addMultipleSeriesToCollectionTag([series]);
         break;
       case (Action.AnalyzeFiles):
-        this.actionService.analyzeFilesForSeries(series, () => {
-          this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        });
+        this.actionService.analyzeFilesForSeries(series);
         break;
       case Action.AddToWantToReadList:
-        this.actionService.addMultipleSeriesToWantToReadList([series.id], () => {
-          this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        });
+        this.actionService.addMultipleSeriesToWantToReadList([series.id]);
         break;
       case Action.RemoveFromWantToReadList:
-        this.actionService.removeMultipleSeriesFromWantToReadList([series.id], () => {
-          this.actionInProgress = false;
-          this.changeDetectionRef.markForCheck();
-        });
+        this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
         break;
-      case (Action.Download):
+      case Action.Download:
         if (this.downloadInProgress) return;
         this.downloadSeries();
         break;
+      case Action.SendTo:
+        {
+          const chapterIds = this.volumes.map(v => v.chapters.map(c => c.id)).flat()
+          const device = (action._extra!.data as Device);
+          this.actionService.sendToDevice(chapterIds, device);
+          break;
+        }
       default:
         break;
     }
@@ -422,6 +397,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
           this.openChapter(volume.chapters.sort(this.utilityService.sortChapters)[0], true);
         }
         break;
+      case (Action.SendTo):
+        {
+          const device = (action._extra!.data as Device);
+          this.actionService.sendToDevice(volume.chapters.map(c => c.id), device);
+          break;
+        }
       default:
         break;
     }
@@ -447,7 +428,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       case (Action.SendTo):
         {
           const device = (action._extra!.data as Device);
-          this.deviceSerivce.sendTo(chapter.id, device.id).subscribe(() => {
+          this.deviceSerivce.sendTo([chapter.id], device.id).subscribe(() => {
             this.toastr.success('File emailed to ' + device.name);
           });
           break;
@@ -460,7 +441,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
   async deleteSeries(series: Series) {
     this.actionService.deleteSeries(series, (result: boolean) => {
-      this.actionInProgress = false;
       this.changeDetectionRef.markForCheck();
       if (result) {
         this.router.navigate(['library', this.libraryId]);
@@ -604,8 +584,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
     this.actionService.markVolumeAsRead(this.seriesId, vol, () => {
       this.setContinuePoint();
-      this.actionInProgress = false;
-      this.changeDetectionRef.markForCheck();
     });
   }
 
@@ -616,8 +594,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
     this.actionService.markVolumeAsUnread(this.seriesId, vol, () => {
       this.setContinuePoint();
-      this.actionInProgress = false;
-      this.changeDetectionRef.markForCheck();
     });
   }
 
@@ -628,8 +604,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
     this.actionService.markChapterAsRead(this.seriesId, chapter, () => {
       this.setContinuePoint();
-      this.actionInProgress = false;
-      this.changeDetectionRef.markForCheck();
     });
   }
 
@@ -640,8 +614,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
     this.actionService.markChapterAsUnread(this.seriesId, chapter, () => {
       this.setContinuePoint();
-      this.actionInProgress = false;
-      this.changeDetectionRef.markForCheck();
     });
   }
 

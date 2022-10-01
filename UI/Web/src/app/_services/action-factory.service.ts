@@ -384,6 +384,24 @@ export class ActionFactoryService {
 				]
 			},
       {
+        action: Action.Submenu,
+        title: 'Send To',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [
+          {
+            action: Action.SendTo,
+            title: '',
+            callback: this.dummyCallback,
+            requiresAdmin: false,
+            dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
+              return {'title': d.name, 'data': d};
+            }), shareReplay())),
+            children: []
+          }
+        ],
+      },
+      {
         action: Action.Download,
         title: 'Download',
         callback: this.dummyCallback,

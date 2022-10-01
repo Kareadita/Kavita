@@ -62,6 +62,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
+    Task<AppUser> GetUserByConfirmationToken(string token);
 }
 
 public class UserRepository : IUserRepository
@@ -268,6 +269,11 @@ public class UserRepository : IUserRepository
         return await query.ToListAsync();
     }
 
+    public async Task<AppUser> GetUserByConfirmationToken(string token)
+    {
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.ConfirmationToken.Equals(token));
+    }
+
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
@@ -403,10 +409,14 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns a list of users that are considered Pending by invite. This means email is unconfirmed and they have never logged in
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync()
     {
         return await _context.Users
-            .Where(u => !u.EmailConfirmed)
+            .Where(u => !u.EmailConfirmed && u.LastActive == DateTime.MinValue)
             .Include(x => x.Libraries)
             .Include(r => r.UserRoles)
             .ThenInclude(r => r.Role)

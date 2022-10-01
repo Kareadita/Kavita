@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
@@ -14,7 +12,6 @@ using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 
 namespace API.Services;
 
@@ -27,6 +24,7 @@ public interface IEmailService
     Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> TestConnectivity(string emailUrl);
     Task<bool> IsDefaultEmailService();
+    Task SendEmailChangeEmail(ConfirmationEmailDto data);
 }
 
 public class EmailService : IEmailService
@@ -82,6 +80,16 @@ public class EmailService : IEmailService
     {
         return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value
             .Equals(DefaultApiUrl);
+    }
+
+    public async Task SendEmailChangeEmail(ConfirmationEmailDto data)
+    {
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        var success = await SendEmailWithPost(emailLink + "/api/account/email-change", data);
+        if (!success)
+        {
+            _logger.LogError("There was a critical error sending Confirmation email");
+        }
     }
 
     public async Task SendConfirmationEmail(ConfirmationEmailDto data)
@@ -172,18 +180,20 @@ public class EmailService : IEmailService
 
             if (response.StatusCode != StatusCodes.Status200OK)
             {
-                return false;
+                var errorMessage = await response.GetStringAsync();
+                throw new KavitaException(errorMessage);
             }
         }
-        catch (Exception)
+        catch (FlurlHttpException ex)
         {
+            _logger.LogError(ex, "There was an exception when interacting with Email Service");
             return false;
         }
         return true;
     }
 
 
-    private async Task<bool> SendEmailWithFiles(string url, IEnumerable<string> filePaths, string destEmail, int timeoutSecs = 30)
+    private async Task<bool> SendEmailWithFiles(string url, IEnumerable<string> filePaths, string destEmail, int timeoutSecs = 300)
     {
         try
         {
@@ -193,7 +203,8 @@ public class EmailService : IEmailService
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithTimeout(TimeSpan.FromSeconds(timeoutSecs))
+                .WithTimeout(timeoutSecs)
+                .AllowHttpStatus("4xx")
                 .PostMultipartAsync(mp =>
                 {
                     mp.AddString("email", destEmail);
@@ -208,10 +219,11 @@ public class EmailService : IEmailService
 
             if (response.StatusCode != StatusCodes.Status200OK)
             {
-                return false;
+                var errorMessage = await response.GetStringAsync();
+                throw new KavitaException(errorMessage);
             }
         }
-        catch (Exception ex)
+        catch (FlurlHttpException ex)
         {
             _logger.LogError(ex, "There was an exception when sending Email for SendTo");
             return false;
