@@ -29,20 +29,15 @@ export class ConfirmEmailChangeComponent implements OnInit {
       const token = this.route.snapshot.queryParamMap.get('token');
       const email = this.route.snapshot.queryParamMap.get('email');
 
-      if (token == undefined || token === '' || token === null) {
+      if (this.isNullOrEmpty(token) || this.isNullOrEmpty(email)) {
         // This is not a valid url, redirect to login
         this.toastr.error('Invalid confirmation url');
-        //this.router.navigateByUrl('login');
+        this.router.navigateByUrl('login');
         return;
       }
-      if (email == undefined || email === '' || email === null) {
-        // This is not a valid url, redirect to login
-        this.toastr.error('Invalid confirmation email');
-        //this.router.navigateByUrl('login');
-        return;
-      }
-      this.token = token;
-      this.email = email;
+
+      this.token = token!;
+      this.email = email!;
   }
 
   ngOnInit(): void {
@@ -51,6 +46,10 @@ export class ConfirmEmailChangeComponent implements OnInit {
       this.cdRef.markForCheck();
       setTimeout(() => this.router.navigateByUrl('login'), 2000);
     });
+  }
+
+  isNullOrEmpty(v: string | null | undefined) {
+    return v == undefined || v === '' || v === null;
   }
 
 }
