@@ -61,7 +61,7 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
           this.toastr.success('An email has been sent to your old email address for confirmation');
         }
       } else {
-        this.toastr.success('The server is not publically accessible. Ask the admin to fetch your confirmation link from the logs');
+        this.toastr.success('The server is not publicly accessible. Ask the admin to fetch your confirmation link from the logs');
       }
       
       this.resetForm();
