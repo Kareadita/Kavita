@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -47,6 +48,8 @@ public class ProcessSeries : IProcessSeries
     private volatile IList<Genre> _genres;
     private volatile IList<Person> _people;
     private volatile IList<Tag> _tags;
+
+    private static readonly SemaphoreSlim _saveChangesLock = new SemaphoreSlim(initialCount: 1);
 
 
 
@@ -162,17 +165,24 @@ public class ProcessSeries : IProcessSeries
             {
                 try
                 {
+                    await _saveChangesLock.WaitAsync();
                     await _unitOfWork.CommitAsync();
                 }
                 catch (Exception ex)
                 {
                     await _unitOfWork.RollbackAsync();
-                    _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the database for series {@SeriesName}", series.Name);
+                    _logger.LogCritical(ex,
+                        "[ScannerService] There was an issue writing to the database for series {@SeriesName}",
+                        series.Name);
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
                             ex.Message));
                     return;
+                }
+                finally
+                {
+                    _saveChangesLock.Release();
                 }
 
                 if (seriesAdded)
