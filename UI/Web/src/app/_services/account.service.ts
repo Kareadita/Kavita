@@ -133,6 +133,10 @@ export class AccountService implements OnDestroy {
     );
   }
 
+  isEmailConfirmed() {
+    return this.httpClient.get<boolean>(this.baseUrl + 'account/email-confirmed');
+  }
+
   migrateUser(model: {email: string, username: string, password: string, sendEmail: boolean}) {
     return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, {responseType: 'text' as 'json'});
   }

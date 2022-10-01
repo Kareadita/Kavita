@@ -2,7 +2,14 @@
     <div class="card-body">
         <div class="card-title">
             <div class="row mb-2">
-                <div class="col-11"><h4 id="email-card">Email</h4></div>
+                <div class="col-11">
+                    <h4 id="email-card">Email 
+                        <ng-container *ngIf="!emailConfirmed">
+                            <i class="fa-solid fa-circle ms-1 confirm-icon" aria-hidden="true" ngbTooltip="This email is not confirmed"></i>
+                            <span class="visually-hidden">This email is not confirmed</span>
+                        </ng-container>
+                    </h4>
+                </div>
                 <div class="col-1">
                     <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
                 </div>
@@ -11,7 +18,6 @@
         
         <ng-container *ngIf="isViewMode">
             <span>{{user?.email}}</span>
-            <!-- TODO: Need an unconfirmed or something -->
         </ng-container>
 
         <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">

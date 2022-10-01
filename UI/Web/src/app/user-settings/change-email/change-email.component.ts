@@ -20,6 +20,7 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
   errors: string[] = [];
   isViewMode: boolean = true;
   emailLink: string = '';
+  emailConfirmed: boolean = true;
 
   public get email() { return this.form.get('email'); }
 
@@ -34,7 +35,13 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
       this.user = user;
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
       this.cdRef.markForCheck();
-    })
+      this.accountService.isEmailConfirmed().subscribe((confirmed) => {
+        this.emailConfirmed = confirmed;
+        this.cdRef.markForCheck();
+      });
+    });
+
+    
   }
 
   ngOnDestroy() {

@@ -750,6 +750,15 @@ public class AccountController : BaseApiController
         return Ok("Your server is not accessible. The Link to reset your password is in the logs.");
     }
 
+    [HttpGet("email-confirmed")]
+    public async Task<ActionResult<bool>> IsEmailConfirmed()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
+
+        return Ok(user.EmailConfirmed);
+    }
+
     [AllowAnonymous]
     [HttpPost("confirm-migration-email")]
     public async Task<ActionResult<UserDto>> ConfirmMigrationEmail(ConfirmMigrationEmailDto dto)
