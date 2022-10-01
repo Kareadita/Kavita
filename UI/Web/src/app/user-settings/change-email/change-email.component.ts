@@ -73,7 +73,6 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
 
   toggleViewMode() {
     this.isViewMode = !this.isViewMode;
-    console.log('email: ', this.user?.email);
     this.resetForm();
   }
 

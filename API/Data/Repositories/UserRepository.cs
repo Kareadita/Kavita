@@ -409,10 +409,14 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns a list of users that are considered Pending by invite. This means email is unconfirmed and they have never logged in
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync()
     {
         return await _context.Users
-            .Where(u => !u.EmailConfirmed)
+            .Where(u => !u.EmailConfirmed && u.LastActive == DateTime.MinValue)
             .Include(x => x.Libraries)
             .Include(r => r.UserRoles)
             .ThenInclude(r => r.Role)
