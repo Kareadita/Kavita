@@ -193,7 +193,7 @@ public class EmailService : IEmailService
     }
 
 
-    private async Task<bool> SendEmailWithFiles(string url, IEnumerable<string> filePaths, string destEmail, int timeoutSecs = 30)
+    private async Task<bool> SendEmailWithFiles(string url, IEnumerable<string> filePaths, string destEmail, int timeoutSecs = 300)
     {
         try
         {
@@ -203,7 +203,7 @@ public class EmailService : IEmailService
                 .WithHeader("x-api-key", "MsnvA2DfQqxSK5jh")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("x-kavita-installId", settings.InstallId)
-                .WithTimeout(TimeSpan.FromSeconds(60 * 2))
+                .WithTimeout(timeoutSecs)
                 .AllowHttpStatus("4xx")
                 .PostMultipartAsync(mp =>
                 {
