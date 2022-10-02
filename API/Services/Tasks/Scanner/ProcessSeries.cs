@@ -49,10 +49,6 @@ public class ProcessSeries : IProcessSeries
     private volatile IList<Person> _people;
     private volatile IList<Tag> _tags;
 
-    private static readonly SemaphoreSlim _saveChangesLock = new SemaphoreSlim(initialCount: 1);
-
-
-
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService)
@@ -165,7 +161,6 @@ public class ProcessSeries : IProcessSeries
             {
                 try
                 {
-                    await _saveChangesLock.WaitAsync();
                     await _unitOfWork.CommitAsync();
                 }
                 catch (Exception ex)
@@ -179,10 +174,6 @@ public class ProcessSeries : IProcessSeries
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
                             ex.Message));
                     return;
-                }
-                finally
-                {
-                    _saveChangesLock.Release();
                 }
 
                 if (seriesAdded)
