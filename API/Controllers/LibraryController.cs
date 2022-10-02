@@ -213,9 +213,11 @@ public class LibraryController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
         // Validate user has Admin privileges
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!isAdmin) return BadRequest("API key must belong to an admin");
+
         if (dto.FolderPath.Contains("..")) return BadRequest("Invalid Path");
 
         dto.FolderPath = Services.Tasks.Scanner.Parser.Parser.NormalizePath(dto.FolderPath);
