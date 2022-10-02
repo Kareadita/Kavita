@@ -51,6 +51,14 @@ public class LibraryWatcher : ILibraryWatcher
     /// <remarks>The Job will be enqueued instantly</remarks>
     private readonly TimeSpan _queueWaitTime;
 
+    /// <summary>
+    /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
+    /// </summary>
+    private int _bufferFullCounter = 0;
+
+    private DateTime _lastBufferOverflow = DateTime.MinValue;
+
+
 
     public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<LibraryWatcher> logger, IScannerService scannerService, IHostEnvironment environment)
     {
@@ -118,6 +126,9 @@ public class LibraryWatcher : ILibraryWatcher
     public async Task RestartWatching()
     {
         _logger.LogDebug("[LibraryWatcher] Restarting watcher");
+
+        UpdateBufferOverflow();
+
         StopWatching();
         await StartWatching();
     }
@@ -151,6 +162,15 @@ public class LibraryWatcher : ILibraryWatcher
     private void OnError(object sender, ErrorEventArgs e)
     {
         _logger.LogError(e.GetException(), "[LibraryWatcher] An error occured, likely too many changes occured at once or the folder being watched was deleted. Restarting Watchers");
+        _bufferFullCounter += 1;
+        _lastBufferOverflow = DateTime.Now;
+
+        if (_bufferFullCounter >= 3)
+        {
+            _logger.LogInformation("[LibraryWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour");
+            BackgroundJob.Schedule(() => RestartWatching(), TimeSpan.FromHours(1));
+            return;
+        }
         Task.Run(RestartWatching);
     }
 
@@ -162,8 +182,11 @@ public class LibraryWatcher : ILibraryWatcher
     /// <remarks>This is public only because Hangfire will invoke it. Do not call external to this class.</remarks>
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
+    // ReSharper disable once MemberCanBePrivate.Global
     public async Task ProcessChange(string filePath, bool isDirectoryChange = false)
     {
+        UpdateBufferOverflow();
+
         var sw = Stopwatch.StartNew();
         _logger.LogDebug("[LibraryWatcher] Processing change of {FilePath}", filePath);
         try
@@ -231,5 +254,16 @@ public class LibraryWatcher : ILibraryWatcher
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
         return  Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.First()));
+    }
+
+    private void UpdateBufferOverflow()
+    {
+        if (_bufferFullCounter == 0) return;
+        // If the last buffer overflow is over 5 mins back, we can remove a buffer count
+        if (_lastBufferOverflow < DateTime.Now.Subtract(TimeSpan.FromMinutes(5)))
+        {
+            _bufferFullCounter = Math.Min(0, _bufferFullCounter - 1);
+            _lastBufferOverflow = DateTime.Now;
+        }
     }
 }
