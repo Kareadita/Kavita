@@ -235,7 +235,7 @@ public class ProcessSeries : IProcessSeries
         var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
 
         // Update Metadata based on Chapter metadata
-        series.Metadata.ReleaseYear = chapters.Min(c => c.ReleaseDate.Year);
+        series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).Min();
 
         if (series.Metadata.ReleaseYear < 1000)
         {
@@ -440,6 +440,7 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
+            _logger.LogDebug("[ScannerService] Looking up volume for {volumeNumber}", volumeNumber);
             var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
             if (volume == null)
             {
