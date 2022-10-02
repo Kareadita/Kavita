@@ -40,7 +40,7 @@ public static class LogLevelOptions
 
     public static LoggerConfiguration CreateConfig(LoggerConfiguration configuration)
     {
-        const string outputTemplate = "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {ThreadId}] [{Level}] {SourceContext} {Message:lj}{NewLine}{Exception}";
+        const string outputTemplate = "[Kavita] [{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} {CorrelationId} {ThreadId}] [{Level}] {SourceContext} {Message:lj}{NewLine}{Exception}";
         return configuration
             .MinimumLevel
             .ControlledBy(LogLevelSwitch)
