@@ -102,6 +102,12 @@ public class ScannerService : IScannerService
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
         if (seriesId > 0)
         {
+            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries",
+                    new object[] {seriesId, true}))
+            {
+                _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
+                return;
+            }
             BackgroundJob.Enqueue(() => ScanSeries(seriesId, true));
             return;
         }
@@ -119,6 +125,12 @@ public class ScannerService : IScannerService
         var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
+            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanLibrary",
+                    new object[] {library.Id, false}))
+            {
+                _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
+                return;
+            }
             BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
         }
     }
