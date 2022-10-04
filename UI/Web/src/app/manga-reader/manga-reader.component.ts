@@ -1044,8 +1044,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.isCoverImage()
         || this.isWideImage(this.canvasImagePrev)
       ) ? 2 : 1;
-    }
-    if (this.layoutMode === LayoutMode.DoubleReversed) {
+    } else if (this.layoutMode === LayoutMode.DoubleReversed) {
       pageAmount = !(
         this.isCoverImage() 
         || this.isCoverImage(this.pageNum - 1) 
@@ -1302,11 +1301,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * and also maintains page info (wide image, etc) due to onload event.
    */
   prefetch() {
-    for(let i = 1; i <= PREFETCH_PAGES - 3; i++) {
+    for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
       const numOffset = this.pageNum + i;
       if (numOffset > this.maxPages - 1) continue;
 
-      const index = numOffset % this.cachedImages.length;
+      const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       if (this.readerService.imageUrlToPageNum(this.cachedImages[index].src) !== numOffset) {
         this.cachedImages[index].src = this.getPageUrl(numOffset);
         this.cachedImages[index].onload = () => this.cdRef.markForCheck();
@@ -1350,7 +1349,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.renderPage();
-    this.cdRef.markForCheck();
     this.prefetch();
     this.isLoading = false;
     this.cdRef.markForCheck();
