@@ -661,6 +661,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pageNum = 0;
     this.pagingDirection = PAGING_DIRECTION.FORWARD;
     this.inSetup = true;
+    this.canvasImage.src = '';
+    this.canvasImage2.src = '';
     this.cdRef.markForCheck();
 
     if (this.goToPageEvent) {
