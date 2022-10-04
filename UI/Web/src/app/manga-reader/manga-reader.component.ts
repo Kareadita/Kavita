@@ -1307,6 +1307,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const index = numOffset % this.cachedImages.length;
       if (this.readerService.imageUrlToPageNum(this.cachedImages[index].src) !== numOffset) {
         this.cachedImages[index].src = this.getPageUrl(numOffset);
+        this.cachedImages[index].onload = () => this.cdRef.markForCheck();
       }
     }
 
@@ -1347,6 +1348,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.renderPage();
+    this.cdRef.markForCheck();
     this.prefetch();
     this.isLoading = false;
     this.cdRef.markForCheck();
