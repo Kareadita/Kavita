@@ -61,7 +61,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'Theme', fragment: FragmentID.Theme},
     {title: 'Devices', fragment: FragmentID.Devices},
   ];
-  active = this.tabs[0];
+  active = this.tabs[1];
   opdsEnabled: boolean = false;
   makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
 
@@ -87,7 +87,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       if (tab.length > 0) {
         this.active = tab[0];
       } else {
-        this.active = this.tabs[0]; // Default to first tab
+        this.active = this.tabs[1]; // Default to preferences
       }
       this.cdRef.markForCheck();
     });

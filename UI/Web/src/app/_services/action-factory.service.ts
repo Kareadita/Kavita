@@ -543,12 +543,28 @@ export class ActionFactoryService {
     });
   }
 
-	private applyCallbackToList(list: Array<ActionItem<any>>, callback: (action: ActionItem<any>, data: any) => void): Array<ActionItem<any>> {
+	public applyCallbackToList(list: Array<ActionItem<any>>, callback: (action: ActionItem<any>, data: any) => void): Array<ActionItem<any>> {
 		const actions = list.map((a) => {
 			return { ...a };
 		});
 		actions.forEach((action) => this.applyCallback(action, callback));
 		return actions;
 	}
+
+  // Checks the whole tree for the action and returns true if it exists
+  public hasAction(actions: Array<ActionItem<any>>, action: Action) {
+    var actionFound = false;
+
+    if (actions.length === 0) return actionFound;
+
+    for (let i = 0; i < actions.length; i++) 
+    {
+      if (actions[i].action === action) return true;
+      if (this.hasAction(actions[i].children, action)) return true;
+    }
+
+
+    return actionFound;
+  }
   
 }

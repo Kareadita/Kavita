@@ -102,6 +102,12 @@ public class ScannerService : IScannerService
         var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
         if (seriesId > 0)
         {
+            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries",
+                    new object[] {seriesId, true}))
+            {
+                _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
+                return;
+            }
             BackgroundJob.Enqueue(() => ScanSeries(seriesId, true));
             return;
         }
@@ -119,6 +125,12 @@ public class ScannerService : IScannerService
         var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
+            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanLibrary",
+                    new object[] {library.Id, false}))
+            {
+                _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
+                return;
+            }
             BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
         }
     }
@@ -175,13 +187,11 @@ public class ScannerService : IScannerService
         }
 
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        var processTasks = new List<Task>();
-
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
 
         await _processSeries.Prime();
-        void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var parsedFiles = parsedInfo.Item2;
             if (parsedFiles.Count == 0) return;
@@ -198,7 +208,7 @@ public class ScannerService : IScannerService
                 return;
             }
 
-            processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
+            await _processSeries.ProcessSeriesAsync(parsedFiles, library);
             parsedSeries.Add(foundParsedSeries, parsedFiles);
         }
 
@@ -424,7 +434,7 @@ public class ScannerService : IScannerService
 
         await _processSeries.Prime();
         var processTasks = new List<Task>();
-        void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
@@ -452,7 +462,7 @@ public class ScannerService : IScannerService
 
 
             seenSeries.Add(foundParsedSeries);
-            processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
+            await _processSeries.ProcessSeriesAsync(parsedFiles, library);
         }
 
 
@@ -512,7 +522,7 @@ public class ScannerService : IScannerService
     }
 
     private async Task<long> ScanFiles(Library library, IEnumerable<string> dirs,
-        bool isLibraryScan, Action<Tuple<bool, IList<ParserInfo>>> processSeriesInfos = null, bool forceChecks = false)
+        bool isLibraryScan, Func<Tuple<bool, IList<ParserInfo>>, Task> processSeriesInfos = null, bool forceChecks = false)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();

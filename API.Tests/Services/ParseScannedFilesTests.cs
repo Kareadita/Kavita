@@ -53,7 +53,7 @@ internal class MockReadingItemService : IReadingItemService
 
     public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public ParserInfo Parse(string path, string rootPath, LibraryType type)
@@ -245,11 +245,11 @@ public class ParseScannedFilesTests
 
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
-        void TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -259,6 +259,7 @@ public class ParseScannedFilesTests
             };
 
             parsedSeries.Add(foundParsedSeries, parsedFiles);
+            return Task.CompletedTask;
         }
 
 

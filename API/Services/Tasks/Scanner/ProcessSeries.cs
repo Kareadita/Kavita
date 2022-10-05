@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -47,8 +48,6 @@ public class ProcessSeries : IProcessSeries
     private volatile IList<Genre> _genres;
     private volatile IList<Person> _people;
     private volatile IList<Tag> _tags;
-
-
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -167,7 +166,9 @@ public class ProcessSeries : IProcessSeries
                 catch (Exception ex)
                 {
                     await _unitOfWork.RollbackAsync();
-                    _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the database for series {@SeriesName}", series.Name);
+                    _logger.LogCritical(ex,
+                        "[ScannerService] There was an issue writing to the database for series {@SeriesName}",
+                        series.Name);
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
@@ -234,7 +235,7 @@ public class ProcessSeries : IProcessSeries
         var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
 
         // Update Metadata based on Chapter metadata
-        series.Metadata.ReleaseYear = chapters.Min(c => c.ReleaseDate.Year);
+        series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).Min();
 
         if (series.Metadata.ReleaseYear < 1000)
         {
@@ -439,6 +440,7 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
+            _logger.LogDebug("[ScannerService] Looking up volume for {volumeNumber}", volumeNumber);
             var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
             if (volume == null)
             {

@@ -66,11 +66,11 @@
                     'fit-to-height-double-offset': FittingOption === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
                     'original-double-offset' : FittingOption === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage}"
                     [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle" (dblclick)="bookmarkPage($event)">
-                <img #image [src]="canvasImage.src" id="image-1"
+                <img alt=" " #image [src]="canvasImage.src" id="image-1"
                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
                 <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !isCoverImage())">
-                    <img [src]="canvasImage2.src" id="image-2" class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}} -->
+                    <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}} -->
                 </ng-container>
             </div>
 

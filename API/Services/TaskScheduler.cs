@@ -158,7 +158,13 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanSiteThemes()
     {
-        _logger.LogInformation("Starting Site Theme scan");
+        if (HasAlreadyEnqueuedTask("ThemeService", "Scan", Array.Empty<object>(), ScanQueue))
+        {
+            _logger.LogInformation("A Theme Scan is already running");
+            return;
+        }
+
+        _logger.LogInformation("Enqueueing Site Theme scan");
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
