@@ -536,7 +536,7 @@ public class BookmarkServiceTests
 
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        Assert.Equal(1, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
+        Assert.Single(ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories));
         Assert.NotNull(await _unitOfWork.UserRepository.GetBookmarkAsync(1));
     }
 

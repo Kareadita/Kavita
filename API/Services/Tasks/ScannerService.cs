@@ -187,8 +187,6 @@ public class ScannerService : IScannerService
         }
 
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
-        var processTasks = new List<Task>();
-
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
 
@@ -210,7 +208,6 @@ public class ScannerService : IScannerService
                 return;
             }
 
-            //processTasks.Add(_processSeries.ProcessSeriesAsync(parsedFiles, library));
             await _processSeries.ProcessSeriesAsync(parsedFiles, library);
             parsedSeries.Add(foundParsedSeries, parsedFiles);
         }
@@ -465,7 +462,6 @@ public class ScannerService : IScannerService
 
 
             seenSeries.Add(foundParsedSeries);
-            //processTasks.Add();
             await _processSeries.ProcessSeriesAsync(parsedFiles, library);
         }
 
