@@ -440,7 +440,7 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
-            _logger.LogDebug("[ScannerService] Looking up volume for {volumeNumber}", volumeNumber);
+            _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
             var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
             if (volume == null)
             {
@@ -496,7 +496,7 @@ public class ProcessSeries : IProcessSeries
             series.Volumes = nonDeletedVolumes;
         }
 
-        _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}",
+        _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from count of {StartingVolumeCount} to {VolumeCount}",
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
