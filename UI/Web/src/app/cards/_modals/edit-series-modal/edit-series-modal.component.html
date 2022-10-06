@@ -70,7 +70,7 @@
                     <ng-template ngbNavContent>
 
                         <div class="row g-0">
-                            <div class="col-md-12">
+                            <div class="col-lg-8 col-md-12 pe-2">
                                 <div class="mb-3">
                                     <label for="collections" class="form-label">Collections </label>
                                     <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">
@@ -81,6 +81,20 @@
                                             {{item.title}}
                                         </ng-template>
                                     </app-typeahead>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-12">
+                                <div class="mb-3" style="width: 100%">
+                                    <label for="release-year" class="form-label">Release Year</label>
+                                    <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
+                                        <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }"></ng-container>
+                                        <input type="number" class="form-control" id="release-year" formControlName="releaseYear" maxlength="4" minlength="4" [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
+                                        <ng-container *ngIf="editSeriesForm.get('releaseYear')?.errors as errors">
+                                            <p class="invalid-feedback" *ngIf="errors.pattern">
+                                                This must be a valid year greater than 1000 and 4 characters long
+                                            </p>
+                                        </ng-container>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -137,7 +151,7 @@
                                     </app-typeahead>
                                 </div>
                             </div>
-                            <div class="col-lg-4  col-md-12 pe-2">
+                            <div class="col-lg-4 col-md-12 pe-2">
                                 <div class="mb-3">
                                     <label for="age-rating" class="form-label">Age Rating</label>
                                     <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">

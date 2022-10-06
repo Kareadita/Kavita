@@ -236,12 +236,15 @@ public class ProcessSeries : IProcessSeries
         var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
 
         // Update Metadata based on Chapter metadata
-        series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).DefaultIfEmpty().Min();
-
-        if (series.Metadata.ReleaseYear < 1000)
+        if (!series.Metadata.ReleaseYearLocked)
         {
-            // Not a valid year, default to 0
-            series.Metadata.ReleaseYear = 0;
+            series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).DefaultIfEmpty().Min();
+
+            if (series.Metadata.ReleaseYear < 1000)
+            {
+                // Not a valid year, default to 0
+                series.Metadata.ReleaseYear = 0;
+            }
         }
 
         // Set the AgeRating as highest in all the comicInfos
