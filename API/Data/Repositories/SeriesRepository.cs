@@ -1516,7 +1516,8 @@ public class SeriesRepository : ISeriesRepository
                 LastScanned = s.LastFolderScanned,
                 SeriesName = s.Name,
                 FolderPath = s.FolderPath,
-                Format = s.Format
+                Format = s.Format,
+                LibraryRoots = s.Library.Folders.Select(f => f.Path)
             }).ToListAsync();
 
         var map = new Dictionary<string, IList<SeriesModified>>();

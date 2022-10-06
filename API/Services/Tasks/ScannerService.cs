@@ -125,7 +125,7 @@ public class ScannerService : IScannerService
 
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
-        if (string.IsNullOrEmpty(parentDirectory)) return; // This should never happen as it's calculated before enqueing
+        if (string.IsNullOrEmpty(parentDirectory)) return; // This should never happen as it's calculated before enqueuing
 
         var libraries = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
@@ -147,7 +147,7 @@ public class ScannerService : IScannerService
     }
 
     /// <summary>
-    ///
+    /// Scans just an existing Series for changes. If the series doesn't exist, will delete it.
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="bypassFolderOptimizationChecks">Not Used. Scan series will always force</param>

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Parser;
 using API.SignalR;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -39,6 +41,7 @@ public class SeriesModified
     public string SeriesName { get; set; }
     public DateTime LastScanned { get; set; }
     public MangaFormat Format { get; set; }
+    public IEnumerable<string> LibraryRoots { get; set; }
 }
 
 
@@ -81,7 +84,6 @@ public class ParseScannedFiles
         if (scanDirectoryByDirectory)
         {
             // This is used in library scan, so we should check first for a ignore file and use that here as well
-            // TODO: We need to calculate all folders till library root and see if any kavitaignores
             var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
             var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
@@ -109,7 +111,41 @@ public class ParseScannedFiles
             await folderAction(new List<string>(), folderPath);
             return;
         }
-        await folderAction(_directoryService.ScanFiles(folderPath), folderPath);
+        // We need to calculate all folders till library root and see if any kavitaignores
+        var seriesMatcher = new GlobMatcher();
+        try
+        {
+            var roots = seriesPaths[folderPath][0].LibraryRoots.Select(Scanner.Parser.Parser.NormalizePath).ToList();
+            var libraryFolder = roots.SingleOrDefault(folderPath.Contains);
+
+            if (string.IsNullOrEmpty(libraryFolder))
+            {
+                await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
+                return;
+            }
+
+            var allParents = _directoryService.GetFoldersTillRoot(libraryFolder, folderPath);
+            var path = libraryFolder;
+
+            // Apply the library root level kavitaignore
+            var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(path, DirectoryService.KavitaIgnoreFile);
+            seriesMatcher.Merge(_directoryService.CreateMatcherFromFile(potentialIgnoreFile));
+
+            // Then apply kavitaignores for each folder down to where the series folder is
+            foreach (var folderPart in allParents.Reverse())
+            {
+                path = Parser.Parser.NormalizePath(Path.Join(libraryFolder, folderPart));
+                potentialIgnoreFile = _directoryService.FileSystem.Path.Join(path, DirectoryService.KavitaIgnoreFile);
+                seriesMatcher.Merge(_directoryService.CreateMatcherFromFile(potentialIgnoreFile));
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error trying to find and apply .kavitaignores above the Series Folder. Scanning without them present");
+        }
+
+
+        await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
     }
 
 
