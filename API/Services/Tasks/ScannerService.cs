@@ -433,12 +433,13 @@ public class ScannerService : IScannerService
 
 
         await _processSeries.Prime();
-        var processTasks = new List<Task>();
-        async Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
+        var processTasks = new List<Func<Task>>();
+
+        Task TrackFiles(Tuple<bool, IList<ParserInfo>> parsedInfo)
         {
             var skippedScan = parsedInfo.Item1;
             var parsedFiles = parsedInfo.Item2;
-            if (parsedFiles.Count == 0) return;
+            if (parsedFiles.Count == 0) return Task.CompletedTask;
 
             var foundParsedSeries = new ParsedSeries()
             {
@@ -455,21 +456,23 @@ public class ScannerService : IScannerService
                     NormalizedName = Scanner.Parser.Parser.Normalize(pf.Series),
                     Format = pf.Format
                 }));
-                return;
+                return Task.CompletedTask;
             }
 
             totalFiles += parsedFiles.Count;
 
 
             seenSeries.Add(foundParsedSeries);
-            await _processSeries.ProcessSeriesAsync(parsedFiles, library);
+            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library));
+            return Task.CompletedTask;
         }
-
 
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
 
-
-        await Task.WhenAll(processTasks);
+        foreach (var task in processTasks)
+        {
+            await task();
+        }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 

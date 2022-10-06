@@ -45,9 +45,9 @@ public class ProcessSeries : IProcessSeries
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
-    private volatile IList<Genre> _genres;
-    private volatile IList<Person> _people;
-    private volatile IList<Tag> _tags;
+    private IList<Genre> _genres;
+    private IList<Person> _people;
+    private IList<Tag> _tags;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -441,7 +441,21 @@ public class ProcessSeries : IProcessSeries
         foreach (var volumeNumber in distinctVolumes)
         {
             _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
-            var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+            Volume volume;
+            try
+            {
+                volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Equals("Sequence contains more than one matching element"))
+                {
+                    _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
+                    Task.Run(() => _eventHub.SendMessageAsync(MessageFactory.Error,
+                        MessageFactory.ErrorEvent($"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan", string.Empty)));
+                }
+                throw;
+            }
             if (volume == null)
             {
                 volume = DbFactory.Volume(volumeNumber);
