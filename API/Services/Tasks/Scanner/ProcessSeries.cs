@@ -15,6 +15,7 @@ using API.Parser;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -451,8 +452,8 @@ public class ProcessSeries : IProcessSeries
                 if (ex.Message.Equals("Sequence contains more than one matching element"))
                 {
                     _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
-                    Task.Run(() => _eventHub.SendMessageAsync(MessageFactory.Error,
-                        MessageFactory.ErrorEvent($"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan", string.Empty)));
+                    throw new KavitaException(
+                        $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
                 }
                 throw;
             }
