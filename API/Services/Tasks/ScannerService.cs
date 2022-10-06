@@ -99,7 +99,18 @@ public class ScannerService : IScannerService
 
     public async Task ScanFolder(string folder)
     {
-        var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
+        var seriesId = 0;
+        try
+        {
+            seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Equals("Sequence contains more than one element."))
+            {
+                _logger.LogCritical("[ScannerService] Multiple series map to this folder. Library scan will be used for ScanFolder");
+            }
+        }
         if (seriesId > 0)
         {
             if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries",
@@ -213,7 +224,7 @@ public class ScannerService : IScannerService
         }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanElapsedTime = await ScanFiles(library, new []{folderPath}, false, TrackFiles, true);
+        var scanElapsedTime = await ScanFiles(library, new []{ folderPath }, false, TrackFiles, true);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
