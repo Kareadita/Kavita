@@ -15,6 +15,7 @@ using API.Parser;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -45,9 +46,9 @@ public class ProcessSeries : IProcessSeries
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
 
-    private volatile IList<Genre> _genres;
-    private volatile IList<Person> _people;
-    private volatile IList<Tag> _tags;
+    private IList<Genre> _genres;
+    private IList<Person> _people;
+    private IList<Tag> _tags;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -117,7 +118,7 @@ public class ProcessSeries : IProcessSeries
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
-            var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, parsedInfos[0]);
+            var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
             UpdateVolumes(series, parsedInfos);
             series.Pages = series.Volumes.Sum(v => v.Pages);
@@ -235,12 +236,15 @@ public class ProcessSeries : IProcessSeries
         var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
 
         // Update Metadata based on Chapter metadata
-        series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).Min();
-
-        if (series.Metadata.ReleaseYear < 1000)
+        if (!series.Metadata.ReleaseYearLocked)
         {
-            // Not a valid year, default to 0
-            series.Metadata.ReleaseYear = 0;
+            series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).DefaultIfEmpty().Min();
+
+            if (series.Metadata.ReleaseYear < 1000)
+            {
+                // Not a valid year, default to 0
+                series.Metadata.ReleaseYear = 0;
+            }
         }
 
         // Set the AgeRating as highest in all the comicInfos
@@ -440,8 +444,22 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
-            _logger.LogDebug("[ScannerService] Looking up volume for {volumeNumber}", volumeNumber);
-            var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+            _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
+            Volume volume;
+            try
+            {
+                volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Equals("Sequence contains more than one matching element"))
+                {
+                    _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
+                    throw new KavitaException(
+                        $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
+                }
+                throw;
+            }
             if (volume == null)
             {
                 volume = DbFactory.Volume(volumeNumber);
@@ -496,7 +514,7 @@ public class ProcessSeries : IProcessSeries
             series.Volumes = nonDeletedVolumes;
         }
 
-        _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}",
+        _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from count of {StartingVolumeCount} to {VolumeCount}",
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 

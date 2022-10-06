@@ -137,6 +137,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       ageRating: new FormControl('', []),
       publicationStatus: new FormControl('', []),
       language: new FormControl('', []),
+      releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/[1-9]\d{3}/)]),
     });
     this.cdRef.markForCheck();
 
@@ -165,6 +166,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('ageRating')?.patchValue(this.metadata.ageRating);
         this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
         this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
+        this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
         this.cdRef.markForCheck();
 
         this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
@@ -198,6 +200,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
           this.metadata.publicationStatus = parseInt(val + '', 10);
           this.metadata.publicationStatusLocked = true;
+          this.cdRef.markForCheck();
+        });
+
+        this.editSeriesForm.get('releaseYear')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.releaseYear = parseInt(val + '', 10);
+          this.metadata.releaseYearLocked = true;
           this.cdRef.markForCheck();
         });
       }

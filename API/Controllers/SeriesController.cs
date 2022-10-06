@@ -377,6 +377,7 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
+    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"seriesId"})]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {

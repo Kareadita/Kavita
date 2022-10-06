@@ -79,6 +79,7 @@ public class SeriesMetadataDto
     public bool PublishersLocked { get; set; }
     public bool TranslatorsLocked { get; set; }
     public bool CoverArtistsLocked { get; set; }
+    public bool ReleaseYearLocked { get; set; }
 
 
     public int SeriesId { get; set; }

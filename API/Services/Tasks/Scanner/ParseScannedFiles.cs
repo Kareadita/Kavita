@@ -81,6 +81,7 @@ public class ParseScannedFiles
         if (scanDirectoryByDirectory)
         {
             // This is used in library scan, so we should check first for a ignore file and use that here as well
+            // TODO: We need to calculate all folders till library root and see if any kavitaignores
             var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
             var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
@@ -228,62 +229,68 @@ public class ParseScannedFiles
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", libraryName, ProgressEventType.Started));
 
+        async Task ProcessFolder(IList<string> files, string folder)
+        {
+            var normalizedFolder = Parser.Parser.NormalizePath(folder);
+            if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedFolder, forceCheck))
+            {
+                var parsedInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
+                {
+                    Series = fp.SeriesName,
+                    Format = fp.Format,
+                }).ToList();
+                await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
+                _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
+                return;
+            }
+
+            _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.FileScanProgressEvent(folder, libraryName, ProgressEventType.Updated));
+            if (files.Count == 0)
+            {
+                _logger.LogInformation("[ScannerService] {Folder} is empty", folder);
+                return;
+            }
+
+            var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
+            var infos = files
+                .Select(file => _readingItemService.ParseFile(file, folder, libraryType))
+                .Where(info => info != null)
+                .ToList();
+
+
+            MergeLocalizedSeriesWithSeries(infos);
+
+            foreach (var info in infos)
+            {
+                try
+                {
+                    TrackSeries(scannedSeries, info);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex,
+                        "There was an exception that occurred during tracking {FilePath}. Skipping this file",
+                        info.FullFilePath);
+                }
+            }
+
+            foreach (var series in scannedSeries.Keys)
+            {
+                if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
+                {
+                    await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
+                }
+            }
+        }
+
+
         foreach (var folderPath in folders)
         {
             try
             {
-                await ProcessFiles(folderPath, isLibraryScan, seriesPaths, async (files, folder) =>
-                {
-                    var normalizedFolder = Parser.Parser.NormalizePath(folder);
-                    if (HasSeriesFolderNotChangedSinceLastScan(seriesPaths, normalizedFolder, forceCheck))
-                    {
-                        var parsedInfos = seriesPaths[normalizedFolder].Select(fp => new ParserInfo()
-                        {
-                            Series = fp.SeriesName,
-                            Format = fp.Format,
-                        }).ToList();
-                        await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
-                        _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
-                        return;
-                    }
-                    _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
-                    await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(folderPath, libraryName, ProgressEventType.Updated));
-                    if (files.Count == 0)
-                    {
-                        _logger.LogInformation("[ScannerService] {Folder} is empty", folder);
-                        return;
-                    }
-                    var scannedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-                    var infos = files
-                        .Select(file => _readingItemService.ParseFile(file, folderPath, libraryType))
-                        .Where(info => info != null)
-                        .ToList();
-
-
-                    MergeLocalizedSeriesWithSeries(infos);
-
-                    foreach (var info in infos)
-                    {
-                        try
-                        {
-                            TrackSeries(scannedSeries, info);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "There was an exception that occurred during tracking {FilePath}. Skipping this file", info.FullFilePath);
-                        }
-                    }
-
-                    // It would be really cool if we can emit an event when a folder hasn't been changed so we don't parse everything, but the first item to ensure we don't delete it
-                    // Otherwise, we can do a last step in the DB where we validate all files on disk exist and if not, delete them. (easy but slow)
-                    foreach (var series in scannedSeries.Keys)
-                    {
-                        if (scannedSeries[series].Count > 0 && processSeriesInfos != null)
-                        {
-                            await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(false, scannedSeries[series]));
-                        }
-                    }
-                }, forceCheck);
+                await ProcessFiles(folderPath, isLibraryScan, seriesPaths, ProcessFolder, forceCheck);
             }
             catch (ArgumentException ex)
             {
