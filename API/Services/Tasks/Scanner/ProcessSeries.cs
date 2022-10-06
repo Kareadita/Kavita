@@ -236,7 +236,7 @@ public class ProcessSeries : IProcessSeries
         var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
 
         // Update Metadata based on Chapter metadata
-        series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).Min();
+        series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).DefaultIfEmpty().Min();
 
         if (series.Metadata.ReleaseYear < 1000)
         {
