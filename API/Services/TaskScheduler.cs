@@ -18,6 +18,7 @@ public interface ITaskScheduler
     Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
+    void ScanFolder(string folderPath, TimeSpan delay);
     void ScanFolder(string folderPath);
     void ScanLibrary(int libraryId, bool force = false);
     void CleanupChapters(int[] chapterIds);
@@ -179,9 +180,32 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(12, 18)), TimeZoneInfo.Local);
     }
 
+    public void ScanFolder(string folderPath, TimeSpan delay)
+    {
+        var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {normalizedFolder}))
+        {
+            _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+                normalizedFolder);
+            return;
+        }
+
+        _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
+        BackgroundJob.Schedule(() => _scannerService.ScanFolder(normalizedFolder), delay);
+    }
+
     public void ScanFolder(string folderPath)
     {
-        _scannerService.ScanFolder(Tasks.Scanner.Parser.Parser.NormalizePath(folderPath));
+        var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {normalizedFolder}))
+        {
+            _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+                normalizedFolder);
+            return;
+        }
+
+        _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
+        _scannerService.ScanFolder(normalizedFolder);
     }
 
     #endregion
