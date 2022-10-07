@@ -62,7 +62,7 @@ public class DefaultParser : IDefaultParser
             };
         }
 
-        if (Parser.IsCoverImage(filePath)) return null;
+        if (Parser.IsCoverImage(_directoryService.FileSystem.Path.GetFileName(filePath))) return null;
 
         if (Parser.IsImage(filePath))
         {

@@ -103,6 +103,7 @@ public class DefaultParserTests
     {
         const string rootPath = @"E:/Manga/";
         var expected = new Dictionary<string, ParserInfo>();
+
         var filepath = @"E:/Manga/Mujaki no Rakuen/Mujaki no Rakuen Vol12 ch76.cbz";
          expected.Add(filepath, new ParserInfo
          {
@@ -215,14 +216,6 @@ public class DefaultParserTests
           FullFilePath = filepath, IsSpecial = false
         });
 
-        filepath = @"E:\Manga\Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub";
-        expected.Add(filepath, new ParserInfo
-        {
-          Series = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows", Volumes = "2.5", Edition = "",
-          Chapters = "0", Filename = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", Format = MangaFormat.Epub,
-          FullFilePath = filepath, IsSpecial = false
-        });
-
         // If an image is cover exclusively, ignore it
         filepath = @"E:\Manga\Seraph of the End\cover.png";
         expected.Add(filepath, null);
@@ -235,11 +228,12 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         });
 
+        // Note: Fallback to folder will parse Monster #8 and get Monster
         filepath = @"E:\Manga\Monster #8\Ch. 001-016 [MangaPlus] [Digital] [amit34521]\Monster #8 Ch. 001 [MangaPlus] [Digital] [amit34521]\13.jpg";
         expected.Add(filepath, new ParserInfo
         {
-            Series = "Monster #8", Volumes = "0", Edition = "",
-            Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Archive,
+            Series = "Monster", Volumes = "0", Edition = "",
+            Chapters = "1", Filename = "13.jpg", Format = MangaFormat.Image,
             FullFilePath = filepath, IsSpecial = false
         });
 
@@ -251,6 +245,29 @@ public class DefaultParserTests
             FullFilePath = filepath, IsSpecial = false
         });
 
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Vol19\ch186\Vol. 19 p106.gif";
+        expected.Add(filepath, new ParserInfo
+        {
+            Series = "Just Images the second", Volumes = "19", Edition = "",
+            Chapters = "186", Filename = "Vol. 19 p106.gif", Format = MangaFormat.Image,
+            FullFilePath = filepath, IsSpecial = false
+        });
+
+        filepath = @"E:\Manga\Extra layer for no reason\Just Images the second\Blank Folder\Vol19\ch186\Vol. 19 p106.gif";
+        expected.Add(filepath, new ParserInfo
+        {
+            Series = "Just Images the second", Volumes = "19", Edition = "",
+            Chapters = "186", Filename = "Vol. 19 p106.gif", Format = MangaFormat.Image,
+            FullFilePath = filepath, IsSpecial = false
+        });
+
+        filepath = @"E:\Manga\Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub";
+        expected.Add(filepath, new ParserInfo
+        {
+            Series = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows", Volumes = "2.5", Edition = "",
+            Chapters = "0", Filename = "Harrison, Kim - The Good, The Bad, and the Undead - Hollows Vol 2.5.epub", Format = MangaFormat.Epub,
+            FullFilePath = filepath, IsSpecial = false
+        });
 
         foreach (var file in expected.Keys)
         {
@@ -259,7 +276,7 @@ public class DefaultParserTests
             if (expectedInfo == null)
             {
                 Assert.Null(actual);
-                return;
+                continue;
             }
             Assert.NotNull(actual);
             _testOutputHelper.WriteLine($"Validating {file}");
@@ -399,7 +416,7 @@ public class DefaultParserTests
                 if (expectedInfo == null)
                 {
                     Assert.Null(actual);
-                    return;
+                    continue;
                 }
                 Assert.NotNull(actual);
                 _testOutputHelper.WriteLine($"Validating {file}");

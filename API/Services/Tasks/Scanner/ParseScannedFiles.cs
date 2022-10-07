@@ -118,7 +118,7 @@ public class ParseScannedFiles
             var roots = seriesPaths[folderPath][0].LibraryRoots.Select(Scanner.Parser.Parser.NormalizePath).ToList();
             var libraryFolder = roots.SingleOrDefault(folderPath.Contains);
 
-            if (string.IsNullOrEmpty(libraryFolder))
+            if (string.IsNullOrEmpty(libraryFolder) || !Directory.Exists(folderPath))
             {
                 await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
                 return;

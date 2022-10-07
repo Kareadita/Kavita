@@ -197,6 +197,7 @@ public class ScannerService : IScannerService
             return;
         }
 
+        // If the series path doesn't exist anymore, it was either moved or renamed. We need to essentially delete it
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
@@ -228,6 +229,8 @@ public class ScannerService : IScannerService
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+
+
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
         RemoveParsedInfosNotForSeries(parsedSeries, series);
