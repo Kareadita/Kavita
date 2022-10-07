@@ -61,6 +61,11 @@ public enum RelationKind
     /// Doujinshi or Fan work
     /// </summary>
     [Description("Doujinshi")]
-    Doujinshi = 11
+    Doujinshi = 11,
+    /// <summary>
+    /// Same story, could be translation, colorization... Different edition of the series
+    /// </summary>
+    [Description("Edition")]
+    Edition = 12
 
 }

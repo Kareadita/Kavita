@@ -141,6 +141,7 @@ public class SeriesServiceTests
             AlternativeVersions = new List<int>(),
             SideStories = new List<int>(),
             SpinOffs = new List<int>(),
+            Editions = new List<int>()
         };
     }
 
