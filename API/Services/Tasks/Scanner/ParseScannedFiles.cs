@@ -84,6 +84,7 @@ public class ParseScannedFiles
         if (scanDirectoryByDirectory)
         {
             // This is used in library scan, so we should check first for a ignore file and use that here as well
+            // TODO: We need to calculate all folders till library root and see if any kavitaignores
             var potentialIgnoreFile = _directoryService.FileSystem.Path.Join(folderPath, DirectoryService.KavitaIgnoreFile);
             var matcher = _directoryService.CreateMatcherFromFile(potentialIgnoreFile);
             var directories = _directoryService.GetDirectories(folderPath, matcher).ToList();
