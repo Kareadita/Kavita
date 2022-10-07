@@ -239,12 +239,6 @@ public class ProcessSeries : IProcessSeries
         if (!series.Metadata.ReleaseYearLocked)
         {
             series.Metadata.ReleaseYear = chapters.MinimumReleaseYear();
-
-            if (series.Metadata.ReleaseYear < 1000)
-            {
-                // Not a valid year, default to 0
-                series.Metadata.ReleaseYear = 0;
-            }
         }
 
         // Set the AgeRating as highest in all the comicInfos
