@@ -124,5 +124,23 @@ public class ComicInfo
         info.CoverArtist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.CoverArtist);
     }
 
+    /// <summary>
+    /// Uses both Volume and Number to make an educated guess as to what count refers to and it's highest number.
+    /// </summary>
+    /// <returns></returns>
+    public int CalculatedCount()
+    {
+        if (!string.IsNullOrEmpty(Number) && float.Parse(Number) > 0)
+        {
+            return (int) Math.Floor(float.Parse(Number));
+        }
+        if (!string.IsNullOrEmpty(Volume) && float.Parse(Volume) > 0)
+        {
+            return Math.Max(Count, (int) Math.Floor(float.Parse(Volume)));
+        }
+
+        return Count;
+    }
+
 
 }
