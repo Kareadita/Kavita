@@ -98,7 +98,6 @@ public class LibraryWatcher : ILibraryWatcher
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
-            //watcher.NotifyFilter = NotifyFilters.LastWrite;
             FileWatchers.Add(watcher);
             if (!WatcherDictionary.ContainsKey(libraryFolder))
             {

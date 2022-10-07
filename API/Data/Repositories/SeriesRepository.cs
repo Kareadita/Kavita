@@ -1171,11 +1171,11 @@ public class SeriesRepository : ISeriesRepository
     /// Return a Series by Folder path. Null if not found.
     /// </summary>
     /// <param name="folder">This will be normalized in the query</param>
+    /// <param name="includes">Additional relationships to include with the base query</param>
     /// <returns></returns>
     public async Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
     {
         var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
-
         var query = _context.Series.Where(s => s.FolderPath.Equals(normalized));
 
         query = AddIncludesToQuery(query, includes);
