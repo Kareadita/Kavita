@@ -651,7 +651,7 @@ public class DirectoryService : IDirectoryService
     public DateTime GetLastWriteTime(string folderPath)
     {
         if (!FileSystem.Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
-        var fileEntries = Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
+        var fileEntries = FileSystem.Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
         if (fileEntries.Length == 0) return DateTime.MaxValue;
         return fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));
     }
