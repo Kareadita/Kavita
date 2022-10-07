@@ -55,11 +55,10 @@ public class LibraryWatcher : ILibraryWatcher
     /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
     /// </summary>
     private int _bufferFullCounter;
-
-    //private DateTime _lastBufferOverflow = DateTime.MinValue;
-    private static readonly object Lock = new object();
-
-
+    /// <summary>
+    /// Used to lock buffer Full Counter
+    /// </summary>
+    private static readonly object Lock = new ();
 
     public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork,
         ILogger<LibraryWatcher> logger, IHostEnvironment environment, ITaskScheduler taskScheduler)
@@ -99,6 +98,7 @@ public class LibraryWatcher : ILibraryWatcher
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;
             watcher.EnableRaisingEvents = true;
+            //watcher.NotifyFilter = NotifyFilters.LastWrite;
             FileWatchers.Add(watcher);
             if (!WatcherDictionary.ContainsKey(libraryFolder))
             {
@@ -135,8 +135,8 @@ public class LibraryWatcher : ILibraryWatcher
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
+        _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
-        _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}", e.FullPath, e.Name);
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name))));
     }
 
@@ -229,7 +229,7 @@ public class LibraryWatcher : ILibraryWatcher
         {
             _logger.LogError(ex, "[LibraryWatcher] An error occured when processing a watch event");
         }
-        _logger.LogDebug("[LibraryWatcher] ProcessChange ran in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+        _logger.LogDebug("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
     private string GetFolder(string filePath, IEnumerable<string> libraryFolders)

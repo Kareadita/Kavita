@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
@@ -183,7 +184,7 @@ public class TaskScheduler : ITaskScheduler
     public void ScanFolder(string folderPath, TimeSpan delay)
     {
         var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
-        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {normalizedFolder}))
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] { normalizedFolder }))
         {
             _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
                 normalizedFolder);
@@ -340,10 +341,17 @@ public class TaskScheduler : ITaskScheduler
     public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        return enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
+        var ret = enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
                                      j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
                                      j.Value.Job.Method.Name.Equals(methodName) &&
                                      j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        if (ret) return true;
+
+        var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
+        return scheduledJobs.Any(j =>
+            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+            j.Value.Job.Method.Name.Equals(methodName) &&
+            j.Value.Job.Method.DeclaringType.Name.Equals(className));
     }
 
     public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = DefaultQueue)

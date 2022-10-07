@@ -98,6 +98,11 @@ public class ScannerService : IScannerService
         _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
+    /// <summary>
+    /// Given a generic folder path, will invoke a Series scan or Library scan.
+    /// </summary>
+    /// <remarks>This will Schedule the job to run 1 minute in the future to allow for any close-by duplicate requests to be dropped</remarks>
+    /// <param name="folder"></param>
     public async Task ScanFolder(string folder)
     {
         Series series = null;
@@ -120,13 +125,13 @@ public class ScannerService : IScannerService
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
-            BackgroundJob.Enqueue(() => ScanSeries(series.Id, true));
+            BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
             return;
         }
 
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
-        if (string.IsNullOrEmpty(parentDirectory)) return; // This should never happen as it's calculated before enqueuing
+        if (string.IsNullOrEmpty(parentDirectory)) return;
 
         var libraries = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
@@ -143,7 +148,7 @@ public class ScannerService : IScannerService
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
                 return;
             }
-            BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
+            BackgroundJob.Schedule(() => ScanLibrary(library.Id, false), TimeSpan.FromMinutes(1));
         }
     }
 
