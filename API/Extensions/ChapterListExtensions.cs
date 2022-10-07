@@ -31,4 +31,14 @@ public static class ChapterListExtensions
             ? chapters.FirstOrDefault(c => c.Range == info.Filename || (c.Files.Select(f => f.FilePath).Contains(info.FullFilePath)))
             : chapters.FirstOrDefault(c => c.Range == info.Chapters);
     }
+
+    /// <summary>
+    /// Returns the minimum Release Year from all Chapters that meets the year requirement (>= 1000)
+    /// </summary>
+    /// <param name="chapters"></param>
+    /// <returns></returns>
+    public static int MinimumReleaseYear(this IList<Chapter> chapters)
+    {
+        return chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).DefaultIfEmpty().Min();
+    }
 }

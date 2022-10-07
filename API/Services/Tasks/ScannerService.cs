@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Parser;
@@ -99,10 +100,10 @@ public class ScannerService : IScannerService
 
     public async Task ScanFolder(string folder)
     {
-        var seriesId = 0;
+        Series series = null;
         try
         {
-            seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
+            series = await _unitOfWork.SeriesRepository.GetSeriesByFolderPath(folder, SeriesIncludes.Library);
         }
         catch (InvalidOperationException ex)
         {
@@ -111,15 +112,15 @@ public class ScannerService : IScannerService
                 _logger.LogCritical("[ScannerService] Multiple series map to this folder. Library scan will be used for ScanFolder");
             }
         }
-        if (seriesId > 0)
+        if (series != null && series.Library.Type != LibraryType.Book)
         {
             if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries",
-                    new object[] {seriesId, true}))
+                    new object[] {series.Id, true}))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
-            BackgroundJob.Enqueue(() => ScanSeries(seriesId, true));
+            BackgroundJob.Enqueue(() => ScanSeries(series.Id, true));
             return;
         }
 

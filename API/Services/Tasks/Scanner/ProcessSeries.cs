@@ -238,7 +238,7 @@ public class ProcessSeries : IProcessSeries
         // Update Metadata based on Chapter metadata
         if (!series.Metadata.ReleaseYearLocked)
         {
-            series.Metadata.ReleaseYear = chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).DefaultIfEmpty().Min();
+            series.Metadata.ReleaseYear = chapters.MinimumReleaseYear();
 
             if (series.Metadata.ReleaseYear < 1000)
             {
