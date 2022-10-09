@@ -41,7 +41,6 @@
     "ngx-color-picker": "^12.0.0",
     "ngx-extended-pdf-viewer": "^15.0.0",
     "ngx-file-drop": "^14.0.1",
-    "ngx-infinite-scroll": "^13.0.2",
     "ngx-toastr": "^14.2.1",
     "requires": "^1.0.2",
     "rxjs": "~7.5.4",
