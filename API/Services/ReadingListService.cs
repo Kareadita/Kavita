@@ -41,7 +41,7 @@ public class ReadingListService : IReadingListService
 
 
     /// <summary>
-    /// Removes all entries that are fully read from the reading list
+    /// Removes all entries that are fully read from the reading list. This commits
     /// </summary>
     /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
     /// <param name="readingListId">Reading List Id</param>
@@ -99,6 +99,11 @@ public class ReadingListService : IReadingListService
         return await _unitOfWork.CommitAsync();
     }
 
+    /// <summary>
+    /// Removes a certain reading list item from a reading list
+    /// </summary>
+    /// <param name="dto">Only ReadingListId and ReadingListItemId are used</param>
+    /// <returns></returns>
     public async Task<bool> DeleteReadingListItem(UpdateReadingListPosition dto)
     {
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
