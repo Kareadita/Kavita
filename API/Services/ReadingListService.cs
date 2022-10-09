@@ -62,10 +62,12 @@ public class ReadingListService : IReadingListService
                     itemIdsToRemove.Contains(r.Id));
             _unitOfWork.ReadingListRepository.BulkRemove(listItems);
 
+            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
+            CalculateReadingListAgeRating(readingList);
+
             if (!_unitOfWork.HasChanges()) return true;
 
-            await _unitOfWork.CommitAsync();
-            return true;
+            return await _unitOfWork.CommitAsync();
         }
         catch
         {
@@ -109,9 +111,20 @@ public class ReadingListService : IReadingListService
             index++;
         }
 
+        CalculateReadingListAgeRating(readingList);
+
         if (!_unitOfWork.HasChanges()) return true;
 
         return await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Calculates the highest Age Rating from each Reading List Item
+    /// </summary>
+    /// <param name="readingList"></param>
+    public static void CalculateReadingListAgeRating(ReadingList readingList)
+    {
+        readingList.AgeRating = readingList.Items.DefaultIfEmpty().Select(l => l.Chapter.AgeRating).Max();
     }
 
     /// <summary>

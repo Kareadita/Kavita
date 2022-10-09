@@ -23,6 +23,7 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
     void Remove(ReadingListItem item);
+    void Add(ReadingList item);
     void BulkRemove(IEnumerable<ReadingListItem> items);
     void Update(ReadingList list);
     Task<int> Count();
@@ -44,6 +45,11 @@ public class ReadingListRepository : IReadingListRepository
     public void Update(ReadingList list)
     {
         _context.Entry(list).State = EntityState.Modified;
+    }
+
+    public void Add(ReadingList list)
+    {
+        _context.Add(list);
     }
 
     public async Task<int> Count()

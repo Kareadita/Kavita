@@ -4,9 +4,11 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Parser;
 using API.Services;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
@@ -79,9 +81,10 @@ public class ReadingListServiceTests
 
     private async Task ResetDb()
     {
-        _context.Series.RemoveRange(_context.Series.ToList());
-
-        await _context.SaveChangesAsync();
+        _context.AppUser.RemoveRange(_context.AppUser);
+        _context.Series.RemoveRange(_context.Series);
+        _context.ReadingList.RemoveRange(_context.ReadingList);
+        await _unitOfWork.CommitAsync();
     }
 
     private static MockFileSystem CreateFileSystem()
@@ -100,10 +103,190 @@ public class ReadingListServiceTests
     #endregion
 
 
+    private async Task SetupUserAndReadingList()
+    {
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                            AgeRating = AgeRating.Everyone
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                            AgeRating = AgeRating.X18Plus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+    }
+
     #region RemoveFullyReadItems
 
     // TODO: Implement all methods here
 
     #endregion
 
+
+    #region CalculateAgeRating
+
+    [Fact]
+    public async Task CalculateAgeRating_ShouldUpdateToUnknown_IfNoneSet()
+    {
+        await ResetDb();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                            AgeRating = AgeRating.Everyone
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                            AgeRating = AgeRating.X18Plus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingList();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        ReadingListService.CalculateReadingListAgeRating(readingList);
+        Assert.Equal(AgeRating.X18Plus, readingList.AgeRating);
+    }
+
+    [Fact]
+    public async Task CalculateAgeRating_ShouldUpdateToMax()
+    {
+        await ResetDb();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingList();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        ReadingListService.CalculateReadingListAgeRating(readingList);
+        Assert.Equal(AgeRating.Unknown, readingList.AgeRating);
+    }
+
+    #endregion
 }
