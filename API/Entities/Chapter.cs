@@ -65,11 +65,12 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public string Language { get; set; }
     /// <summary>
-    /// Total number of issues in the series
+    /// Total number of issues or volumes in the series
     /// </summary>
+    /// <remarks>Users may use Volume count or issue count. Kavita performs some light logic to help Count match up with TotalCount</remarks>
     public int TotalCount { get; set; } = 0;
     /// <summary>
-    /// Number in the Total Count
+    /// Number of the Total Count (progress the Series is complete)
     /// </summary>
     public int Count { get; set; } = 0;
 

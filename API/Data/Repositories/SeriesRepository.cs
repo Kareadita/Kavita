@@ -33,8 +33,7 @@ public enum SeriesIncludes
     Volumes = 2,
     Metadata = 4,
     Related = 8,
-    //Related = 16,
-    //UserPreferences = 32
+    Library = 16,
 }
 
 internal class RecentlyAddedSeries
@@ -120,8 +119,7 @@ public interface ISeriesRepository
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
     Task<int> GetSeriesIdByFolder(string folder);
-    Task<Series> GetSeriesByFolderPath(string folder);
-    Task<Series> GetFullSeriesByName(string series, int libraryId);
+    Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<List<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
@@ -1173,52 +1171,16 @@ public class SeriesRepository : ISeriesRepository
     /// Return a Series by Folder path. Null if not found.
     /// </summary>
     /// <param name="folder">This will be normalized in the query</param>
+    /// <param name="includes">Additional relationships to include with the base query</param>
     /// <returns></returns>
-    public async Task<Series> GetSeriesByFolderPath(string folder)
+    public async Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
     {
         var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
-        return await _context.Series.SingleOrDefaultAsync(s => s.FolderPath.Equals(normalized));
-    }
+        var query = _context.Series.Where(s => s.FolderPath.Equals(normalized));
 
-    /// <summary>
-    /// Finds a series by series name for a given library.
-    /// </summary>
-    /// <remarks>This pulls everything with the Series, so should be used only when needing tracking on all related tables</remarks>
-    /// <param name="series"></param>
-    /// <param name="libraryId"></param>
-    /// <returns></returns>
-    public Task<Series> GetFullSeriesByName(string series, int libraryId)
-    {
-        var localizedSeries = Services.Tasks.Scanner.Parser.Parser.Normalize(series);
-        return _context.Series
-            .Where(s => (s.NormalizedName.Equals(localizedSeries)
-                         || s.LocalizedName.Equals(series)) && s.LibraryId == libraryId)
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.People)
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.Genres)
-            .Include(s => s.Library)
-            .Include(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(cm => cm.People)
+        query = AddIncludesToQuery(query, includes);
 
-            .Include(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(c => c.Tags)
-
-            .Include(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(c => c.Genres)
-
-
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.Tags)
-
-            .Include(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(c => c.Files)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync();
+        return await query.SingleOrDefaultAsync();
     }
 
     /// <summary>
@@ -1240,6 +1202,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
                         || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty));
+
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {
             query = query.Where(s =>
@@ -1516,7 +1479,8 @@ public class SeriesRepository : ISeriesRepository
                 LastScanned = s.LastFolderScanned,
                 SeriesName = s.Name,
                 FolderPath = s.FolderPath,
-                Format = s.Format
+                Format = s.Format,
+                LibraryRoots = s.Library.Folders.Select(f => f.Path)
             }).ToListAsync();
 
         var map = new Dictionary<string, IList<SeriesModified>>();
@@ -1537,5 +1501,31 @@ public class SeriesRepository : ISeriesRepository
         }
 
         return map;
+    }
+
+    private static IQueryable<Series> AddIncludesToQuery(IQueryable<Series> query, SeriesIncludes includeFlags)
+    {
+        if (includeFlags.HasFlag(SeriesIncludes.Library))
+        {
+            query = query.Include(u => u.Library);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Related))
+        {
+            query = query.Include(u => u.Relations);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Metadata))
+        {
+            query = query.Include(u => u.Metadata);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Volumes))
+        {
+            query = query.Include(u => u.Volumes);
+        }
+
+
+        return query;
     }
 }

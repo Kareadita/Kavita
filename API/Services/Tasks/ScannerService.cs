@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Parser;
@@ -97,24 +98,39 @@ public class ScannerService : IScannerService
         _wordCountAnalyzerService = wordCountAnalyzerService;
     }
 
+    /// <summary>
+    /// Given a generic folder path, will invoke a Series scan or Library scan.
+    /// </summary>
+    /// <remarks>This will Schedule the job to run 1 minute in the future to allow for any close-by duplicate requests to be dropped</remarks>
+    /// <param name="folder"></param>
     public async Task ScanFolder(string folder)
     {
-        var seriesId = await _unitOfWork.SeriesRepository.GetSeriesIdByFolder(folder);
-        if (seriesId > 0)
+        Series series = null;
+        try
         {
-            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries",
-                    new object[] {seriesId, true}))
+            series = await _unitOfWork.SeriesRepository.GetSeriesByFolderPath(folder, SeriesIncludes.Library);
+        }
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Equals("Sequence contains more than one element."))
+            {
+                _logger.LogCritical("[ScannerService] Multiple series map to this folder. Library scan will be used for ScanFolder");
+            }
+        }
+        if (series != null && series.Library.Type != LibraryType.Book)
+        {
+            if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
             }
-            BackgroundJob.Enqueue(() => ScanSeries(seriesId, true));
+            BackgroundJob.Schedule(() => ScanSeries(series.Id, true), TimeSpan.FromMinutes(1));
             return;
         }
 
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = _directoryService.GetParentDirectoryName(folder);
-        if (string.IsNullOrEmpty(parentDirectory)) return; // This should never happen as it's calculated before enqueing
+        if (string.IsNullOrEmpty(parentDirectory)) return;
 
         var libraries = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
@@ -125,18 +141,17 @@ public class ScannerService : IScannerService
         var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
-            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanLibrary",
-                    new object[] {library.Id, false}))
+            if (TaskScheduler.HasScanTaskRunningForLibrary(library.Id))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
                 return;
             }
-            BackgroundJob.Enqueue(() => ScanLibrary(library.Id, false));
+            BackgroundJob.Schedule(() => ScanLibrary(library.Id, false), TimeSpan.FromMinutes(1));
         }
     }
 
     /// <summary>
-    ///
+    /// Scans just an existing Series for changes. If the series doesn't exist, will delete it.
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="bypassFolderOptimizationChecks">Not Used. Scan series will always force</param>
@@ -186,6 +201,7 @@ public class ScannerService : IScannerService
             return;
         }
 
+        // If the series path doesn't exist anymore, it was either moved or renamed. We need to essentially delete it
         var parsedSeries = new Dictionary<ParsedSeries, IList<ParserInfo>>();
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Started, series.Name));
@@ -213,10 +229,12 @@ public class ScannerService : IScannerService
         }
 
         _logger.LogInformation("Beginning file scan on {SeriesName}", series.Name);
-        var scanElapsedTime = await ScanFiles(library, new []{folderPath}, false, TrackFiles, true);
+        var scanElapsedTime = await ScanFiles(library, new []{ folderPath }, false, TrackFiles, true);
         _logger.LogInformation("ScanFiles for {Series} took {Time}", series.Name, scanElapsedTime);
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Ended, series.Name));
+
+
 
         // Remove any parsedSeries keys that don't belong to our series. This can occur when users store 2 series in the same folder
         RemoveParsedInfosNotForSeries(parsedSeries, series);

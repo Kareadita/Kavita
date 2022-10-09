@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
@@ -108,7 +109,6 @@ public class ChapterListExtensionsTests
         var actualChapter = chapterList.GetChapterByRange(info);
 
         Assert.Equal(chapterList[0], actualChapter);
-
     }
 
     #region GetFirstChapterWithFiles
@@ -139,6 +139,48 @@ public class ChapterListExtensionsTests
         Assert.Equal(chapterList.Last(), chapterList.GetFirstChapterWithFiles());
     }
 
+
+    #endregion
+
+    #region MinimumReleaseYear
+
+    [Fact]
+    public void MinimumReleaseYear_ZeroIfNoChapters()
+    {
+        var chapterList = new List<Chapter>();
+
+        Assert.Equal(0, chapterList.MinimumReleaseYear());
+    }
+
+    [Fact]
+    public void MinimumReleaseYear_ZeroIfNoValidDates()
+    {
+        var chapterList = new List<Chapter>()
+        {
+            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
+            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
+        };
+
+        chapterList[0].ReleaseDate = new DateTime(10, 1, 1);
+        chapterList[1].ReleaseDate = DateTime.MinValue;
+
+        Assert.Equal(0, chapterList.MinimumReleaseYear());
+    }
+
+    [Fact]
+    public void MinimumReleaseYear_MinValidReleaseYear()
+    {
+        var chapterList = new List<Chapter>()
+        {
+            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true),
+            CreateChapter("detective comics", "0", CreateFile("/manga/detective comics #001.cbz", MangaFormat.Archive), true)
+        };
+
+        chapterList[0].ReleaseDate = new DateTime(2002, 1, 1);
+        chapterList[1].ReleaseDate = new DateTime(2012, 2, 1);
+
+        Assert.Equal(2002, chapterList.MinimumReleaseYear());
+    }
 
     #endregion
 }
