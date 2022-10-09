@@ -1202,6 +1202,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
                         || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty));
+
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {
             query = query.Where(s =>

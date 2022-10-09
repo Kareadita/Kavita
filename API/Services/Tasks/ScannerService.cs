@@ -120,7 +120,7 @@ public class ScannerService : IScannerService
         if (series != null && series.Library.Type != LibraryType.Book)
         {
             if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries",
-                    new object[] {series.Id, true}))
+                    new object[] {series.Id, true}, TaskScheduler.ScanQueue))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
@@ -143,7 +143,7 @@ public class ScannerService : IScannerService
         if (library != null)
         {
             if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanLibrary",
-                    new object[] {library.Id, false}))
+                    new object[] {library.Id, false}, TaskScheduler.ScanQueue))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
                 return;
