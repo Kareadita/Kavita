@@ -323,15 +323,32 @@ public class TaskScheduler : ITaskScheduler
         await _versionUpdaterService.PushUpdate(update);
     }
 
+    /// <summary>
+    /// If there is an enqueued or scheduled tak for <see cref="ScannerService.ScanLibrary"/> method
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     public static bool HasScanTaskRunningForLibrary(int libraryId)
     {
         return
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
     }
 
     /// <summary>
-    /// Checks if this same invocation is already enqueued
+    /// If there is an enqueued or scheduled tak for <see cref="ScannerService.ScanSeries"/> method
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    public static bool HasScanTaskRunningForSeries(int seriesId)
+    {
+        return
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue);
+    }
+
+    /// <summary>
+    /// Checks if this same invocation is already enqueued or scheduled
     /// </summary>
     /// <param name="methodName">Method name that was enqueued</param>
     /// <param name="className">Class name the method resides on</param>
@@ -354,10 +371,20 @@ public class TaskScheduler : ITaskScheduler
             j.Value.Job.Method.DeclaringType.Name.Equals(className));
     }
 
+    /// <summary>
+    /// Checks against any jobs that are running or about to run
+    /// </summary>
+    /// <param name="classNames"></param>
+    /// <param name="queue"></param>
+    /// <returns></returns>
     public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        return enqueuedJobs.Any(j => !j.Value.InEnqueuedState &&
+        var ret = enqueuedJobs.Any(j => !j.Value.InEnqueuedState &&
                                      classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
+        if (ret) return true;
+
+        var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
+        return runningJobs.Any(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
     }
 }

@@ -119,8 +119,7 @@ public class ScannerService : IScannerService
         }
         if (series != null && series.Library.Type != LibraryType.Book)
         {
-            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanSeries",
-                    new object[] {series.Id, true}, TaskScheduler.ScanQueue))
+            if (TaskScheduler.HasScanTaskRunningForSeries(series.Id))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this series. Dropping request", folder);
                 return;
@@ -142,8 +141,7 @@ public class ScannerService : IScannerService
         var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
-            if (TaskScheduler.HasAlreadyEnqueuedTask(Name, "ScanLibrary",
-                    new object[] {library.Id, false}, TaskScheduler.ScanQueue))
+            if (TaskScheduler.HasScanTaskRunningForLibrary(library.Id))
             {
                 _logger.LogInformation("[ScannerService] Scan folder invoked for {Folder} but a task is already queued for this library. Dropping request", folder);
                 return;
