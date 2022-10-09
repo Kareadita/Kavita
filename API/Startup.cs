@@ -188,11 +188,13 @@ public class Startup
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
-
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
 
                     // only needed for v0.5.4 and v0.6.0
                     await MigrateNormalizedEverything.Migrate(unitOfWork, dataContext, logger);
+
+                    // v0.6.0
+                    await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

@@ -10,8 +10,16 @@ import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { DeviceService } from './device.service';
 import { UpdateEmailResponse } from '../_models/email/update-email-response';
+import { AgeRating } from '../_models/metadata/age-rating';
+
+export enum Role {
+  Admin = 'Admin',
+  ChangePassword = 'Change Password',
+  Bookmark = 'Bookmark',
+  Download = 'Download',
+  ChangeRestriction = 'Change Restriction' 
+}
 
 @Injectable({
   providedIn: 'root'
@@ -49,19 +57,23 @@ export class AccountService implements OnDestroy {
   }
 
   hasAdminRole(user: User) {
-    return user && user.roles.includes('Admin');
+    return user && user.roles.includes(Role.Admin);
   }
 
   hasChangePasswordRole(user: User) {
-    return user && user.roles.includes('Change Password');
+    return user && user.roles.includes(Role.ChangePassword);
+  }
+
+  hasChangeAgeRestrictionRole(user: User) {
+    return user && user.roles.includes(Role.ChangeRestriction);
   }
 
   hasDownloadRole(user: User) {
-    return user && user.roles.includes('Download');
+    return user && user.roles.includes(Role.Download);
   }
 
   hasBookmarkRole(user: User) {
-    return user && user.roles.includes('Bookmark');
+    return user && user.roles.includes(Role.Bookmark);
   }
 
   getRoles() {
@@ -149,7 +161,7 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, {responseType: 'text' as 'json'});
   }
 
-  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>}) {
+  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, ageRestriction: AgeRating}) {
     return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/invite', model);
   }
 
@@ -186,12 +198,16 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, {responseType: 'json' as 'text'});
   }
 
-  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {
+  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number, ageRestriction: AgeRating}) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
   }
 
   updateEmail(email: string) {
     return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email});
+  }
+
+  updateAgeRestriction(ageRating: AgeRating) {
+    return this.httpClient.post(this.baseUrl + 'account/update/age-restriction', {ageRating});
   }
 
   /**

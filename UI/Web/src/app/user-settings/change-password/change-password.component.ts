@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { map, Observable, of, shareReplay, Subject, takeUntil } from 'rxjs';
+import { map, Observable, of, shareReplay, Subject, take, takeUntil } from 'rxjs';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 
@@ -29,6 +29,12 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   constructor(private accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+
+    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), take(1)).subscribe(user => {
+      this.user = user;
+      this.cdRef.markForCheck();
+    });
+
     this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), map(user => {
       return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
     }));
@@ -37,8 +43,6 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
     this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
     this.passwordChangeForm.addControl('oldPassword', new FormControl('', [Validators.required]));
-
-    
 
     this.observableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
       const values = this.passwordChangeForm.value;

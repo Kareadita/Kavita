@@ -12,7 +12,6 @@ using API.DTOs.Account;
 using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Enums.UserPreferences;
 using API.Errors;
 using API.Extensions;
 using API.Services;
@@ -358,6 +357,34 @@ public class AccountController : BaseApiController
         return Ok();
     }
 
+    [HttpPost("update/email")]
+    public async Task<ActionResult> UpdateEmail(UpdateAgeRestrictionDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized("You do not have permission");
+        if (dto == null) return BadRequest("Invalid payload");
+
+        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+
+        user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRestriction;
+        _unitOfWork.UserRepository.Update(user);
+
+        if (!_unitOfWork.HasChanges()) return Ok();
+        try
+        {
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error updating the age restriction");
+            return BadRequest("There was an error updating the age restriction");
+        }
+
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+
+        return Ok();
+    }
+
     /// <summary>
     /// Update the user account. This can only affect Username, Email (will require confirming), Roles, and Library access.
     /// </summary>
@@ -427,6 +454,9 @@ public class AccountController : BaseApiController
             lib.AppUsers ??= new List<AppUser>();
             lib.AppUsers.Add(user);
         }
+
+        user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction;
+        _unitOfWork.UserRepository.Update(user);
 
         if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
         {
@@ -539,6 +569,8 @@ public class AccountController : BaseApiController
                 lib.AppUsers ??= new List<AppUser>();
                 lib.AppUsers.Add(user);
             }
+
+            user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction;
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token))

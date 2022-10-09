@@ -363,10 +363,13 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="ageRating"></param>
     /// <returns></returns>
+    /// <remarks>This is cached for an hour</remarks>
+    [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"ageRating"})]
     [HttpGet("age-rating")]
     public ActionResult<string> GetAgeRating(int ageRating)
     {
         var val = (AgeRating) ageRating;
+        if (val == AgeRating.NotApplicable) return "No Restriction";
 
         return Ok(val.ToDescription());
     }
