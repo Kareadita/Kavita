@@ -1048,7 +1048,11 @@ public class SeriesRepository : ISeriesRepository
          var userRating = await GetUserAgeRestriction(userId);
 
          var items = (await GetRecentlyAddedChaptersQuery(userId));
-         foreach (var item in items.Where(c => c.AgeRating <= userRating))
+         if (userRating != AgeRating.NotApplicable)
+         {
+             items = items.Where(c => c.AgeRating <= userRating);
+         }
+         foreach (var item in items)
          {
              if (seriesMap.Keys.Count == pageSize) break;
 
