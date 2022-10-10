@@ -224,17 +224,14 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanLibrary(int libraryId, bool force = false)
     {
-        var alreadyEnqueued =
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
-        if (alreadyEnqueued)
+        if (HasScanTaskRunningForLibrary(libraryId))
         {
-            _logger.LogInformation("A duplicate request to scan library for library occured. Skipping");
+            _logger.LogInformation("A duplicate request for Library Scan on library {LibraryId} occured. Skipping", libraryId);
             return;
         }
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
-            _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
+            _logger.LogInformation("A Library Scan is already running, rescheduling ScanLibrary in 3 hours");
             BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), TimeSpan.FromHours(3));
             return;
         }
@@ -324,27 +321,29 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// If there is an enqueued or scheduled tak for <see cref="ScannerService.ScanLibrary"/> method
+    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanLibrary"/> method
     /// </summary>
     /// <param name="libraryId"></param>
+    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
     /// <returns></returns>
-    public static bool HasScanTaskRunningForLibrary(int libraryId)
+    public static bool HasScanTaskRunningForLibrary(int libraryId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true}, ScanQueue, checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false}, ScanQueue, checkRunningJobs);
     }
 
     /// <summary>
-    /// If there is an enqueued or scheduled tak for <see cref="ScannerService.ScanSeries"/> method
+    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanSeries"/> method
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
     /// <returns></returns>
-    public static bool HasScanTaskRunningForSeries(int seriesId)
+    public static bool HasScanTaskRunningForSeries(int seriesId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue, true) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue, true);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue, checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue, checkRunningJobs);
     }
 
     /// <summary>
