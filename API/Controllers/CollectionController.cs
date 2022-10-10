@@ -41,7 +41,8 @@ public class CollectionController : BaseApiController
         {
             return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
         }
-        return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
+
+        return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id);
     }
 
     /// <summary>
@@ -56,7 +57,8 @@ public class CollectionController : BaseApiController
     {
         queryString ??= "";
         queryString = queryString.Replace(@"%", string.Empty);
-        if (queryString.Length == 0) return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (queryString.Length == 0) return await GetAllTags();
 
         // TODO: Apply RestrictedProfile logic here
         return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString);

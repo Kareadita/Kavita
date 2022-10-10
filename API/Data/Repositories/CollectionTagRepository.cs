@@ -17,7 +17,7 @@ public interface ICollectionTagRepository
     Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync();
     Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery);
     Task<string> GetCoverImageAsync(int collectionTagId);
-    Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync();
+    Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
     Task<CollectionTag> GetTagAsync(int tagId);
     Task<CollectionTag> GetFullTagAsync(int tagId);
     void Update(CollectionTag tag);
@@ -85,6 +85,7 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
     {
+
         return await _context.CollectionTag
             .OrderBy(c => c.NormalizedTitle)
             .AsNoTracking()
@@ -92,10 +93,12 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync()
+    public async Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId)
     {
+        var userRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
         return await _context.CollectionTag
             .Where(c => c.Promoted)
+            .Where(c => c.SeriesMetadatas.All(sm => sm.AgeRating <= userRating))
             .OrderBy(c => c.NormalizedTitle)
             .AsNoTracking()
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
