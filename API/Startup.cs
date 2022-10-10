@@ -77,7 +77,7 @@ public class Startup
                     Location = ResponseCacheLocation.Any,
                     NoStore = false
                 });
-            options.CacheProfiles.Add("5Minutes",
+            options.CacheProfiles.Add("5Minute",
                 new CacheProfile()
                 {
                     Duration = 60 * 5,

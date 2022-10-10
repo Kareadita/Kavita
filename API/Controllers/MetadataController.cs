@@ -78,7 +78,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "5Minutes", VaryByQueryKeys = new [] {"libraryIds"})]
+    [ResponseCache(CacheProfileName = "5Minute", VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("age-ratings")]
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
@@ -101,7 +101,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "5Minutes", VaryByQueryKeys = new [] {"libraryIds"})]
+    [ResponseCache(CacheProfileName = "5Minute", VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("publication-status")]
     public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {
