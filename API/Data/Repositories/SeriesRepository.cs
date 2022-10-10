@@ -118,7 +118,6 @@ public interface ISeriesRepository
     Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
-    Task<int> GetSeriesIdByFolder(string folder);
     Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<List<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
@@ -1151,21 +1150,6 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => libraryIds.Contains(s.LibraryId))
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
-    }
-
-    /// <summary>
-    /// Given a folder path return a Series with the <see cref="Series.FolderPath"/> that matches.
-    /// </summary>
-    /// <remarks>This will apply normalization on the path.</remarks>
-    /// <param name="folder"></param>
-    /// <returns></returns>
-    public async Task<int> GetSeriesIdByFolder(string folder)
-    {
-        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
-        var series = await _context.Series
-            .Where(s => s.FolderPath.Equals(normalized))
-            .SingleOrDefaultAsync();
-        return series?.Id ?? 0;
     }
 
     /// <summary>
