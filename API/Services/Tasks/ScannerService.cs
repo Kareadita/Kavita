@@ -192,6 +192,7 @@ public class ScannerService : IScannerService
                 await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Files for series are not in a nested folder under library path. Correct this and rescan."));
                 return;
             }
+
         }
 
         if (string.IsNullOrEmpty(folderPath))

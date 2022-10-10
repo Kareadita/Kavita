@@ -262,7 +262,7 @@ public class ParseScannedFiles
 
 
     /// <summary>
-    /// This will process series by folder groups.
+    /// This will process series by folder groups. This is used solely by ScanSeries
     /// </summary>
     /// <param name="libraryType"></param>
     /// <param name="folders"></param>
@@ -299,7 +299,7 @@ public class ParseScannedFiles
                 MessageFactory.FileScanProgressEvent(folder, libraryName, ProgressEventType.Updated));
             if (files.Count == 0)
             {
-                _logger.LogInformation("[ScannerService] {Folder} is empty", folder);
+                _logger.LogInformation("[ScannerService] {Folder} is empty or is no longer in this location", folder);
                 return;
             }
 
