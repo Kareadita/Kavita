@@ -343,8 +343,8 @@ public class TaskScheduler : ITaskScheduler
     public static bool HasScanTaskRunningForSeries(int seriesId)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue, true) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue, true);
     }
 
     /// <summary>
@@ -355,7 +355,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
     /// <returns></returns>
-    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
+    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
         var ret = enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
@@ -365,10 +365,23 @@ public class TaskScheduler : ITaskScheduler
         if (ret) return true;
 
         var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
-        return scheduledJobs.Any(j =>
+        ret = scheduledJobs.Any(j =>
             j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
             j.Value.Job.Method.Name.Equals(methodName) &&
             j.Value.Job.Method.DeclaringType.Name.Equals(className));
+
+        if (ret) return true;
+
+        if (checkRunningJobs)
+        {
+            var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
+            return scheduledJobs.Any(j =>
+                j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+                j.Value.Job.Method.Name.Equals(methodName) &&
+                j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        }
+
+        return false;
     }
 
     /// <summary>
