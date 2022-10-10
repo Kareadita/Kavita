@@ -137,7 +137,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       ageRating: new FormControl('', []),
       publicationStatus: new FormControl('', []),
       language: new FormControl('', []),
-      releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/[1-9]\d{3}/)]),
+      releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
     });
     this.cdRef.markForCheck();
 
@@ -431,6 +431,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
+    console.log('form: ', this.editSeriesForm);
     this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset});
   }
 
