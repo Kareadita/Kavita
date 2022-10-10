@@ -357,8 +357,8 @@ public class AccountController : BaseApiController
         return Ok();
     }
 
-    [HttpPost("update/email")]
-    public async Task<ActionResult> UpdateEmail(UpdateAgeRestrictionDto dto)
+    [HttpPost("update/age-restriction")]
+    public async Task<ActionResult> UpdateAgeRestriction(UpdateAgeRestrictionDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized("You do not have permission");
