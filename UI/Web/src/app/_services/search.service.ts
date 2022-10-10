@@ -18,7 +18,7 @@ export class SearchService {
     if (term === '') {
       return of(new SearchResultGroup());
     }
-    return this.httpClient.get<SearchResultGroup>(this.baseUrl + 'library/search?queryString=' + encodeURIComponent(term));
+    return this.httpClient.get<SearchResultGroup>(this.baseUrl + 'search/search?queryString=' + encodeURIComponent(term));
   }
 
   getSeriesForMangaFile(mangaFileId: number) {

@@ -308,9 +308,11 @@ public class SeriesRepository : ISeriesRepository
         const int maxRecords = 15;
         var result = new SearchResultGroupDto();
         var searchQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(searchQuery);
+        var userRating = await GetUserAgeRestriction(userId);
 
         var seriesIds = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => s.Metadata.AgeRating <= userRating)
             .Select(s => s.Id)
             .ToList();
 
@@ -334,6 +336,7 @@ public class SeriesRepository : ISeriesRepository
                         || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")
                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
+            .Where(s => s.Metadata.AgeRating <= userRating)
             .Include(s => s.Library)
             .OrderBy(s => s.SortName)
             .AsNoTracking()
@@ -342,19 +345,20 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
-        // TODO: hook in a check for age rating
         result.ReadingLists = await _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)
             .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
+            .Where(rl => rl.AgeRating <= userRating)
             .AsSplitQuery()
             .Take(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
         result.Collections =  await _context.CollectionTag
-            .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.NormalizedTitle, $"%{searchQueryNormalized}%"))
-            .Where(s => s.Promoted || isAdmin)
+            .Where(c => EF.Functions.Like(c.Title, $"%{searchQuery}%")
+                        || EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%"))
+            .Where(c => c.Promoted || isAdmin)
+            .Where(c => c.SeriesMetadatas.All(sm => sm.AgeRating <= userRating))
             .OrderBy(s => s.Title)
             .AsNoTracking()
             .AsSplitQuery()
@@ -393,7 +397,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
 
         var fileIds = _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => seriesIds.Contains(s.Id))
             .AsSplitQuery()
             .SelectMany(s => s.Volumes)
             .SelectMany(v => v.Chapters)
@@ -1144,6 +1148,8 @@ public class SeriesRepository : ISeriesRepository
     public async Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId)
     {
         var libraryIds = GetLibraryIdsForUser(userId);
+        var userRating = await GetUserAgeRestriction(userId);
+
         return await _context.MangaFile
             .Where(m => m.Id == mangaFileId)
             .AsSplitQuery()
@@ -1151,6 +1157,7 @@ public class SeriesRepository : ISeriesRepository
             .Select(c => c.Volume)
             .Select(v => v.Series)
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => s.Metadata.AgeRating <= userRating)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }
@@ -1158,12 +1165,14 @@ public class SeriesRepository : ISeriesRepository
     public async Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId)
     {
         var libraryIds = GetLibraryIdsForUser(userId);
+        var userRating = await GetUserAgeRestriction(userId);
         return await _context.Chapter
             .Where(m => m.Id == chapterId)
             .AsSplitQuery()
             .Select(c => c.Volume)
             .Select(v => v.Series)
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => s.Metadata.AgeRating <= userRating)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }
