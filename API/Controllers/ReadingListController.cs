@@ -217,9 +217,15 @@ public class ReadingListController : BaseApiController
             return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
         }
 
+        dto.Title = dto.Title.Trim();
         if (!string.IsNullOrEmpty(dto.Title))
         {
-            readingList.Title = dto.Title; // Should I check if this is unique?
+            var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));
+            if (hasExisting)
+            {
+                return BadRequest("A list of this name already exists");
+            }
+            readingList.Title = dto.Title;
             readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
         }
         if (!string.IsNullOrEmpty(dto.Title))
