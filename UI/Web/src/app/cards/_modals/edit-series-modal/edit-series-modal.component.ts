@@ -431,7 +431,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   }
 
   close() {
-    console.log('form: ', this.editSeriesForm);
     this.modal.close({success: false, series: undefined, coverImageUpdate: this.coverImageReset});
   }
 

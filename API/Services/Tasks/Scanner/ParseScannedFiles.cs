@@ -185,7 +185,6 @@ public class ParseScannedFiles
                 ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
                                              || ps.NormalizedName.Equals(normalizedLocalizedSeries)
                                              || ps.NormalizedName.Equals(normalizedSortSeries)));
-            // NOTE: Do I need to match on Original Series?
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,

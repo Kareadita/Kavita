@@ -220,7 +220,8 @@ public class ScannerService : IScannerService
                 Format = parsedFiles.First().Format
             };
 
-            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName))
+            // For Scan Series, we need to filter out anything that isn't our Series
+            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(Scanner.Parser.Parser.Normalize(series.OriginalName)))
             {
                 return;
             }
