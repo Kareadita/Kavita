@@ -1,11 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
-import { map, take } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { JumpKey } from '../_models/jumpbar/jump-key';
 import { Library, LibraryType } from '../_models/library';
-import { SearchResultGroup } from '../_models/search/search-result-group';
 import { DirectoryDto } from '../_models/system/directory-dto';
 
 
@@ -66,10 +65,6 @@ export class LibraryService {
 
   getLibraries() {
     return this.httpClient.get<Library[]>(this.baseUrl + 'library');
-  }
-
-  getLibrariesForMember() {
-    return this.httpClient.get<Library[]>(this.baseUrl + 'library/libraries');
   }
 
   updateLibrariesForMember(username: string, selectedLibraries: Library[]) {

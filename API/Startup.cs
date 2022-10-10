@@ -66,9 +66,22 @@ public class Startup
             options.CacheProfiles.Add("Hour",
                 new CacheProfile()
                 {
-                    Duration = 60 * 10,
+                    Duration = 60 * 60,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
+                });
+            options.CacheProfiles.Add("10Minute",
+                new CacheProfile()
+                {
+                    Duration = 60 * 10,
+                    Location = ResponseCacheLocation.Any,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add("5Minutes",
+                new CacheProfile()
+                {
+                    Duration = 60 * 5,
+                    Location = ResponseCacheLocation.Any,
                 });
         });
         services.Configure<ForwardedHeadersOptions>(options =>

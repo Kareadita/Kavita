@@ -374,7 +374,7 @@ public class TaskScheduler : ITaskScheduler
         if (checkRunningJobs)
         {
             var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-            return scheduledJobs.Any(j =>
+            return runningJobs.Any(j =>
                 j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
                 j.Value.Job.Method.Name.Equals(methodName) &&
                 j.Value.Job.Method.DeclaringType.Name.Equals(className));

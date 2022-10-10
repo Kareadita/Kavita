@@ -112,10 +112,12 @@ public class LibraryController : BaseApiController
         return Ok(_directoryService.ListDirectory(path));
     }
 
+
+    [ResponseCache(CacheProfileName = "10Minute")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
-        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosAsync());
+        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
     }
 
     [HttpGet("jump-bar")]
@@ -194,12 +196,6 @@ public class LibraryController : BaseApiController
     {
         _taskScheduler.AnalyzeFilesForLibrary(libraryId, true);
         return Ok();
-    }
-
-    [HttpGet("libraries")]
-    public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser()
-    {
-        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
     }
 
     /// <summary>

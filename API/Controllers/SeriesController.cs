@@ -364,7 +364,7 @@ public class SeriesController : BaseApiController
     /// <param name="ageRating"></param>
     /// <returns></returns>
     /// <remarks>This is cached for an hour</remarks>
-    [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"ageRating"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"ageRating"})]
     [HttpGet("age-rating")]
     public ActionResult<string> GetAgeRating(int ageRating)
     {
@@ -380,7 +380,7 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
-    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"seriesId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"seriesId"})]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {

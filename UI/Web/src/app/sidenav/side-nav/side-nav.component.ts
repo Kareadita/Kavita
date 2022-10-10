@@ -54,7 +54,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) {
-        this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
+        this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
           this.libraries = libraries;
           this.cdRef.markForCheck();
         });
@@ -64,7 +64,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     });
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
-      this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
+      this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
         this.cdRef.markForCheck();
       });
