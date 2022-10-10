@@ -115,7 +115,7 @@ public class ParseScannedFiles
         var seriesMatcher = new GlobMatcher();
         try
         {
-            var roots = seriesPaths[folderPath][0].LibraryRoots.Select(Scanner.Parser.Parser.NormalizePath).ToList();
+            var roots = seriesPaths[folderPath][0].LibraryRoots.Select(Parser.Parser.NormalizePath).ToList();
             var libraryFolder = roots.SingleOrDefault(folderPath.Contains);
 
             if (string.IsNullOrEmpty(libraryFolder) || !Directory.Exists(folderPath))

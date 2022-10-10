@@ -50,7 +50,6 @@ export class ChangeAgeRestrictionComponent implements OnInit {
 
   resetForm() {
     if (!this.user) return;
-    console.log('resetting to ', this.originalRating)
     this.reset.emit(this.originalRating);
     this.cdRef.markForCheck();
   }
