@@ -45,11 +45,11 @@ public class ReadingListController : BaseApiController
     /// <summary>
     /// Returns reading lists (paginated) for a given user.
     /// </summary>
-    /// <param name="includePromoted">Defaults to true</param>
+    /// <param name="includePromoted">Include Promoted Reading Lists along with user's Reading Lists. Defaults to true</param>
     /// <param name="userParams">Pagination parameters</param>
     /// <returns></returns>
     [HttpPost("lists")]
-    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, [FromQuery] bool includePromoted = true)
+    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, bool includePromoted = true)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, includePromoted,
@@ -279,7 +279,6 @@ public class ReadingListController : BaseApiController
         // If there are adds, tell tracking this has been modified
         if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, chapterIdsForSeries, readingList))
         {
-            ReadingListService.CalculateReadingListAgeRating(readingList);
             _unitOfWork.ReadingListRepository.Update(readingList);
         }
 
@@ -325,7 +324,6 @@ public class ReadingListController : BaseApiController
         // If there are adds, tell tracking this has been modified
         if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, chapterIds, readingList))
         {
-            ReadingListService.CalculateReadingListAgeRating(readingList);
             _unitOfWork.ReadingListRepository.Update(readingList);
         }
 
@@ -368,7 +366,6 @@ public class ReadingListController : BaseApiController
             // If there are adds, tell tracking this has been modified
             if (await _readingListService.AddChaptersToReadingList(seriesId, ids[seriesId], readingList))
             {
-                ReadingListService.CalculateReadingListAgeRating(readingList);
                 _unitOfWork.ReadingListRepository.Update(readingList);
             }
         }
@@ -406,7 +403,6 @@ public class ReadingListController : BaseApiController
         // If there are adds, tell tracking this has been modified
         if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, chapterIdsForVolume, readingList))
         {
-            ReadingListService.CalculateReadingListAgeRating(readingList);
             _unitOfWork.ReadingListRepository.Update(readingList);
         }
 
@@ -440,7 +436,6 @@ public class ReadingListController : BaseApiController
         // If there are adds, tell tracking this has been modified
         if (await _readingListService.AddChaptersToReadingList(dto.SeriesId, new List<int>() { dto.ChapterId }, readingList))
         {
-            ReadingListService.CalculateReadingListAgeRating(readingList);
             _unitOfWork.ReadingListRepository.Update(readingList);
         }
 

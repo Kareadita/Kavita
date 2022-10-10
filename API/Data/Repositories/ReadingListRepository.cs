@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -88,8 +89,10 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams)
     {
+        var userAgeRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
+            .Where(l => l.AgeRating >= userAgeRating)
             .OrderBy(l => l.LastModified)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
@@ -103,7 +106,7 @@ public class ReadingListRepository : IReadingListRepository
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
             .AsSplitQuery()
-            .OrderBy(l => l.LastModified)
+            .OrderBy(l => l.Title)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
 

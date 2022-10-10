@@ -9,7 +9,6 @@ using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
-using API.Parser;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -407,7 +406,7 @@ public class ReadingListServiceTests
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 
-        ReadingListService.CalculateReadingListAgeRating(readingList);
+        await _readingListService.CalculateReadingListAgeRating(readingList);
         Assert.Equal(AgeRating.X18Plus, readingList.AgeRating);
     }
 
@@ -470,7 +469,7 @@ public class ReadingListServiceTests
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 
-        ReadingListService.CalculateReadingListAgeRating(readingList);
+        await _readingListService.CalculateReadingListAgeRating(readingList);
         Assert.Equal(AgeRating.Unknown, readingList.AgeRating);
     }
 

@@ -123,6 +123,7 @@ public interface ISeriesRepository
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<List<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
+    Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1501,6 +1502,21 @@ public class SeriesRepository : ISeriesRepository
         }
 
         return map;
+    }
+
+    /// <summary>
+    /// Returns the highest Age Rating for a list of Series
+    /// </summary>
+    /// <param name="seriesIds"></param>
+    /// <returns></returns>
+    public async Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds)
+    {
+        return await _context.Series
+            .Where(s => seriesIds.Contains(s.Id))
+            .Include(s => s.Metadata)
+            .Select(s => s.Metadata.AgeRating)
+            .OrderBy(s => s)
+            .LastOrDefaultAsync();
     }
 
     private static IQueryable<Series> AddIncludesToQuery(IQueryable<Series> query, SeriesIncludes includeFlags)

@@ -17,7 +17,7 @@ public interface IReadingListService
     Task<bool> DeleteReadingListItem(UpdateReadingListPosition dto);
     Task<AppUser?> UserHasReadingListAccess(int readingListId, string username);
     Task<bool> DeleteReadingList(int readingListId, AppUser user);
-
+    Task CalculateReadingListAgeRating(ReadingList readingList);
     Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
         ReadingList readingList);
 }
@@ -63,7 +63,7 @@ public class ReadingListService : IReadingListService
             _unitOfWork.ReadingListRepository.BulkRemove(listItems);
 
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
-            CalculateReadingListAgeRating(readingList);
+            await CalculateReadingListAgeRating(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
 
@@ -116,7 +116,7 @@ public class ReadingListService : IReadingListService
             index++;
         }
 
-        CalculateReadingListAgeRating(readingList);
+        await CalculateReadingListAgeRating(readingList);
 
         if (!_unitOfWork.HasChanges()) return true;
 
@@ -127,9 +127,21 @@ public class ReadingListService : IReadingListService
     /// Calculates the highest Age Rating from each Reading List Item
     /// </summary>
     /// <param name="readingList"></param>
-    public static void CalculateReadingListAgeRating(ReadingList readingList)
+    public async Task CalculateReadingListAgeRating(ReadingList readingList)
     {
-        readingList.AgeRating = readingList.Items.DefaultIfEmpty().Select(l => l.Chapter.AgeRating).Max();
+        await CalculateReadingListAgeRating(readingList, readingList.Items.Select(i => i.SeriesId));
+    }
+
+    /// <summary>
+    /// Calculates the highest Age Rating from each Reading List Item
+    /// </summary>
+    /// <remarks>This method is used when the ReadingList doesn't have items yet</remarks>
+    /// <param name="readingList"></param>
+    /// <param name="chapters">The Chapters for all the reading list items</param>
+    private async Task CalculateReadingListAgeRating(ReadingList readingList, IEnumerable<int> seriesIds)
+    {
+        var ageRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
+        readingList.AgeRating = ageRating;
     }
 
     /// <summary>
@@ -185,15 +197,17 @@ public class ReadingListService : IReadingListService
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
         var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
             .OrderBy(c => Tasks.Scanner.Parser.Parser.MinNumberFromRange(c.Volume.Name))
-            .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
+            .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting)
+            .ToList();
 
         var index = lastOrder + 1;
-        foreach (var chapter in chaptersForSeries)
+        foreach (var chapter in chaptersForSeries.Where(chapter => !existingChapterExists.Contains(chapter.Id)))
         {
-            if (existingChapterExists.Contains(chapter.Id)) continue;
             readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
             index += 1;
         }
+
+        await CalculateReadingListAgeRating(readingList, new []{ seriesId });
 
         return index > lastOrder + 1;
     }
