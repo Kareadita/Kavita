@@ -1101,6 +1101,7 @@ public class SeriesRepository : ISeriesRepository
 
         return await _context.Series
             .Where(s => targetSeries.Contains(s.Id))
+            .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .AsNoTracking()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -1381,21 +1382,22 @@ public class SeriesRepository : ISeriesRepository
     {
         var libraryIds = GetLibraryIdsForUser(userId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
+        var userRating = await GetUserAgeRestriction(userId);
 
         return new RelatedSeriesDto()
         {
             SourceSeriesId = seriesId,
-            Adaptations = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Adaptation),
-            Characters = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Character),
-            Prequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Prequel),
-            Sequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Sequel),
-            Contains = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Contains),
-            SideStories = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SideStory),
-            SpinOffs = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SpinOff),
-            Others = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Other),
-            AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting),
-            AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion),
-            Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi),
+            Adaptations = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Adaptation, userRating),
+            Characters = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Character, userRating),
+            Prequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Prequel, userRating),
+            Sequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Sequel, userRating),
+            Contains = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Contains, userRating),
+            SideStories = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SideStory, userRating),
+            SpinOffs = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SpinOff, userRating),
+            Others = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Other, userRating),
+            AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating),
+            AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating),
+            Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating),
             Parent = await _context.Series
                 .SelectMany(s =>
                     s.RelationOf.Where(r => r.TargetSeriesId == seriesId
@@ -1403,6 +1405,7 @@ public class SeriesRepository : ISeriesRepository
                                              && r.RelationKind != RelationKind.Prequel
                                              && r.RelationKind != RelationKind.Sequel)
                         .Select(sr => sr.Series))
+                .RestrictAgainstAgeRestriction(userRating)
                 .AsSplitQuery()
                 .AsNoTracking()
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -1417,11 +1420,12 @@ public class SeriesRepository : ISeriesRepository
             .Select(s => s.Id);
     }
 
-    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind)
+    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind, AgeRating userRating)
     {
         return await _context.Series.SelectMany(s =>
             s.Relations.Where(sr => sr.RelationKind == kind && sr.SeriesId == seriesId && usersSeriesIds.Contains(sr.TargetSeriesId))
                 .Select(sr => sr.TargetSeries))
+            .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .AsNoTracking()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
