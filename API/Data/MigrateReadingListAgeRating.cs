@@ -22,7 +22,7 @@ public static class MigrateReadingListAgeRating
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext context, IReadingListService readingListService, ILogger<Program> logger)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (Version.Parse(settings.InstallVersion) > new Version(0, 5, 6, 24))
+        if (Version.Parse(settings.InstallVersion) > new Version(0, 5, 6, 26))
         {
             return;
         }
