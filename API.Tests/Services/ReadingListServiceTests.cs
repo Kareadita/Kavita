@@ -375,12 +375,10 @@ public class ReadingListServiceTests
                                         new Chapter()
                                         {
                                             Number = "1",
-                                            AgeRating = AgeRating.Everyone
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
-                                            AgeRating = AgeRating.X18Plus
                                         }
                                     }
                                 }
@@ -407,7 +405,7 @@ public class ReadingListServiceTests
         await _unitOfWork.CommitAsync();
 
         await _readingListService.CalculateReadingListAgeRating(readingList);
-        Assert.Equal(AgeRating.X18Plus, readingList.AgeRating);
+        Assert.Equal(AgeRating.Unknown, readingList.AgeRating);
     }
 
     [Fact]
