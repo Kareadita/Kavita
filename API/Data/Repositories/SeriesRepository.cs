@@ -51,6 +51,7 @@ internal class RecentlyAddedSeries
     public string ChapterTitle { get; init; }
     public bool IsSpecial { get; init; }
     public int VolumeNumber { get; init; }
+    public AgeRating AgeRating { get; init; }
 }
 
 public interface ISeriesRepository
@@ -735,6 +736,8 @@ public class SeriesRepository : ISeriesRepository
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter)
     {
         var userLibraries = await GetUserLibraries(libraryId, userId);
+        var userRating = await GetUserAgeRestriction(userId);
+
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
             out var hasCollectionTagFilter, out var hasRatingFilter, out var hasProgressFilter,
@@ -759,8 +762,13 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => !hasSeriesNameFilter ||
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
                                              || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
-            .AsNoTracking();
+                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"));
+        if (userRating != AgeRating.NotApplicable)
+        {
+            query = query.Where(s => s.Metadata.AgeRating <= userRating);
+        }
+
+        query = query.AsNoTracking();
 
         // If no sort options, default to using SortName
         filter.SortOptions ??= new SortOptions()
@@ -1033,7 +1041,10 @@ public class SeriesRepository : ISeriesRepository
     {
         var seriesMap = new Dictionary<string, GroupedSeriesDto>();
          var index = 0;
-         foreach (var item in await GetRecentlyAddedChaptersQuery(userId))
+         var userRating = await GetUserAgeRestriction(userId);
+
+         var items = (await GetRecentlyAddedChaptersQuery(userId));
+         foreach (var item in items.Where(c => c.AgeRating <= userRating))
          {
              if (seriesMap.Keys.Count == pageSize) break;
 
@@ -1059,6 +1070,11 @@ public class SeriesRepository : ISeriesRepository
          }
 
          return seriesMap.Values.AsEnumerable();
+    }
+
+    private async Task<AgeRating> GetUserAgeRestriction(int userId)
+    {
+        return (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
     }
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind)
@@ -1402,16 +1418,15 @@ public class SeriesRepository : ISeriesRepository
 
     private async Task<IEnumerable<RecentlyAddedSeries>> GetRecentlyAddedChaptersQuery(int userId)
     {
-        var libraries = await _context.AppUser
+        var libraryIds = await _context.AppUser
             .Where(u => u.Id == userId)
             .SelectMany(u => u.Libraries.Select(l => new {LibraryId = l.Id, LibraryType = l.Type}))
+            .Select(l => l.LibraryId)
             .ToListAsync();
-        var libraryIds = libraries.Select(l => l.LibraryId).ToList();
 
         var withinLastWeek = DateTime.Now - TimeSpan.FromDays(12);
-        var ret = _context.Chapter
-            .Where(c => c.Created >= withinLastWeek)
-            .AsNoTracking()
+        return _context.Chapter
+            .Where(c => c.Created >= withinLastWeek).AsNoTracking()
             .Include(c => c.Volume)
             .ThenInclude(v => v.Series)
             .ThenInclude(s => s.Library)
@@ -1430,12 +1445,12 @@ public class SeriesRepository : ISeriesRepository
                 ChapterRange = c.Range,
                 IsSpecial = c.IsSpecial,
                 VolumeNumber = c.Volume.Number,
-                ChapterTitle = c.Title
+                ChapterTitle = c.Title,
+                AgeRating = c.Volume.Series.Metadata.AgeRating
             })
             .AsSplitQuery()
             .Where(c => c.Created >= withinLastWeek && libraryIds.Contains(c.LibraryId))
             .AsEnumerable();
-        return ret;
     }
 
     public async Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter)
