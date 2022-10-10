@@ -137,7 +137,7 @@ public class ReadingListService : IReadingListService
     /// </summary>
     /// <remarks>This method is used when the ReadingList doesn't have items yet</remarks>
     /// <param name="readingList"></param>
-    /// <param name="chapters">The Chapters for all the reading list items</param>
+    /// <param name="seriesIds">The series ids of all the reading list items</param>
     private async Task CalculateReadingListAgeRating(ReadingList readingList, IEnumerable<int> seriesIds)
     {
         var ageRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);

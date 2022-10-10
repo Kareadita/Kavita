@@ -5,7 +5,6 @@ using API.Data;
 using API.DTOs;
 using API.DTOs.Search;
 using API.Extensions;
-using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -16,12 +15,10 @@ namespace API.Controllers;
 public class SearchController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ISeriesService _seriesService;
 
-    public SearchController(IUnitOfWork unitOfWork, ISeriesService seriesService)
+    public SearchController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _seriesService = seriesService;
     }
 
     /// <summary>

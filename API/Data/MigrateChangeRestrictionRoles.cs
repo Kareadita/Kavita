@@ -16,6 +16,7 @@ public static class MigrateChangeRestrictionRoles
     /// </summary>
     /// <param name="unitOfWork"></param>
     /// <param name="userManager"></param>
+    /// <param name="logger"></param>
     public static async Task Migrate(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, ILogger<Program> logger)
     {
         var usersWithRole = await userManager.GetUsersInRoleAsync(PolicyConstants.ChangeRestrictionRole);

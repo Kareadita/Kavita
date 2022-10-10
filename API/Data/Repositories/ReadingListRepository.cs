@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
 using API.Entities;
-using API.Entities.Enums;
 using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -24,7 +23,7 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
     void Remove(ReadingListItem item);
-    void Add(ReadingList item);
+    void Add(ReadingList list);
     void BulkRemove(IEnumerable<ReadingListItem> items);
     void Update(ReadingList list);
     Task<int> Count();

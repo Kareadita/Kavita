@@ -18,6 +18,7 @@ public static class MigrateReadingListAgeRating
     /// </summary>
     /// <param name="context"></param>
     /// <param name="readingListService"></param>
+    /// <param name="logger"></param>
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext context, IReadingListService readingListService, ILogger<Program> logger)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();

@@ -336,7 +336,7 @@ public class ReadingListServiceTests
 
 
         Assert.Equal(2, readingList.Items.Count);
-        Assert.False(readingList.Items.Any(i => i.Id == 2));
+        Assert.DoesNotContain(readingList.Items, i => i.Id == 2);
     }
 
 
