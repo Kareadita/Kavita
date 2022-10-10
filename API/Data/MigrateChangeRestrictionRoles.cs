@@ -2,6 +2,7 @@
 using API.Constants;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace API.Data;
 
@@ -15,10 +16,12 @@ public static class MigrateChangeRestrictionRoles
     /// </summary>
     /// <param name="unitOfWork"></param>
     /// <param name="userManager"></param>
-    public static async Task Migrate(IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+    public static async Task Migrate(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, ILogger<Program> logger)
     {
         var usersWithRole = await userManager.GetUsersInRoleAsync(PolicyConstants.ChangeRestrictionRole);
         if (usersWithRole.Count != 0) return;
+
+        logger.LogCritical("Running MigrateChangeRestrictionRoles migration");
 
         var allUsers = await unitOfWork.UserRepository.GetAllUsers();
         foreach (var user in allUsers)
@@ -26,5 +29,7 @@ public static class MigrateChangeRestrictionRoles
             await userManager.RemoveFromRoleAsync(user, PolicyConstants.ChangeRestrictionRole);
             await userManager.AddToRoleAsync(user, PolicyConstants.ChangeRestrictionRole);
         }
+
+        logger.LogInformation("MigrateChangeRestrictionRoles migration complete");
     }
 }

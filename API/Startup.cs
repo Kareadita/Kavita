@@ -184,6 +184,7 @@ public class Startup
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                     var themeService = serviceProvider.GetRequiredService<IThemeService>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
+                    var readingListService = serviceProvider.GetRequiredService<IReadingListService>();
 
 
                     // Only run this if we are upgrading
@@ -194,7 +195,8 @@ public class Startup
                     await MigrateNormalizedEverything.Migrate(unitOfWork, dataContext, logger);
 
                     // v0.6.0
-                    await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager);
+                    await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager, logger);
+                    await MigrateReadingListAgeRating.Migrate(unitOfWork, dataContext, readingListService, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
