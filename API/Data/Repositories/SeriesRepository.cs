@@ -312,7 +312,7 @@ public class SeriesRepository : ISeriesRepository
 
         var seriesIds = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => s.Metadata.AgeRating <= userRating)
+            .RestrictAgainstAgeRestriction(userRating)
             .Select(s => s.Id)
             .ToList();
 
@@ -336,7 +336,7 @@ public class SeriesRepository : ISeriesRepository
                         || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")
                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
-            .Where(s => s.Metadata.AgeRating <= userRating)
+            .RestrictAgainstAgeRestriction(userRating)
             .Include(s => s.Library)
             .OrderBy(s => s.SortName)
             .AsNoTracking()
@@ -348,7 +348,7 @@ public class SeriesRepository : ISeriesRepository
         result.ReadingLists = await _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)
             .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
-            .Where(rl => rl.AgeRating <= userRating)
+            .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .Take(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
@@ -358,7 +358,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(c => EF.Functions.Like(c.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%"))
             .Where(c => c.Promoted || isAdmin)
-            .Where(c => c.SeriesMetadatas.All(sm => sm.AgeRating <= userRating))
+            .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(s => s.Title)
             .AsNoTracking()
             .AsSplitQuery()
@@ -769,7 +769,7 @@ public class SeriesRepository : ISeriesRepository
                                              || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"));
         if (userRating != AgeRating.NotApplicable)
         {
-            query = query.Where(s => s.Metadata.AgeRating <= userRating);
+            query = query.RestrictAgainstAgeRestriction(userRating);
         }
 
         query = query.AsNoTracking();
@@ -1084,8 +1084,11 @@ public class SeriesRepository : ISeriesRepository
     public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind)
     {
         var libraryIds = GetLibraryIdsForUser(userId);
+        var userRating = await GetUserAgeRestriction(userId);
+
         var usersSeriesIds = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .RestrictAgainstAgeRestriction(userRating)
             .Select(s => s.Id);
 
         var targetSeries = _context.SeriesRelation
@@ -1157,7 +1160,7 @@ public class SeriesRepository : ISeriesRepository
             .Select(c => c.Volume)
             .Select(v => v.Series)
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => s.Metadata.AgeRating <= userRating)
+            .RestrictAgainstAgeRestriction(userRating)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }
@@ -1172,7 +1175,7 @@ public class SeriesRepository : ISeriesRepository
             .Select(c => c.Volume)
             .Select(v => v.Series)
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => s.Metadata.AgeRating <= userRating)
+            .RestrictAgainstAgeRestriction(userRating)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
     }

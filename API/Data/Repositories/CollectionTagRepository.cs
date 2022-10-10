@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.CollectionTags;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -98,7 +99,7 @@ public class CollectionTagRepository : ICollectionTagRepository
         var userRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
         return await _context.CollectionTag
             .Where(c => c.Promoted)
-            .Where(c => c.SeriesMetadatas.All(sm => sm.AgeRating <= userRating))
+            .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(c => c.NormalizedTitle)
             .AsNoTracking()
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
@@ -127,7 +128,7 @@ public class CollectionTagRepository : ICollectionTagRepository
         return await _context.CollectionTag
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
-            .Where(c => c.SeriesMetadatas.All(sm => sm.AgeRating <= userRating))
+            .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(s => s.Title)
             .AsNoTracking()
             .OrderBy(c => c.NormalizedTitle)
