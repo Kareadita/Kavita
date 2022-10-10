@@ -83,6 +83,13 @@ public class Startup
                     Duration = 60 * 5,
                     Location = ResponseCacheLocation.Any,
                 });
+            // Instant is a very quick cache, because we can't bust based on the query params, but rather body
+            options.CacheProfiles.Add("Instant",
+                new CacheProfile()
+                {
+                    Duration = 30,
+                    Location = ResponseCacheLocation.Any,
+                });
         });
         services.Configure<ForwardedHeadersOptions>(options =>
         {

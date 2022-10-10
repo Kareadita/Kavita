@@ -134,7 +134,7 @@ public class MetadataService : IMetadataService
         string coverImage = null;
 
         var chapters = firstCover.Chapters.OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default).ToList();
-        if (chapters.Any(c => c.IsSpecial))
+        if (chapters.Count > 1 && chapters.Any(c => c.IsSpecial))
         {
             coverImage = chapters.First(c => !c.IsSpecial).CoverImage ?? chapters.First().CoverImage;
             firstCover = null;
