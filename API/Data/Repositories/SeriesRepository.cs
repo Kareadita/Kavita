@@ -1215,7 +1215,8 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
-                        || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty));
+                        || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty)
+                        || s.OriginalName.Equals(seriesName));
 
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {
