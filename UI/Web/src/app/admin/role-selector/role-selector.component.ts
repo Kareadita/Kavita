@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Member } from 'src/app/_models/member';
+import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { MemberService } from 'src/app/_services/member.service';
 
@@ -11,7 +12,10 @@ import { MemberService } from 'src/app/_services/member.service';
 })
 export class RoleSelectorComponent implements OnInit {
 
-  @Input() member: Member | undefined;
+  /**
+   * This must have roles
+   */
+  @Input() member: Member | undefined | User;
   /**
    * Allows the selection of Admin role
    */
@@ -25,7 +29,7 @@ export class RoleSelectorComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountService.getRoles().subscribe(roles => {
-      let bannedRoles = ['Pleb'];
+      const bannedRoles = ['Pleb'];
       if (!this.allowAdmin) {
         bannedRoles.push('Admin');
       }

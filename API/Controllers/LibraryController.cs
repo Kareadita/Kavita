@@ -319,23 +319,6 @@ public class LibraryController : BaseApiController
 
     }
 
-    [HttpGet("search")]
-    public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString)
-    {
-        queryString = Uri.UnescapeDataString(queryString).Trim().Replace(@"%", string.Empty).Replace(":", string.Empty);
-
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        // Get libraries user has access to
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
-
-        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
-        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-
-        var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin, libraries.Select(l => l.Id).ToArray(), queryString);
-
-        return Ok(series);
-    }
 
     [HttpGet("type")]
     public async Task<ActionResult<LibraryType>> GetLibraryType(int libraryId)

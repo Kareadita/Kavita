@@ -8,6 +8,7 @@ import { Series } from 'src/app/_models/series';
 import { RelationKind, RelationKinds } from 'src/app/_models/series-detail/relation-kind';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
+import { SearchService } from 'src/app/_services/search.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 interface RelationControl {
@@ -47,7 +48,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   private onDestroy: Subject<void> = new Subject<void>();
 
   constructor(private seriesService: SeriesService, private utilityService: UtilityService, 
-    public imageService: ImageService, private libraryService: LibraryService, 
+    public imageService: ImageService, private libraryService: LibraryService,  private searchService: SearchService,
     private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -127,7 +128,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     seriesSettings.id = 'relation--' + index;
     seriesSettings.unique = true;
     seriesSettings.addIfNonExisting = false;
-    seriesSettings.fetchFn = (searchFilter: string) => this.libraryService.search(searchFilter).pipe(
+    seriesSettings.fetchFn = (searchFilter: string) => this.searchService.search(searchFilter).pipe(
       map(group => group.series),
       map(items => seriesSettings.compareFn(items, searchFilter)),
       map(series => series.filter(s => s.seriesId !== this.series.id)), 
@@ -142,7 +143,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     }
 
     if (series !== undefined) {
-      return this.libraryService.search(series.name).pipe(
+      return this.searchService.search(series.name).pipe(
         map(group => group.series), map(results => {
           seriesSettings.savedData = results.filter(s => s.seriesId === series.id);
           return seriesSettings;

@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using API.Entities.Enums;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace API.DTOs.Account;
 
@@ -13,5 +16,9 @@ public record UpdateUserDto
     /// A list of libraries to grant access to
     /// </summary>
     public IList<int> Libraries { get; init; }
+    /// <summary>
+    /// An Age Rating which will limit the account to seeing everything equal to or below said rating.
+    /// </summary>
+    public AgeRating AgeRestriction { get; init; }
 
 }

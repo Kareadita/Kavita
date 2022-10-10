@@ -15,6 +15,8 @@ import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
 import { EditDeviceComponent } from './edit-device/edit-device.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { ChangeEmailComponent } from './change-email/change-email.component';
+import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-age-restriction.component';
+import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
 
 
 @NgModule({
@@ -28,6 +30,8 @@ import { ChangeEmailComponent } from './change-email/change-email.component';
     EditDeviceComponent,
     ChangePasswordComponent,
     ChangeEmailComponent,
+    RestrictionSelectorComponent,
+    ChangeAgeRestrictionComponent,
   ],
   imports: [
     CommonModule,
@@ -47,7 +51,8 @@ import { ChangeEmailComponent } from './change-email/change-email.component';
   ],
   exports: [
     SiteThemeProviderPipe,
-    ApiKeyComponent
+    ApiKeyComponent,
+    RestrictionSelectorComponent
   ]
 })
 export class UserSettingsModule { }

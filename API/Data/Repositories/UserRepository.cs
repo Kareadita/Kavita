@@ -396,6 +396,7 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                AgeRestriction = u.AgeRestriction,
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,
@@ -429,6 +430,7 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                AgeRestriction = u.AgeRestriction,
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,

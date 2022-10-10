@@ -76,7 +76,9 @@ public class MetadataController : BaseApiController
     /// Fetches all age ratings from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
+    /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
+    [ResponseCache(Duration = 60 * 5, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("age-ratings")]
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
@@ -90,14 +92,16 @@ public class MetadataController : BaseApiController
         {
             Title = t.ToDescription(),
             Value = t
-        }));
+        }).Where(r => r.Value > AgeRating.NotApplicable));
     }
 
     /// <summary>
     /// Fetches all publication status' from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
+    /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
+    [ResponseCache(Duration = 60 * 5, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("publication-status")]
     public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {

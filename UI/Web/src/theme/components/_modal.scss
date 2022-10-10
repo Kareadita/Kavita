@@ -6,3 +6,8 @@
 .modal-title {
     word-break: break-all;
 }
+
+.scrollable-modal {
+    max-height: calc(var(--vh) * 100 - 198px);
+    overflow: auto;
+}

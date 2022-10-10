@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
 
 namespace API.Entities;
@@ -26,6 +27,12 @@ public class ReadingList : IEntityDate
     /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
     public string CoverImage { get; set; }
     public bool CoverImageLocked { get; set; }
+
+    /// <summary>
+    /// The highest age rating from all Series within the reading list
+    /// </summary>
+    /// <remarks>Introduced in v0.6</remarks>
+    public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
 
     public ICollection<ReadingListItem> Items { get; set; }
     public DateTime Created { get; set; }

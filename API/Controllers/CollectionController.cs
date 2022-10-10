@@ -41,7 +41,8 @@ public class CollectionController : BaseApiController
         {
             return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
         }
-        return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
+
+        return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id);
     }
 
     /// <summary>
@@ -56,9 +57,10 @@ public class CollectionController : BaseApiController
     {
         queryString ??= "";
         queryString = queryString.Replace(@"%", string.Empty);
-        if (queryString.Length == 0) return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
+        if (queryString.Length == 0) return await GetAllTags();
 
-        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, user.Id);
     }
 
     /// <summary>

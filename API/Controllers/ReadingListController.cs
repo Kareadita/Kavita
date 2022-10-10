@@ -45,11 +45,11 @@ public class ReadingListController : BaseApiController
     /// <summary>
     /// Returns reading lists (paginated) for a given user.
     /// </summary>
-    /// <param name="includePromoted">Defaults to true</param>
+    /// <param name="includePromoted">Include Promoted Reading Lists along with user's Reading Lists. Defaults to true</param>
     /// <param name="userParams">Pagination parameters</param>
     /// <returns></returns>
     [HttpPost("lists")]
-    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, [FromQuery] bool includePromoted = true)
+    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, bool includePromoted = true)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, includePromoted,
@@ -217,9 +217,15 @@ public class ReadingListController : BaseApiController
             return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
         }
 
+        dto.Title = dto.Title.Trim();
         if (!string.IsNullOrEmpty(dto.Title))
         {
-            readingList.Title = dto.Title; // Should I check if this is unique?
+            var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));
+            if (hasExisting)
+            {
+                return BadRequest("A list of this name already exists");
+            }
+            readingList.Title = dto.Title;
             readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
         }
         if (!string.IsNullOrEmpty(dto.Title))

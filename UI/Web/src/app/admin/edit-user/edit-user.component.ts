@@ -3,6 +3,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/member';
+import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AccountService } from 'src/app/_services/account.service';
 
 // TODO: Rename this to EditUserModal
@@ -17,6 +18,7 @@ export class EditUserComponent implements OnInit {
   
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
+  selectedRating: AgeRating = AgeRating.NotApplicable;
   isSaving: boolean = false;
 
   userForm: FormGroup = new FormGroup({});
@@ -24,6 +26,7 @@ export class EditUserComponent implements OnInit {
   public get email() { return this.userForm.get('email'); }
   public get username() { return this.userForm.get('username'); }
   public get password() { return this.userForm.get('password'); }
+  public get hasAdminRoleSelected() { return this.selectedRoles.includes('Admin'); };
 
   constructor(public modal: NgbActiveModal, private accountService: AccountService) { }
 
@@ -36,6 +39,10 @@ export class EditUserComponent implements OnInit {
 
   updateRoleSelection(roles: Array<string>) {
     this.selectedRoles = roles;
+  }
+
+  updateRestrictionSelection(rating: AgeRating) {
+    this.selectedRating = rating;
   }
 
   updateLibrarySelection(libraries: Array<Library>) {
@@ -51,6 +58,8 @@ export class EditUserComponent implements OnInit {
     model.userId = this.member.id;
     model.roles = this.selectedRoles;
     model.libraries = this.selectedLibraries;
+    model.ageRestriction = this.selectedRating || AgeRating.NotApplicable;
+    console.log('rating: ', this.selectedRating);
     this.accountService.update(model).subscribe(() => {
       this.modal.close(true);
     });
