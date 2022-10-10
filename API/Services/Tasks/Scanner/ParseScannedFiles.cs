@@ -112,6 +112,20 @@ public class ParseScannedFiles
             return;
         }
         // We need to calculate all folders till library root and see if any kavitaignores
+        var seriesMatcher = BuildIgnoreFromLibraryRoot(folderPath, seriesPaths);
+
+        await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
+    }
+
+    /// <summary>
+    /// Used in ScanSeries, which enters at a lower level folder and hence needs a .kavitaignore from higher (up to root) to be built before
+    /// the scan takes place.
+    /// </summary>
+    /// <param name="folderPath"></param>
+    /// <param name="seriesPaths"></param>
+    /// <returns>A GlobMatter. Empty if not applicable</returns>
+    private GlobMatcher BuildIgnoreFromLibraryRoot(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths)
+    {
         var seriesMatcher = new GlobMatcher();
         try
         {
@@ -120,8 +134,7 @@ public class ParseScannedFiles
 
             if (string.IsNullOrEmpty(libraryFolder) || !Directory.Exists(folderPath))
             {
-                await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
-                return;
+                return seriesMatcher;
             }
 
             var allParents = _directoryService.GetFoldersTillRoot(libraryFolder, folderPath);
@@ -141,11 +154,11 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error trying to find and apply .kavitaignores above the Series Folder. Scanning without them present");
+            _logger.LogError(ex,
+                "There was an error trying to find and apply .kavitaignores above the Series Folder. Scanning without them present");
         }
 
-
-        await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
+        return seriesMatcher;
     }
 
 
@@ -172,6 +185,7 @@ public class ParseScannedFiles
                 ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
                                              || ps.NormalizedName.Equals(normalizedLocalizedSeries)
                                              || ps.NormalizedName.Equals(normalizedSortSeries)));
+            // NOTE: Do I need to match on Original Series?
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
