@@ -50,6 +50,7 @@ export class ChangeAgeRestrictionComponent implements OnInit {
 
   resetForm() {
     if (!this.user) return;
+    console.log('resetting to ', this.originalRating)
     this.reset.emit(this.originalRating);
     this.cdRef.markForCheck();
   }
@@ -60,6 +61,9 @@ export class ChangeAgeRestrictionComponent implements OnInit {
     this.accountService.updateAgeRestriction(this.selectedRating).subscribe(() => {
       this.toastr.success('Age Restriction has been updated');
       this.originalRating = this.selectedRating;
+      if (this.user) {
+        this.user.ageRestriction = this.selectedRating;
+      }
       this.resetForm();
       this.isViewMode = true;
     }, err => {
