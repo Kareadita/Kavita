@@ -714,6 +714,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId", "volumeId", "currentChapterId"})]
     [HttpGet("next-chapter")]
     public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
     {
@@ -732,6 +733,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId", "volumeId", "currentChapterId"})]
     [HttpGet("prev-chapter")]
     public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
     {
