@@ -388,31 +388,7 @@ public class SeriesController : BaseApiController
         return await _seriesService.GetSeriesDetail(seriesId, userId);
     }
 
-    /// <summary>
-    /// Returns the series for the MangaFile id. If the user does not have access (shouldn't happen by the UI),
-    /// then null is returned
-    /// </summary>
-    /// <param name="mangaFileId"></param>
-    /// <returns></returns>
-    [HttpGet("series-for-mangafile")]
-    public async Task<ActionResult<SeriesDto>> GetSeriesForMangaFile(int mangaFileId)
-    {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, userId));
-    }
 
-    /// <summary>
-    /// Returns the series for the Chapter id. If the user does not have access (shouldn't happen by the UI),
-    /// then null is returned
-    /// </summary>
-    /// <param name="chapterId"></param>
-    /// <returns></returns>
-    [HttpGet("series-for-chapter")]
-    public async Task<ActionResult<SeriesDto>> GetSeriesForChapter(int chapterId)
-    {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, userId));
-    }
 
     /// <summary>
     /// Fetches the related series for a given series
