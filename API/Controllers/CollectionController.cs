@@ -57,11 +57,10 @@ public class CollectionController : BaseApiController
     {
         queryString ??= "";
         queryString = queryString.Replace(@"%", string.Empty);
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (queryString.Length == 0) return await GetAllTags();
 
-        // TODO: Apply RestrictedProfile logic here
-        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, user.Id);
     }
 
     /// <summary>

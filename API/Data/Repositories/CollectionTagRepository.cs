@@ -15,7 +15,7 @@ public interface ICollectionTagRepository
     void Add(CollectionTag tag);
     void Remove(CollectionTag tag);
     Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync();
-    Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery);
+    Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId);
     Task<string> GetCoverImageAsync(int collectionTagId);
     Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
     Task<CollectionTag> GetTagAsync(int tagId);
@@ -121,11 +121,13 @@ public class CollectionTagRepository : ICollectionTagRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery)
+    public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId)
     {
+        var userRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
         return await _context.CollectionTag
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
+            .Where(c => c.SeriesMetadatas.All(sm => sm.AgeRating <= userRating))
             .OrderBy(s => s.Title)
             .AsNoTracking()
             .OrderBy(c => c.NormalizedTitle)
