@@ -353,6 +353,7 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="className">Class name the method resides on</param>
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
+    /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
     /// <returns></returns>
     public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {

@@ -16,6 +16,7 @@ public static class MigrateReadingListAgeRating
     /// <summary>
     /// Will not run if any above v0.5.6.24 or v0.6.0
     /// </summary>
+    /// <param name="unitOfWork"></param>
     /// <param name="context"></param>
     /// <param name="readingListService"></param>
     /// <param name="logger"></param>
