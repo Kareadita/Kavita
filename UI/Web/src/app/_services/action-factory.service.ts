@@ -243,7 +243,7 @@ export class ActionFactoryService {
         action: Action.Scan,
         title: 'Scan Series',
         callback: this.dummyCallback,
-        requiresAdmin: false,
+        requiresAdmin: true,
         children: [],
       },
       {
@@ -304,7 +304,7 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'Others',
         callback: this.dummyCallback,
-        requiresAdmin: false,
+        requiresAdmin: true,
         children: [
           {
             action: Action.RefreshMetadata,

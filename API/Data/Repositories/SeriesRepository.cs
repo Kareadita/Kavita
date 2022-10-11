@@ -1048,7 +1048,11 @@ public class SeriesRepository : ISeriesRepository
          var userRating = await GetUserAgeRestriction(userId);
 
          var items = (await GetRecentlyAddedChaptersQuery(userId));
-         foreach (var item in items.Where(c => c.AgeRating <= userRating))
+         if (userRating != AgeRating.NotApplicable)
+         {
+             items = items.Where(c => c.AgeRating <= userRating);
+         }
+         foreach (var item in items)
          {
              if (seriesMap.Keys.Count == pageSize) break;
 
@@ -1215,7 +1219,8 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
-                        || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty));
+                        || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty)
+                        || s.OriginalName.Equals(seriesName));
 
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {

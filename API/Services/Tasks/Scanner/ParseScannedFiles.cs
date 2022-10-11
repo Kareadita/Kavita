@@ -112,16 +112,29 @@ public class ParseScannedFiles
             return;
         }
         // We need to calculate all folders till library root and see if any kavitaignores
+        var seriesMatcher = BuildIgnoreFromLibraryRoot(folderPath, seriesPaths);
+
+        await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
+    }
+
+    /// <summary>
+    /// Used in ScanSeries, which enters at a lower level folder and hence needs a .kavitaignore from higher (up to root) to be built before
+    /// the scan takes place.
+    /// </summary>
+    /// <param name="folderPath"></param>
+    /// <param name="seriesPaths"></param>
+    /// <returns>A GlobMatter. Empty if not applicable</returns>
+    private GlobMatcher BuildIgnoreFromLibraryRoot(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths)
+    {
         var seriesMatcher = new GlobMatcher();
         try
         {
-            var roots = seriesPaths[folderPath][0].LibraryRoots.Select(Scanner.Parser.Parser.NormalizePath).ToList();
+            var roots = seriesPaths[folderPath][0].LibraryRoots.Select(Parser.Parser.NormalizePath).ToList();
             var libraryFolder = roots.SingleOrDefault(folderPath.Contains);
 
             if (string.IsNullOrEmpty(libraryFolder) || !Directory.Exists(folderPath))
             {
-                await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
-                return;
+                return seriesMatcher;
             }
 
             var allParents = _directoryService.GetFoldersTillRoot(libraryFolder, folderPath);
@@ -141,11 +154,11 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error trying to find and apply .kavitaignores above the Series Folder. Scanning without them present");
+            _logger.LogError(ex,
+                "There was an error trying to find and apply .kavitaignores above the Series Folder. Scanning without them present");
         }
 
-
-        await folderAction(_directoryService.ScanFiles(folderPath, seriesMatcher), folderPath);
+        return seriesMatcher;
     }
 
 
@@ -248,7 +261,7 @@ public class ParseScannedFiles
 
 
     /// <summary>
-    /// This will process series by folder groups.
+    /// This will process series by folder groups. This is used solely by ScanSeries
     /// </summary>
     /// <param name="libraryType"></param>
     /// <param name="folders"></param>
@@ -285,7 +298,7 @@ public class ParseScannedFiles
                 MessageFactory.FileScanProgressEvent(folder, libraryName, ProgressEventType.Updated));
             if (files.Count == 0)
             {
-                _logger.LogInformation("[ScannerService] {Folder} is empty", folder);
+                _logger.LogInformation("[ScannerService] {Folder} is empty or is no longer in this location", folder);
                 return;
             }
 

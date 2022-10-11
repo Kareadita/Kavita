@@ -192,6 +192,7 @@ public class ScannerService : IScannerService
                 await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Files for series are not in a nested folder under library path. Correct this and rescan."));
                 return;
             }
+
         }
 
         if (string.IsNullOrEmpty(folderPath))
@@ -219,7 +220,8 @@ public class ScannerService : IScannerService
                 Format = parsedFiles.First().Format
             };
 
-            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName))
+            // For Scan Series, we need to filter out anything that isn't our Series
+            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(Scanner.Parser.Parser.Normalize(series.OriginalName)))
             {
                 return;
             }
@@ -506,7 +508,9 @@ public class ScannerService : IScannerService
 
         // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
         // NOTE: This implementation is expensive
+        _logger.LogDebug("Removing Series that were not found during the scan");
         var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
+        _logger.LogDebug("Removing Series that were not found during the scan - complete");
 
         _unitOfWork.LibraryRepository.Update(library);
         if (await _unitOfWork.CommitAsync())

@@ -224,17 +224,14 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanLibrary(int libraryId, bool force = false)
     {
-        var alreadyEnqueued =
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
-        if (alreadyEnqueued)
+        if (HasScanTaskRunningForLibrary(libraryId))
         {
-            _logger.LogInformation("A duplicate request to scan library for library occured. Skipping");
+            _logger.LogInformation("A duplicate request for Library Scan on library {LibraryId} occured. Skipping", libraryId);
             return;
         }
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
-            _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
+            _logger.LogInformation("A Library Scan is already running, rescheduling ScanLibrary in 3 hours");
             BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), TimeSpan.FromHours(3));
             return;
         }
@@ -324,27 +321,29 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
-    /// If there is an enqueued or scheduled tak for <see cref="ScannerService.ScanLibrary"/> method
+    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanLibrary"/> method
     /// </summary>
     /// <param name="libraryId"></param>
+    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
     /// <returns></returns>
-    public static bool HasScanTaskRunningForLibrary(int libraryId)
+    public static bool HasScanTaskRunningForLibrary(int libraryId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true}, ScanQueue, checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false}, ScanQueue, checkRunningJobs);
     }
 
     /// <summary>
-    /// If there is an enqueued or scheduled tak for <see cref="ScannerService.ScanSeries"/> method
+    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanSeries"/> method
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
     /// <returns></returns>
-    public static bool HasScanTaskRunningForSeries(int seriesId)
+    public static bool HasScanTaskRunningForSeries(int seriesId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue, checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue, checkRunningJobs);
     }
 
     /// <summary>
@@ -354,8 +353,9 @@ public class TaskScheduler : ITaskScheduler
     /// <param name="className">Class name the method resides on</param>
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
+    /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
     /// <returns></returns>
-    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
+    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
         var ret = enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
@@ -365,10 +365,23 @@ public class TaskScheduler : ITaskScheduler
         if (ret) return true;
 
         var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
-        return scheduledJobs.Any(j =>
+        ret = scheduledJobs.Any(j =>
             j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
             j.Value.Job.Method.Name.Equals(methodName) &&
             j.Value.Job.Method.DeclaringType.Name.Equals(className));
+
+        if (ret) return true;
+
+        if (checkRunningJobs)
+        {
+            var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
+            return runningJobs.Any(j =>
+                j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+                j.Value.Job.Method.Name.Equals(methodName) &&
+                j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        }
+
+        return false;
     }
 
     /// <summary>

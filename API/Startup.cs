@@ -66,9 +66,29 @@ public class Startup
             options.CacheProfiles.Add("Hour",
                 new CacheProfile()
                 {
-                    Duration = 60 * 10,
+                    Duration = 60 * 60,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
+                });
+            options.CacheProfiles.Add("10Minute",
+                new CacheProfile()
+                {
+                    Duration = 60 * 10,
+                    Location = ResponseCacheLocation.Any,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add("5Minute",
+                new CacheProfile()
+                {
+                    Duration = 60 * 5,
+                    Location = ResponseCacheLocation.Any,
+                });
+            // Instant is a very quick cache, because we can't bust based on the query params, but rather body
+            options.CacheProfiles.Add("Instant",
+                new CacheProfile()
+                {
+                    Duration = 30,
+                    Location = ResponseCacheLocation.Any,
                 });
         });
         services.Configure<ForwardedHeadersOptions>(options =>

@@ -16,13 +16,14 @@ public static class MigrateReadingListAgeRating
     /// <summary>
     /// Will not run if any above v0.5.6.24 or v0.6.0
     /// </summary>
+    /// <param name="unitOfWork"></param>
     /// <param name="context"></param>
     /// <param name="readingListService"></param>
     /// <param name="logger"></param>
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext context, IReadingListService readingListService, ILogger<Program> logger)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (Version.Parse(settings.InstallVersion) > new Version(0, 5, 6, 24))
+        if (Version.Parse(settings.InstallVersion) > new Version(0, 5, 6, 26))
         {
             return;
         }

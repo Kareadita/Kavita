@@ -676,7 +676,7 @@ public class DirectoryService : IDirectoryService
         }
 
         GlobMatcher matcher = new();
-        foreach (var line in lines)
+        foreach (var line in lines.Where(s => !string.IsNullOrEmpty(s)))
         {
             matcher.AddExclude(line);
         }

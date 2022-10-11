@@ -270,7 +270,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.librarySettings.unique = true;
     this.librarySettings.addIfNonExisting = false;
     this.librarySettings.fetchFn = (filter: string) => {
-      return this.libraryService.getLibrariesForMember()
+      return this.libraryService.getLibraries()
       .pipe(map(items => this.librarySettings.compareFn(items, filter))); 
     };
     this.librarySettings.compareFn = (options: Library[], filter: string) => {

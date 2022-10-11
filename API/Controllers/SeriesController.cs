@@ -194,6 +194,7 @@ public class SeriesController : BaseApiController
         return BadRequest("There was an error with updating the series");
     }
 
+    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-added")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
@@ -211,6 +212,7 @@ public class SeriesController : BaseApiController
         return Ok(series);
     }
 
+    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-updated-series")]
     public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
     {
@@ -242,6 +244,7 @@ public class SeriesController : BaseApiController
     /// <param name="userParams"></param>
     /// <param name="libraryId">Default of 0 meaning all libraries</param>
     /// <returns></returns>
+    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("on-deck")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
@@ -364,7 +367,7 @@ public class SeriesController : BaseApiController
     /// <param name="ageRating"></param>
     /// <returns></returns>
     /// <remarks>This is cached for an hour</remarks>
-    [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"ageRating"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"ageRating"})]
     [HttpGet("age-rating")]
     public ActionResult<string> GetAgeRating(int ageRating)
     {
@@ -380,7 +383,7 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
-    [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Any, VaryByQueryKeys = new [] {"seriesId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"seriesId"})]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {

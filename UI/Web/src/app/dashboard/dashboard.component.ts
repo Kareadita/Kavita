@@ -90,7 +90,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    this.libraries$ = this.libraryService.getLibrariesForMember().pipe(take(1), tap((libs) => {
+    this.libraries$ = this.libraryService.getLibraries().pipe(take(1), tap((libs) => {
       this.isLoading = false;
       this.cdRef.markForCheck();
     }));

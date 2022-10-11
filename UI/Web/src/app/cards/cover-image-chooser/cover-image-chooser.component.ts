@@ -72,10 +72,6 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       coverImageUrl: new FormControl('', [])
     });
 
-    this.imageUrls.forEach(url => {
-      
-    });
-    console.log('imageUrls: ', this.imageUrls);
     this.cdRef.markForCheck();
   }
 
