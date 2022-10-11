@@ -433,7 +433,7 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId));
+        return Ok(await _seriesService.GetRelatedSeries(userId, seriesId));
     }
 
 

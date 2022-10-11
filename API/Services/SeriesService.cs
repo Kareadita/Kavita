@@ -28,6 +28,7 @@ public interface ISeriesService
     Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
+    Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
 }
 
 public class SeriesService : ISeriesService
@@ -610,6 +611,17 @@ public class SeriesService : ISeriesService
             LibraryType.Book => "Book",
             _ => "Chapter"
         };
+    }
+
+    /// <summary>
+    /// Returns all related series against the passed series Id
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId)
+    {
+        return await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId);
     }
 
     /// <summary>
