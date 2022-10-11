@@ -63,9 +63,14 @@ public enum RelationKind
     [Description("Doujinshi")]
     Doujinshi = 11,
     /// <summary>
+    /// This is a UI field only. Not to be used in backend
+    /// </summary>
+    [Description("Parent")]
+    Parent = 12,
+    /// <summary>
     /// Same story, could be translation, colorization... Different edition of the series
     /// </summary>
     [Description("Edition")]
-    Edition = 12
+    Edition = 13
 
 }

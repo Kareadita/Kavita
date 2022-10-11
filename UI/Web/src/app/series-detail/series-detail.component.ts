@@ -251,7 +251,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
               private downloadService: DownloadService, private actionService: ActionService,
               public imageSerivce: ImageService, private messageHub: MessageHubService,
               private readingListService: ReadingListService, public navService: NavService,
-              private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document, 
+              private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document,
               private changeDetectionRef: ChangeDetectorRef, private scrollService: ScrollService,
               private deviceSerivce: DeviceService
               ) {
@@ -473,7 +473,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       this.seriesMetadata = metadata;
       this.changeDetectionRef.markForCheck();
     });
-    
+
     this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
       this.readingLists = lists;
       this.changeDetectionRef.markForCheck();
@@ -501,16 +501,17 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         this.relations = [
           ...relations.prequels.map(item => this.createRelatedSeries(item, RelationKind.Prequel)),
           ...relations.sequels.map(item => this.createRelatedSeries(item, RelationKind.Sequel)),
-          ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)), 
+          ...relations.sideStories.map(item => this.createRelatedSeries(item, RelationKind.SideStory)),
           ...relations.spinOffs.map(item => this.createRelatedSeries(item, RelationKind.SpinOff)),
           ...relations.adaptations.map(item => this.createRelatedSeries(item, RelationKind.Adaptation)),
           ...relations.contains.map(item => this.createRelatedSeries(item, RelationKind.Contains)),
-          ...relations.characters.map(item => this.createRelatedSeries(item, RelationKind.Character)), 
+          ...relations.characters.map(item => this.createRelatedSeries(item, RelationKind.Character)),
           ...relations.others.map(item => this.createRelatedSeries(item, RelationKind.Other)),
           ...relations.alternativeSettings.map(item => this.createRelatedSeries(item, RelationKind.AlternativeSetting)),
           ...relations.alternativeVersions.map(item => this.createRelatedSeries(item, RelationKind.AlternativeVersion)),
           ...relations.doujinshis.map(item => this.createRelatedSeries(item, RelationKind.Doujinshi)),
           ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
+          ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
         ];
         if (this.relations.length > 0) {
           this.hasRelations = true;
@@ -717,7 +718,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
           this.series = s;
           this.changeDetectionRef.detectChanges();
         });
-        
+
         this.loadSeries(this.seriesId);
       }
 

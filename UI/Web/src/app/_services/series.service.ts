@@ -194,13 +194,13 @@ export class SeriesService {
     return this.httpClient.get<RelatedSeries>(this.baseUrl + 'series/all-related?seriesId=' + seriesId);
   }
 
-  updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>, 
-    contains: Array<number>, others: Array<number>, prequels: Array<number>, 
+  updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>,
+    contains: Array<number>, others: Array<number>, prequels: Array<number>,
     sequels: Array<number>, sideStories: Array<number>, spinOffs: Array<number>,
-    alternativeSettings: Array<number>, alternativeVersions: Array<number>, doujinshis: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'series/update-related?seriesId=' + seriesId, 
+    alternativeSettings: Array<number>, alternativeVersions: Array<number>, doujinshis: Array<number>, editions: Array<number>) {
+    return this.httpClient.post(this.baseUrl + 'series/update-related?seriesId=' + seriesId,
     {seriesId, adaptations, characters, sequels, prequels, contains, others, sideStories, spinOffs,
-     alternativeSettings, alternativeVersions, doujinshis}); 
+     alternativeSettings, alternativeVersions, doujinshis, editions});
   }
 
   getSeriesDetail(seriesId: number) {
