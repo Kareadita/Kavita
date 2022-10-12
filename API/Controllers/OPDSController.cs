@@ -196,8 +196,8 @@ public class OpdsController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        IList<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync()).ToList()
-            : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync()).ToList();
+        IEnumerable<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
+            : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId));
 
 
         var feed = CreateFeed("All Collections", $"{apiKey}/collections", apiKey);
@@ -239,7 +239,7 @@ public class OpdsController : BaseApiController
         }
         else
         {
-            tags = await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
+            tags = await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId);
         }
 
         var tag = tags.SingleOrDefault(t => t.Id == collectionId);

@@ -313,10 +313,12 @@ public class ReaderService : IReaderService
             if (chapterId > 0) return chapterId;
         }
 
+        var currentVolumeNumber = float.Parse(currentVolume.Name);
         var next = false;
         foreach (var volume in volumes)
         {
-            if (volume.Number == currentVolume.Number && volume.Chapters.Count > 1)
+            var volumeNumbersMatch = Math.Abs(float.Parse(volume.Name) - currentVolumeNumber) < 0.00001f;
+            if (volumeNumbersMatch && volume.Chapters.Count > 1)
             {
                 // Handle Chapters within current Volume
                 // In this case, i need 0 first because 0 represents a full volume file.
@@ -327,7 +329,7 @@ public class ReaderService : IReaderService
                 continue;
             }
 
-            if (volume.Number == currentVolume.Number)
+            if (volumeNumbersMatch)
             {
                 next = true;
                 continue;

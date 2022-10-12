@@ -13,6 +13,10 @@ import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageDevicesComponent } from './manage-devices/manage-devices.component';
 import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
 import { EditDeviceComponent } from './edit-device/edit-device.component';
+import { ChangePasswordComponent } from './change-password/change-password.component';
+import { ChangeEmailComponent } from './change-email/change-email.component';
+import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-age-restriction.component';
+import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
 
 
 @NgModule({
@@ -24,6 +28,10 @@ import { EditDeviceComponent } from './edit-device/edit-device.component';
     ManageDevicesComponent,
     DevicePlatformPipe,
     EditDeviceComponent,
+    ChangePasswordComponent,
+    ChangeEmailComponent,
+    RestrictionSelectorComponent,
+    ChangeAgeRestrictionComponent,
   ],
   imports: [
     CommonModule,
@@ -43,7 +51,8 @@ import { EditDeviceComponent } from './edit-device/edit-device.component';
   ],
   exports: [
     SiteThemeProviderPipe,
-    ApiKeyComponent
+    ApiKeyComponent,
+    RestrictionSelectorComponent
   ]
 })
 export class UserSettingsModule { }

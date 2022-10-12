@@ -27,7 +27,11 @@ public static class PolicyConstants
     /// Used to give a user ability to bookmark files on the server
     /// </summary>
     public const string BookmarkRole = "Bookmark";
+    /// <summary>
+    /// Used to give a user ability to Change Restrictions on their account
+    /// </summary>
+    public const string ChangeRestrictionRole = "Change Restriction";
 
     public static readonly ImmutableArray<string> ValidRoles =
-        ImmutableArray.Create(AdminRole, PlebRole, DownloadRole, ChangePasswordRole, BookmarkRole);
+        ImmutableArray.Create(AdminRole, PlebRole, DownloadRole, ChangePasswordRole, BookmarkRole, ChangeRestrictionRole);
 }

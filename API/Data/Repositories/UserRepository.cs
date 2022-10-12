@@ -62,6 +62,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
+    Task<AppUser> GetUserByConfirmationToken(string token);
 }
 
 public class UserRepository : IUserRepository
@@ -268,6 +269,11 @@ public class UserRepository : IUserRepository
         return await query.ToListAsync();
     }
 
+    public async Task<AppUser> GetUserByConfirmationToken(string token)
+    {
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.ConfirmationToken.Equals(token));
+    }
+
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
@@ -351,31 +357,6 @@ public class UserRepository : IUserRepository
                             || EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%")
                 );
 
-            // This doesn't work on bookmarks themselves, only the series. For now, I don't think there is much value add
-            // if (filter.SortOptions != null)
-            // {
-            //     if (filter.SortOptions.IsAscending)
-            //     {
-            //         filterSeriesQuery = filter.SortOptions.SortField switch
-            //         {
-            //             SortField.SortName => filterSeriesQuery.OrderBy(s => s.series.SortName),
-            //             SortField.CreatedDate => filterSeriesQuery.OrderBy(s => s.bookmark.Created),
-            //             SortField.LastModifiedDate => filterSeriesQuery.OrderBy(s => s.bookmark.LastModified),
-            //             _ => filterSeriesQuery
-            //         };
-            //     }
-            //     else
-            //     {
-            //         filterSeriesQuery = filter.SortOptions.SortField switch
-            //         {
-            //             SortField.SortName => filterSeriesQuery.OrderByDescending(s => s.series.SortName),
-            //             SortField.CreatedDate => filterSeriesQuery.OrderByDescending(s => s.bookmark.Created),
-            //             SortField.LastModifiedDate => filterSeriesQuery.OrderByDescending(s => s.bookmark.LastModified),
-            //             _ => filterSeriesQuery
-            //         };
-            //     }
-            // }
-
             query = filterSeriesQuery.Select(o => o.bookmark);
         }
 
@@ -415,6 +396,7 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                AgeRestriction = u.AgeRestriction,
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,
@@ -428,10 +410,14 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns a list of users that are considered Pending by invite. This means email is unconfirmed and they have never logged in
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync()
     {
         return await _context.Users
-            .Where(u => !u.EmailConfirmed)
+            .Where(u => !u.EmailConfirmed && u.LastActive == DateTime.MinValue)
             .Include(x => x.Libraries)
             .Include(r => r.UserRoles)
             .ThenInclude(r => r.Role)
@@ -444,6 +430,7 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                AgeRestriction = u.AgeRestriction,
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,

@@ -194,6 +194,7 @@ public class SeriesController : BaseApiController
         return BadRequest("There was an error with updating the series");
     }
 
+    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-added")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
@@ -211,6 +212,7 @@ public class SeriesController : BaseApiController
         return Ok(series);
     }
 
+    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-updated-series")]
     public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
     {
@@ -242,6 +244,7 @@ public class SeriesController : BaseApiController
     /// <param name="userParams"></param>
     /// <param name="libraryId">Default of 0 meaning all libraries</param>
     /// <returns></returns>
+    [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("on-deck")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
@@ -363,10 +366,13 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="ageRating"></param>
     /// <returns></returns>
+    /// <remarks>This is cached for an hour</remarks>
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"ageRating"})]
     [HttpGet("age-rating")]
     public ActionResult<string> GetAgeRating(int ageRating)
     {
         var val = (AgeRating) ageRating;
+        if (val == AgeRating.NotApplicable) return "No Restriction";
 
         return Ok(val.ToDescription());
     }
@@ -377,6 +383,7 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"seriesId"})]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
@@ -384,31 +391,7 @@ public class SeriesController : BaseApiController
         return await _seriesService.GetSeriesDetail(seriesId, userId);
     }
 
-    /// <summary>
-    /// Returns the series for the MangaFile id. If the user does not have access (shouldn't happen by the UI),
-    /// then null is returned
-    /// </summary>
-    /// <param name="mangaFileId"></param>
-    /// <returns></returns>
-    [HttpGet("series-for-mangafile")]
-    public async Task<ActionResult<SeriesDto>> GetSeriesForMangaFile(int mangaFileId)
-    {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, userId));
-    }
 
-    /// <summary>
-    /// Returns the series for the Chapter id. If the user does not have access (shouldn't happen by the UI),
-    /// then null is returned
-    /// </summary>
-    /// <param name="chapterId"></param>
-    /// <returns></returns>
-    [HttpGet("series-for-chapter")]
-    public async Task<ActionResult<SeriesDto>> GetSeriesForChapter(int chapterId)
-    {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, userId));
-    }
 
     /// <summary>
     /// Fetches the related series for a given series

@@ -17,15 +17,17 @@ public static class VolumeListExtensions
     /// <returns></returns>
     public static Volume GetCoverImage(this IList<Volume> volumes, MangaFormat seriesFormat)
     {
-        if (seriesFormat is MangaFormat.Epub or MangaFormat.Pdf)
+        if (seriesFormat == MangaFormat.Epub || seriesFormat == MangaFormat.Pdf)
         {
-            return volumes.OrderBy(x => x.Number).FirstOrDefault();
+            return volumes.MinBy(x => x.Number);
         }
 
         if (volumes.Any(x => x.Number != 0))
         {
             return volumes.OrderBy(x => x.Number).FirstOrDefault(x => x.Number != 0);
         }
-        return volumes.OrderBy(x => x.Number).FirstOrDefault();
+
+        // We only have 1 volume of chapters, we need to be cautious if there are specials, as we don't want to order them first
+        return volumes.MinBy(x => x.Number);
     }
 }

@@ -188,6 +188,10 @@ public class LibraryRepository : ILibraryRepository
         });
     }
 
+    /// <summary>
+    /// Returns all Libraries with their Folders
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()
     {
         return await _context.Library

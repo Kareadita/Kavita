@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.Entities.Enums;
 using API.Entities.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
@@ -40,7 +41,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// The confirmation token for the user (invite). This will be set to null after the user confirms.
     /// </summary>
     public string ConfirmationToken { get; set; }
-
+    /// <summary>
+    /// The highest age rating the user has access to. Not applicable for admins
+    /// </summary>
+    public AgeRating AgeRestriction { get; set; } = AgeRating.NotApplicable;
 
     /// <inheritdoc />
     [ConcurrencyCheck]

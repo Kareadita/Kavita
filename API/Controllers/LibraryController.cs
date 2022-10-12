@@ -112,10 +112,12 @@ public class LibraryController : BaseApiController
         return Ok(_directoryService.ListDirectory(path));
     }
 
+
+    [ResponseCache(CacheProfileName = "10Minute")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
-        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosAsync());
+        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
     }
 
     [HttpGet("jump-bar")]
@@ -196,12 +198,6 @@ public class LibraryController : BaseApiController
         return Ok();
     }
 
-    [HttpGet("libraries")]
-    public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibrariesForUser()
-    {
-        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
-    }
-
     /// <summary>
     /// Given a valid path, will invoke either a Scan Series or Scan Library. If the folder does not exist within Kavita, the request will be ignored
     /// </summary>
@@ -213,9 +209,11 @@ public class LibraryController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+
         // Validate user has Admin privileges
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!isAdmin) return BadRequest("API key must belong to an admin");
+
         if (dto.FolderPath.Contains("..")) return BadRequest("Invalid Path");
 
         dto.FolderPath = Services.Tasks.Scanner.Parser.Parser.NormalizePath(dto.FolderPath);
@@ -317,23 +315,6 @@ public class LibraryController : BaseApiController
 
     }
 
-    [HttpGet("search")]
-    public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString)
-    {
-        queryString = Uri.UnescapeDataString(queryString).Trim().Replace(@"%", string.Empty).Replace(":", string.Empty);
-
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        // Get libraries user has access to
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
-
-        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
-        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
-        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
-
-        var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin, libraries.Select(l => l.Id).ToArray(), queryString);
-
-        return Ok(series);
-    }
 
     [HttpGet("type")]
     public async Task<ActionResult<LibraryType>> GetLibraryType(int libraryId)

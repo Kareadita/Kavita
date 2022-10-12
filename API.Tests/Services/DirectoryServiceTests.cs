@@ -995,4 +995,20 @@ public class DirectoryServiceTests
     }
 
     #endregion
+
+    #region GetLastWriteTime
+
+    [Fact]
+    public void GetLastWriteTime_ShouldReturnMaxTime_IfNoFiles()
+    {
+        const string dir = "C:/manga/";
+        var filesystem = new MockFileSystem();
+        filesystem.AddDirectory("C:/");
+        filesystem.AddDirectory(dir);
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+
+        Assert.Equal(DateTime.MaxValue, ds.GetLastWriteTime(dir));
+    }
+
+    #endregion
 }

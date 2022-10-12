@@ -12,13 +12,13 @@ using API.DTOs.Account;
 using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Enums.UserPreferences;
 using API.Errors;
 using API.Extensions;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -188,15 +188,6 @@ public class AccountController : BaseApiController
 
         if (user == null) return Unauthorized("Invalid username");
 
-        // Check if the user has an email, if not, inform them so they can migrate
-        var validPassword = await _signInManager.UserManager.CheckPasswordAsync(user, loginDto.Password);
-        if (string.IsNullOrEmpty(user.Email) && !user.EmailConfirmed && validPassword)
-        {
-            _logger.LogCritical("User {UserName} does not have an email. Providing a one time migration", user.UserName);
-            return Unauthorized(
-                "You are missing an email on your account. Please wait while we migrate your account.");
-        }
-
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
 
@@ -256,6 +247,7 @@ public class AccountController : BaseApiController
     [HttpGet("roles")]
     public ActionResult<IList<string>> GetRoles()
     {
+        // TODO: This should be moved to ServerController
         return typeof(PolicyConstants)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(string))
@@ -285,6 +277,114 @@ public class AccountController : BaseApiController
 
     }
 
+
+    /// <summary>
+    /// Initiates the flow to update a user's email address. The email address is not changed in this API. A confirmation link is sent/dumped which will
+    /// validate the email. It must be confirmed for the email to update.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns>Returns just if the email was sent or server isn't reachable</returns>
+    [HttpPost("update/email")]
+    public async Task<ActionResult> UpdateEmail(UpdateEmailDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized("You do not have permission");
+
+        if (dto == null || string.IsNullOrEmpty(dto.Email)) return BadRequest("Invalid payload");
+
+        // Validate no other users exist with this email
+        if (user.Email.Equals(dto.Email)) return Ok("Nothing to do");
+
+        // Check if email is used by another user
+        var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+        if (existingUserEmail != null)
+        {
+            return BadRequest("You cannot share emails across multiple accounts");
+        }
+
+        // All validations complete, generate a new token and email it to the user at the new address. Confirm email link will update the email
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        if (string.IsNullOrEmpty(token))
+        {
+            _logger.LogError("There was an issue generating a token for the email");
+            return BadRequest("There was an issue creating a confirmation email token. See logs.");
+        }
+
+        user.EmailConfirmed = false;
+        user.ConfirmationToken = token;
+        await _userManager.UpdateAsync(user);
+
+        // Send a confirmation email
+        try
+        {
+            var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email-update", dto.Email);
+            _logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+            var accessible = await _emailService.CheckIfAccessible(host);
+            if (accessible)
+            {
+                try
+                {
+                    // Email the old address of the update change
+                    await _emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
+                    {
+                        EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
+                        InstallId = BuildInfo.Version.ToString(),
+                        InvitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName,
+                        ServerConfirmationLink = emailLink
+                    });
+                }
+                catch (Exception)
+                {
+                    /* Swallow exception */
+                }
+            }
+
+            return Ok(new InviteUserResponse
+            {
+                EmailLink = string.Empty,
+                EmailSent = accessible
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error during invite user flow, unable to send an email");
+        }
+
+
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+
+        return Ok();
+    }
+
+    [HttpPost("update/age-restriction")]
+    public async Task<ActionResult> UpdateAgeRestriction(UpdateAgeRestrictionDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized("You do not have permission");
+        if (dto == null) return BadRequest("Invalid payload");
+
+        var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+
+        user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRestriction;
+        _unitOfWork.UserRepository.Update(user);
+
+        if (!_unitOfWork.HasChanges()) return Ok();
+        try
+        {
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error updating the age restriction");
+            return BadRequest("There was an error updating the age restriction");
+        }
+
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+
+        return Ok();
+    }
+
     /// <summary>
     /// Update the user account. This can only affect Username, Email (will require confirming), Roles, and Library access.
     /// </summary>
@@ -308,14 +408,6 @@ public class AccountController : BaseApiController
             if (errors.Any()) return BadRequest("Username already taken");
             user.UserName = dto.Username;
             _unitOfWork.UserRepository.Update(user);
-        }
-
-        if (!user.Email.Equals(dto.Email))
-        {
-            // Validate username change
-            var errors = await _accountService.ValidateEmail(dto.Email);
-            if (errors.Any()) return BadRequest("Email already registered");
-            // NOTE: This needs to be handled differently, like save it in a temp variable in DB until email is validated. For now, I wont allow it
         }
 
         // Update roles
@@ -363,6 +455,9 @@ public class AccountController : BaseApiController
             lib.AppUsers.Add(user);
         }
 
+        user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction;
+        _unitOfWork.UserRepository.Update(user);
+
         if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
         {
             await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
@@ -404,18 +499,22 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> InviteUser(InviteUserDto dto)
     {
         var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (adminUser == null) return Unauthorized("You need to login");
+        if (adminUser == null) return Unauthorized("You are not permitted");
+
         _logger.LogInformation("{User} is inviting {Email} to the server", adminUser.UserName, dto.Email);
 
         // Check if there is an existing invite
-        dto.Email = dto.Email.Trim();
-        var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
-        if (emailValidationErrors.Any())
+        if (!string.IsNullOrEmpty(dto.Email))
         {
-            var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (await _userManager.IsEmailConfirmedAsync(invitedUser))
-                return BadRequest($"User is already registered as {invitedUser.UserName}");
-            return BadRequest("User is already invited under this email and has yet to accepted invite.");
+            dto.Email = dto.Email.Trim();
+            var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
+            if (emailValidationErrors.Any())
+            {
+                var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
+                if (await _userManager.IsEmailConfirmedAsync(invitedUser))
+                    return BadRequest($"User is already registered as {invitedUser.UserName}");
+                return BadRequest("User is already invited under this email and has yet to accepted invite.");
+            }
         }
 
         // Create a new user
@@ -470,6 +569,8 @@ public class AccountController : BaseApiController
                 lib.AppUsers ??= new List<AppUser>();
                 lib.AppUsers.Add(user);
             }
+
+            user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction;
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token))
@@ -575,6 +676,44 @@ public class AccountController : BaseApiController
         };
     }
 
+    /// <summary>
+    /// Final step in email update change. Given a confirmation token and the email, this will finish the email change.
+    /// </summary>
+    /// <remarks>This will force connected clients to re-authenticate</remarks>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpPost("confirm-email-update")]
+    public async Task<ActionResult> ConfirmEmailUpdate(ConfirmEmailUpdateDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByConfirmationToken(dto.Token);
+        if (user == null)
+        {
+            return BadRequest("Invalid Email Token");
+        }
+
+        if (!await ConfirmEmailToken(dto.Token, user)) return BadRequest("Invalid Email Token");
+
+
+        _logger.LogInformation("User is updating email from {OldEmail} to {NewEmail}", user.Email, dto.Email);
+        var result = await _userManager.SetEmailAsync(user, dto.Email);
+        if (!result.Succeeded)
+        {
+            _logger.LogError("Unable to update email for users: {Errors}", result.Errors.Select(e => e.Description));
+            return BadRequest("Unable to update email for user. Check logs");
+        }
+        user.ConfirmationToken = null;
+        await _unitOfWork.CommitAsync();
+
+
+        // For the user's connected devices to pull the new information in
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
+            MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+
+        // Perform Login code
+        return Ok();
+    }
+
     [AllowAnonymous]
     [HttpPost("confirm-password-reset")]
     public async Task<ActionResult<string>> ConfirmForgotPassword(ConfirmPasswordResetDto dto)
@@ -619,15 +758,15 @@ public class AccountController : BaseApiController
         }
 
         var roles = await _userManager.GetRolesAsync(user);
-
-
         if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
             return Unauthorized("You are not permitted to this operation.");
+
+        if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
+            return BadRequest("You do not have an email on account or it has not been confirmed");
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var emailLink = GenerateEmailLink(token, "confirm-reset-password", user.Email);
         _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-        _logger.LogCritical("[Forgot Password]: Token {UserName}: {Token}", user.UserName, token);
         var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
         if (await _emailService.CheckIfAccessible(host))
         {
@@ -641,6 +780,15 @@ public class AccountController : BaseApiController
         }
 
         return Ok("Your server is not accessible. The Link to reset your password is in the logs.");
+    }
+
+    [HttpGet("email-confirmed")]
+    public async Task<ActionResult<bool>> IsEmailConfirmed()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
+
+        return Ok(user.EmailConfirmed);
     }
 
     [AllowAnonymous]

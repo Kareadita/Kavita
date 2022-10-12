@@ -91,7 +91,7 @@ public abstract class BasicTest
         return await _context.SaveChangesAsync() > 0;
     }
 
-    protected async Task ResetDB()
+    protected async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
         _context.Users.RemoveRange(_context.Users.ToList());

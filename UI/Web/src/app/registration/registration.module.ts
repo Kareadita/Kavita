@@ -11,6 +11,7 @@ import { ConfirmMigrationEmailComponent } from './confirm-migration-email/confir
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { ConfirmResetPasswordComponent } from './confirm-reset-password/confirm-reset-password.component';
 import { UserLoginComponent } from './user-login/user-login.component';
+import { ConfirmEmailChangeComponent } from './confirm-email-change/confirm-email-change.component';
 
 
 
@@ -23,7 +24,8 @@ import { UserLoginComponent } from './user-login/user-login.component';
     ConfirmMigrationEmailComponent,
     ResetPasswordComponent,
     ConfirmResetPasswordComponent,
-    UserLoginComponent
+    UserLoginComponent,
+    ConfirmEmailChangeComponent
   ],
   imports: [
     CommonModule,

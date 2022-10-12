@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -126,9 +126,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
       summary: new FormControl('', []),
-      name: new FormControl(this.series.name, []),
+      name: new FormControl(this.series.name, [Validators.required]),
       localizedName: new FormControl(this.series.localizedName, []),
-      sortName: new FormControl(this.series.sortName, []),
+      sortName: new FormControl(this.series.sortName, [Validators.required]),
       rating: new FormControl(this.series.userRating, []),
 
       coverImageIndex: new FormControl(0, []),
@@ -137,6 +137,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
       ageRating: new FormControl('', []),
       publicationStatus: new FormControl('', []),
       language: new FormControl('', []),
+      releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
     });
     this.cdRef.markForCheck();
 
@@ -165,6 +166,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('ageRating')?.patchValue(this.metadata.ageRating);
         this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
         this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
+        this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
         this.cdRef.markForCheck();
 
         this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
@@ -200,6 +202,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
           this.metadata.publicationStatusLocked = true;
           this.cdRef.markForCheck();
         });
+
+        this.editSeriesForm.get('releaseYear')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+          this.metadata.releaseYear = parseInt(val + '', 10);
+          this.metadata.releaseYearLocked = true;
+          this.cdRef.markForCheck();
+        });
       }
     });
 
@@ -208,6 +216,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
       this.seriesVolumes = volumes;
       this.isLoadingVolumes = false;
+
+      if (this.seriesVolumes.length === 1) {
+        this.imageUrls.push(...this.seriesVolumes[0].chapters.map((c: Chapter) => this.imageService.getChapterCoverImage(c.id)));
+      } else {
+        this.imageUrls.push(...this.seriesVolumes.map(v => this.imageService.getVolumeCoverImage(v.id)));
+      }
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;

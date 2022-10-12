@@ -1,4 +1,8 @@
 export enum AgeRating {
+    /**
+     * This is not a valid state for Series/Chapters, but used for Restricted Profiles
+     */
+    NotApplicable = -1,
     Unknown = 0,
     AdultsOnly = 1,
     EarlyChildhood = 2,

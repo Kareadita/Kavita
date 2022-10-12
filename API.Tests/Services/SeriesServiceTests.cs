@@ -1019,6 +1019,41 @@ public class SeriesServiceTests
         Assert.True(series.Metadata.GenresLocked);
     }
 
+    [Fact]
+    public async Task UpdateSeriesMetadata_ShouldNotUpdateReleaseYear_IfLessThan1000()
+    {
+        await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Book,
+            },
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
+        };
+        _context.Series.Add(s);
+        await _context.SaveChangesAsync();
+
+        var success = await _seriesService.UpdateSeriesMetadata(new UpdateSeriesMetadataDto()
+        {
+            SeriesMetadata = new SeriesMetadataDto()
+            {
+                SeriesId = 1,
+                ReleaseYear = 100,
+            },
+            CollectionTags = new List<CollectionTagDto>()
+        });
+
+        Assert.True(success);
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        Assert.NotNull(series.Metadata);
+        Assert.Equal(0, series.Metadata.ReleaseYear);
+        Assert.False(series.Metadata.ReleaseYearLocked);
+    }
+
     #endregion
 
     #region GetFirstChapterForMetadata

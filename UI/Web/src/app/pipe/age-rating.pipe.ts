@@ -11,7 +11,9 @@ export class AgeRatingPipe implements PipeTransform {
 
   constructor(private metadataService: MetadataService) {}
 
-  transform(value: AgeRating | AgeRatingDto): Observable<string> {
+  transform(value: AgeRating | AgeRatingDto | undefined): Observable<string> {
+    if (value === undefined || value === null) return of('undefined');
+
     if (value.hasOwnProperty('title')) {
       return of((value as AgeRatingDto).title);  
     }

@@ -2,7 +2,7 @@
     <app-side-nav-companion-bar *ngIf="series !== undefined" [hasExtras]="true" [extraDrawer]="extrasDrawer">
             <ng-container title>
                 <h2 class="title text-break">
-                    <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
                     <span>{{series.name}}</span>
                 </h2>
             </ng-container>
@@ -58,11 +58,11 @@
 
 <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-3 info-container">
-        <div class="image-container col-xl-1 col-lg-2 col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
+        <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block">
             <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
             <!-- NOTE: We can put continue point here as Vol X Ch Y or just Ch Y or Book Z ?-->
         </div>
-        <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
+        <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
             <div class="row g-0">
                 <div class="col-auto">
                     <button class="btn btn-primary" (click)="read()">
@@ -81,7 +81,7 @@
                 </div>
                 <div class="col-auto ms-2 d-none d-sm-block">
                     <div class="card-actions">
-                        <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
                     </div>
                 </div>
 

@@ -79,6 +79,12 @@ public class SeriesService : ISeriesService
                 series.Metadata.AgeRatingLocked = true;
             }
 
+            if (updateSeriesMetadataDto.SeriesMetadata.ReleaseYear > 1000 && series.Metadata.ReleaseYear != updateSeriesMetadataDto.SeriesMetadata.ReleaseYear)
+            {
+                series.Metadata.ReleaseYear = updateSeriesMetadataDto.SeriesMetadata.ReleaseYear;
+                series.Metadata.ReleaseYearLocked = true;
+            }
+
             if (series.Metadata.PublicationStatus != updateSeriesMetadataDto.SeriesMetadata.PublicationStatus)
             {
                 series.Metadata.PublicationStatus = updateSeriesMetadataDto.SeriesMetadata.PublicationStatus;
@@ -170,6 +176,7 @@ public class SeriesService : ISeriesService
             series.Metadata.CoverArtistLocked = updateSeriesMetadataDto.SeriesMetadata.CoverArtistsLocked;
             series.Metadata.WriterLocked = updateSeriesMetadataDto.SeriesMetadata.WritersLocked;
             series.Metadata.SummaryLocked = updateSeriesMetadataDto.SeriesMetadata.SummaryLocked;
+            series.Metadata.ReleaseYearLocked = updateSeriesMetadataDto.SeriesMetadata.ReleaseYearLocked;
 
             if (!_unitOfWork.HasChanges())
             {
@@ -469,6 +476,14 @@ public class SeriesService : ISeriesService
         var libraryIds = (await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId));
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("User does not have access to the library this series belongs to");
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user.AgeRestriction != AgeRating.NotApplicable)
+        {
+            var seriesMetadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
+            if (seriesMetadata.AgeRating > user.AgeRestriction)
+                throw new UnauthorizedAccessException("User is not allowed to view this series due to age restrictions");
+        }
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))

@@ -38,19 +38,23 @@ export class ConfirmEmailComponent {
       const token = this.route.snapshot.queryParamMap.get('token');
       const email = this.route.snapshot.queryParamMap.get('email');
       this.cdRef.markForCheck();
-      if (token == undefined || token === '' || token === null) {
+      if (this.isNullOrEmpty(token) || this.isNullOrEmpty(email)) {
         // This is not a valid url, redirect to login
-        this.toastr.error('Invalid confirmation email');
+        this.toastr.error('Invalid confirmation url');
         this.router.navigateByUrl('login');
         return;
       }
-      this.token = token;
+      this.token = token!;
       this.registerForm.get('email')?.setValue(email || '');
       this.cdRef.markForCheck();
   }
 
+  isNullOrEmpty(v: string | null | undefined) {
+    return v == undefined || v === '' || v === null;
+  }
+
   submit() {
-    let model = this.registerForm.getRawValue();
+    const model = this.registerForm.getRawValue();
     model.token = this.token;
     this.accountService.confirmEmail(model).subscribe((user) => {
       this.toastr.success('Account registration complete');

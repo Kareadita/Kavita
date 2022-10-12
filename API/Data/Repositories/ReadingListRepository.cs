@@ -23,6 +23,7 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
     void Remove(ReadingListItem item);
+    void Add(ReadingList list);
     void BulkRemove(IEnumerable<ReadingListItem> items);
     void Update(ReadingList list);
     Task<int> Count();
@@ -44,6 +45,11 @@ public class ReadingListRepository : IReadingListRepository
     public void Update(ReadingList list)
     {
         _context.Entry(list).State = EntityState.Modified;
+    }
+
+    public void Add(ReadingList list)
+    {
+        _context.Add(list);
     }
 
     public async Task<int> Count()
@@ -82,8 +88,10 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams)
     {
+        var userAgeRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
+            .Where(l => l.AgeRating >= userAgeRating)
             .OrderBy(l => l.LastModified)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
@@ -97,7 +105,7 @@ public class ReadingListRepository : IReadingListRepository
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
             .AsSplitQuery()
-            .OrderBy(l => l.LastModified)
+            .OrderBy(l => l.Title)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
 

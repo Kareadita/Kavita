@@ -118,4 +118,15 @@ public class AccountService : IAccountService
         return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
     }
 
+    /// <summary>
+    /// Does the user have Change Restriction permission or admin rights
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns></returns>
+    public async Task<bool> HasChangeRestrictionRole(AppUser user)
+    {
+        var roles = await _userManager.GetRolesAsync(user);
+        return roles.Contains(PolicyConstants.ChangePasswordRole) || roles.Contains(PolicyConstants.AdminRole);
+    }
+
 }

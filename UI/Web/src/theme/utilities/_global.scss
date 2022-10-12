@@ -10,6 +10,10 @@ body {
   overflow-y: auto;
 }
 
+.no-transitions, .no-transitions * {
+    transition: none !important;
+}
+
 
 hr {
     background-color: var(--hr-color);

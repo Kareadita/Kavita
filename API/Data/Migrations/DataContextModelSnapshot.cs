@@ -53,6 +53,9 @@ namespace API.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AgeRestriction")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ApiKey")
                         .HasColumnType("TEXT");
 
@@ -217,6 +220,9 @@ namespace API.Data.Migrations
                         .HasDefaultValue(0);
 
                     b.Property<int>("LayoutMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("NoTransitions")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("PageSplitOption")
@@ -644,6 +650,9 @@ namespace API.Data.Migrations
                     b.Property<int>("ReleaseYear")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ReleaseYearLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<uint>("RowVersion")
                         .IsConcurrencyToken()
                         .HasColumnType("INTEGER");
@@ -728,6 +737,9 @@ namespace API.Data.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("AppUserId")

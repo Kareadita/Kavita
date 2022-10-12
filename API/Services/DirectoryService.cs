@@ -645,12 +645,15 @@ public class DirectoryService : IDirectoryService
     /// <summary>
     /// Recursively scans a folder and returns the max last write time on any folders and files
     /// </summary>
+    /// <remarks>If the folder is empty, this will return MaxValue for a DateTime</remarks>
     /// <param name="folderPath"></param>
     /// <returns>Max Last Write Time</returns>
     public DateTime GetLastWriteTime(string folderPath)
     {
         if (!FileSystem.Directory.Exists(folderPath)) throw new IOException($"{folderPath} does not exist");
-        return Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories).Max(path => FileSystem.File.GetLastWriteTime(path));
+        var fileEntries = FileSystem.Directory.GetFileSystemEntries(folderPath, "*.*", SearchOption.AllDirectories);
+        if (fileEntries.Length == 0) return DateTime.MaxValue;
+        return fileEntries.Max(path => FileSystem.File.GetLastWriteTime(path));
     }
 
     /// <summary>
@@ -673,7 +676,7 @@ public class DirectoryService : IDirectoryService
         }
 
         GlobMatcher matcher = new();
-        foreach (var line in lines)
+        foreach (var line in lines.Where(s => !string.IsNullOrEmpty(s)))
         {
             matcher.AddExclude(line);
         }

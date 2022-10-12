@@ -1,6 +1,7 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener,
+   Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
@@ -13,7 +14,6 @@ import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -156,5 +156,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
     this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
     this.changeDetectionRef.markForCheck();
+  }
+
+  tryToSaveJumpKey(item: any) {
+    let name = '';
+    if (item.hasOwnProperty('name')) {
+      name = item.name;
+    } else if (item.hasOwnProperty('title')) {
+      name = item.title;
+    }
+    this.jumpbarService.saveResumeKey(this.router.url, name.charAt(0));
   }
 }

@@ -2,11 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { ConfirmService } from 'src/app/shared/confirm.service';
 import { InviteUserResponse } from 'src/app/_models/invite-user-response';
 import { Library } from 'src/app/_models/library';
+import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AccountService } from 'src/app/_services/account.service';
-import { ServerService } from 'src/app/_services/server.service';
 
 @Component({
   selector: 'app-invite-user',
@@ -22,14 +21,16 @@ export class InviteUserComponent implements OnInit {
   inviteForm: FormGroup = new FormGroup({});
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
+  selectedRating: AgeRating = AgeRating.NotApplicable;
   emailLink: string = '';
 
   makeLink: (val: string) => string = (val: string) => {return this.emailLink};
 
+  public get hasAdminRoleSelected() { return this.selectedRoles.includes('Admin'); };
+
   public get email() { return this.inviteForm.get('email'); }
 
-  constructor(public modal: NgbActiveModal, private accountService: AccountService, private serverService: ServerService, 
-    private confirmService: ConfirmService, private toastr: ToastrService) { }
+  constructor(public modal: NgbActiveModal, private accountService: AccountService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.inviteForm.addControl('email', new FormControl('', [Validators.required]));
@@ -47,6 +48,7 @@ export class InviteUserComponent implements OnInit {
       email,
       libraries: this.selectedLibraries,
       roles: this.selectedRoles,
+      ageRestriction: this.selectedRating
     }).subscribe((data: InviteUserResponse) => {
       this.emailLink = data.emailLink;
       this.isSending = false;
@@ -65,6 +67,10 @@ export class InviteUserComponent implements OnInit {
 
   updateLibrarySelection(libraries: Array<Library>) {
     this.selectedLibraries = libraries.map(l => l.id);
+  }
+
+  updateRestrictionSelection(rating: AgeRating) {
+    this.selectedRating = rating;
   }
 
 }

@@ -66,9 +66,29 @@ public class Startup
             options.CacheProfiles.Add("Hour",
                 new CacheProfile()
                 {
-                    Duration = 60 * 10,
+                    Duration = 60 * 60,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
+                });
+            options.CacheProfiles.Add("10Minute",
+                new CacheProfile()
+                {
+                    Duration = 60 * 10,
+                    Location = ResponseCacheLocation.Any,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add("5Minute",
+                new CacheProfile()
+                {
+                    Duration = 60 * 5,
+                    Location = ResponseCacheLocation.Any,
+                });
+            // Instant is a very quick cache, because we can't bust based on the query params, but rather body
+            options.CacheProfiles.Add("Instant",
+                new CacheProfile()
+                {
+                    Duration = 30,
+                    Location = ResponseCacheLocation.Any,
                 });
         });
         services.Configure<ForwardedHeadersOptions>(options =>
@@ -184,15 +204,19 @@ public class Startup
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                     var themeService = serviceProvider.GetRequiredService<IThemeService>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
+                    var readingListService = serviceProvider.GetRequiredService<IReadingListService>();
 
 
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
-
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
 
                     // only needed for v0.5.4 and v0.6.0
                     await MigrateNormalizedEverything.Migrate(unitOfWork, dataContext, logger);
+
+                    // v0.6.0
+                    await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager, logger);
+                    await MigrateReadingListAgeRating.Migrate(unitOfWork, dataContext, readingListService, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

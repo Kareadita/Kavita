@@ -142,16 +142,17 @@ export class BulkSelectionService {
   getActions(callback: (action: ActionItem<any>, data: any) => void) {
     // checks if series is present. If so, returns only series actions
     // else returns volume/chapter items
-    const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection, Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList];
+    const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection, 
+      Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList];
     if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
-      return this.actionFactory.getSeriesActions(callback).filter(item => allowedActions.includes(item.action));
+      return this.applyFilterToList(this.actionFactory.getSeriesActions(callback), allowedActions);
     }
 
     if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
       return this.actionFactory.getBookmarkActions(callback);
     }
 
-    return this.actionFactory.getVolumeActions(callback).filter(item => allowedActions.includes(item.action));
+    return this.applyFilterToList(this.actionFactory.getVolumeActions(callback), allowedActions);
   }
 
   private debugLog(message: string, extraData?: any) {
@@ -163,4 +164,29 @@ export class BulkSelectionService {
       console.log(message);
     }
   }
+
+  private applyFilter(action: ActionItem<any>, allowedActions: Array<Action>) {
+    
+    var ret = false;
+    if (action.action === Action.Submenu || allowedActions.includes(action.action)) {
+      // Do something
+      ret = true;
+    }
+
+    if (action.children === null || action.children?.length === 0) return ret;
+
+    action.children = action.children.filter((childAction) => this.applyFilter(childAction, allowedActions));
+
+    // action.children?.forEach((childAction) => {
+    //   this.applyFilter(childAction, allowedActions);
+    // });
+    return ret;
+  }
+
+	private applyFilterToList(list: Array<ActionItem<any>>, allowedActions: Array<Action>): Array<ActionItem<any>> {
+		const actions = list.map((a) => {
+			return { ...a };
+		});
+    return actions.filter(action => this.applyFilter(action, allowedActions));
+	}
 }

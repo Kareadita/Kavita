@@ -38,7 +38,7 @@ public class LibraryWatcher : ILibraryWatcher
     private readonly IDirectoryService _directoryService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LibraryWatcher> _logger;
-    private readonly IScannerService _scannerService;
+    private readonly ITaskScheduler _taskScheduler;
 
     private static readonly Dictionary<string, IList<FileSystemWatcher>> WatcherDictionary = new ();
     /// <summary>
@@ -51,13 +51,22 @@ public class LibraryWatcher : ILibraryWatcher
     /// <remarks>The Job will be enqueued instantly</remarks>
     private readonly TimeSpan _queueWaitTime;
 
+    /// <summary>
+    /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
+    /// </summary>
+    private int _bufferFullCounter;
+    /// <summary>
+    /// Used to lock buffer Full Counter
+    /// </summary>
+    private static readonly object Lock = new ();
 
-    public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<LibraryWatcher> logger, IScannerService scannerService, IHostEnvironment environment)
+    public LibraryWatcher(IDirectoryService directoryService, IUnitOfWork unitOfWork,
+        ILogger<LibraryWatcher> logger, IHostEnvironment environment, ITaskScheduler taskScheduler)
     {
         _directoryService = directoryService;
         _unitOfWork = unitOfWork;
         _logger = logger;
-        _scannerService = scannerService;
+        _taskScheduler = taskScheduler;
 
         _queueWaitTime = environment.IsDevelopment() ? TimeSpan.FromSeconds(30) : TimeSpan.FromMinutes(5);
 
@@ -83,8 +92,8 @@ public class LibraryWatcher : ILibraryWatcher
             watcher.Created += OnCreated;
             watcher.Deleted += OnDeleted;
             watcher.Error += OnError;
-            watcher.Disposed += (sender, args) =>
-                _logger.LogError("[LibraryWatcher] watcher was disposed when it shouldn't have been");
+            watcher.Disposed += (_, _) =>
+                _logger.LogError("[LibraryWatcher] watcher was disposed when it shouldn't have been. Please report this to Kavita dev");
 
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = true;
@@ -118,14 +127,15 @@ public class LibraryWatcher : ILibraryWatcher
     public async Task RestartWatching()
     {
         _logger.LogDebug("[LibraryWatcher] Restarting watcher");
+
         StopWatching();
         await StartWatching();
     }
 
     private void OnChanged(object sender, FileSystemEventArgs e)
     {
+        _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}, {ChangeType}", e.FullPath, e.Name, e.ChangeType);
         if (e.ChangeType != WatcherChangeTypes.Changed) return;
-        _logger.LogDebug("[LibraryWatcher] Changed: {FullPath}, {Name}", e.FullPath, e.Name);
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, string.IsNullOrEmpty(_directoryService.FileSystem.Path.GetExtension(e.Name))));
     }
 
@@ -147,11 +157,31 @@ public class LibraryWatcher : ILibraryWatcher
         BackgroundJob.Enqueue(() => ProcessChange(e.FullPath, true));
     }
 
-
+    /// <summary>
+    /// On error, we count the number of errors that have occured. If the number of errors has been more than 2 in last 10 minutes, then we suspend listening for an hour
+    /// </summary>
+    /// <remarks>This will schedule jobs to decrement the buffer full counter</remarks>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnError(object sender, ErrorEventArgs e)
     {
-        _logger.LogError(e.GetException(), "[LibraryWatcher] An error occured, likely too many watches occured at once. Restarting Watchers");
+        _logger.LogError(e.GetException(), "[LibraryWatcher] An error occured, likely too many changes occured at once or the folder being watched was deleted. Restarting Watchers");
+        bool condition;
+        lock (Lock)
+        {
+            _bufferFullCounter += 1;
+            condition = _bufferFullCounter >= 3;
+        }
+
+        if (condition)
+        {
+            _logger.LogInformation("[LibraryWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour");
+            StopWatching();
+            BackgroundJob.Schedule(() => RestartWatching(), TimeSpan.FromHours(1));
+            return;
+        }
         Task.Run(RestartWatching);
+        BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
     }
 
 
@@ -162,6 +192,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// <remarks>This is public only because Hangfire will invoke it. Do not call external to this class.</remarks>
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
+    // ReSharper disable once MemberCanBePrivate.Global
     public async Task ProcessChange(string filePath, bool isDirectoryChange = false)
     {
         var sw = Stopwatch.StartNew();
@@ -191,29 +222,16 @@ public class LibraryWatcher : ILibraryWatcher
                 return;
             }
 
-            // Check if this task has already enqueued or is being processed, before enqueing
-
-            var alreadyScheduled =
-                TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {fullPath});
-            if (!alreadyScheduled)
-            {
-                _logger.LogInformation("[LibraryWatcher] Scheduling ScanFolder for {Folder}", fullPath);
-                BackgroundJob.Schedule(() => _scannerService.ScanFolder(fullPath), _queueWaitTime);
-            }
-            else
-            {
-                _logger.LogInformation("[LibraryWatcher] Skipped scheduling ScanFolder for {Folder} as a job already queued",
-                    fullPath);
-            }
+            _taskScheduler.ScanFolder(fullPath, _queueWaitTime);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[LibraryWatcher] An error occured when processing a watch event");
         }
-        _logger.LogDebug("[LibraryWatcher] ProcessChange ran in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
+        _logger.LogDebug("[LibraryWatcher] ProcessChange completed in {ElapsedMilliseconds}ms", sw.ElapsedMilliseconds);
     }
 
-    private string GetFolder(string filePath, IList<string> libraryFolders)
+    private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
         _logger.LogDebug("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
@@ -230,6 +248,20 @@ public class LibraryWatcher : ILibraryWatcher
         if (!rootFolder.Any()) return string.Empty;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.
-        return  Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.First()));
+        return  Parser.Parser.NormalizePath(_directoryService.FileSystem.Path.Join(libraryFolder, rootFolder.Last()));
+    }
+
+
+    /// <summary>
+    /// This is called via Hangfire to decrement the counter. Must work around a lock
+    /// </summary>
+    // ReSharper disable once MemberCanBePrivate.Global
+    public void UpdateLastBufferOverflow()
+    {
+        lock (Lock)
+        {
+            if (_bufferFullCounter == 0) return;
+            _bufferFullCounter -= 1;
+        }
     }
 }
