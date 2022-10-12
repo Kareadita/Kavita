@@ -1416,7 +1416,7 @@ public class SeriesRepository : ISeriesRepository
                 .AsNoTracking()
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .ToListAsync(),
-            Editions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Edition)
+            Editions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Edition, userRating)
         };
     }
 
