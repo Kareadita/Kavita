@@ -596,4 +596,5 @@ public class ScannerService : IScannerService
     {
         return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
     }
+
 }
