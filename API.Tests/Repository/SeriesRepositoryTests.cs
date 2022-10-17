@@ -140,12 +140,12 @@ public class SeriesRepositoryTests
 
     [InlineData("Heion Sedai no Idaten-tachi", "", MangaFormat.Archive, "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
     [InlineData("Heion Sedai no Idaten-tachi", "", MangaFormat.Pdf, null)]
-    public async Task GetFullSeriesByAnyName_Should(string seriesName, string localizedName, string? expected)
+    public async Task GetFullSeriesByAnyName_Should(string seriesName, MangaFormat format, string localizedName, string? expected)
     {
         var firstSeries = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         var series =
             await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
-                1, MangaFormat.Unknown);
+                1, format);
         if (expected == null)
         {
             Assert.Null(series);
@@ -157,4 +157,6 @@ public class SeriesRepositoryTests
         }
     }
 
+
+    //public async Task
 }

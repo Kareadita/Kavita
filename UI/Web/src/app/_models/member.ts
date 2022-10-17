@@ -1,5 +1,5 @@
+import { AgeRestriction } from './age-restriction';
 import { Library } from './library';
-import { AgeRating } from './metadata/age-rating';
 
 export interface Member {
     id: number;
@@ -9,8 +9,5 @@ export interface Member {
     created: string; // datetime
     roles: string[];
     libraries: Library[];
-    /**
-     * If not applicable, will store a -1
-     */
-    ageRestriction: AgeRating;
+    ageRestriction: AgeRestriction;
 }

@@ -20,5 +20,5 @@ public class InviteUserDto
     /// <summary>
     /// An Age Rating which will limit the account to seeing everything equal to or below said rating.
     /// </summary>
-    public AgeRating AgeRestriction { get; set; }
+    public AgeRestrictionDto AgeRestriction { get; set; }
 }

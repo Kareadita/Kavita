@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using API.Data.Misc;
+using API.DTOs.Account;
 using API.Entities.Enums;
 
 namespace API.DTOs;
@@ -12,11 +14,7 @@ public class MemberDto
     public int Id { get; init; }
     public string Username { get; init; }
     public string Email { get; init; }
-
-    /// <summary>
-    /// The maximum age rating a user has access to. -1 if not applicable
-    /// </summary>
-    public AgeRating AgeRestriction { get; init; } = AgeRating.NotApplicable;
+    public AgeRestrictionDto AgeRestriction { get; init; }
     public DateTime Created { get; init; }
     public DateTime LastActive { get; init; }
     public IEnumerable<LibraryDto> Libraries { get; init; }

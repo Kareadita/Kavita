@@ -45,6 +45,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// The highest age rating the user has access to. Not applicable for admins
     /// </summary>
     public AgeRating AgeRestriction { get; set; } = AgeRating.NotApplicable;
+    /// <summary>
+    /// If an age rating restriction is applied to the account, if Unknowns should be allowed for the user. Defaults to false.
+    /// </summary>
+    public bool AgeRestrictionIncludeUnknowns { get; set; } = false;
 
     /// <inheritdoc />
     [ConcurrencyCheck]

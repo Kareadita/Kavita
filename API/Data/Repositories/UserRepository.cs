@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
+using API.DTOs.Account;
 using API.DTOs.Filtering;
 using API.DTOs.Reader;
 using API.Entities;
@@ -396,7 +397,11 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
-                AgeRestriction = u.AgeRestriction,
+                AgeRestriction = new AgeRestrictionDto()
+                {
+                    AgeRating = u.AgeRestriction,
+                    IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+                },
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,
@@ -430,7 +435,11 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
-                AgeRestriction = u.AgeRestriction,
+                AgeRestriction = new AgeRestrictionDto()
+                {
+                    AgeRating = u.AgeRestriction,
+                    IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+                },
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,

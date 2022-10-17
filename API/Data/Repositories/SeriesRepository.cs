@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
@@ -34,24 +35,6 @@ public enum SeriesIncludes
     Metadata = 4,
     Related = 8,
     Library = 16,
-}
-
-internal class RecentlyAddedSeries
-{
-    public int LibraryId { get; init; }
-    public LibraryType LibraryType { get; init; }
-    public DateTime Created { get; init; }
-    public int SeriesId { get; init; }
-    public string SeriesName { get; init; }
-    public MangaFormat Format { get; init; }
-    public int ChapterId { get; init; }
-    public int VolumeId { get; init; }
-    public string ChapterNumber { get; init; }
-    public string ChapterRange { get; init; }
-    public string ChapterTitle { get; init; }
-    public bool IsSpecial { get; init; }
-    public int VolumeNumber { get; init; }
-    public AgeRating AgeRating { get; init; }
 }
 
 public interface ISeriesRepository
@@ -767,7 +750,7 @@ public class SeriesRepository : ISeriesRepository
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
                                              || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
                                              || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"));
-        if (userRating != AgeRating.NotApplicable)
+        if (userRating.AgeRating != AgeRating.NotApplicable)
         {
             query = query.RestrictAgainstAgeRestriction(userRating);
         }
@@ -1048,9 +1031,9 @@ public class SeriesRepository : ISeriesRepository
          var userRating = await GetUserAgeRestriction(userId);
 
          var items = (await GetRecentlyAddedChaptersQuery(userId));
-         if (userRating != AgeRating.NotApplicable)
+         if (userRating.AgeRating != AgeRating.NotApplicable)
          {
-             items = items.Where(c => c.AgeRating <= userRating);
+             items = items.RestrictAgainstAgeRestriction(userRating); //.Where(c => c.AgeRating <= userRating);
          }
          foreach (var item in items)
          {
@@ -1080,9 +1063,17 @@ public class SeriesRepository : ISeriesRepository
          return seriesMap.Values.AsEnumerable();
     }
 
-    private async Task<AgeRating> GetUserAgeRestriction(int userId)
+    private async Task<AgeRestriction> GetUserAgeRestriction(int userId)
     {
-        return (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
+        return await _context.AppUser
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u =>
+            new AgeRestriction(){
+                AgeRating = u.AgeRestriction,
+                IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+            })
+            .SingleAsync();
     }
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind)
@@ -1425,7 +1416,7 @@ public class SeriesRepository : ISeriesRepository
             .Select(s => s.Id);
     }
 
-    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind, AgeRating userRating)
+    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind, AgeRestriction userRating)
     {
         return await _context.Series.SelectMany(s =>
             s.Relations.Where(sr => sr.RelationKind == kind && sr.SeriesId == seriesId && usersSeriesIds.Contains(sr.TargetSeriesId))

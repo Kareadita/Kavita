@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using API.DTOs;
+using API.DTOs.Account;
 using API.DTOs.CollectionTags;
 using API.DTOs.Device;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
-using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.DTOs.Theme;
 using API.Entities;
@@ -98,7 +98,14 @@ public class AutoMapperProfiles : Profile
                 opt =>
                     opt.MapFrom(src => src.People.Where(p => p.Role == PersonRole.Editor)));
 
-        CreateMap<AppUser, UserDto>();
+        CreateMap<AppUser, UserDto>()
+            .ForMember(dest => dest.AgeRestriction,
+            opt =>
+                opt.MapFrom(src => new AgeRestrictionDto()
+                {
+                    AgeRating = src.AgeRestriction,
+                    IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
+                }));
         CreateMap<SiteTheme, SiteThemeDto>();
         CreateMap<AppUserPreferences, UserPreferencesDto>()
             .ForMember(dest => dest.Theme,
@@ -130,6 +137,13 @@ public class AutoMapperProfiles : Profile
                     opt.MapFrom(src => src.Folders.Select(x => x.Path).ToList()));
 
         CreateMap<AppUser, MemberDto>()
+            .ForMember(dest => dest.AgeRestriction,
+                opt =>
+                    opt.MapFrom(src => new AgeRestrictionDto()
+                    {
+                        AgeRating = src.AgeRestriction,
+                        IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
+                    }))
             .AfterMap((ps, pst, context) => context.Mapper.Map(ps.Libraries, pst.Libraries));
 
         CreateMap<RegisterDto, AppUser>();

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { AgeRestriction } from 'src/app/_models/age-restriction';
 import { Member } from 'src/app/_models/member';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
@@ -20,8 +21,8 @@ export class RestrictionSelectorComponent implements OnInit, OnChanges {
    * Show labels and description around the form
    */
   @Input() showContext: boolean = true;
-  @Input() reset: EventEmitter<AgeRating> | undefined;
-  @Output() selected: EventEmitter<AgeRating> = new EventEmitter<AgeRating>();
+  @Input() reset: EventEmitter<AgeRestriction> | undefined;
+  @Output() selected: EventEmitter<AgeRestriction> = new EventEmitter<AgeRestriction>();
   
 
   ageRatings: Array<AgeRatingDto> = [];
@@ -32,22 +33,36 @@ export class RestrictionSelectorComponent implements OnInit, OnChanges {
   ngOnInit(): void {
 
     this.restrictionForm = new FormGroup({
-      'ageRating': new FormControl(this.member?.ageRestriction || AgeRating.NotApplicable, [])
+      'ageRating': new FormControl(this.member?.ageRestriction.ageRating || AgeRating.NotApplicable || AgeRating.NotApplicable, []),
+      'ageRestrictionIncludeUnknowns': new FormControl(this.member?.ageRestriction.includeUnknowns, []),
+      
     });
 
     if (this.isAdmin) {
       this.restrictionForm.get('ageRating')?.disable();
+      this.restrictionForm.get('ageRestrictionIncludeUnknowns')?.disable();
     }
 
     if (this.reset) {
       this.reset.subscribe(e => {
-        this.restrictionForm?.get('ageRating')?.setValue(e);
+        this.restrictionForm?.get('ageRating')?.setValue(e.ageRating);
+        this.restrictionForm?.get('ageRestrictionIncludeUnknowns')?.setValue(e.includeUnknowns);
         this.cdRef.markForCheck();
       });
     }
 
     this.restrictionForm.get('ageRating')?.valueChanges.subscribe(e => {
-      this.selected.emit(parseInt(e, 10));
+      this.selected.emit({
+        ageRating: parseInt(e, 10),
+        includeUnknowns: this.restrictionForm?.get('ageRestrictionIncludeUnknowns')?.value
+      });
+    });
+
+    this.restrictionForm.get('ageRestrictionIncludeUnknowns')?.valueChanges.subscribe(e => {
+      this.selected.emit({
+        ageRating: parseInt(this.restrictionForm?.get('ageRating')?.value, 10),
+        includeUnknowns: e
+      });
     });
 
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
@@ -60,8 +75,8 @@ export class RestrictionSelectorComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     if (!this.member) return;
-    console.log('changes: ');
-    this.restrictionForm?.get('ageRating')?.setValue(this.member?.ageRestriction || AgeRating.NotApplicable);
+    this.restrictionForm?.get('ageRating')?.setValue(this.member?.ageRestriction.ageRating || AgeRating.NotApplicable);
+    this.restrictionForm?.get('ageRestrictionIncludeUnknowns')?.setValue(this.member?.ageRestriction.includeUnknowns);
     this.cdRef.markForCheck();
   }
 

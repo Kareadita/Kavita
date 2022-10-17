@@ -12,6 +12,7 @@ import { InviteUserResponse } from '../_models/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { UpdateEmailResponse } from '../_models/email/update-email-response';
 import { AgeRating } from '../_models/metadata/age-rating';
+import { AgeRestriction } from '../_models/age-restriction';
 
 export enum Role {
   Admin = 'Admin',
@@ -161,7 +162,7 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, {responseType: 'text' as 'json'});
   }
 
-  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, ageRestriction: AgeRating}) {
+  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, ageRestriction: AgeRestriction}) {
     return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/invite', model);
   }
 
@@ -198,7 +199,7 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, {responseType: 'json' as 'text'});
   }
 
-  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number, ageRestriction: AgeRating}) {
+  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number, ageRestriction: AgeRestriction}) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
   }
 
@@ -206,8 +207,8 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email});
   }
 
-  updateAgeRestriction(ageRating: AgeRating) {
-    return this.httpClient.post(this.baseUrl + 'account/update/age-restriction', {ageRating});
+  updateAgeRestriction(ageRating: AgeRating, includeUnknowns: boolean) {
+    return this.httpClient.post(this.baseUrl + 'account/update/age-restriction', {ageRating, includeUnknowns});
   }
 
   /**
