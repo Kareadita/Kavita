@@ -72,8 +72,7 @@ public class ReadingItemService : IReadingItemService
         // This catches when original library type is Manga/Comic and when parsing with non
         if (Tasks.Scanner.Parser.Parser.IsEpub(path) && Tasks.Scanner.Parser.Parser.ParseVolume(info.Series) != Tasks.Scanner.Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
         {
-            info = _defaultParser.Parse(path, rootPath, LibraryType.Book);
-            var info2 = Parse(path, rootPath, type);
+            var info2 = _defaultParser.Parse(path, rootPath, LibraryType.Book);
             info.Merge(info2);
         }
 

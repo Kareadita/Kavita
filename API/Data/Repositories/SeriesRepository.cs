@@ -1277,7 +1277,7 @@ public class SeriesRepository : ISeriesRepository
                     ids.Add(seriesId);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // This is due to v0.5.6 introducing bugs where we could have multiple series get duplicated and no way to delete them
                 // This here will delete the 2nd one as the first is the one to likely be used.
@@ -1307,8 +1307,6 @@ public class SeriesRepository : ISeriesRepository
             sr.Relations = new List<SeriesRelation>();
             Update(sr);
         }
-
-
 
         _context.Series.RemoveRange(seriesToRemove);
 
