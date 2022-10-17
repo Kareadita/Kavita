@@ -1033,7 +1033,7 @@ public class SeriesRepository : ISeriesRepository
          var items = (await GetRecentlyAddedChaptersQuery(userId));
          if (userRating.AgeRating != AgeRating.NotApplicable)
          {
-             items = items.RestrictAgainstAgeRestriction(userRating); //.Where(c => c.AgeRating <= userRating);
+             items = items.RestrictAgainstAgeRestriction(userRating);
          }
          foreach (var item in items)
          {
