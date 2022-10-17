@@ -1140,7 +1140,54 @@ public class SeriesServiceTests
 
     #region SeriesRelation
     [Fact]
-    public async Task UpdateRelatedSeries_ShouldAddAllRelations_And_DeleteAllRelations()
+    public async Task UpdateRelatedSeries_ShouldAddAllRelations()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = InstantiateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(2);
+        addRelationDto.Sequels.Add(3);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
+        Assert.Equal(3, series1.Relations.Single(s => s.TargetSeriesId == 3).TargetSeriesId);
+    }
+
+    [Fact]
+    public async Task UpdateRelatedSeries_DeleteAllRelations()
     {
         await ResetDb();
         _context.Library.Add(new Library()
@@ -1246,7 +1293,7 @@ public class SeriesServiceTests
     }
 
     [Fact]
-    public async Task AddRelation_EditionPrequelSequel_ShouldNotHaveParent()
+    public async Task GetRelatedSeries_EditionPrequelSequel_ShouldNotHaveParent()
     {
         await ResetDb();
         _context.Library.Add(new Library()
@@ -1304,8 +1351,6 @@ public class SeriesServiceTests
         Assert.Empty(_seriesService.GetRelatedSeries(1, 3).Result.Parent);
         Assert.Empty(_seriesService.GetRelatedSeries(1, 4).Result.Parent);
         Assert.NotEmpty(_seriesService.GetRelatedSeries(1, 5).Result.Parent);
-
-
     }
 
     #endregion
