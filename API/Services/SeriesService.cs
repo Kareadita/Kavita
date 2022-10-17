@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Helpers;
 using API.SignalR;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +27,8 @@ public interface ISeriesService
     Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto);
     Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto);
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
-
+    Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
+    Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
 }
 
 public class SeriesService : ISeriesService
@@ -623,5 +626,77 @@ public class SeriesService : ISeriesService
             LibraryType.Book => "Book",
             _ => "Chapter"
         };
+    }
+
+    /// <summary>
+    /// Returns all related series against the passed series Id
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId)
+    {
+        return await _unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId);
+    }
+
+    /// <summary>
+    /// Update the relations attached to the Series. Does not generate associated Sequel/Prequel pairs on target series.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    public async Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related);
+
+        UpdateRelationForKind(dto.Adaptations, series.Relations.Where(r => r.RelationKind == RelationKind.Adaptation).ToList(), series, RelationKind.Adaptation);
+        UpdateRelationForKind(dto.Characters, series.Relations.Where(r => r.RelationKind == RelationKind.Character).ToList(), series, RelationKind.Character);
+        UpdateRelationForKind(dto.Contains, series.Relations.Where(r => r.RelationKind == RelationKind.Contains).ToList(), series, RelationKind.Contains);
+        UpdateRelationForKind(dto.Others, series.Relations.Where(r => r.RelationKind == RelationKind.Other).ToList(), series, RelationKind.Other);
+        UpdateRelationForKind(dto.SideStories, series.Relations.Where(r => r.RelationKind == RelationKind.SideStory).ToList(), series, RelationKind.SideStory);
+        UpdateRelationForKind(dto.SpinOffs, series.Relations.Where(r => r.RelationKind == RelationKind.SpinOff).ToList(), series, RelationKind.SpinOff);
+        UpdateRelationForKind(dto.AlternativeSettings, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeSetting).ToList(), series, RelationKind.AlternativeSetting);
+        UpdateRelationForKind(dto.AlternativeVersions, series.Relations.Where(r => r.RelationKind == RelationKind.AlternativeVersion).ToList(), series, RelationKind.AlternativeVersion);
+        UpdateRelationForKind(dto.Doujinshis, series.Relations.Where(r => r.RelationKind == RelationKind.Doujinshi).ToList(), series, RelationKind.Doujinshi);
+        UpdateRelationForKind(dto.Prequels, series.Relations.Where(r => r.RelationKind == RelationKind.Prequel).ToList(), series, RelationKind.Prequel);
+        UpdateRelationForKind(dto.Sequels, series.Relations.Where(r => r.RelationKind == RelationKind.Sequel).ToList(), series, RelationKind.Sequel);
+        UpdateRelationForKind(dto.Editions, series.Relations.Where(r => r.RelationKind == RelationKind.Edition).ToList(), series, RelationKind.Edition);
+
+        if (!_unitOfWork.HasChanges()) return true;
+        return await _unitOfWork.CommitAsync();
+    }
+
+
+    /// <summary>
+    /// Applies the provided list to the series. Adds new relations and removes deleted relations.
+    /// </summary>
+    /// <param name="dtoTargetSeriesIds"></param>
+    /// <param name="adaptations"></param>
+    /// <param name="series"></param>
+    /// <param name="kind"></param>
+    private void UpdateRelationForKind(ICollection<int> dtoTargetSeriesIds, IEnumerable<SeriesRelation> adaptations, Series series, RelationKind kind)
+    {
+        foreach (var adaptation in adaptations.Where(adaptation => !dtoTargetSeriesIds.Contains(adaptation.TargetSeriesId)))
+        {
+            // If the seriesId isn't in dto, it means we've removed or reclassified
+            series.Relations.Remove(adaptation);
+        }
+
+        // At this point, we only have things to add
+        foreach (var targetSeriesId in dtoTargetSeriesIds)
+        {
+            // This ensures we don't allow any duplicates to be added
+            if (series.Relations.SingleOrDefault(r =>
+                    r.RelationKind == kind && r.TargetSeriesId == targetSeriesId) !=
+                null) continue;
+
+            series.Relations.Add(new SeriesRelation()
+            {
+                Series = series,
+                SeriesId = series.Id,
+                TargetSeriesId = targetSeriesId,
+                RelationKind = kind
+            });
+            _unitOfWork.SeriesRepository.Update(series);
+        }
     }
 }

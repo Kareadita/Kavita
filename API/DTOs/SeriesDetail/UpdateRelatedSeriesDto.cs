@@ -16,4 +16,5 @@ public class UpdateRelatedSeriesDto
     public IList<int> AlternativeSettings { get; set; }
     public IList<int> AlternativeVersions { get; set; }
     public IList<int> Doujinshis { get; set; }
+    public IList<int> Editions { get; set; }
 }

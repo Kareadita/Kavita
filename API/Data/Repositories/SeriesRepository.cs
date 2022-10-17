@@ -1408,13 +1408,15 @@ public class SeriesRepository : ISeriesRepository
                     s.RelationOf.Where(r => r.TargetSeriesId == seriesId
                                              && usersSeriesIds.Contains(r.TargetSeriesId)
                                              && r.RelationKind != RelationKind.Prequel
-                                             && r.RelationKind != RelationKind.Sequel)
+                                             && r.RelationKind != RelationKind.Sequel
+                                             && r.RelationKind != RelationKind.Edition)
                         .Select(sr => sr.Series))
                 .RestrictAgainstAgeRestriction(userRating)
                 .AsSplitQuery()
                 .AsNoTracking()
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .ToListAsync()
+                .ToListAsync(),
+            Editions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Edition, userRating)
         };
     }
 

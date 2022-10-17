@@ -8,9 +8,10 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
-using API.DTOs.Reader;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -22,10 +23,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.Extensions;
-using NSubstitute.ReceivedExtensions;
 using Xunit;
-using Xunit.Sdk;
 
 namespace API.Tests.Services;
 
@@ -125,6 +123,26 @@ public class SeriesServiceTests
         fileSystem.AddDirectory(DataDirectory);
 
         return fileSystem;
+    }
+
+    private static UpdateRelatedSeriesDto InstantiateRelationsDto(Series series)
+    {
+        return new UpdateRelatedSeriesDto()
+        {
+            SeriesId = series.Id,
+            Prequels = new List<int>(),
+            Adaptations = new List<int>(),
+            Characters = new List<int>(),
+            Contains = new List<int>(),
+            Doujinshis = new List<int>(),
+            Others = new List<int>(),
+            Sequels = new List<int>(),
+            AlternativeSettings = new List<int>(),
+            AlternativeVersions = new List<int>(),
+            SideStories = new List<int>(),
+            SpinOffs = new List<int>(),
+            Editions = new List<int>()
+        };
     }
 
     #endregion
@@ -1116,6 +1134,223 @@ public class SeriesServiceTests
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, false);
         Assert.Same("1.1", firstChapter.Range);
+    }
+
+    #endregion
+
+    #region SeriesRelation
+    [Fact]
+    public async Task UpdateRelatedSeries_ShouldAddAllRelations()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = InstantiateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(2);
+        addRelationDto.Sequels.Add(3);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
+        Assert.Equal(3, series1.Relations.Single(s => s.TargetSeriesId == 3).TargetSeriesId);
+    }
+
+    [Fact]
+    public async Task UpdateRelatedSeries_DeleteAllRelations()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = InstantiateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(2);
+        addRelationDto.Sequels.Add(3);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
+        Assert.Equal(3, series1.Relations.Single(s => s.TargetSeriesId == 3).TargetSeriesId);
+
+        // Remove relations
+        var removeRelationDto = InstantiateRelationsDto(series1);
+        await _seriesService.UpdateRelatedSeries(removeRelationDto);
+        Assert.Empty(series1.Relations.Where(s => s.TargetSeriesId == 1));
+        Assert.Empty(series1.Relations.Where(s => s.TargetSeriesId == 2));
+    }
+
+    [Fact]
+    public async Task UpdateRelatedSeries_ShouldNotAllowDuplicates()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        var relation = new SeriesRelation()
+        {
+            Series = series1,
+            SeriesId = series1.Id,
+            TargetSeriesId = 2, // Target series id
+            RelationKind = RelationKind.Prequel
+
+        };
+        // Manually create a relation
+        series1.Relations.Add(relation);
+
+        // Create a new dto with the previous relation as well
+        var relationDto = InstantiateRelationsDto(series1);
+        relationDto.Adaptations.Add(2);
+
+        await _seriesService.UpdateRelatedSeries(relationDto);
+        // Expected is only one instance of the relation (hence not duping)
+        Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
+    }
+
+    [Fact]
+    public async Task GetRelatedSeries_EditionPrequelSequel_ShouldNotHaveParent()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Editions",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Adaption",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+        await _context.SaveChangesAsync();
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = InstantiateRelationsDto(series1);
+        addRelationDto.Editions.Add(2);
+        addRelationDto.Prequels.Add(3);
+        addRelationDto.Sequels.Add(4);
+        addRelationDto.Adaptations.Add(5);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+
+
+        Assert.Empty(_seriesService.GetRelatedSeries(1, 2).Result.Parent);
+        Assert.Empty(_seriesService.GetRelatedSeries(1, 3).Result.Parent);
+        Assert.Empty(_seriesService.GetRelatedSeries(1, 4).Result.Parent);
+        Assert.NotEmpty(_seriesService.GetRelatedSeries(1, 5).Result.Parent);
     }
 
     #endregion
