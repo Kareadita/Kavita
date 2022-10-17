@@ -10,7 +10,11 @@
         </div>
 
         <ng-container *ngIf="isViewMode">
-            <span >{{user?.ageRestriction | ageRating | async}}</span>
+            <span>{{user?.ageRestriction?.ageRating| ageRating | async}}
+                <ng-container *ngIf="user?.ageRestriction?.ageRating !== AgeRating.NotApplicable && user?.ageRestriction?.includeUnknowns">
+                    <span class="ms-1 me-1">+</span> Unknowns
+                </ng-container>
+            </span>
         </ng-container>
 
         <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">

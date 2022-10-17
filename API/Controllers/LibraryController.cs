@@ -113,7 +113,6 @@ public class LibraryController : BaseApiController
     }
 
 
-    [ResponseCache(CacheProfileName = "10Minute")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {

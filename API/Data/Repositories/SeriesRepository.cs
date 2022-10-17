@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
@@ -34,24 +35,6 @@ public enum SeriesIncludes
     Metadata = 4,
     Related = 8,
     Library = 16,
-}
-
-internal class RecentlyAddedSeries
-{
-    public int LibraryId { get; init; }
-    public LibraryType LibraryType { get; init; }
-    public DateTime Created { get; init; }
-    public int SeriesId { get; init; }
-    public string SeriesName { get; init; }
-    public MangaFormat Format { get; init; }
-    public int ChapterId { get; init; }
-    public int VolumeId { get; init; }
-    public string ChapterNumber { get; init; }
-    public string ChapterRange { get; init; }
-    public string ChapterTitle { get; init; }
-    public bool IsSpecial { get; init; }
-    public int VolumeNumber { get; init; }
-    public AgeRating AgeRating { get; init; }
 }
 
 public interface ISeriesRepository
@@ -121,7 +104,7 @@ public interface ISeriesRepository
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
     Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
-    Task<List<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
+    Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
 }
@@ -767,7 +750,7 @@ public class SeriesRepository : ISeriesRepository
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
                                              || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
                                              || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"));
-        if (userRating != AgeRating.NotApplicable)
+        if (userRating.AgeRating != AgeRating.NotApplicable)
         {
             query = query.RestrictAgainstAgeRestriction(userRating);
         }
@@ -1048,9 +1031,9 @@ public class SeriesRepository : ISeriesRepository
          var userRating = await GetUserAgeRestriction(userId);
 
          var items = (await GetRecentlyAddedChaptersQuery(userId));
-         if (userRating != AgeRating.NotApplicable)
+         if (userRating.AgeRating != AgeRating.NotApplicable)
          {
-             items = items.Where(c => c.AgeRating <= userRating);
+             items = items.RestrictAgainstAgeRestriction(userRating);
          }
          foreach (var item in items)
          {
@@ -1080,9 +1063,17 @@ public class SeriesRepository : ISeriesRepository
          return seriesMap.Values.AsEnumerable();
     }
 
-    private async Task<AgeRating> GetUserAgeRestriction(int userId)
+    private async Task<AgeRestriction> GetUserAgeRestriction(int userId)
     {
-        return (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
+        return await _context.AppUser
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u =>
+            new AgeRestriction(){
+                AgeRating = u.AgeRestriction,
+                IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+            })
+            .SingleAsync();
     }
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind)
@@ -1267,20 +1258,39 @@ public class SeriesRepository : ISeriesRepository
     /// </summary>
     /// <param name="seenSeries"></param>
     /// <param name="libraryId"></param>
-    public async Task<List<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
+    public async Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId)
     {
-        if (seenSeries.Count == 0) return new List<Series>();
+        if (seenSeries.Count == 0) return Array.Empty<Series>();
+
         var ids = new List<int>();
         foreach (var parsedSeries in seenSeries)
         {
-            var series = await _context.Series
-                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
-                            s.LibraryId == libraryId)
-                .Select(s => s.Id)
-                .SingleOrDefaultAsync();
-            if (series > 0)
+            try
             {
-                ids.Add(series);
+                var seriesId = await _context.Series
+                    .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
+                                s.LibraryId == libraryId)
+                    .Select(s => s.Id)
+                    .SingleOrDefaultAsync();
+                if (seriesId > 0)
+                {
+                    ids.Add(seriesId);
+                }
+            }
+            catch (Exception)
+            {
+                // This is due to v0.5.6 introducing bugs where we could have multiple series get duplicated and no way to delete them
+                // This here will delete the 2nd one as the first is the one to likely be used.
+                var sId = _context.Series
+                    .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName &&
+                                s.LibraryId == libraryId)
+                    .Select(s => s.Id)
+                    .OrderBy(s => s)
+                    .Last();
+                if (sId > 0)
+                {
+                    ids.Add(sId);
+                }
             }
         }
 
@@ -1288,6 +1298,15 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.LibraryId == libraryId)
             .Where(s => !ids.Contains(s.Id))
             .ToListAsync();
+
+        // If the series to remove has Relation (related series), we must manually unlink due to the DB not being
+        // setup correctly (if this is not done, a foreign key constraint will be thrown)
+
+        foreach (var sr in seriesToRemove)
+        {
+            sr.Relations = new List<SeriesRelation>();
+            Update(sr);
+        }
 
         _context.Series.RemoveRange(seriesToRemove);
 
@@ -1427,7 +1446,7 @@ public class SeriesRepository : ISeriesRepository
             .Select(s => s.Id);
     }
 
-    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind, AgeRating userRating)
+    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds, RelationKind kind, AgeRestriction userRating)
     {
         return await _context.Series.SelectMany(s =>
             s.Relations.Where(sr => sr.RelationKind == kind && sr.SeriesId == seriesId && usersSeriesIds.Contains(sr.TargetSeriesId))

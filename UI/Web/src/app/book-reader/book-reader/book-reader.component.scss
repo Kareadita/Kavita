@@ -264,8 +264,7 @@ $action-bar-height: 38px;
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width-container {
     width: auto;
-    // * 4 is just for extra buffer which is needed based on testing.  --book-reader-content-max-height is set by us on calculation of columnHeight
-    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height * 4)), calc((var(--vh)*100) - ($action-bar-height * 4)) !important;
+    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
 }
 
 // This is applied to images in the backend

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using API.Comparators;
 using API.Entities;
 using API.Parser;
 using API.Services.Tasks.Scanner;
@@ -44,5 +45,27 @@ public static class SeriesExtensions
         return Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series) == series.NormalizedName || Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name)
             || info.Series == series.Name || info.Series == series.LocalizedName || info.Series == series.OriginalName
             || Services.Tasks.Scanner.Parser.Parser.Normalize(info.Series) == Services.Tasks.Scanner.Parser.Parser.Normalize(series.OriginalName);
+    }
+
+    /// <summary>
+    /// Calculates the Cover Image for the Series
+    /// </summary>
+    /// <param name="series"></param>
+    /// <returns></returns>
+    /// <remarks>This is under the assumption that the Volume already has a Cover Image calculated and set</remarks>
+    public static string GetCoverImage(this Series series)
+    {
+        var volumes = series.Volumes ?? new List<Volume>();
+        var firstVolume = volumes.GetCoverImage(series.Format);
+        string coverImage = null;
+
+        var chapters = firstVolume.Chapters.OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default).ToList();
+        if (chapters.Count > 1 && chapters.Any(c => c.IsSpecial))
+        {
+            coverImage = chapters.FirstOrDefault(c => !c.IsSpecial)?.CoverImage ?? chapters.First().CoverImage;
+            firstVolume = null;
+        }
+
+        return firstVolume?.CoverImage ?? coverImage;
     }
 }

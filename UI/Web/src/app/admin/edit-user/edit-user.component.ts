@@ -1,12 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { AgeRestriction } from 'src/app/_models/age-restriction';
 import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/member';
-import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AccountService } from 'src/app/_services/account.service';
 
-// TODO: Rename this to EditUserModal
 @Component({
   selector: 'app-edit-user',
   templateUrl: './edit-user.component.html',
@@ -18,7 +17,7 @@ export class EditUserComponent implements OnInit {
   
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
-  selectedRating: AgeRating = AgeRating.NotApplicable;
+  selectedRestriction!: AgeRestriction;
   isSaving: boolean = false;
 
   userForm: FormGroup = new FormGroup({});
@@ -41,8 +40,8 @@ export class EditUserComponent implements OnInit {
     this.selectedRoles = roles;
   }
 
-  updateRestrictionSelection(rating: AgeRating) {
-    this.selectedRating = rating;
+  updateRestrictionSelection(restriction: AgeRestriction) {
+    this.selectedRestriction = restriction;
   }
 
   updateLibrarySelection(libraries: Array<Library>) {
@@ -58,8 +57,7 @@ export class EditUserComponent implements OnInit {
     model.userId = this.member.id;
     model.roles = this.selectedRoles;
     model.libraries = this.selectedLibraries;
-    model.ageRestriction = this.selectedRating || AgeRating.NotApplicable;
-    console.log('rating: ', this.selectedRating);
+    model.ageRestriction = this.selectedRestriction;
     this.accountService.update(model).subscribe(() => {
       this.modal.close(true);
     });

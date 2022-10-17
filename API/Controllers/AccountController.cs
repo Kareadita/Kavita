@@ -366,7 +366,9 @@ public class AccountController : BaseApiController
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRestriction;
+        user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRating;
+        user.AgeRestrictionIncludeUnknowns = isAdmin || dto.IncludeUnknowns;
+
         _unitOfWork.UserRepository.Update(user);
 
         if (!_unitOfWork.HasChanges()) return Ok();
@@ -455,7 +457,9 @@ public class AccountController : BaseApiController
             lib.AppUsers.Add(user);
         }
 
-        user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction;
+        user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction.AgeRating;
+        user.AgeRestrictionIncludeUnknowns = hasAdminRole || dto.AgeRestriction.IncludeUnknowns;
+
         _unitOfWork.UserRepository.Update(user);
 
         if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
@@ -570,7 +574,8 @@ public class AccountController : BaseApiController
                 lib.AppUsers.Add(user);
             }
 
-            user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction;
+            user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction.AgeRating;
+            user.AgeRestrictionIncludeUnknowns = hasAdminRole || dto.AgeRestriction.IncludeUnknowns;
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             if (string.IsNullOrEmpty(token))

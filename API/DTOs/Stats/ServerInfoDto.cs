@@ -140,4 +140,9 @@ public class ServerInfoDto
     /// </summary>
     /// <remarks>Introduced in v0.6.0</remarks>
     public IEnumerable<FileFormatDto> FileFormats { get; set; }
+    /// <summary>
+    /// If there is at least one user that is using an age restricted profile on the instance
+    /// </summary>
+    /// <remarks>Introduced in v0.6.0</remarks>
+    public bool UsingRestrictedProfiles { get; set; }
 }

@@ -506,11 +506,6 @@ public class ScannerService : IScannerService
 
         library.LastScanned = time;
 
-        // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
-        // NOTE: This implementation is expensive
-        _logger.LogDebug("Removing Series that were not found during the scan");
-        var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
-        _logger.LogDebug("Removing Series that were not found during the scan - complete");
 
         _unitOfWork.LibraryRepository.Update(library);
         if (await _unitOfWork.CommitAsync())
@@ -528,10 +523,27 @@ public class ScannerService : IScannerService
                     totalFiles, seenSeries.Count, sw.ElapsedMilliseconds, library.Name);
             }
 
-            foreach (var s in removedSeries)
+            try
             {
-                await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
-                    MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false);
+                // Could I delete anything in a Library's Series where the LastScan date is before scanStart?
+                // NOTE: This implementation is expensive
+                _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan");
+                var removedSeries = await _unitOfWork.SeriesRepository.RemoveSeriesNotInList(seenSeries, library.Id);
+                _logger.LogDebug("[ScannerService] Found {Count} series that needs to be removed: {SeriesList}",
+                    removedSeries.Count, removedSeries.Select(s => s.Name));
+                _logger.LogDebug("[ScannerService] Removing Series that were not found during the scan - complete");
+
+                await _unitOfWork.CommitAsync();
+
+                foreach (var s in removedSeries)
+                {
+                    await _eventHub.SendMessageAsync(MessageFactory.SeriesRemoved,
+                        MessageFactory.SeriesRemovedEvent(s.Id, s.Name, s.LibraryId), false);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "[ScannerService] There was an issue deleting series for cleanup. Please check logs and rescan");
             }
         }
         else
@@ -584,4 +596,5 @@ public class ScannerService : IScannerService
     {
         return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));
     }
+
 }

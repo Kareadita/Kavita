@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Extensions;
@@ -96,7 +97,7 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId)
     {
-        var userRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
+        var userRating = await GetUserAgeRestriction(userId);
         return await _context.CollectionTag
             .Where(c => c.Promoted)
             .RestrictAgainstAgeRestriction(userRating)
@@ -122,9 +123,22 @@ public class CollectionTagRepository : ICollectionTagRepository
             .SingleOrDefaultAsync();
     }
 
+    private async Task<AgeRestriction> GetUserAgeRestriction(int userId)
+    {
+        return await _context.AppUser
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u =>
+                new AgeRestriction(){
+                    AgeRating = u.AgeRestriction,
+                    IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+                })
+            .SingleAsync();
+    }
+
     public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId)
     {
-        var userRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
+        var userRating = await GetUserAgeRestriction(userId);
         return await _context.CollectionTag
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using API.Data.Misc;
+using API.Entities.Enums;
 
 namespace API.Extensions;
 
@@ -26,5 +28,17 @@ public static class EnumerableExtensions
             .Max() ?? 0;
 
         return list.OrderBy(i => Regex.Replace(selector(i), match => match.Value.PadLeft(maxDigits, '0')), stringComparer ?? StringComparer.CurrentCulture);
+    }
+
+    public static IEnumerable<RecentlyAddedSeries> RestrictAgainstAgeRestriction(this IEnumerable<RecentlyAddedSeries> items, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return items;
+        var q = items.Where(s => s.AgeRating <= restriction.AgeRating);
+        if (!restriction.IncludeUnknowns)
+        {
+            return q.Where(s => s.AgeRating != AgeRating.Unknown);
+        }
+
+        return q;
     }
 }

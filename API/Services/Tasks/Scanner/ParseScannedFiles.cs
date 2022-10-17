@@ -29,12 +29,6 @@ public class ParsedSeries
     public MangaFormat Format { get; init; }
 }
 
-public enum Modified
-{
-    Modified = 1,
-    NotModified = 2
-}
-
 public class SeriesModified
 {
     public string FolderPath { get; set; }

@@ -134,6 +134,7 @@ public class StatsService : IStatsService
             MangaReaderPageSplittingModes = await AllMangaReaderPageSplitting(),
             MangaReaderLayoutModes = await AllMangaReaderLayoutModes(),
             FileFormats = AllFormats(),
+            UsingRestrictedProfiles = await GetUsingRestrictedProfiles(),
         };
 
         var usersWithPref = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences)).ToList();
@@ -260,5 +261,10 @@ public class StatsService : IStatsService
             .ToList();
 
         return results;
+    }
+
+    private Task<bool> GetUsingRestrictedProfiles()
+    {
+        return _context.Users.AnyAsync(u => u.AgeRestriction > AgeRating.NotApplicable);
     }
 }

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, of, Subject, takeUntil, shareReplay, map, take } from 'rxjs';
+import { AgeRestriction } from 'src/app/_models/age-restriction';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
@@ -16,9 +17,9 @@ export class ChangeAgeRestrictionComponent implements OnInit {
   user: User | undefined = undefined;
   hasChangeAgeRestrictionAbility: Observable<boolean> = of(false);
   isViewMode: boolean = true;
-  selectedRating: AgeRating = AgeRating.NotApplicable;
-  originalRating!: AgeRating;
-  reset: EventEmitter<AgeRating> = new EventEmitter();
+  selectedRestriction!: AgeRestriction;
+  originalRestriction!: AgeRestriction;
+  reset: EventEmitter<AgeRestriction> = new EventEmitter();
 
   get AgeRating() { return AgeRating; } 
 
@@ -28,8 +29,9 @@ export class ChangeAgeRestrictionComponent implements OnInit {
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), take(1)).subscribe(user => {
+      if (!user) return;
       this.user = user;
-      this.originalRating = this.user?.ageRestriction || AgeRating.NotApplicable;
+      this.originalRestriction = this.user.ageRestriction;
       this.cdRef.markForCheck();
     });
     
@@ -39,8 +41,8 @@ export class ChangeAgeRestrictionComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateRestrictionSelection(rating: AgeRating) {
-    this.selectedRating = rating;
+  updateRestrictionSelection(restriction: AgeRestriction) {
+    this.selectedRestriction = restriction;
   }
 
   ngOnDestroy() {
@@ -50,18 +52,19 @@ export class ChangeAgeRestrictionComponent implements OnInit {
 
   resetForm() {
     if (!this.user) return;
-    this.reset.emit(this.originalRating);
+    this.reset.emit(this.originalRestriction);
     this.cdRef.markForCheck();
   }
 
   saveForm() {
     if (this.user === undefined) { return; }
 
-    this.accountService.updateAgeRestriction(this.selectedRating).subscribe(() => {
+    this.accountService.updateAgeRestriction(this.selectedRestriction.ageRating, this.selectedRestriction.includeUnknowns).subscribe(() => {
       this.toastr.success('Age Restriction has been updated');
-      this.originalRating = this.selectedRating;
+      this.originalRestriction = this.selectedRestriction;
       if (this.user) {
-        this.user.ageRestriction = this.selectedRating;
+        this.user.ageRestriction.ageRating = this.selectedRestriction.ageRating;
+        this.user.ageRestriction.includeUnknowns = this.selectedRestriction.includeUnknowns;
       }
       this.resetForm();
       this.isViewMode = true;

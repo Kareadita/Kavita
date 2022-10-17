@@ -1,4 +1,4 @@
-import { AgeRating } from './metadata/age-rating';
+import { AgeRestriction } from './age-restriction';
 import { Preferences } from './preferences/preferences';
 
 // This interface is only used for login and storing/retreiving JWT from local storage
@@ -10,5 +10,5 @@ export interface User {
     preferences: Preferences;
     apiKey: string;
     email: string;
-    ageRestriction: AgeRating;
+    ageRestriction: AgeRestriction;
 }

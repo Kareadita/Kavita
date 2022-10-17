@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import { AgeRestriction } from 'src/app/_models/age-restriction';
 import { InviteUserResponse } from 'src/app/_models/invite-user-response';
 import { Library } from 'src/app/_models/library';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
@@ -21,7 +22,7 @@ export class InviteUserComponent implements OnInit {
   inviteForm: FormGroup = new FormGroup({});
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
-  selectedRating: AgeRating = AgeRating.NotApplicable;
+  selectedRestriction: AgeRestriction = {ageRating: AgeRating.NotApplicable, includeUnknowns: false};
   emailLink: string = '';
 
   makeLink: (val: string) => string = (val: string) => {return this.emailLink};
@@ -48,7 +49,7 @@ export class InviteUserComponent implements OnInit {
       email,
       libraries: this.selectedLibraries,
       roles: this.selectedRoles,
-      ageRestriction: this.selectedRating
+      ageRestriction: this.selectedRestriction
     }).subscribe((data: InviteUserResponse) => {
       this.emailLink = data.emailLink;
       this.isSending = false;
@@ -69,8 +70,8 @@ export class InviteUserComponent implements OnInit {
     this.selectedLibraries = libraries.map(l => l.id);
   }
 
-  updateRestrictionSelection(rating: AgeRating) {
-    this.selectedRating = rating;
+  updateRestrictionSelection(restriction: AgeRestriction) {
+    this.selectedRestriction = restriction;
   }
 
 }
