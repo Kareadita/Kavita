@@ -72,7 +72,7 @@ public class ServerController : BaseApiController
     public ActionResult ClearCache()
     {
         _logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", User.GetUsername());
-        _cleanupService.CleanupCacheDirectory();
+        _cleanupService.CleanupCacheAndTempDirectories();
 
         return Ok();
     }

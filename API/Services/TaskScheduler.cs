@@ -239,7 +239,7 @@ public class TaskScheduler : ITaskScheduler
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force));
         // When we do a scan, force cache to re-unpack in case page numbers change
-        BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
+        BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheAndTempDirectories());
     }
 
     public void CleanupChapters(int[] chapterIds)

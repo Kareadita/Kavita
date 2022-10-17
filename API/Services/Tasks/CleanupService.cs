@@ -20,7 +20,7 @@ public interface ICleanupService
 {
     Task Cleanup();
     Task CleanupDbEntries();
-    void CleanupCacheDirectory();
+    void CleanupCacheAndTempDirectories();
     Task DeleteSeriesCoverImages();
     Task DeleteChapterCoverImages();
     Task DeleteTagCoverImages();
@@ -65,7 +65,7 @@ public class CleanupService : ICleanupService
         _logger.LogInformation("Cleaning temp directory");
         _directoryService.ClearDirectory(_directoryService.TempDirectory);
         await SendProgress(0.1F, "Cleaning temp directory");
-        CleanupCacheDirectory();
+        CleanupCacheAndTempDirectories();
         await SendProgress(0.25F, "Cleaning old database backups");
         _logger.LogInformation("Cleaning old database backups");
         await CleanupBackups();
@@ -143,9 +143,9 @@ public class CleanupService : ICleanupService
     /// <summary>
     /// Removes all files and directories in the cache and temp directory
     /// </summary>
-    public void CleanupCacheDirectory()
+    public void CleanupCacheAndTempDirectories()
     {
-        _logger.LogInformation("Performing cleanup of Cache directory");
+        _logger.LogInformation("Performing cleanup of Cache & Temp directories");
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
         _directoryService.ExistOrCreate(_directoryService.TempDirectory);
 
@@ -159,7 +159,7 @@ public class CleanupService : ICleanupService
             _logger.LogError(ex, "There was an issue deleting one or more folders/files during cleanup");
         }
 
-        _logger.LogInformation("Cache directory purged");
+        _logger.LogInformation("Cache and temp directory purged");
     }
 
     /// <summary>

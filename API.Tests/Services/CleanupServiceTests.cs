@@ -351,7 +351,7 @@ public class CleanupServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
             ds);
-        cleanupService.CleanupCacheDirectory();
+        cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 
@@ -365,7 +365,7 @@ public class CleanupServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
             ds);
-        cleanupService.CleanupCacheDirectory();
+        cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 
