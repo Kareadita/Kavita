@@ -52,12 +52,13 @@ public class MetadataController : BaseApiController
     [HttpGet("people")]
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(string? libraryIds)
     {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, userId));
         }
-        return Ok(await _unitOfWork.PersonRepository.GetAllPeople());
+        return Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(userId));
     }
 
     /// <summary>

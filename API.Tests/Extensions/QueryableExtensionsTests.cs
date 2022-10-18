@@ -205,6 +205,57 @@ public class QueryableExtensionsTests
     [Theory]
     [InlineData(true, 2)]
     [InlineData(false, 1)]
+    public void RestrictAgainstAgeRestriction_Person_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
+    {
+        var items = new List<Person>()
+        {
+            new Person()
+            {
+                SeriesMetadatas = new List<SeriesMetadata>()
+                {
+                    new SeriesMetadata()
+                    {
+                        AgeRating = AgeRating.Teen,
+                    }
+                }
+            },
+            new Person()
+            {
+                SeriesMetadatas = new List<SeriesMetadata>()
+                {
+                    new SeriesMetadata()
+                    {
+                        AgeRating = AgeRating.Unknown,
+                    },
+                    new SeriesMetadata()
+                    {
+                        AgeRating = AgeRating.Teen,
+                    }
+                }
+            },
+            new Person()
+            {
+                SeriesMetadatas = new List<SeriesMetadata>()
+                {
+                    new SeriesMetadata()
+                    {
+                        AgeRating = AgeRating.X18Plus,
+                    }
+                }
+            },
+        };
+
+        var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()
+        {
+            AgeRating = AgeRating.Teen,
+            IncludeUnknowns = includeUnknowns
+        });
+        Assert.Equal(expectedCount, filtered.Count());
+    }
+
+    [Theory]
+    [InlineData(true, 2)]
+    [InlineData(false, 1)]
     public void RestrictAgainstAgeRestriction_ReadingList_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
         var items = new List<ReadingList>()

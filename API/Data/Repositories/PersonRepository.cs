@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +15,9 @@ public interface IPersonRepository
     void Attach(Person person);
     void Remove(Person person);
     Task<IList<Person>> GetAllPeople();
+    Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId);
     Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false);
-    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds);
+    Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds, int userId);
     Task<int> GetCountAsync();
 }
 
@@ -40,14 +42,6 @@ public class PersonRepository : IPersonRepository
         _context.Person.Remove(person);
     }
 
-    public async Task<Person> FindByNameAsync(string name)
-    {
-        var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
-        return await _context.Person
-            .Where(p => normalizedName.Equals(p.NormalizedName))
-            .SingleOrDefaultAsync();
-    }
-
     public async Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false)
     {
         var peopleWithNoConnections = await _context.Person
@@ -62,10 +56,12 @@ public class PersonRepository : IPersonRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds)
+    public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds, int userId)
     {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .RestrictAgainstAgeRestriction(ageRating)
             .SelectMany(s => s.Metadata.People)
             .Distinct()
             .OrderBy(p => p.Name)
@@ -85,6 +81,16 @@ public class PersonRepository : IPersonRepository
     {
         return await _context.Person
             .OrderBy(p => p.Name)
+            .ToListAsync();
+    }
+
+    public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        return await _context.Person
+            .OrderBy(p => p.Name)
+            .RestrictAgainstAgeRestriction(ageRating)
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 }

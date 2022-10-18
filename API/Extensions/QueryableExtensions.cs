@@ -63,6 +63,20 @@ public static class QueryableExtensions
             sm.AgeRating <= restriction.AgeRating && sm.AgeRating > AgeRating.Unknown));
     }
 
+    public static IQueryable<Person> RestrictAgainstAgeRestriction(this IQueryable<Person> queryable, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
+
+        if (restriction.IncludeUnknowns)
+        {
+            return queryable.Where(c => c.SeriesMetadatas.All(sm =>
+                sm.AgeRating <= restriction.AgeRating));
+        }
+
+        return queryable.Where(c => c.SeriesMetadatas.All(sm =>
+            sm.AgeRating <= restriction.AgeRating && sm.AgeRating > AgeRating.Unknown));
+    }
+
     public static IQueryable<ReadingList> RestrictAgainstAgeRestriction(this IQueryable<ReadingList> queryable, AgeRestriction restriction)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
@@ -78,6 +92,14 @@ public static class QueryableExtensions
 
     public static Task<AgeRestriction> GetUserAgeRestriction(this DbSet<AppUser> queryable, int userId)
     {
+        if (userId < 1)
+        {
+            return Task.FromResult(new AgeRestriction()
+            {
+                AgeRating = AgeRating.NotApplicable,
+                IncludeUnknowns = true
+            });
+        }
         return queryable
             .AsNoTracking()
             .Where(u => u.Id == userId)
