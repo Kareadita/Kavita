@@ -21,7 +21,6 @@ public class ReadingListController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
-    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
 
     public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService)
     {
@@ -220,21 +219,21 @@ public class ReadingListController : BaseApiController
         dto.Title = dto.Title.Trim();
         if (!string.IsNullOrEmpty(dto.Title))
         {
-            var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));
-            if (hasExisting)
-            {
-                return BadRequest("A list of this name already exists");
-            }
-            readingList.Title = dto.Title;
-            readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
-        }
-        if (!string.IsNullOrEmpty(dto.Title))
-        {
             readingList.Summary = dto.Summary;
+
+            if (!readingList.Title.Equals(dto.Title))
+            {
+                var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));
+                if (hasExisting)
+                {
+                    return BadRequest("A list of this name already exists");
+                }
+                readingList.Title = dto.Title;
+                readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
+            }
         }
 
         readingList.Promoted = dto.Promoted;
-
         readingList.CoverImageLocked = dto.CoverImageLocked;
 
         if (!dto.CoverImageLocked)
