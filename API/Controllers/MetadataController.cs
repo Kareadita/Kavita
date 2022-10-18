@@ -8,6 +8,7 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.Entities.Enums;
+using API.Extensions;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,14 +32,17 @@ public class MetadataController : BaseApiController
     [HttpGet("genres")]
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
     {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, userId));
         }
 
-        return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync());
+        return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync(userId));
     }
+
+
 
     /// <summary>
     /// Fetches people from the instance
@@ -64,12 +68,13 @@ public class MetadataController : BaseApiController
     [HttpGet("tags")]
     public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, userId));
         }
-        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync());
+        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync(userId));
     }
 
     /// <summary>

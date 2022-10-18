@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Metadata;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,10 @@ public interface ITagRepository
 {
     void Attach(Tag tag);
     void Remove(Tag tag);
-    Task<Tag> FindByNameAsync(string tagName);
     Task<IList<Tag>> GetAllTagsAsync();
-    Task<IList<TagDto>> GetAllTagDtosAsync();
+    Task<IList<TagDto>> GetAllTagDtosAsync(int userId);
     Task RemoveAllTagNoLongerAssociated(bool removeExternal = false);
-    Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds);
+    Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds, int userId);
 }
 
 public class TagRepository : ITagRepository
@@ -41,13 +41,6 @@ public class TagRepository : ITagRepository
         _context.Tag.Remove(tag);
     }
 
-    public async Task<Tag> FindByNameAsync(string tagName)
-    {
-        var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(tagName);
-        return await _context.Tag
-            .FirstOrDefaultAsync(g => g.NormalizedTitle.Equals(normalizedName));
-    }
-
     public async Task RemoveAllTagNoLongerAssociated(bool removeExternal = false)
     {
         var tagsWithNoConnections = await _context.Tag
@@ -62,10 +55,12 @@ public class TagRepository : ITagRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds)
+    public async Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds, int userId)
     {
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .RestrictAgainstAgeRestriction(userRating)
             .SelectMany(s => s.Metadata.Tags)
             .AsSplitQuery()
             .Distinct()
@@ -80,10 +75,12 @@ public class TagRepository : ITagRepository
         return await _context.Tag.ToListAsync();
     }
 
-    public async Task<IList<TagDto>> GetAllTagDtosAsync()
+    public async Task<IList<TagDto>> GetAllTagDtosAsync(int userId)
     {
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.Tag
             .AsNoTracking()
+            .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(t => t.Title)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();

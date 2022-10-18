@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Data.Scanner;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;

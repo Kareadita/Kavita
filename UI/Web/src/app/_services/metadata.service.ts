@@ -86,8 +86,6 @@ export class MetadataService {
       return of(this.validLanguages);
     }
     return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages').pipe(map(l => this.validLanguages = l));
-
-    //return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages').pipe();
   }
 
   getAllPeople(libraries?: Array<number>) {
