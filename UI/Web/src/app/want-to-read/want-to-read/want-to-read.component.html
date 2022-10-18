@@ -23,8 +23,9 @@
         [refresh]="refresh"
         (applyFilter)="updateFilter($event)">
         <ng-template #cardItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="removeSeries(item.id)" 
-            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="removeSeries($event)" 
+            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" 
+            [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
             ></app-series-card>
         </ng-template>
     
