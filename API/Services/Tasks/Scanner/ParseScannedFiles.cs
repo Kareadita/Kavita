@@ -68,6 +68,7 @@ public class ParseScannedFiles
     /// This will Scan all files in a folder path. For each folder within the folderPath, FolderAction will be invoked for all files contained
     /// </summary>
     /// <param name="scanDirectoryByDirectory">Scan directory by directory and for each, call folderAction</param>
+    /// <param name="seriesPaths">A dictionary mapping a normalized path to a list of <see cref="SeriesModified"/> to help scanner skip I/O</param>
     /// <param name="folderPath">A library folder or series folder</param>
     /// <param name="folderAction">A callback async Task to be called once all files for each folder path are found</param>
     /// <param name="forceCheck">If we should bypass any folder last write time checks on the scan and force I/O</param>
@@ -215,6 +216,7 @@ public class ParseScannedFiles
     /// Using a normalized name from the passed ParserInfo, this checks against all found series so far and if an existing one exists with
     /// same normalized name, it merges into the existing one. This is important as some manga may have a slight difference with punctuation or capitalization.
     /// </summary>
+    /// <param name="scannedSeries"></param>
     /// <param name="info"></param>
     /// <returns>Series Name to group this info into</returns>
     private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)

@@ -61,6 +61,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
         break;
     }
   }
+  
   collectionTag: any;
   tagImage: any;
 
@@ -163,6 +164,23 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
     this.loadPage();
+  }
+
+  handleAction(action: ActionItem<Series>, series: Series) {
+    // let lib: Partial<Library> = library;
+    // if (library === undefined) {
+    //   lib = {id: this.libraryId, name: this.libraryName};
+    // }
+    // switch (action.action) {
+    //   case(Action.Scan):
+    //     this.actionService.scanLibrary(lib);
+    //     break;
+    //   case(Action.RefreshMetadata):
+    //   this.actionService.refreshMetadata(lib);
+    //     break;
+    //   default:
+    //     break;
+    // }
   }
 }
 

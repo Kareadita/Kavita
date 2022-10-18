@@ -74,21 +74,21 @@ public class Startup
                 new CacheProfile()
                 {
                     Duration = 60 * 10,
-                    Location = ResponseCacheLocation.Any,
+                    Location = ResponseCacheLocation.None,
                     NoStore = false
                 });
             options.CacheProfiles.Add("5Minute",
                 new CacheProfile()
                 {
                     Duration = 60 * 5,
-                    Location = ResponseCacheLocation.Any,
+                    Location = ResponseCacheLocation.None,
                 });
             // Instant is a very quick cache, because we can't bust based on the query params, but rather body
             options.CacheProfiles.Add("Instant",
                 new CacheProfile()
                 {
                     Duration = 30,
-                    Location = ResponseCacheLocation.Any,
+                    Location = ResponseCacheLocation.None,
                 });
         });
         services.Configure<ForwardedHeadersOptions>(options =>
@@ -300,13 +300,6 @@ public class Startup
 
         app.Use(async (context, next) =>
         {
-            // Note: I removed this as I caught Chrome caching api responses when it shouldn't have
-            // context.Response.GetTypedHeaders().CacheControl =
-            //     new CacheControlHeaderValue()
-            //     {
-            //         Public = false,
-            //         MaxAge = TimeSpan.FromSeconds(10),
-            //     };
             context.Response.Headers[HeaderNames.Vary] =
                 new[] { "Accept-Encoding" };
 

@@ -1,10 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { filter, take } from 'rxjs/operators';
 import { Series } from 'src/app/_models/series';
-import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -37,7 +35,10 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   @Input() relation: RelationKind | undefined = undefined;
 
   @Output() clicked = new EventEmitter<Series>();
-  @Output() reload = new EventEmitter<boolean>();
+  /**
+   * Emits when a reload needs to occur and the id of the entity
+   */
+  @Output() reload = new EventEmitter<number>();
   @Output() dataChanged = new EventEmitter<Series>();
   /**
    * When the card is selected.
@@ -103,7 +104,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       case Action.RemoveFromWantToReadList:
         this.actionService.removeMultipleSeriesFromWantToReadList([series.id]);
         if (this.router.url.startsWith('/want-to-read')) {
-          this.reload.emit(true);
+          this.reload.emit(series.id);
         }
         break;
       case(Action.AddToCollection):
@@ -125,7 +126,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
         this.seriesService.getSeries(data.id).subscribe(series => {
           this.data = series;
           this.cdRef.markForCheck();
-          this.reload.emit(true);
+          this.reload.emit(series.id);
           this.dataChanged.emit(series);
         });
       }
@@ -145,7 +146,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   async deleteSeries(series: Series) {
     this.actionService.deleteSeries(series, (result: boolean) => {
       if (result) {
-        this.reload.emit(true);
+        this.reload.emit(series.id);
       }
     });
   }

@@ -11,6 +11,7 @@ using API.DTOs.Search;
 using API.DTOs.System;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks.Scanner;
@@ -251,6 +252,14 @@ public class LibraryController : BaseApiController
                 return BadRequest(
                     "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");
             }
+
+            // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
+            foreach (var s in await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id))
+            {
+                s.Relations = new List<SeriesRelation>();
+                _unitOfWork.SeriesRepository.Update(s);
+            }
+
             _unitOfWork.LibraryRepository.Delete(library);
             await _unitOfWork.CommitAsync();
 

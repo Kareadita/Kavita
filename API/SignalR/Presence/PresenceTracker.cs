@@ -90,7 +90,6 @@ public class PresenceTracker : IPresenceTracker
 
     public Task<string[]> GetOnlineAdmins()
     {
-        // TODO: This might end in stale data, we want to get the online users, query against DB to check if they are admins then return
         string[] onlineUsers;
         lock (OnlineUsers)
         {
