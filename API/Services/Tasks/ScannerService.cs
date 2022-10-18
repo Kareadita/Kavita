@@ -428,7 +428,7 @@ public class ScannerService : IScannerService
     /// <param name="forceUpdate">Defaults to false</param>
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
-    [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
