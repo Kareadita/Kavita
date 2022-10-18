@@ -1108,9 +1108,14 @@ public class SeriesRepository : ISeriesRepository
         var libraryIds = GetLibraryIdsForUser(userId, libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 
+        var userRating = await GetUserAgeRestriction(userId);
+        // Because this can be called from an API, we need to provide an additional check if the genre has anything the
+        // user with age restrictions can access
+
         var query = _context.Series
             .Where(s => s.Metadata.Genres.Select(g => g.Id).Contains(genreId))
             .Where(s => usersSeriesIds.Contains(s.Id))
+            .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
 
@@ -1321,9 +1326,11 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => usersSeriesIds.Contains(s.SeriesId) && s.Rating > 4)
             .Select(p => p.SeriesId)
             .Distinct();
+        var ageRestriction = await GetUserAgeRestriction(userId);
 
         var query = _context.Series
             .Where(s => distinctSeriesIdsWithHighRating.Contains(s.Id))
+            .RestrictAgainstAgeRestriction(ageRestriction)
             .AsSplitQuery()
             .OrderByDescending(s => _context.AppUserRating.Where(r => r.SeriesId == s.Id).Select(r => r.Rating).Average())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
@@ -1340,6 +1347,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => usersSeriesIds.Contains(s.SeriesId))
             .Select(p => p.SeriesId)
             .Distinct();
+        var ageRestriction = await GetUserAgeRestriction(userId);
 
 
         var query = _context.Series
@@ -1349,6 +1357,7 @@ public class SeriesRepository : ISeriesRepository
                     && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
                          usersSeriesIds.Contains(s.Id))
             .Where(s => s.Metadata.PublicationStatus != PublicationStatus.OnGoing)
+            .RestrictAgainstAgeRestriction(ageRestriction)
             .AsSplitQuery()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
 
@@ -1365,6 +1374,8 @@ public class SeriesRepository : ISeriesRepository
             .Select(p => p.SeriesId)
             .Distinct();
 
+        var ageRestriction = await GetUserAgeRestriction(userId);
+
 
         var query = _context.Series
             .Where(s => (
@@ -1373,6 +1384,7 @@ public class SeriesRepository : ISeriesRepository
                         && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
                         usersSeriesIds.Contains(s.Id))
             .Where(s => s.Metadata.PublicationStatus == PublicationStatus.OnGoing)
+            .RestrictAgainstAgeRestriction(ageRestriction)
             .AsSplitQuery()
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider);
 
