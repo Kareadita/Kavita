@@ -190,9 +190,12 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
     this.imageUrls.push(e.target.result); // This is base64 already
     this.imageUrlsChange.emit(this.imageUrls);
-    this.selectedIndex += 1;
+    this.selectedIndex = this.imageUrls.length - 1;
     this.imageSelected.emit(this.selectedIndex); // Auto select newly uploaded image
     this.selectedBase64Url.emit(e.target.result);
+    setTimeout(() => {
+      (this.document.querySelector('div.image-card[aria-label="Image ' + this.selectedIndex + '"]') as HTMLElement).focus();
+    })
     this.cdRef.markForCheck();
   }
 
@@ -209,7 +212,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
     setTimeout(() => {
       // Auto select newly uploaded image and tell parent of new base64 url
-      this.selectImage(this.selectedIndex + 1);
+      this.selectImage(index >= 0 ? index : this.imageUrls.length - 1);
     });
   }
 
