@@ -749,12 +749,12 @@ public static class Parser
         foreach (var regex in MangaChapterRegex)
         {
             var matches = regex.Matches(filename);
-            foreach (Match match in matches)
+            foreach (var groups in matches.Select(match => match.Groups))
             {
-                if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
+                if (!groups["Chapter"].Success || groups["Chapter"] == Match.Empty) continue;
 
-                var value = match.Groups["Chapter"].Value;
-                var hasPart = match.Groups["Part"].Success;
+                var value = groups["Chapter"].Value;
+                var hasPart = groups["Part"].Success;
 
                 return FormatValue(value, hasPart);
             }
@@ -778,11 +778,11 @@ public static class Parser
         foreach (var regex in ComicChapterRegex)
         {
             var matches = regex.Matches(filename);
-            foreach (Match match in matches)
+            foreach (var groups in matches.Select(match => match.Groups))
             {
-                if (!match.Groups["Chapter"].Success || match.Groups["Chapter"] == Match.Empty) continue;
-                var value = match.Groups["Chapter"].Value;
-                var hasPart = match.Groups["Part"].Success;
+                if (!groups["Chapter"].Success || groups["Chapter"] == Match.Empty) continue;
+                var value = groups["Chapter"].Value;
+                var hasPart = groups["Part"].Success;
                 return FormatValue(value, hasPart);
 
             }

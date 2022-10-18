@@ -75,7 +75,7 @@ public class TokenService : ITokenService
         var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.NameId)?.Value;
         var user = await _userManager.FindByNameAsync(username);
         if (user == null) return null; // This forces a logout
-        var isValid = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken", request.RefreshToken);
+        await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken", request.RefreshToken);
 
         await _userManager.UpdateSecurityStampAsync(user);
 

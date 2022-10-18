@@ -300,13 +300,6 @@ public class Startup
 
         app.Use(async (context, next) =>
         {
-            // Note: I removed this as I caught Chrome caching api responses when it shouldn't have
-            // context.Response.GetTypedHeaders().CacheControl =
-            //     new CacheControlHeaderValue()
-            //     {
-            //         Public = false,
-            //         MaxAge = TimeSpan.FromSeconds(10),
-            //     };
             context.Response.Headers[HeaderNames.Vary] =
                 new[] { "Accept-Encoding" };
 
