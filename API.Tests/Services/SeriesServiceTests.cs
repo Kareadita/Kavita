@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -125,7 +126,7 @@ public class SeriesServiceTests
         return fileSystem;
     }
 
-    private static UpdateRelatedSeriesDto InstantiateRelationsDto(Series series)
+    private static UpdateRelatedSeriesDto CreateRelationsDto(Series series)
     {
         return new UpdateRelatedSeriesDto()
         {
@@ -1178,7 +1179,7 @@ public class SeriesServiceTests
 
         var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
-        var addRelationDto = InstantiateRelationsDto(series1);
+        var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
@@ -1225,7 +1226,7 @@ public class SeriesServiceTests
 
         var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
-        var addRelationDto = InstantiateRelationsDto(series1);
+        var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Adaptations.Add(2);
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
@@ -1233,7 +1234,7 @@ public class SeriesServiceTests
         Assert.Equal(3, series1.Relations.Single(s => s.TargetSeriesId == 3).TargetSeriesId);
 
         // Remove relations
-        var removeRelationDto = InstantiateRelationsDto(series1);
+        var removeRelationDto = CreateRelationsDto(series1);
         await _seriesService.UpdateRelatedSeries(removeRelationDto);
         Assert.Empty(series1.Relations.Where(s => s.TargetSeriesId == 1));
         Assert.Empty(series1.Relations.Where(s => s.TargetSeriesId == 2));
@@ -1284,7 +1285,7 @@ public class SeriesServiceTests
         series1.Relations.Add(relation);
 
         // Create a new dto with the previous relation as well
-        var relationDto = InstantiateRelationsDto(series1);
+        var relationDto = CreateRelationsDto(series1);
         relationDto.Adaptations.Add(2);
 
         await _seriesService.UpdateRelatedSeries(relationDto);
@@ -1339,7 +1340,7 @@ public class SeriesServiceTests
         await _context.SaveChangesAsync();
         var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
         // Add relations
-        var addRelationDto = InstantiateRelationsDto(series1);
+        var addRelationDto = CreateRelationsDto(series1);
         addRelationDto.Editions.Add(2);
         addRelationDto.Prequels.Add(3);
         addRelationDto.Sequels.Add(4);
@@ -1351,6 +1352,173 @@ public class SeriesServiceTests
         Assert.Empty(_seriesService.GetRelatedSeries(1, 3).Result.Parent);
         Assert.Empty(_seriesService.GetRelatedSeries(1, 4).Result.Parent);
         Assert.NotEmpty(_seriesService.GetRelatedSeries(1, 5).Result.Parent);
+    }
+
+    [Fact]
+    public async Task SeriesRelation_ShouldAllowDeleteOnLibrary()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = CreateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(2);
+        addRelationDto.Sequels.Add(3);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1);
+        _unitOfWork.LibraryRepository.Delete(library);
+
+        try
+        {
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception)
+        {
+            Assert.False(true);
+        }
+
+        Assert.Null(await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1));
+    }
+
+    [Fact]
+    public async Task SeriesRelation_ShouldAllowDeleteOnLibrary_WhenSeriesCrossLibraries()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>()
+                    {
+                        new Volume()
+                        {
+                            Chapters = new List<Chapter>()
+                            {
+                                new Chapter()
+                                {
+                                    Files = new List<MangaFile>()
+                                    {
+                                        new MangaFile()
+                                        {
+                                            Pages = 1,
+                                            FilePath = "fake file"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb 2",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Test Series 2",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels 2",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels 2",
+                    Volumes = new List<Volume>(){}
+                }
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = CreateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(4); // cross library link
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1, LibraryIncludes.Series);
+        _unitOfWork.LibraryRepository.Delete(library);
+
+        try
+        {
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception)
+        {
+            Assert.False(true);
+        }
+
+        Assert.Null(await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1));
     }
 
     #endregion

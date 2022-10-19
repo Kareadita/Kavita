@@ -33,7 +33,7 @@ public interface ILibraryRepository
     void Delete(Library library);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
     Task<bool> LibraryExists(string libraryName);
-    Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes);
+    Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
@@ -203,14 +203,14 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes)
+    public async Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None)
     {
 
         var query = _context.Library
             .Where(x => x.Id == libraryId);
 
         query = AddIncludesToQuery(query, includes);
-        return await query.SingleAsync();
+        return await query.SingleOrDefaultAsync();
     }
 
     private static IQueryable<Library> AddIncludesToQuery(IQueryable<Library> query, LibraryIncludes includeFlags)

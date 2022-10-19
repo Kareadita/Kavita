@@ -63,7 +63,7 @@ public interface ISeriesRepository
     /// <param name="searchQuery"></param>
     /// <returns></returns>
     Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery);
-    Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId);
+    Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
     Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<bool> DeleteSeriesAsync(int seriesId);
     Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
@@ -160,12 +160,16 @@ public class SeriesRepository : ISeriesRepository
     }
 
 
-    public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId)
+    public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None)
     {
-        return await _context.Series
+        var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
-            .OrderBy(s => s.SortName)
-            .ToListAsync();
+            .OrderBy(s => s.SortName);
+
+
+        AddIncludesToQuery(query, includes);
+
+        return await query.ToListAsync();
     }
 
     /// <summary>
@@ -1561,6 +1565,7 @@ public class SeriesRepository : ISeriesRepository
 
     private static IQueryable<Series> AddIncludesToQuery(IQueryable<Series> query, SeriesIncludes includeFlags)
     {
+        // TODO: Move this to an Extension Method
         if (includeFlags.HasFlag(SeriesIncludes.Library))
         {
             query = query.Include(u => u.Library);
@@ -1568,7 +1573,7 @@ public class SeriesRepository : ISeriesRepository
 
         if (includeFlags.HasFlag(SeriesIncludes.Related))
         {
-            query = query.Include(u => u.Relations);
+            query = query.Include(u => u.Relations).Include(u => u.RelationOf);
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Metadata))
