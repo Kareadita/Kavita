@@ -431,7 +431,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.Id == seriesId)
             .AsSplitQuery();
 
-         query = AddIncludesToQuery(query, includes)
+        query = AddIncludesToQuery(query, includes);
 
          return await query.SingleOrDefaultAsync();
     }
