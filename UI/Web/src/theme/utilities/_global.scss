@@ -34,3 +34,7 @@ hr {
 .subtitle-with-actionables {
     margin-left: 32px;
 }
+
+.form-switch .form-check-input:checked {
+    background-color: var(--primary-color);
+}
