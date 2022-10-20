@@ -47,9 +47,9 @@ export const BookWhiteTheme = `
       --btn-alt-hover-bg-color: #3b4466;
       --btn-alt-focus-bg-color: #343c59;
       --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
-      --btn-fa-icon-color: white;
+      --btn-fa-icon-color: black;
       --btn-disabled-bg-color: #343a40;
-      --btn-disabled-text-color: white;
+      --btn-disabled-text-color: #efefef;
       --btn-disabled-border-color: #6c757d;
 
       /* Inputs */
