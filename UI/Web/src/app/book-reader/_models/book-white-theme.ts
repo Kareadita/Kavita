@@ -93,14 +93,13 @@ export const BookWhiteTheme = `
     /* Drawer */
     --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(0 0 0 / 13%);
     --drawer-pagination-border: 1px solid rgb(0 0 0 / 13%);
-  }
+}
 
-  .reader-container {
-    color: black !important;
-    background-image: none !important;
-    background-color: white !important;
-  }
-
+.reader-container {
+  color: black !important;
+  background-image: none !important;
+  background-color: white !important;
+}
 
 
 .book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
@@ -121,11 +120,6 @@ filter: brightness(0.85) !important;
 background-color: initial !important;
 }
 
-.reader-container {
-  color: #dcdcdc !important;
-  background-image: none !important;
-  background-color: black !important;
-}
 
 .book-content *:not(code), .book-content *:not(a) {
     background-color: black;
