@@ -45,7 +45,7 @@ export class ConfirmResetPasswordComponent {
   submit() {
     const model = this.registerForm.getRawValue();
     model.token = this.token;
-    this.accountService.confirmResetPasswordEmail(model).subscribe(() => {
+    this.accountService.confirmResetPasswordEmail(model).subscribe((response: string) => {
       this.toastr.success("Password reset");
       this.router.navigateByUrl('login');
     }, err => {

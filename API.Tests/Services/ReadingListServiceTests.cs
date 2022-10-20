@@ -329,7 +329,7 @@ public class ReadingListServiceTests
             Substitute.For<IEventHub>());
         // Mark 2 as fully read
         await readerService.MarkChaptersAsRead(user, 1,
-            await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(new List<int>() {2}));
+            (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(new List<int>() {2})).ToList());
         await _unitOfWork.CommitAsync();
 
         await _readingListService.RemoveFullyReadItems(1, user);

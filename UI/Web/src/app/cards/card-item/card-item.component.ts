@@ -188,19 +188,27 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
 
       // For volume or Series, we can't just take the event 
+      if (this.utilityService.isChapter(this.entity)) {
+        const c = this.utilityService.asChapter(this.entity);
+        c.pagesRead = updateEvent.pagesRead;
+        this.read = updateEvent.pagesRead;
+      }
       if (this.utilityService.isVolume(this.entity) || this.utilityService.isSeries(this.entity)) {
         if (this.utilityService.isVolume(this.entity)) {
           const v = this.utilityService.asVolume(this.entity);
-          const chapter = v.chapters.find(c => c.id === updateEvent.chapterId);
-          if (chapter) {
+          let sum = 0;
+          const chapters = v.chapters.filter(c => c.volumeId === updateEvent.volumeId);
+          chapters.forEach(chapter => {
             chapter.pagesRead = updateEvent.pagesRead;
-          }
+            sum += chapter.pagesRead;
+          });
+          v.pagesRead = sum;
+          this.read = sum;
         } else {
           return;
         }
       }
 
-      this.read = updateEvent.pagesRead;
       this.cdRef.detectChanges();
     });
 

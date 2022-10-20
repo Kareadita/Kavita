@@ -85,7 +85,6 @@ export const BookBlackTheme = `
   --br-actionbar-button-hover-border-color: #6c757d;
   --br-actionbar-bg-color: black;
 }
-}
 
 
 

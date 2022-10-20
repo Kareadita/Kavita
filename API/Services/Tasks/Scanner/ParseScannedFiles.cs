@@ -150,7 +150,7 @@ public class ParseScannedFiles
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "There was an error trying to find and apply .kavitaignores above the Series Folder. Scanning without them present");
+                "[ScannerService] There was an error trying to find and apply .kavitaignores above the Series Folder. Scanning without them present");
         }
 
         return seriesMatcher;
@@ -200,13 +200,13 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "{SeriesName} matches against multiple series in the parsed series. This indicates a critical kavita issue. Key will be skipped", info.Series);
+            _logger.LogCritical(ex, "[ScannerService] {SeriesName} matches against multiple series in the parsed series. This indicates a critical kavita issue. Key will be skipped", info.Series);
             foreach (var seriesKey in scannedSeries.Keys.Where(ps =>
                          ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
                                                       || ps.NormalizedName.Equals(normalizedLocalizedSeries)
                                                       || ps.NormalizedName.Equals(normalizedSortSeries))))
             {
-                _logger.LogCritical("Matches: {SeriesName} matches on {SeriesKey}", info.Series, seriesKey.Name);
+                _logger.LogCritical("[ScannerService] Matches: {SeriesName} matches on {SeriesKey}", info.Series, seriesKey.Name);
             }
         }
     }
@@ -240,14 +240,14 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
+            _logger.LogCritical(ex, "[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
             var values = scannedSeries.Where(p =>
                 (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
                  Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
                 p.Key.Format == info.Format);
             foreach (var pair in values)
             {
-                _logger.LogCritical("Duplicate Series in DB matches with {SeriesName}: {DuplicateName}", info.Series, pair.Key.Name);
+                _logger.LogCritical("[ScannerService] Duplicate Series in DB matches with {SeriesName}: {DuplicateName}", info.Series, pair.Key.Name);
             }
 
         }
@@ -285,11 +285,11 @@ public class ParseScannedFiles
                     Format = fp.Format,
                 }).ToList();
                 await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
-                _logger.LogDebug("Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
+                _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
                 return;
             }
 
-            _logger.LogDebug("Found {Count} files for {Folder}", files.Count, folder);
+            _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.FileScanProgressEvent(folder, libraryName, ProgressEventType.Updated));
             if (files.Count == 0)
@@ -316,7 +316,7 @@ public class ParseScannedFiles
                 catch (Exception ex)
                 {
                     _logger.LogError(ex,
-                        "There was an exception that occurred during tracking {FilePath}. Skipping this file",
+                        "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
                         info.FullFilePath);
                 }
             }
@@ -339,7 +339,7 @@ public class ParseScannedFiles
             }
             catch (ArgumentException ex)
             {
-                _logger.LogError(ex, "The directory '{FolderPath}' does not exist", folderPath);
+                _logger.LogError(ex, "[ScannerService] The directory '{FolderPath}' does not exist", folderPath);
             }
         }
 

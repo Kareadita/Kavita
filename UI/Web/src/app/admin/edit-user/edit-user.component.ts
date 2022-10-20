@@ -34,6 +34,7 @@ export class EditUserComponent implements OnInit {
     this.userForm.addControl('username', new FormControl(this.member.username, [Validators.required]));
 
     this.userForm.get('email')?.disable();
+    this.selectedRestriction = this.member.ageRestriction;
   }
 
   updateRoleSelection(roles: Array<string>) {

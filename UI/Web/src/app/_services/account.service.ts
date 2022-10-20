@@ -192,7 +192,7 @@ export class AccountService implements OnDestroy {
   }
 
   confirmResetPasswordEmail(model: {email: string, token: string, password: string}) {
-    return this.httpClient.post(this.baseUrl + 'account/confirm-password-reset', model, {responseType: 'json' as 'text'});
+    return this.httpClient.post<string>(this.baseUrl + 'account/confirm-password-reset', model, {responseType: 'text' as 'json'});
   }
 
   resetPassword(username: string, password: string, oldPassword: string) {

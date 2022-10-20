@@ -53,12 +53,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
-          this.libraries = libraries;
-          this.cdRef.markForCheck();
-        });
-      }
+      if (!user) return;
+      this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
+        this.libraries = libraries;
+        this.cdRef.markForCheck();
+      });
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
       this.cdRef.markForCheck();
     });

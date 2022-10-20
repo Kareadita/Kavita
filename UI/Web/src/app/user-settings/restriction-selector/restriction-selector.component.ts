@@ -34,7 +34,7 @@ export class RestrictionSelectorComponent implements OnInit, OnChanges {
 
     this.restrictionForm = new FormGroup({
       'ageRating': new FormControl(this.member?.ageRestriction.ageRating || AgeRating.NotApplicable || AgeRating.NotApplicable, []),
-      'ageRestrictionIncludeUnknowns': new FormControl(this.member?.ageRestriction.includeUnknowns, []),
+      'ageRestrictionIncludeUnknowns': new FormControl(this.member?.ageRestriction.includeUnknowns || false, []),
       
     });
 

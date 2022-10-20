@@ -640,6 +640,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   openChapter(chapter: Chapter, incognitoMode = false) {
+    if (this.bulkSelectionService.hasSelections()) return;
     if (chapter.pages === 0) {
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
@@ -648,6 +649,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   }
 
   openVolume(volume: Volume) {
+    if (this.bulkSelectionService.hasSelections()) return;
     if (volume.chapters === undefined || volume.chapters?.length === 0) {
       this.toastr.error('There are no chapters to this volume. Cannot read.');
       return;

@@ -21,8 +21,8 @@ public interface IReaderService
 {
     Task MarkSeriesAsRead(AppUser user, int seriesId);
     Task MarkSeriesAsUnread(AppUser user, int seriesId);
-    Task MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
-    Task MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters);
+    Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters);
+    Task MarkChaptersAsUnread(AppUser user, int seriesId, IList<Chapter> chapters);
     Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
     Task<int> CapPageToChapter(int chapterId, int page);
     int CapPageToChapter(Chapter chapter, int page);
@@ -76,8 +76,6 @@ public class ReaderService : IReaderService
         {
             await MarkChaptersAsRead(user, seriesId, volume.Chapters);
         }
-
-        _unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
@@ -93,18 +91,18 @@ public class ReaderService : IReaderService
         {
             await MarkChaptersAsUnread(user, seriesId, volume.Chapters);
         }
-
-        _unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
     /// Marks all Chapters as Read by creating or updating UserProgress rows. Does not commit.
     /// </summary>
+    /// <remarks>Emits events to the UI for each chapter progress and one for each volume progress</remarks>
     /// <param name="user"></param>
     /// <param name="seriesId"></param>
     /// <param name="chapters"></param>
-    public async Task MarkChaptersAsRead(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
+    public async Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters)
     {
+        var seenVolume = new Dictionary<int, bool>();
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -118,19 +116,29 @@ public class ReaderService : IReaderService
                     SeriesId = seriesId,
                     ChapterId = chapter.Id
                 });
-                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
             }
             else
             {
                 userProgress.PagesRead = chapter.Pages;
                 userProgress.SeriesId = seriesId;
                 userProgress.VolumeId = chapter.VolumeId;
-
-                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, chapter.Pages));
             }
+
+            await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
+
+            // Send out volume events for each distinct volume
+            if (!seenVolume.ContainsKey(chapter.VolumeId))
+            {
+                seenVolume[chapter.VolumeId] = true;
+                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId,
+                        chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));
+            }
+
         }
+
+        _unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
@@ -139,8 +147,9 @@ public class ReaderService : IReaderService
     /// <param name="user"></param>
     /// <param name="seriesId"></param>
     /// <param name="chapters"></param>
-    public async Task MarkChaptersAsUnread(AppUser user, int seriesId, IEnumerable<Chapter> chapters)
+    public async Task MarkChaptersAsUnread(AppUser user, int seriesId, IList<Chapter> chapters)
     {
+        var seenVolume = new Dictionary<int, bool>();
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -153,7 +162,17 @@ public class ReaderService : IReaderService
 
             await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                 MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
+
+            // Send out volume events for each distinct volume
+            if (!seenVolume.ContainsKey(chapter.VolumeId))
+            {
+                seenVolume[chapter.VolumeId] = true;
+                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId,
+                        chapter.VolumeId, 0, 0));
+            }
         }
+        _unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
@@ -526,7 +545,7 @@ public class ReaderService : IReaderService
             var chapters = volume.Chapters
                 .OrderBy(c => float.Parse(c.Number))
                 .Where(c => !c.IsSpecial && Tasks.Scanner.Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber);
-            await MarkChaptersAsRead(user, volume.SeriesId, chapters);
+            await MarkChaptersAsRead(user, volume.SeriesId, chapters.ToList());
         }
     }
 
