@@ -68,13 +68,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasOne(pt => pt.Series)
             .WithMany(p => p.Relations)
             .HasForeignKey(pt => pt.SeriesId)
-            .OnDelete(DeleteBehavior.ClientCascade);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<SeriesRelation>()
             .HasOne(pt => pt.TargetSeries)
             .WithMany(t => t.RelationOf)
             .HasForeignKey(pt => pt.TargetSeriesId)
-            .OnDelete(DeleteBehavior.ClientCascade);
+            .OnDelete(DeleteBehavior.Cascade);
 
 
         builder.Entity<AppUserPreferences>()

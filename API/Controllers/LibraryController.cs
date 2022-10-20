@@ -248,19 +248,24 @@ public class LibraryController : BaseApiController
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
                 // TODO: Figure out how to cancel a job
+
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 return BadRequest(
                     "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");
             }
 
             // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
-            foreach (var s in await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id))
+            // Aka SeriesRelation has an invalid foreign key
+            foreach (var s in await _unitOfWork.SeriesRepository.GetSeriesForLibraryIdAsync(library.Id,
+                         SeriesIncludes.Related))
             {
                 s.Relations = new List<SeriesRelation>();
                 _unitOfWork.SeriesRepository.Update(s);
             }
+            await _unitOfWork.CommitAsync();
 
             _unitOfWork.LibraryRepository.Delete(library);
+
             await _unitOfWork.CommitAsync();
 
             if (chapterIds.Any())

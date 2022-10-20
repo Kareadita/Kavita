@@ -163,13 +163,11 @@ public class SeriesRepository : ISeriesRepository
     public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None)
     {
         var query = _context.Series
-            .Where(s => s.LibraryId == libraryId)
-            .OrderBy(s => s.SortName);
+            .Where(s => s.LibraryId == libraryId);
 
+        query = AddIncludesToQuery(query, includes);
 
-        AddIncludesToQuery(query, includes);
-
-        return await query.ToListAsync();
+        return await query.OrderBy(s => s.SortName).ToListAsync();
     }
 
     /// <summary>
@@ -1573,7 +1571,7 @@ public class SeriesRepository : ISeriesRepository
 
         if (includeFlags.HasFlag(SeriesIncludes.Related))
         {
-            query = query.Include(u => u.Relations).Include(u => u.RelationOf);
+            query = query.Include(u => u.Relations);
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Metadata))
@@ -1587,6 +1585,6 @@ public class SeriesRepository : ISeriesRepository
         }
 
 
-        return query;
+        return query.AsSplitQuery();
     }
 }
