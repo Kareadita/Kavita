@@ -13,6 +13,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
+using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,12 +33,13 @@ public class ReaderController : BaseApiController
     private readonly IReaderService _readerService;
     private readonly IBookmarkService _bookmarkService;
     private readonly IAccountService _accountService;
+    private readonly IEventHub _eventHub;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
         IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
         IReaderService readerService, IBookmarkService bookmarkService,
-        IAccountService accountService)
+        IAccountService accountService, IEventHub eventHub)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -45,6 +47,7 @@ public class ReaderController : BaseApiController
         _readerService = readerService;
         _bookmarkService = bookmarkService;
         _accountService = accountService;
+        _eventHub = eventHub;
     }
 
     /// <summary>
@@ -273,8 +276,6 @@ public class ReaderController : BaseApiController
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters);
 
-        _unitOfWork.UserRepository.Update(user);
-
         if (await _unitOfWork.CommitAsync())
         {
             return Ok();
@@ -295,6 +296,9 @@ public class ReaderController : BaseApiController
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+        await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markVolumeReadDto.SeriesId,
+                markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
 
         if (await _unitOfWork.CommitAsync())
         {
@@ -322,12 +326,13 @@ public class ReaderController : BaseApiController
             chapterIds.Add(chapterId);
         }
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
-        await _readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters);
+        await _readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters.ToList());
 
         if (await _unitOfWork.CommitAsync())
         {
             return Ok();
         }
+
 
         return BadRequest("Could not save progress");
     }
@@ -349,9 +354,7 @@ public class ReaderController : BaseApiController
             chapterIds.Add(chapterId);
         }
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
-        await _readerService.MarkChaptersAsUnread(user, dto.SeriesId, chapters);
-
-        _unitOfWork.UserRepository.Update(user);
+        await _readerService.MarkChaptersAsUnread(user, dto.SeriesId, chapters.ToList());
 
         if (await _unitOfWork.CommitAsync())
         {
@@ -402,8 +405,6 @@ public class ReaderController : BaseApiController
         {
             await _readerService.MarkChaptersAsUnread(user, volume.SeriesId, volume.Chapters);
         }
-
-        _unitOfWork.UserRepository.Update(user);
 
         if (await _unitOfWork.CommitAsync())
         {
