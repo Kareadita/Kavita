@@ -65,7 +65,6 @@ public interface ISeriesRepository
     Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
     Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
-    Task<bool> DeleteSeriesAsync(int seriesId);
     Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
@@ -420,15 +419,6 @@ public class SeriesRepository : ISeriesRepository
         return seriesList[0];
     }
 
-    public async Task<bool> DeleteSeriesAsync(int seriesId)
-    {
-        var series = await _context.Series.Where(s => s.Id == seriesId).SingleOrDefaultAsync();
-        if (series != null) _context.Series.Remove(series);
-
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-
     /// <summary>
     /// Returns Volumes, Metadata (Incl Genres and People), and Collection Tags
     /// </summary>
@@ -441,29 +431,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.Id == seriesId)
             .AsSplitQuery();
 
-         if (includes.HasFlag(SeriesIncludes.Volumes))
-         {
-             query = query.Include(s => s.Volumes);
-         }
-
-         if (includes.HasFlag(SeriesIncludes.Related))
-         {
-             query = query.Include(s => s.Relations)
-                 .ThenInclude(r => r.TargetSeries)
-                 .Include(s => s.RelationOf);
-         }
-
-         if (includes.HasFlag(SeriesIncludes.Metadata))
-         {
-             query = query.Include(s => s.Metadata)
-                 .ThenInclude(m => m.CollectionTags)
-                 .Include(s => s.Metadata)
-                 .ThenInclude(m => m.Genres)
-                 .Include(s => s.Metadata)
-                 .ThenInclude(m => m.People)
-                 .Include(s => s.Metadata)
-                 .ThenInclude(m => m.Tags);
-         }
+         query = AddIncludesToQuery(query, includes)
 
          return await query.SingleOrDefaultAsync();
     }
@@ -1569,19 +1537,28 @@ public class SeriesRepository : ISeriesRepository
             query = query.Include(u => u.Library);
         }
 
+        if (includeFlags.HasFlag(SeriesIncludes.Volumes))
+        {
+            query = query.Include(s => s.Volumes);
+        }
+
         if (includeFlags.HasFlag(SeriesIncludes.Related))
         {
-            query = query.Include(u => u.Relations);
+            query = query.Include(s => s.Relations)
+                .ThenInclude(r => r.TargetSeries)
+                .Include(s => s.RelationOf);
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Metadata))
         {
-            query = query.Include(u => u.Metadata);
-        }
-
-        if (includeFlags.HasFlag(SeriesIncludes.Volumes))
-        {
-            query = query.Include(u => u.Volumes);
+            query = query.Include(s => s.Metadata)
+                .ThenInclude(m => m.CollectionTags)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.Genres)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.People)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.Tags);
         }
 
 
