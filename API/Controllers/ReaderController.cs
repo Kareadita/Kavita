@@ -296,8 +296,6 @@ public class ReaderController : BaseApiController
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
 
-        _unitOfWork.UserRepository.Update(user);
-
         if (await _unitOfWork.CommitAsync())
         {
             return Ok();
@@ -325,8 +323,6 @@ public class ReaderController : BaseApiController
         }
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
         await _readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters);
-
-        _unitOfWork.UserRepository.Update(user);
 
         if (await _unitOfWork.CommitAsync())
         {
@@ -381,8 +377,6 @@ public class ReaderController : BaseApiController
         {
             await _readerService.MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }
-
-        _unitOfWork.UserRepository.Update(user);
 
         if (await _unitOfWork.CommitAsync())
         {

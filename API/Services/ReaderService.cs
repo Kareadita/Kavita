@@ -76,8 +76,6 @@ public class ReaderService : IReaderService
         {
             await MarkChaptersAsRead(user, seriesId, volume.Chapters);
         }
-
-        _unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
@@ -118,19 +116,19 @@ public class ReaderService : IReaderService
                     SeriesId = seriesId,
                     ChapterId = chapter.Id
                 });
-                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
             }
             else
             {
                 userProgress.PagesRead = chapter.Pages;
                 userProgress.SeriesId = seriesId;
                 userProgress.VolumeId = chapter.VolumeId;
-
-                await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, chapter.Pages));
             }
+
+            await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
+                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
         }
+
+        _unitOfWork.UserRepository.Update(user);
     }
 
     /// <summary>
