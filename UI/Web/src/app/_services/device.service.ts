@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ReplaySubject, shareReplay, take, tap } from 'rxjs';
+import { ReplaySubject, shareReplay, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Device } from '../_models/device/device';
 import { DevicePlatform } from '../_models/device/device-platform';
@@ -19,8 +19,11 @@ export class DeviceService {
 
   constructor(private httpClient: HttpClient, private accountService: AccountService) {
     // Ensure we are authenticated before we make an authenticated api call. 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (!user) return;
+    this.accountService.currentUser$.subscribe(user => {
+      if (!user) {
+        this.devicesSource.next([]);
+        return;
+      }
 
       this.httpClient.get<Device[]>(this.baseUrl + 'device', {}).subscribe(data => {
         this.devicesSource.next(data);
