@@ -368,7 +368,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         break;
       case Action.SendTo:
         {
-          const chapterIds = this.volumes.map(v => v.chapters.map(c => c.id)).flat()
+          const chapterIds = [...this.volumes.map(v => v.chapters.map(c => c.id)).flat(), ...this.specials.map(c => c.id)]
           const device = (action._extra!.data as Device);
           this.actionService.sendToDevice(chapterIds, device);
           break;
