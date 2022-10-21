@@ -11,6 +11,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.Helpers.Filters;
 using API.Parser;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
