@@ -77,6 +77,13 @@ export class CardActionablesComponent implements OnInit {
     subMenu.open();
   }
 
+  closeAllSubmenus() {
+    Object.keys(this.submenu).forEach(key => {
+      this.submenu[key].close();
+        delete this.submenu[key];
+    });
+  }
+
   performDynamicClick(event: any, action: ActionItem<any>, dynamicItem: any) {
     action._extra = dynamicItem;
     this.performAction(event, action);
