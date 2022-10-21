@@ -144,7 +144,7 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.readingListService.delete(readingList.id).subscribe(() => {
       this.toastr.success('Reading list deleted');
-      this.router.navigateByUrl('library#lists');
+      this.router.navigateByUrl('/lists');
     });
   }
 
