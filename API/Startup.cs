@@ -17,6 +17,7 @@ using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Hangfire.MemoryStorage;
+using Hangfire.Storage.SQLite;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
@@ -176,7 +177,7 @@ public class Startup
         services.AddHangfire(configuration => configuration
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
-            .UseMemoryStorage()); // UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted
+            .UseSQLiteStorage("config/Hangfire.db")); // UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted
 
         // Add the processing server as IHostedService
         services.AddHangfireServer(options =>

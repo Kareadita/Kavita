@@ -78,7 +78,7 @@ export class ThemeService implements OnDestroy {
       this.themeCache = themes;
       this.themesSource.next(themes);
       this.currentTheme$.pipe(take(1)).subscribe(theme => {
-        if (!themes.includes(theme)) {
+        if (themes.filter(t => t.id === theme.id).length === 0) {
           this.setTheme(this.defaultTheme);
           this.toastr.info('The active theme no longer exists. Please refresh the page.');
         }

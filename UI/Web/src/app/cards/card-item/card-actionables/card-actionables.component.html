@@ -18,7 +18,7 @@
         </ng-container>
 
         <ng-template #justItem>
-          <button ngbDropdownItem *ngIf="willRenderAction(action)" (click)="performAction($event, action)">{{action.title}}</button>
+          <button ngbDropdownItem *ngIf="willRenderAction(action)" (click)="performAction($event, action)" (mouseover)="closeAllSubmenus()">{{action.title}}</button>
         </ng-template>
       </ng-container>
       <ng-template #submenuDropdown>
