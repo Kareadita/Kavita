@@ -1,20 +1,22 @@
 <div class="card mt-2">
     <div class="card-body">
         <div class="card-title">
-            <div class="row mb-2">
-                <div class="col-11"><h4 id="age-restriction">Age Restriction</h4></div>
-                <div class="col-1">
+            <div class="container-fluid row mb-2">
+                <div class="col-10 col-sm-11"><h4 id="age-restriction">Age Restriction</h4></div>
+                <div class="col-1 text-end">
                     <button class="btn btn-primary btn-sm" (click)="toggleViewMode()" *ngIf="(hasChangeAgeRestrictionAbility | async)">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
                 </div>
             </div>
         </div>
 
         <ng-container *ngIf="isViewMode">
-            <span>{{user?.ageRestriction?.ageRating| ageRating | async}}
-                <ng-container *ngIf="user?.ageRestriction?.ageRating !== AgeRating.NotApplicable && user?.ageRestriction?.includeUnknowns">
-                    <span class="ms-1 me-1">+</span> Unknowns
-                </ng-container>
-            </span>
+            <div class="container-fluid row">
+                <span class="col-12">{{user?.ageRestriction?.ageRating| ageRating | async}}
+                    <ng-container *ngIf="user?.ageRestriction?.ageRating !== AgeRating.NotApplicable && user?.ageRestriction?.includeUnknowns">
+                        <span class="ms-1 me-1">+</span> Unknowns
+                    </ng-container>
+                </span>
+            </div>
         </ng-container>
 
         <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
