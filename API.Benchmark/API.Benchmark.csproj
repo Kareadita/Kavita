@@ -10,15 +10,21 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
-      <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.1" />
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.2" />
+      <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.2" />
       <PackageReference Include="NSubstitute" Version="4.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="Data\SeriesNamesForNormalization.txt">
+      <Content Include="Data/*.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      </Content>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="../API.Tests/Services/Test Data/ArchiveService/ComicInfos/*.zip">
+        <LinkBase>Data</LinkBase>
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

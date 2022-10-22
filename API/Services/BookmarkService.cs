@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
@@ -78,15 +79,14 @@ public class BookmarkService : IBookmarkService
     /// <returns>If the save to DB and copy was successful</returns>
     public async Task<bool> BookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto, string imageToBookmark)
     {
+        if (userWithBookmarks == null || userWithBookmarks.Bookmarks == null) return false;
         try
         {
-            var userBookmark =
-                await _unitOfWork.UserRepository.GetBookmarkForPage(bookmarkDto.Page, bookmarkDto.ChapterId, userWithBookmarks.Id);
-
+            var userBookmark = userWithBookmarks.Bookmarks.SingleOrDefault(b => b.Page == bookmarkDto.Page && b.ChapterId == bookmarkDto.ChapterId);
             if (userBookmark != null)
             {
                 _logger.LogError("Bookmark already exists for Series {SeriesId}, Volume {VolumeId}, Chapter {ChapterId}, Page {PageNum}", bookmarkDto.SeriesId, bookmarkDto.VolumeId, bookmarkDto.ChapterId, bookmarkDto.Page);
-                return false;
+                return true;
             }
 
             var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(imageToBookmark);
@@ -100,14 +100,13 @@ public class BookmarkService : IBookmarkService
                 VolumeId = bookmarkDto.VolumeId,
                 SeriesId = bookmarkDto.SeriesId,
                 ChapterId = bookmarkDto.ChapterId,
-                FileName = Path.Join(targetFolderStem, fileInfo.Name)
+                FileName = Path.Join(targetFolderStem, fileInfo.Name),
+                AppUserId = userWithBookmarks.Id
             };
 
             _directoryService.CopyFileToDirectory(imageToBookmark, targetFilepath);
-            userWithBookmarks.Bookmarks ??= new List<AppUserBookmark>();
-            userWithBookmarks.Bookmarks.Add(bookmark);
 
-            _unitOfWork.UserRepository.Update(userWithBookmarks);
+            _unitOfWork.UserRepository.Add(bookmark);
             await _unitOfWork.CommitAsync();
 
             if (settings.ConvertBookmarkToWebP)
@@ -135,15 +134,12 @@ public class BookmarkService : IBookmarkService
     public async Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto)
     {
         if (userWithBookmarks.Bookmarks == null) return true;
+        var bookmarkToDelete = userWithBookmarks.Bookmarks.SingleOrDefault(x =>
+            x.ChapterId == bookmarkDto.ChapterId && x.Page == bookmarkDto.Page);
         try
         {
-            var bookmarkToDelete = userWithBookmarks.Bookmarks.SingleOrDefault(x =>
-                x.ChapterId == bookmarkDto.ChapterId && x.AppUserId == userWithBookmarks.Id && x.Page == bookmarkDto.Page &&
-                x.SeriesId == bookmarkDto.SeriesId);
-
             if (bookmarkToDelete != null)
             {
-                await DeleteBookmarkFiles(new[] {bookmarkToDelete});
                 _unitOfWork.UserRepository.Delete(bookmarkToDelete);
             }
 
@@ -151,10 +147,10 @@ public class BookmarkService : IBookmarkService
         }
         catch (Exception)
         {
-            await _unitOfWork.RollbackAsync();
             return false;
         }
 
+        await DeleteBookmarkFiles(new[] {bookmarkToDelete});
         return true;
     }
 

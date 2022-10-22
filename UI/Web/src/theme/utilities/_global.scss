@@ -10,6 +10,10 @@ body {
   overflow-y: auto;
 }
 
+.no-transitions, .no-transitions * {
+    transition: none !important;
+}
+
 
 hr {
     background-color: var(--hr-color);
@@ -29,4 +33,8 @@ hr {
 
 .subtitle-with-actionables {
     margin-left: 32px;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--primary-color);
 }

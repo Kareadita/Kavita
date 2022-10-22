@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { of, ReplaySubject, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
@@ -10,6 +10,17 @@ import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
 import { InviteUserResponse } from '../_models/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
+import { UpdateEmailResponse } from '../_models/email/update-email-response';
+import { AgeRating } from '../_models/metadata/age-rating';
+import { AgeRestriction } from '../_models/age-restriction';
+
+export enum Role {
+  Admin = 'Admin',
+  ChangePassword = 'Change Password',
+  Bookmark = 'Bookmark',
+  Download = 'Download',
+  ChangeRestriction = 'Change Restriction' 
+}
 
 @Injectable({
   providedIn: 'root'
@@ -47,22 +58,30 @@ export class AccountService implements OnDestroy {
   }
 
   hasAdminRole(user: User) {
-    return user && user.roles.includes('Admin');
+    return user && user.roles.includes(Role.Admin);
   }
 
   hasChangePasswordRole(user: User) {
-    return user && user.roles.includes('Change Password');
+    return user && user.roles.includes(Role.ChangePassword);
+  }
+
+  hasChangeAgeRestrictionRole(user: User) {
+    return user && user.roles.includes(Role.ChangeRestriction);
   }
 
   hasDownloadRole(user: User) {
-    return user && user.roles.includes('Download');
+    return user && user.roles.includes(Role.Download);
+  }
+
+  hasBookmarkRole(user: User) {
+    return user && user.roles.includes(Role.Bookmark);
   }
 
   getRoles() {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  login(model: {username: string, password: string}): Observable<any> {
+  login(model: {username: string, password: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
         const user = response;
@@ -127,6 +146,10 @@ export class AccountService implements OnDestroy {
     );
   }
 
+  isEmailConfirmed() {
+    return this.httpClient.get<boolean>(this.baseUrl + 'account/email-confirmed');
+  }
+
   migrateUser(model: {email: string, username: string, password: string, sendEmail: boolean}) {
     return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, {responseType: 'text' as 'json'});
   }
@@ -139,12 +162,16 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, {responseType: 'text' as 'json'});
   }
 
-  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>}) {
+  inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, ageRestriction: AgeRestriction}) {
     return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/invite', model);
   }
 
   confirmEmail(model: {email: string, username: string, password: string, token: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email', model);
+  }
+
+  confirmEmailUpdate(model: {email: string, token: string}) {
+    return this.httpClient.post<User>(this.baseUrl + 'account/confirm-email-update', model);
   }
 
   /**
@@ -165,15 +192,23 @@ export class AccountService implements OnDestroy {
   }
 
   confirmResetPasswordEmail(model: {email: string, token: string, password: string}) {
-    return this.httpClient.post(this.baseUrl + 'account/confirm-password-reset', model, {responseType: 'json' as 'text'});
+    return this.httpClient.post<string>(this.baseUrl + 'account/confirm-password-reset', model, {responseType: 'text' as 'json'});
   }
 
   resetPassword(username: string, password: string, oldPassword: string) {
     return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, {responseType: 'json' as 'text'});
   }
 
-  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number}) {
+  update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number, ageRestriction: AgeRestriction}) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
+  }
+
+  updateEmail(email: string) {
+    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email});
+  }
+
+  updateAgeRestriction(ageRating: AgeRating, includeUnknowns: boolean) {
+    return this.httpClient.post(this.baseUrl + 'account/update/age-restriction', {ageRating, includeUnknowns});
   }
 
   /**

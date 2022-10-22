@@ -42,7 +42,7 @@ export enum FilterQueryParam {
 })
 export class FilterUtilitiesService {
 
-  constructor(private route: ActivatedRoute, private seriesService: SeriesService) { }
+  constructor() { }
 
   /**
    * Updates the window location with a custom url based on filter and pagination objects
@@ -145,7 +145,7 @@ export class FilterUtilitiesService {
    * @returns The Preset filter and if something was set within
    */
    filterPresetsFromUrl(snapshot: ActivatedRouteSnapshot): [SeriesFilter, boolean] {
-    const filter =  this.seriesService.createSeriesFilter();
+    const filter =  this.createSeriesFilter();
     let anyChanged = false;
 
     const format = snapshot.queryParamMap.get(FilterQueryParam.Format);
@@ -304,5 +304,41 @@ export class FilterUtilitiesService {
     
 
     return [filter, false]; // anyChanged. Testing out if having a filter active but keep drawer closed by default works better
+  }
+
+  createSeriesFilter(filter?: SeriesFilter) {
+    if (filter !== undefined) return filter;
+    const data: SeriesFilter = {
+      formats: [],
+      libraries: [],
+      genres: [],
+      writers: [],
+      artists: [],
+      penciller: [],
+      inker: [],
+      colorist: [],
+      letterer: [],
+      coverArtist: [],
+      editor: [],
+      publisher: [],
+      character: [],
+      translators: [],
+      collectionTags: [],
+      rating: 0,
+      readStatus: {
+        read: true,
+        inProgress: true,
+        notRead: true
+      },
+      sortOptions: null,
+      ageRating: [],
+      tags: [],
+      languages: [],
+      publicationStatus: [],
+      seriesNameQuery: '',
+      releaseYearRange: null
+    };
+
+    return data;
   }
 }

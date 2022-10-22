@@ -11,9 +11,8 @@ import { JumpKey } from '../_models/jumpbar/jump-key';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { FilterEvent, SeriesFilter } from '../_models/series-filter';
-import { Action } from '../_services/action-factory.service';
+import { Action, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
-import { LibraryService } from '../_services/library.service';
 import { EVENTS, Message, MessageHubService } from '../_services/message-hub.service';
 import { SeriesService } from '../_services/series.service';
 
@@ -35,11 +34,11 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
 
-  bulkActionCallback = (action: Action, data: any) => {
+  bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
 
-    switch (action) {
+    switch (action.action) {
       case Action.AddToReadingList:
         this.actionService.addMultipleSeriesToReadingList(selectedSeries, (success) => {
           if (success) this.bulkSelectionService.deselectAll();
@@ -86,14 +85,14 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     private titleService: Title, private actionService: ActionService, 
     public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
     private utilityService: UtilityService, private route: ActivatedRoute, 
-    private filterUtilityService: FilterUtilitiesService, private libraryService: LibraryService) {
+    private filterUtilityService: FilterUtilitiesService) {
     
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.titleService.setTitle('Kavita - All Series');
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-    this.filterActiveCheck = this.seriesService.createSeriesFilter();
+    this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
   }
 
   ngOnInit(): void {

@@ -33,6 +33,8 @@ export class RelationshipPipe implements PipeTransform {
         return 'Spin Off';
       case RelationKind.Parent:
         return 'Parent';
+      case RelationKind.Edition:
+        return 'Edition'
       default:
         return '';
     }

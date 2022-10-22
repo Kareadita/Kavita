@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
+import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from '../typeahead/typeahead-settings';
 import { CollectionTag } from '../_models/collection-tag';
@@ -17,7 +18,6 @@ import { Tag } from '../_models/tag';
 import { CollectionTagService } from '../_services/collection-tag.service';
 import { LibraryService } from '../_services/library.service';
 import { MetadataService } from '../_services/metadata.service';
-import { SeriesService } from '../_services/series.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 
@@ -69,6 +69,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   readProgressGroup!: FormGroup;
   sortGroup!: FormGroup;
   seriesNameGroup!: FormGroup;
+  releaseYearRange!: FormGroup;
   isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
@@ -86,9 +87,9 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     return SortField;
   }
 
-  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private seriesService: SeriesService,
-    private utilityService: UtilityService, private collectionTagService: CollectionTagService, public toggleService: ToggleService,
-    private readonly cdRef: ChangeDetectorRef) {
+  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private utilityService: UtilityService, 
+    private collectionTagService: CollectionTagService, public toggleService: ToggleService,
+    private readonly cdRef: ChangeDetectorRef, private filterUtilitySerivce: FilterUtilitiesService) {
   }
 
   ngOnInit(): void {
@@ -105,7 +106,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       });
     }
     
-    this.filter = this.seriesService.createSeriesFilter();
+    this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
       notRead: new FormControl({value: this.filter.readStatus.notRead, disabled: this.filterSettings.readProgressDisabled}, []),
@@ -118,6 +119,11 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
     this.seriesNameGroup = new FormGroup({
       seriesNameQuery: new FormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
+    });
+
+    this.releaseYearRange = new FormGroup({
+      min: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)]),
+      max: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)])
     });
 
     this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
@@ -160,6 +166,15 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     )
     .subscribe(changes => {
       this.filter.seriesNameQuery = changes; // TODO: See if we can make this into observable
+      this.cdRef.markForCheck();
+    });
+
+    this.releaseYearRange.valueChanges.pipe(
+      distinctUntilChanged(), 
+      takeUntil(this.onDestroy)
+    )
+    .subscribe(changes => {
+      this.filter.releaseYearRange = {min: this.releaseYearRange.get('min')?.value, max: this.releaseYearRange.get('max')?.value};
       this.cdRef.markForCheck();
     });
 
@@ -255,7 +270,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.librarySettings.unique = true;
     this.librarySettings.addIfNonExisting = false;
     this.librarySettings.fetchFn = (filter: string) => {
-      return this.libraryService.getLibrariesForMember()
+      return this.libraryService.getLibraries()
       .pipe(map(items => this.librarySettings.compareFn(items, filter))); 
     };
     this.librarySettings.compareFn = (options: Library[], filter: string) => {
@@ -601,7 +616,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   clear() {
-    this.filter = this.seriesService.createSeriesFilter();
+    this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.readProgressGroup.get('read')?.setValue(true);
     this.readProgressGroup.get('notRead')?.setValue(true);
     this.readProgressGroup.get('inProgress')?.setValue(true);

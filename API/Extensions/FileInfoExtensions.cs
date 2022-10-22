@@ -1,19 +1,18 @@
 ﻿using System;
 using System.IO;
 
-namespace API.Extensions
+namespace API.Extensions;
+
+public static class FileInfoExtensions
 {
-    public static class FileInfoExtensions
+    /// <summary>
+    /// Checks if the last write time of the file is after the passed date
+    /// </summary>
+    /// <param name="fileInfo"></param>
+    /// <param name="comparison"></param>
+    /// <returns></returns>
+    public static bool HasFileBeenModifiedSince(this FileInfo fileInfo, DateTime comparison)
     {
-        /// <summary>
-        /// Checks if the last write time of the file is after the passed date
-        /// </summary>
-        /// <param name="fileInfo"></param>
-        /// <param name="comparison"></param>
-        /// <returns></returns>
-        public static bool HasFileBeenModifiedSince(this FileInfo fileInfo, DateTime comparison)
-        {
-            return DateTime.Compare(fileInfo.LastWriteTime, comparison) > 0;
-        }
+        return DateTime.Compare(fileInfo.LastWriteTime, comparison) > 0;
     }
 }

@@ -12,7 +12,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 
 
-
 @NgModule({
   declarations: [
     SeriesDetailComponent,

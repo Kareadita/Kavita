@@ -56,4 +56,5 @@ public class EventHub : IEventHub
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         await _messageHub.Clients.User(user.UserName).SendAsync(method, message);
     }
+
 }

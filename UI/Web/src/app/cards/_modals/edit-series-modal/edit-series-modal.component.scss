@@ -1,8 +1,3 @@
-.scrollable-modal {
-    max-height: calc(var(--vh) * 100 - 198px);
-    overflow: auto;
-}
-
 .lock-active {
     > .input-group-text {
         background-color: var(--primary-color);

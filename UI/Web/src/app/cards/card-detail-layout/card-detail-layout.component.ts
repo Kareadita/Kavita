@@ -1,10 +1,12 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener,
+   Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
+import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
@@ -12,7 +14,6 @@ import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { SeriesService } from 'src/app/_services/series.service';
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -71,10 +72,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     return Breakpoint;
   }
 
-  constructor(private seriesService: SeriesService, public utilityService: UtilityService,
+  constructor(private filterUtilitySerivce: FilterUtilitiesService, public utilityService: UtilityService,
     @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
     private jumpbarService: JumpbarService, private router: Router) {
-    this.filter = this.seriesService.createSeriesFilter();
+    this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
 
   }
@@ -134,7 +135,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, undefined);
+      action.callback(action, undefined);
     }
   }
 
@@ -155,5 +156,15 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
     this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
     this.changeDetectionRef.markForCheck();
+  }
+
+  tryToSaveJumpKey(item: any) {
+    let name = '';
+    if (item.hasOwnProperty('name')) {
+      name = item.name;
+    } else if (item.hasOwnProperty('title')) {
+      name = item.title;
+    }
+    this.jumpbarService.saveResumeKey(this.router.url, name.charAt(0));
   }
 }

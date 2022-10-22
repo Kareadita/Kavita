@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Metadata;
 using API.Data.Repositories;
 using API.Data.Scanner;
+using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -51,7 +52,6 @@ public class MetadataService : IMetadataService
     private readonly ICacheHelper _cacheHelper;
     private readonly IReadingItemService _readingItemService;
     private readonly IDirectoryService _directoryService;
-    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
     private readonly IList<SignalRMessage> _updateEvents = new List<SignalRMessage>();
     public MetadataService(IUnitOfWork unitOfWork, ILogger<MetadataService> logger,
         IEventHub eventHub, ICacheHelper cacheHelper,
@@ -89,7 +89,7 @@ public class MetadataService : IMetadataService
     private void UpdateChapterLastModified(Chapter chapter, bool forceUpdate)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
-        if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
+        if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
         firstFile.UpdateLastModified();
     }
@@ -108,7 +108,7 @@ public class MetadataService : IMetadataService
 
 
         volume.Chapters ??= new List<Chapter>();
-        var firstChapter = volume.Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting);
+        var firstChapter = volume.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default);
         if (firstChapter == null) return Task.FromResult(false);
 
         volume.CoverImage = firstChapter.CoverImage;
@@ -131,23 +131,8 @@ public class MetadataService : IMetadataService
             return Task.CompletedTask;
 
         series.Volumes ??= new List<Volume>();
-        var firstCover = series.Volumes.GetCoverImage(series.Format);
-        string coverImage = null;
-        if (firstCover == null && series.Volumes.Any())
-        {
-            // If firstCover is null and one volume, the whole series is Chapters under Vol 0.
-            if (series.Volumes.Count == 1)
-            {
-                coverImage = series.Volumes[0].Chapters.OrderBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)
-                    .FirstOrDefault(c => !c.IsSpecial)?.CoverImage;
-            }
+        series.CoverImage = series.GetCoverImage();
 
-            if (!_cacheHelper.CoverImageExists(coverImage))
-            {
-                coverImage = series.Volumes[0].Chapters.MinBy(c => double.Parse(c.Number), _chapterSortComparerForInChapterSorting)?.CoverImage;
-            }
-        }
-        series.CoverImage = firstCover?.CoverImage ?? coverImage;
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series));
         return Task.CompletedTask;
     }

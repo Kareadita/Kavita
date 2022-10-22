@@ -21,5 +21,9 @@ public enum SortField
     /// <summary>
     /// Time it takes to read. Uses Average.
     /// </summary>
-    TimeToRead = 5
+    TimeToRead = 5,
+    /// <summary>
+    /// Release Year of the Series
+    /// </summary>
+    ReleaseYear = 6
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,6 @@ using API.Entities.Enums;
 using API.Helpers.Converters;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
-using API.Services.Tasks.Scanner;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 
@@ -19,6 +19,7 @@ public interface ITaskScheduler
     Task ScheduleTasks();
     Task ScheduleStatsTasks();
     void ScheduleUpdaterTasks();
+    void ScanFolder(string folderPath, TimeSpan delay);
     void ScanFolder(string folderPath);
     void ScanLibrary(int libraryId, bool force = false);
     void CleanupChapters(int[] chapterIds);
@@ -49,9 +50,14 @@ public class TaskScheduler : ITaskScheduler
     public static BackgroundJobServer Client => new BackgroundJobServer();
     public const string ScanQueue = "scan";
     public const string DefaultQueue = "default";
+    public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
+    public const string CleanupDbTaskId = "cleanup-db";
+    public const string CleanupTaskId = "cleanup";
+    public const string BackupTaskId = "backup";
+    public const string ScanLibrariesTaskId = "scan-libraries";
+    public const string ReportStatsTaskId = "report-stats";
 
-    public static readonly IList<string> ScanTasks = new List<string>()
-        {"ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries"};
+    private static readonly ImmutableArray<string> ScanTasks = ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
 
     private static readonly Random Rnd = new Random();
 
@@ -83,27 +89,28 @@ public class TaskScheduler : ITaskScheduler
         {
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
-            RecurringJob.AddOrUpdate("scan-libraries", () => _scannerService.ScanLibraries(),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(),
                 () => CronConverter.ConvertToCronNotation(scanLibrarySetting), TimeZoneInfo.Local);
         }
         else
         {
-            RecurringJob.AddOrUpdate("scan-libraries", () => ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
         if (setting != null)
         {
             _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), TimeZoneInfo.Local);
         }
         else
         {
-            RecurringJob.AddOrUpdate("backup", () => _backupService.BackupDatabase(), Cron.Weekly, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), Cron.Weekly, TimeZoneInfo.Local);
         }
 
-        RecurringJob.AddOrUpdate("cleanup", () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
-        RecurringJob.AddOrUpdate("cleanup-db", () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, TimeZoneInfo.Local);
     }
 
     #region StatsTasks
@@ -119,7 +126,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogDebug("Scheduling stat collection daily");
-        RecurringJob.AddOrUpdate("report-stats", () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
     }
 
     public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
@@ -127,11 +134,14 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanLibrary(libraryId, forceUpdate));
     }
 
+    /// <summary>
+    /// Upon cancelling stat, we do report to the Stat service that we are no longer going to be reporting
+    /// </summary>
     public void CancelStatsTasks()
     {
-        _logger.LogDebug("Cancelling/Removing StatsTasks");
-
-        RecurringJob.RemoveIfExists("report-stats");
+        _logger.LogDebug("Stopping Stat collection as user has opted out");
+        RecurringJob.RemoveIfExists(ReportStatsTaskId);
+        _statsService.SendCancellation();
     }
 
     /// <summary>
@@ -150,10 +160,15 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanSiteThemes()
     {
-        _logger.LogInformation("Starting Site Theme scan");
+        if (HasAlreadyEnqueuedTask("ThemeService", "Scan", Array.Empty<object>(), ScanQueue))
+        {
+            _logger.LogInformation("A Theme Scan is already running");
+            return;
+        }
+
+        _logger.LogInformation("Enqueueing Site Theme scan");
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
-
 
     #endregion
 
@@ -166,9 +181,32 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(12, 18)), TimeZoneInfo.Local);
     }
 
+    public void ScanFolder(string folderPath, TimeSpan delay)
+    {
+        var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] { normalizedFolder }))
+        {
+            _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+                normalizedFolder);
+            return;
+        }
+
+        _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
+        BackgroundJob.Schedule(() => _scannerService.ScanFolder(normalizedFolder), delay);
+    }
+
     public void ScanFolder(string folderPath)
     {
-        _scannerService.ScanFolder(Tasks.Scanner.Parser.Parser.NormalizePath(folderPath));
+        var normalizedFolder = Tasks.Scanner.Parser.Parser.NormalizePath(folderPath);
+        if (HasAlreadyEnqueuedTask(ScannerService.Name, "ScanFolder", new object[] {normalizedFolder}))
+        {
+            _logger.LogInformation("Skipped scheduling ScanFolder for {Folder} as a job already queued",
+                normalizedFolder);
+            return;
+        }
+
+        _logger.LogInformation("Scheduling ScanFolder for {Folder}", normalizedFolder);
+        _scannerService.ScanFolder(normalizedFolder);
     }
 
     #endregion
@@ -186,17 +224,14 @@ public class TaskScheduler : ITaskScheduler
 
     public void ScanLibrary(int libraryId, bool force = false)
     {
-        var alreadyEnqueued =
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
-        if (alreadyEnqueued)
+        if (HasScanTaskRunningForLibrary(libraryId))
         {
-            _logger.LogInformation("A duplicate request to scan library for library occured. Skipping");
+            _logger.LogInformation("A duplicate request for Library Scan on library {LibraryId} occured. Skipping", libraryId);
             return;
         }
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
-            _logger.LogInformation("A Scan is already running, rescheduling ScanLibrary in 3 hours");
+            _logger.LogInformation("A Library Scan is already running, rescheduling ScanLibrary in 3 hours");
             BackgroundJob.Schedule(() => ScanLibrary(libraryId, force), TimeSpan.FromHours(3));
             return;
         }
@@ -204,7 +239,7 @@ public class TaskScheduler : ITaskScheduler
         _logger.LogInformation("Enqueuing library scan for: {LibraryId}", libraryId);
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force));
         // When we do a scan, force cache to re-unpack in case page numbers change
-        BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheDirectory());
+        BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheAndTempDirectories());
     }
 
     public void CleanupChapters(int[] chapterIds)
@@ -285,34 +320,84 @@ public class TaskScheduler : ITaskScheduler
         await _versionUpdaterService.PushUpdate(update);
     }
 
-    public static bool HasScanTaskRunningForLibrary(int libraryId)
+    /// <summary>
+    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanLibrary"/> method
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
+    /// <returns></returns>
+    public static bool HasScanTaskRunningForLibrary(int libraryId, bool checkRunningJobs = true)
     {
         return
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, true}, ScanQueue) ||
-            HasAlreadyEnqueuedTask("ScannerService", "ScanLibrary", new object[] {libraryId, false}, ScanQueue);
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, true}, ScanQueue, checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanLibrary", new object[] {libraryId, false}, ScanQueue, checkRunningJobs);
     }
 
     /// <summary>
-    /// Checks if this same invocation is already enqueued
+    /// If there is an enqueued or scheduled task for <see cref="ScannerService.ScanSeries"/> method
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="checkRunningJobs">Checks against jobs currently executing as well</param>
+    /// <returns></returns>
+    public static bool HasScanTaskRunningForSeries(int seriesId, bool checkRunningJobs = true)
+    {
+        return
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, true}, ScanQueue, checkRunningJobs) ||
+            HasAlreadyEnqueuedTask(ScannerService.Name, "ScanSeries", new object[] {seriesId, false}, ScanQueue, checkRunningJobs);
+    }
+
+    /// <summary>
+    /// Checks if this same invocation is already enqueued or scheduled
     /// </summary>
     /// <param name="methodName">Method name that was enqueued</param>
     /// <param name="className">Class name the method resides on</param>
     /// <param name="args">object[] of arguments in the order they are passed to enqueued job</param>
     /// <param name="queue">Queue to check against. Defaults to "default"</param>
+    /// <param name="checkRunningJobs">Check against running jobs. Defaults to false.</param>
     /// <returns></returns>
-    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue)
+    public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        return enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
+        var ret = enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
                                      j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
                                      j.Value.Job.Method.Name.Equals(methodName) &&
                                      j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        if (ret) return true;
+
+        var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
+        ret = scheduledJobs.Any(j =>
+            j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+            j.Value.Job.Method.Name.Equals(methodName) &&
+            j.Value.Job.Method.DeclaringType.Name.Equals(className));
+
+        if (ret) return true;
+
+        if (checkRunningJobs)
+        {
+            var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
+            return runningJobs.Any(j =>
+                j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+                j.Value.Job.Method.Name.Equals(methodName) &&
+                j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        }
+
+        return false;
     }
 
+    /// <summary>
+    /// Checks against any jobs that are running or about to run
+    /// </summary>
+    /// <param name="classNames"></param>
+    /// <param name="queue"></param>
+    /// <returns></returns>
     public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        return enqueuedJobs.Any(j => !j.Value.InEnqueuedState &&
+        var ret = enqueuedJobs.Any(j => !j.Value.InEnqueuedState &&
                                      classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
+        if (ret) return true;
+
+        var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
+        return runningJobs.Any(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
     }
 }

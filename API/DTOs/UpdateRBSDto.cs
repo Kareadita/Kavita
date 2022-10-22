@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace API.DTOs
+namespace API.DTOs;
+
+public class UpdateRbsDto
 {
-    public class UpdateRbsDto
-    {
-        public string Username { get; init; }
-        public IList<string> Roles { get; init; }
-    }
+    public string Username { get; init; }
+    public IList<string> Roles { get; init; }
 }

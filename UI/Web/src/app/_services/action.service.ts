@@ -8,10 +8,12 @@ import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-t
 import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { ConfirmService } from '../shared/confirm.service';
 import { Chapter } from '../_models/chapter';
+import { Device } from '../_models/device/device';
 import { Library } from '../_models/library';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
+import { DeviceService } from './device.service';
 import { LibraryService } from './library.service';
 import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
@@ -39,7 +41,7 @@ export class ActionService implements OnDestroy {
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService, 
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService) { }
+    private confirmService: ConfirmService, private memberService: MemberService, private deviceSerivce: DeviceService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -548,6 +550,15 @@ export class ActionService implements OnDestroy {
       if (callback) {
         this.toastr.success('Series deleted');
         callback(res);
+      }
+    });
+  }
+
+  sendToDevice(chapterIds: Array<number>, device: Device, callback?: VoidActionCallback) {
+    this.deviceSerivce.sendTo(chapterIds, device.id).subscribe(() => {
+      this.toastr.success('File emailed to ' + device.name);
+      if (callback) {
+        callback();
       }
     });
   }

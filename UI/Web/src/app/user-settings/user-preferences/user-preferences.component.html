@@ -8,7 +8,12 @@
         <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
             <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
             <ng-template ngbNavContent>
-              <ng-container *ngIf="tab.fragment === ''">
+              <ng-container *ngIf="tab.fragment === FragmentID.Account">
+                  <app-change-email></app-change-email>
+                  <app-change-password></app-change-password>
+                  <app-change-age-restriction></app-change-age-restriction>
+              </ng-container>
+              <ng-container *ngIf="tab.fragment === FragmentID.Prefernces">
                 <p>
                     These are global settings that are bound to your account.
                 </p>
@@ -57,6 +62,18 @@
                                             
                                             <ng-template #promptForDownloadSizeTooltip>Prompt when a download exceedes 100MB in size</ng-template>
                                             <span class="visually-hidden" id="settings-global-promptForDownloadSize-help">Prompt when a download exceedes 100MB in size</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-0">
+                                        <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <div class="form-check form-switch">
+                                                <input type="checkbox" id="no-transitions" role="switch" formControlName="noTransitions" class="form-check-input" aria-describedby="settings-global-noTransitions-help" [value]="true" aria-labelledby="auto-close-label">
+                                                <label class="form-check-label" for="no-transitions">Disable Animations</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="noTransitionsTooltip" role="button" tabindex="0"></i>
+                                            </div>
+
+                                            <ng-template #noTransitionsTooltip>Turns off animations in the site. Useful for e-ink readers</ng-template>
+                                            <span class="visually-hidden" id="settings-global-noTransitions-help">Turns off animations in the site. Useful for e-ink readers</span>
                                         </div>
                                     </div>
 
@@ -126,7 +143,7 @@
                                             <label for="settings-backgroundcolor-option" class="form-label">Background Color</label>
                                             <input [value]="user.preferences.backgroundColor"
                                                 class="form-control"
-                                                (colorPickerChange)="settingsForm.markAsTouched()"
+                                                (colorPickerChange)="handleBackgroundColorChange()"
                                                 [style.background]="user.preferences.backgroundColor"
                                                 [cpAlphaChannel]="'disabled'"
                                                 [(colorPicker)]="user.preferences.backgroundColor"/>
@@ -277,63 +294,19 @@
                     </ngb-accordion>
                 </form>
               </ng-container>
-              <ng-container *ngIf="tab.fragment === 'password'">
-                
-                <ng-container *ngIf="(hasChangePasswordAbility | async); else noPermission">
-                    <p>Change your Password</p>
-                    <div class="alert alert-danger" role="alert" *ngIf="resetPasswordErrors.length > 0">
-                        <div *ngFor="let error of resetPasswordErrors">{{error}}</div>
-                    </div>
-                    <form [formGroup]="passwordChangeForm">
-                        <div class="mb-3">
-                            <label for="oldpass" class="form-label">Current Password</label>
-                            <input class="form-control custom-input" type="password" id="oldpass" formControlName="oldPassword">
-                            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
-                                <div *ngIf="passwordChangeForm.get('oldPassword')?.errors?.required">
-                                    This field is required
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="new-password">New Password</label>
-                            <input class="form-control" type="password" id="new-password" formControlName="password">
-                            <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
-                                <div *ngIf="password?.errors?.required">
-                                    This field is required
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirm-password">Confirm Password</label>
-                            <input class="form-control" type="password" id="confirm-password" formControlName="confirmPassword" aria-describedby="password-validations">
-                            <div id="password-validations" class="invalid-feedback" *ngIf="passwordChangeForm.dirty || passwordChangeForm.touched">
-                                <div *ngIf="!passwordsMatch">
-                                    Passwords must match
-                                </div>
-                                <div *ngIf="confirmPassword?.errors?.required">
-                                    This field is required
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                            <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="password-panel" (click)="resetPasswordForm()">Reset</button>
-                            <button type="submit" class="flex-fill btn btn-primary" aria-describedby="password-panel" (click)="savePasswordForm()" [disabled]="!passwordChangeForm.valid || !(passwordChangeForm.dirty || passwordChangeForm.touched)">Save</button>
-                        </div>
-                    </form>
-                </ng-container>
-                <ng-template #noPermission>
-                    <p>You do not have permission to change your password. Reach out to the admin of the server.</p>
-                </ng-template>
-              </ng-container>
-              <ng-container *ngIf="tab.fragment === 'clients'">
+
+
+              <ng-container *ngIf="tab.fragment === FragmentID.Clients">
                 <p>All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.</p>
                 <p class="alert alert-warning" role="alert" *ngIf="!opdsEnabled">OPDS is not enabled on this server.</p>
                 <app-api-key tooltipText="The API key is like a password. Keep it secret, Keep it safe."></app-api-key>
                 <app-api-key title="OPDS URL" [showRefresh]="false" [transform]="makeUrl"></app-api-key>
               </ng-container>
-              <ng-container *ngIf="tab.fragment === 'theme'">
+              <ng-container *ngIf="tab.fragment === FragmentID.Theme">
                 <app-theme-manager></app-theme-manager>
+              </ng-container>
+              <ng-container *ngIf="tab.fragment === FragmentID.Devices">
+                <app-manage-devices></app-manage-devices>
               </ng-container>
             </ng-template>
         </li>

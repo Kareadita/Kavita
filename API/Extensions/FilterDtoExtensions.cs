@@ -3,20 +3,19 @@ using System.Collections.Generic;
 using API.DTOs.Filtering;
 using API.Entities.Enums;
 
-namespace API.Extensions
+namespace API.Extensions;
+
+public static class FilterDtoExtensions
 {
-    public static class FilterDtoExtensions
+    private static readonly IList<MangaFormat> AllFormats = Enum.GetValues<MangaFormat>();
+
+    public static IList<MangaFormat> GetSqlFilter(this FilterDto filter)
     {
-        private static readonly IList<MangaFormat> AllFormats = Enum.GetValues<MangaFormat>();
-
-        public static IList<MangaFormat> GetSqlFilter(this FilterDto filter)
+        if (filter.Formats == null || filter.Formats.Count == 0)
         {
-            if (filter.Formats == null || filter.Formats.Count == 0)
-            {
-                return AllFormats;
-            }
-
-            return filter.Formats;
+            return AllFormats;
         }
+
+        return filter.Formats;
     }
 }

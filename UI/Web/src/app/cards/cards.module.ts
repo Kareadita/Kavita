@@ -26,7 +26,7 @@ import { ListItemComponent } from './list-item/list-item.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
 import { DownloadIndicatorComponent } from './download-indicator/download-indicator.component';
-
+import { DynamicListPipe } from './dynamic-list.pipe';
 
 
 
@@ -49,6 +49,7 @@ import { DownloadIndicatorComponent } from './download-indicator/download-indica
     ListItemComponent,
     SeriesInfoCardsComponent,
     DownloadIndicatorComponent,
+    DynamicListPipe,
   ],
   imports: [
     CommonModule,
@@ -67,7 +68,6 @@ import { DownloadIndicatorComponent } from './download-indicator/download-indica
     NgbRatingModule,
     
     VirtualScrollerModule,
-
 
     NgbOffcanvasModule, // Series Detail, action of cards
     NgbNavModule, //Series Detail

@@ -33,17 +33,19 @@ public interface ILibraryRepository
     void Delete(Library library);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
     Task<bool> LibraryExists(string libraryName);
-    Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes);
+    Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
+    Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
     IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
+    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync();
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
     Library GetLibraryByFolder(string folder);
@@ -110,12 +112,25 @@ public class LibraryRepository : ILibraryRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
+    /// <summary>
+    /// This does not track
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     public async Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId)
     {
         return await _context.Library
             .Include(l => l.AppUsers)
             .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
             .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId)
+    {
+        return await _context.Library
+            .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
+            .Select(l => l.Id)
             .ToListAsync();
     }
 
@@ -173,6 +188,10 @@ public class LibraryRepository : ILibraryRepository
         });
     }
 
+    /// <summary>
+    /// Returns all Libraries with their Folders
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync()
     {
         return await _context.Library
@@ -184,14 +203,14 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes)
+    public async Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None)
     {
 
         var query = _context.Library
             .Where(x => x.Id == libraryId);
 
         query = AddIncludesToQuery(query, includes);
-        return await query.SingleAsync();
+        return await query.SingleOrDefaultAsync();
     }
 
     private static IQueryable<Library> AddIncludesToQuery(IQueryable<Library> query, LibraryIncludes includeFlags)
@@ -294,6 +313,26 @@ public class LibraryRepository : ILibraryRepository
     {
         var ret = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
+            .Select(s => s.Metadata.Language)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Distinct()
+            .ToListAsync();
+
+        return ret
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(s => new LanguageDto()
+            {
+                Title = CultureInfo.GetCultureInfo(s).DisplayName,
+                IsoCode = s
+            })
+            .OrderBy(s => s.Title)
+            .ToList();
+    }
+
+    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync()
+    {
+        var ret = await _context.Series
             .Select(s => s.Metadata.Language)
             .AsSplitQuery()
             .AsNoTracking()

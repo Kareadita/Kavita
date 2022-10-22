@@ -32,6 +32,7 @@ public class OpdsController : BaseApiController
     private readonly ICacheService _cacheService;
     private readonly IReaderService _readerService;
     private readonly ISeriesService _seriesService;
+    private readonly IAccountService _accountService;
 
 
     private readonly XmlSerializer _xmlSerializer;
@@ -65,7 +66,8 @@ public class OpdsController : BaseApiController
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
-        IReaderService readerService, ISeriesService seriesService)
+        IReaderService readerService, ISeriesService seriesService,
+        IAccountService accountService)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -73,6 +75,7 @@ public class OpdsController : BaseApiController
         _cacheService = cacheService;
         _readerService = readerService;
         _seriesService = seriesService;
+        _accountService = accountService;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -193,8 +196,8 @@ public class OpdsController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        IList<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync()).ToList()
-            : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync()).ToList();
+        IEnumerable<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
+            : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId));
 
 
         var feed = CreateFeed("All Collections", $"{apiKey}/collections", apiKey);
@@ -236,7 +239,7 @@ public class OpdsController : BaseApiController
         }
         else
         {
-            tags = await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync();
+            tags = await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId);
         }
 
         var tag = tags.SingleOrDefault(t => t.Id == collectionId);
@@ -619,7 +622,7 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
-        if (!await _downloadService.HasDownloadPermission(user))
+        if (!await _accountService.HasDownloadPermission(user))
         {
             return BadRequest("User does not have download permissions");
         }

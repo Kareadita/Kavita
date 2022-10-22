@@ -4,80 +4,79 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 
-namespace API.Tests.Helpers
+namespace API.Tests.Helpers;
+
+/// <summary>
+/// Used to help quickly create DB entities for Unit Testing
+/// </summary>
+public static class EntityFactory
 {
-    /// <summary>
-    /// Used to help quickly create DB entities for Unit Testing
-    /// </summary>
-    public static class EntityFactory
+    public static Series CreateSeries(string name)
     {
-        public static Series CreateSeries(string name)
+        return new Series()
         {
-            return new Series()
-            {
-                Name = name,
-                SortName = name,
-                LocalizedName = name,
-                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-                Volumes = new List<Volume>(),
-                Metadata = new SeriesMetadata()
-            };
-        }
+            Name = name,
+            SortName = name,
+            LocalizedName = name,
+            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            Volumes = new List<Volume>(),
+            Metadata = new SeriesMetadata()
+        };
+    }
 
-        public static Volume CreateVolume(string volumeNumber, List<Chapter> chapters = null)
+    public static Volume CreateVolume(string volumeNumber, List<Chapter> chapters = null)
+    {
+        var chaps = chapters ?? new List<Chapter>();
+        var pages = chaps.Count > 0 ? chaps.Max(c => c.Pages) : 0;
+        return new Volume()
         {
-            var chaps = chapters ?? new List<Chapter>();
-            var pages = chaps.Count > 0 ? chaps.Max(c => c.Pages) : 0;
-            return new Volume()
-            {
-                Name = volumeNumber,
-                Number = (int) API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
-                Pages = pages,
-                Chapters = chaps
-            };
-        }
+            Name = volumeNumber,
+            Number = (int) API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
+            Pages = pages,
+            Chapters = chaps
+        };
+    }
 
-        public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null, int pageCount = 0)
+    public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null, int pageCount = 0)
+    {
+        return new Chapter()
         {
-            return new Chapter()
-            {
-                IsSpecial = isSpecial,
-                Range = range,
-                Number = API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(range) + string.Empty,
-                Files = files ?? new List<MangaFile>(),
-                Pages = pageCount,
+            IsSpecial = isSpecial,
+            Range = range,
+            Number = API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(range) + string.Empty,
+            Files = files ?? new List<MangaFile>(),
+            Pages = pageCount,
 
-            };
-        }
+        };
+    }
 
-        public static MangaFile CreateMangaFile(string filename, MangaFormat format, int pages)
+    public static MangaFile CreateMangaFile(string filename, MangaFormat format, int pages)
+    {
+        return new MangaFile()
         {
-            return new MangaFile()
-            {
-                FilePath = filename,
-                Format = format,
-                Pages = pages
-            };
-        }
+            FilePath = filename,
+            Format = format,
+            Pages = pages
+        };
+    }
 
-        public static SeriesMetadata CreateSeriesMetadata(ICollection<CollectionTag> collectionTags)
+    public static SeriesMetadata CreateSeriesMetadata(ICollection<CollectionTag> collectionTags)
+    {
+        return new SeriesMetadata()
         {
-            return new SeriesMetadata()
-            {
-                CollectionTags = collectionTags
-            };
-        }
+            CollectionTags = collectionTags
+        };
+    }
 
-        public static CollectionTag CreateCollectionTag(int id, string title, string summary, bool promoted)
+    public static CollectionTag CreateCollectionTag(int id, string title, string summary, bool promoted)
+    {
+        return new CollectionTag()
         {
-            return new CollectionTag()
-            {
-                Id = id,
-                NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize(title).ToUpper(),
-                Title = title,
-                Summary = summary,
-                Promoted = promoted
-            };
-        }
+            Id = id,
+            NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize(title).ToUpper(),
+            Title = title,
+            Summary = summary,
+            Promoted = promoted
+        };
     }
 }

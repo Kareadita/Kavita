@@ -1,7 +1,6 @@
-﻿namespace API.DTOs
+﻿namespace API.DTOs;
+
+public class SeriesByIdsDto
 {
-    public class SeriesByIdsDto
-    {
-        public int[] SeriesIds { get; init; }
-    }
+    public int[] SeriesIds { get; init; }
 }

@@ -1,0 +1,49 @@
+<div class="card">
+    <form [formGroup]="settingsForm" class="card-body">
+        <div class="row g-0 mb-2">
+            <div class="col-md-3 col-sm-12 pe-2">
+                <label for="settings-name" class="form-label">Device Name</label>
+                <input id="settings-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="settingsForm.get('name')?.invalid && settingsForm.get('name')?.touched">
+                <ng-container *ngIf="settingsForm.get('name')?.errors as errors">
+                    <p class="invalid-feedback" *ngIf="errors.required">
+                        This field is required
+                    </p>
+                </ng-container>
+            </div>
+
+            <div class="col-md-3 col-sm-12 pe-2">
+                <label for="email" class="form-label">Email</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="emailTooltip" role="button" tabindex="0"></i>
+                <ng-template #emailTooltip>This email will be used to accept the file via Send To</ng-template>
+                <span class="visually-hidden" id="email-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
+                
+                <input id="email" aria-describedby="email-help" 
+                class="form-control" formControlName="email" type="email" 
+                placeholder="@kindle.com" [class.is-invalid]="settingsForm.get('email')?.invalid && settingsForm.get('email')?.touched">
+                <ng-container *ngIf="settingsForm.get('email')?.errors as errors">
+                    <p class="invalid-feedback" *ngIf="errors.email">
+                        This must be a valid email
+                    </p>
+                    <p class="invalid-feedback" *ngIf="errors.required">
+                        This field is required
+                    </p>
+                </ng-container>
+            </div>
+
+            <div class="col-md-3 col-sm-12 pe-2">
+                <label for="device-platform" class="form-label">Device Platform</label>
+                <select id="device-platform" aria-describedby="device-platform-help" class="form-select" formControlName="platform"
+                 [class.is-invalid]="settingsForm.get('platform')?.invalid && settingsForm.get('platform')?.touched">
+                    <option *ngFor="let patform of devicePlatforms" [value]="patform">{{patform | devicePlatform}}</option>
+                </select>
+                <ng-container *ngIf="settingsForm.get('platform')?.errors as errors">
+                    <p class="invalid-feedback" *ngIf="errors.required">
+                        This field is required
+                    </p>
+                </ng-container>
+            </div>
+        </div>
+        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
+            <button type="submit" class="flex-fill btn btn-primary" (click)="addDevice()" [disabled]="!settingsForm.dirty">Save</button>
+        </div>
+    </form>
+</div>

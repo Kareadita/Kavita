@@ -35,4 +35,62 @@ public class ComicInfoTests
         Assert.Equal(AgeRating.RatingPending, ComicInfo.ConvertAgeRatingToEnum("rating pending"));
     }
     #endregion
+
+
+    #region CalculatedCount
+
+    [Fact]
+    public void CalculatedCount_ReturnsVolumeCount()
+    {
+        var ci = new ComicInfo()
+        {
+            Number = "5",
+            Volume = "10",
+            Count = 10
+        };
+
+        Assert.Equal(5, ci.CalculatedCount());
+    }
+
+    [Fact]
+    public void CalculatedCount_ReturnsNoCountWhenCountNotSet()
+    {
+        var ci = new ComicInfo()
+        {
+            Number = "5",
+            Volume = "10",
+            Count = 0
+        };
+
+        Assert.Equal(5, ci.CalculatedCount());
+    }
+
+    [Fact]
+    public void CalculatedCount_ReturnsNumberCount()
+    {
+        var ci = new ComicInfo()
+        {
+            Number = "5",
+            Volume = "",
+            Count = 10
+        };
+
+        Assert.Equal(5, ci.CalculatedCount());
+    }
+
+    [Fact]
+    public void CalculatedCount_ReturnsNumberCount_OnlyWholeNumber()
+    {
+        var ci = new ComicInfo()
+        {
+            Number = "5.7",
+            Volume = "",
+            Count = 10
+        };
+
+        Assert.Equal(5, ci.CalculatedCount());
+    }
+
+
+    #endregion
 }

@@ -24,6 +24,7 @@ public class ThemeController : BaseApiController
         _taskScheduler = taskScheduler;
     }
 
+    [ResponseCache(CacheProfileName = "10Minute")]
     [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<SiteThemeDto>>> GetThemes()

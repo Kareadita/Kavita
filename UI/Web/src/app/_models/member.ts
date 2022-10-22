@@ -1,3 +1,4 @@
+import { AgeRestriction } from './age-restriction';
 import { Library } from './library';
 
 export interface Member {
@@ -6,7 +7,7 @@ export interface Member {
     email: string;
     lastActive: string; // datetime
     created: string; // datetime
-    //isAdmin: boolean;
     roles: string[];
     libraries: Library[];
+    ageRestriction: AgeRestriction;
 }

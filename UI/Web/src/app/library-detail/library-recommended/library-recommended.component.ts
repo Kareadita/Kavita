@@ -66,8 +66,8 @@ export class LibraryRecommendedComponent implements OnInit, OnDestroy {
   }
 
 
-  reloadInProgress(series: Series | boolean) {
-    if (series === true || series === false) {
+  reloadInProgress(series: Series | number) {
+    if (Number.isInteger(series)) {
       if (!series) {return;}
     }
     // If the update to Series doesn't affect the requirement to be in this stream, then ignore update request

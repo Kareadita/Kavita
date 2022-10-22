@@ -12,7 +12,7 @@ import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { SeriesFilter, FilterEvent } from 'src/app/_models/series-filter';
-import { Action } from 'src/app/_services/action-factory.service';
+import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
@@ -48,11 +48,11 @@ export class WantToReadComponent implements OnInit, OnDestroy {
   private onDestroy: Subject<void> = new Subject<void>();
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
-  bulkActionCallback = (action: Action, data: any) => {
+  bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
     const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
 
-    switch (action) {
+    switch (action.action) {
       case Action.RemoveFromWantToReadList:
         this.actionService.removeMultipleSeriesFromWantToReadList(selectedSeries.map(s => s.id), () => {
           this.bulkSelectionService.deselectAll();
@@ -61,6 +61,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
         break;
     }
   }
+  
   collectionTag: any;
   tagImage: any;
 
@@ -85,7 +86,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
 
       this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
       [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-      this.filterActiveCheck = this.seriesService.createSeriesFilter();
+      this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
       this.cdRef.markForCheck();
 
       this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
@@ -163,6 +164,23 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
     this.loadPage();
+  }
+
+  handleAction(action: ActionItem<Series>, series: Series) {
+    // let lib: Partial<Library> = library;
+    // if (library === undefined) {
+    //   lib = {id: this.libraryId, name: this.libraryName};
+    // }
+    // switch (action.action) {
+    //   case(Action.Scan):
+    //     this.actionService.scanLibrary(lib);
+    //     break;
+    //   case(Action.RefreshMetadata):
+    //   this.actionService.refreshMetadata(lib);
+    //     break;
+    //   default:
+    //     break;
+    // }
   }
 }
 

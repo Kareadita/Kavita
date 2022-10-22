@@ -1,0 +1,68 @@
+<div class="card mt-2">
+    <div class="card-body">
+        <div class="card-title">
+            <div class="container-fluid row mb-2">
+                <div class="col-10 col-sm-11">
+                    <h4 id="email-card">Email 
+                        <ng-container *ngIf="!emailConfirmed">
+                            <i class="fa-solid fa-circle ms-1 confirm-icon" aria-hidden="true" ngbTooltip="This email is not confirmed"></i>
+                            <span class="visually-hidden">This email is not confirmed</span>
+                        </ng-container>
+                    </h4>
+                </div>
+                <div class="col-1 text-end">
+                    <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
+                </div>
+            </div>
+        </div>
+        
+        <ng-container *ngIf="isViewMode">
+            <div class="container-fluid row">
+                <span class="col-12">{{user?.email}}</span>  
+            </div>
+        </ng-container>
+
+        <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+            <ng-container>
+                <div class="alert alert-danger" role="alert" *ngIf="errors.length > 0">
+                    <div *ngFor="let error of errors">{{error}}</div>
+                </div>
+                <form [formGroup]="form">
+                    <div class="mb-3">
+                        <label for="email" class="form-label visually-hidden">Email</label>
+                        <input class="form-control custom-input" type="email" id="email" formControlName="email"
+                         [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched">
+                        <div id="email-validations" class="invalid-feedback" *ngIf="form.dirty || form.touched">
+                            <div *ngIf="form.get('email')?.errors?.required">
+                                This field is required
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+                        <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="email-card" (click)="resetForm()">Reset</button>
+                        <button type="submit" class="flex-fill btn btn-primary" aria-describedby="email-card" (click)="saveForm()" [disabled]="!form.valid || !(form.dirty || form.touched)">Save</button>
+                    </div>
+                </form>
+            </ng-container>
+
+            <ng-container *ngIf="emailLink !== ''">
+                <h4>Email Updated</h4>
+                <p>You can use the following link below to confirm the email for your account. 
+                    If your server is externally accessible, an email will have been sent to the email and the link can be used to confirm the email.
+                </p>
+                <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">Setup user's account</a>
+                <app-api-key title="Invite Url" tooltipText="Copy this and paste in a new tab. You may need to log out." [showRefresh]="false" [transform]="makeLink"></app-api-key>
+            </ng-container>
+            
+            <ng-template #noPermission>
+                <p>You do not have permission to change your password. Reach out to the admin of the server.</p>
+            </ng-template>
+        </div>
+
+        
+    </div>
+    
+
+</div>
+

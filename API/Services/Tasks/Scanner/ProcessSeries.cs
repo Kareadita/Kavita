@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -14,6 +15,7 @@ using API.Parser;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks.Scanner;
@@ -47,8 +49,6 @@ public class ProcessSeries : IProcessSeries
     private IList<Genre> _genres;
     private IList<Person> _people;
     private IList<Tag> _tags;
-
-
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -108,6 +108,7 @@ public class ProcessSeries : IProcessSeries
         {
             seriesAdded = true;
             series = DbFactory.Series(firstInfo.Series, firstInfo.LocalizedSeries);
+            _unitOfWork.SeriesRepository.Add(series);
         }
 
         if (series.LibraryId == 0) series.LibraryId = library.Id;
@@ -116,7 +117,8 @@ public class ProcessSeries : IProcessSeries
         {
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
-            var firstParsedInfo = parsedInfos[0];
+            // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
+            var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
             UpdateVolumes(series, parsedInfos);
             series.Pages = series.Volumes.Sum(v => v.Pages);
@@ -155,7 +157,6 @@ public class ProcessSeries : IProcessSeries
             await UpdateSeriesFolderPath(parsedInfos, library, series);
 
             series.LastFolderScanned = DateTime.Now;
-            _unitOfWork.SeriesRepository.Attach(series);
 
             if (_unitOfWork.HasChanges())
             {
@@ -166,7 +167,9 @@ public class ProcessSeries : IProcessSeries
                 catch (Exception ex)
                 {
                     await _unitOfWork.RollbackAsync();
-                    _logger.LogCritical(ex, "[ScannerService] There was an issue writing to the for series {@SeriesName}", series);
+                    _logger.LogCritical(ex,
+                        "[ScannerService] There was an issue writing to the database for series {@SeriesName}",
+                        series.Name);
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
@@ -210,13 +213,13 @@ public class ProcessSeries : IProcessSeries
             if (!library.Folders.Select(f => f.Path).Contains(seriesDirs.Keys.First()))
             {
                 series.FolderPath = Parser.Parser.NormalizePath(seriesDirs.Keys.First());
+                _logger.LogDebug("Updating {Series} FolderPath to {FolderPath}", series.Name, series.FolderPath);
             }
         }
     }
 
     public void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false)
     {
-        //BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(libraryId, seriesId, forceUpdate));
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
@@ -233,12 +236,9 @@ public class ProcessSeries : IProcessSeries
         var chapters = series.Volumes.SelectMany(volume => volume.Chapters).ToList();
 
         // Update Metadata based on Chapter metadata
-        series.Metadata.ReleaseYear = chapters.Min(c => c.ReleaseDate.Year);
-
-        if (series.Metadata.ReleaseYear < 1000)
+        if (!series.Metadata.ReleaseYearLocked)
         {
-            // Not a valid year, default to 0
-            series.Metadata.ReleaseYear = 0;
+            series.Metadata.ReleaseYear = chapters.MinimumReleaseYear();
         }
 
         // Set the AgeRating as highest in all the comicInfos
@@ -438,7 +438,22 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
-            var volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+            _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
+            Volume volume;
+            try
+            {
+                volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Equals("Sequence contains more than one matching element"))
+                {
+                    _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
+                    throw new KavitaException(
+                        $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
+                }
+                throw;
+            }
             if (volume == null)
             {
                 volume = DbFactory.Volume(volumeNumber);
@@ -457,7 +472,7 @@ public class ProcessSeries : IProcessSeries
             foreach (var chapter in volume.Chapters)
             {
                 var firstFile = chapter.Files.MinBy(x => x.Chapter);
-                if (firstFile == null || _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
+                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
                 try
                 {
                     var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
@@ -479,10 +494,10 @@ public class ProcessSeries : IProcessSeries
             var deletedVolumes = series.Volumes.Except(nonDeletedVolumes);
             foreach (var volume in deletedVolumes)
             {
-                var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? "";
+                var file = volume.Chapters.FirstOrDefault()?.Files?.FirstOrDefault()?.FilePath ?? string.Empty;
                 if (!string.IsNullOrEmpty(file) && _directoryService.FileSystem.File.Exists(file))
                 {
-                    _logger.LogError(
+                    _logger.LogInformation(
                         "[ScannerService] Volume cleanup code was trying to remove a volume with a file still existing on disk. File: {File}",
                         file);
                 }
@@ -493,7 +508,7 @@ public class ProcessSeries : IProcessSeries
             series.Volumes = nonDeletedVolumes;
         }
 
-        _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from {StartingVolumeCount} to {VolumeCount}",
+        _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from count of {StartingVolumeCount} to {VolumeCount}",
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
@@ -582,7 +597,7 @@ public class ProcessSeries : IProcessSeries
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
-            _cacheHelper.HasFileNotChangedSinceCreationOrLastScan(chapter, false, firstFile)) return;
+            _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) return;
 
         var comicInfo = info;
         if (info == null)
@@ -616,14 +631,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         // This needs to check against both Number and Volume to calculate Count
-        if (!string.IsNullOrEmpty(comicInfo.Number) && float.Parse(comicInfo.Number) > 0)
-        {
-            chapter.Count = (int) Math.Floor(float.Parse(comicInfo.Number));
-        }
-        if (!string.IsNullOrEmpty(comicInfo.Volume) && float.Parse(comicInfo.Volume) > 0)
-        {
-            chapter.Count = Math.Max(chapter.Count, (int) Math.Floor(float.Parse(comicInfo.Volume)));
-        }
+        chapter.Count = comicInfo.CalculatedCount();
 
         void AddPerson(Person person)
         {
@@ -632,13 +640,11 @@ public class ProcessSeries : IProcessSeries
 
         void AddGenre(Genre genre)
         {
-            //chapter.Genres.Add(genre);
             GenreHelper.AddGenreIfNotExists(chapter.Genres, genre);
         }
 
         void AddTag(Tag tag, bool added)
         {
-            //chapter.Tags.Add(tag);
             TagHelper.AddTagIfNotExists(chapter.Tags, tag);
         }
 
@@ -647,7 +653,7 @@ public class ProcessSeries : IProcessSeries
         {
             var day = Math.Max(comicInfo.Day, 1);
             var month = Math.Max(comicInfo.Month, 1);
-            chapter.ReleaseDate = DateTime.Parse($"{month}/{day}/{comicInfo.Year}");
+            chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
         var people = GetTagValues(comicInfo.Colorist);
@@ -736,7 +742,6 @@ public class ProcessSeries : IProcessSeries
     /// <param name="action"></param>
     private void UpdatePeople(IEnumerable<string> names, PersonRole role, Action<Person> action)
     {
-
         var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
 
         foreach (var name in names)

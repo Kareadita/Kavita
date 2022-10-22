@@ -1,6 +1,6 @@
 import { Component, HostListener, Inject, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { distinctUntilChanged, map, take } from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { MessageHubService } from './_services/message-hub.service';
@@ -8,6 +8,8 @@ import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT } from '@angular/common';
+import { DeviceService } from './_services/device.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +17,8 @@ import { DOCUMENT } from '@angular/common';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+
+  transitionState$!: Observable<boolean>;
 
   constructor(private accountService: AccountService, public navService: NavService, 
     private messageHub: MessageHubService, private libraryService: LibraryService, 
@@ -34,6 +38,10 @@ export class AppComponent implements OnInit {
         }
       });
 
+    this.transitionState$ = this.accountService.currentUser$.pipe(map((user) => {
+      if (!user) return false;
+      return user.preferences.noTransitions;
+    }));
   }
 
   @HostListener('window:resize', ['$event'])

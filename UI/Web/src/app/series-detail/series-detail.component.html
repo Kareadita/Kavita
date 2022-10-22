@@ -1,13 +1,13 @@
 <div #companionBar>
     <app-side-nav-companion-bar *ngIf="series !== undefined" [hasExtras]="true" [extraDrawer]="extrasDrawer">
             <ng-container title>
-                <h2 class="title">
-                    <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
+                <h2 class="title text-break">
+                    <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-v"></app-card-actionables>
                     <span>{{series.name}}</span>
                 </h2>
             </ng-container>
             <ng-container subtitle *ngIf="series.localizedName !== series.name">
-                <h6 class="subtitle-with-actionables" title="Localized Name">{{series.localizedName}}</h6>
+                <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
             </ng-container>
 
             <ng-template #extrasDrawer let-offcanvas>
@@ -58,11 +58,11 @@
 
 <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-3 info-container">
-        <div class="image-container col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
-            <app-image height="100%" maxHeight="100%" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
+        <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block">
+            <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
             <!-- NOTE: We can put continue point here as Vol X Ch Y or just Ch Y or Book Z ?-->
         </div>
-        <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
+        <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
             <div class="row g-0">
                 <div class="col-auto">
                     <button class="btn btn-primary" (click)="read()">
@@ -81,7 +81,7 @@
                 </div>
                 <div class="col-auto ms-2 d-none d-sm-block">
                     <div class="card-actions">
-                        <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
+                        <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
                     </div>
                 </div>
 
@@ -97,12 +97,16 @@
                     </button>
                 </div>
                 <div class="col-auto ms-2">
-                    <ngb-rating class="rating-star" [(rate)]="series.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()"></ngb-rating>
-                    <button *ngIf="series.userRating || series.userRating" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="bottom" ngbTooltip="Edit Review" aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
+                    <ngb-rating class="rating-star" [(rate)]="series.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()" [resettable]="false">
+                        <ng-template let-fill="fill" let-index="index">
+                            <span class="star" [class.filled]="(index < series.userRating) && series.userRating > 0">&#9733;</span>
+                          </ng-template>
+                    </ngb-rating>
+                    <button *ngIf="series.userRating || series.userReview" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="bottom" ngbTooltip="Edit Review" aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
                 </div>
             </div>
             <div class="row g-0">
-                <!-- TODO: This will be the first of reviews section. Reviews will show your plus other peoples reviews in media cards like Plex does and this will be below metadata -->
+                <!-- TODO: This will be the first of reviews section. Reviews will show your plus other peoples reviews in media cards like Plex does and this will be below metadata. NOTE: We need to clean the reviews in case any html is in there.-->
                 <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series.userReview || ''" [maxLength]="250"></app-read-more>
             </div>
             <div *ngIf="seriesMetadata" class="mt-2">

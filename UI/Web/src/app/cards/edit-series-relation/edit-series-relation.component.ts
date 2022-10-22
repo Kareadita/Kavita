@@ -8,6 +8,7 @@ import { Series } from 'src/app/_models/series';
 import { RelationKind, RelationKinds } from 'src/app/_models/series-detail/relation-kind';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
+import { SearchService } from 'src/app/_services/search.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
 interface RelationControl {
@@ -47,7 +48,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   private onDestroy: Subject<void> = new Subject<void>();
 
   constructor(private seriesService: SeriesService, private utilityService: UtilityService, 
-    public imageService: ImageService, private libraryService: LibraryService, 
+    public imageService: ImageService, private libraryService: LibraryService,  private searchService: SearchService,
     private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -64,6 +65,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
         this.setupRelationRows(relations.doujinshis, RelationKind.Doujinshi);
         this.setupRelationRows(relations.contains, RelationKind.Contains);
         this.setupRelationRows(relations.parent, RelationKind.Parent);
+        this.setupRelationRows(relations.editions, RelationKind.Edition);
         this.cdRef.detectChanges();
     });
 
@@ -109,7 +111,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
- 
+
   updateSeries(event: Array<SearchResult | undefined>, relation: RelationControl) {
     if (event[0] === undefined) {
       relation.series = undefined;
@@ -127,11 +129,11 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     seriesSettings.id = 'relation--' + index;
     seriesSettings.unique = true;
     seriesSettings.addIfNonExisting = false;
-    seriesSettings.fetchFn = (searchFilter: string) => this.libraryService.search(searchFilter).pipe(
+    seriesSettings.fetchFn = (searchFilter: string) => this.searchService.search(searchFilter).pipe(
       map(group => group.series),
       map(items => seriesSettings.compareFn(items, searchFilter)),
-      map(series => series.filter(s => s.seriesId !== this.series.id)), 
-    ); 
+      map(series => series.filter(s => s.seriesId !== this.series.id)),
+    );
 
     seriesSettings.compareFn = (options: SearchResult[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.name, filter));
@@ -142,7 +144,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     }
 
     if (series !== undefined) {
-      return this.libraryService.search(series.name).pipe(
+      return this.searchService.search(series.name).pipe(
         map(group => group.series), map(results => {
           seriesSettings.savedData = results.filter(s => s.seriesId === series.id);
           return seriesSettings;
@@ -164,10 +166,11 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     const alternativeSettings = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeSetting && item.series !== undefined).map(item => item.series!.id);
     const alternativeVersions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.AlternativeVersion && item.series !== undefined).map(item => item.series!.id);
     const doujinshis = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Doujinshi && item.series !== undefined).map(item => item.series!.id);
-    
+    const editions = this.relations.filter(item => (parseInt(item.formControl.value, 10) as RelationKind) === RelationKind.Edition && item.series !== undefined).map(item => item.series!.id);
+
     // NOTE: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
-    this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis).subscribe(() => {});
-    
+    this.seriesService.updateRelationships(this.series.id, adaptations, characters, contains, others, prequels, sequels, sideStories, spinOffs, alternativeSettings, alternativeVersions, doujinshis, editions).subscribe(() => {});
+
   }
 
 }

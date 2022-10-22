@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using API.Entities.Enums;
 
 namespace API.DTOs.Account;
 
@@ -16,4 +17,8 @@ public class InviteUserDto
     /// A list of libraries to grant access to
     /// </summary>
     public IList<int> Libraries { get; init; }
+    /// <summary>
+    /// An Age Rating which will limit the account to seeing everything equal to or below said rating.
+    /// </summary>
+    public AgeRestrictionDto AgeRestriction { get; set; }
 }

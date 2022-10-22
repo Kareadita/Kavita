@@ -5,12 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
+using API.DTOs.Account;
+using API.DTOs.Filtering;
 using API.DTOs.Reader;
 using API.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace API.Data.Repositories;
 
@@ -25,6 +28,7 @@ public enum AppUserIncludes
     UserPreferences = 32,
     WantToRead = 64,
     ReadingListsWithItems = 128,
+    Devices = 256,
 
 }
 
@@ -33,6 +37,7 @@ public interface IUserRepository
     void Update(AppUser user);
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
+    void Add(AppUserBookmark bookmark);
     public void Delete(AppUser user);
     void Delete(AppUserBookmark bookmark);
     Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
@@ -44,7 +49,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
-    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId);
+    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter);
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
     Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId);
@@ -58,6 +63,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
+    Task<AppUser> GetUserByConfirmationToken(string token);
 }
 
 public class UserRepository : IUserRepository
@@ -86,6 +92,11 @@ public class UserRepository : IUserRepository
     public void Update(AppUserBookmark bookmark)
     {
         _context.Entry(bookmark).State = EntityState.Modified;
+    }
+
+    public void Add(AppUserBookmark bookmark)
+    {
+        _context.AppUserBookmark.Add(bookmark);
     }
 
     public void Delete(AppUser user)
@@ -186,6 +197,11 @@ public class UserRepository : IUserRepository
             query = query.Include(u => u.WantToRead);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.Devices))
+        {
+            query = query.Include(u => u.Devices);
+        }
+
 
 
         return query;
@@ -227,7 +243,8 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<AppUser>> GetAllUsers()
     {
-        return await _context.AppUser.ToListAsync();
+        return await _context.AppUser
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId)
@@ -251,6 +268,11 @@ public class UserRepository : IUserRepository
     {
         var query = AddIncludesToQuery(_context.Users.AsQueryable(), includeFlags);
         return await query.ToListAsync();
+    }
+
+    public async Task<AppUser> GetUserByConfirmationToken(string token)
+    {
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.ConfirmationToken.Equals(token));
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
@@ -309,12 +331,38 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId)
+    /// <summary>
+    /// Get all bookmarks for the user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="filter">Only supports SeriesNameQuery</param>
+    /// <returns></returns>
+    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter)
     {
-        return await _context.AppUserBookmark
+        var query = _context.AppUserBookmark
             .Where(x => x.AppUserId == userId)
             .OrderBy(x => x.Page)
-            .AsNoTracking()
+            .AsNoTracking();
+
+        if (!string.IsNullOrEmpty(filter.SeriesNameQuery))
+        {
+            var seriesNameQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(filter.SeriesNameQuery);
+            var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
+                {
+                    bookmark,
+                    series
+                })
+                .Where(o => EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%")
+                            || EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%")
+                            || EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%")
+                            || EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%")
+                );
+
+            query = filterSeriesQuery.Select(o => o.bookmark);
+        }
+
+
+        return await query
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -349,6 +397,11 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                AgeRestriction = new AgeRestrictionDto()
+                {
+                    AgeRating = u.AgeRestriction,
+                    IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+                },
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,
@@ -362,10 +415,14 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+    /// <summary>
+    /// Returns a list of users that are considered Pending by invite. This means email is unconfirmed and they have never logged in
+    /// </summary>
+    /// <returns></returns>
     public async Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync()
     {
         return await _context.Users
-            .Where(u => !u.EmailConfirmed)
+            .Where(u => !u.EmailConfirmed && u.LastActive == DateTime.MinValue)
             .Include(x => x.Libraries)
             .Include(r => r.UserRoles)
             .ThenInclude(r => r.Role)
@@ -378,6 +435,11 @@ public class UserRepository : IUserRepository
                 Created = u.Created,
                 LastActive = u.LastActive,
                 Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                AgeRestriction = new AgeRestrictionDto()
+                {
+                    AgeRating = u.AgeRestriction,
+                    IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+                },
                 Libraries =  u.Libraries.Select(l => new LibraryDto
                 {
                     Name = l.Name,

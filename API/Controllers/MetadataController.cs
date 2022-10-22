@@ -8,6 +8,7 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Metadata;
 using API.Entities.Enums;
+using API.Extensions;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,14 +32,17 @@ public class MetadataController : BaseApiController
     [HttpGet("genres")]
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
     {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, userId));
         }
 
-        return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync());
+        return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync(userId));
     }
+
+
 
     /// <summary>
     /// Fetches people from the instance
@@ -48,12 +52,13 @@ public class MetadataController : BaseApiController
     [HttpGet("people")]
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(string? libraryIds)
     {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, userId));
         }
-        return Ok(await _unitOfWork.PersonRepository.GetAllPeople());
+        return Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(userId));
     }
 
     /// <summary>
@@ -64,19 +69,22 @@ public class MetadataController : BaseApiController
     [HttpGet("tags")]
     public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids));
+            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, userId));
         }
-        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync());
+        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync(userId));
     }
 
     /// <summary>
     /// Fetches all age ratings from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
+    /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
+    [ResponseCache(CacheProfileName = "5Minute", VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("age-ratings")]
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
@@ -90,14 +98,16 @@ public class MetadataController : BaseApiController
         {
             Title = t.ToDescription(),
             Value = t
-        }));
+        }).Where(r => r.Value > AgeRating.NotApplicable));
     }
 
     /// <summary>
     /// Fetches all publication status' from the instance
     /// </summary>
     /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
+    /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
+    [ResponseCache(CacheProfileName = "5Minute", VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("publication-status")]
     public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {
@@ -115,8 +125,9 @@ public class MetadataController : BaseApiController
     }
 
     /// <summary>
-    /// Fetches all age ratings from the instance
+    /// Fetches all age languages from the libraries passed (or if none passed, all in the server)
     /// </summary>
+    /// <remarks>This does not perform RBS for the user if they have Library access due to the non-sensitive nature of languages</remarks>
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <returns></returns>
     [HttpGet("languages")]
@@ -128,15 +139,8 @@ public class MetadataController : BaseApiController
             return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
         }
 
-        var englishTag = CultureInfo.GetCultureInfo("en");
-        return Ok(new List<LanguageDto>()
-        {
-            new ()
-            {
-                Title = englishTag.DisplayName,
-                IsoCode = englishTag.IetfLanguageTag
-            }
-        });
+
+        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync());
     }
 
     [HttpGet("all-languages")]

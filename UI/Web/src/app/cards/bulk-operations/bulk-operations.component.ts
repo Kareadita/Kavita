@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
+import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { BulkSelectionService } from '../bulk-selection.service';
 
 @Component({
@@ -11,7 +11,7 @@ import { BulkSelectionService } from '../bulk-selection.service';
 })
 export class BulkOperationsComponent implements OnInit, OnDestroy {
 
-  @Input() actionCallback!: (action: Action, data: any) => void;
+  @Input() actionCallback!: (action: ActionItem<any>, data: any) => void;
 
   topOffset: number = 56;
   hasMarkAsRead: boolean = false;
@@ -24,14 +24,15 @@ export class BulkOperationsComponent implements OnInit, OnDestroy {
     return Action;
   }
 
-  constructor(public bulkSelectionService: BulkSelectionService, private readonly cdRef: ChangeDetectorRef) { }
+  constructor(public bulkSelectionService: BulkSelectionService, private readonly cdRef: ChangeDetectorRef,
+    private actionFactoryService: ActionFactoryService) { }
 
   ngOnInit(): void {
     this.bulkSelectionService.actions$.pipe(takeUntil(this.onDestory)).subscribe(actions => {
-      actions.forEach(a => a.callback = this.actionCallback.bind(this));
-      this.actions = actions;
-      this.hasMarkAsRead = this.actions.filter(act => act.action === Action.MarkAsRead).length > 0;
-      this.hasMarkAsUnread = this.actions.filter(act => act.action === Action.MarkAsUnread).length > 0;
+      // We need to do a recursive callback apply
+      this.actions = this.actionFactoryService.applyCallbackToList(actions, this.actionCallback.bind(this));
+      this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);
+      this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
       this.cdRef.markForCheck();
     });
   }
@@ -41,14 +42,12 @@ export class BulkOperationsComponent implements OnInit, OnDestroy {
     this.onDestory.complete();
   }
 
-  handleActionCallback(action: Action, data: any) {
+  handleActionCallback(action: ActionItem<any>, data: any) {
     this.actionCallback(action, data);
   }
 
   performAction(action: ActionItem<any>) {
-    if (typeof action.callback === 'function') {
-      action.callback(action.action, null);
-    }
+    this.actionCallback(action, null);
   }
 
   executeAction(action: Action) {

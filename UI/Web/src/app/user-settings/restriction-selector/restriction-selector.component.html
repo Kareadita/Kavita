@@ -1,0 +1,31 @@
+<ng-container *ngIf="restrictionForm">
+    <ng-container *ngIf="showContext">
+        <h4>Age Rating Restriction</h4>
+        <p>When selected, all series and reading lists that have at least one item that is greater than the selected restriction will be pruned from results. 
+            <ng-container *ngIf="isAdmin">This is not applicable for admins.</ng-container>
+        </p>
+    </ng-container>
+    <form [formGroup]="restrictionForm">
+        <div class="mb-3">
+            <label for="age-rating" class="form-label visually-hidden">Age Rating</label>
+            <div class="input-group">
+                <select class="form-select"id="age-rating" formControlName="ageRating">
+                    <option value="-1">No Restriction</option>
+                    <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-check form-switch">
+                <input type="checkbox" id="auto-close" role="switch" formControlName="ageRestrictionIncludeUnknowns" class="form-check-input" aria-describedby="include-unknowns-help" [value]="true" aria-labelledby="auto-close-label">
+                <label class="form-check-label" for="auto-close">Include Unknowns</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="includeUnknownsTooltip" role="button" tabindex="0"></i>
+            </div>
+            
+            <ng-template #includeUnknownsTooltip>If true, Unknowns will be allowed with Age Restrcition. This could lead to untagged media leaking to users with Age restrictions.</ng-template>
+            <span class="visually-hidden" id="include-unknowns-help">If true, Unknowns will be allowed with Age Restrcition. This could lead to untagged media leaking to users with Age restrictions.</span>
+        </div>
+
+
+    </form>
+</ng-container>

@@ -1,16 +1,15 @@
 ﻿using System.Xml.Serialization;
 
-namespace API.DTOs.OPDS
+namespace API.DTOs.OPDS;
+
+public class SearchLink
 {
-    public class SearchLink
-    {
-        [XmlAttribute("type")]
-        public string Type { get; set; }
+    [XmlAttribute("type")]
+    public string Type { get; set; }
 
-        [XmlAttribute("rel")]
-        public string Rel { get; set; } = "results";
+    [XmlAttribute("rel")]
+    public string Rel { get; set; } = "results";
 
-        [XmlAttribute("template")]
-        public string Template { get; set; }
-    }
+    [XmlAttribute("template")]
+    public string Template { get; set; }
 }

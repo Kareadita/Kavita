@@ -38,6 +38,7 @@ public class CleanupServiceTests
     private const string CacheDirectory = "C:/kavita/config/cache/";
     private const string CoverImageDirectory = "C:/kavita/config/covers/";
     private const string BackupDirectory = "C:/kavita/config/backups/";
+    private const string LogDirectory = "C:/kavita/config/logs/";
     private const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
 
 
@@ -83,6 +84,9 @@ public class CleanupServiceTests
 
         setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
         setting.Value = BookmarkDirectory;
+
+        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
+        setting.Value = "10";
 
         _context.ServerSetting.Update(setting);
 
@@ -347,7 +351,7 @@ public class CleanupServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
             ds);
-        cleanupService.CleanupCacheDirectory();
+        cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 
@@ -361,7 +365,7 @@ public class CleanupServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
         var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
             ds);
-        cleanupService.CleanupCacheDirectory();
+        cleanupService.CleanupCacheAndTempDirectories();
         Assert.Empty(ds.GetFiles(CacheDirectory, searchOption: SearchOption.AllDirectories));
     }
 
@@ -408,6 +412,59 @@ public class CleanupServiceTests
             ds);
         await cleanupService.CleanupBackups();
         Assert.True(filesystem.File.Exists($"{BackupDirectory}randomfile.zip"));
+    }
+
+    #endregion
+
+    #region CleanupLogs
+
+    [Fact]
+    public async Task CleanupLogs_LeaveOneFile_SinceAllAreExpired()
+    {
+        var filesystem = CreateFileSystem();
+        foreach (var i in Enumerable.Range(1, 10))
+        {
+            var day = API.Services.Tasks.Scanner.Parser.Parser.PadZeros($"{i}");
+            filesystem.AddFile($"{LogDirectory}kavita202009{day}.log", new MockFileData("")
+            {
+                CreationTime = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(31))
+            });
+        }
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
+            ds);
+        await cleanupService.CleanupLogs();
+        Assert.Single(ds.GetFiles(LogDirectory, searchOption: SearchOption.AllDirectories));
+    }
+
+    [Fact]
+    public async Task CleanupLogs_LeaveLestExpired()
+    {
+        var filesystem = CreateFileSystem();
+        foreach (var i in Enumerable.Range(1, 9))
+        {
+            var day = API.Services.Tasks.Scanner.Parser.Parser.PadZeros($"{i}");
+            filesystem.AddFile($"{LogDirectory}kavita202009{day}.log", new MockFileData("")
+            {
+                CreationTime = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(31 - i))
+            });
+        }
+        filesystem.AddFile($"{LogDirectory}kavita20200910.log", new MockFileData("")
+        {
+            CreationTime = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(31 - 10))
+        });
+        filesystem.AddFile($"{LogDirectory}kavita20200911.log", new MockFileData("")
+        {
+            CreationTime = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(31 - 11))
+        });
+
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var cleanupService = new CleanupService(_logger, _unitOfWork, _messageHub,
+            ds);
+        await cleanupService.CleanupLogs();
+        Assert.True(filesystem.File.Exists($"{LogDirectory}kavita20200911.log"));
     }
 
     #endregion

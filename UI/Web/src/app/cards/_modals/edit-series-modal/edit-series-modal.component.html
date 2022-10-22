@@ -16,9 +16,13 @@
                     <div class="row g-0">
                         <div class="mb-3" style="width: 100%">
                             <label for="name" class="form-label">Name</label>
-                            <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
-                                <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }"></ng-container>
-                                <input id="name" class="form-control" formControlName="name" type="text">
+                            <div class="input-group">
+                                <input id="name" class="form-control" formControlName="name" type="text" [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
+                                <ng-container *ngIf="editSeriesForm.get('name')?.errors as errors">
+                                    <div class="invalid-feedback" *ngIf="errors.required">
+                                        This field is required
+                                    </div>
+                                </ng-container>
                             </div>
                         </div>
                     </div>
@@ -26,9 +30,15 @@
                     <div class="row g-0">
                         <div class="mb-3" style="width: 100%">
                             <label for="sort-name" class="form-label">Sort Name</label>
-                            <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
+                            <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
+                                [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
                                 <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
                                 <input id="sort-name" class="form-control" formControlName="sortName" type="text">
+                                <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
+                                    <div class="invalid-feedback" *ngIf="errors.required">
+                                        This field is required
+                                    </div>
+                                </ng-container>
                             </div>
                         </div>
                     </div>
@@ -60,7 +70,7 @@
                     <ng-template ngbNavContent>
 
                         <div class="row g-0">
-                            <div class="col-md-12">
+                            <div class="col-lg-8 col-md-12 pe-2">
                                 <div class="mb-3">
                                     <label for="collections" class="form-label">Collections </label>
                                     <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">
@@ -71,6 +81,20 @@
                                             {{item.title}}
                                         </ng-template>
                                     </app-typeahead>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-12">
+                                <div class="mb-3" style="width: 100%">
+                                    <label for="release-year" class="form-label">Release Year</label>
+                                    <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
+                                        <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }"></ng-container>
+                                        <input type="number" class="form-control" id="release-year" formControlName="releaseYear" maxlength="4" minlength="4" [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
+                                        <ng-container *ngIf="editSeriesForm.get('releaseYear')?.errors as errors">
+                                            <p class="invalid-feedback" *ngIf="errors.pattern">
+                                                This must be a valid year greater than 1000 and 4 characters long
+                                            </p>
+                                        </ng-container>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -127,7 +151,7 @@
                                     </app-typeahead>
                                 </div>
                             </div>
-                            <div class="col-lg-4  col-md-12 pe-2">
+                            <div class="col-lg-4 col-md-12 pe-2">
                                 <div class="mb-3">
                                     <label for="age-rating" class="form-label">Age Rating</label>
                                     <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
@@ -418,7 +442,7 @@
     </div>
     <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
-        <button type="submit" class="btn btn-primary" (click)="save()">Save</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">Save</button>
     </div>
 </div>
 

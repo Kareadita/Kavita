@@ -59,8 +59,8 @@ export class AllCollectionsComponent implements OnInit {
     });
   }
 
-  handleCollectionActionCallback(action: Action, collectionTag: CollectionTag) {
-    switch (action) {
+  handleCollectionActionCallback(action: ActionItem<CollectionTag>, collectionTag: CollectionTag) {
+    switch (action.action) {
       case(Action.Edit):
         const modalRef = this.modalService.open(EditCollectionTagsComponent, { size: 'lg', scrollable: true });
         modalRef.componentInstance.tag = collectionTag;

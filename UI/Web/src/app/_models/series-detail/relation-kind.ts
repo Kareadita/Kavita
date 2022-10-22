@@ -13,7 +13,8 @@ export enum RelationKind {
     /**
      * This is UI only. Backend will generate Parent series for everything but Prequel/Sequel
      */
-    Parent = 12
+    Parent = 12,
+    Edition = 13
 }
 
 export const RelationKinds = [
@@ -26,6 +27,7 @@ export const RelationKinds = [
     {text: 'Side Story', value: RelationKind.SideStory},
     {text: 'Character', value: RelationKind.Character},
     {text: 'Contains', value: RelationKind.Contains},
+    {text: 'Edition', value: RelationKind.Edition},
     {text: 'Doujinshi', value: RelationKind.Doujinshi},
     {text: 'Other', value: RelationKind.Other},
 ];

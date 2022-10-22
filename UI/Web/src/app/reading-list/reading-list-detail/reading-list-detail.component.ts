@@ -109,7 +109,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, this.readingList);
+      action.callback(action, this.readingList);
     }
   }
 
@@ -123,8 +123,8 @@ export class ReadingListDetailComponent implements OnInit {
     this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
 
-  handleReadingListActionCallback(action: Action, readingList: ReadingList) {
-    switch(action) {
+  handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
+    switch(action.action) {
       case Action.Delete:
         this.deleteList(readingList);
         break;
@@ -144,7 +144,7 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.readingListService.delete(readingList.id).subscribe(() => {
       this.toastr.success('Reading list deleted');
-      this.router.navigateByUrl('library#lists');
+      this.router.navigateByUrl('/lists');
     });
   }
 

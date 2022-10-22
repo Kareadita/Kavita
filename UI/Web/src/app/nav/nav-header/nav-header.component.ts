@@ -1,12 +1,12 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { fromEvent, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, takeUntil, takeWhile, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { ScrollService } from 'src/app/_services/scroll.service';
-import { SeriesService } from 'src/app/_services/series.service';
+import { SearchService } from 'src/app/_services/search.service';
 import { FilterQueryParam } from '../../shared/_services/filter-utilities.service';
 import { CollectionTag } from '../../_models/collection-tag';
 import { Library } from '../../_models/library';
@@ -52,8 +52,8 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   private readonly onDestroy = new Subject<void>();
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService,
-    private libraryService: LibraryService, public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
-    private scrollService: ScrollService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {
+    public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
+    private scrollService: ScrollService, private searchService: SearchService, private readonly cdRef: ChangeDetectorRef) {
       this.scrollElem = this.document.body;
     }
 
@@ -68,6 +68,13 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
         fromEvent(elem.nativeElement, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(elem.nativeElement));
       }
     })).subscribe();
+
+    // Sometimes the top event emitter can be slow, so let's also check when a navigation occurs and recalculate
+    this.router.events
+    .pipe(filter(event => event instanceof NavigationEnd))
+    .subscribe(() => {
+      this.checkBackToTopNeeded(this.scrollElem);
+    });
   }
 
   checkBackToTopNeeded(elem: HTMLElement) {
@@ -103,7 +110,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
       this.searchTerm = val.trim();
       this.cdRef.markForCheck();
 
-      this.libraryService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+      this.searchService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
         this.cdRef.markForCheck();
@@ -178,7 +185,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   clickFileSearchResult(item: MangaFile) {
     this.clearSearch();
-    this.seriesService.getSeriesForMangaFile(item.id).subscribe(series => {
+    this.searchService.getSeriesForMangaFile(item.id).subscribe(series => {
       if (series !== undefined && series !== null) {
         this.router.navigate(['library', series.libraryId, 'series', series.id]);
       }
@@ -187,7 +194,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   clickChapterSearchResult(item: Chapter) {
     this.clearSearch();
-    this.seriesService.getSeriesForChapter(item.id).subscribe(series => {
+    this.searchService.getSeriesForChapter(item.id).subscribe(series => {
       if (series !== undefined && series !== null) {
         this.router.navigate(['library', series.libraryId, 'series', series.id]);
       }

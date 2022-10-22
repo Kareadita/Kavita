@@ -1,7 +1,7 @@
 <div class="row g-0 mb-4 mt-3">
     <ng-container *ngIf="seriesMetadata.releaseYear > 0">
         <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-            <app-icon-and-title label="Release Year" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
+            <app-icon-and-title label="Release" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
                 {{seriesMetadata.releaseYear}}
             </app-icon-and-title>
         </div>
@@ -31,7 +31,7 @@
     <ng-container>
         <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
             <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
-                <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}" (click)="handleGoTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" title="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
+                <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}" (click)="handleGoTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" ngbTooltip="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
                     {{pubStatus}}
                 </app-icon-and-title>
             </ng-container>

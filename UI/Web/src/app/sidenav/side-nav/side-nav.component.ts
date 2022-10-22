@@ -53,18 +53,17 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
-          this.libraries = libraries;
-          this.cdRef.markForCheck();
-        });
-      }
+      if (!user) return;
+      this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
+        this.libraries = libraries;
+        this.cdRef.markForCheck();
+      });
       this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
       this.cdRef.markForCheck();
     });
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
-      this.libraryService.getLibrariesForMember().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
+      this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = libraries;
         this.cdRef.markForCheck();
       });
@@ -76,8 +75,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  handleAction(action: Action, library: Library) {
-    switch (action) {
+  handleAction(action: ActionItem<Library>, library: Library) {
+    switch (action.action) {
       case(Action.Scan):
         this.actionService.scanLibrary(library);
         break;
@@ -95,7 +94,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {
-      action.callback(action.action, library);
+      action.callback(action, library);
     }
   }
 

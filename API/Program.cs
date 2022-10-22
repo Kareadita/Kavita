@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Logging;
 using API.Services;
+using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
@@ -18,35 +20,41 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.AspNetCore.SignalR.Extensions;
 
-namespace API
+namespace API;
+
+public class Program
 {
-    public class Program
-    {
-        private static readonly int HttpPort = Configuration.Port;
+    private static readonly int HttpPort = Configuration.Port;
 
-        protected Program()
+    protected Program()
+    {
+    }
+
+    public static async Task Main(string[] args)
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console()
+            .CreateBootstrapLogger();
+
+        var directoryService = new DirectoryService(null, new FileSystem());
+
+        // Before anything, check if JWT has been generated properly or if user still has default
+        if (!Configuration.CheckIfJwtTokenSet() &&
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
         {
+            Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
+            var rBytes = new byte[128];
+            RandomNumberGenerator.Create().GetBytes(rBytes);
+            Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
         }
 
-        public static async Task Main(string[] args)
+        try
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
-            var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
-
-
-            var directoryService = new DirectoryService(null, new FileSystem());
-
-            // Before anything, check if JWT has been generated properly or if user still has default
-            if (!Configuration.CheckIfJwtTokenSet() &&
-                Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
-            {
-                Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
-                var rBytes = new byte[128];
-                RandomNumberGenerator.Create().GetBytes(rBytes);
-                Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
-            }
-
             var host = CreateHostBuilder(args).Build();
 
             using var scope = host.Services.CreateScope();
@@ -78,7 +86,8 @@ namespace API
                 await Seed.SeedThemes(context);
                 await Seed.SeedUserApiKeys(context);
 
-
+                // NOTE: This check is from v0.4.8 (Nov 04, 2021). We can likely remove this
+                var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
                 if (isDocker && new FileInfo("data/appsettings.json").Exists)
                 {
                     logger.LogCritical("WARNING! Mount point is incorrect, nothing here will persist. Please change your container mount from /kavita/data to /kavita/config");
@@ -97,58 +106,76 @@ namespace API
                 return;
             }
 
+            // Update the logger with the log level
+            var unitOfWork = services.GetRequiredService<IUnitOfWork>();
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            LogLevelOptions.SwitchLogLevel(settings.LoggingLevel);
+
             await host.RunAsync();
-        }
-
-        private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
+        } catch (Exception ex)
         {
-            string currentVersion = null;
-            try
-            {
-                if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
-                currentVersion =
-                    (await context.ServerSetting.SingleOrDefaultAsync(s =>
-                        s.Key == ServerSettingKey.InstallVersion))?.Value;
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
+            Log.Fatal(ex, "Host terminated unexpectedly");
+        } finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
+    }
 
-            if (string.IsNullOrEmpty(currentVersion))
-            {
-                currentVersion = "vUnknown";
-            }
-
-            var migrationDirectory = directoryService.FileSystem.Path.Join(directoryService.TempDirectory,
-                "migration", currentVersion);
-            return migrationDirectory;
+    private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
+    {
+        string currentVersion = null;
+        try
+        {
+            if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
+            currentVersion =
+                (await context.ServerSetting.SingleOrDefaultAsync(s =>
+                    s.Key == ServerSettingKey.InstallVersion))?.Value;
+        }
+        catch (Exception)
+        {
+            // ignored
         }
 
-        private static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((hostingContext, config) =>
+        if (string.IsNullOrEmpty(currentVersion))
+        {
+            currentVersion = "vUnknown";
+        }
+
+        var migrationDirectory = directoryService.FileSystem.Path.Join(directoryService.TempDirectory,
+            "migration", currentVersion);
+        return migrationDirectory;
+    }
+
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .UseSerilog((_, services, configuration) =>
+            {
+                LogLevelOptions.CreateConfig(configuration)
+                    .WriteTo.SignalRSink<LogHub, ILogHub>(
+                        LogEventLevel.Information,
+                        services);
+            })
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                config.Sources.Clear();
+
+                var env = hostingContext.HostingEnvironment;
+
+                config.AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: false)
+                    .AddJsonFile($"config/appsettings.{env.EnvironmentName}.json",
+                        optional: true, reloadOnChange: false);
+            })
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseKestrel((opts) =>
                 {
-                    config.Sources.Clear();
-
-                    var env = hostingContext.HostingEnvironment;
-
-                    config.AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: false)
-                        .AddJsonFile($"config/appsettings.{env.EnvironmentName}.json",
-                            optional: true, reloadOnChange: false);
-                })
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseKestrel((opts) =>
-                    {
-                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
-                    });
-
-                    webBuilder.UseStartup<Startup>();
+                    opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                 });
 
+                webBuilder.UseStartup<Startup>();
+            });
 
 
 
-    }
+
 }

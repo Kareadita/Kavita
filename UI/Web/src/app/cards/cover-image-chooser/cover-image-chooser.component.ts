@@ -71,6 +71,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       coverImageUrl: new FormControl('', [])
     });
+
     this.cdRef.markForCheck();
   }
 
@@ -79,6 +80,11 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
+  /**
+   * Generates a base64 encoding for an Image. Used in manual file upload flow.
+   * @param img 
+   * @returns 
+   */
   getBase64Image(img: HTMLImageElement) {
     const canvas = document.createElement("canvas");
     canvas.width = img.width;
@@ -95,6 +101,25 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
   selectImage(index: number) {
     if (this.selectedIndex === index) { return; }
+
+    // If we load custom images of series/chapters/covers, then those urls are not properly encoded, so on select we have to clean them up
+    if (!this.imageUrls[index].startsWith('data:image/')) {
+      const imgUrl = this.imageUrls[index];
+      const img = new Image();
+      img.crossOrigin = 'Anonymous';
+      img.src = imgUrl;
+      img.onload = (e) => this.handleUrlImageAdd(img, index);
+      img.onerror = (e) => {
+        this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
+        this.form.get('coverImageUrl')?.setValue('');
+        this.cdRef.markForCheck();
+      };
+      this.form.get('coverImageUrl')?.setValue('');
+      this.cdRef.markForCheck();
+      this.selectedBase64Url.emit(this.imageUrls[this.selectedIndex]);
+      return;
+    }
+
     this.selectedIndex = index;
     this.cdRef.markForCheck();
     this.imageSelected.emit(this.selectedIndex);
@@ -115,9 +140,9 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadImage() {
-    const url = this.form.get('coverImageUrl')?.value.trim();
-    if (!url && url === '') return;
+  loadImage(url?: string) {
+    url = url || this.form.get('coverImageUrl')?.value.trim();
+    if (!url || url === '') return;
 
     this.uploadService.uploadByUrl(url).subscribe(filename => {
       const img = new Image();
@@ -133,6 +158,8 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
   }
+
+
 
   changeMode(mode: 'url') {
     this.mode = mode;
@@ -161,23 +188,31 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
   handleFileImageAdd(e: any) {
     if (e.target == null) return;
 
-    this.imageUrls.push(e.target.result);
+    this.imageUrls.push(e.target.result); // This is base64 already
     this.imageUrlsChange.emit(this.imageUrls);
-    this.selectedIndex += 1;
+    this.selectedIndex = this.imageUrls.length - 1;
     this.imageSelected.emit(this.selectedIndex); // Auto select newly uploaded image
     this.selectedBase64Url.emit(e.target.result);
+    setTimeout(() => {
+      (this.document.querySelector('div.image-card[aria-label="Image ' + this.selectedIndex + '"]') as HTMLElement).focus();
+    })
     this.cdRef.markForCheck();
   }
 
-  handleUrlImageAdd(img: HTMLImageElement) {
+  handleUrlImageAdd(img: HTMLImageElement, index: number = -1) {
     const url = this.getBase64Image(img);
-    this.imageUrls.push(url);
+    if (index >= 0) {
+      this.imageUrls[index] = url;
+    } else {
+      this.imageUrls.push(url);
+    }
+    
     this.imageUrlsChange.emit(this.imageUrls);
     this.cdRef.markForCheck();
 
     setTimeout(() => {
       // Auto select newly uploaded image and tell parent of new base64 url
-      this.selectImage(this.selectedIndex + 1);
+      this.selectImage(index >= 0 ? index : this.imageUrls.length - 1);
     });
   }
 

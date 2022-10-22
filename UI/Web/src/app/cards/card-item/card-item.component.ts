@@ -13,7 +13,7 @@ import { Series } from 'src/app/_models/series';
 import { User } from 'src/app/_models/user';
 import { Volume } from 'src/app/_models/volume';
 import { AccountService } from 'src/app/_services/account.service';
-import { Action, ActionItem } from 'src/app/_services/action-factory.service';
+import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
@@ -126,9 +126,11 @@ export class CardItemComponent implements OnInit, OnDestroy {
     public utilityService: UtilityService, private downloadService: DownloadService,
     public bulkSelectionService: BulkSelectionService,
     private messageHub: MessageHubService, private accountService: AccountService, 
-    private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef) {}
+    private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef,
+    private actionFactoryService: ActionFactoryService) {}
 
   ngOnInit(): void {
+
     if (this.entity.hasOwnProperty('promoted') && this.entity.hasOwnProperty('title')) {
       this.suppressArchiveWarning = true;
       this.cdRef.markForCheck();
@@ -172,6 +174,8 @@ export class CardItemComponent implements OnInit, OnDestroy {
     } else if (this.utilityService.isSeries(this.entity)) {
       this.tooltipTitle = this.title || (this.utilityService.asSeries(this.entity).name);
     }
+
+    this.filterSendTo();
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
       this.user = user;
     });
@@ -184,35 +188,27 @@ export class CardItemComponent implements OnInit, OnDestroy {
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
 
       // For volume or Series, we can't just take the event 
+      if (this.utilityService.isChapter(this.entity)) {
+        const c = this.utilityService.asChapter(this.entity);
+        c.pagesRead = updateEvent.pagesRead;
+        this.read = updateEvent.pagesRead;
+      }
       if (this.utilityService.isVolume(this.entity) || this.utilityService.isSeries(this.entity)) {
         if (this.utilityService.isVolume(this.entity)) {
           const v = this.utilityService.asVolume(this.entity);
-          const chapter = v.chapters.find(c => c.id === updateEvent.chapterId);
-          if (chapter) {
+          let sum = 0;
+          const chapters = v.chapters.filter(c => c.volumeId === updateEvent.volumeId);
+          chapters.forEach(chapter => {
             chapter.pagesRead = updateEvent.pagesRead;
-          }
+            sum += chapter.pagesRead;
+          });
+          v.pagesRead = sum;
+          this.read = sum;
         } else {
-          // Ignore
           return;
-          // re-request progress for the series
-          // const s = this.utilityService.asSeries(this.entity);
-          // let pagesRead = 0;
-          // if (s.hasOwnProperty('volumes')) {
-          //   s.volumes.forEach(v => {
-          //     v.chapters.forEach(c => {
-          //       if (c.id === updateEvent.chapterId) {
-          //         c.pagesRead = updateEvent.pagesRead;
-          //       }
-          //       pagesRead += c.pagesRead;
-          //     });
-          //   });
-          //   s.pagesRead = pagesRead;
-          // }
         }
       }
 
-
-      this.read = updateEvent.pagesRead;
       this.cdRef.detectChanges();
     });
 
@@ -280,12 +276,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {
-
-      // if (this.download$ !== null) {
-      //   this.toastr.info('Download is already in progress. Please wait.');
-      //   return;
-      // }
-
       if (this.utilityService.isVolume(this.entity)) {
         const volume = this.utilityService.asVolume(this.entity);
         this.downloadService.download('volume', volume);
@@ -300,7 +290,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     }
 
     if (typeof action.callback === 'function') {
-      action.callback(action.action, this.entity);
+      action.callback(action, this.entity);
     }
   }
 
@@ -317,5 +307,21 @@ export class CardItemComponent implements OnInit, OnDestroy {
     }
     this.selection.emit(this.selected);
     this.cdRef.detectChanges();
+  }
+
+  filterSendTo() {
+    if (!this.actions || this.actions.length === 0) return;
+
+    if (this.utilityService.isChapter(this.entity)) {
+      this.actions = this.actionFactoryService.filterSendToAction(this.actions, this.entity as Chapter);
+    } else if (this.utilityService.isVolume(this.entity)) {
+      const vol = this.utilityService.asVolume(this.entity);
+      this.actions = this.actionFactoryService.filterSendToAction(this.actions, vol.chapters[0]);
+    } else if (this.utilityService.isSeries(this.entity)) {
+      const series = (this.entity as Series);
+      if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
+        this.actions = this.actions.filter(a => a.title !== 'Send To');
+      }
+    }
   }
 }

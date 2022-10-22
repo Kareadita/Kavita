@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using API.Data.Misc;
+using API.Entities.Enums;
 using API.Extensions;
 using Xunit;
 
@@ -131,5 +134,34 @@ public class EnumerableExtensionsTests
                 Assert.Equal(s, expected[i]);
                 i++;
             }
+        }
+
+        [Theory]
+        [InlineData(true, 2)]
+        [InlineData(false, 1)]
+        public void RestrictAgainstAgeRestriction_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
+        {
+            var items = new List<RecentlyAddedSeries>()
+            {
+                new RecentlyAddedSeries()
+                {
+                    AgeRating = AgeRating.Teen,
+                },
+                new RecentlyAddedSeries()
+                {
+                    AgeRating = AgeRating.Unknown,
+                },
+                new RecentlyAddedSeries()
+                {
+                    AgeRating = AgeRating.X18Plus,
+                },
+            };
+
+            var filtered = items.RestrictAgainstAgeRestriction(new AgeRestriction()
+            {
+                AgeRating = AgeRating.Teen,
+                IncludeUnknowns = includeUnknowns
+            });
+            Assert.Equal(expectedCount, filtered.Count());
         }
 }

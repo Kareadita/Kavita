@@ -1,7 +1,6 @@
-﻿namespace API.DTOs.Reader
+﻿namespace API.DTOs.Reader;
+
+public class RemoveBookmarkForSeriesDto
 {
-    public class RemoveBookmarkForSeriesDto
-    {
-        public int SeriesId { get; init; }
-    }
+    public int SeriesId { get; init; }
 }

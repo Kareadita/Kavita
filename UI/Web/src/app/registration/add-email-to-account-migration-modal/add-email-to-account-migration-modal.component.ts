@@ -29,7 +29,7 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
   ngOnInit(): void {
     this.registerForm.addControl('username', new FormControl(this.username, [Validators.required]));
     this.registerForm.addControl('email', new FormControl('', [Validators.required, Validators.email]));
-    this.registerForm.addControl('password', new FormControl(this.password, [Validators.required]));
+    this.registerForm.addControl('password', new FormControl(this.password, [Validators.required, Validators.minLength(6), Validators.maxLength(32)]));
     this.cdRef.markForCheck();
   }
 

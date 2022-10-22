@@ -2,11 +2,10 @@
 using System.ComponentModel.DataAnnotations;
 using API.DTOs.Reader;
 
-namespace API.DTOs.Downloads
+namespace API.DTOs.Downloads;
+
+public class DownloadBookmarkDto
 {
-    public class DownloadBookmarkDto
-    {
-        [Required]
-        public IEnumerable<BookmarkDto> Bookmarks { get; set; }
-    }
+    [Required]
+    public IEnumerable<BookmarkDto> Bookmarks { get; set; }
 }

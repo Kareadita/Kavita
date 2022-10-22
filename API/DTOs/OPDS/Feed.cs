@@ -2,61 +2,60 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace API.DTOs.OPDS
+namespace API.DTOs.OPDS;
+
+/// <summary>
+///
+/// </summary>
+[XmlRoot("feed", Namespace = "http://www.w3.org/2005/Atom")]
+public class Feed
 {
-    /// <summary>
-    ///
-    /// </summary>
-    [XmlRoot("feed", Namespace = "http://www.w3.org/2005/Atom")]
-    public class Feed
+    [XmlElement("updated")]
+    public string Updated { get; init; } = DateTime.UtcNow.ToString("s");
+
+    [XmlElement("id")]
+    public string Id { get; set; }
+
+    [XmlElement("title")]
+    public string Title { get; set; }
+
+    [XmlElement("icon")]
+    public string Icon { get; set; } = "/favicon.ico";
+
+    [XmlElement("author")]
+    public FeedAuthor Author { get; set; } = new FeedAuthor()
     {
-        [XmlElement("updated")]
-        public string Updated { get; init; } = DateTime.UtcNow.ToString("s");
+        Name = "Kavita",
+        Uri = "https://kavitareader.com"
+    };
 
-        [XmlElement("id")]
-        public string Id { get; set; }
+    [XmlElement("totalResults", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
+    public int? Total { get; set; } = null;
 
-        [XmlElement("title")]
-        public string Title { get; set; }
+    [XmlElement("itemsPerPage", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
+    public int? ItemsPerPage { get; set; } = null;
 
-        [XmlElement("icon")]
-        public string Icon { get; set; } = "/favicon.ico";
+    [XmlElement("startIndex", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
+    public int? StartIndex { get; set; } = null;
 
-        [XmlElement("author")]
-        public FeedAuthor Author { get; set; } = new FeedAuthor()
-        {
-            Name = "Kavita",
-            Uri = "https://kavitareader.com"
-        };
+    [XmlElement("link")]
+    public List<FeedLink> Links { get; set; } = new List<FeedLink>() ;
 
-        [XmlElement("totalResults", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
-        public int? Total { get; set; } = null;
+    [XmlElement("entry")]
+    public List<FeedEntry> Entries { get; set; } = new List<FeedEntry>();
 
-        [XmlElement("itemsPerPage", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
-        public int? ItemsPerPage { get; set; } = null;
+    public bool ShouldSerializeTotal()
+    {
+        return Total.HasValue;
+    }
 
-        [XmlElement("startIndex", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]
-        public int? StartIndex { get; set; } = null;
+    public bool ShouldSerializeItemsPerPage()
+    {
+        return ItemsPerPage.HasValue;
+    }
 
-        [XmlElement("link")]
-        public List<FeedLink> Links { get; set; } = new List<FeedLink>() ;
-
-        [XmlElement("entry")]
-        public List<FeedEntry> Entries { get; set; } = new List<FeedEntry>();
-
-        public bool ShouldSerializeTotal()
-        {
-            return Total.HasValue;
-        }
-
-        public bool ShouldSerializeItemsPerPage()
-        {
-            return ItemsPerPage.HasValue;
-        }
-
-        public bool ShouldSerializeStartIndex()
-        {
-            return StartIndex.HasValue;
-        }
+    public bool ShouldSerializeStartIndex()
+    {
+        return StartIndex.HasValue;
     }
 }

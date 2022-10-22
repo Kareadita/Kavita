@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { ConfirmService } from 'src/app/shared/confirm.service';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
-import { catchError, finalize, shareReplay, take, takeWhile } from 'rxjs/operators';
+import { shareReplay, take } from 'rxjs/operators';
 import { defer, forkJoin, Observable, of } from 'rxjs';
 import { ServerService } from 'src/app/_services/server.service';
 import { Job } from 'src/app/_models/job/job';
@@ -32,7 +31,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
 
-  reoccuringTasks$: Observable<Array<Job>> = of([]);
+  recurringTasks$: Observable<Array<Job>> = of([]);
   adhocTasks: Array<AdhocTask> = [
     {
       name: 'Convert Bookmarks to WebP', 
@@ -45,6 +44,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       description: 'Clears cached files for reading. Usefull when you\'ve just updated a file that you were previously reading within last 24 hours.',
       api: this.serverService.clearCache(), 
       successMessage: 'Cache has been cleared'
+    },
+    {
+      name: 'Clean up Want to Read', 
+      description: 'Removes any series that users have fully read that are within want to read and have a publication status of Completed. Runs every 24 hours.',
+      api: this.serverService.cleanupWantToRead(), 
+      successMessage: 'Want to Read has been cleaned up'
     },
     {
       name: 'Backup Database', 
@@ -93,7 +98,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
     });
 
-    this.reoccuringTasks$ = this.serverService.getReoccuringJobs().pipe(shareReplay());
+    this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
   }
 
   resetForm() {
@@ -110,7 +115,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.reoccuringTasks$ = this.serverService.getReoccuringJobs().pipe(shareReplay());
+      this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
       this.toastr.success('Server settings updated');
     }, (err: any) => {
       console.error('error: ', err);

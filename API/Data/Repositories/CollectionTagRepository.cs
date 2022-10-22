@@ -2,8 +2,10 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data.Misc;
 using API.DTOs.CollectionTags;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -15,9 +17,9 @@ public interface ICollectionTagRepository
     void Add(CollectionTag tag);
     void Remove(CollectionTag tag);
     Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync();
-    Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery);
+    Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId);
     Task<string> GetCoverImageAsync(int collectionTagId);
-    Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync();
+    Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
     Task<CollectionTag> GetTagAsync(int tagId);
     Task<CollectionTag> GetFullTagAsync(int tagId);
     void Update(CollectionTag tag);
@@ -85,6 +87,7 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
     {
+
         return await _context.CollectionTag
             .OrderBy(c => c.NormalizedTitle)
             .AsNoTracking()
@@ -92,10 +95,12 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync()
+    public async Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId)
     {
+        var userRating = await GetUserAgeRestriction(userId);
         return await _context.CollectionTag
             .Where(c => c.Promoted)
+            .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(c => c.NormalizedTitle)
             .AsNoTracking()
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
@@ -118,11 +123,26 @@ public class CollectionTagRepository : ICollectionTagRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery)
+    private async Task<AgeRestriction> GetUserAgeRestriction(int userId)
     {
+        return await _context.AppUser
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u =>
+                new AgeRestriction(){
+                    AgeRating = u.AgeRestriction,
+                    IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
+                })
+            .SingleAsync();
+    }
+
+    public async Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId)
+    {
+        var userRating = await GetUserAgeRestriction(userId);
         return await _context.CollectionTag
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
+            .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(s => s.Title)
             .AsNoTracking()
             .OrderBy(c => c.NormalizedTitle)
