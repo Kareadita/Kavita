@@ -20,7 +20,7 @@ export const BookWhiteTheme = `
     --drawer-text-color: black;
     --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(255 255 255 / 20%);
     --drawer-pagination-border: 1px solid rgb(0 0 0 / 13%);
-    
+
 
     /* Accordion */
     --accordion-header-text-color: rgba(74, 198, 148, 0.9);
@@ -103,7 +103,7 @@ export const BookWhiteTheme = `
 
 
 .book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
-  color: #dcdcdc !important;
+  color: black !important;
 }
 
 .book-content code {
@@ -122,13 +122,13 @@ background-color: initial !important;
 
 
 .book-content *:not(code), .book-content *:not(a) {
-    background-color: black;
+    background-color: white;
     box-shadow: none;
     text-shadow: none;
     border-radius: unset;
     color: #dcdcdc !important;
 }
-  
+
 .book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
 .book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
 
