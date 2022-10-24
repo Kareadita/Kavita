@@ -129,8 +129,8 @@ background-color: initial !important;
     color: #dcdcdc !important;
 }
 
-.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(211, 138, 138) !important}
-.book-content :link:not(cite), :link .book-content *:not(cite) {color: #8db2e5 !important}
+.book-content :visited, .book-content :visited *, .book-content :visited *[class] {color: rgb(240, 50, 50) !important}
+.book-content :link:not(cite), :link .book-content *:not(cite) {color: #00f !important}
 
 .btn-check:checked + .btn {
   color: white;
