@@ -632,6 +632,11 @@ public class AccountController : BaseApiController
         return BadRequest("There was an error setting up your account. Please check the logs");
     }
 
+    /// <summary>
+    /// Last step in authentication flow, confirms the email token for email
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [AllowAnonymous]
     [HttpPost("confirm-email")]
     public async Task<ActionResult<UserDto>> ConfirmEmail(ConfirmEmailDto dto)
@@ -640,7 +645,8 @@ public class AccountController : BaseApiController
 
         if (user == null)
         {
-            return BadRequest("The email does not match the registered email");
+            _logger.LogInformation("confirm-email failed from invalid registered email: {Email}", dto.Email);
+            return BadRequest("Invalid email confirmation");
         }
 
         // Validate Password and Username
@@ -654,7 +660,11 @@ public class AccountController : BaseApiController
         }
 
 
-        if (!await ConfirmEmailToken(dto.Token, user)) return BadRequest("Invalid Email Token");
+        if (!await ConfirmEmailToken(dto.Token, user))
+        {
+            _logger.LogInformation("confirm-email failed from invalid token: {Token}", dto.Token);
+            return BadRequest("Invalid email confirmation");
+        }
 
         user.UserName = dto.Username;
         user.ConfirmationToken = null;
@@ -694,11 +704,15 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByConfirmationToken(dto.Token);
         if (user == null)
         {
-            return BadRequest("Invalid Email Token");
+            _logger.LogInformation("confirm-email failed from invalid registered email: {Email}", dto.Email);
+            return BadRequest("Invalid email confirmation");
         }
 
-        if (!await ConfirmEmailToken(dto.Token, user)) return BadRequest("Invalid Email Token");
-
+        if (!await ConfirmEmailToken(dto.Token, user))
+        {
+            _logger.LogInformation("confirm-email failed from invalid token: {Token}", dto.Token);
+            return BadRequest("Invalid email confirmation");
+        }
 
         _logger.LogInformation("User is updating email from {OldEmail} to {NewEmail}", user.Email, dto.Email);
         var result = await _userManager.SetEmailAsync(user, dto.Email);
@@ -728,12 +742,16 @@ public class AccountController : BaseApiController
             var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
             if (user == null)
             {
-                return BadRequest("Invalid Details");
+                return BadRequest("Invalid credentials");
             }
 
             var result = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
                 "ResetPassword", dto.Token);
-            if (!result) return BadRequest("Unable to reset password, your email token is not correct.");
+            if (!result)
+            {
+                _logger.LogInformation("Unable to reset password, your email token is not correct: {@Dto}", dto);
+                return BadRequest("Invalid credentials");
+            }
 
             var errors = await _accountService.ChangeUserPassword(user, dto.Password);
             return errors.Any() ? BadRequest(errors) : Ok("Password updated");
@@ -801,9 +819,13 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<UserDto>> ConfirmMigrationEmail(ConfirmMigrationEmailDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-        if (user == null) return BadRequest("This email is not on system");
+        if (user == null) return BadRequest("Invalid credentials");
 
-        if (!await ConfirmEmailToken(dto.Token, user)) return BadRequest("Invalid Email Token");
+        if (!await ConfirmEmailToken(dto.Token, user))
+        {
+            _logger.LogInformation("confirm-migration-email email token is invalid");
+            return BadRequest("Invalid credentials");
+        }
 
         await _unitOfWork.CommitAsync();
 
