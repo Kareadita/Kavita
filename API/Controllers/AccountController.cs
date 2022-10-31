@@ -865,6 +865,10 @@ public class AccountController : BaseApiController
     [HttpPost("migrate-email")]
     public async Task<ActionResult<string>> MigrateEmail(MigrateUserEmailDto dto)
     {
+        // If there is an admin account already, return
+        var users = await _unitOfWork.UserRepository.GetAdminUsersAsync();
+        if (users.Any()) return BadRequest("Admin already exists");
+
         // Check if there is an existing invite
         var emailValidationErrors = await _accountService.ValidateEmail(dto.Email);
         if (emailValidationErrors.Any())
