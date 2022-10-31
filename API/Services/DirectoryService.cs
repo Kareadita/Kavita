@@ -434,30 +434,32 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     private string RenameFileForCopy(string fileToCopy, string directoryPath, string prepend = "")
     {
-        var fileInfo = FileSystem.FileInfo.FromFileName(fileToCopy);
-        var filename = prepend + fileInfo.Name;
-
-        var targetFile = FileSystem.FileInfo.FromFileName(FileSystem.Path.Join(directoryPath, filename));
-        if (!targetFile.Exists)
+        while (true)
         {
-            return targetFile.FullName;
-        }
+            var fileInfo = FileSystem.FileInfo.FromFileName(fileToCopy);
+            var filename = prepend + fileInfo.Name;
 
-        var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
-        if (FileCopyAppend.IsMatch(noExtension))
-        {
-            var match = FileCopyAppend.Match(noExtension).Value;
-            var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
-            noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
-        }
-        else
-        {
-            noExtension += " (1)";
-        }
+            var targetFile = FileSystem.FileInfo.FromFileName(FileSystem.Path.Join(directoryPath, filename));
+            if (!targetFile.Exists)
+            {
+                return targetFile.FullName;
+            }
 
-        var newFilename = prepend + noExtension +
-                          FileSystem.Path.GetExtension(fileInfo.Name);
-        return RenameFileForCopy(FileSystem.Path.Join(directoryPath, newFilename), directoryPath, prepend);
+            var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
+            if (FileCopyAppend.IsMatch(noExtension))
+            {
+                var match = FileCopyAppend.Match(noExtension).Value;
+                var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
+                noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
+            }
+            else
+            {
+                noExtension += " (1)";
+            }
+
+            var newFilename = prepend + noExtension + FileSystem.Path.GetExtension(fileInfo.Name);
+            fileToCopy = FileSystem.Path.Join(directoryPath, newFilename);
+        }
     }
 
     /// <summary>
