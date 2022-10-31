@@ -305,7 +305,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserBookmark
             .Where(x => x.AppUserId == userId && x.SeriesId == seriesId)
-            .OrderBy(x => x.Page)
+            .OrderBy(x => x.Created)
             .AsNoTracking()
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -315,7 +315,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserBookmark
             .Where(x => x.AppUserId == userId && x.VolumeId == volumeId)
-            .OrderBy(x => x.Page)
+            .OrderBy(x => x.Created)
             .AsNoTracking()
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -325,7 +325,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserBookmark
             .Where(x => x.AppUserId == userId && x.ChapterId == chapterId)
-            .OrderBy(x => x.Page)
+            .OrderBy(x => x.Created)
             .AsNoTracking()
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -341,7 +341,7 @@ public class UserRepository : IUserRepository
     {
         var query = _context.AppUserBookmark
             .Where(x => x.AppUserId == userId)
-            .OrderBy(x => x.Page)
+            .OrderBy(x => x.Created)
             .AsNoTracking();
 
         if (!string.IsNullOrEmpty(filter.SeriesNameQuery))
