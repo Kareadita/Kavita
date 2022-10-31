@@ -186,7 +186,7 @@ public class AccountController : BaseApiController
             .Include(u => u.UserPreferences)
             .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
-        if (user == null) return Unauthorized("Invalid username");
+        if (user == null) return Unauthorized("Your credentials are not correct");
 
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
@@ -198,7 +198,7 @@ public class AccountController : BaseApiController
 
         if (!result.Succeeded)
         {
-            return Unauthorized(result.IsNotAllowed ? "You must confirm your email first" : "Your credentials are not correct.");
+            return Unauthorized(result.IsNotAllowed ? "You must confirm your email first" : "Your credentials are not correct");
         }
 
         // Update LastActive on account
