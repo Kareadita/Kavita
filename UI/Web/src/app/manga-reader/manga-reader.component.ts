@@ -377,29 +377,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'right-side';
   }
 
-  get LayoutModeIconClass() {
-    switch (this.layoutMode) {
-      case LayoutMode.Single:
-        return 'none';
-      case LayoutMode.Double:
-        return 'double';
-      case LayoutMode.DoubleReversed:
-        return 'double-reversed';
-    }
-  }
-
-  get ReaderModeIcon() {
-    switch(this.readerMode) {
-      case ReaderMode.LeftRight:
-        return 'fa-exchange-alt';
-      case ReaderMode.UpDown:
-        return 'fa-exchange-alt fa-rotate-90';
-      case ReaderMode.Webtoon:
-        return 'fa-arrows-alt-v';
-      default:
-        return '';
-    }
-  }
 
   get ReaderMode() {
     return ReaderMode;
@@ -1077,8 +1054,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
       if (img) {
         this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
+        console.log('Using prefetched image');
       } else {
         this.canvasImage.src = this.getPageUrl(this.pageNum);
+        console.log('Using new image');
       }
     } else {
       this.canvasImage.src = this.getPageUrl(this.pageNum);
@@ -1086,6 +1065,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     
     this.canvasImage.onload = () => {
+      console.log('Canvas Image Onload'); // I never see this fire
       this.cdRef.markForCheck();
     };
     
@@ -1301,6 +1281,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * and also maintains page info (wide image, etc) due to onload event.
    */
   prefetch() {
+    // NOTE: This doesn't allow for any directionality
+    // NOTE: This doesn't maintain 1 image behind at all times
     for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
       const numOffset = this.pageNum + i;
       if (numOffset > this.maxPages - 1) continue;
@@ -1308,11 +1290,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       if (this.readerService.imageUrlToPageNum(this.cachedImages[index].src) !== numOffset) {
         this.cachedImages[index].src = this.getPageUrl(numOffset);
-        this.cachedImages[index].onload = () => this.cdRef.markForCheck();
+        this.cachedImages[index].onload = () => {
+          console.log('Page ', numOffset, ' loaded');
+          this.cdRef.markForCheck();
+        };
       }
     }
 
-    //console.log(this.pageNum, ' Prefetched pages: ', this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src)));
+    const pages = this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src));
+    const pagesBefore = pages.filter(p => p >= 0 && p < this.pageNum).length;
+    const pagesAfter = pages.filter(p => p >= 0 && p > this.pageNum).length;
+    console.log('Buffer Health: Before: ', pagesBefore, ' After: ', pagesAfter);
+    console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
+      if (this.pageNum === p) return '[' + p + ']';
+      return '' + p
+    }));
   }
 
 

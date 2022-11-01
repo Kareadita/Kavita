@@ -344,22 +344,24 @@ public class UserRepository : IUserRepository
             .OrderBy(x => x.Created)
             .AsNoTracking();
 
-        if (!string.IsNullOrEmpty(filter.SeriesNameQuery))
-        {
-            var seriesNameQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(filter.SeriesNameQuery);
-            var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
-                {
-                    bookmark,
-                    series
-                })
-                .Where(o => EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%")
-                            || EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%")
-                            || EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%")
-                            || EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%")
-                );
+        if (string.IsNullOrEmpty(filter.SeriesNameQuery))
+            return await query
+                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
 
-            query = filterSeriesQuery.Select(o => o.bookmark);
-        }
+        var seriesNameQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(filter.SeriesNameQuery);
+        var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
+            {
+                bookmark,
+                series
+            })
+            .Where(o => EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%")
+                        || EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%")
+                        || EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%")
+                        || EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%")
+            );
+
+        query = filterSeriesQuery.Select(o => o.bookmark);
 
 
         return await query

@@ -121,7 +121,7 @@
             </div>
             <div class="col">
                 <button class="btn btn-icon" title="Reading Mode" (click)="toggleReaderMode();resetMenuCloseTimer();">
-                    <i class="fa {{ReaderModeIcon}}" aria-hidden="true"></i>
+                    <i class="fa {{this.readerMode | readerModeIcon}}" aria-hidden="true"></i>
                     <span class="visually-hidden">Reading Mode</span>
                 </button>
             </div>
@@ -197,7 +197,6 @@
                                           </span>
                                     </div>                                   
                                 </ng-container>
-                                <!-- <div class="{{LayoutModeIconClass}}"></div> -->
                             </ng-container>
                         <select class="form-control" id="page-fitting" formControlName="layoutMode">
                             <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>

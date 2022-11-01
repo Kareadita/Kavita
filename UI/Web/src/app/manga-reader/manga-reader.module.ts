@@ -8,14 +8,18 @@ import { SharedModule } from '../shared/shared.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
 import { InfiniteScrollerComponent } from './infinite-scroller/infinite-scroller.component';
 import { ReaderSharedModule } from '../reader-shared/reader-shared.module';
-import { FullscreenIconPipe } from './fullscreen-icon.pipe';
 import { PipeModule } from '../pipe/pipe.module';
+import { FullscreenIconPipe } from './_pipes/fullscreen-icon.pipe';
+import { LayoutModeIconPipe } from './_pipes/layout-mode-icon.pipe';
+import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
 
 @NgModule({
   declarations: [
     MangaReaderComponent,
     InfiniteScrollerComponent,
-    FullscreenIconPipe
+    FullscreenIconPipe,
+    ReaderModeIconPipe,
+    LayoutModeIconPipe,
   ],
   imports: [
     CommonModule,
