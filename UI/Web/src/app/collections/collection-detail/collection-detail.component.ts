@@ -21,6 +21,7 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { ActionService } from 'src/app/_services/action.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
+import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -124,7 +125,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
 
   constructor(public imageService: ImageService, private collectionService: CollectionTagService, private router: Router, private route: ActivatedRoute, 
     private seriesService: SeriesService, private toastr: ToastrService, private actionFactoryService: ActionFactoryService, 
-    private modalService: NgbModal, private titleService: Title, 
+    private modalService: NgbModal, private titleService: Title, private jumpbarService: JumpbarService,
     public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
     private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
     private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService) {
@@ -210,7 +211,7 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
     this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.seriesPagination = series.pagination;
-      this.jumpbarKeys = this.utilityService.getJumpKeys(this.series, (series: Series) => series.name);
+      this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
       window.scrollTo(0, 0);
       this.cdRef.markForCheck();

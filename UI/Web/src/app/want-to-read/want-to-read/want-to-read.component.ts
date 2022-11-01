@@ -15,6 +15,7 @@ import { SeriesFilter, FilterEvent } from 'src/app/_models/series-filter';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
+import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
@@ -80,7 +81,8 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     private seriesService: SeriesService, private titleService: Title, 
     public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
     private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
-    private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService) {
+    private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService,
+    private jumpbarService: JumpbarService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
       this.titleService.setTitle('Want To Read');
 
@@ -152,7 +154,7 @@ export class WantToReadComponent implements OnInit, OnDestroy {
     this.seriesService.getWantToRead(undefined, undefined, this.filter).pipe(take(1)).subscribe(paginatedList => {
       this.series = paginatedList.result;
       this.seriesPagination = paginatedList.pagination;
-      this.jumpbarKeys = this.utilityService.getJumpKeys(this.series, (series: Series) => series.name);
+      this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
       window.scrollTo(0, 0);
       this.cdRef.markForCheck();
