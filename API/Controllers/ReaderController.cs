@@ -83,8 +83,9 @@ public class ReaderController : BaseApiController
     }
 
     /// <summary>
-    /// Returns an image for a given chapter. Side effect: This will cache the chapter images for reading.
+    /// Returns an image for a given chapter. Will perform bounding checks
     /// </summary>
+    /// <remarks>This will cache the chapter images for reading</remarks>
     /// <param name="chapterId"></param>
     /// <param name="page"></param>
     /// <returns></returns>

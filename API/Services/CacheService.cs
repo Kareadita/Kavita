@@ -224,6 +224,8 @@ public class CacheService : ICacheService
             return string.Empty;
         }
 
+        if (page > files.Length) page = files.Length;
+
         // Since array is 0 based, we need to keep that in account (only affects last image)
         return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
     }

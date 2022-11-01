@@ -1060,21 +1060,26 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
       if (img) {
         this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
-        console.log('Using prefetched image');
+        console.log(this.pageNum, 'Using prefetched image, already loaded: ', this.canvasImage.complete);
       } else {
+        this.canvasImage = new Image();
         this.canvasImage.src = this.getPageUrl(this.pageNum);
-        console.log('Using new image');
+        console.log(this.pageNum, 'Using new image, already loaded: ', this.canvasImage.complete, this.canvasImage.src);
       }
     } else {
+      this.canvasImage = new Image();
       this.canvasImage.src = this.getPageUrl(this.pageNum);
     }
 
     // This is called on first load or when the prefetcher hasn't loaded 
+    // ?! This is not triggering correctly when using a new image fetch
     this.canvasImage.onload = () => {
-      console.log('Canvas Image Onload'); // I never see this fire
-      this.isLoading = false;
-      this.cdRef.markForCheck();
+      console.log('Canvas Image Onload', this.canvasImage.complete);
+      this.renderPage();
     };
+    this.canvasImage.onerror = (e) => {
+      console.error('An error occured loading the image: ', e);
+    }
     
     this.cdRef.markForCheck();
   }
@@ -1292,12 +1297,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   prefetch() {
     // NOTE: This doesn't allow for any directionality
     // NOTE: This doesn't maintain 1 image behind at all times
+    // NOTE: I may want to provide a different prefetcher for double renderer
     for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
       const numOffset = this.pageNum + i;
       if (numOffset > this.maxPages - 1) continue;
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       if (this.readerService.imageUrlToPageNum(this.cachedImages[index].src) !== numOffset) {
+        this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
         this.cachedImages[index].onload = () => {
           console.log('Page ', numOffset, ' loaded');
@@ -1329,17 +1336,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     if (this.layoutMode !== LayoutMode.Single) {
+      this.canvasImageNext = new Image();
+      this.canvasImagePrev = new Image();
       this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()
       this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
 
       if (this.pageNum + 2 < this.maxPages - 1) {
+        this.canvasImageAheadBy2 = new Image();
         this.canvasImageAheadBy2.src = this.getPageUrl(this.pageNum + 2);
       }
       if (this.pageNum - 2 >= 0) {
+        this.canvasImageBehindBy2 = new Image();
         this.canvasImageBehindBy2.src = this.getPageUrl(this.pageNum - 2 || 0);
       }      
     
       if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
+        this.canvasImage2 = new Image();
         if (this.layoutMode === LayoutMode.Double) {
           this.canvasImage2.src = this.canvasImageNext.src;
         } else {
@@ -1491,6 +1503,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // We must set this here because loadPage from render doesn't call if we aren't page splitting
     if (this.readerMode !== ReaderMode.Webtoon) {
       this.canvasImage = this.cachedImages[this.pageNum & this.cachedImages.length];
+      console.log('Setting canvas image to: ', this.cachedImages[this.pageNum & this.cachedImages.length])
       this.isLoading = true;
     }
 
