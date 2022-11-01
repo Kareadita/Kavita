@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, NgZone, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
@@ -290,9 +290,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   bookmarkPageHandler = this.bookmarkPage.bind(this);
 
-  getPageUrl = (pageNum: number) => {
+  getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
-    return this.readerService.getPageUrl(this.chapterId, pageNum);
+    return this.readerService.getPageUrl(chapterId, pageNum);
   }
 
   private readonly onDestroy = new Subject<void>();
@@ -410,7 +410,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               private toastr: ToastrService, private memberService: MemberService,
               public utilityService: UtilityService, private renderer: Renderer2,
               @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
-              private readonly cdRef: ChangeDetectorRef) {
+              private readonly cdRef: ChangeDetectorRef, private readonly ngZone: NgZone) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
                 this.cdRef.markForCheck();
@@ -725,6 +725,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.nextChapterDisabled = true;
           this.cdRef.markForCheck();
+        } else {
+          // Fetch the first page of next chapter
+          new Image().src = this.getPageUrl(0, this.nextChapterId);
         }
       });
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -732,6 +735,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.prevChapterDisabled = true;
           this.cdRef.markForCheck();
+        } else {
+          // Fetch the last page of prev chapter
+          new Image().src = this.getPageUrl(1000000, this.prevChapterId);
         }
       });
 
@@ -1063,9 +1069,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.canvasImage.src = this.getPageUrl(this.pageNum);
     }
 
-    
+    // This is called on first load or when the prefetcher hasn't loaded 
     this.canvasImage.onload = () => {
       console.log('Canvas Image Onload'); // I never see this fire
+      this.isLoading = false;
       this.cdRef.markForCheck();
     };
     
@@ -1179,6 +1186,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.readingArea.nativeElement.scroll(0,0);
       }
       this.isLoading = false;
+      console.log('[RenderPage] shortcut')
       this.cdRef.markForCheck();
       return;
     }
@@ -1205,6 +1213,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.isLoading = false;
     this.cdRef.markForCheck();
+    console.log('[RenderPage] done');
   }
 
   updateScalingForFirstPageRender() {
@@ -1292,7 +1301,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cachedImages[index].src = this.getPageUrl(numOffset);
         this.cachedImages[index].onload = () => {
           console.log('Page ', numOffset, ' loaded');
-          this.cdRef.markForCheck();
+          //this.cdRef.markForCheck();
         };
       }
     }
@@ -1342,7 +1351,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.renderPage();
     this.prefetch();
-    this.isLoading = false;
+    //this.isLoading = false; // We don't need this as if we get stuck in the renderPage/loading, then this would have removed the loader to quick
     this.cdRef.markForCheck();
   }
 
