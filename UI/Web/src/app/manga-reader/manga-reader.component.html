@@ -69,7 +69,7 @@
                 <img alt=" " #image [src]="canvasImage.src" id="image-1"
                     class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
-                <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !isCoverImage())">
+                <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !mangaReaderService.isCoverImage(this.pageNum))">
                     <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}} -->
                 </ng-container>
             </div>

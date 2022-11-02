@@ -1,7 +1,9 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { Observable, Subject, tap } from 'rxjs';
+import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../_models/reader-enums';
 import { ReaderSetting } from '../_models/reader-setting';
+import { ManagaReaderService } from '../_series/managa-reader.service';
 
 @Component({
   selector: 'app-canvas-renderer',
@@ -12,7 +14,11 @@ import { ReaderSetting } from '../_models/reader-setting';
 export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() canvasImage: HTMLImageElement = new Image();
-  @Input() fittingClass: string = '';
+
+  @Input() fittingClass: string = ''; // I don't think we need this
+  /**
+   * When rendering settings update, this observable will keep track so canvas renderer is kept in sync
+   */
   @Input() readerSettings!: Observable<ReaderSetting>;
 
   @Input() image!: Observable<ReaderSetting>;
@@ -31,8 +37,9 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   isWideImage: boolean = false;
   isNoSplit: boolean = false;
   fit: FITTING_OPTION = FITTING_OPTION.ORIGINAL;
+  pageSplit: PageSplitOption = PageSplitOption.FitSplit;
 
-  constructor(private readonly cdRef: ChangeDetectorRef) { }
+  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
 
   ngOnInit(): void {
     this.readerSettings.pipe(tap(value => {
@@ -41,6 +48,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       this.isSplitLeftToRight = value.isSplitLeftToRight;
       this.isWideImage = value.isWideImage;
       this.isNoSplit = value.isNoSplit;
+      this.pageSplit = value.pageSplit;
       console.log('Canvas Renderer - settings: ', value);
     })).subscribe(() => {});
   }
@@ -60,37 +68,38 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
 
   updateSplitPage() {
-    const needsSplitting = this.isWideImage;
-    if (!needsSplitting || this.isNoSplit) {
+    const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+    if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return;
     }
+    const splitLeftToRight = this.mangaReaderService.isSplitLeftToRight(this.pageSplit);
 
     if (this.pagingDirection === PAGING_DIRECTION.FORWARD) {
       switch (this.currentImageSplitPart) {
         case SPLIT_PAGE_PART.NO_SPLIT:
-          this.currentImageSplitPart = this.isSplitLeftToRight ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART;
+          this.currentImageSplitPart = splitLeftToRight ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART;
           break;
         case SPLIT_PAGE_PART.LEFT_PART:
           const r2lSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT);
-          this.currentImageSplitPart = this.isSplitLeftToRight ? SPLIT_PAGE_PART.RIGHT_PART : r2lSplittingPart;
+          this.currentImageSplitPart = splitLeftToRight ? SPLIT_PAGE_PART.RIGHT_PART : r2lSplittingPart;
           break;
         case SPLIT_PAGE_PART.RIGHT_PART:
           const l2rSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT);
-          this.currentImageSplitPart = this.isSplitLeftToRight ? l2rSplittingPart : SPLIT_PAGE_PART.LEFT_PART;
+          this.currentImageSplitPart = splitLeftToRight ? l2rSplittingPart : SPLIT_PAGE_PART.LEFT_PART;
           break;
       }
     } else if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
       switch (this.currentImageSplitPart) {
         case SPLIT_PAGE_PART.NO_SPLIT:
-          this.currentImageSplitPart = this.isSplitLeftToRight ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART;
+          this.currentImageSplitPart = splitLeftToRight ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART;
           break;
         case SPLIT_PAGE_PART.LEFT_PART:
           const l2rSplittingPart = (needsSplitting ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.NO_SPLIT);
-          this.currentImageSplitPart = this.isSplitLeftToRight ? l2rSplittingPart : SPLIT_PAGE_PART.RIGHT_PART;
+          this.currentImageSplitPart = splitLeftToRight? l2rSplittingPart : SPLIT_PAGE_PART.RIGHT_PART;
           break;
         case SPLIT_PAGE_PART.RIGHT_PART:
-          this.currentImageSplitPart = this.isSplitLeftToRight ? SPLIT_PAGE_PART.LEFT_PART : (needsSplitting ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT);
+          this.currentImageSplitPart = splitLeftToRight ? SPLIT_PAGE_PART.LEFT_PART : (needsSplitting ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.NO_SPLIT);
           break;
       }
     }
