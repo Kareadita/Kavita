@@ -607,13 +607,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Gets a page from cache else gets a brand new Image
    * @param pageNum Page Number to load
    * @param forceNew Forces to fetch a new image
+   * @param chapterId ChapterId to fetch page from. Defaults to current chapterId
    * @returns 
    */
-   getPage(pageNum: number, forceNew: boolean = false) {
+   getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
     let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
     if (!img || forceNew) {
       img = new Image();
-      img.src = this.getPageUrl(this.pageNum);
+      img.src = this.getPageUrl(this.pageNum, chapterId);
     }
 
     return img;
@@ -743,7 +744,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.cdRef.markForCheck();
         } else {
           // Fetch the first page of next chapter
-          new Image().src = this.getPageUrl(0, this.nextChapterId);
+          this.getPage(0, this.nextChapterId);
         }
       });
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -753,7 +754,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.cdRef.markForCheck();
         } else {
           // Fetch the last page of prev chapter
-          new Image().src = this.getPageUrl(1000000, this.prevChapterId);
+          this.getPage(1000000, this.nextChapterId);
         }
       });
 
@@ -1076,31 +1077,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
    */
   setCanvasImage() {
-    // TODO: Refactor to a method that loads from cache or new, but all within one method that we can use anywhere (like in double page code)
-    // if (this.layoutMode === LayoutMode.Single) {
-    //   const img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
-    //   if (img) {
-    //     this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
-    //     //console.log(this.pageNum, 'Using prefetched image, already loaded: ', this.canvasImage.complete);
-    //   } else {
-    //     this.canvasImage = new Image();
-    //     this.canvasImage.src = this.getPageUrl(this.pageNum);
-    //     //console.log(this.pageNum, 'Using new image, already loaded: ', this.canvasImage.complete, this.canvasImage.src);
-    //   }
-    // } else {
-    //   this.canvasImage = new Image();
-    //   this.canvasImage.src = this.getPageUrl(this.pageNum);
-    // }
     this.canvasImage = this.getPage(this.pageNum);
-
-    // This is called on first load or when the prefetcher hasn't loaded 
     this.canvasImage.onload = () => {
       this.renderPage();
     };
     
     this.cdRef.markForCheck();
   }
-
 
 
   loadNextChapter() {
@@ -1364,37 +1347,34 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // If prev page was a spread, then we don't do + 1
       console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
       console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
-      if (this.isWideImage(this.canvasImage2)) {
-        this.canvasImagePrev = new Image();
-        this.canvasImagePrev.src = this.getPageUrl(this.pageNum);
-        console.log('Setting Prev to ', this.pageNum);
-      } else {
-        this.canvasImagePrev = new Image();
-        this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
-        console.log('Setting Prev to ', this.pageNum - 1);
-      }
+      // if (this.isWideImage(this.canvasImage2)) {
+      //   this.canvasImagePrev = this.getPage(this.pageNum); // this.getPageUrl(this.pageNum);
+      //   console.log('Setting Prev to ', this.pageNum);
+      // } else {
+      //   this.canvasImagePrev = this.getPage(this.pageNum - 1); //this.getPageUrl(this.pageNum - 1);
+      //   console.log('Setting Prev to ', this.pageNum - 1);
+      // }
 
-      this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()
+      // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
+      this.canvasImageNext = this.getPage(this.pageNum + 1);
       console.log('Setting Next to ', this.pageNum + 1);
 
-      //this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
+      this.canvasImagePrev = this.getPage(this.pageNum - 1);
+      console.log('Setting Prev to ', this.pageNum - 1);
 
       if (this.pageNum + 2 < this.maxPages - 1) {
-        this.canvasImageAheadBy2 = new Image();
-        this.canvasImageAheadBy2.src = this.getPageUrl(this.pageNum + 2);
+        this.canvasImageAheadBy2 = this.getPage(this.pageNum + 2);
       }
       if (this.pageNum - 2 >= 0) {
-        this.canvasImageBehindBy2 = new Image();
-        this.canvasImageBehindBy2.src = this.getPageUrl(this.pageNum - 2 || 0);
+        this.canvasImageBehindBy2 = this.getPage(this.pageNum - 2 || 0);
       }      
     
       if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
         console.log('Rendering Double Page');
-        this.canvasImage2 = new Image();
         if (this.layoutMode === LayoutMode.Double) {
-          this.canvasImage2.src = this.canvasImageNext.src;
+          this.canvasImage2 = this.canvasImageNext;
         } else {
-          this.canvasImage2.src = this.canvasImagePrev.src;
+          this.canvasImage2 = this.canvasImagePrev;
         }
       }
     }
