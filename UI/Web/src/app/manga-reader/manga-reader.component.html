@@ -33,12 +33,12 @@
     </ng-container>
 
     <div class="reading-area" 
+            appSwipe (swipeEvent)="onSwipeEvent($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
+            {{renderWithCanvas}}
             <div class="image-container" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
-                <canvas #content class="{{getFittingOptionClass()}}"
-                    ondragstart="return false;" onselectstart="return false;">
-                </canvas>
+                <app-canvas-renderer [fittingClass]="getFittingOptionClass()" [canvasImage]="canvasImage" [readerSettings]="readerSettings$"></app-canvas-renderer>
             </div>
 
             <div class="pagination-area">
@@ -95,6 +95,7 @@
     </div>
 
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
+
         <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
             <span class="visually-hidden" id="slider-info"></span>
             <div class="row g-0">

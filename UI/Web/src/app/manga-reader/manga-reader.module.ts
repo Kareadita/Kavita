@@ -12,6 +12,8 @@ import { PipeModule } from '../pipe/pipe.module';
 import { FullscreenIconPipe } from './_pipes/fullscreen-icon.pipe';
 import { LayoutModeIconPipe } from './_pipes/layout-mode-icon.pipe';
 import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
+import { SwipeDirective } from './swipe.directive';
+import { CanvasRendererComponent } from './canvas-renderer/canvas-renderer.component';
 
 @NgModule({
   declarations: [
@@ -20,6 +22,8 @@ import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
     FullscreenIconPipe,
     ReaderModeIconPipe,
     LayoutModeIconPipe,
+    SwipeDirective,
+    CanvasRendererComponent,
   ],
   imports: [
     CommonModule,

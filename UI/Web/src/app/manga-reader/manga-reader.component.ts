@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, NgZone, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { debounceTime, map, take, takeUntil } from 'rxjs/operators';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
@@ -10,7 +10,7 @@ import { NavService } from '../_services/nav.service';
 import { ReadingDirection } from '../_models/preferences/reading-direction';
 import { ScalingOption } from '../_models/preferences/scaling-option';
 import { PageSplitOption } from '../_models/preferences/page-split-option';
-import { BehaviorSubject, forkJoin, fromEvent, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, fromEvent, Observable, ReplaySubject, Subject } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { Breakpoint, KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { MemberService } from '../_services/member.service';
@@ -25,6 +25,7 @@ import { LibraryType } from '../_models/library';
 import { ShortcutsModalComponent } from '../reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { LayoutMode } from './_models/layout-mode';
+import { ReaderSetting } from './_models/reader-setting';
 
 const PREFETCH_PAGES = 10;
 
@@ -111,8 +112,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readingDirection = ReadingDirection.LeftToRight;
   scalingOption = ScalingOption.FitToHeight;
   pageSplitOption = PageSplitOption.FitSplit;
+
   currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
+
   isFullscreen: boolean = false;
   autoCloseMenu: boolean = true;
   readerMode: ReaderMode = ReaderMode.LeftRight;
@@ -288,6 +291,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   rightPaginationOffset = 0;
 
+  readerSettings$!: Observable<ReaderSetting>;
+
   bookmarkPageHandler = this.bookmarkPage.bind(this);
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
@@ -410,7 +415,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               private toastr: ToastrService, private memberService: MemberService,
               public utilityService: UtilityService, private renderer: Renderer2,
               @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
-              private readonly cdRef: ChangeDetectorRef, private readonly ngZone: NgZone) {
+              private readonly cdRef: ChangeDetectorRef) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
                 this.cdRef.markForCheck();
@@ -463,6 +468,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         layoutMode: this.layoutMode,
         darkness: 100
       });
+
+      // We need a mergeMap when page changes
+      this.readerSettings$ = this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy), map(values => {
+        return {
+          pageSplit: values.pageSplitOption,
+          fitting: this.translateScalingOption(this.scalingOption),
+          layoutMode: this.layoutMode,
+          darkness: 100,
+          isSplitLeftToRight: this.isSplitLeftToRight(),
+          isWideImage: this.isWideImage(),
+          isNoSplit: this.isNoSplit(),
+        }
+      }));
 
       this.updateForm();
 
@@ -754,7 +772,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.cdRef.markForCheck();
         } else {
           // Fetch the last page of prev chapter
-          this.getPage(1000000, this.nextChapterId);
+          this.getPage(1000000, this.prevChapterId);
         }
       });
 
@@ -910,6 +928,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  // TODO: This is needed in multiple places, let's refactor into a service or maybe menu can have emitters that update these infos on change
   isSplitLeftToRight() {
     return parseInt(this.generalSettingsForm?.get('pageSplitOption')?.value, 10) === PageSplitOption.SplitLeftToRight;
   }
@@ -1077,7 +1096,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
    */
   setCanvasImage() {
-    this.canvasImage = this.getPage(this.pageNum);
+    this.canvasImage = this.getPage(this.pageNum, this.chapterId, this.layoutMode !== LayoutMode.Single);
     this.canvasImage.onload = () => {
       this.renderPage();
     };
@@ -1158,36 +1177,36 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns If we should continue to the render loop
    */
   setCanvasSize() {
-    if (this.ctx && this.canvas) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const isSafari = [
-        'iPad Simulator',
-        'iPhone Simulator',
-        'iPod Simulator',
-        'iPad',
-        'iPhone',
-        'iPod'
-      ].includes(navigator.platform)
-      // iPad on iOS 13 detection
-      || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
-      const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
-      const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
-      if (needsScaling) {
-        this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
-        this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
-      } else {
-        this.canvas.nativeElement.width = this.canvasImage.width;
-        this.canvas.nativeElement.height = this.canvasImage.height;
-      }
-      this.cdRef.markForCheck();
+    if (!this.ctx || !this.canvas) { return; }
+    // TODO: Move this somewhere else (maybe canvas renderer?)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const isSafari = [
+      'iPad Simulator',
+      'iPhone Simulator',
+      'iPod Simulator',
+      'iPad',
+      'iPhone',
+      'iPod'
+    ].includes(navigator.platform)
+    // iPad on iOS 13 detection
+    || (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+    const canvasLimit = isSafari ? 16_777_216 : 124_992_400;
+    const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
+    if (needsScaling) {
+      this.canvas.nativeElement.width = isSafari ? 4_096 : 16_384;
+      this.canvas.nativeElement.height = isSafari ? 4_096 : 16_384;
+    } else {
+      this.canvas.nativeElement.width = this.canvasImage.width;
+      this.canvas.nativeElement.height = this.canvasImage.height;
     }
+    this.cdRef.markForCheck();
   }
 
   renderPage() {
     const needsSplitting = this.isWideImage();
-    
-    if (!this.ctx || !this.canvas || this.isNoSplit() || !needsSplitting) {
+    console.log('rendering a wide image: ', needsSplitting);
+    if (this.isNoSplit() || !needsSplitting) { // !this.ctx || !this.canvas || (moved to canvas renderer)
       this.renderWithCanvas = false;
       if (this.getFit() !== FITTING_OPTION.HEIGHT) {
         this.readingArea.nativeElement.scroll(0,0);
@@ -1201,24 +1220,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImage.onload = null;
 
     this.setCanvasSize();
-    this.updateSplitPage();
+    // this.updateSplitPage();
 
-    if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
-      this.canvas.nativeElement.width = this.canvasImage.width / 2;
-      this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
-      this.cdRef.markForCheck();
-    } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
-      this.canvas.nativeElement.width = this.canvasImage.width / 2;
-      this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
-      this.cdRef.markForCheck();
-    }
+    // if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
+    //   this.canvas.nativeElement.width = this.canvasImage.width / 2;
+    //   this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
+    //   this.cdRef.markForCheck();
+    // } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
+    //   this.canvas.nativeElement.width = this.canvasImage.width / 2;
+    //   this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
+    //   this.cdRef.markForCheck();
+    // }
 
-    // Reset scroll on non HEIGHT Fits
-    if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-      this.readingArea.nativeElement.scroll(0,0);
-    }
-    this.isLoading = false;
-    this.cdRef.markForCheck();
+    // // Reset scroll on non HEIGHT Fits
+    // if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+    //   this.readingArea.nativeElement.scroll(0,0);
+    // }
+    // this.isLoading = false;
+    // this.cdRef.markForCheck();
   }
 
   updateScalingForFirstPageRender() {
