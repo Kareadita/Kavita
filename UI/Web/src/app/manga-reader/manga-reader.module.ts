@@ -6,14 +6,15 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { MangaReaderRoutingModule } from './manga-reader.router.module';
 import { SharedModule } from '../shared/shared.module';
 import { NgxSliderModule } from '@angular-slider/ngx-slider';
-import { InfiniteScrollerComponent } from './infinite-scroller/infinite-scroller.component';
+import { InfiniteScrollerComponent } from './_components/infinite-scroller/infinite-scroller.component';
 import { ReaderSharedModule } from '../reader-shared/reader-shared.module';
 import { PipeModule } from '../pipe/pipe.module';
 import { FullscreenIconPipe } from './_pipes/fullscreen-icon.pipe';
 import { LayoutModeIconPipe } from './_pipes/layout-mode-icon.pipe';
 import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
 import { SwipeDirective } from './swipe.directive';
-import { CanvasRendererComponent } from './canvas-renderer/canvas-renderer.component';
+import { CanvasRendererComponent } from './_components/canvas-renderer/canvas-renderer.component';
+import { SingleRendererComponent } from './_components/single-renderer/single-renderer.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +25,7 @@ import { CanvasRendererComponent } from './canvas-renderer/canvas-renderer.compo
     LayoutModeIconPipe,
     SwipeDirective,
     CanvasRendererComponent,
+    SingleRendererComponent,
   ],
   imports: [
     CommonModule,

@@ -3,9 +3,9 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Even
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ScrollService } from 'src/app/_services/scroll.service';
-import { ReaderService } from '../../_services/reader.service';
-import { PAGING_DIRECTION } from '../_models/reader-enums';
-import { WebtoonImage } from '../_models/webtoon-image';
+import { ReaderService } from '../../../_services/reader.service';
+import { PAGING_DIRECTION } from '../../_models/reader-enums';
+import { WebtoonImage } from '../../_models/webtoon-image';
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load

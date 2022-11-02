@@ -1,9 +1,10 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { Observable, Subject, tap } from 'rxjs';
+import { distinctUntilChanged, filter, Observable, of, Subject, switchMap, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../_models/reader-enums';
-import { ReaderSetting } from '../_models/reader-setting';
-import { ManagaReaderService } from '../_series/managa-reader.service';
+import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
+import { ReaderSetting } from '../../_models/reader-setting';
+import { ImageRenderer } from '../../_models/renderer';
+import { ManagaReaderService } from '../../_series/managa-reader.service';
 
 @Component({
   selector: 'app-canvas-renderer',
@@ -13,15 +14,20 @@ import { ManagaReaderService } from '../_series/managa-reader.service';
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @Input() canvasImage: HTMLImageElement = new Image();
+  canvasImage: HTMLImageElement | null = null;
+  /**
+   * The current page
+   */
+  @Input() pageNum!: Observable<number>;
 
-  @Input() fittingClass: string = ''; // I don't think we need this
+  //@Input() fittingClass: string = ''; // I don't think we need this
   /**
    * When rendering settings update, this observable will keep track so canvas renderer is kept in sync
    */
   @Input() readerSettings!: Observable<ReaderSetting>;
 
-  @Input() image!: Observable<ReaderSetting>;
+  // The idea here is for image to flow in via observable and when that thappens, we just render onto the canvas
+  @Input() image!: Observable<HTMLImageElement | null>;
 
   @Output() render = new EventEmitter<HTMLImageElement>();
 
@@ -33,30 +39,40 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
-  isSplitLeftToRight: boolean = false;
-  isWideImage: boolean = false;
-  isNoSplit: boolean = false;
   fit: FITTING_OPTION = FITTING_OPTION.ORIGINAL;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
+
+  isLoading: boolean = false;
 
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
 
   ngOnInit(): void {
     this.readerSettings.pipe(tap(value => {
-      this.isNoSplit = value.isNoSplit;
       this.fit = value.fitting;
-      this.isSplitLeftToRight = value.isSplitLeftToRight;
-      this.isWideImage = value.isWideImage;
-      this.isNoSplit = value.isNoSplit;
       this.pageSplit = value.pageSplit;
-      console.log('Canvas Renderer - settings: ', value);
+      this.pagingDirection = value.pagingDirection;
     })).subscribe(() => {});
+
+    this.image.pipe(
+      tap(img => console.log('[Canvas Renderer] image update: ', img)),
+      //distinctUntilChanged(), 
+      tap(img => {
+        if (img === null) return;
+        this.canvasImage = img;
+        img.onload = () => {
+          this.renderPage();
+        }
+        this.cdRef.markForCheck();
+        //this.renderPage();
+      })
+    ).subscribe(() => {});
   }
 
   ngAfterViewInit() {
     if (this.canvas) {
       this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-      this.canvasImage.onload = () => this.renderPage();
+      //if (this.canvasImage) this.renderPage();
+      if (this.canvasImage) this.canvasImage.onload = () => this.renderPage();
     }
   }
 
@@ -68,6 +84,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
 
   updateSplitPage() {
+    if (this.canvasImage == null) return;
     const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
     if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
@@ -107,11 +124,20 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
 
   renderPage() {
-
+    console.log('[Canvas Renderer] RenderPage() started');
+    if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) return;
-
-    const needsSplitting = this.isWideImage;
+    
+    this.isLoading = true;
+    const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+    this.setCanvasSize();
+    
     this.updateSplitPage();
+
+    console.log('\tAttempting to render page: ', this.canvasImage.src);
+    console.log('\tPage loaded: ', this.canvasImage.complete);
+    console.log('\tNeeds Splitting: ', needsSplitting);
+    console.log('\tCurrent Split Part: ', this.currentImageSplitPart);
 
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
@@ -126,11 +152,13 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     // Reset scroll on non HEIGHT Fits
     if (this.fit !== FITTING_OPTION.HEIGHT) {
       //this.readingArea.nativeElement.scroll(0,0);
-      // We can emit an event instead when renderer renders
+      // We can emit an event instead when renderer renders so the parent can do any extra work, like scrolling
       this.render.emit(this.canvasImage);
     }
-    //this.isLoading = false;
+
+    this.isLoading = false;
     this.cdRef.markForCheck();
+    console.log('[Canvas Renderer] RenderPage() ended');
   }
 
 
@@ -142,6 +170,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
    * @returns If we should continue to the render loop
    */
    setCanvasSize() {
+    if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) { return; }
     // TODO: Move this somewhere else (maybe canvas renderer?)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
