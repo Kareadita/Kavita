@@ -603,6 +603,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Gets a page from cache else gets a brand new Image
+   * @param pageNum Page Number to load
+   * @param forceNew Forces to fetch a new image
+   * @returns 
+   */
+   getPage(pageNum: number, forceNew: boolean = false) {
+    let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
+    if (!img || forceNew) {
+      img = new Image();
+      img.src = this.getPageUrl(this.pageNum);
+    }
+
+    return img;
+  }
+
   // if there is scroll room and on original, then don't paginate
   checkIfPaginationAllowed() {
     // This is not used atm due to the complexity it adds with keyboard.
@@ -944,6 +960,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  onSwipeEvent(event: any) {
+    console.log('Swipe event occured: ', event);
+  }
+
   handlePageChange(event: any, direction: string) {
     if (this.readerMode === ReaderMode.Webtoon) {
       if (direction === 'right') {
@@ -1056,33 +1076,32 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
    */
   setCanvasImage() {
-    if (this.layoutMode === LayoutMode.Single) {
-      const img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
-      if (img) {
-        this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
-        console.log(this.pageNum, 'Using prefetched image, already loaded: ', this.canvasImage.complete);
-      } else {
-        this.canvasImage = new Image();
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
-        console.log(this.pageNum, 'Using new image, already loaded: ', this.canvasImage.complete, this.canvasImage.src);
-      }
-    } else {
-      this.canvasImage = new Image();
-      this.canvasImage.src = this.getPageUrl(this.pageNum);
-    }
+    // TODO: Refactor to a method that loads from cache or new, but all within one method that we can use anywhere (like in double page code)
+    // if (this.layoutMode === LayoutMode.Single) {
+    //   const img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
+    //   if (img) {
+    //     this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
+    //     //console.log(this.pageNum, 'Using prefetched image, already loaded: ', this.canvasImage.complete);
+    //   } else {
+    //     this.canvasImage = new Image();
+    //     this.canvasImage.src = this.getPageUrl(this.pageNum);
+    //     //console.log(this.pageNum, 'Using new image, already loaded: ', this.canvasImage.complete, this.canvasImage.src);
+    //   }
+    // } else {
+    //   this.canvasImage = new Image();
+    //   this.canvasImage.src = this.getPageUrl(this.pageNum);
+    // }
+    this.canvasImage = this.getPage(this.pageNum);
 
     // This is called on first load or when the prefetcher hasn't loaded 
-    // ?! This is not triggering correctly when using a new image fetch
     this.canvasImage.onload = () => {
-      console.log('Canvas Image Onload', this.canvasImage.complete);
       this.renderPage();
     };
-    this.canvasImage.onerror = (e) => {
-      console.error('An error occured loading the image: ', e);
-    }
     
     this.cdRef.markForCheck();
   }
+
+
 
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) { 
@@ -1191,7 +1210,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.readingArea.nativeElement.scroll(0,0);
       }
       this.isLoading = false;
-      console.log('[RenderPage] shortcut')
       this.cdRef.markForCheck();
       return;
     }
@@ -1218,7 +1236,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.isLoading = false;
     this.cdRef.markForCheck();
-    console.log('[RenderPage] done');
   }
 
   updateScalingForFirstPageRender() {
@@ -1307,7 +1324,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
         this.cachedImages[index].onload = () => {
-          console.log('Page ', numOffset, ' loaded');
+          //console.log('Page ', numOffset, ' loaded');
           //this.cdRef.markForCheck();
         };
       }
@@ -1335,11 +1352,32 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setCanvasImage();
 
 
+    // ?! This logic is hella complex and confusing to read
+    // ?! We need to refactor into separate methods and keep it clean
+    // ?! In addition, we shouldn't update canvasImage outside of this code
+
     if (this.layoutMode !== LayoutMode.Single) {
+      
       this.canvasImageNext = new Image();
-      this.canvasImagePrev = new Image();
+      
+      
+      // If prev page was a spread, then we don't do + 1
+      console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
+      console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
+      if (this.isWideImage(this.canvasImage2)) {
+        this.canvasImagePrev = new Image();
+        this.canvasImagePrev.src = this.getPageUrl(this.pageNum);
+        console.log('Setting Prev to ', this.pageNum);
+      } else {
+        this.canvasImagePrev = new Image();
+        this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
+        console.log('Setting Prev to ', this.pageNum - 1);
+      }
+
       this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()
-      this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
+      console.log('Setting Next to ', this.pageNum + 1);
+
+      //this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
 
       if (this.pageNum + 2 < this.maxPages - 1) {
         this.canvasImageAheadBy2 = new Image();
@@ -1351,6 +1389,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }      
     
       if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
+        console.log('Rendering Double Page');
         this.canvasImage2 = new Image();
         if (this.layoutMode === LayoutMode.Double) {
           this.canvasImage2.src = this.canvasImageNext.src;
@@ -1359,11 +1398,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     }
-    this.cdRef.markForCheck();
 
+    
+    this.cdRef.markForCheck();
     this.renderPage();
     this.prefetch();
-    //this.isLoading = false; // We don't need this as if we get stuck in the renderPage/loading, then this would have removed the loader to quick
     this.cdRef.markForCheck();
   }
 
@@ -1503,7 +1542,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // We must set this here because loadPage from render doesn't call if we aren't page splitting
     if (this.readerMode !== ReaderMode.Webtoon) {
       this.canvasImage = this.cachedImages[this.pageNum & this.cachedImages.length];
-      console.log('Setting canvas image to: ', this.cachedImages[this.pageNum & this.cachedImages.length])
       this.isLoading = true;
     }
 

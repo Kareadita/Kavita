@@ -102,7 +102,7 @@ public class CacheService : ICacheService
         var extractPath = GetCachePath(chapterId);
 
         if (_directoryService.Exists(extractPath)) return chapter;
-        var files = chapter.Files.ToList();
+        var files = chapter?.Files.ToList();
         ExtractChapterFiles(extractPath, files);
 
         return  chapter;
