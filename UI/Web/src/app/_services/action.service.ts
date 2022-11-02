@@ -264,7 +264,7 @@ export class ActionService implements OnDestroy {
   markChapterAsUnread(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
     this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
-      this.toastr.success('Marked as unread');
+      this.toastr.success('Marked as Unread');
       if (callback) {
         callback(chapter);
       }
@@ -306,7 +306,7 @@ export class ActionService implements OnDestroy {
         volume.chapters?.forEach(c => c.pagesRead = 0);
       });
       chapters?.forEach(c => c.pagesRead = 0);
-      this.toastr.success('Marked as Read');
+      this.toastr.success('Marked as Unread');
 
       if (callback) {
         callback();
