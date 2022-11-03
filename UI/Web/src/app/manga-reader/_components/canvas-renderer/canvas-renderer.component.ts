@@ -44,6 +44,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   isLoading: boolean = false;
 
+
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
 
   ngOnInit(): void {
@@ -53,19 +54,18 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       this.pagingDirection = value.pagingDirection;
     })).subscribe(() => {});
 
-    this.image.pipe(
-      tap(img => console.log('[Canvas Renderer] image update: ', img)),
-      //distinctUntilChanged(), 
-      tap(img => {
-        if (img === null) return;
-        this.canvasImage = img;
-        img.onload = () => {
-          this.renderPage();
-        }
-        this.cdRef.markForCheck();
-        //this.renderPage();
-      })
-    ).subscribe(() => {});
+    // this.image.pipe(
+    //   tap(img => console.log('[Canvas Renderer] image update: ', img)),
+    //   distinctUntilChanged(), 
+    //   tap(img => {
+    //     if (img === null) return;
+    //     this.canvasImage = img;
+    //     this.canvasImage.addEventListener('load', () => {
+    //       this.renderPage();
+    //     }, false);
+    //     this.cdRef.markForCheck();
+    //   })
+    // ).subscribe(() => {});
   }
 
   ngAfterViewInit() {
@@ -82,13 +82,12 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
 
-
   updateSplitPage() {
     if (this.canvasImage == null) return;
     const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
     if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
-      return;
+      return needsSplitting;
     }
     const splitLeftToRight = this.mangaReaderService.isSplitLeftToRight(this.pageSplit);
 
@@ -120,23 +119,36 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
           break;
       }
     }
+    return needsSplitting;
   }
 
-
-  renderPage() {
-    console.log('[Canvas Renderer] RenderPage() started');
+  /**
+   * This renderer does not render when splitting is not needed
+   * @param img 
+   * @returns 
+   */
+  renderPage(img: HTMLImageElement | null = this.canvasImage) {
+    console.log('[Canvas Renderer] RenderPage() started', this.canvasImage);
+    if (img) {
+      this.canvasImage = img;
+    }
+    
     if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) return;
     
     this.isLoading = true;
-    const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
     this.setCanvasSize();
     
-    this.updateSplitPage();
+    const needsSplitting = this.updateSplitPage();
 
-    console.log('\tAttempting to render page: ', this.canvasImage.src);
-    console.log('\tPage loaded: ', this.canvasImage.complete);
-    console.log('\tNeeds Splitting: ', needsSplitting);
+    if (!needsSplitting) {
+      console.error('Canvas Renderer tried to render when splitting not needed');
+      return;
+    }
+
+    // console.log('\tAttempting to render page: ', this.canvasImage.src);
+    // console.log('\tPage loaded: ', this.canvasImage.complete);
+    // console.log('\tNeeds Splitting: ', needsSplitting);
     console.log('\tCurrent Split Part: ', this.currentImageSplitPart);
 
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
@@ -161,13 +173,31 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     console.log('[Canvas Renderer] RenderPage() ended');
   }
 
+  getPageAmount() {
+    switch(this.pagingDirection) {
+      case PAGING_DIRECTION.FORWARD:
+        return this.shouldMoveNext() ? 1 : 0;
+      case PAGING_DIRECTION.BACKWARDS:
+        return this.shouldMovePrev() ? 1 : 0;
+    }
+  }
+
+  shouldMoveNext() {
+    if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
+    return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
+  }
+
+  shouldMovePrev() {
+    if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
+    return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
+  }
+
 
 
 
   /**
    * There are some hard limits on the size of canvas' that we must cap at. https://github.com/jhildenbiddle/canvas-size#test-results
    * For Safari, it's 16,777,216, so we cap at 4096x4096 when this happens. The drawImage in render will perform bi-cubic scaling for us.
-   * @returns If we should continue to the render loop
    */
    setCanvasSize() {
     if (this.canvasImage == null) return;
@@ -196,5 +226,4 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     }
     this.cdRef.markForCheck();
   }
-
 }

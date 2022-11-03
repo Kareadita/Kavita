@@ -46,6 +46,10 @@ export class ManagaReaderService {
     return splitValue === PageSplitOption.NoSplit || splitValue === PageSplitOption.FitSplit;
   }
 
+  /**
+   * If the split option is Left to Right. This means that the Left side of the image renders before the Right side.
+   * In other words, If you were to visualize the parts as pages, Left is Page 0, Right is Page 1
+   */
   isSplitLeftToRight(pageSplitOption: PageSplitOption) {
     return parseInt(pageSplitOption + '', 10) === PageSplitOption.SplitLeftToRight;
   }
