@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { debounceTime, map, take, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, take, takeUntil, tap } from 'rxjs/operators';
 import { User } from '../_models/user';
 import { AccountService } from '../_services/account.service';
 import { ReaderService } from '../_services/reader.service';
@@ -482,6 +482,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       );
 
       this.updateForm();
+      
+      this.pagingDirectionSubject.pipe(
+        distinctUntilChanged(),
+        tap(dir => {
+          this.pagingDirection = dir;
+          this.cdRef.markForCheck();
+        }), 
+        takeUntil(this.onDestroy)
+      ).subscribe(() => {});
 
       
 
@@ -510,9 +519,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
         this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
+
         const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
         // If we need to split on a menu change, then we need to re-render.
         if (needsSplitting) {
+          // If we need to re-render, to ensure things layout properly, let's update paging direction & reset render
+          this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
+          this.canvasRenderer.reset();
           this.loadPage();
         }
       });
@@ -681,7 +694,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
     this.pageNum = 0;
-    this.pagingDirection = PAGING_DIRECTION.FORWARD;
+    //this.pagingDirection = PAGING_DIRECTION.FORWARD;
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     this.inSetup = true;
     this.canvasImage.src = '';
@@ -936,7 +949,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    this.pagingDirection = PAGING_DIRECTION.FORWARD;
+    //this.pagingDirection = PAGING_DIRECTION.FORWARD;
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
     let pageAmount = 1;
@@ -986,7 +999,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
+    //this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
     let pageAmount = 1;
@@ -1266,10 +1279,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const page = context.value;
 
     if (page > this.pageNum) {
-      this.pagingDirection = PAGING_DIRECTION.FORWARD;
+      //this.pagingDirection = PAGING_DIRECTION.FORWARD;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     } else {
-      this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
+      //this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
@@ -1325,10 +1338,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (page > this.pageNum) {
-      this.pagingDirection = PAGING_DIRECTION.FORWARD;
+      //this.pagingDirection = PAGING_DIRECTION.FORWARD;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     } else {
-      this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
+      //this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
@@ -1367,7 +1380,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch(this.readerMode) {
       case ReaderMode.LeftRight:
         this.readerMode = ReaderMode.UpDown;
-        this.pagingDirection = PAGING_DIRECTION.FORWARD;
+        //this.pagingDirection = PAGING_DIRECTION.FORWARD;
         this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
         break;
       case ReaderMode.UpDown:

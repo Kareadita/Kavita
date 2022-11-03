@@ -25,6 +25,11 @@ export interface ImageRenderer {
      * Returns the number of pages that should occur based on page direction and internal state of the renderer.
      */
     getPageAmount(): number;
+    /**
+     * When layout shifts occur, where a re-render might be needed but from menu option (like split option changed on a split image), this will be called.
+     * This should reset any needed state, but not unset the image.
+     */
+    reset(): void;
     
 
 }

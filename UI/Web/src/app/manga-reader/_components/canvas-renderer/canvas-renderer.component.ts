@@ -81,6 +81,9 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     this.onDestroy.complete();
   }
 
+  reset() {
+    this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
+  }
 
   updateSplitPage() {
     if (this.canvasImage == null) return;
@@ -136,9 +139,9 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) return;
     
-
+    // ?! Bug: updating from no split -> left to right will render right side first (likely has to do with paging direction)
     const needsSplitting = this.updateSplitPage();
-    console.log('\tSplit Part: ', this.currentImageSplitPart); // ?! The issue is this isn't being called on non splits, thus we are always stuck on left/right
+    console.log('\tSplit Part: ', this.currentImageSplitPart);
 
     if (!needsSplitting) {
       return;
