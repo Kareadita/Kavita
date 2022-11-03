@@ -12,7 +12,7 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
   styleUrls: ['./canvas-renderer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy, ImageRenderer {
 
   canvasImage: HTMLImageElement | null = null;
   /**

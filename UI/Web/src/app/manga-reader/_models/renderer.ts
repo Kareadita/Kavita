@@ -8,7 +8,7 @@ export interface ImageRenderer {
     /**
      * The current Image 
      */
-    image: Observable<HTMLImageElement>;
+    image: Observable<HTMLImageElement | null>;
     /**
      * Performs a rendering pass
      */
