@@ -56,9 +56,7 @@ export class EditReadingListModalComponent implements OnInit {
   save() {
     if (this.reviewGroup.value.title.trim() === '') return;
 
-
     const model = {...this.reviewGroup.value, readingListId: this.readingList.id, promoted: this.readingList.promoted, coverImageLocked: this.coverImageLocked};
-
     const apis = [this.readingListService.update(model)];
     
     if (this.selectedCover !== '') {
@@ -77,7 +75,7 @@ export class EditReadingListModalComponent implements OnInit {
   togglePromotion() {
     const originalPromotion = this.readingList.promoted;
     this.readingList.promoted = !this.readingList.promoted;
-    const model = {readingListId: this.readingList.id, promoted: this.readingList.promoted};
+    const model = {...this.reviewGroup.value, readingListId: this.readingList.id, promoted: this.readingList.promoted, coverImageLocked: this.coverImageLocked};
     this.readingListService.update(model).subscribe(res => {
       /* No Operation */
     }, err => {

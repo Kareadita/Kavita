@@ -37,6 +37,7 @@ public interface IDirectoryService
     IEnumerable<DirectoryDto> ListDirectory(string rootPath);
     Task<byte[]> ReadFileAsync(string path);
     bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "");
+    bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, IList<string> newFilenames);
     bool Exists(string directory);
     void CopyFileToDirectory(string fullFilePath, string targetDirectory);
     int TraverseTreeParallelForEach(string root, Action<string> action, string searchPattern, ILogger logger);
@@ -425,6 +426,46 @@ public class DirectoryService : IDirectoryService
     }
 
     /// <summary>
+    /// Copies files to a destination directory. If the destination directory doesn't exist, this will create it.
+    /// </summary>
+    /// <remarks>If a file already exists in dest, this will rename as (2). It does not support multiple iterations of this. Overwriting is not supported.</remarks>
+    /// <param name="filePaths"></param>
+    /// <param name="directoryPath"></param>
+    /// <param name="newFilenames">A list that matches one to one with filePaths. Each filepath will be renamed to newFilenames</param>
+    /// <returns></returns>
+    public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, IList<string> newFilenames)
+    {
+        ExistOrCreate(directoryPath);
+        string currentFile = null;
+        var index = 0;
+        try
+        {
+            foreach (var file in filePaths)
+            {
+                currentFile = file;
+
+                if (!FileSystem.File.Exists(file))
+                {
+                    _logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
+                    continue;
+                }
+                var fileInfo = FileSystem.FileInfo.FromFileName(file);
+                var targetFile = FileSystem.FileInfo.FromFileName(RenameFileForCopy(newFilenames[index] + fileInfo.Extension, directoryPath));
+
+                fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, targetFile.Name));
+                index++;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unable to copy {File} to {DirectoryPath}", currentFile, directoryPath);
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Generates the combined filepath given a prepend (optional), output directory path, and a full input file path.
     /// If the output file already exists, will append (1), (2), etc until it can be written out
     /// </summary>
@@ -434,30 +475,32 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     private string RenameFileForCopy(string fileToCopy, string directoryPath, string prepend = "")
     {
-        var fileInfo = FileSystem.FileInfo.FromFileName(fileToCopy);
-        var filename = prepend + fileInfo.Name;
-
-        var targetFile = FileSystem.FileInfo.FromFileName(FileSystem.Path.Join(directoryPath, filename));
-        if (!targetFile.Exists)
+        while (true)
         {
-            return targetFile.FullName;
-        }
+            var fileInfo = FileSystem.FileInfo.FromFileName(fileToCopy);
+            var filename = prepend + fileInfo.Name;
 
-        var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
-        if (FileCopyAppend.IsMatch(noExtension))
-        {
-            var match = FileCopyAppend.Match(noExtension).Value;
-            var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
-            noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
-        }
-        else
-        {
-            noExtension += " (1)";
-        }
+            var targetFile = FileSystem.FileInfo.FromFileName(FileSystem.Path.Join(directoryPath, filename));
+            if (!targetFile.Exists)
+            {
+                return targetFile.FullName;
+            }
 
-        var newFilename = prepend + noExtension +
-                          FileSystem.Path.GetExtension(fileInfo.Name);
-        return RenameFileForCopy(FileSystem.Path.Join(directoryPath, newFilename), directoryPath, prepend);
+            var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
+            if (FileCopyAppend.IsMatch(noExtension))
+            {
+                var match = FileCopyAppend.Match(noExtension).Value;
+                var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
+                noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
+            }
+            else
+            {
+                noExtension += " (1)";
+            }
+
+            var newFilename = prepend + noExtension + FileSystem.Path.GetExtension(fileInfo.Name);
+            fileToCopy = FileSystem.Path.Join(directoryPath, newFilename);
+        }
     }
 
     /// <summary>
