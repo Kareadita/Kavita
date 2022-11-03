@@ -193,6 +193,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
     // ReSharper disable once MemberCanBePrivate.Global
+    [DisableConcurrentExecution(60)]
     public async Task ProcessChange(string filePath, bool isDirectoryChange = false)
     {
         var sw = Stopwatch.StartNew();
