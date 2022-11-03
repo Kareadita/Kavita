@@ -509,6 +509,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.generalSettingsForm.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((changes: SimpleChanges) => {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
+        this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
         const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
         // If we need to split on a menu change, then we need to re-render.
         if (needsSplitting) {
@@ -618,6 +619,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createReaderSettingsUpdate() {
+    console.log('page split option: ', this.pageSplitOption);
     return {
       pageSplit: this.pageSplitOption,
       fitting: this.mangaReaderService.translateScalingOption(this.scalingOption),
@@ -1104,7 +1106,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.renderWithCanvas = !(this.mangaReaderService.isNoSplit(this.pageSplitOption) || !needsSplitting);
     if (this.renderWithCanvas) this.canvasImage.onload = null;
-    
+
     this.canvasRenderer.renderPage(this.canvasImage);
     this.cdRef.markForCheck();
 
