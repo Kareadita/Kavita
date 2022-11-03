@@ -967,14 +967,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const notInSplit = this.canvasRenderer.shouldMoveNext();
     console.log('Next Page, not in split: ', notInSplit);
     pageAmount = this.canvasRenderer.getPageAmount();
-    
-    if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) {
-      // if (this.isLoading) { 
-      //   this.setPageNum(this.pageNum + pageAmount);
-      //   this.loadPage();
-      //   return; 
-      // }
 
+    if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
       return;
@@ -1013,12 +1007,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
 
     if ((this.pageNum - 1 < 0 && notInSplit)) {
-      // if (this.isLoading) { 
-      //   this.setPageNum(this.pageNum - pageAmount);
-      //   this.loadPage();
-      //   return; 
-      // }
-
       // Move to next volume/chapter automatically
       this.loadPrevChapter();
       return;
@@ -1113,25 +1101,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   renderPage() {
     console.log('[Manga Reader] renderPage() started');
     const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
-    //console.log('rendering a wide image: ', needsSplitting);
-    //console.log('rendering no split: ', this.mangaReaderService.isNoSplit(this.pageSplitOption));
-    if (this.mangaReaderService.isNoSplit(this.pageSplitOption) || !needsSplitting) {
-      this.renderWithCanvas = false;
-      if (this.getFit() !== FITTING_OPTION.HEIGHT) {
-        this.readingArea.nativeElement.scroll(0,0);
-      }
-      this.isLoading = false;
-      this.cdRef.markForCheck();
-      return;
-    }
 
-    // Render with a canvas
-    this.renderWithCanvas = true;
-    this.canvasImage.onload = null;
+    this.renderWithCanvas = !(this.mangaReaderService.isNoSplit(this.pageSplitOption) || !needsSplitting);
+    if (this.renderWithCanvas) this.canvasImage.onload = null;
+    
     this.canvasRenderer.renderPage(this.canvasImage);
     this.cdRef.markForCheck();
 
-    // todo: tell the canvas renderer to render
+    if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+        this.readingArea.nativeElement.scroll(0,0);
+    }
     console.log('[Manga Reader] renderPage() ended');
   }
 

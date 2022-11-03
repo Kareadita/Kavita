@@ -17,9 +17,12 @@ export class ManagaReaderService {
    */
   isWideImage(elem: HTMLImageElement) {
     if (elem) {
-      elem.onload = () => {
+      // elem.onload = () => {
+      //   return elem.width > elem.height;
+      // }
+      elem.addEventListener('load', () => {
         return elem.width > elem.height;
-      }
+      }, false);
       if (elem.src === '') return false;
     }
     const element = elem;

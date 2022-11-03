@@ -136,15 +136,18 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) return;
     
-    this.isLoading = true;
-    this.setCanvasSize();
-    
+
     const needsSplitting = this.updateSplitPage();
+    console.log('\tSplit Part: ', this.currentImageSplitPart); // ?! The issue is this isn't being called on non splits, thus we are always stuck on left/right
 
     if (!needsSplitting) {
-      console.error('Canvas Renderer tried to render when splitting not needed');
       return;
     }
+
+    if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
+
+    this.isLoading = true;
+    this.setCanvasSize();
 
     // console.log('\tAttempting to render page: ', this.canvasImage.src);
     // console.log('\tPage loaded: ', this.canvasImage.complete);
@@ -174,6 +177,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   getPageAmount() {
+    if (this.canvasImage === null) return 1;
+    if (!this.mangaReaderService.isWideImage(this.canvasImage)) return 1;
     switch(this.pagingDirection) {
       case PAGING_DIRECTION.FORWARD:
         return this.shouldMoveNext() ? 1 : 0;
