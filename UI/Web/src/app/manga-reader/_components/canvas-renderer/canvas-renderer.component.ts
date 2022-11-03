@@ -14,23 +14,8 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy, ImageRenderer {
 
-  canvasImage: HTMLImageElement | null = null;
-  /**
-   * The current page
-   */
-  @Input() pageNum!: Observable<number>;
-
-  //@Input() fittingClass: string = ''; // I don't think we need this
-  /**
-   * When rendering settings update, this observable will keep track so canvas renderer is kept in sync
-   */
   @Input() readerSettings!: Observable<ReaderSetting>;
-
-  // The idea here is for image to flow in via observable and when that thappens, we just render onto the canvas
   @Input() image!: Observable<HTMLImageElement | null>;
-
-  @Output() render = new EventEmitter<HTMLImageElement>();
-
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
@@ -43,6 +28,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
 
   isLoading: boolean = false;
+  canvasImage: HTMLImageElement | null = null;
 
 
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
@@ -51,8 +37,15 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     this.readerSettings.pipe(tap(value => {
       this.fit = value.fitting;
       this.pageSplit = value.pageSplit;
+      const rerenderNeeded = this.pageSplit != value.pageSplit;
       this.pagingDirection = value.pagingDirection;
+      if (rerenderNeeded) {
+        this.reset();
+      }
+
     })).subscribe(() => {});
+
+    
 
     // this.image.pipe(
     //   tap(img => console.log('[Canvas Renderer] image update: ', img)),
@@ -71,8 +64,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   ngAfterViewInit() {
     if (this.canvas) {
       this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
-      //if (this.canvasImage) this.renderPage();
-      if (this.canvasImage) this.canvasImage.onload = () => this.renderPage();
     }
   }
 
@@ -130,32 +121,17 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
    * @param img 
    * @returns 
    */
-  renderPage(img: HTMLImageElement | null = this.canvasImage) {
-    console.log('[Canvas Renderer] RenderPage() started', this.canvasImage);
-    if (img) {
-      this.canvasImage = img;
-    }
-    
-    if (this.canvasImage == null) return;
+  renderPage(img: Array<HTMLImageElement | null>) {
+    if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.ctx || !this.canvas) return;
+    this.canvasImage = img[0];
     
-    // ?! Bug: updating from no split -> left to right will render right side first (likely has to do with paging direction)
     const needsSplitting = this.updateSplitPage();
-    console.log('\tSplit Part: ', this.currentImageSplitPart);
-
-    if (!needsSplitting) {
-      return;
-    }
-
+    if (!needsSplitting) return;
     if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
 
     this.isLoading = true;
     this.setCanvasSize();
-
-    // console.log('\tAttempting to render page: ', this.canvasImage.src);
-    // console.log('\tPage loaded: ', this.canvasImage.complete);
-    // console.log('\tNeeds Splitting: ', needsSplitting);
-    console.log('\tCurrent Split Part: ', this.currentImageSplitPart);
 
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
       this.canvas.nativeElement.width = this.canvasImage.width / 2;
@@ -167,16 +143,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       this.cdRef.markForCheck();
     }
 
-    // Reset scroll on non HEIGHT Fits
-    if (this.fit !== FITTING_OPTION.HEIGHT) {
-      //this.readingArea.nativeElement.scroll(0,0);
-      // We can emit an event instead when renderer renders so the parent can do any extra work, like scrolling
-      this.render.emit(this.canvasImage);
-    }
-
     this.isLoading = false;
     this.cdRef.markForCheck();
-    console.log('[Canvas Renderer] RenderPage() ended');
   }
 
   getPageAmount() {
@@ -199,9 +167,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
     return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
   }
-
-
-
 
   /**
    * There are some hard limits on the size of canvas' that we must cap at. https://github.com/jhildenbiddle/canvas-size#test-results

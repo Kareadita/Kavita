@@ -483,7 +483,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.updateForm();
       
-      this.pagingDirectionSubject.pipe(
+      this.pagingDirection$.pipe(
         distinctUntilChanged(),
         tap(dir => {
           this.pagingDirection = dir;
@@ -632,9 +632,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   createReaderSettingsUpdate() {
-    console.log('page split option: ', this.pageSplitOption);
     return {
-      pageSplit: this.pageSplitOption,
+      pageSplit: parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10),
       fitting: this.mangaReaderService.translateScalingOption(this.scalingOption),
       layoutMode: this.layoutMode,
       darkness: 100,
@@ -694,7 +693,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
     this.pageNum = 0;
-    //this.pagingDirection = PAGING_DIRECTION.FORWARD;
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     this.inSetup = true;
     this.canvasImage.src = '';
@@ -831,7 +829,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const formControl = this.generalSettingsForm.get('fittingOption');
     let val = FITTING_OPTION.HEIGHT;
     if (formControl === undefined) {
-      val =  FITTING_OPTION.HEIGHT;
+      val = FITTING_OPTION.HEIGHT;
     }
     val =  formControl?.value;
 
@@ -858,7 +856,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFittingIcon() {
     const value = this.getFit();
-
+    // TODO: This can be a pipe
     switch(value) {
       case FITTING_OPTION.HEIGHT:
         return 'fa-arrows-alt-v';
@@ -949,7 +947,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    //this.pagingDirection = PAGING_DIRECTION.FORWARD;
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
     let pageAmount = 1;
@@ -998,8 +995,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-
-    //this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
     let pageAmount = 1;
@@ -1115,12 +1110,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   renderPage() {
     console.log('[Manga Reader] renderPage() started');
+
     const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
-
     this.renderWithCanvas = !(this.mangaReaderService.isNoSplit(this.pageSplitOption) || !needsSplitting);
-    if (this.renderWithCanvas) this.canvasImage.onload = null;
 
-    this.canvasRenderer.renderPage(this.canvasImage);
+    this.canvasRenderer.renderPage([this.canvasImage]);
     this.cdRef.markForCheck();
 
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
@@ -1279,10 +1273,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const page = context.value;
 
     if (page > this.pageNum) {
-      //this.pagingDirection = PAGING_DIRECTION.FORWARD;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     } else {
-      //this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
@@ -1338,10 +1330,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (page > this.pageNum) {
-      //this.pagingDirection = PAGING_DIRECTION.FORWARD;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     } else {
-      //this.pagingDirection = PAGING_DIRECTION.BACKWARDS;
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
@@ -1380,7 +1370,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch(this.readerMode) {
       case ReaderMode.LeftRight:
         this.readerMode = ReaderMode.UpDown;
-        //this.pagingDirection = PAGING_DIRECTION.FORWARD;
         this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
         break;
       case ReaderMode.UpDown:
@@ -1459,7 +1448,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.showBookmarkEffectEvent.next(pageNum);
     if (this.readerMode === ReaderMode.Webtoon) return;
 
-    let elements:Array<Element | ElementRef> = [];
+    const elements:Array<Element | ElementRef> = [];
     if (this.renderWithCanvas && this.canvas) {
       elements.push(this.canvas?.nativeElement);
     } else {

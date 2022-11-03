@@ -36,7 +36,6 @@
             appSwipe (swipeEvent)="onSwipeEvent($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
-            {{renderWithCanvas}}
             <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
                 <app-canvas-renderer [readerSettings]="readerSettings$" [image]="currentImage$"></app-canvas-renderer>
             </div>

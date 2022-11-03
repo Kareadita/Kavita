@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import { ReaderSetting } from "./reader-setting";
 
 /**
  * A generic interface for an image renderer 
@@ -6,13 +7,17 @@ import { Observable } from "rxjs";
 export interface ImageRenderer {
 
     /**
+     * Updates with menu items that may affect renderer. This keeps reader and menu/parent in sync.
+     */
+    readerSettings: Observable<ReaderSetting>;
+    /**
      * The current Image 
      */
     image: Observable<HTMLImageElement | null>;
     /**
-     * Performs a rendering pass
+     * Performs a rendering pass. This is passed one or more images to render from prefetcher
      */
-    renderPage(): void;
+    renderPage(img: Array<HTMLImageElement | null>): void;
     /**
      * If a valid move next page should occur, this will return true. Otherwise, this will return false. 
      */
