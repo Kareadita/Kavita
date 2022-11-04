@@ -78,7 +78,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('content') canvas: ElementRef | undefined;
 
   //@ViewChild('image', { static: false }) image!: ElementRef; // TODO: We need to get this from the renderer
-  image!: ElementRef;
+  //image!: ElementRef;
   
 
   @ViewChild(CanvasRendererComponent, { static: false }) canvasRenderer!: CanvasRendererComponent;
@@ -249,7 +249,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If the click overlay is rendered on screen
    */
   showClickOverlay: boolean = false;
-  showClickOverlaySubject: ReplaySubject<boolean> = new ReplaySubject();
+  private showClickOverlaySubject: ReplaySubject<boolean> = new ReplaySubject();
   showClickOverlay$ = this.showClickOverlaySubject.asObservable();
   /**
    * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
