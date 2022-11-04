@@ -20,19 +20,15 @@ export class ManagaReaderService {
    * @param elem Image
    */
   isWideImage(elem: HTMLImageElement) {
+    if (!elem) return false;
     if (elem) {
-      // elem.onload = () => {
-      //   return elem.width > elem.height;
-      // }
       elem.addEventListener('load', () => {
         console.log('isWideImage load: ', elem.width > elem.height)
         return elem.width > elem.height;
       }, false);
       if (elem.src === '') return false;
     }
-    const element = elem;
-    // ?! BUG: This can be undefined. We might need to rewrite this a bit
-    return element.width > element.height;
+    return elem.width > elem.height;
   }
 
   /**
