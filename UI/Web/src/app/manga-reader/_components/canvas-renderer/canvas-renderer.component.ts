@@ -61,19 +61,39 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       takeUntil(this.onDestroy)
     );
 
-    this.imageFitClass$ = this.imageFit$.pipe(
+    // this.imageFitClass$ = this.imageFit$.pipe(
+    //   takeUntil(this.onDestroy),
+    //   map(fit => {
+    //     if (
+    //       this.canvasImage != null && 
+    //       this.mangaReaderService.isWideImage(this.canvasImage) &&
+    //       this.layoutMode === LayoutMode.Single &&
+    //       fit !== FITTING_OPTION.WIDTH &&
+    //       this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
+    //       ) {
+    //       // Rewriting to fit to width for this cover image
+    //       return FITTING_OPTION.WIDTH;
+    //     }
+    //     return fit;
+    //   })
+    // );
+
+    this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
+      map(values => values.fitting),
       map(fit => {
         if (
-          this.canvasImage != null && 
+          this.canvasImage != null &&
           this.mangaReaderService.isWideImage(this.canvasImage) &&
           this.layoutMode === LayoutMode.Single &&
           fit !== FITTING_OPTION.WIDTH &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
+          console.log('Fit (override): ', fit);
           return FITTING_OPTION.WIDTH;
         }
+        console.log('Fit: ', fit);
         return fit;
       })
     );

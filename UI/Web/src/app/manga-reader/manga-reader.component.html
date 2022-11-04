@@ -45,8 +45,9 @@
                 (imageHeight)="updateImageHeight($event)">
             </app-canvas-renderer>
 
-            <div class="pagination-area">
-                <!-- Pagination controls and screen hints-->
+            <!-- Pagination controls and screen hints-->
+            <!-- <div class="pagination-area">
+                
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" 
                     [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? (imageHeight$ | async): '25%')}">
                     <div *ngIf="showClickOverlay">
@@ -63,7 +64,7 @@
                          title="Next Page" aria-hidden="true"></i>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <div (dblclick)="bookmarkPage($event)">
                 <app-single-renderer [image$]="currentImage$" 

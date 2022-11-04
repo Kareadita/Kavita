@@ -80,8 +80,25 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       })
     ).subscribe(() => {});
 
-    this.imageFitClass$ = this.imageFit$.pipe(
+    // this.imageFitClass$ = this.imageFit$.pipe(
+    //   takeUntil(this.onDestroy),
+    //   map(fit => {
+    //     if (
+    //       this.mangaReaderService.isWideImage(this.currentImage) &&
+    //       this.layoutMode === LayoutMode.Single &&
+    //       fit !== FITTING_OPTION.WIDTH &&
+    //       this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
+    //       ) {
+    //       // Rewriting to fit to width for this cover image
+    //       return FITTING_OPTION.WIDTH;
+    //     }
+    //     return fit;
+    //   })
+    // );
+
+    this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
+      map(values => values.fitting),
       map(fit => {
         if (
           this.mangaReaderService.isWideImage(this.currentImage) &&

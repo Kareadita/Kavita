@@ -25,6 +25,7 @@ export class ManagaReaderService {
       //   return elem.width > elem.height;
       // }
       elem.addEventListener('load', () => {
+        console.log('isWideImage load: ', elem.width > elem.height)
         return elem.width > elem.height;
       }, false);
       if (elem.src === '') return false;
