@@ -192,10 +192,10 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
     console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
     // if (this.mangaReaderService.isWideImage(this.currentImage2)) {
-    //   this.currentImagePrev = this.getPage(this.pageNum); // this.getPageUrl(this.pageNum);
+    //   this.currentImagePrev = this.getPage(this.pageNum);
     //   console.log('Setting Prev to ', this.pageNum);
     // } else {
-    //   this.currentImagePrev = this.getPage(this.pageNum - 1); //this.getPageUrl(this.pageNum - 1);
+    //   this.currentImagePrev = this.getPage(this.pageNum - 1); 
     //   console.log('Setting Prev to ', this.pageNum - 1);
     // }
 

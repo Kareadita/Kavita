@@ -61,23 +61,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       takeUntil(this.onDestroy)
     );
 
-    // this.imageFitClass$ = this.imageFit$.pipe(
-    //   takeUntil(this.onDestroy),
-    //   map(fit => {
-    //     if (
-    //       this.canvasImage != null && 
-    //       this.mangaReaderService.isWideImage(this.canvasImage) &&
-    //       this.layoutMode === LayoutMode.Single &&
-    //       fit !== FITTING_OPTION.WIDTH &&
-    //       this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
-    //       ) {
-    //       // Rewriting to fit to width for this cover image
-    //       return FITTING_OPTION.WIDTH;
-    //     }
-    //     return fit;
-    //   })
-    // );
-
     this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
       map(values => values.fitting),
@@ -183,8 +166,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.ctx || !this.canvas) return;
     this.canvasImage = img[0];
-
-    this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplit);
     
     const needsSplitting = this.updateSplitPage();
     if (!needsSplitting) return;

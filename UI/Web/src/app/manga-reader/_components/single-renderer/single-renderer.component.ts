@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { map, Observable, of, Subject, takeUntil, tap } from 'rxjs';
+import { map, Observable, of, Subject, takeUntil, tap, zip } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { LayoutMode } from '../../_models/layout-mode';
@@ -96,9 +96,10 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     //   })
     // );
 
-    this.imageFitClass$ = this.readerSettings$.pipe(
+    // ?! This needs to be updated when image changes too
+    this.imageFitClass$ = zip(this.readerSettings$, this.image$).pipe(
       takeUntil(this.onDestroy),
-      map(values => values.fitting),
+      map(values => values[0].fitting),
       map(fit => {
         if (
           this.mangaReaderService.isWideImage(this.currentImage) &&
@@ -124,9 +125,11 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     if (this.layoutMode !== LayoutMode.Single) return;
     if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
 
+
+
     this.currentImage = img[0];
-    this.imageHeight.emit(this.currentImage.height);
     this.cdRef.markForCheck();
+    this.imageHeight.emit(this.currentImage.height);
   }
 
   shouldMovePrev(): boolean {

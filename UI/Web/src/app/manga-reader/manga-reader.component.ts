@@ -378,20 +378,31 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.readingArea?.nativeElement.scrollWidth + 'px';
   }
 
-  updateImageHeight(height: number) {
-    if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
-      this.imageHeight.next(this.readingArea?.nativeElement.scrollHeight + 'px');
-    }
-    console.log('Reading Area: ', this.readingArea);
-    console.log('Img: Height: ', height);
-    console.log('Reading Area Height: ', this.document.querySelector('.reading-area')?.clientHeight);
-    console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, height));
-
-    // if (this.readingArea?.nativeElement?.clientHeight >= height) this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');
-    // else if (this.FittingOption !== FITTING_OPTION.HEIGHT) this.imageHeight.next(height + 'px');
-    
-    this.imageHeight.next(Math.max(this.readingArea?.nativeElement?.clientHeight, height) + 'px');
+  get ImageHeight() {
+    return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
   }
+
+  // updateImageHeight(height: number) {
+  //   console.log('updateImageHeight');
+  //   if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
+  //     this.imageHeight.next(this.readingArea?.nativeElement.scrollHeight + 'px');
+  //   }
+  //   //console.log('Reading Area: ', this.readingArea);
+  //   console.log('Img: Height: ', height);
+  //   console.log('Reading Area Height: ', this.document.querySelector('.reading-area')?.clientHeight);
+  //   //console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, height));
+
+  //   // if (this.readingArea?.nativeElement?.clientHeight >= height) this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');
+  //   // else if (this.FittingOption !== FITTING_OPTION.HEIGHT) this.imageHeight.next(height + 'px');
+
+  //   if (this.FittingOption === FITTING_OPTION.WIDTH) {
+  //     this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');  
+  //   } else {
+  //     this.imageHeight.next(height + 'px'); 
+  //   }
+    
+  //   //this.imageHeight.next(Math.max(this.readingArea?.nativeElement?.clientHeight, height) + 'px');
+  // }
 
   get RightPaginationOffset() {
     if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
@@ -591,17 +602,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (event.detail > 1) return;
       this.toggleMenu();
     });
-
-    // Update reference to image from the renderer 
-    // TODO: Figure out how to do properly
-    // this.singleRenderer.image$.pipe(
-    //   takeUntil(this.onDestroy), 
-    //   tap(img => {
-    //     if (img !== null) {
-    //       this.image = new ElementRef(img);
-    //     }
-    //   })
-    // ).subscribe(() => {});
   }
 
   ngOnDestroy() {
@@ -721,6 +721,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu code
   clickOverlayClass(side: 'right' | 'left') {
+    // TODO: This needs to be validated with subject
     if (!this.showClickOverlay) {
       return '';
     }
@@ -778,20 +779,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // this.imageHeight$ = this.currentImage$.pipe(
-    //   takeUntil(this.onDestroy), 
-    //   map(img => {
-    //   if (img === null) return '0px';
-    //   if (this.mangaReaderService.isWideImage(img) || this.FittingOption === FITTING_OPTION.WIDTH) {
-    //     return this.WindowHeight;
-    //   }
-    //   console.log('img: ', img);
-    //   console.log('Height: ', img.height);
-    //   console.log('Height: ', this.readingArea?.nativeElement?.clientHeight);
-    //   // NOTE: I changed this to min
-    //   return Math.min(this.readingArea?.nativeElement?.clientHeight || 100000, img.height) + 'px';
-    // }));
-
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId),
@@ -813,9 +800,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.setPageNum(page);
       this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
-
-
-
       // Due to change detection rules in Angular, we need to re-create the options object to apply the change
       const newOptions: Options = Object.assign({}, this.pageOptions);
       newOptions.ceil = this.maxPages - 1; // We -1 so that the slider UI shows us hitting the end, since visually we +1 everything.
@@ -826,7 +810,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.subtitle = results.chapterInfo.subtitle;
 
       this.inSetup = false;
-
 
 
       // From bookmarks, create map of pages to make lookup time O(1)
@@ -1193,10 +1176,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   renderPage() {
     console.log('[Manga Reader] renderPage()');
     this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplitOption);
-    if (this.renderWithCanvas) {
-      this.canvasRenderer.renderPage([this.canvasImage]); // I should be able to just call this without any issue. Just validate to be sure
+    if (this.renderWithCanvas) { // Canvas Renderer must be gatted. 
+      this.canvasRenderer.renderPage([this.canvasImage]); 
     }
-
 
     this.singleRenderer.renderPage([this.canvasImage]);
     this.doubleRenderer.renderPage([this.canvasImage]);
@@ -1268,6 +1250,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readerMode === ReaderMode.Webtoon) return;
     
     this.isLoading = true;
+
+    // ?! Resetting src like this doesn't work. Need to reset whole image element
     this.canvasImage2.src = '';
     this.canvasImageAheadBy2.src = '';
 
@@ -1280,10 +1264,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
       console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
       // if (this.mangaReaderService.isWideImage(this.canvasImage2)) {
-      //   this.canvasImagePrev = this.getPage(this.pageNum); // this.getPageUrl(this.pageNum);
+      //   this.canvasImagePrev = this.getPage(this.pageNum);
       //   console.log('Setting Prev to ', this.pageNum);
       // } else {
-      //   this.canvasImagePrev = this.getPage(this.pageNum - 1); //this.getPageUrl(this.pageNum - 1);
+      //   this.canvasImagePrev = this.getPage(this.pageNum - 1);
       //   console.log('Setting Prev to ', this.pageNum - 1);
       // }
 

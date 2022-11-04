@@ -41,22 +41,20 @@
                 [readerSettings$]="readerSettings$"
                 [image$]="currentImage$" 
                 [bookmark$]="showBookmarkEffect$"
-                [showClickOverlay$]="showClickOverlay$"
-                (imageHeight)="updateImageHeight($event)">
+                [showClickOverlay$]="showClickOverlay$">
             </app-canvas-renderer>
 
             <!-- Pagination controls and screen hints-->
-            <!-- <div class="pagination-area">
-                
+            <div class="pagination-area">
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" 
-                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? (imageHeight$ | async): '25%')}">
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%')}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                          title="Previous Page" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"
-                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? (imageHeight$ | async): '25%'),
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'),
                                 'left': 'inherit',
                                 'right': rightPaginationOffset + 'px'}">
                     <div *ngIf="showClickOverlay">
@@ -64,7 +62,7 @@
                          title="Next Page" aria-hidden="true"></i>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
             <div (dblclick)="bookmarkPage($event)">
                 <ng-container *ngIf="layoutMode === LayoutMode.Double || layoutMode === LayoutMode.DoubleReversed">
@@ -74,8 +72,7 @@
                     [readerSettings$]="readerSettings$" 
                     [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
-                    [showClickOverlay$]="showClickOverlay$"
-                    (imageHeight)="updateImageHeight($event)">
+                    [showClickOverlay$]="showClickOverlay$">
                 </app-single-renderer>
 
                 <app-double-renderer [image$]="currentImage$" 
@@ -84,8 +81,7 @@
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
-                    [getPage]="getPage"
-                    (imageHeight)="updateImageHeight($event)">
+                    [getPage]="getPage">
                 </app-double-renderer>
             </div>
 <!-- 

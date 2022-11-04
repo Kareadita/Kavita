@@ -25,7 +25,6 @@ export class ManagaReaderService {
     if (!elem) return false;
     if (elem) {
       elem.addEventListener('load', () => {
-        console.log('isWideImage load: ', elem.width > elem.height)
         return elem.width > elem.height;
       }, false);
       if (elem.src === '') return false;
