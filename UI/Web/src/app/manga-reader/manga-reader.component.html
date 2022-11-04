@@ -35,21 +35,23 @@
             appSwipe (swipeEvent)="onSwipeEvent($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
-            <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
-                <app-canvas-renderer [readerSettings$]="readerSettings$" [image$]="currentImage$" [bookmark$]="showBookmarkEffect$"></app-canvas-renderer>
-            </div>
 
-            <div class="pagination-area" *ngIf="imageHeight$ | async as imageHeight">
+            <app-canvas-renderer [readerSettings$]="readerSettings$" [image$]="currentImage$" [bookmark$]="showBookmarkEffect$"></app-canvas-renderer>
+            <!-- <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
+                <app-canvas-renderer [readerSettings$]="readerSettings$" [image$]="currentImage$" [bookmark$]="showBookmarkEffect$"></app-canvas-renderer>
+            </div> -->
+
+            <div class="pagination-area">
                 <!-- Pagination controls and screen hints-->
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" 
-                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? imageHeight: '25%')}">
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? (imageHeight$ | async): '25%')}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                          title="Previous Page" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"
-                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? imageHeight: '25%'),
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? (imageHeight$ | async): '25%'),
                                 'left': 'inherit',
                                 'right': rightPaginationOffset + 'px'}">
                     <div *ngIf="showClickOverlay">
@@ -59,17 +61,32 @@
                 </div>
             </div>
 
-            <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
+            <div (dblclick)="bookmarkPage($event)">
+                <app-single-renderer [image$]="currentImage$" 
+                    [readerSettings$]="readerSettings$" 
+                    [imageFit$]="imageFit$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    (imageHeight)="updateImageHeight($event)">
+                </app-single-renderer>
+            </div>
+<!-- 
+            <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
                     'fit-to-width-double-offset' : FittingOption === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
                     'fit-to-height-double-offset': FittingOption === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
                     'original-double-offset' : FittingOption === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage}"
                     [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle" (dblclick)="bookmarkPage($event)">
 
-                    <app-single-renderer [image$]="currentImage$" [readerSettings$]="readerSettings$" [imageFit$]="imageFit$" [bookmark$]="showBookmarkEffect$"></app-single-renderer>
-                <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !mangaReaderService.isCoverImage(this.pageNum))">
-                    <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}} -->
-                </ng-container>
-            </div>
+                    <app-single-renderer [image$]="currentImage$" 
+                        [readerSettings$]="readerSettings$" 
+                        [imageFit$]="imageFit$" 
+                        [bookmark$]="showBookmarkEffect$"
+                        (imageHeight)="updateImageHeight($event)">
+                    </app-single-renderer>
+                
+                    <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !mangaReaderService.isCoverImage(this.pageNum))">
+                        <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{imageFitClass$ | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}}
+                    </ng-container>
+            </div> -->
 
         </ng-container>
 

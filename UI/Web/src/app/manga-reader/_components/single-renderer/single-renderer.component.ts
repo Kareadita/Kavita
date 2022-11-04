@@ -1,6 +1,7 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { map, Observable, Subject, takeUntil, tap } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { map, Observable, of, Subject, takeUntil, tap } from 'rxjs';
+import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION } from '../../_models/reader-enums';
@@ -21,12 +22,17 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   /**
    * The image fit class
    */
-  @Input() imageFit$!: Observable<FITTING_OPTION>;
+  @Input() imageFit$!: Observable<FITTING_OPTION>;  
   @Input() bookmark$!: Observable<number>;
 
+  @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+
+  imageFitClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
+  darkenss$: Observable<string> = of('brightness(100%)');
   currentImage!: HTMLImageElement;
   layoutMode: LayoutMode = LayoutMode.Single;
+  pageSplit: PageSplitOption = PageSplitOption.FitSplit;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -41,10 +47,18 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
       takeUntil(this.onDestroy)
     );
+
+    this.darkenss$ = this.readerSettings$.pipe(
+      map(values => 'brightness(' + values.darkness + '%)'), 
+      takeUntil(this.onDestroy)
+    );
+
     this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
       tap(values => {
         this.layoutMode = values.layoutMode;
+        this.pageSplit = values.pageSplit;
+        this.cdRef.markForCheck();
       })
     ).subscribe(() => {});
 
@@ -59,15 +73,21 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       })
     ).subscribe(() => {});
 
-    this.image$.pipe(
+    this.imageFitClass$ = this.imageFit$.pipe(
       takeUntil(this.onDestroy),
-      tap(img => {
-        if (img != null) {
-          this.currentImage = img;
-          this.cdRef.markForCheck();
+      map(fit => {
+        if (
+          this.mangaReaderService.isWideImage(this.currentImage) &&
+          this.layoutMode === LayoutMode.Single &&
+          fit !== FITTING_OPTION.WIDTH &&
+          this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
+          ) {
+          // Rewriting to fit to width for this cover image
+          return FITTING_OPTION.WIDTH;
         }
+        return fit;
       })
-    ).subscribe(() => {});
+    )
   }
 
   ngOnDestroy(): void {
@@ -77,8 +97,11 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
-    this.currentImage = img[0];
     if (this.layoutMode !== LayoutMode.Single) return;
+    if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
+
+    this.currentImage = img[0];
+    this.imageHeight.emit(this.currentImage.height);
     this.cdRef.markForCheck();
   }
 
@@ -89,7 +112,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return true;
   }
   getPageAmount(): number {
-    // TODO: Check if in a mode that this renderer is valid, if not return 0
+    if (this.layoutMode !== LayoutMode.Single || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
     return 1;
   }
   reset(): void {}

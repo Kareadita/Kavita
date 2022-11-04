@@ -309,8 +309,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   currentImage$: Observable<HTMLImageElement | null> = this.currentImage.asObservable();
 
   private imageFit: Subject<FITTING_OPTION> = new ReplaySubject();
+  private imageFitClass: Subject<string> = new ReplaySubject();
+  imageFitClass$: Observable<string> = this.imageFitClass.asObservable();
   imageFit$: Observable<FITTING_OPTION> = this.imageFit.asObservable();
 
+  private imageHeight: Subject<string> = new ReplaySubject();
   imageHeight$!: Observable<string>;
   
 
@@ -380,14 +383,35 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   //   return this.image?.nativeElement.width + 'px';
   // }
 
-  // get ImageHeight() {
-  //   // If we are a wide image and implied fit to screen, then we need to take screen height rather than image height
-  //   if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
-  //     return this.WindowHeight;
-  //   }
-  //   console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, this.canvasImage.height));
-  //   return Math.max(this.readingArea?.nativeElement?.clientHeight, this.canvasImage.height) + 'px';
-  // }
+  get ImageHeight() {
+    // If we are a wide image and implied fit to screen, then we need to take screen height rather than image height
+    if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
+      return this.WindowHeight;
+    }
+    console.log('Reading Area: ', this.readingArea);
+    console.log('Canvas Image: ', this.canvasImage);
+    console.log('Img: Height: ', this.canvasImage.height);
+    console.log('Reading Area Height: ', this.document.querySelector('.reading-area')?.clientHeight);
+    console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, this.canvasImage.height));
+    
+    return Math.max(this.readingArea?.nativeElement?.clientHeight, this.canvasImage.height) + 'px';
+  }
+
+
+  updateImageHeight(height: number) {
+    if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
+      this.imageHeight.next(this.WindowHeight);
+    }
+    console.log('Reading Area: ', this.readingArea);
+    console.log('Img: Height: ', height);
+    console.log('Reading Area Height: ', this.document.querySelector('.reading-area')?.clientHeight);
+    console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, height));
+
+    if (this.readingArea?.nativeElement?.clientHeight >= height) this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');
+    else if (this.FittingOption !== FITTING_OPTION.HEIGHT) this.imageHeight.next(height + 'px');
+    
+    //this.imageHeight.next(Math.max(this.readingArea?.nativeElement?.clientHeight, height) + 'px');
+  }
 
   get RightPaginationOffset() {
     if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
@@ -774,19 +798,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.imageHeight$ = this.currentImage$.pipe(
-      takeUntil(this.onDestroy), 
-      map(img => {
-      if (img === null) return '0px';
-      if (this.mangaReaderService.isWideImage(img) || this.FittingOption === FITTING_OPTION.WIDTH) {
-        return this.WindowHeight;
-      }
-      console.log('img: ', img);
-      console.log('Height: ', img.height);
-      console.log('Height: ', this.readingArea?.nativeElement?.clientHeight);
-      // NOTE: I changed this to min
-      return Math.min(this.readingArea?.nativeElement?.clientHeight || 100000, img.height) + 'px';
-    }));
+    // this.imageHeight$ = this.currentImage$.pipe(
+    //   takeUntil(this.onDestroy), 
+    //   map(img => {
+    //   if (img === null) return '0px';
+    //   if (this.mangaReaderService.isWideImage(img) || this.FittingOption === FITTING_OPTION.WIDTH) {
+    //     return this.WindowHeight;
+    //   }
+    //   console.log('img: ', img);
+    //   console.log('Height: ', img.height);
+    //   console.log('Height: ', this.readingArea?.nativeElement?.clientHeight);
+    //   // NOTE: I changed this to min
+    //   return Math.min(this.readingArea?.nativeElement?.clientHeight || 100000, img.height) + 'px';
+    // }));
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
@@ -886,29 +910,34 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (formControl === undefined) {
       val = FITTING_OPTION.HEIGHT;
     }
-    val =  formControl?.value;
+    val = formControl?.value;
+
 
     if (
       this.mangaReaderService.isWideImage(this.canvasImage) &&
       this.layoutMode === LayoutMode.Single &&
       val !== FITTING_OPTION.WIDTH &&
-      this.shouldRenderAsFitSplit()
+      this.mangaReaderService.shouldRenderAsFitSplit(this.generalSettingsForm.get('pageSplitOption')?.value)
       ) {
       // Rewriting to fit to width for this cover image
+      this.imageFitClass.next(FITTING_OPTION.WIDTH);
       this.imageFit.next(FITTING_OPTION.WIDTH);
       return FITTING_OPTION.WIDTH;
     }
 
     // TODO: Move this to double renderer
     if (this.mangaReaderService.isWideImage(this.canvasImage) && this.layoutMode !== LayoutMode.Single) {
+      this.imageFitClass.next(val + ' wide double');
       return val + ' wide double';
     }
 
     // TODO: Move this to double renderer
     if (this.mangaReaderService.isCoverImage(this.pageNum) && this.layoutMode !== LayoutMode.Single) {
+      this.imageFitClass.next(val + ' cover double');
       return val + ' cover double';
     }
 
+    this.imageFitClass.next(val);
     this.imageFit.next(val);
     return val;
   }
@@ -929,6 +958,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFit() {
     // TODO: getFit can be refactored with typed form controls so we don't need this
+    // can't this also just be this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT
     let value = FITTING_OPTION.HEIGHT;
     const formControl = this.generalSettingsForm.get('fittingOption');
     if (formControl !== undefined) {
@@ -1180,13 +1210,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   renderPage() {
     console.log('[Manga Reader] renderPage()');
-
-    const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
-    this.renderWithCanvas = !(this.mangaReaderService.isNoSplit(this.pageSplitOption) || !needsSplitting);
-
+    this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplitOption);
     if (this.renderWithCanvas) {
-      this.canvasRenderer.renderPage([this.canvasImage]);
+      this.canvasRenderer.renderPage([this.canvasImage]); // I should be able to just call this without any issue. Just validate to be sure
     }
+
+
     this.singleRenderer.renderPage([this.canvasImage]);
     this.cdRef.markForCheck();
 
@@ -1219,11 +1248,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
   }
 
-  shouldRenderAsFitSplit() {
-    // Some pages aren't cover images but might need fit split renderings
-    if (parseInt(this.generalSettingsForm.value.pageSplitOption, 10) !== PageSplitOption.FitSplit) return false;
-    return true;
-  }
+  // shouldRenderAsFitSplit() {
+  //   // Some pages aren't cover images but might need fit split renderings
+  //   if (parseInt(this.generalSettingsForm.value.pageSplitOption, 10) !== PageSplitOption.FitSplit) return false;
+  //   return true;
+  // }
 
   /**
    * Maintains an array of images (that are requested from backend) around the user's current page. This allows for quick loading (seemless to user)
@@ -1538,13 +1567,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // }
 
     //this.mangaReaderService.applyBookmarkEffect(elements);
-    // if (elements.length > 0) {
-    //   elements.forEach(elem => this.renderer.addClass(elem, 'bookmark-effect'));
-    //   setTimeout(() => {
-    //     elements.forEach(elem => this.renderer.removeClass(elem, 'bookmark-effect'));
-    //   }, 1000);
-    // }
-
   }
 
   // This is menu only code

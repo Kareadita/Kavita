@@ -75,6 +75,23 @@ export class ManagaReaderService {
     return maxPages - 1 === pageNum;
   }
 
+  /**
+   * Should Canvas Renderer be used
+   * @param img 
+   * @param pageSplitOption 
+   * @returns 
+   */
+  shouldSplit(img: HTMLImageElement, pageSplitOption: PageSplitOption) {
+    const needsSplitting = this.isWideImage(img);
+    return !(this.isNoSplit(pageSplitOption) || !needsSplitting)
+  }
+
+  shouldRenderAsFitSplit(pageSplitOption: PageSplitOption) {
+    // Some pages aren't cover images but might need fit split renderings
+    if (parseInt(pageSplitOption + '', 10) !== PageSplitOption.FitSplit) return false;
+    return true;
+  }
+
 
   translateScalingOption(option: ScalingOption) {
     switch (option) {
