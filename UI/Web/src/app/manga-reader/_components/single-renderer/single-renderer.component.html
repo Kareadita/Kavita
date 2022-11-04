@@ -1,1 +1,10 @@
-<p>single-renderer works!</p>
+<ng-container *ngIf="currentImage">
+    <img alt=" " 
+        #image [src]="currentImage.src" 
+        id="image-1" 
+        class="{{imageFit$ | async}} {{readerModeClass$ | async}}"
+    >
+</ng-container>
+
+
+<!-- class="{{imageFit | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" -->

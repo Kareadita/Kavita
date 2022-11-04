@@ -1,5 +1,5 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { distinctUntilChanged, filter, Observable, of, Subject, switchMap, tap } from 'rxjs';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Observable, Subject, takeUntil, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
@@ -14,8 +14,9 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy, ImageRenderer {
 
-  @Input() readerSettings!: Observable<ReaderSetting>;
-  @Input() image!: Observable<HTMLImageElement | null>;
+  @Input() readerSettings$!: Observable<ReaderSetting>;
+  @Input() image$!: Observable<HTMLImageElement | null>;
+  @Input() bookmark$!: Observable<number>;
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
@@ -34,7 +35,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
 
   ngOnInit(): void {
-    this.readerSettings.pipe(tap(value => {
+    this.readerSettings$.pipe(takeUntil(this.onDestroy), tap(value => {
       this.fit = value.fitting;
       this.pageSplit = value.pageSplit;
       const rerenderNeeded = this.pageSplit != value.pageSplit;
@@ -42,12 +43,22 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       if (rerenderNeeded) {
         this.reset();
       }
-
     })).subscribe(() => {});
 
-    
 
-    // this.image.pipe(
+    this.bookmark$.pipe(
+      takeUntil(this.onDestroy),
+      tap(_ => {
+        if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
+        if (!this.canvas) return;
+
+        const elements = [this.canvas?.nativeElement];
+        console.log('Applying bookmark on ', elements);
+        this.mangaReaderService.applyBookmarkEffect(elements);
+      })
+    ).subscribe(() => {});
+
+    // this.image$.pipe(
     //   tap(img => console.log('[Canvas Renderer] image update: ', img)),
     //   distinctUntilChanged(), 
     //   tap(img => {

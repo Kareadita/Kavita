@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ElementRef, Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { FITTING_OPTION } from '../_models/reader-enums';
@@ -8,7 +9,10 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 })
 export class ManagaReaderService {
 
-  constructor() { }
+  private renderer: Renderer2;
+  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document) {
+    this.renderer = rendererFactory.createRenderer(null, null);
+  }
 
 
   /**
@@ -99,6 +103,16 @@ export class ManagaReaderService {
         return FITTING_OPTION.WIDTH;
       default:
         return FITTING_OPTION.ORIGINAL;
+    }
+  }
+
+
+  applyBookmarkEffect(elements: Array<Element | ElementRef>) {
+    if (elements.length > 0) {
+      elements.forEach(elem => this.renderer.addClass(elem, 'bookmark-effect'));
+      setTimeout(() => {
+        elements.forEach(elem => this.renderer.removeClass(elem, 'bookmark-effect'));
+      }, 1000);
     }
   }
 

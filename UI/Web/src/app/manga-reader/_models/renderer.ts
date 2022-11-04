@@ -9,11 +9,15 @@ export interface ImageRenderer {
     /**
      * Updates with menu items that may affect renderer. This keeps reader and menu/parent in sync.
      */
-    readerSettings: Observable<ReaderSetting>;
+    readerSettings$: Observable<ReaderSetting>;
     /**
      * The current Image 
      */
-    image: Observable<HTMLImageElement | null>;
+    image$: Observable<HTMLImageElement | null>;
+    /**
+     * When a page is bookmarked or unbookmarked. Emits with page number.
+     */
+    bookmark$: Observable<number>;
     /**
      * Performs a rendering pass. This is passed one or more images to render from prefetcher
      */
