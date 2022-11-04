@@ -249,6 +249,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * If the click overlay is rendered on screen
    */
   showClickOverlay: boolean = false;
+  showClickOverlaySubject: ReplaySubject<boolean> = new ReplaySubject();
+  showClickOverlay$ = this.showClickOverlaySubject.asObservable();
   /**
    * Next Chapter Id. This is not guaranteed to be a valid ChapterId. Prefetched on page load (non-blocking).
    */
@@ -1344,8 +1346,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.menuOpen && this.user.preferences.showScreenHints) {
       this.showClickOverlay = true;
+      this.showClickOverlaySubject.next(true);
       setTimeout(() => {
         this.showClickOverlay = false;
+        this.showClickOverlaySubject.next(false);
       }, CLICK_OVERLAY_TIMEOUT);
     }
   }
@@ -1536,8 +1540,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Show an effect on the image to show that it was bookmarked
     this.showBookmarkEffectEvent.next(pageNum);
-
-    // if (this.readerMode === ReaderMode.Webtoon) return;
 
     //   if (this.layoutMode !== LayoutMode.Single) {
     //     const image2 = this.document.querySelector('#image-2');

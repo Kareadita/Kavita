@@ -24,10 +24,12 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
    */
   @Input() imageFit$!: Observable<FITTING_OPTION>;  
   @Input() bookmark$!: Observable<number>;
+  @Input() showClickOverlay$!: Observable<boolean>;
 
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
   imageFitClass$!: Observable<string>;
+  showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   darkenss$: Observable<string> = of('brightness(100%)');
   currentImage!: HTMLImageElement;
@@ -50,6 +52,11 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.darkenss$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'), 
+      takeUntil(this.onDestroy)
+    );
+
+    this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
+      map(showOverlay => showOverlay ? 'blur' : ''), 
       takeUntil(this.onDestroy)
     );
 
@@ -87,7 +94,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         }
         return fit;
       })
-    )
+    );
   }
 
   ngOnDestroy(): void {

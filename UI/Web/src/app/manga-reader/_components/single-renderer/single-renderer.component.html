@@ -6,10 +6,7 @@
         <img alt=" " 
             #image [src]="currentImage.src" 
             id="image-1" 
-            class="{{imageFitClass$ | async}} {{readerModeClass$ | async}}"
+            class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"
         >
     </ng-container>
 </div>
-
-
-<!-- class="{{imageFit | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}" -->

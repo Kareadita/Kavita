@@ -1,6 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { Observable, Subject, takeUntil, tap } from 'rxjs';
+import { map, Observable, of, Subject, takeUntil, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
+import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
@@ -17,6 +18,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
   @Input() bookmark$!: Observable<number>;
+  @Input() showClickOverlay$!: Observable<boolean>;
+  @Input() imageFit$!: Observable<FITTING_OPTION>; 
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
@@ -27,9 +30,15 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   fit: FITTING_OPTION = FITTING_OPTION.ORIGINAL;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
+  layoutMode: LayoutMode = LayoutMode.Single;
 
   isLoading: boolean = false;
   canvasImage: HTMLImageElement | null = null;
+  showClickOverlayClass$!: Observable<string>;
+  darkenss$: Observable<string> = of('brightness(100%)');
+  imageFitClass$!: Observable<string>;
+  renderWithCanvas: boolean = false;
+  
 
 
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
@@ -38,12 +47,35 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     this.readerSettings$.pipe(takeUntil(this.onDestroy), tap(value => {
       this.fit = value.fitting;
       this.pageSplit = value.pageSplit;
+      this.layoutMode = value.layoutMode;
       const rerenderNeeded = this.pageSplit != value.pageSplit;
       this.pagingDirection = value.pagingDirection;
       if (rerenderNeeded) {
         this.reset();
       }
     })).subscribe(() => {});
+
+    this.darkenss$ = this.readerSettings$.pipe(
+      map(values => 'brightness(' + values.darkness + '%)'), 
+      takeUntil(this.onDestroy)
+    );
+
+    this.imageFitClass$ = this.imageFit$.pipe(
+      takeUntil(this.onDestroy),
+      map(fit => {
+        if (
+          this.canvasImage != null && 
+          this.mangaReaderService.isWideImage(this.canvasImage) &&
+          this.layoutMode === LayoutMode.Single &&
+          fit !== FITTING_OPTION.WIDTH &&
+          this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
+          ) {
+          // Rewriting to fit to width for this cover image
+          return FITTING_OPTION.WIDTH;
+        }
+        return fit;
+      })
+    );
 
 
     this.bookmark$.pipe(
@@ -58,18 +90,10 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       })
     ).subscribe(() => {});
 
-    // this.image$.pipe(
-    //   tap(img => console.log('[Canvas Renderer] image update: ', img)),
-    //   distinctUntilChanged(), 
-    //   tap(img => {
-    //     if (img === null) return;
-    //     this.canvasImage = img;
-    //     this.canvasImage.addEventListener('load', () => {
-    //       this.renderPage();
-    //     }, false);
-    //     this.cdRef.markForCheck();
-    //   })
-    // ).subscribe(() => {});
+    this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
+      map(showOverlay => showOverlay ? 'blur' : ''), 
+      takeUntil(this.onDestroy)
+    );
   }
 
   ngAfterViewInit() {
@@ -133,9 +157,13 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
    * @returns 
    */
   renderPage(img: Array<HTMLImageElement | null>) {
+    this.renderWithCanvas = false;
+    this.cdRef.markForCheck();
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.ctx || !this.canvas) return;
     this.canvasImage = img[0];
+
+    this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplit);
     
     const needsSplitting = this.updateSplitPage();
     if (!needsSplitting) return;
