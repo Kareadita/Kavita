@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { map, Observable, of, Subject, takeUntil, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { LayoutMode } from '../../_models/layout-mode';
@@ -20,6 +20,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
   @Input() imageFit$!: Observable<FITTING_OPTION>; 
+  @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
@@ -236,6 +237,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       this.canvas.nativeElement.width = this.canvasImage.width;
       this.canvas.nativeElement.height = this.canvasImage.height;
     }
+    this.imageHeight.emit(this.canvas.nativeElement.height);
     this.cdRef.markForCheck();
   }
 }

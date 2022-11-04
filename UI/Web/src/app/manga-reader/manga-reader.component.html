@@ -34,17 +34,16 @@
     <div class="reading-area" 
             appSwipe (swipeEvent)="onSwipeEvent($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
+        
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
 
             <app-canvas-renderer 
                 [readerSettings$]="readerSettings$"
                 [image$]="currentImage$" 
                 [bookmark$]="showBookmarkEffect$"
-                [showClickOverlay$]="showClickOverlay$">
+                [showClickOverlay$]="showClickOverlay$"
+                (imageHeight)="updateImageHeight($event)">
             </app-canvas-renderer>
-            <!-- <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
-                <app-canvas-renderer [readerSettings$]="readerSettings$" [image$]="currentImage$" [bookmark$]="showBookmarkEffect$"></app-canvas-renderer>
-            </div> -->
 
             <div class="pagination-area">
                 <!-- Pagination controls and screen hints-->

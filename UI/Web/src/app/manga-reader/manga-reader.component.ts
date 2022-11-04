@@ -376,19 +376,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.readingArea?.nativeElement.scrollWidth + 'px';
   }
 
-  get WindowHeight() {
-    return this.readingArea?.nativeElement.scrollHeight + 'px';
-  }
-
-  // get ImageWidth() {
-  //   console.log(this.image?.nativeElement.width, ' vs ', this.canvasImage?.width);
-  //   return this.image?.nativeElement.width + 'px';
+  // get WindowHeight() {
+  //   return this.readingArea?.nativeElement.scrollHeight + 'px';
   // }
 
   get ImageHeight() {
     // If we are a wide image and implied fit to screen, then we need to take screen height rather than image height
     if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
-      return this.WindowHeight;
+      return this.readingArea?.nativeElement.scrollHeight + 'px';
     }
     console.log('Reading Area: ', this.readingArea);
     console.log('Canvas Image: ', this.canvasImage);
@@ -402,7 +397,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateImageHeight(height: number) {
     if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
-      this.imageHeight.next(this.WindowHeight);
+      this.imageHeight.next(this.readingArea?.nativeElement.scrollHeight + 'px');
     }
     console.log('Reading Area: ', this.readingArea);
     console.log('Img: Height: ', height);

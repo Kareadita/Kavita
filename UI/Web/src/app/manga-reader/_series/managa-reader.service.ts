@@ -30,6 +30,7 @@ export class ManagaReaderService {
       if (elem.src === '') return false;
     }
     const element = elem;
+    // ?! BUG: This can be undefined. We might need to rewrite this a bit
     return element.width > element.height;
   }
 
