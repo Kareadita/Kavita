@@ -37,12 +37,14 @@
         
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
 
-            <app-canvas-renderer 
-                [readerSettings$]="readerSettings$"
-                [image$]="currentImage$" 
-                [bookmark$]="showBookmarkEffect$"
-                [showClickOverlay$]="showClickOverlay$">
-            </app-canvas-renderer>
+            <div (dblclick)="bookmarkPage($event)">
+                <app-canvas-renderer 
+                    [readerSettings$]="readerSettings$"
+                    [image$]="currentImage$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$">
+                </app-canvas-renderer>
+            </div>
 
             <!-- Pagination controls and screen hints-->
             <div class="pagination-area">

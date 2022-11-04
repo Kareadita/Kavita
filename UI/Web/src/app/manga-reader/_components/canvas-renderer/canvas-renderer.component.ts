@@ -198,7 +198,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   getPageAmount(direction: PAGING_DIRECTION) {
     if (this.canvasImage === null) return 1;
     if (!this.mangaReaderService.isWideImage(this.canvasImage)) return 1;
-    switch(this.pagingDirection) {
+    switch(direction) {
       case PAGING_DIRECTION.FORWARD:
         return this.shouldMoveNext() ? 1 : 0;
       case PAGING_DIRECTION.BACKWARDS:
