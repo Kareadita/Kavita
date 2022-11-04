@@ -1,5 +1,3 @@
-
-
 <div class="image-container {{imageFitClass$ | async}}" 
     [style.filter]="(darkenss$ | async)  ?? '' | safeStyle">
     <ng-container *ngIf="currentImage">

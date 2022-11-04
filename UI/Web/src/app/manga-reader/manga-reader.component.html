@@ -67,6 +67,9 @@
             </div> -->
 
             <div (dblclick)="bookmarkPage($event)">
+                <ng-container *ngIf="layoutMode === LayoutMode.Double || layoutMode === LayoutMode.DoubleReversed">
+
+                </ng-container>
                 <app-single-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
                     [imageFit$]="imageFit$" 
@@ -74,6 +77,15 @@
                     [showClickOverlay$]="showClickOverlay$"
                     (imageHeight)="updateImageHeight($event)">
                 </app-single-renderer>
+
+                <app-double-renderer [image$]="currentImage$" 
+                    [readerSettings$]="readerSettings$" 
+                    [imageFit$]="imageFit$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$"
+                    [pageNum$]="pageNum$"
+                    (imageHeight)="updateImageHeight($event)">
+                </app-double-renderer>
             </div>
 <!-- 
             <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
@@ -90,7 +102,7 @@
                     </app-single-renderer>
                 
                     <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !mangaReaderService.isCoverImage(this.pageNum))">
-                        <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{imageFitClass$ | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}}
+                        <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{imageFitClass$ | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}  {{ShouldRenderReverseDouble ? 'reverse' : ''}}"> 
                     </ng-container>
             </div> -->
 

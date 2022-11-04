@@ -15,6 +15,7 @@ import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
 import { SwipeDirective } from './swipe.directive';
 import { CanvasRendererComponent } from './_components/canvas-renderer/canvas-renderer.component';
 import { SingleRendererComponent } from './_components/single-renderer/single-renderer.component';
+import { DoubleRendererComponent } from './_components/double-renderer/double-renderer.component';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,7 @@ import { SingleRendererComponent } from './_components/single-renderer/single-re
     SwipeDirective,
     CanvasRendererComponent,
     SingleRendererComponent,
+    DoubleRendererComponent,
   ],
   imports: [
     CommonModule,

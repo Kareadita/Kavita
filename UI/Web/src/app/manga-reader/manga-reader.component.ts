@@ -316,7 +316,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   imageFit$: Observable<FITTING_OPTION> = this.imageFit.asObservable();
 
   private imageHeight: Subject<string> = new ReplaySubject();
-  imageHeight$!: Observable<string>;
+  imageHeight$: Observable<string> = this.imageHeight.asObservable();
+
+  private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
+  pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
   
 
   bookmarkPageHandler = this.bookmarkPage.bind(this);
@@ -376,25 +379,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.readingArea?.nativeElement.scrollWidth + 'px';
   }
 
-  // get WindowHeight() {
-  //   return this.readingArea?.nativeElement.scrollHeight + 'px';
-  // }
-
-  get ImageHeight() {
-    // If we are a wide image and implied fit to screen, then we need to take screen height rather than image height
-    if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
-      return this.readingArea?.nativeElement.scrollHeight + 'px';
-    }
-    console.log('Reading Area: ', this.readingArea);
-    console.log('Canvas Image: ', this.canvasImage);
-    console.log('Img: Height: ', this.canvasImage.height);
-    console.log('Reading Area Height: ', this.document.querySelector('.reading-area')?.clientHeight);
-    console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, this.canvasImage.height));
-    
-    return Math.max(this.readingArea?.nativeElement?.clientHeight, this.canvasImage.height) + 'px';
-  }
-
-
   updateImageHeight(height: number) {
     if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
       this.imageHeight.next(this.readingArea?.nativeElement.scrollHeight + 'px');
@@ -404,10 +388,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('Reading Area Height: ', this.document.querySelector('.reading-area')?.clientHeight);
     console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, height));
 
-    if (this.readingArea?.nativeElement?.clientHeight >= height) this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');
-    else if (this.FittingOption !== FITTING_OPTION.HEIGHT) this.imageHeight.next(height + 'px');
+    // if (this.readingArea?.nativeElement?.clientHeight >= height) this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');
+    // else if (this.FittingOption !== FITTING_OPTION.HEIGHT) this.imageHeight.next(height + 'px');
     
-    //this.imageHeight.next(Math.max(this.readingArea?.nativeElement?.clientHeight, height) + 'px');
+    this.imageHeight.next(Math.max(this.readingArea?.nativeElement?.clientHeight, height) + 'px');
   }
 
   get RightPaginationOffset() {
@@ -1375,6 +1359,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setPageNum(pageNum: number) {
     this.pageNum = Math.max(Math.min(pageNum, this.maxPages - 1), 0);
+    this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
     this.cdRef.markForCheck();
 
     if (this.pageNum >= this.maxPages - 10) {
