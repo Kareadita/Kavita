@@ -1,11 +1,6 @@
 <div class="image-container {{imageFitClass$ | async}}" 
 [ngClass]="{'d-none': !renderWithCanvas }"
      [style.filter]="(darkenss$ | async)  ?? '' | safeStyle">
-     <ng-container *ngIf="isLoading">
-        <div class="spinner-border text-secondary loading" role="status">
-            <span class="invisible">Loading...</span>
-        </div>
-    </ng-container>
      <canvas #content ondragstart="return false;" onselectstart="return false;"></canvas>
 </div>
 

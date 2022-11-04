@@ -1171,8 +1171,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('[Manga Reader] renderPage()');
     // this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplitOption);
     // if (this.renderWithCanvas) { // Canvas Renderer must be gatted. 
-      
     // }
+    
     this.canvasRenderer.renderPage([this.canvasImage]); 
 
     this.singleRenderer.renderPage([this.canvasImage]);

@@ -33,10 +33,15 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
   layoutMode: LayoutMode = LayoutMode.Single;
 
-  isLoading: boolean = false;
   canvasImage: HTMLImageElement | null = null;
   showClickOverlayClass$!: Observable<string>;
+  /**
+   * Maps darkness value to the filter style
+   */
   darkenss$: Observable<string> = of('brightness(100%)');
+  /**
+   * Maps image fit value to the classes for image fitting
+   */
   imageFitClass$!: Observable<string>;
   renderWithCanvas: boolean = false;
   
@@ -71,17 +76,13 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
         const isFitSplit = this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit);
 
         if (
-          //this.canvasImage != null &&
           this.mangaReaderService.isWideImage(this.canvasImage) &&
-          //this.layoutMode === LayoutMode.Single &&
-          //fit !== FITTING_OPTION.WIDTH &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
           console.log('Fit (override): ', fit);
           return FITTING_OPTION.WIDTH;
         }
-        console.log('Fit: ', fit);
         return fit;
       })
     );
@@ -178,7 +179,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
 
     this.renderWithCanvas = true;
-    this.isLoading = true;
     this.setCanvasSize();
 
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
@@ -191,7 +191,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       this.cdRef.markForCheck();
     }
 
-    this.isLoading = false;
     this.cdRef.markForCheck();
   }
 

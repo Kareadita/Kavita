@@ -189,8 +189,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
 
     // If prev page was a spread, then we don't do + 1
-    console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
-    console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
+    
     // if (this.mangaReaderService.isWideImage(this.currentImage2)) {
     //   this.currentImagePrev = this.getPage(this.pageNum);
     //   console.log('Setting Prev to ', this.pageNum);
@@ -200,23 +199,28 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     // }
 
     // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
-    this.currentImageNext = this.getPage(this.pageNum + 1);
-    console.log('Setting Next to ', this.pageNum + 1);
-
-    this.currentImagePrev = this.getPage(this.pageNum - 1);
-    console.log('Setting Prev to ', this.pageNum - 1);
-    
+    this.currentImage = img[0];
     this.shouldRenderDouble$.pipe(take(1)).subscribe(shouldRenderDoublePage => {
       if (!shouldRenderDoublePage) return;
+      console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
+      console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
+
+      this.currentImageNext = this.getPage(this.pageNum + 1);
+      console.log('Setting Next to ', this.pageNum + 1);
+
+      this.currentImagePrev = this.getPage(this.pageNum - 1);
+      console.log('Setting Prev to ', this.pageNum - 1);
+      
+
       console.log('Rendering Double Page');
-      if (this.layoutMode === LayoutMode.Double) {
-        this.currentImage2 = this.currentImageNext;
-      } else {
-        this.currentImage2 = this.currentImagePrev;
-      }
+      
+      this.currentImage2 = this.currentImageNext;
+      //  else {
+      //   this.currentImage2 = this.currentImagePrev;
+      // }
     });
 
-    this.currentImage = img[0];
+    
 
     this.imageHeight.emit(this.currentImage.height);
     this.cdRef.markForCheck();
