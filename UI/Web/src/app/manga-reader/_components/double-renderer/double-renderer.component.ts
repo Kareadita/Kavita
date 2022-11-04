@@ -5,7 +5,7 @@ import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
-import { FITTING_OPTION } from '../../_models/reader-enums';
+import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
@@ -228,9 +228,24 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   shouldMoveNext(): boolean {
     return true;
   }
-  getPageAmount(): number {
+  getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.Single || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
-    return 1;
+    // If prev page:
+    switch (direction) {
+      case PAGING_DIRECTION.FORWARD:
+        return (
+          !this.mangaReaderService.isCoverImage(this.pageNum) &&
+          !this.mangaReaderService.isWideImage(this.currentImage) &&
+          !this.mangaReaderService.isWideImage(this.currentImageNext) &&
+          !this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages) &&
+          !this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)
+          ? 2 : 1);
+      case PAGING_DIRECTION.BACKWARDS:
+        return !(
+          this.mangaReaderService.isCoverImage(this.pageNum)
+          || this.mangaReaderService.isWideImage(this.currentImagePrev)
+        ) ? 2 : 1;
+    }
   }
   reset(): void {}
 

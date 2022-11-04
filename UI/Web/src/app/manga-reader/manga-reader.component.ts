@@ -1029,19 +1029,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    // const notInSplit = this.canvasRenderer.shouldMoveNext();
-    // console.log('Next Page, not in split: ', notInSplit);
-    // if (!notInSplit) pageAmount = this.canvasRenderer.getPageAmount();
-    // else pageAmount = this.singleRenderer.getPageAmount();
+
     let imageRenderer: ImageRenderer = this.singleRenderer;
     if (this.renderWithCanvas) imageRenderer = this.canvasRenderer;
     if (this.layoutMode === LayoutMode.Double) imageRenderer = this.doubleRenderer;
     // TODO: Build out other renderers
 
-    const notInSplit = imageRenderer.shouldMovePrev();
-    pageAmount = imageRenderer.getPageAmount();
+    pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
+    const notInSplit = this.canvasRenderer.shouldMovePrev();
+    console.log('Next Page, not in split: ', notInSplit, ' page amt: ', pageAmount, ' page: ', this.canvasImage.src);
 
-    if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) {
+    if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) { //  
       // Move to next volume/chapter automatically
       this.loadNextChapter();
       return;
@@ -1072,13 +1070,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         || this.mangaReaderService.isWideImage(this.canvasImagePrev) // This should be Prev, if prev image  (original: canvasImageNext)
       ) ? 2 : 1;
     }
-    let imageRenderer: ImageRenderer = this.singleRenderer;
-    if (this.renderWithCanvas) imageRenderer = this.canvasRenderer;
-    if (this.layoutMode === LayoutMode.Double) imageRenderer = this.doubleRenderer;
-    // TODO: Build out other renderers
 
-    const notInSplit = imageRenderer.shouldMovePrev();
-    pageAmount = imageRenderer.getPageAmount();
+    pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
+    const notInSplit = this.canvasRenderer.shouldMovePrev();
     console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
 
     if ((this.pageNum - 1 < 0 && notInSplit)) {
@@ -1175,10 +1169,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   renderPage() {
     console.log('[Manga Reader] renderPage()');
-    this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplitOption);
-    if (this.renderWithCanvas) { // Canvas Renderer must be gatted. 
-      this.canvasRenderer.renderPage([this.canvasImage]); 
-    }
+    // this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplitOption);
+    // if (this.renderWithCanvas) { // Canvas Renderer must be gatted. 
+      
+    // }
+    this.canvasRenderer.renderPage([this.canvasImage]); 
 
     this.singleRenderer.renderPage([this.canvasImage]);
     this.doubleRenderer.renderPage([this.canvasImage]);

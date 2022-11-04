@@ -1,4 +1,5 @@
 import { Observable } from "rxjs";
+import { PAGING_DIRECTION } from "./reader-enums";
 import { ReaderSetting } from "./reader-setting";
 
 /**
@@ -33,7 +34,7 @@ export interface ImageRenderer {
     /**
      * Returns the number of pages that should occur based on page direction and internal state of the renderer.
      */
-    getPageAmount(): number;
+    getPageAmount(direction: PAGING_DIRECTION): number;
     /**
      * When layout shifts occur, where a re-render might be needed but from menu option (like split option changed on a split image), this will be called.
      * This should reset any needed state, but not unset the image.

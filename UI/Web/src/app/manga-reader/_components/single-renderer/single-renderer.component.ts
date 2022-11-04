@@ -4,7 +4,7 @@ import { map, Observable, of, Subject, takeUntil, tap, zip } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { LayoutMode } from '../../_models/layout-mode';
-import { FITTING_OPTION } from '../../_models/reader-enums';
+import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
@@ -80,22 +80,6 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       })
     ).subscribe(() => {});
 
-    // this.imageFitClass$ = this.imageFit$.pipe(
-    //   takeUntil(this.onDestroy),
-    //   map(fit => {
-    //     if (
-    //       this.mangaReaderService.isWideImage(this.currentImage) &&
-    //       this.layoutMode === LayoutMode.Single &&
-    //       fit !== FITTING_OPTION.WIDTH &&
-    //       this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
-    //       ) {
-    //       // Rewriting to fit to width for this cover image
-    //       return FITTING_OPTION.WIDTH;
-    //     }
-    //     return fit;
-    //   })
-    // );
-
     // ?! This needs to be updated when image changes too
     this.imageFitClass$ = zip(this.readerSettings$, this.image$).pipe(
       takeUntil(this.onDestroy),
@@ -108,6 +92,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
+          console.log('overridding for fit to screen');
           return FITTING_OPTION.WIDTH;
         }
         return fit;
@@ -123,7 +108,9 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (this.layoutMode !== LayoutMode.Single) return;
-    if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
+    
+    // This seems to cause a problem after rendering a split
+    //if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
 
 
 
@@ -138,7 +125,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   shouldMoveNext(): boolean {
     return true;
   }
-  getPageAmount(): number {
+  getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.Single || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
     return 1;
   }
