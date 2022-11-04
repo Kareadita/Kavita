@@ -147,7 +147,12 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
         if (image1 != null) elements.push(image1);
-        console.log('Applying bookmark on ', image1);
+        
+        if (this.layoutMode !== LayoutMode.Single) {
+          const image2 = this.document.querySelector('#image-2');
+          if (image2 != null) elements.push(image2);
+        }
+  
         this.mangaReaderService.applyBookmarkEffect(elements);
       })
     ).subscribe(() => {});
