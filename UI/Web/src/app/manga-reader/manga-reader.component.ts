@@ -30,6 +30,7 @@ import { ManagaReaderService } from './_series/managa-reader.service';
 import { CanvasRendererComponent } from './_components/canvas-renderer/canvas-renderer.component';
 import { SingleRendererComponent } from './_components/single-renderer/single-renderer.component';
 import { ImageRenderer } from './_models/renderer';
+import { DoubleRendererComponent } from './_components/double-renderer/double-renderer.component';
 
 const PREFETCH_PAGES = 10;
 
@@ -47,6 +48,7 @@ const CLICK_OVERLAY_TIMEOUT = 3000;
   templateUrl: './manga-reader.component.html',
   styleUrls: ['./manga-reader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ManagaReaderService],
   animations: [
     trigger('slideFromTop', [
       state('in', style({ transform: 'translateY(0)'})),
@@ -77,12 +79,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingArea') readingArea!: ElementRef;
   @ViewChild('content') canvas: ElementRef | undefined;
 
-  //@ViewChild('image', { static: false }) image!: ElementRef; // TODO: We need to get this from the renderer
-  //image!: ElementRef;
-  
-
   @ViewChild(CanvasRendererComponent, { static: false }) canvasRenderer!: CanvasRendererComponent;
   @ViewChild(SingleRendererComponent, { static: false }) singleRenderer!: SingleRendererComponent;
+  @ViewChild(DoubleRendererComponent, { static: false }) doubleRenderer!: DoubleRendererComponent;
 
 
   libraryId!: number;
@@ -1053,6 +1052,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // else pageAmount = this.singleRenderer.getPageAmount();
     let imageRenderer: ImageRenderer = this.singleRenderer;
     if (this.renderWithCanvas) imageRenderer = this.canvasRenderer;
+    if (this.layoutMode === LayoutMode.Double) imageRenderer = this.doubleRenderer;
     // TODO: Build out other renderers
 
     const notInSplit = imageRenderer.shouldMovePrev();
@@ -1091,6 +1091,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     let imageRenderer: ImageRenderer = this.singleRenderer;
     if (this.renderWithCanvas) imageRenderer = this.canvasRenderer;
+    if (this.layoutMode === LayoutMode.Double) imageRenderer = this.doubleRenderer;
     // TODO: Build out other renderers
 
     const notInSplit = imageRenderer.shouldMovePrev();
@@ -1198,6 +1199,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     this.singleRenderer.renderPage([this.canvasImage]);
+    this.doubleRenderer.renderPage([this.canvasImage]);
     this.cdRef.markForCheck();
 
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
@@ -1520,14 +1522,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Show an effect on the image to show that it was bookmarked
     this.showBookmarkEffectEvent.next(pageNum);
-
-    //   if (this.layoutMode !== LayoutMode.Single) {
-    //     const image2 = this.document.querySelector('#image-2');
-    //     if (image2 != null) elements.push(image2);
-    //   }
-    // }
-
-    //this.mangaReaderService.applyBookmarkEffect(elements);
   }
 
   // This is menu only code

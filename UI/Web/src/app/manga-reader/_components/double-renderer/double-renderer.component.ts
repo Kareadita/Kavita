@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, merge, zip } from 'rxjs';
+import { Observable, of, Subject, map, takeUntil, tap, merge, zip, take } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -26,6 +26,8 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
   @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
+
+  @Input() getPage!: (pageNum: number) => HTMLImageElement;
 
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
@@ -147,7 +149,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
         if (image1 != null) elements.push(image1);
-        
+
         if (this.layoutMode !== LayoutMode.Single) {
           const image2 = this.document.querySelector('#image-2');
           if (image2 != null) elements.push(image2);
@@ -157,21 +159,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       })
     ).subscribe(() => {});
 
-    // this.imageFitClass$ = this.imageFit$.pipe(
-    //   takeUntil(this.onDestroy),
-    //   map(fit => {
-    //     if (
-    //       this.mangaReaderService.isWideImage(this.currentImage) &&
-    //       this.layoutMode === LayoutMode.Single &&
-    //       fit !== FITTING_OPTION.WIDTH &&
-    //       this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
-    //       ) {
-    //       // Rewriting to fit to width for this cover image
-    //       return FITTING_OPTION.WIDTH;
-    //     }
-    //     return fit;
-    //   })
-    // );
 
     this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
@@ -198,8 +185,36 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
-    if (this.layoutMode !== LayoutMode.Single) return;
+    if (this.layoutMode !== LayoutMode.Double) return;
     if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
+
+    // If prev page was a spread, then we don't do + 1
+    console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
+    console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
+    // if (this.mangaReaderService.isWideImage(this.currentImage2)) {
+    //   this.currentImagePrev = this.getPage(this.pageNum); // this.getPageUrl(this.pageNum);
+    //   console.log('Setting Prev to ', this.pageNum);
+    // } else {
+    //   this.currentImagePrev = this.getPage(this.pageNum - 1); //this.getPageUrl(this.pageNum - 1);
+    //   console.log('Setting Prev to ', this.pageNum - 1);
+    // }
+
+    // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
+    this.currentImageNext = this.getPage(this.pageNum + 1);
+    console.log('Setting Next to ', this.pageNum + 1);
+
+    this.currentImagePrev = this.getPage(this.pageNum - 1);
+    console.log('Setting Prev to ', this.pageNum - 1);
+    
+    this.shouldRenderDouble$.pipe(take(1)).subscribe(shouldRenderDoublePage => {
+      if (!shouldRenderDoublePage) return;
+      console.log('Rendering Double Page');
+      if (this.layoutMode === LayoutMode.Double) {
+        this.currentImage2 = this.currentImageNext;
+      } else {
+        this.currentImage2 = this.currentImagePrev;
+      }
+    });
 
     this.currentImage = img[0];
 

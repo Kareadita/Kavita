@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { ElementRef, Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
+import { ReaderService } from 'src/app/_services/reader.service';
 import { FITTING_OPTION } from '../_models/reader-enums';
 
 @Injectable({
@@ -10,9 +11,10 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 export class ManagaReaderService {
 
   private renderer: Renderer2;
-  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document) {
+  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
+
 
 
   /**
