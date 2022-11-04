@@ -1248,12 +1248,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
   }
 
-  // shouldRenderAsFitSplit() {
-  //   // Some pages aren't cover images but might need fit split renderings
-  //   if (parseInt(this.generalSettingsForm.value.pageSplitOption, 10) !== PageSplitOption.FitSplit) return false;
-  //   return true;
-  // }
-
   /**
    * Maintains an array of images (that are requested from backend) around the user's current page. This allows for quick loading (seemless to user)
    * and also maintains page info (wide image, etc) due to onload event.
@@ -1296,11 +1290,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     this.setCanvasImage();
-
-
-    // ?! This logic is hella complex and confusing to read
-    // ?! We need to refactor into separate methods and keep it clean
-    // ?! In addition, we shouldn't update canvasImage outside of this code
 
     if (this.layoutMode !== LayoutMode.Single) {
       
@@ -1470,16 +1459,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleReaderMode() {
     switch(this.readerMode) {
       case ReaderMode.LeftRight:
-        //this.readerMode = ReaderMode.UpDown;
         this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
         this.readerModeSubject.next(ReaderMode.UpDown);
         break;
       case ReaderMode.UpDown:
-        //this.readerMode = ReaderMode.Webtoon;
         this.readerModeSubject.next(ReaderMode.Webtoon);
         break;
       case ReaderMode.Webtoon:
-        //this.readerMode = ReaderMode.LeftRight;
         this.readerModeSubject.next(ReaderMode.LeftRight);
         break;
     }
@@ -1553,13 +1539,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // if (this.readerMode === ReaderMode.Webtoon) return;
 
-    // const elements:Array<Element | ElementRef> = [];
-    // if (this.renderWithCanvas && this.canvas) {
-    //   elements.push(this.canvas?.nativeElement); // TODO: Move to canvas renderer
-    // } else {
-    //   const image1 = this.document.querySelector('#image-1');
-    //   if (image1 != null) elements.push(image1);
-
     //   if (this.layoutMode !== LayoutMode.Single) {
     //     const image2 = this.document.querySelector('#image-2');
     //     if (image2 != null) elements.push(image2);
@@ -1593,6 +1572,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {key: '↓', description: 'Move to previous page'},
       {key: 'G', description: 'Open Go to Page dialog'},
       {key: 'B', description: 'Bookmark current page'},
+      {key: 'double click', description: 'Bookmark current page'},
       {key: 'ESC', description: 'Close reader'},
       {key: 'SPACE', description: 'Toggle Menu'},
     ];
