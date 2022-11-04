@@ -4,6 +4,8 @@ $side-width: 25%;
 $dash-width: 3px;
 $pointer-offset: 5px;
 
+@use '../../manga-reader-common';
+
 img {
   user-select: none;
 }
@@ -27,55 +29,55 @@ img {
 
 
 
-.image-container {
-  text-align: center;
+// .image-container {
+//   text-align: center;
 
-  // Original
-  //display: block;
+//   // Original
+//   //display: block;
 
-  // New (for centering in both axis)
-  //display: flex; // Leave this off as it can cutoff the image
-  align-items: center;
+//   // New (for centering in both axis)
+//   //display: flex; // Leave this off as it can cutoff the image
+//   align-items: center;
 
-  .full-width {
-    width: 100vw;
-    height: calc(var(--vh)*100);
-    display: grid;
-  }
+//   .full-width {
+//     width: 100vw;
+//     height: calc(var(--vh)*100);
+//     display: grid;
+//   }
 
-  .full-height {
-    height: 100vh;
-    display: inline-block;
-  }
+//   .full-height {
+//     height: 100vh;
+//     display: inline-block;
+//   }
 
-  .original {
-    height: 100vh;
-    display: grid;
-  }
+//   .original {
+//     height: 100vh;
+//     display: grid;
+//   }
 
-  #image-1 {
-    &.double {
-      margin: 0 0 0 auto;
-    }
-  }
+//   #image-1 {
+//     &.double {
+//       margin: 0 0 0 auto;
+//     }
+//   }
 
-  &.reverse {
-    overflow: unset;
-    display: flex;
-    align-content: center;
-    justify-content: center;
+//   &.reverse {
+//     overflow: unset;
+//     display: flex;
+//     align-content: center;
+//     justify-content: center;
 
-    img {
-      margin: unset;
-    }
-  }
+//     img {
+//       margin: unset;
+//     }
+//   }
   
-  #image-2 {
-    &.double {
-      margin: 0 auto 0 0;
-    }
-  }
-}
+//   #image-2 {
+//     &.double {
+//       margin: 0 auto 0 0;
+//     }
+//   }
+// }
 
 .reader {
     background-color: var(--manga-reader-bg-color);
@@ -84,14 +86,6 @@ img {
     img {
         align-items: center;
     }
-}
-
-
-.loading {
-    position: absolute;
-    left: 48%;
-    top: 20%;
-    z-index: 1;
 }
 
 .title, .subtitle {
@@ -323,21 +317,4 @@ img {
         z-index: 100;
     }
   }
-
-.highlight {
-  background-color: var(--manga-reader-next-highlight-bg-color) !important;
-  animation: fadein .5s both;
-  backdrop-filter: blur(10px);
-}
-.highlight-2 {
-  background-color: var(--manga-reader-prev-highlight-bg-color) !important;
-  animation: fadein .5s both;
-  backdrop-filter: blur(10px);
-}
-
-  
-.bookmark-effect {
-    animation: bookmark 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
 

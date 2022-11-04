@@ -4,58 +4,26 @@ img {
   user-select: none;
 }
 
-// TODO: I can move this into a separate _scss and import the common stuff, then each renderer can customize
-// .image-container {
-//   text-align: center;
+.full-height {
+  width: auto;
+  margin: 0 auto;
+  max-height: calc(var(--vh)*100);
+  vertical-align: top;
+    &.wide {
+      height: 100vh;
+  }
+}
 
-//   // Original
-//   //display: block;
+.original {
+  align-self: center;
+  width: auto;
+  margin: 0 auto;
+  vertical-align: top;
+}
 
-//   // New (for centering in both axis)
-//   //display: flex; // Leave this off as it can cutoff the image
-//   align-items: center;
-
-//   &.full-width {
-//     width: 100vw;
-//     height: calc(var(--vh)*100);
-//     display: grid;
-//   }
-
-//   &.full-height {
-//     height: 100vh;
-//     display: inline-block;
-//   }
-
-//   &.original {
-//     height: 100vh;
-//     display: grid;
-//   }
-
-//   #image-1 {
-//     &.double {
-//       margin: 0 0 0 auto;
-//     }
-//   }
-
-//   &.reverse {
-//     overflow: unset;
-//     display: flex;
-//     align-content: center;
-//     justify-content: center;
-
-//     img {
-//       margin: unset;
-//     }
-//   }
-  
-//   #image-2 {
-//     &.double {
-//       margin: 0 auto 0 0;
-//     }
-//   }
-// }
-
-
-// .bookmark-effect {
-//     animation: bookmark 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
-// }
+.full-width {
+  width: 100%;
+  margin: 0 auto;
+  vertical-align: top;
+  max-width: fit-content;
+}
