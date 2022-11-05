@@ -331,7 +331,7 @@ public class ArchiveService : IArchiveService
     private static bool IsComicInfoArchiveEntry(string fullName, string name)
     {
         return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
-               && name.Equals(ComicInfoFilename, StringComparison.OrdinalIgnoreCase)
+               && name.EndsWith(ComicInfoFilename, StringComparison.OrdinalIgnoreCase)
                && !name.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
     }
 

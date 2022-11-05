@@ -281,6 +281,17 @@ public class ArchiveServiceTests
         Assert.Equal("BTOOOM! - Duplicate", comicInfo.Series);
     }
 
+    [Fact]
+    public void ShouldHaveComicInfo_OutsideRoot_SharpCompress()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+        var archive = Path.Join(testDirectory, "ComicInfo_outside_root_SharpCompress.cb7");
+
+        var comicInfo = _archiveService.GetComicInfo(archive);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Fire Punch", comicInfo.Series);
+    }
+
     #endregion
 
     #region CanParseComicInfo
