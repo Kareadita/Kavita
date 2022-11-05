@@ -174,7 +174,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     this.cdRef.markForCheck();
     
     const needsSplitting = this.updateSplitPage();
-    console.log('split: ',this.currentImageSplitPart);
+    //console.log('split: ',this.currentImageSplitPart);
     if (!needsSplitting) return;
     if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
 

@@ -99,18 +99,24 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       takeUntil(this.onDestroy)
     );
 
-    this.shouldRenderDouble$ = this.pageNum$.pipe(
+    this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       tap(pageInfo => {
+        console.log('[DoubleRenderer] Page Num: ', pageInfo.pageNum);
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
+
+        //this.currentImage = this.getPage(this.pageNum);
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
         console.log('Setting Next to ', this.pageNum + 1);
 
         this.currentImagePrev = this.getPage(this.pageNum - 1);
         console.log('Setting Prev to ', this.pageNum - 1);
-      }),
+      })).subscribe(() => {});
+
+    this.shouldRenderDouble$ = this.pageNum$.pipe(
+      takeUntil(this.onDestroy),
       map((_) => {
         return this.shouldRenderDouble();
       })

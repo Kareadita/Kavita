@@ -67,9 +67,6 @@
             </div>
 
             <div (dblclick)="bookmarkPage($event)">
-                <ng-container *ngIf="layoutMode === LayoutMode.Double || layoutMode === LayoutMode.DoubleReversed">
-
-                </ng-container>
                 <app-single-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
                     [imageFit$]="imageFit$" 
@@ -83,7 +80,7 @@
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
-                    [getPage]="getPage">
+                    [getPage]="getPageFn">
                 </app-double-renderer>
             </div>
 <!-- 

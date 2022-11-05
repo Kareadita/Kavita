@@ -1,0 +1,22 @@
+@use '../../../../manga-reader-common';
+
+.center-double {
+    display: flex;
+    overflow: unset;
+  }
+  
+  .fit-to-width-double-offset {
+    max-width: 100%; // max-width fixes center alignment issue
+  }
+  
+  .original-double-offset {
+    max-width: 100%;
+  }
+  
+  .fit-to-height-double-offset {
+    height: 100vh;
+    object-fit: scale-down;
+    top: 50%;
+    left: 50%;
+    max-width: 100%;
+  }
