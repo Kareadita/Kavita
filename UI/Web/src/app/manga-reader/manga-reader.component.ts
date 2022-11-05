@@ -181,7 +181,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * A circular array of size PREFETCH_PAGES. Maintains prefetched Images around the current page to load from to avoid loading animation.
    * @see CircularArray
    */
-  cachedImages!: Array<HTMLImageElement>;
+  cachedImages: Array<HTMLImageElement> = [];
   /**
    * A stack of the chapter ids we come across during continuous reading mode. When we traverse a boundary, we use this to avoid extra API calls.
    * @see Stack
@@ -745,6 +745,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImage2.src = '';
     this.cdRef.markForCheck();
 
+    this.cachedImages = [];
+    for (let i = 0; i < PREFETCH_PAGES; i++) {
+      this.cachedImages.push(new Image());
+    }
+
     if (this.goToPageEvent) {
       // There was a bug where goToPage was emitting old values into infinite scroller between chapter loads. We explicity clear it out between loads
       // and we use a BehaviourSubject to ensure only latest value is sent
@@ -766,7 +771,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.inSetup = false;
         this.cdRef.markForCheck();
 
-        this.cachedImages = [];
         for (let i = 0; i < PREFETCH_PAGES; i++) {
           this.cachedImages.push(new Image())
         }
@@ -839,11 +843,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.getPage(1000000, this.prevChapterId);
         }
       });
-
-      this.cachedImages = [];
-      for (let i = 0; i < PREFETCH_PAGES; i++) {
-        this.cachedImages.push(new Image());
-      }
 
 
       this.render();
@@ -1089,10 +1088,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
    */
   setCanvasImage() {
+    if (this.cachedImages === undefined) return;
     this.canvasImage = this.getPage(this.pageNum, this.chapterId, this.layoutMode !== LayoutMode.Single);
     this.canvasImage.addEventListener('load', () => {
       this.currentImage.next(this.canvasImage);
-      this.renderPage();
+      //this.renderPage();
     }, false);
     
     this.cdRef.markForCheck();
@@ -1256,8 +1256,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.layoutMode !== LayoutMode.Single) {
       
       // If prev page was a spread, then we don't do + 1
-      console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
-      console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
+      //console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
+      //console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
       // if (this.mangaReaderService.isWideImage(this.canvasImage2)) {
       //   this.canvasImagePrev = this.getPage(this.pageNum);
       //   console.log('Setting Prev to ', this.pageNum);
@@ -1267,32 +1267,32 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // }
 
       // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
-      this.canvasImageNext = this.getPage(this.pageNum + 1);
-      console.log('Setting Next to ', this.pageNum + 1);
+      // this.canvasImageNext = this.getPage(this.pageNum + 1);
+      // console.log('Setting Next to ', this.pageNum + 1);
 
-      this.canvasImagePrev = this.getPage(this.pageNum - 1);
-      console.log('Setting Prev to ', this.pageNum - 1);
+      // this.canvasImagePrev = this.getPage(this.pageNum - 1);
+      // console.log('Setting Prev to ', this.pageNum - 1);
 
-      if (this.pageNum + 2 < this.maxPages - 1) {
-        this.canvasImageAheadBy2 = this.getPage(this.pageNum + 2);
-      }
-      if (this.pageNum - 2 >= 0) {
-        this.canvasImageBehindBy2 = this.getPage(this.pageNum - 2 || 0);
-      }      
+      // if (this.pageNum + 2 < this.maxPages - 1) {
+      //   this.canvasImageAheadBy2 = this.getPage(this.pageNum + 2);
+      // }
+      // if (this.pageNum - 2 >= 0) {
+      //   this.canvasImageBehindBy2 = this.getPage(this.pageNum - 2 || 0);
+      // }      
     
-      if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
-        console.log('Rendering Double Page');
-        if (this.layoutMode === LayoutMode.Double) {
-          this.canvasImage2 = this.canvasImageNext;
-        } else {
-          this.canvasImage2 = this.canvasImagePrev;
-        }
-      }
+      // if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
+      //   console.log('Rendering Double Page');
+      //   if (this.layoutMode === LayoutMode.Double) {
+      //     this.canvasImage2 = this.canvasImageNext;
+      //   } else {
+      //     this.canvasImage2 = this.canvasImagePrev;
+      //   }
+      // }
     }
 
     
     this.cdRef.markForCheck();
-    this.renderPage();
+    this.renderPage(); // Allow the image loader to trigger render
     this.prefetch();
     this.cdRef.markForCheck();
   }

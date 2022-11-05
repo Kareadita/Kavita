@@ -101,16 +101,18 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      map((pageInfo) => {
+      tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
-        if (this.layoutMode !== LayoutMode.Double) return false;
 
-        return !(
-          this.mangaReaderService.isCoverImage(this.pageNum)
-          || this.mangaReaderService.isWideImage(this.currentImage)
-          || this.mangaReaderService.isWideImage(this.currentImageNext)
-          );
+        this.currentImageNext = this.getPage(this.pageNum + 1);
+        console.log('Setting Next to ', this.pageNum + 1);
+
+        this.currentImagePrev = this.getPage(this.pageNum - 1);
+        console.log('Setting Prev to ', this.pageNum - 1);
+      }),
+      map((_) => {
+        return this.shouldRenderDouble();
       })
     );
 
@@ -182,12 +184,23 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     this.onDestroy.next();
     this.onDestroy.complete();
   }
+
+  shouldRenderDouble() {
+    if (this.layoutMode !== LayoutMode.Double) return false;
+
+    return !(
+      this.mangaReaderService.isCoverImage(this.pageNum)
+      || this.mangaReaderService.isWideImage(this.currentImage)
+      || this.mangaReaderService.isWideImage(this.currentImageNext)
+      );
+  }
   
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (this.layoutMode !== LayoutMode.Double) return;
     if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
 
+    console.log('[DoubleRenderer] renderPage()');
     // If prev page was a spread, then we don't do + 1
     
     // if (this.mangaReaderService.isWideImage(this.currentImage2)) {
@@ -200,25 +213,27 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
     this.currentImage = img[0];
-    this.shouldRenderDouble$.pipe(take(1)).subscribe(shouldRenderDoublePage => {
-      if (!shouldRenderDoublePage) return;
-      console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
-      console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
 
-      this.currentImageNext = this.getPage(this.pageNum + 1);
-      console.log('Setting Next to ', this.pageNum + 1);
+    // This renderer is different. It needs to set the images 
 
-      this.currentImagePrev = this.getPage(this.pageNum - 1);
-      console.log('Setting Prev to ', this.pageNum - 1);
-      
+    console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
+    console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
 
-      console.log('Rendering Double Page');
-      
-      this.currentImage2 = this.currentImageNext;
-      //  else {
-      //   this.currentImage2 = this.currentImagePrev;
-      // }
-    });
+    this.currentImageNext = this.getPage(this.pageNum + 1);
+    console.log('Setting Next to ', this.pageNum + 1);
+
+    this.currentImagePrev = this.getPage(this.pageNum - 1);
+    console.log('Setting Prev to ', this.pageNum - 1);
+    
+
+    if (!this.shouldRenderDouble()) return;
+    console.log('Rendering Double Page');
+    
+    this.currentImage2 = this.currentImageNext;
+
+    //  else {
+    //   this.currentImage2 = this.currentImagePrev;
+    // }
 
     
 
