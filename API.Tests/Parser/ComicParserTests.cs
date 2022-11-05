@@ -194,7 +194,7 @@ public class ComicParserTests
     [InlineData("Asterix - HS - Les 12 travaux d'Astérix", true)]
     [InlineData("Sillage Hors Série - Le Collectionneur - Concordance-DKFR", true)]
     [InlineData("laughs", false)]
-    [InlineData("Annual Days of Summer", false)]
+    [InlineData("Annual Days of Summer", true)]
     [InlineData("Adventure Time 2013 Annual #001 (2013)", true)]
     [InlineData("Adventure Time 2013_Annual_#001 (2013)", true)]
     [InlineData("Adventure Time 2013_-_Annual #001 (2013)", true)]
@@ -202,6 +202,13 @@ public class ComicParserTests
     [InlineData("Mazebook 001", false)]
     [InlineData("X-23 One Shot (2010)", true)]
     [InlineData("Casus Belli v1 Hors-Série 21 - Mousquetaires et Sorcellerie", true)]
+    [InlineData("Batman Beyond Annual", true)]
+    [InlineData("Batman Beyond Bonus", true)]
+    [InlineData("Batman Beyond OneShot", true)]
+    [InlineData("Batman Beyond Specials", true)]
+    [InlineData("Batman Beyond Omnibus (1999)", true)]
+    [InlineData("Batman Beyond Omnibus", true)]
+    [InlineData("01 Annual Batman Beyond", true)]
     public void IsComicSpecialTest(string input, bool expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsComicSpecial(input));
