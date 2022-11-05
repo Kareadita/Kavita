@@ -200,11 +200,11 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
         new Regex(
-            @"(?<Series>.*) (\b|_|-)(vol)\.?(\s|-|_)?\d+",
+            @"(?<Series>.+?):? (\b|_|-)(vol)\.?(\s|-|_)?\d+",
             MatchOptions, RegexTimeout),
         // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
         new Regex(
-            @"(?<Series>.*) (\b|_|-)(vol)(ume)",
+            @"(?<Series>.+?):? (\b|_|-)(vol)(ume)",
             MatchOptions,
             RegexTimeout),
         //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]

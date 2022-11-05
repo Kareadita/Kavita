@@ -195,6 +195,7 @@ public class MangaParserTests
     [InlineData("Манга Глава 2-2", "Манга")]
     [InlineData("Манга Том 1 3-4 Глава", "Манга")]
     [InlineData("Esquire 6권 2021년 10월호", "Esquire")]
+    [InlineData("Accel World: Vol 1", "Accel World")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
