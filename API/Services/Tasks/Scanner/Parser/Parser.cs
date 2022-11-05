@@ -200,11 +200,11 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // [dmntsf.net] One Piece - Digital Colored Comics Vol. 20 Ch. 177 - 30 Million vs 81 Million.cbz
         new Regex(
-            @"(?<Series>.*) (\b|_|-)(vol)\.?(\s|-|_)?\d+",
+            @"(?<Series>.+?):? (\b|_|-)(vol)\.?(\s|-|_)?\d+",
             MatchOptions, RegexTimeout),
         // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
         new Regex(
-            @"(?<Series>.*) (\b|_|-)(vol)(ume)",
+            @"(?<Series>.+?):? (\b|_|-)(vol)(ume)",
             MatchOptions,
             RegexTimeout),
         //Knights of Sidonia c000 (S2 LE BD Omake - BLAME!) [Habanero Scans]
@@ -596,7 +596,7 @@ public static class Parser
 
     private static readonly Regex ComicSpecialRegex = new Regex(
     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|\d.+?\WAnnual|Annual\W\d.+?|Book \d.+?|Compendium \d.+?|Omnibus \d.+?|FCBD \d.+?|Absolute \d.+?|Preview \d.+?|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
+        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
         MatchOptions, RegexTimeout
     );
 

@@ -38,7 +38,10 @@ public class SeriesModified
     public IEnumerable<string> LibraryRoots { get; set; }
 }
 
-
+/// <summary>
+/// Responsible for taking parsed info from ReadingItemService and DirectoryService and combining them to emit DB work
+/// on a series by series.
+/// </summary>
 public class ParseScannedFiles
 {
     private readonly ILogger _logger;
