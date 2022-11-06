@@ -335,21 +335,21 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
   }
 
-  /**
-   * Determines if we should render a double page.
-   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image 
-   * and the next page is not a wide image (as only non-wides should be shown next to each other).
-   * @remarks This will always fail if the window's width is greater than the height
-   */
-  get ShouldRenderDoublePage() {
-    if (this.layoutMode !== LayoutMode.Double) return false;
+  // /**
+  //  * Determines if we should render a double page.
+  //  * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image 
+  //  * and the next page is not a wide image (as only non-wides should be shown next to each other).
+  //  * @remarks This will always fail if the window's width is greater than the height
+  //  */
+  // get ShouldRenderDoublePage() {
+  //   if (this.layoutMode !== LayoutMode.Double) return false;
 
-    return !(
-      this.mangaReaderService.isCoverImage(this.pageNum)
-      || this.mangaReaderService.isWideImage(this.canvasImage)
-      || this.mangaReaderService.isWideImage(this.canvasImageNext)
-      );
-  }
+  //   return !(
+  //     this.mangaReaderService.isCoverImage(this.pageNum)
+  //     || this.mangaReaderService.isWideImage(this.canvasImage)
+  //     || this.mangaReaderService.isWideImage(this.canvasImageNext)
+  //     );
+  // }
 
   /**
    * We should Render 2 pages if:
@@ -380,6 +380,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ImageHeight() {
+    // ?! This doesn't work reliably
+    console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight)
+    console.log('Image 1 Height: ', this.document.querySelector('#image-1')?.clientHeight || 0)
+    //return 'calc(100*var(--vh))';
     return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
   }
 

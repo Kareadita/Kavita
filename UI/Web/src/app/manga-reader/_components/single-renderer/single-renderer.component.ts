@@ -39,6 +39,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   private readonly onDestroy = new Subject<void>();
 
   get ReaderMode() {return ReaderMode;} 
+  get LayoutMode() {return LayoutMode;} 
 
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, 
     @Inject(DOCUMENT) private document: Document) { }
@@ -64,6 +65,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       takeUntil(this.onDestroy),
       tap(values => {
         this.layoutMode = values.layoutMode;
+        console.log('layout mode: ', this.layoutMode);
         this.pageSplit = values.pageSplit;
         this.cdRef.markForCheck();
       })
