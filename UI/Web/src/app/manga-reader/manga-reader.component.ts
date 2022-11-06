@@ -1005,32 +1005,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
-    //let pageAmount = 1;
-    // If we are on the cover image, always do 1 page
-    // if (!this.mangaReaderService.isCoverImage(this.pageNum)) {
-    //   if (this.layoutMode === LayoutMode.Double) {
-    //     pageAmount = (
-    //       !this.mangaReaderService.isCoverImage(this.pageNum) &&
-    //       !this.mangaReaderService.isWideImage(this.canvasImage) &&
-    //       !this.mangaReaderService.isWideImage(this.canvasImageNext) &&
-    //       !this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages) &&
-    //       !this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)
-    //       ? 2 : 1);
-    //   } else if (this.layoutMode === LayoutMode.DoubleReversed) {
-    //     // Move forward by 1 pages if:
-    //     // 1. The next page is a wide image
-    //     // 2. The next page + 1 is a wide image (why do we care at this point?)
-    //     // 3. We are on the second to last page
-    //     // 4. We are on the last page
-    //     pageAmount = !(
-    //       this.mangaReaderService.isWideImage(this.canvasImageNext)  
-    //       || this.mangaReaderService.isWideImage(this.canvasImageAheadBy2)  // Remember we are doing this logic before we've hit the next page, so we need this
-    //       || this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)
-    //       || this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)
-    //       ) ? 2 : 1;
-    //   }
-    // }
-
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
     const notInSplit = this.canvasRenderer.shouldMovePrev(); // TODO: Make this generic like above, but by default only canvasRenderer will have logic
     console.log('Next Page, in split: ', !notInSplit, ' page amt: ', pageAmount, ' page: ', this.canvasImage.src);
@@ -1052,22 +1026,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
-    // let pageAmount = 1;
-    // if (this.layoutMode === LayoutMode.Double) {
-    //   pageAmount = !(
-    //     this.mangaReaderService.isCoverImage(this.pageNum)
-    //     || this.mangaReaderService.isWideImage(this.canvasImagePrev)
-    //   ) ? 2 : 1;
-    // } else if (this.layoutMode === LayoutMode.DoubleReversed) {
-    //   pageAmount = !(
-    //     this.mangaReaderService.isCoverImage(this.pageNum) 
-    //     || this.mangaReaderService.isCoverImage(this.pageNum - 1) 
-    //     || this.mangaReaderService.isWideImage(this.canvasImage)  // JOE: At this point, these aren't yet set to the new values
-    //     || this.mangaReaderService.isWideImage(this.canvasImagePrev) // This should be Prev, if prev image  (original: canvasImageNext)
-    //   ) ? 2 : 1;
-    // }
 
-    const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
+    const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
+    this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
+    this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
+
     const notInSplit = this.canvasRenderer.shouldMovePrev();
     console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
 

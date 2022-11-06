@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, merge, zip, take, shareReplay } from 'rxjs';
+import { Observable, of, Subject, map, takeUntil, tap, zip, shareReplay } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -112,7 +112,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       tap(pageInfo => {
-        console.log('[DoubleRenderer] Page Num: ', pageInfo.pageNum);
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
 
@@ -120,10 +119,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         this.currentImage2 = this.getPage(this.pageNum + 1);
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
-        //console.log('Setting Next to ', this.pageNum + 1);
-
         this.currentImagePrev = this.getPage(this.pageNum - 1);
-        //console.log('Setting Prev to ', this.pageNum - 1);
 
         this.currentImage2Behind = this.getPage(this.pageNum - 2);
         this.currentImage2Ahead = this.getPage(this.pageNum + 2);
@@ -240,24 +236,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
 
     console.log('[DoubleRenderer] renderPage(): ', this.pageNum);
-    // If prev page was a spread, then we don't do + 1
-    
-    // if (this.mangaReaderService.isWideImage(this.currentImage2)) {
-    //   this.currentImagePrev = this.getPage(this.pageNum);
-    //   console.log('Setting Prev to ', this.pageNum);
-    // } else {
-    //   this.currentImagePrev = this.getPage(this.pageNum - 1); 
-    //   console.log('Setting Prev to ', this.pageNum - 1);
-    // }
-
-    // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
-  
-    // console.log('Current Image ', this.readerService.imageUrlToPageNum(this.currentImage.src));
-    // console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
-    // console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
-    // console.log('Current - 1 canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImagePrev.src));
-    // console.log('Current + 1 canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImageNext.src));
-
     console.log(this.readerService.imageUrlToPageNum(this.currentImage2Behind.src), this.readerService.imageUrlToPageNum(this.currentImagePrev.src),
     '[', this.readerService.imageUrlToPageNum(this.currentImage.src), ']',
     this.readerService.imageUrlToPageNum(this.currentImageNext.src), this.readerService.imageUrlToPageNum(this.currentImage2Ahead.src))
@@ -267,12 +245,10 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       this.imageHeight.emit(this.currentImage.height);
       return;
     }
-
-    console.log('Rendering Double Page');
     
     this.currentImage2 = this.currentImageNext;
 
-    //  else {
+    //  else { // This is for double reverse
     //   this.currentImage2 = this.currentImagePrev;
     // }
 
