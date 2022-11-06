@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { map, Observable, of, Subject, takeUntil, tap, zip } from 'rxjs';
+import { filter, map, Observable, of, Subject, takeUntil, tap, zip } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { LayoutMode } from '../../_models/layout-mode';
@@ -46,17 +46,20 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
+      filter(_ => this.isValid()),
       map(values => values.readerMode), 
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
       takeUntil(this.onDestroy)
     );
 
     this.darkenss$ = this.readerSettings$.pipe(
+      filter(_ => this.isValid()),
       map(values => 'brightness(' + values.darkness + '%)'), 
       takeUntil(this.onDestroy)
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
+      filter(_ => this.isValid()),
       map(showOverlay => showOverlay ? 'blur' : ''), 
       takeUntil(this.onDestroy)
     );
@@ -65,7 +68,6 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       takeUntil(this.onDestroy),
       tap(values => {
         this.layoutMode = values.layoutMode;
-        console.log('layout mode: ', this.layoutMode);
         this.pageSplit = values.pageSplit;
         this.cdRef.markForCheck();
       })
@@ -73,6 +75,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.bookmark$.pipe(
       takeUntil(this.onDestroy),
+      filter(_ => this.isValid()),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -82,9 +85,9 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       })
     ).subscribe(() => {});
 
-    // ?! This needs to be updated when image changes too
     this.imageFitClass$ = zip(this.readerSettings$, this.image$).pipe(
       takeUntil(this.onDestroy),
+      filter(_ => this.isValid()),
       map(values => values[0].fitting),
       map(fit => {
         if (
@@ -102,6 +105,10 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     );
   }
 
+  isValid() {
+    return this.layoutMode === LayoutMode.Single;
+  }
+
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
@@ -109,7 +116,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
-    if (this.layoutMode !== LayoutMode.Single) return;
+    if (!this.isValid()) return;
     
     // This seems to cause a problem after rendering a split
     //if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
@@ -128,7 +135,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return true;
   }
   getPageAmount(direction: PAGING_DIRECTION): number {
-    if (this.layoutMode !== LayoutMode.Single || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
+    if (!this.isValid() || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
     return 1;
   }
   reset(): void {}

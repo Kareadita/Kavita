@@ -72,9 +72,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       map(fit => {
         if (fit === FITTING_OPTION.WIDTH || this.layoutMode === LayoutMode.Single) return fit;
         if (this.canvasImage === null) return fit;
-        const isWide = this.mangaReaderService.isWideImage(this.canvasImage);
-        const isFitSplit = this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit);
 
+        // Would this ever execute given that we perform splitting only in this renderer? 
         if (
           this.mangaReaderService.isWideImage(this.canvasImage) &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
