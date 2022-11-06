@@ -294,13 +294,28 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     // If prev page:
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
-        return (
-          !this.mangaReaderService.isCoverImage(this.pageNum) &&
-          !this.mangaReaderService.isWideImage(this.currentImage) &&
-          !this.mangaReaderService.isWideImage(this.currentImageNext) &&
-          !this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages) &&
-          !this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)
-          ? 2 : 1);
+        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+          console.log('Moving forward 1 page as on cover image');
+          return 1;
+        }
+        if (this.mangaReaderService.isWideImage(this.currentImage)) {
+          console.log('Moving forward 1 page as current page is wide');
+          return 1;
+        }
+        if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
+          console.log('Moving forward 1 page as next page is wide');
+          return 1;
+        }
+        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+          console.log('Moving forward 1 page as 2 pages left');
+          return 1;
+        }
+        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+          console.log('Moving forward 1 page as 1 page left');
+          return 1;
+        }
+        console.log('Moving forward 2 pages');
+        return 2;
       case PAGING_DIRECTION.BACKWARDS:
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {
           console.log('Moving back 1 page as on cover image');
