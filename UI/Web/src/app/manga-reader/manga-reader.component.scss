@@ -6,18 +6,8 @@ $pointer-offset: 5px;
 
 @use '../../manga-reader-common';
 
-img {
-  user-select: none;
-}
 
-@media(min-width: 600px) {
-    .overlay .left .i {
-        left: 20px;
-    }
-    .overlay .right .i {
-        right: 20px;
-    }
-} 
+
 
 .reading-area {
   position: relative;
@@ -106,6 +96,15 @@ img {
   backdrop-filter: var(--manga-reader-overlay-filter); // BUG: This doesn't work on Firefox
   color: var(--manga-reader-overlay-text-color);
 }
+
+@media(min-width: 600px) {
+  .overlay .left .i {
+      left: 20px;
+  }
+  .overlay .right .i {
+      right: 20px;
+  }
+} 
 
 // Fitting Options
 
@@ -269,10 +268,11 @@ img {
       width: 100%;
   }
 
-  //$pagination-bg: rgba(0, 0, 0, 0);
-  $pagination-bg: rgba(0, 0, 255, 0.4); // DEBUG CODE
+
 
   .pagination-area {
+      //$pagination-bg: rgba(0, 0, 0, 0);
+    $pagination-bg: rgba(0, 0, 255, 0.4); // DEBUG CODE
     cursor: pointer;
     z-index: 100;
 

@@ -1,11 +1,9 @@
+img {
+  user-select: none;
+}
+
 .image-container {
   text-align: center;
-
-  // Original
-  //display: block;
-
-  // New (for centering in both axis)
-  //display: flex; // Leave this off as it can cutoff the image
   align-items: center;
 
   &.full-width {

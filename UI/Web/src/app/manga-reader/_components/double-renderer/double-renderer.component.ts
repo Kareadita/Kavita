@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, merge, zip, take } from 'rxjs';
+import { Observable, of, Subject, map, takeUntil, tap, merge, zip, take, shareReplay } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -117,12 +117,13 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         this.maxPages = pageInfo.maxPages;
 
         this.currentImage = this.getPage(this.pageNum);
+        this.currentImage2 = this.getPage(this.pageNum + 1);
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
-        console.log('Setting Next to ', this.pageNum + 1);
+        //console.log('Setting Next to ', this.pageNum + 1);
 
         this.currentImagePrev = this.getPage(this.pageNum - 1);
-        console.log('Setting Prev to ', this.pageNum - 1);
+        //console.log('Setting Prev to ', this.pageNum - 1);
 
         this.currentImage2Behind = this.getPage(this.pageNum - 2);
         this.currentImage2Ahead = this.getPage(this.pageNum + 2);
@@ -149,11 +150,26 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     this.shouldRenderSecondPage$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       map(_ => {
-        if (this.currentImage2.src === '') return false;
-        if (this.mangaReaderService.isCoverImage(this.pageNum)) return false;
-        if (this.readerService.imageUrlToPageNum(this.currentImage2.src) > this.maxPages - 1) return false;
-        if (this.mangaReaderService.isWideImage(this.currentImageNext)) return false;
-        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) return false;
+        if (this.currentImage2.src === '') {
+          console.log('Not rendering second page as 2nd image is empty');
+          return false;
+        }
+        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+          console.log('Not rendering second page as on cover image');
+          return false;
+        }
+        if (this.readerService.imageUrlToPageNum(this.currentImage2.src) > this.maxPages - 1) {
+          console.log('Not rendering second page as 2nd image is on last page');
+          return false;
+        }
+        if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
+          console.log('Not rendering second page as next page is wide');
+          return false;
+        }
+        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
+          console.log('Not rendering second page as prev page is wide');
+          return false;
+        }
         return true;
       })
     );
@@ -198,7 +214,8 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           return FITTING_OPTION.WIDTH;
         }
         return fit;
-      })
+      }),
+      shareReplay()
     );
   }
 
@@ -272,7 +289,8 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return true;
   }
   getPageAmount(direction: PAGING_DIRECTION): number {
-    if (this.layoutMode !== LayoutMode.Single || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
+    if (this.layoutMode !== LayoutMode.Double || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
+
     // If prev page:
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
@@ -284,10 +302,29 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           !this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)
           ? 2 : 1);
       case PAGING_DIRECTION.BACKWARDS:
-        return !(
-          this.mangaReaderService.isCoverImage(this.pageNum)
-          || this.mangaReaderService.isWideImage(this.currentImagePrev)
-        ) ? 2 : 1;
+        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+          console.log('Moving back 1 page as on cover image');
+          return 1;
+        }
+        if (this.mangaReaderService.isWideImage(this.currentImage)) {
+          console.log('Moving back 1 page as current page is wide');
+          return 1;
+        }
+        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
+          console.log('Moving back 1 page as prev page is wide');
+          return 1;
+        }
+        if (this.mangaReaderService.isWideImage(this.currentImage2Behind)) {
+          console.log('Moving back 1 page as 2 pages back is wide');
+          return 1;
+        }
+        // Not sure about this condition on moving backwards
+        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+          console.log('Moving back 1 page as 2 pages left');
+          return 1;
+        }
+        console.log('Moving back 2 pages');
+        return 2;
     }
   }
   reset(): void {}
