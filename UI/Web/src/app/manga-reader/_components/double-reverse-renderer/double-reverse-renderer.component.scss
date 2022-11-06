@@ -1,9 +1,28 @@
-@use '../../../../manga-reader-common';
+//@use '../../../../manga-reader-common';
+@import '../../../../manga-reader-common';
 
+// Overrides for reverse
 .image-container {
+    &.reverse {
+        overflow: unset;
+        display: flex;
+        align-content: center;
+        justify-content: center;
+
+        img {
+            margin: unset;
+        }
+    }
+
     #image-1 {
         &.double {
             margin: 0 0 0 auto;
+        }
+    }
+
+    #image-2 {
+        &.double {
+            margin: 0 auto 0 0;
         }
     }
 }

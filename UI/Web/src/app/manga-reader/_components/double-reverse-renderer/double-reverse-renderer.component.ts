@@ -10,13 +10,18 @@ import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
 
+/**
+ * This is aimed at manga. Double page renderer but where if we have page = 10, you will see
+ * page 11 page 10. 
+ */
 @Component({
-  selector: 'app-double-renderer',
-  templateUrl: './double-renderer.component.html',
-  styleUrls: ['./double-renderer.component.scss'],
+  selector: 'app-double-reverse-renderer',
+  templateUrl: './double-reverse-renderer.component.html',
+  styleUrls: ['./double-reverse-renderer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer {
+export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageRenderer {
+
 
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
@@ -124,7 +129,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
         this.currentImage2Behind = this.getPage(this.pageNum - 2);
         this.currentImage2Ahead = this.getPage(this.pageNum + 2);
-        this.cdRef.markForCheck();
       })).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
@@ -321,5 +325,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     }
   }
   reset(): void {}
+
 
 }

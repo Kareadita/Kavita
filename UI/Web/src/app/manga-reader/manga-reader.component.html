@@ -82,6 +82,15 @@
                     [pageNum$]="pageNum$"
                     [getPage]="getPageFn">
                 </app-double-renderer>
+
+                <app-double-reverse-renderer [image$]="currentImage$" 
+                    [readerSettings$]="readerSettings$" 
+                    [imageFit$]="imageFit$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$"
+                    [pageNum$]="pageNum$"
+                    [getPage]="getPageFn">
+                </app-double-reverse-renderer>
             </div>
 <!-- 
             <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
