@@ -62,6 +62,16 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     * @see currentImage
     */
   currentImageNext = new Image();
+  /**
+    * Used solely for LayoutMode.Double rendering. Will always hold the current - 2 image to currentImage
+    * @see currentImage
+    */
+  currentImage2Behind = new Image();
+  /**
+   * Used solely for LayoutMode.Double rendering. Will always hold the current + 2 image to currentImage
+   * @see currentImage
+   */
+  currentImage2Ahead = new Image();
 
   /**
    * Determines if we should render a double page.
@@ -106,13 +116,16 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
 
-        //this.currentImage = this.getPage(this.pageNum);
+        this.currentImage = this.getPage(this.pageNum);
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
         console.log('Setting Next to ', this.pageNum + 1);
 
         this.currentImagePrev = this.getPage(this.pageNum - 1);
         console.log('Setting Prev to ', this.pageNum - 1);
+
+        this.currentImage2Behind = this.getPage(this.pageNum - 2);
+        this.currentImage2Ahead = this.getPage(this.pageNum + 2);
       })).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
@@ -136,9 +149,12 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     this.shouldRenderSecondPage$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       map(_ => {
-        return (this.currentImage2.src !== '') 
-              && (this.readerService.imageUrlToPageNum(this.currentImage2.src) <= this.maxPages - 1 
-              && !this.mangaReaderService.isCoverImage(this.pageNum));
+        if (this.currentImage2.src === '') return false;
+        if (this.mangaReaderService.isCoverImage(this.pageNum)) return false;
+        if (this.readerService.imageUrlToPageNum(this.currentImage2.src) > this.maxPages - 1) return false;
+        if (this.mangaReaderService.isWideImage(this.currentImageNext)) return false;
+        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) return false;
+        return true;
       })
     );
 
@@ -206,7 +222,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     if (this.layoutMode !== LayoutMode.Double) return;
     if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
 
-    console.log('[DoubleRenderer] renderPage()');
+    console.log('[DoubleRenderer] renderPage(): ', this.pageNum);
     // If prev page was a spread, then we don't do + 1
     
     // if (this.mangaReaderService.isWideImage(this.currentImage2)) {
@@ -218,21 +234,23 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     // }
 
     // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
-    this.currentImage = img[0];
+  
+    // console.log('Current Image ', this.readerService.imageUrlToPageNum(this.currentImage.src));
+    // console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
+    // console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
+    // console.log('Current - 1 canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImagePrev.src));
+    // console.log('Current + 1 canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImageNext.src));
 
-    // This renderer is different. It needs to set the images 
-
-    console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage.src));
-    console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.currentImage2.src));
-
-    this.currentImageNext = this.getPage(this.pageNum + 1);
-    console.log('Setting Next to ', this.pageNum + 1);
-
-    this.currentImagePrev = this.getPage(this.pageNum - 1);
-    console.log('Setting Prev to ', this.pageNum - 1);
+    console.log(this.readerService.imageUrlToPageNum(this.currentImage2Behind.src), this.readerService.imageUrlToPageNum(this.currentImagePrev.src),
+    '[', this.readerService.imageUrlToPageNum(this.currentImage.src), ']',
+    this.readerService.imageUrlToPageNum(this.currentImageNext.src), this.readerService.imageUrlToPageNum(this.currentImage2Ahead.src))
     
 
-    if (!this.shouldRenderDouble()) return;
+    if (!this.shouldRenderDouble()) {
+      this.imageHeight.emit(this.currentImage.height);
+      return;
+    }
+
     console.log('Rendering Double Page');
     
     this.currentImage2 = this.currentImageNext;
@@ -242,8 +260,8 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     // }
 
     
-
-    this.imageHeight.emit(this.currentImage.height);
+    this.cdRef.markForCheck();
+    this.imageHeight.emit(Math.max(this.currentImage.height, this.currentImage2.height));
     this.cdRef.markForCheck();
   }
 

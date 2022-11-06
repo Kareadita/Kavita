@@ -702,7 +702,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
     if (!img || forceNew) {
       img = new Image();
-      img.src = this.getPageUrl(this.pageNum, chapterId);
+      img.src = this.getPageUrl(pageNum, chapterId);
     }
 
     return img;
@@ -1166,19 +1166,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   renderPage() {
     console.log('[Manga Reader] renderPage()');
-    // this.renderWithCanvas = this.mangaReaderService.shouldSplit(this.canvasImage, this.pageSplitOption);
-    // if (this.renderWithCanvas) { // Canvas Renderer must be gatted. 
-    // }
-    
-    this.canvasRenderer.renderPage([this.canvasImage]); 
 
+    this.canvasRenderer.renderPage([this.canvasImage]); 
     this.singleRenderer.renderPage([this.canvasImage]);
     this.doubleRenderer.renderPage([this.canvasImage]);
-    this.cdRef.markForCheck();
 
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
         this.readingArea.nativeElement.scroll(0,0);
     }
+
+    this.cdRef.markForCheck();
   }
 
   updateScalingForFirstPageRender() {
