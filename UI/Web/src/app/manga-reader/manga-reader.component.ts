@@ -335,41 +335,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
   }
 
-  // /**
-  //  * Determines if we should render a double page.
-  //  * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image 
-  //  * and the next page is not a wide image (as only non-wides should be shown next to each other).
-  //  * @remarks This will always fail if the window's width is greater than the height
-  //  */
-  // get ShouldRenderDoublePage() {
-  //   if (this.layoutMode !== LayoutMode.Double) return false;
-
-  //   return !(
-  //     this.mangaReaderService.isCoverImage(this.pageNum)
-  //     || this.mangaReaderService.isWideImage(this.canvasImage)
-  //     || this.mangaReaderService.isWideImage(this.canvasImageNext)
-  //     );
-  // }
-
-  /**
-   * We should Render 2 pages if:
-   *   1. We are not currently the first image (cover image)
-   *   2. The previous page is not a cover image
-   *   3. The current page is not a wide image
-   *   4. The next page is not a wide image
-   */
-  get ShouldRenderReverseDouble() {
-    if (this.layoutMode !== LayoutMode.DoubleReversed) return false;
-
-    const result =  !(
-      this.mangaReaderService.isCoverImage(this.pageNum) 
-      || this.mangaReaderService.isCoverImage(this.pageNum - 1)  // This is because we use prev page and hence the cover will re-show
-      || this.mangaReaderService.isWideImage(this.canvasImage) 
-      || this.mangaReaderService.isWideImage(this.canvasImageNext)
-      );
-    
-    return result;
-  }
 
   get CurrentPageBookmarked() {
     return this.bookmarks.hasOwnProperty(this.pageNum);
@@ -381,33 +346,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ImageHeight() {
     // ?! This doesn't work reliably
-    console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight)
-    console.log('Image 1 Height: ', this.document.querySelector('#image-1')?.clientHeight || 0)
+    //console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight)
+    //console.log('Image 1 Height: ', this.document.querySelector('#image-1')?.clientHeight || 0)
     //return 'calc(100*var(--vh))';
     return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
   }
-
-  // updateImageHeight(height: number) {
-  //   console.log('updateImageHeight');
-  //   if (this.mangaReaderService.isWideImage(this.canvasImage) || this.FittingOption === FITTING_OPTION.WIDTH) {
-  //     this.imageHeight.next(this.readingArea?.nativeElement.scrollHeight + 'px');
-  //   }
-  //   //console.log('Reading Area: ', this.readingArea);
-  //   console.log('Img: Height: ', height);
-  //   console.log('Reading Area Height: ', this.document.querySelector('.reading-area')?.clientHeight);
-  //   //console.log('Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, height));
-
-  //   // if (this.readingArea?.nativeElement?.clientHeight >= height) this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');
-  //   // else if (this.FittingOption !== FITTING_OPTION.HEIGHT) this.imageHeight.next(height + 'px');
-
-  //   if (this.FittingOption === FITTING_OPTION.WIDTH) {
-  //     this.imageHeight.next(this.readingArea?.nativeElement?.clientHeight + 'px');  
-  //   } else {
-  //     this.imageHeight.next(height + 'px'); 
-  //   }
-    
-  //   //this.imageHeight.next(Math.max(this.readingArea?.nativeElement?.clientHeight, height) + 'px');
-  // }
 
   get RightPaginationOffset() {
     if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
@@ -1011,7 +954,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
     const notInSplit = this.canvasRenderer.shouldMovePrev(); // TODO: Make this generic like above, but by default only canvasRenderer will have logic
-    console.log('Next Page, in split: ', !notInSplit, ' page amt: ', pageAmount, ' page: ', this.canvasImage.src);
+    //console.log('Next Page, in split: ', !notInSplit, ' page amt: ', pageAmount, ' page: ', this.canvasImage.src);
 
     if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) { 
       // Move to next volume/chapter automatically
@@ -1036,7 +979,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
 
     const notInSplit = this.canvasRenderer.shouldMovePrev();
-    console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
+    //console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
 
     if ((this.pageNum - 1 < 0 && notInSplit)) {
       // Move to next volume/chapter automatically
@@ -1132,7 +1075,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
 
   renderPage() {
-    console.log('[Manga Reader] renderPage()');
+    //console.log('[Manga Reader] renderPage()');
 
     this.canvasRenderer.renderPage([this.canvasImage]); 
     this.singleRenderer.renderPage([this.canvasImage]);
@@ -1206,56 +1149,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readerMode === ReaderMode.Webtoon) return;
     
     this.isLoading = true;
-
-    // ?! Resetting src like this doesn't work. Need to reset whole image element
-    // this.canvasImage2.src = '';
-    // this.canvasImageAheadBy2.src = '';
-
-
     this.setCanvasImage();
-
-    if (this.layoutMode !== LayoutMode.Single) {
-      
-      // If prev page was a spread, then we don't do + 1
-      //console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
-      //console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
-      // if (this.mangaReaderService.isWideImage(this.canvasImage2)) {
-      //   this.canvasImagePrev = this.getPage(this.pageNum);
-      //   console.log('Setting Prev to ', this.pageNum);
-      // } else {
-      //   this.canvasImagePrev = this.getPage(this.pageNum - 1);
-      //   console.log('Setting Prev to ', this.pageNum - 1);
-      // }
-
-      // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
-      // this.canvasImageNext = this.getPage(this.pageNum + 1);
-      // console.log('Setting Next to ', this.pageNum + 1);
-
-      // this.canvasImagePrev = this.getPage(this.pageNum - 1);
-      // console.log('Setting Prev to ', this.pageNum - 1);
-
-      // if (this.pageNum + 2 < this.maxPages - 1) {
-      //   this.canvasImageAheadBy2 = this.getPage(this.pageNum + 2);
-      // }
-      // if (this.pageNum - 2 >= 0) {
-      //   this.canvasImageBehindBy2 = this.getPage(this.pageNum - 2 || 0);
-      // }      
-    
-      // if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
-      //   console.log('Rendering Double Page');
-      //   if (this.layoutMode === LayoutMode.Double) {
-      //     this.canvasImage2 = this.canvasImageNext;
-      //   } else {
-      //     this.canvasImage2 = this.canvasImagePrev;
-      //   }
-      // }
-    }
-
-    
     this.cdRef.markForCheck();
-    this.renderPage(); // Allow the image loader to trigger render
+
+    this.renderPage();
+    this.isLoading = false;
+    this.cdRef.markForCheck();
+    
     this.prefetch();
-    this.cdRef.markForCheck();
   }
 
   setReadingDirection() {

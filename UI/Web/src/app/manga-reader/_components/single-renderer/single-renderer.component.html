@@ -1,6 +1,6 @@
 <div class="image-container {{imageFitClass$ | async}}" 
     [style.filter]="(darkenss$ | async)  ?? '' | safeStyle">
-    <ng-container *ngIf="currentImage && layoutMode === LayoutMode.Single">
+    <ng-container *ngIf="currentImage && isValid()">
         <img alt=" " 
             #image [src]="currentImage.src" 
             id="image-1" 

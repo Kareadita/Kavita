@@ -1,19 +1,18 @@
-<ng-container *ngIf="layoutMode === LayoutMode.DoubleReversed">
-    <div class="image-container {{imageFitClass$ | async}} {{layoutClass$ | async}}" 
+<ng-container *ngIf="isValid()">
+    <div class="image-container {{layoutClass$ | async}}" 
         [style.filter]="(darkenss$ | async)  ?? '' | safeStyle"
-        [ngClass]="{'center-double': (shouldRenderDouble$ | async)}">
-        <ng-container *ngIf="currentImage">
+        [ngClass]="{'center-double': (shouldRenderDouble$ | async), 'reverse': (shouldRenderSecondPage$ | async)}">
+        <ng-container *ngIf="leftImage">
             <img alt=" " 
-                #image [src]="currentImage.src" 
+                #image [src]="leftImage.src" 
                 id="image-1" 
                 class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"
             >
         </ng-container>
         <ng-container *ngIf="shouldRenderSecondPage$ | async">
-            <img alt=" " [src]="currentImage2.src" 
+            <img alt=" " [src]="rightImage.src" 
             id="image-2" 
-            class="image-2 {{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"> 
-            <!--{{ShouldRenderReverseDouble ? 'reverse' : ''}}" Should I put this or just reverse the code? -->
+            class="image-2 {{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}">  <!--reverse-->
         </ng-container>
     </div>
 </ng-container>

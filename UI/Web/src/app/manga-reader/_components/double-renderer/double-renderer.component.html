@@ -1,4 +1,4 @@
-<ng-container *ngIf="layoutMode === LayoutMode.Double">
+<ng-container *ngIf="isValid()">
     <div class="image-container {{imageFitClass$ | async}} {{layoutClass$ | async}}" 
         [style.filter]="(darkenss$ | async)  ?? '' | safeStyle"
         [ngClass]="{'center-double': (shouldRenderDouble$ | async)}">

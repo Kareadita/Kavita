@@ -80,7 +80,6 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
         if (image1 != null) elements.push(image1);
-        console.log('Applying bookmark on ', image1);
         this.mangaReaderService.applyBookmarkEffect(elements);
       })
     ).subscribe(() => {});
