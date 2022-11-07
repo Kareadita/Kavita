@@ -30,6 +30,7 @@ import { ManagaReaderService } from './_series/managa-reader.service';
 import { CanvasRendererComponent } from './_components/canvas-renderer/canvas-renderer.component';
 import { SingleRendererComponent } from './_components/single-renderer/single-renderer.component';
 import { DoubleRendererComponent } from './_components/double-renderer/double-renderer.component';
+import { DoubleReverseRendererComponent } from './_components/double-reverse-renderer/double-reverse-renderer.component';
 
 const PREFETCH_PAGES = 10;
 
@@ -81,6 +82,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(CanvasRendererComponent, { static: false }) canvasRenderer!: CanvasRendererComponent;
   @ViewChild(SingleRendererComponent, { static: false }) singleRenderer!: SingleRendererComponent;
   @ViewChild(DoubleRendererComponent, { static: false }) doubleRenderer!: DoubleRendererComponent;
+  @ViewChild(DoubleReverseRendererComponent, { static: false }) doubleReverseRenderer!: DoubleReverseRendererComponent;
 
 
   libraryId!: number;
@@ -952,7 +954,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
-    const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
+    const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), 
+    this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD),
+    this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
     const notInSplit = this.canvasRenderer.shouldMovePrev(); // TODO: Make this generic like above, but by default only canvasRenderer will have logic
     //console.log('Next Page, in split: ', !notInSplit, ' page amt: ', pageAmount, ' page: ', this.canvasImage.src);
 
@@ -976,7 +980,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
     this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
-    this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
+    this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+    this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
 
     const notInSplit = this.canvasRenderer.shouldMovePrev();
     //console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
@@ -1080,6 +1085,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasRenderer.renderPage([this.canvasImage]); 
     this.singleRenderer.renderPage([this.canvasImage]);
     this.doubleRenderer.renderPage([this.canvasImage]);
+    this.doubleReverseRenderer.renderPage([this.canvasImage]);
 
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
         this.readingArea.nativeElement.scroll(0,0);

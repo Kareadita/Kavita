@@ -143,9 +143,8 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     this.shouldRenderDouble$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       filter(_ => this.isValid()),
-      map((_) => {
-        return this.shouldRenderDouble();
-      })
+      map((_) => this.shouldRenderDouble()),
+      shareReplay()
     );
 
     this.layoutClass$ = zip(this.shouldRenderDouble$, this.imageFit$).pipe(
@@ -164,6 +163,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       takeUntil(this.onDestroy),
       filter(_ => this.isValid()),
       map(_ => {
+        // This should never occur
         if (this.rightImage.src === '') {
           console.log('Not rendering second page as 2nd image is empty');
           return false;
@@ -195,7 +195,8 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return false;
         }
         return true;
-      })
+      }),
+      shareReplay()
     );
 
     this.readerSettings$.pipe(
@@ -244,6 +245,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
    *   4. The next page is not a wide image
    */
   shouldRenderDouble() {
+    console.log('should render double')
     if (!this.isValid()) return false;
 
     if (this.mangaReaderService.isCoverImage(this.pageNum)) {
@@ -262,7 +264,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       console.log('Not rendering right image as it is wide');
       return false;
     }
-    
+
     if (this.mangaReaderService.isWideImage(this.currentImageNext) ) {
       console.log('Not rendering right image as it is wide');
       return false;
@@ -296,6 +298,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     this.readerService.imageUrlToPageNum(this.currentImageNext.src), this.readerService.imageUrlToPageNum(this.currentImage2Ahead.src))
     
 
+    // Is this really needed since the observable will prevent showing
     if (!this.shouldRenderDouble()) {
       this.imageHeight.emit(this.leftImage.height);
       return;
