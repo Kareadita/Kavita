@@ -185,6 +185,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return false;
         }
 
+        // Added: Unsure
         if (this.mangaReaderService.isWideImage(this.currentImage2Ahead)) {
           console.log('Not rendering second page as 2 pages ahead are wide');
           return false;
@@ -249,15 +250,25 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       console.log('Not rendering right image as is cover image');
       return false;
     }
-    // This is direction dependent, is it needed? 
     if (this.mangaReaderService.isCoverImage(this.pageNum - 1)) {
       console.log('Not rendering right image as current - 1 is cover image');
+      return false;
+    }
+    if (this.mangaReaderService.isWideImage(this.leftImage) ) {
+      console.log('Not rendering right image as left is wide');
       return false;
     }
     if (this.mangaReaderService.isWideImage(this.rightImage) ) {
       console.log('Not rendering right image as it is wide');
       return false;
     }
+    
+    if (this.mangaReaderService.isWideImage(this.currentImageNext) ) {
+      console.log('Not rendering right image as it is wide');
+      return false;
+    }
+
+
     return true;
 
 

@@ -22,17 +22,41 @@ img {
     display: grid;
   }
 
-  #image-1 {
-    &.double {
-      margin: 0 0 0 auto;
+  .full-height {
+    width: auto;
+    margin: 0 auto;
+    max-height: calc(var(--vh)*100);
+    vertical-align: top;
+      &.wide {
+        height: 100vh;
     }
   }
 
-  #image-2 {
-    &.double {
-      margin: 0 auto 0 0;
-    }
+  .original {
+    align-self: center;
+    width: auto;
+    margin: 0 auto;
+    vertical-align: top;
   }
+
+  .full-width {
+    width: 100%;
+    margin: 0 auto;
+    vertical-align: top;
+    max-width: fit-content;
+  }
+
+  // #image-1 {
+  //   &.double {
+  //     margin: 0 0 0 auto;
+  //   }
+  // }
+
+  // #image-2 {
+  //   &.double {
+  //     margin: 0 auto 0 0;
+  //   }
+  // }
 
   // &.reverse {
   //   overflow: unset;
