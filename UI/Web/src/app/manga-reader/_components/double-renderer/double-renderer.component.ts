@@ -171,6 +171,12 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           console.log('Not rendering second page as next page is wide');
           return false;
         }
+
+        if (this.mangaReaderService.isWideImage(this.currentImage)) {
+          console.log('Not rendering second page as next page is wide');
+          return false;
+        }
+
         if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
           console.log('Not rendering second page as prev page is wide');
           return false;
