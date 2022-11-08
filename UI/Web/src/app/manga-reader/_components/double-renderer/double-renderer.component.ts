@@ -202,10 +202,8 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         const image1 = this.document.querySelector('#image-1');
         if (image1 != null) elements.push(image1);
 
-        if (this.layoutMode !== LayoutMode.Single) {
-          const image2 = this.document.querySelector('#image-2');
-          if (image2 != null) elements.push(image2);
-        }
+        const image2 = this.document.querySelector('#image-2');
+        if (image2 != null) elements.push(image2);
   
         this.mangaReaderService.applyBookmarkEffect(elements);
       })
@@ -256,11 +254,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     
     this.currentImage2 = this.currentImageNext;
 
-    //  else { // This is for double reverse
-    //   this.currentImage2 = this.currentImagePrev;
-    // }
-
-    
     this.cdRef.markForCheck();
     this.imageHeight.emit(Math.max(this.currentImage.height, this.currentImage2.height));
     this.cdRef.markForCheck();
@@ -273,7 +266,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return true;
   }
   getPageAmount(direction: PAGING_DIRECTION): number {
-    if (this.layoutMode !== LayoutMode.Double || this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return 0;
+    if (this.layoutMode !== LayoutMode.Double) return 0;
 
     // If prev page:
     switch (direction) {

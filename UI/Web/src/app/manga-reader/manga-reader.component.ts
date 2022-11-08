@@ -979,9 +979,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
-    this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
-    this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
-    this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
+      this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
+      this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+      this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
 
     const notInSplit = this.canvasRenderer.shouldMovePrev();
     //console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
