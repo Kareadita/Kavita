@@ -36,15 +36,15 @@ export class JumpbarService {
     const removalTimes = Math.ceil(removeCount / 2);
     const midPoint = Math.floor(jumpBarKeys.length / 2);
     jumpBarKeysToRender.push(jumpBarKeys[0]);
-    this.removeFirstPartOfJumpBar(midPoint, removalTimes, jumpBarKeys, jumpBarKeysToRender);
+    this._removeFirstPartOfJumpBar(midPoint, removalTimes, jumpBarKeys, jumpBarKeysToRender);
     jumpBarKeysToRender.push(jumpBarKeys[midPoint]);
-    this.removeSecondPartOfJumpBar(midPoint, removalTimes, jumpBarKeys, jumpBarKeysToRender);
+    this._removeSecondPartOfJumpBar(midPoint, removalTimes, jumpBarKeys, jumpBarKeysToRender);
     jumpBarKeysToRender.push(jumpBarKeys[jumpBarKeys.length - 1]);
 
     return jumpBarKeysToRender;
   }
 
-  removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1, jumpBarKeys: Array<JumpKey>, jumpBarKeysToRender: Array<JumpKey>) {
+  _removeSecondPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1, jumpBarKeys: Array<JumpKey>, jumpBarKeysToRender: Array<JumpKey>) {
     const removedIndexes: Array<number> = [];
     for(let removal = 0; removal < numberOfRemovals; removal++) {
       let min = 100000000;
@@ -62,7 +62,7 @@ export class JumpbarService {
     }
   }
 
-  removeFirstPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1, jumpBarKeys: Array<JumpKey>, jumpBarKeysToRender: Array<JumpKey>) {
+  _removeFirstPartOfJumpBar(midPoint: number, numberOfRemovals: number = 1, jumpBarKeys: Array<JumpKey>, jumpBarKeysToRender: Array<JumpKey>) {
     const removedIndexes: Array<number> = [];
     for(let removal = 0; removal < numberOfRemovals; removal++) {
       let min = 100000000;
@@ -79,5 +79,36 @@ export class JumpbarService {
     for(let i = 1; i < midPoint; i++) {
       if (!removedIndexes.includes(i)) jumpBarKeysToRender.push(jumpBarKeys[i]);
     }
+  }
+
+  /**
+   * 
+   * @param data An array of objects
+   * @param keySelector A method to fetch a string from the object, which is used to classify the JumpKey
+   * @returns 
+   */
+   getJumpKeys(data :Array<any>, keySelector: (data: any) => string) {
+    const keys: {[key: string]: number} = {};
+    data.forEach(obj => {
+      let ch = keySelector(obj).charAt(0);
+      if (/\d|\#|!|%|@|\(|\)|\^|\.|_|\*/g.test(ch)) {
+        ch = '#';
+      }
+      if (!keys.hasOwnProperty(ch)) {
+        keys[ch] = 0;
+      }
+      keys[ch] += 1;
+    });
+    return Object.keys(keys).map(k => {
+      return {
+        key: k,
+        size: keys[k],
+        title: k.toUpperCase()
+      }
+    }).sort((a, b) => {
+      if (a.key < b.key) return -1;
+      if (a.key > b.key) return 1;
+      return 0;
+    });
   }
 }

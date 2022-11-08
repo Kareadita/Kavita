@@ -79,10 +79,7 @@ public static class Seed
         {
             new() {Key = ServerSettingKey.CacheDirectory, Value = directoryService.CacheDirectory},
             new() {Key = ServerSettingKey.TaskScan, Value = "daily"},
-            new()
-            {
-                Key = ServerSettingKey.LoggingLevel, Value = "Information"
-            }, // Not used from DB, but DB is sync with appSettings.json
+            new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
             new() {Key = ServerSettingKey.TaskBackup, Value = "daily"},
             new()
             {

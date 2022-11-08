@@ -34,6 +34,8 @@ public class DefaultParser : IDefaultParser
     public ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
     {
         var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
+        // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
+        if (Parser.IsCoverImage(_directoryService.FileSystem.Path.GetFileName(filePath))) return null;
         ParserInfo ret;
 
         if (Parser.IsEpub(filePath))
@@ -62,7 +64,6 @@ public class DefaultParser : IDefaultParser
             };
         }
 
-        if (Parser.IsCoverImage(_directoryService.FileSystem.Path.GetFileName(filePath))) return null;
 
         if (Parser.IsImage(filePath))
         {

@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, NgZone, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
@@ -290,9 +290,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   bookmarkPageHandler = this.bookmarkPage.bind(this);
 
-  getPageUrl = (pageNum: number) => {
+  getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
-    return this.readerService.getPageUrl(this.chapterId, pageNum);
+    return this.readerService.getPageUrl(chapterId, pageNum);
   }
 
   private readonly onDestroy = new Subject<void>();
@@ -377,29 +377,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'right-side';
   }
 
-  get LayoutModeIconClass() {
-    switch (this.layoutMode) {
-      case LayoutMode.Single:
-        return 'none';
-      case LayoutMode.Double:
-        return 'double';
-      case LayoutMode.DoubleReversed:
-        return 'double-reversed';
-    }
-  }
-
-  get ReaderModeIcon() {
-    switch(this.readerMode) {
-      case ReaderMode.LeftRight:
-        return 'fa-exchange-alt';
-      case ReaderMode.UpDown:
-        return 'fa-exchange-alt fa-rotate-90';
-      case ReaderMode.Webtoon:
-        return 'fa-arrows-alt-v';
-      default:
-        return '';
-    }
-  }
 
   get ReaderMode() {
     return ReaderMode;
@@ -433,7 +410,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               private toastr: ToastrService, private memberService: MemberService,
               public utilityService: UtilityService, private renderer: Renderer2,
               @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
-              private readonly cdRef: ChangeDetectorRef) {
+              private readonly cdRef: ChangeDetectorRef, private readonly ngZone: NgZone) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
                 this.cdRef.markForCheck();
@@ -626,6 +603,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Gets a page from cache else gets a brand new Image
+   * @param pageNum Page Number to load
+   * @param forceNew Forces to fetch a new image
+   * @param chapterId ChapterId to fetch page from. Defaults to current chapterId
+   * @returns 
+   */
+   getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
+    let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
+    if (!img || forceNew) {
+      img = new Image();
+      img.src = this.getPageUrl(pageNum, chapterId);
+    }
+
+    return img;
+  }
+
   // if there is scroll room and on original, then don't paginate
   checkIfPaginationAllowed() {
     // This is not used atm due to the complexity it adds with keyboard.
@@ -748,6 +742,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.nextChapterDisabled = true;
           this.cdRef.markForCheck();
+        } else {
+          // Fetch the first page of next chapter
+          this.getPage(0, this.nextChapterId);
         }
       });
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -755,6 +752,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         if (chapterId === CHAPTER_ID_DOESNT_EXIST || chapterId === this.chapterId) {
           this.prevChapterDisabled = true;
           this.cdRef.markForCheck();
+        } else {
+          // Fetch the last page of prev chapter
+          this.getPage(1000000, this.nextChapterId);
         }
       });
 
@@ -961,6 +961,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  onSwipeEvent(event: any) {
+    console.log('Swipe event occured: ', event);
+  }
+
   handlePageChange(event: any, direction: string) {
     if (this.readerMode === ReaderMode.Webtoon) {
       if (direction === 'right') {
@@ -1073,24 +1077,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Sets canvasImage's src to current page, but first attempts to use a pre-fetched image
    */
   setCanvasImage() {
-    if (this.layoutMode === LayoutMode.Single) {
-      const img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === this.pageNum);
-      if (img) {
-        this.canvasImage = img; // If we tried to use this for double, then the loadPage might not render correctly when switching layout mode
-      } else {
-        this.canvasImage.src = this.getPageUrl(this.pageNum);
-      }
-    } else {
-      this.canvasImage.src = this.getPageUrl(this.pageNum);
-    }
-
-    
+    this.canvasImage = this.getPage(this.pageNum);
     this.canvasImage.onload = () => {
-      this.cdRef.markForCheck();
+      this.renderPage();
     };
     
     this.cdRef.markForCheck();
   }
+
 
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) { 
@@ -1301,18 +1295,32 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * and also maintains page info (wide image, etc) due to onload event.
    */
   prefetch() {
+    // NOTE: This doesn't allow for any directionality
+    // NOTE: This doesn't maintain 1 image behind at all times
+    // NOTE: I may want to provide a different prefetcher for double renderer
     for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
       const numOffset = this.pageNum + i;
       if (numOffset > this.maxPages - 1) continue;
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       if (this.readerService.imageUrlToPageNum(this.cachedImages[index].src) !== numOffset) {
+        this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
-        this.cachedImages[index].onload = () => this.cdRef.markForCheck();
+        this.cachedImages[index].onload = () => {
+          //console.log('Page ', numOffset, ' loaded');
+          //this.cdRef.markForCheck();
+        };
       }
     }
 
-    //console.log(this.pageNum, ' Prefetched pages: ', this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src)));
+    const pages = this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src));
+    const pagesBefore = pages.filter(p => p >= 0 && p < this.pageNum).length;
+    const pagesAfter = pages.filter(p => p >= 0 && p > this.pageNum).length;
+    console.log('Buffer Health: Before: ', pagesBefore, ' After: ', pagesAfter);
+    console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
+      if (this.pageNum === p) return '[' + p + ']';
+      return '' + p
+    }));
   }
 
 
@@ -1327,30 +1335,54 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setCanvasImage();
 
 
+    // ?! This logic is hella complex and confusing to read
+    // ?! We need to refactor into separate methods and keep it clean
+    // ?! In addition, we shouldn't update canvasImage outside of this code
+
     if (this.layoutMode !== LayoutMode.Single) {
-      this.canvasImageNext.src = this.getPageUrl(this.pageNum + 1); // This needs to be capped at maxPages !this.isLastImage()
-      this.canvasImagePrev.src = this.getPageUrl(this.pageNum - 1);
+      
+      this.canvasImageNext = new Image();
+      
+      
+      // If prev page was a spread, then we don't do + 1
+      console.log('Current canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage.src));
+      console.log('Prev canvas image page: ', this.readerService.imageUrlToPageNum(this.canvasImage2.src));
+      // if (this.isWideImage(this.canvasImage2)) {
+      //   this.canvasImagePrev = this.getPage(this.pageNum); // this.getPageUrl(this.pageNum);
+      //   console.log('Setting Prev to ', this.pageNum);
+      // } else {
+      //   this.canvasImagePrev = this.getPage(this.pageNum - 1); //this.getPageUrl(this.pageNum - 1);
+      //   console.log('Setting Prev to ', this.pageNum - 1);
+      // }
+
+      // TODO: Validate this statement: This needs to be capped at maxPages !this.isLastImage()
+      this.canvasImageNext = this.getPage(this.pageNum + 1);
+      console.log('Setting Next to ', this.pageNum + 1);
+
+      this.canvasImagePrev = this.getPage(this.pageNum - 1);
+      console.log('Setting Prev to ', this.pageNum - 1);
 
       if (this.pageNum + 2 < this.maxPages - 1) {
-        this.canvasImageAheadBy2.src = this.getPageUrl(this.pageNum + 2);
+        this.canvasImageAheadBy2 = this.getPage(this.pageNum + 2);
       }
       if (this.pageNum - 2 >= 0) {
-        this.canvasImageBehindBy2.src = this.getPageUrl(this.pageNum - 2 || 0);
+        this.canvasImageBehindBy2 = this.getPage(this.pageNum - 2 || 0);
       }      
     
       if (this.ShouldRenderDoublePage || this.ShouldRenderReverseDouble) {
+        console.log('Rendering Double Page');
         if (this.layoutMode === LayoutMode.Double) {
-          this.canvasImage2.src = this.canvasImageNext.src;
+          this.canvasImage2 = this.canvasImageNext;
         } else {
-          this.canvasImage2.src = this.canvasImagePrev.src;
+          this.canvasImage2 = this.canvasImagePrev;
         }
       }
     }
-    this.cdRef.markForCheck();
 
+    
+    this.cdRef.markForCheck();
     this.renderPage();
     this.prefetch();
-    this.isLoading = false;
     this.cdRef.markForCheck();
   }
 

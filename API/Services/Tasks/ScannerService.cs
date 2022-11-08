@@ -160,6 +160,7 @@ public class ScannerService : IScannerService
         var sw = Stopwatch.StartNew();
         var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
         var series = await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(seriesId);
+        if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();

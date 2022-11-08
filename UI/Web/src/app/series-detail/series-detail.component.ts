@@ -440,7 +440,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
 
   async deleteSeries(series: Series) {
-    this.actionService.deleteSeries(series, (result: boolean) => {
+    await this.actionService.deleteSeries(series, (result: boolean) => {
       this.changeDetectionRef.markForCheck();
       if (result) {
         this.router.navigate(['library', this.libraryId]);

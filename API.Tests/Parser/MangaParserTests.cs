@@ -195,6 +195,7 @@ public class MangaParserTests
     [InlineData("Манга Глава 2-2", "Манга")]
     [InlineData("Манга Том 1 3-4 Глава", "Манга")]
     [InlineData("Esquire 6권 2021년 10월호", "Esquire")]
+    [InlineData("Accel World: Vol 1", "Accel World")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
@@ -314,8 +315,8 @@ public class MangaParserTests
     [InlineData("Beastars SP01", false)]
     [InlineData("The League of Extraordinary Gentlemen", false)]
     [InlineData("The League of Extra-ordinary Gentlemen", false)]
-    [InlineData("Gifting The Wonderful World With Blessings! - 3 Side Stories [yuNS][Unknown].epub", true)]
-    [InlineData("Dr. Ramune - Mysterious Disease Specialist v01 (2020) (Digital) (danke-Empire).cbz", false)]
+    [InlineData("Dr. Ramune - Mysterious Disease Specialist v01 (2020) (Digital) (danke-Empire)", false)]
+    [InlineData("Hajime no Ippo - Artbook", false)]
     public void IsMangaSpecialTest(string input, bool expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.IsMangaSpecial(input));

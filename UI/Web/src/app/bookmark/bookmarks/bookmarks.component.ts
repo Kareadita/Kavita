@@ -8,12 +8,14 @@ import { ConfirmService } from 'src/app/shared/confirm.service';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
+import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { PageBookmark } from 'src/app/_models/page-bookmark';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { FilterEvent, SeriesFilter } from 'src/app/_models/series-filter';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
+import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 
@@ -32,6 +34,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   downloadingSeries: {[id: number]: boolean} = {};
   clearingSeries: {[id: number]: boolean} = {};
   actions: ActionItem<Series>[] = [];
+  jumpbarKeys: Array<JumpKey> = [];
 
   pagination!: Pagination;
   filter: SeriesFilter | undefined = undefined;
@@ -50,7 +53,8 @@ export class BookmarksComponent implements OnInit, OnDestroy {
     private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService, 
     public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private router: Router, private readonly cdRef: ChangeDetectorRef, 
-    private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute) {
+    private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
+    private jumpbarService: JumpbarService) {
       this.filterSettings.ageRatingDisabled = true;
       this.filterSettings.collectionDisabled = true;
       this.filterSettings.formatDisabled = true;
@@ -158,6 +162,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
 
       const ids = Object.keys(this.seriesIds).map(k => parseInt(k, 10));
       this.seriesService.getAllSeriesByIds(ids).subscribe(series => {
+        this.jumpbarKeys = this.jumpbarService.getJumpKeys(series, (t: Series) => t.name);
         this.series = series;
         this.loadingBookmarks = false;
         this.cdRef.markForCheck();

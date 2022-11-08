@@ -192,6 +192,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// <remarks>This is public only because Hangfire will invoke it. Do not call external to this class.</remarks>
     /// <param name="filePath">File or folder that changed</param>
     /// <param name="isDirectoryChange">If the change is on a directory and not a file</param>
+    [DisableConcurrentExecution(60)]
     // ReSharper disable once MemberCanBePrivate.Global
     public async Task ProcessChange(string filePath, bool isDirectoryChange = false)
     {

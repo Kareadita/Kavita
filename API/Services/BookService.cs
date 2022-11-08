@@ -451,7 +451,20 @@ public class BookService : IBookService
                         info.Series = metadataItem.Content;
                         info.SeriesSort = metadataItem.Content;
                         break;
+                    case "calibre:series_index":
+                        info.Volume = metadataItem.Content;
+                        break;
                 }
+            }
+
+            var hasVolumeInSeries = !Tasks.Scanner.Parser.Parser.ParseVolume(info.Title)
+                .Equals(Tasks.Scanner.Parser.Parser.DefaultVolume);
+
+            if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries && (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
+            {
+                // This is likely a light novel for which we can set series from parsed title
+                info.Series = Tasks.Scanner.Parser.Parser.ParseSeries(info.Title);
+                info.Volume = Tasks.Scanner.Parser.Parser.ParseVolume(info.Title);
             }
 
             return info;

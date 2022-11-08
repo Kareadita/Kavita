@@ -83,8 +83,9 @@ public class ReaderController : BaseApiController
     }
 
     /// <summary>
-    /// Returns an image for a given chapter. Side effect: This will cache the chapter images for reading.
+    /// Returns an image for a given chapter. Will perform bounding checks
     /// </summary>
+    /// <remarks>This will cache the chapter images for reading</remarks>
     /// <param name="chapterId"></param>
     /// <param name="page"></param>
     /// <returns></returns>
@@ -99,6 +100,7 @@ public class ReaderController : BaseApiController
 
         try
         {
+            // TODO: This code is very generic and repeated, see if we can refactor into a common method
             var path = _cacheService.GetCachedPagePath(chapter, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}. Try refreshing to allow re-cache.");
             var format = Path.GetExtension(path).Replace(".", "");
@@ -128,7 +130,6 @@ public class ReaderController : BaseApiController
         if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
 
-        // NOTE: I'm not sure why I need this flow here
         var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
         if (page > totalPages)
         {
@@ -139,7 +140,7 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
-            var format = Path.GetExtension(path).Replace(".", "");
+            var format = Path.GetExtension(path).Replace(".", string.Empty);
 
             return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
         }

@@ -593,6 +593,23 @@ public class DirectoryServiceTests
                     || outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("C:/manga/output/file (3).zip")));
     }
 
+    [Fact]
+    public void CopyFilesToDirectory_ShouldRenameFilesToPassedNames()
+    {
+        const string testDirectory = "/manga/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddFile(MockUnixSupport.Path($"{testDirectory}file.zip"), new MockFileData(""));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/", new [] {"01"});
+        var outputFiles = ds.GetFiles("/manga/output/").Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList();
+        Assert.Single(outputFiles);
+        // For some reason, this has C:/ on directory even though everything is emulated (System.IO.Abstractions issue, not changing)
+        // https://github.com/TestableIO/System.IO.Abstractions/issues/831
+        Assert.True(outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("/manga/output/01.zip"))
+                    || outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("C:/manga/output/01.zip")));
+    }
+
     #endregion
 
     #region ListDirectory

@@ -54,4 +54,28 @@ public class BookServiceTests
         Assert.Equal("Roger Starbuck,Junya Inoue", comicInfo.Writer);
     }
 
+    [Fact]
+    public void ShouldParseAsVolumeGroup_WithoutSeriesIndex()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var archive = Path.Join(testDirectory, "TitleWithVolume_NoSeriesOrSeriesIndex.epub");
+
+        var comicInfo = _bookService.GetComicInfo(archive);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("1", comicInfo.Volume);
+        Assert.Equal("Accel World", comicInfo.Series);
+    }
+
+    [Fact]
+    public void ShouldParseAsVolumeGroup_WithSeriesIndex()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/BookService");
+        var archive = Path.Join(testDirectory, "TitleWithVolume.epub");
+
+        var comicInfo = _bookService.GetComicInfo(archive);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("1.0", comicInfo.Volume);
+        Assert.Equal("Accel World", comicInfo.Series);
+    }
+
 }

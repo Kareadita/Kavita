@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -101,7 +102,7 @@ public class CacheService : ICacheService
         var extractPath = GetCachePath(chapterId);
 
         if (_directoryService.Exists(extractPath)) return chapter;
-        var files = chapter.Files.ToList();
+        var files = chapter?.Files.ToList();
         ExtractChapterFiles(extractPath, files);
 
         return  chapter;
@@ -223,6 +224,8 @@ public class CacheService : ICacheService
             return string.Empty;
         }
 
+        if (page > files.Length) page = files.Length;
+
         // Since array is 0 based, we need to keep that in account (only affects last image)
         return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
     }
@@ -234,8 +237,8 @@ public class CacheService : ICacheService
 
         var bookmarkDtos = await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(userId, seriesId);
         var files = (await _bookmarkService.GetBookmarkFilesById(bookmarkDtos.Select(b => b.Id))).ToList();
-        _directoryService.CopyFilesToDirectory(files, destDirectory);
-        _directoryService.Flatten(destDirectory);
+        _directoryService.CopyFilesToDirectory(files, destDirectory,
+            Enumerable.Range(1, files.Count).Select(i => i + string.Empty).ToList());
         return files.Count;
     }
 

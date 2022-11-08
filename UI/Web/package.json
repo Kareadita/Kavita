@@ -44,7 +44,7 @@
     "ngx-toastr": "^14.2.1",
     "requires": "^1.0.2",
     "rxjs": "~7.5.4",
-    "swiper": "^8.0.6",
+    "swiper": "^8.4.4",
     "tslib": "^2.3.1",
     "webpack-bundle-analyzer": "^4.5.0",
     "zone.js": "~0.11.4"
