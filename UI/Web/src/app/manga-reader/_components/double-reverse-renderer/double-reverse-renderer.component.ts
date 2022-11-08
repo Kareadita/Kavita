@@ -381,6 +381,8 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     console.log("++currentImage2Ahead:", this.currentImage2Ahead);
     console.log("+++currentImage3Ahead:", this.currentImage3Ahead);
     console.log("++++currentImage4Ahead:", this.currentImage4Ahead);
+    console.log("pagenums", this.pageNum);
+    console.log("maxPages", this.maxPages);
     // If prev page:
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
@@ -388,6 +390,12 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           console.log('Moving forward 1 page as on cover image');
           return 1;
         }
+
+        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages-1)) {
+          console.log('Moving forward 1 page as 2 pages left');
+          return 1;
+        }
+
         if (this.mangaReaderService.isWideImage(this.rightImage)) {
           console.log('Moving forward 1 page as current page is wide');
           return 1;
@@ -407,13 +415,14 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
         
-        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
-          console.log('Moving forward 1 page as 2 pages left');
-          return 1;
-        }
-        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages-1)) {
           console.log('Moving forward 1 page as 1 page left');
           return 1;
+        }
+
+        if (this.pageNum === this.maxPages-1) {
+          console.log('last page');
+          return 0;
         }
         console.log('Moving forward 2 pages');
         return 2;
