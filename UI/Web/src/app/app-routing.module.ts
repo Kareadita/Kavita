@@ -50,6 +50,10 @@ const routes: Routes = [
     loadChildren: () => import('../app/want-to-read/want-to-read.module').then(m => m.WantToReadModule)
   },
   {
+    path: 'search',
+    loadChildren: () => import('../app/search/search.module').then(m => m.SearchModule)
+  },
+  {
     path: 'library',
     runGuardsAndResolvers: 'always',
     canActivate: [AuthGuard, LibraryAccessGuard],

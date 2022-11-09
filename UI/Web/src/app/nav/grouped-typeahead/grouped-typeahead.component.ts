@@ -58,6 +58,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   @ContentChild('personTemplate') personTemplate: TemplateRef<any> | undefined;
   @ContentChild('genreTemplate') genreTemplate!: TemplateRef<any>;
   @ContentChild('noResultsTemplate') noResultsTemplate!: TemplateRef<any>;
+  @ContentChild('seeMoreTemplate') seeMoreTemplate!: TemplateRef<any>;
   @ContentChild('libraryTemplate') libraryTemplate!: TemplateRef<any>;
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
   @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
@@ -77,7 +78,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   get hasData() {
-    return !(this.noResultsTemplate != undefined && !this.grouppedData.persons.length && !this.grouppedData.collections.length 
+    return !(!this.grouppedData.persons.length && !this.grouppedData.collections.length 
       && !this.grouppedData.series.length && !this.grouppedData.persons.length && !this.grouppedData.tags.length && !this.grouppedData.genres.length && !this.grouppedData.libraries.length
       && !this.grouppedData.files.length && !this.grouppedData.chapters.length);
   }

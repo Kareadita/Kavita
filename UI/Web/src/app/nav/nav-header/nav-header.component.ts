@@ -16,7 +16,6 @@ import { SearchResult } from '../../_models/search-result';
 import { SearchResultGroup } from '../../_models/search/search-result-group';
 import { AccountService } from '../../_services/account.service';
 import { ImageService } from '../../_services/image.service';
-import { LibraryService } from '../../_services/library.service';
 import { NavService } from '../../_services/nav.service';
 
 @Component({
@@ -53,7 +52,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService,
     public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
-    private scrollService: ScrollService, private searchService: SearchService, private readonly cdRef: ChangeDetectorRef) {
+    private scrollService: ScrollService, public searchService: SearchService, private readonly cdRef: ChangeDetectorRef) {
       this.scrollElem = this.document.body;
     }
 
@@ -110,8 +109,10 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
       this.searchTerm = val.trim();
       this.cdRef.markForCheck();
 
-      this.searchService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
-        this.searchResults = results;
+      this.searchService.search(val.trim());
+
+      this.searchService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe((results: SearchResultGroup) => {
+        //this.searchResults = results;
         this.isLoading = false;
         this.cdRef.markForCheck();
       }, err => {

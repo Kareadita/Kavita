@@ -13,6 +13,14 @@
       </div>
       <div class="dropdown" *ngIf="hasFocus">
         <ul class="list-group" role="listbox" id="dropdown">
+            <ng-container *ngIf="seeMoreTemplate !== undefined && hasData && searchTerm.length > 0">
+                <li class="list-group-item section-header"><h5 id="seemore-group">See More</h5></li>
+                <ul class="list-group results">
+                    <li class="list-group-item">
+                      <ng-container [ngTemplateOutlet]="seeMoreTemplate" [ngTemplateOutletContext]="{ $implicit: searchTerm }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
             <ng-container *ngIf="seriesTemplate !== undefined && grouppedData.series.length > 0">
                 <li class="list-group-item section-header"><h5 id="series-group">Series</h5></li>
                 <ul class="list-group results" role="group" aria-describedby="series-group">
@@ -109,7 +117,6 @@
                   <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
                 </li>
               </ul>
-
             </ng-container>
         </ul>
     </div>

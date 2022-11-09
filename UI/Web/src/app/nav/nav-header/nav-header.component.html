@@ -192,7 +192,7 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
               [minQueryLength]="2"
               initialValue=""
               placeholder="Search…"
-              [grouppedData]="searchResults"
+              [grouppedData]="(searchService.searchResults$ | async) || searchResults"
               (inputChanged)="onChangeSearch($event)"
               (clearField)="clearSearch()"
               (focusChanged)="focusUpdate($event)"
@@ -301,6 +301,9 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
               No results found
             </ng-template>
 
+            <ng-template #seeMoreTemplate let-query>
+              <a routerLink="/search" [queryParams]="{'query': query}">See more</a>
+            </ng-template>
           </app-grouped-typeahead>
           </div>
         </div>
