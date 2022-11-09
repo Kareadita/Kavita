@@ -62,7 +62,7 @@ public interface ISeriesRepository
     /// <param name="libraryIds"></param>
     /// <param name="searchQuery"></param>
     /// <returns></returns>
-    Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery);
+    Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery, int maxRecords = 15);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
     Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
@@ -287,27 +287,26 @@ public class SeriesRepository : ISeriesRepository
         };
     }
 
-    public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery)
+    public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery, int maxRecords = 15)
     {
-        const int maxRecords = 15;
         var result = new SearchResultGroupDto();
         var searchQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(searchQuery);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        var seriesIds = _context.Series
+        var seriesIds = await _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .Select(s => s.Id)
-            .ToList();
+            .ToListAsync();
 
-        result.Libraries = await _context.Library
+        result.Libraries = _context.Library
             .Where(l => libraryIds.Contains(l.Id))
             .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .OrderBy(l => l.Name)
             .AsSplitQuery()
             .Take(maxRecords)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
         var justYear = Regex.Match(searchQuery, @"\d{4}").Value;
         var hasYearInQuery = !string.IsNullOrEmpty(justYear);
@@ -329,56 +328,57 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
-        result.ReadingLists = await _context.ReadingList
+        result.ReadingLists = _context.ReadingList
             .Where(rl => rl.AppUserId == userId || rl.Promoted)
             .Where(rl => EF.Functions.Like(rl.Title, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
+            .OrderBy(c => c.NormalizedTitle)
             .Take(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
-        result.Collections =  await _context.CollectionTag
+        result.Collections = _context.CollectionTag
             .Where(c => EF.Functions.Like(c.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%"))
             .Where(c => c.Promoted || isAdmin)
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.Title)
             .AsNoTracking()
             .AsSplitQuery()
+            .OrderBy(s => s.Title)
             .Take(maxRecords)
-            .OrderBy(c => c.NormalizedTitle)
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
-        result.Persons = await _context.SeriesMetadata
+        result.Persons = _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .Take(maxRecords)
             .Distinct()
+            .OrderBy(p => p.NormalizedName)
+            .Take(maxRecords)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
-        result.Genres = await _context.SeriesMetadata
+        result.Genres = _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .OrderBy(t => t.Title)
             .Distinct()
+            .OrderBy(t => t.Title)
             .Take(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
-        result.Tags = await _context.SeriesMetadata
+        result.Tags = _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .OrderBy(t => t.Title)
             .Distinct()
+            .OrderBy(t => t.Title)
             .Take(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
         var fileIds = _context.Series
             .Where(s => seriesIds.Contains(s.Id))
@@ -387,22 +387,24 @@ public class SeriesRepository : ISeriesRepository
             .SelectMany(v => v.Chapters)
             .SelectMany(c => c.Files.Select(f => f.Id));
 
-        result.Files = await _context.MangaFile
+        result.Files = _context.MangaFile
             .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
             .AsSplitQuery()
+            .OrderBy(f => f.Id)
             .Take(maxRecords)
             .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
 
-        result.Chapters = await _context.Chapter
+        result.Chapters = _context.Chapter
             .Include(c => c.Files)
             .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%"))
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
+            .OrderBy(c => c.Id)
             .Take(maxRecords)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
+            .AsEnumerable();
 
         return result;
     }
