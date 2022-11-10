@@ -129,11 +129,14 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     seriesSettings.id = 'relation--' + index;
     seriesSettings.unique = true;
     seriesSettings.addIfNonExisting = false;
-    seriesSettings.fetchFn = (searchFilter: string) => this.searchService.search(searchFilter).pipe(
-      map(group => group.series),
-      map(items => seriesSettings.compareFn(items, searchFilter)),
-      map(series => series.filter(s => s.seriesId !== this.series.id)),
-    );
+    seriesSettings.fetchFn = (searchFilter: string) => {
+      this.searchService.search(searchFilter);
+      return this.searchService.searchResults$.pipe(
+        map(group => group.series),
+        map(items => seriesSettings.compareFn(items, searchFilter)),
+        map(series => series.filter(s => s.seriesId !== this.series.id)),
+      );
+    }
 
     seriesSettings.compareFn = (options: SearchResult[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.name, filter));
@@ -144,7 +147,8 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
     }
 
     if (series !== undefined) {
-      return this.searchService.search(series.name).pipe(
+      this.searchService.search(series.name)
+      return this.searchService.searchResults$.pipe(
         map(group => group.series), map(results => {
           seriesSettings.savedData = results.filter(s => s.seriesId === series.id);
           return seriesSettings;

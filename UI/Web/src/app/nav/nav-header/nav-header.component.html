@@ -192,7 +192,7 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
               [minQueryLength]="2"
               initialValue=""
               placeholder="Search…"
-              [grouppedData]="(searchService.searchResults$ | async) || searchResults"
+              [grouppedData]="(search$ | async) || emptyResult"
               (inputChanged)="onChangeSearch($event)"
               (clearField)="clearSearch()"
               (focusChanged)="focusUpdate($event)"

@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { fromEvent, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
+import { fromEvent, Observable, of, Subject } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, startWith, takeUntil, tap } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -31,7 +31,8 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   isLoading = false;
   debounceTime = 300;
   imageStyles = {width: '24px', 'margin-top': '5px'};
-  searchResults: SearchResultGroup = new SearchResultGroup();
+  emptyResult: SearchResultGroup = new SearchResultGroup();
+  search$!: Observable<SearchResultGroup>;
   searchTerm = '';
   customFilter: (items: SearchResult[], query: string) => SearchResult[] = (items: SearchResult[], query: string) => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -54,6 +55,21 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
     private scrollService: ScrollService, public searchService: SearchService, private readonly cdRef: ChangeDetectorRef) {
       this.scrollElem = this.document.body;
+
+      this.search$ = this.searchService.searchResults$.pipe(
+        startWith(new SearchResultGroup()),
+        takeUntil(this.onDestroy),
+        tap((_) => {
+          this.isLoading = false;
+          this.cdRef.markForCheck();
+        }),
+        catchError(() => {
+          this.isLoading = false;
+          this.searchTerm = '';
+          this.cdRef.markForCheck();
+          return of();
+        })
+      );
     }
 
   ngOnInit(): void {
@@ -107,20 +123,8 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   onChangeSearch(val: string) {
       this.isLoading = true;
       this.searchTerm = val.trim();
-      this.cdRef.markForCheck();
-
-      this.searchService.search(val.trim());
-
-      this.searchService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe((results: SearchResultGroup) => {
-        //this.searchResults = results;
-        this.isLoading = false;
-        this.cdRef.markForCheck();
-      }, err => {
-        this.searchResults.reset();
-        this.isLoading = false;
-        this.searchTerm = '';
-        this.cdRef.markForCheck();
-      });
+      this.searchService.search(val);
+      this.cdRef.markForCheck(); 
   }
 
   goTo(queryParamName: string, filter: any) {
@@ -173,7 +177,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   clearSearch() {
     this.searchViewRef.clear();
     this.searchTerm = '';
-    this.searchResults = new SearchResultGroup();
+    this.searchService.search('');
     this.cdRef.markForCheck();
   }
 
