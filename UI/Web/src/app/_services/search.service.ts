@@ -14,6 +14,7 @@ export class SearchService {
 
   private searchSubject: ReplaySubject<string> = new ReplaySubject(1);
   searchResults$: Observable<SearchResultGroup>;
+  searchTerm$: Observable<string> = this.searchSubject.asObservable();
 
   constructor(private httpClient: HttpClient) {
     this.searchResults$ = this.searchSubject.pipe(

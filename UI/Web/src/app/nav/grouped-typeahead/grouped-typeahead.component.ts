@@ -180,6 +180,7 @@ export class GroupedTypeaheadComponent implements OnInit, OnDestroy {
   }
 
   open(event?: FocusEvent) {
+    // TODO: Supress showing the groupped results when on the search page directly
     this.hasFocus = true;
     this.focusChanged.emit(this.hasFocus);
     this.cdRef.markForCheck();
