@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { distinctUntilChanged, filter, map, Observable, of, ReplaySubject, startWith, switchMap } from 'rxjs';
+import { distinctUntilChanged, map, Observable, of, ReplaySubject, startWith, switchMap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { SearchResultGroup } from '../_models/search/search-result-group';
 import { Series } from '../_models/series';

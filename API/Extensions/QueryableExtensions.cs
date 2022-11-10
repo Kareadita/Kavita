@@ -110,4 +110,21 @@ public static class QueryableExtensions
                 })
             .SingleAsync();
     }
+
+    /// <summary>
+    /// Only applies the Take if it's greater than 0
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="takeAmt"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IQueryable<T> TakeIfGreaterThan0<T>(this IQueryable<T> queryable, int takeAmt)
+    {
+        if (takeAmt > 0)
+        {
+            return queryable.Take(takeAmt);
+        }
+
+        return queryable;
+    }
 }

@@ -287,6 +287,15 @@ public class SeriesRepository : ISeriesRepository
         };
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="isAdmin"></param>
+    /// <param name="libraryIds"></param>
+    /// <param name="searchQuery"></param>
+    /// <param name="maxRecords">If 0 or less, will not apply any LIMIT</param>
+    /// <returns></returns>
     public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, int[] libraryIds, string searchQuery, int maxRecords = 15)
     {
         var result = new SearchResultGroupDto();
@@ -304,7 +313,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .OrderBy(l => l.Name)
             .AsSplitQuery()
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -324,7 +333,7 @@ public class SeriesRepository : ISeriesRepository
             .OrderBy(s => s.SortName)
             .AsNoTracking()
             .AsSplitQuery()
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<SearchResultDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -334,7 +343,7 @@ public class SeriesRepository : ISeriesRepository
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .OrderBy(c => c.NormalizedTitle)
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -346,7 +355,7 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking()
             .AsSplitQuery()
             .OrderBy(s => s.Title)
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -356,7 +365,7 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .Distinct()
             .OrderBy(p => p.NormalizedName)
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -366,7 +375,7 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .Distinct()
             .OrderBy(t => t.Title)
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -376,7 +385,7 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery()
             .Distinct()
             .OrderBy(t => t.Title)
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -391,7 +400,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(m => EF.Functions.Like(m.FilePath, $"%{searchQuery}%") && fileIds.Contains(m.Id))
             .AsSplitQuery()
             .OrderBy(f => f.Id)
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<MangaFileDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
@@ -402,7 +411,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
             .OrderBy(c => c.Id)
-            .Take(maxRecords)
+            .TakeIfGreaterThan0(maxRecords)
             .ProjectTo<ChapterDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
