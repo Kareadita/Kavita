@@ -18,7 +18,7 @@
                 
                 <input id="email" aria-describedby="email-help" 
                 class="form-control" formControlName="email" type="email" 
-                placeholder="@kindle.com" [class.is-invalid]="settingsForm.get('email')?.invalid && settingsForm.get('email')?.touched">
+                placeholder="id@kindle.com" [class.is-invalid]="settingsForm.get('email')?.invalid && settingsForm.get('email')?.touched">
                 <ng-container *ngIf="settingsForm.get('email')?.errors as errors">
                     <p class="invalid-feedback" *ngIf="errors.email">
                         This must be a valid email
