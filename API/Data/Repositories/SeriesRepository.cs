@@ -833,8 +833,8 @@ public class SeriesRepository : ISeriesRepository
     {
         var metadataDto = await _context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
-            .Include(m => m.Genres)
-            .Include(m => m.Tags)
+            .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
+            .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
@@ -848,6 +848,7 @@ public class SeriesRepository : ISeriesRepository
                 .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
+                .OrderBy(t => t.Title)
                 .AsSplitQuery()
                 .ToListAsync();
         }
@@ -1552,13 +1553,13 @@ public class SeriesRepository : ISeriesRepository
         if (includeFlags.HasFlag(SeriesIncludes.Metadata))
         {
             query = query.Include(s => s.Metadata)
-                .ThenInclude(m => m.CollectionTags)
+                .ThenInclude(m => m.CollectionTags.OrderBy(g => g.NormalizedTitle))
                 .Include(s => s.Metadata)
-                .ThenInclude(m => m.Genres)
+                .ThenInclude(m => m.Genres.OrderBy(g => g.NormalizedTitle))
                 .Include(s => s.Metadata)
                 .ThenInclude(m => m.People)
                 .Include(s => s.Metadata)
-                .ThenInclude(m => m.Tags);
+                .ThenInclude(m => m.Tags.OrderBy(g => g.NormalizedTitle));
         }
 
 
