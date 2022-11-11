@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -432,7 +433,7 @@ public class BookService : IBookService
                 Year = year,
                 Title = epubBook.Title,
                 Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
-                LanguageISO = epubBook.Schema.Package.Metadata.Languages.FirstOrDefault() ?? string.Empty
+                LanguageISO = ValidateLanguage(epubBook.Schema.Package.Metadata.Languages.FirstOrDefault())
             };
             ComicInfo.CleanComicInfo(info);
 
@@ -477,6 +478,21 @@ public class BookService : IBookService
         return null;
     }
 
+    private static string ValidateLanguage(string? language)
+    {
+        if (string.IsNullOrEmpty(language)) return string.Empty;
+
+        try
+        {
+            CultureInfo.GetCultureInfo(language);
+        }
+        catch (Exception ex)
+        {
+            return string.Empty;
+        }
+
+        return language;
+    }
     private bool IsValidFile(string filePath)
     {
         if (!File.Exists(filePath))
