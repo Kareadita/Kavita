@@ -65,4 +65,8 @@ public class ServerSettingDto
     /// </summary>
     /// <remarks>Value should be between 1 and 30</remarks>
     public int TotalLogs { get; set; }
+    /// <summary>
+    /// If the server should save covers as WebP encoding
+    /// </summary>
+    public bool ConvertCoverToWebP { get; set; }
 }

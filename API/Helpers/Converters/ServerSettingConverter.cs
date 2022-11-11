@@ -51,6 +51,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.ConvertBookmarkToWebP:
                     destination.ConvertBookmarkToWebP = bool.Parse(row.Value);
                     break;
+                case ServerSettingKey.ConvertCoverToWebP:
+                    destination.ConvertCoverToWebP = bool.Parse(row.Value);
+                    break;
                 case ServerSettingKey.EnableSwaggerUi:
                     destination.EnableSwaggerUi = bool.Parse(row.Value);
                     break;

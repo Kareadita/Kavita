@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TaskScheduler = System.Threading.Tasks.TaskScheduler;
+using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
 
@@ -119,6 +119,8 @@ public class ServerController : BaseApiController
     [HttpPost("convert-bookmarks")]
     public ActionResult ScheduleConvertBookmarks()
     {
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true)) return Ok();
         BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToWebP());
         return Ok();
     }

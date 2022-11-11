@@ -31,7 +31,7 @@ namespace API.Services;
 public interface IBookService
 {
     int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory);
+    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 
     /// <summary>
@@ -881,13 +881,13 @@ public class BookService : IBookService
     /// <param name="fileName">Name of the new file.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <returns></returns>
-    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory)
+    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP)
     {
         if (!IsValidFile(fileFilePath)) return string.Empty;
 
         if (Tasks.Scanner.Parser.Parser.IsPdf(fileFilePath))
         {
-            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory);
+            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, saveAsWebP);
         }
 
         using var epubBook = EpubReader.OpenBook(fileFilePath, BookReaderOptions);
@@ -902,7 +902,7 @@ public class BookService : IBookService
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
         }
         catch (Exception ex)
         {
@@ -913,7 +913,7 @@ public class BookService : IBookService
     }
 
 
-    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory)
+    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP)
     {
         try
         {
@@ -923,7 +923,7 @@ public class BookService : IBookService
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
 
         }
         catch (Exception ex)
