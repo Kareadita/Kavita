@@ -72,7 +72,7 @@
         <ng-template #showPages>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Print Length" [clickable]="false" fontClasses="fa-regular fa-file-lines">
-                    {{series.pages | number:''}} Pages
+                    {{series.pages | compactNumber}} Pages
                 </app-icon-and-title>
             </div>
             <div class="vr d-none d-lg-block m-2"></div>

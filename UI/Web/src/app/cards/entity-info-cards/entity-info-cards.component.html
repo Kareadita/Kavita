@@ -20,7 +20,7 @@
     <ng-container *ngIf="totalPages > 0">
         <div class="col-auto mb-2">
             <app-icon-and-title label="Print Length" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
-                {{totalPages | number:''}} Pages
+                {{totalPages | compactNumber}} Pages
             </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>

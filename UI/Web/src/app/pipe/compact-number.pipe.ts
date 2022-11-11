@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 const formatter = new Intl.NumberFormat('en-GB', { 
   //@ts-ignore
-  notation: 'compact' // https://github.com/microsoft/TypeScript/issues/36533
+  notation: 'compact', // https://github.com/microsoft/TypeScript/issues/36533
+  maximumSignificantDigits: 3
 });
 
 @Pipe({
