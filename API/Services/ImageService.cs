@@ -10,7 +10,7 @@ namespace API.Services;
 public interface IImageService
 {
     void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
-    string GetCoverImage(string path, string fileName, string outputDirectory, bool saveAsWebP);
+    string GetCoverImage(string path, string fileName, string outputDirectory, bool saveAsWebP = false);
 
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
@@ -20,7 +20,7 @@ public interface IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     string CreateThumbnailFromBase64(string encodedImage, string fileName);
 
-    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP);
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false);
     /// <summary>
     /// Converts the passed image to webP and outputs it in the same directory
     /// </summary>
@@ -67,7 +67,7 @@ public class ImageService : IImageService
         }
     }
 
-    public string GetCoverImage(string path, string fileName, string outputDirectory, bool saveAsWebP)
+    public string GetCoverImage(string path, string fileName, string outputDirectory, bool saveAsWebP = false)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
@@ -95,7 +95,7 @@ public class ImageService : IImageService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="saveAsWebP">Export the file as webP otherwise will default to png</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false)
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
         var filename = fileName + (saveAsWebP ? ".webp" : ".png");

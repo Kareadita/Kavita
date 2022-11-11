@@ -32,7 +32,7 @@ namespace API.Services;
 public interface IBookService
 {
     int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP);
+    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 
     /// <summary>
@@ -897,7 +897,7 @@ public class BookService : IBookService
     /// <param name="fileName">Name of the new file.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <returns></returns>
-    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP)
+    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false)
     {
         if (!IsValidFile(fileFilePath)) return string.Empty;
 

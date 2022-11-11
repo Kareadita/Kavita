@@ -100,6 +100,7 @@ public class ComicParserTests
     [InlineData("Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)", "1")]
     [InlineData("Scott Pilgrim 02 - Scott Pilgrim vs. The World (2005)", "0")]
     [InlineData("Superman v1 024 (09-10 1943)", "1")]
+    [InlineData("Superman v1.5 024 (09-10 1943)", "1.5")]
     [InlineData("Amazing Man Comics chapter 25", "0")]
     [InlineData("Invincible 033.5 - Marvel Team-Up 14 (2006) (digital) (Minutemen-Slayer)", "0")]
     [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
@@ -118,6 +119,7 @@ public class ComicParserTests
     [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
     [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "0")]
     [InlineData("Daredevil - v6 - 10 - (2019)", "6")]
+    [InlineData("Daredevil - v6.5", "6.5")]
     // Tome Tests
     [InlineData("Daredevil - t6 - 10 - (2019)", "6")]
     [InlineData("Batgirl T2000 #57", "2000")]

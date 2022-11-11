@@ -64,7 +64,7 @@ public class TagRepository : ITagRepository
             .SelectMany(s => s.Metadata.Tags)
             .AsSplitQuery()
             .Distinct()
-            .OrderBy(t => t.Title)
+            .OrderBy(t => t.NormalizedTitle)
             .AsNoTracking()
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
@@ -81,7 +81,7 @@ public class TagRepository : ITagRepository
         return await _context.Tag
             .AsNoTracking()
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(t => t.Title)
+            .OrderBy(t => t.NormalizedTitle)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

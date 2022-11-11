@@ -76,6 +76,15 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
+    public async Task<string> GetCoverImageAsync(int collectionTagId)
+    {
+        return await _context.CollectionTag
+            .Where(c => c.Id == collectionTagId)
+            .Select(c => c.CoverImage)
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
+    }
+
     public async Task<IList<string>> GetAllCoverImagesAsync()
     {
         return await _context.CollectionTag
@@ -116,6 +125,7 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<CollectionTag> GetFullTagAsync(int tagId)
     {
+        // TODO: Refactor this into Includes pattern
         return await _context.CollectionTag
             .Where(c => c.Id == tagId)
             .Include(c => c.SeriesMetadatas)
@@ -125,6 +135,7 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     private async Task<AgeRestriction> GetUserAgeRestriction(int userId)
     {
+        // TODO: Move this into UserRepository
         return await _context.AppUser
             .AsNoTracking()
             .Where(u => u.Id == userId)
@@ -143,19 +154,9 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.Title)
+            .OrderBy(s => s.NormalizedTitle)
             .AsNoTracking()
-            .OrderBy(c => c.NormalizedTitle)
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-    }
-
-    public async Task<string> GetCoverImageAsync(int collectionTagId)
-    {
-        return await _context.CollectionTag
-            .Where(c => c.Id == collectionTagId)
-            .Select(c => c.CoverImage)
-            .AsNoTracking()
-            .SingleOrDefaultAsync();
     }
 }
