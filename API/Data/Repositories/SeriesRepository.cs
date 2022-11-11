@@ -161,12 +161,10 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None)
     {
-        var query = _context.Series
-            .Where(s => s.LibraryId == libraryId);
-
-        query = AddIncludesToQuery(query, includes);
-
-        return await query.OrderBy(s => s.SortName).ToListAsync();
+        return await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .Includes(includes)
+            .OrderBy(s => s.SortName).ToListAsync();
     }
 
     /// <summary>
@@ -427,13 +425,10 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
-        var query = _context.Series
+        return await _context.Series
             .Where(s => s.Id == seriesId)
-            .AsSplitQuery();
-
-        query = AddIncludesToQuery(query, includes);
-
-         return await query.SingleOrDefaultAsync();
+            .Includes(includes)
+            .SingleOrDefaultAsync();
     }
 
     /// <summary>
@@ -1148,11 +1143,10 @@ public class SeriesRepository : ISeriesRepository
     public async Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
     {
         var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
-        var query = _context.Series.Where(s => s.FolderPath.Equals(normalized));
-
-        query = AddIncludesToQuery(query, includes);
-
-        return await query.SingleOrDefaultAsync();
+        return await _context.Series
+            .Where(s => s.FolderPath.Equals(normalized))
+            .Includes(includes)
+            .SingleOrDefaultAsync();
     }
 
     /// <summary>
@@ -1530,39 +1524,39 @@ public class SeriesRepository : ISeriesRepository
             .LastOrDefaultAsync();
     }
 
-    private static IQueryable<Series> AddIncludesToQuery(IQueryable<Series> query, SeriesIncludes includeFlags)
-    {
-        // TODO: Move this to an Extension Method
-        if (includeFlags.HasFlag(SeriesIncludes.Library))
-        {
-            query = query.Include(u => u.Library);
-        }
-
-        if (includeFlags.HasFlag(SeriesIncludes.Volumes))
-        {
-            query = query.Include(s => s.Volumes);
-        }
-
-        if (includeFlags.HasFlag(SeriesIncludes.Related))
-        {
-            query = query.Include(s => s.Relations)
-                .ThenInclude(r => r.TargetSeries)
-                .Include(s => s.RelationOf);
-        }
-
-        if (includeFlags.HasFlag(SeriesIncludes.Metadata))
-        {
-            query = query.Include(s => s.Metadata)
-                .ThenInclude(m => m.CollectionTags.OrderBy(g => g.NormalizedTitle))
-                .Include(s => s.Metadata)
-                .ThenInclude(m => m.Genres.OrderBy(g => g.NormalizedTitle))
-                .Include(s => s.Metadata)
-                .ThenInclude(m => m.People)
-                .Include(s => s.Metadata)
-                .ThenInclude(m => m.Tags.OrderBy(g => g.NormalizedTitle));
-        }
-
-
-        return query.AsSplitQuery();
-    }
+    // private static IQueryable<Series> AddIncludesToQuery(IQueryable<Series> query, SeriesIncludes includeFlags)
+    // {
+    //     // TODO: Move this to an Extension Method
+    //     if (includeFlags.HasFlag(SeriesIncludes.Library))
+    //     {
+    //         query = query.Include(u => u.Library);
+    //     }
+    //
+    //     if (includeFlags.HasFlag(SeriesIncludes.Volumes))
+    //     {
+    //         query = query.Include(s => s.Volumes);
+    //     }
+    //
+    //     if (includeFlags.HasFlag(SeriesIncludes.Related))
+    //     {
+    //         query = query.Include(s => s.Relations)
+    //             .ThenInclude(r => r.TargetSeries)
+    //             .Include(s => s.RelationOf);
+    //     }
+    //
+    //     if (includeFlags.HasFlag(SeriesIncludes.Metadata))
+    //     {
+    //         query = query.Include(s => s.Metadata)
+    //             .ThenInclude(m => m.CollectionTags.OrderBy(g => g.NormalizedTitle))
+    //             .Include(s => s.Metadata)
+    //             .ThenInclude(m => m.Genres.OrderBy(g => g.NormalizedTitle))
+    //             .Include(s => s.Metadata)
+    //             .ThenInclude(m => m.People)
+    //             .Include(s => s.Metadata)
+    //             .ThenInclude(m => m.Tags.OrderBy(g => g.NormalizedTitle));
+    //     }
+    //
+    //
+    //     return query.AsSplitQuery();
+    // }
 }

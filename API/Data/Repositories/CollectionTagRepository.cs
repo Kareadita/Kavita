@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
@@ -12,6 +12,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 
+[Flags]
+public enum CollectionTagIncludes
+{
+    None = 1,
+    SeriesMetadata = 2,
+}
+
 public interface ICollectionTagRepository
 {
     void Add(CollectionTag tag);
@@ -21,7 +28,7 @@ public interface ICollectionTagRepository
     Task<string> GetCoverImageAsync(int collectionTagId);
     Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
     Task<CollectionTag> GetTagAsync(int tagId);
-    Task<CollectionTag> GetFullTagAsync(int tagId);
+    Task<CollectionTag> GetFullTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata);
     void Update(CollectionTag tag);
     Task<int> RemoveTagsWithoutSeries();
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync();
@@ -123,19 +130,17 @@ public class CollectionTagRepository : ICollectionTagRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<CollectionTag> GetFullTagAsync(int tagId)
+    public async Task<CollectionTag> GetFullTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata)
     {
-        // TODO: Refactor this into Includes pattern
         return await _context.CollectionTag
             .Where(c => c.Id == tagId)
-            .Include(c => c.SeriesMetadatas)
+            .Includes(includes)
             .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
 
     private async Task<AgeRestriction> GetUserAgeRestriction(int userId)
     {
-        // TODO: Move this into UserRepository
         return await _context.AppUser
             .AsNoTracking()
             .Where(u => u.Id == userId)
