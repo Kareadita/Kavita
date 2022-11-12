@@ -101,6 +101,7 @@ public interface ISeriesRepository
     Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
+    Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
     Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
@@ -1472,6 +1473,19 @@ public class SeriesRepository : ISeriesRepository
         var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
 
         return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)
+    {
+        var libraryIds = GetLibraryIdsForUser(userId);
+        return await _context.AppUser
+            .Where(user => user.Id == userId)
+            .SelectMany(u => u.WantToRead)
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .Where(s => s.Id == seriesId)
+            .AsSplitQuery()
+            .AsNoTracking()
+            .AnyAsync();
     }
 
     public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId)

@@ -107,6 +107,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
   readingLists: Array<ReadingList> = [];
+  isWantToRead: boolean = false;
+  unreadCount: number = 0;
+  totalCount: number = 0;
   /**
    * Poster image for the Series
    */
@@ -454,6 +457,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       this.changeDetectionRef.markForCheck();
     });
 
+    this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {
+      this.isWantToRead = isWantToRead;
+      this.changeDetectionRef.markForCheck();
+    });
+
     this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
       this.readingLists = lists;
       this.changeDetectionRef.markForCheck();
@@ -508,6 +516,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         return of(null);
       })).subscribe(detail => {
         if (detail == null) return;
+        this.unreadCount = detail.unreadCount;
+        this.totalCount = detail.totalCount;
+        
         this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
 

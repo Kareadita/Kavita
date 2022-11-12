@@ -9,4 +9,6 @@ export interface SeriesDetail {
     chapters: Array<Chapter>;
     volumes: Array<Volume>;
     storylineChapters: Array<Chapter>;
+    unreadCount: number;
+    totalCount: number;
 }

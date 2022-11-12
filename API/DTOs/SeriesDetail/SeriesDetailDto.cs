@@ -24,5 +24,13 @@ public class SeriesDetailDto
     /// These are chapters that are in Volume 0 and should be read AFTER the volumes
     /// </summary>
     public IEnumerable<ChapterDto> StorylineChapters { get; set; }
+    /// <summary>
+    /// How many chapters are unread
+    /// </summary>
+    public int UnreadCount { get; set; }
+    /// <summary>
+    /// How many chapters are there
+    /// </summary>
+    public int TotalCount { get; set; }
 
 }
