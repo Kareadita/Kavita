@@ -23,7 +23,8 @@ if [ ! -f /kavita/config/appsettings.json" ]; then
 }' >> /kavita/config/appsettings.json
 fi
 
-chown -R "$PUID":"$PGID" /kavita
+# Set ownership on all files except the library
+find /kavita -path /kavita/library -prune -o -exec chown "$PUID":"$PGID" {} \;
 chmod 0500 /kavita/Kavita
 
 su -l "$KAVITAUSER" -c ./Kavita
