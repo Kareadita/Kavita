@@ -1,21 +1,20 @@
 #! /bin/bash
 
-# Set default username, UID and GID for Kavita but allow overrides
-PUID=${PUID:-1000}
-PGID=${PGID:-1000}
-KAVITAUSER=${KAVITAUSER:-kavita}
+# Set default UID and GID for Kavita but allow overrides
+PUID=${PUID:-0}
+PGID=${PGID:-0}
 
 # Add Kavita group if it doesn't already exist
-if [[ $(getent group "$PGID" | cut -d':' -f1) != "$KAVITAUSER" ]]; then
-    groupadd -o -g "$PGID" "$KAVITAUSER"
+if [[ -z "$(getent group "$PGID" | cut -d':' -f1)" ]]; then
+    groupadd -o -g "$PGID" kavita
 fi
 
 # Add Kavita user if it doesn't already exist
-if [[ $(getent passwd "$PUID" | cut -d':' -f1) != "$KAVITAUSER" ]]; then
-    useradd -o -u "$PUID" -g "$PGID" -d /kavita "$KAVITAUSER"
+if [[ -z "$(getent passwd "$PUID" | cut -d':' -f1)" ]]; then
+    useradd -o -u "$PUID" -g "$PGID" -d /kavita kavita
 fi
 
-if [ ! -f /kavita/config/appsettings.json" ]; then
+if [ ! -f "/kavita/config/appsettings.json" ]; then
     echo "Kavita configuration file does not exist, creating..."
     echo '{
   "TokenKey": "super secret unguessable key",
@@ -23,8 +22,15 @@ if [ ! -f /kavita/config/appsettings.json" ]; then
 }' >> /kavita/config/appsettings.json
 fi
 
-# Set ownership on all files except the library
-find /kavita -path /kavita/library -prune -o -exec chown "$PUID":"$PGID" {} \;
 chmod 0500 /kavita/Kavita
 
-su -l "$KAVITAUSER" -c ./Kavita
+if [[ "$PUID" -eq 0 ]]; then
+    # Run as root
+    ./Kavita
+else
+    # Set ownership on all files except the library if running non-root
+    find /kavita -path /kavita/library -prune -o -exec chown "$PUID":"$PGID" {} \;
+
+    # Run as non-root user
+    su -l kavita -c ./Kavita
+fi
