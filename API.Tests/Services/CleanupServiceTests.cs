@@ -6,9 +6,11 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Helpers;
 using API.Helpers.Converters;
 using API.Services;
@@ -128,7 +130,6 @@ public class CleanupServiceTests
     }
 
     #endregion
-
 
     #region DeleteSeriesCoverImages
 
@@ -469,6 +470,105 @@ public class CleanupServiceTests
 
     #endregion
 
+    #region CleanupDbEntries
+
+    [Fact]
+    public async Task CleanupDbEntries_CleanupAbandonedChapters()
+    {
+        var c = EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1);
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    c,
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
+        await readerService.MarkChaptersUntilAsRead(user, 1, 5);
+        await _context.SaveChangesAsync();
+
+        // Validate correct chapters have read status
+        Assert.Equal(1, (await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1)).PagesRead);
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+        // Delete the Chapter
+        _context.Chapter.Remove(c);
+        await _unitOfWork.CommitAsync();
+        Assert.Single(await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(1, 1));
+
+        await cleanupService.CleanupDbEntries();
+
+        Assert.Empty(await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(1, 1));
+    }
+
+    [Fact]
+    public async Task CleanupDbEntries_RemoveTagsWithoutSeries()
+    {
+        var c = new CollectionTag()
+        {
+            Title = "Test Tag"
+        };
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>(),
+            Metadata = new SeriesMetadata()
+            {
+                CollectionTags = new List<CollectionTag>()
+                {
+                    c
+                }
+            }
+        };
+        _context.Series.Add(s);
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+        // Delete the Chapter
+        _context.Series.Remove(s);
+        await _unitOfWork.CommitAsync();
+
+        await cleanupService.CleanupDbEntries();
+
+        Assert.Empty(await _unitOfWork.CollectionTagRepository.GetAllTagsAsync());
+    }
+
+    #endregion
     // #region CleanupBookmarks
     //
     // [Fact]

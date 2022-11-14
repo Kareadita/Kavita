@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -109,5 +110,52 @@ public static class QueryableExtensions
                     IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
                 })
             .SingleAsync();
+    }
+
+    public static IQueryable<CollectionTag> Includes(this IQueryable<CollectionTag> queryable,
+        CollectionTagIncludes includes)
+    {
+        if (includes.HasFlag(CollectionTagIncludes.SeriesMetadata))
+        {
+            queryable = queryable.Include(c => c.SeriesMetadatas);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
+    public static IQueryable<Series> Includes(this IQueryable<Series> query,
+        SeriesIncludes includeFlags)
+    {
+        if (includeFlags.HasFlag(SeriesIncludes.Library))
+        {
+            query = query.Include(u => u.Library);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Volumes))
+        {
+            query = query.Include(s => s.Volumes);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Related))
+        {
+            query = query.Include(s => s.Relations)
+                .ThenInclude(r => r.TargetSeries)
+                .Include(s => s.RelationOf);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Metadata))
+        {
+            query = query.Include(s => s.Metadata)
+                .ThenInclude(m => m.CollectionTags.OrderBy(g => g.NormalizedTitle))
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.Genres.OrderBy(g => g.NormalizedTitle))
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.People)
+                .Include(s => s.Metadata)
+                .ThenInclude(m => m.Tags.OrderBy(g => g.NormalizedTitle));
+        }
+
+
+        return query.AsSplitQuery();
     }
 }

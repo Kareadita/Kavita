@@ -48,7 +48,6 @@
         <app-badge-expander [items]="readingLists">
             <ng-template #badgeExpanderItem let-item let-position="idx">
                 <app-tag-badge a11y-click="13,32" class="col-auto" routerLink="/lists/{{item.id}}" [selectionMode]="TagBadgeCursor.Clickable">
-                    <!-- TODO: Build a promoted badge code -->
                     <span *ngIf="item.promoted">
                         <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;
                         <span class="visually-hidden">(promoted)</span>

@@ -2,6 +2,29 @@
   font-style: italic;
 }
 
+.want-to-read-star {
+  //position: absolute;
+  //top: 15px;
+  //left: 20px;
+  //color: var(--primary-color);
+}
+
+.to-read-counter {
+  position: absolute;
+  // top: 15px;
+  // right: 20px;
+  top: 15px;
+  left: 20px;
+}
+
+.under-image {
+  background-color: var(--breadcrumb-bg-color);
+  color: white;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  text-align: center;
+}
+
 .rating-star {
   margin-top: 2px;
   font-size: 1.5rem;

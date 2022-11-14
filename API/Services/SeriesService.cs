@@ -553,7 +553,9 @@ public class SeriesService : ISeriesService
             Specials = specials,
             Chapters = retChapters,
             Volumes = processedVolumes,
-            StorylineChapters = storylineChapters
+            StorylineChapters = storylineChapters,
+            TotalCount = chapters.Count,
+            UnreadCount = chapters.Count(c => c.Pages > 0 && c.PagesRead < c.Pages)
         };
     }
 

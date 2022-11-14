@@ -408,7 +408,7 @@ public static class Parser
     {
         // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
         new Regex(
-            @"^(?<Series>.*)(?: |_)(t|v)(?<Volume>\d+)",
+            @"^(?<Series>.+?)(?: |_)(t|v)(?<Volume>" + NumberRange + @")",
             MatchOptions, RegexTimeout),
         // Batgirl Vol.2000 #57 (December, 2004)
         new Regex(

@@ -59,8 +59,13 @@
 <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" *ngIf="series !== undefined" #scrollingBlock>
     <div class="row mb-3 info-container">
         <div class="image-container col-4 col-sm-6 col-md-4 col-lg-4 col-xl-2 col-xxl-2 d-none d-sm-block">
+            <div class="to-read-counter" *ngIf="unreadCount > 0 && unreadCount !== totalCount">
+                <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed" fillStyle="filled">{{unreadCount}}</app-tag-badge>
+            </div>
             <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
-            <!-- NOTE: We can put continue point here as Vol X Ch Y or just Ch Y or Book Z ?-->
+            <div class="under-image mt-1" *ngIf="hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
+                From {{ContinuePointTitle}}
+            </div>
         </div>
         <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
             <div class="row g-0">
@@ -72,8 +77,15 @@
                         <span class="d-none d-sm-inline-block">{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
                     </button>
                 </div>
+                <div class="col-auto ms-2">
+                    <button class="btn btn-secondary" (click)="toggleWantToRead()" placement="top" [closeDelay]="100000" ngbTooltip="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
+                        <span>
+                            <i class="fa-{{isWantToRead ? 'solid' : 'regular'}} fa-star" aria-hidden="true"></i>
+                        </span>
+                    </button>
+                </div>
                 <div class="col-auto ms-2" *ngIf="isAdmin">
-                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" title="Edit Series information">
+                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" placement="top" ngbTooltip="Edit Series information">
                         <span>
                             <i class="fa fa-pen" aria-hidden="true"></i>
                         </span>
