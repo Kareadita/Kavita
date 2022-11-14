@@ -1477,13 +1477,14 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)
     {
+        // BUG: This is always returning true for any series
         var libraryIds = GetLibraryIdsForUser(userId);
         return await _context.AppUser
             .Where(user => user.Id == userId)
-            .SelectMany(u => u.WantToRead)
+            .SelectMany(u => u.WantToRead.Where(s => s.Id == seriesId && libraryIds.Contains(s.LibraryId)))
             .AsSplitQuery()
             .AsNoTracking()
-            .AnyAsync(s => libraryIds.Contains(s.LibraryId) && s.Id == seriesId);
+            .AnyAsync();
     }
 
     public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId)

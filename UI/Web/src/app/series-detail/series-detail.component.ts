@@ -480,6 +480,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
     this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {
       this.isWantToRead = isWantToRead;
+      console.log(this.isWantToRead);
+      console.log(typeof(this.isWantToRead))
       this.changeDetectionRef.markForCheck();
     });
 

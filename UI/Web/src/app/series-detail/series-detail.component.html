@@ -80,7 +80,7 @@
                 <div class="col-auto ms-2">
                     <button class="btn btn-secondary" (click)="toggleWantToRead()" placement="top" [closeDelay]="100000" ngbTooltip="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
                         <span>
-                            <i class="fa-{{isWantToRead ? 'solid' : 'regular'}} fa-star" aria-hidden="true"></i>
+                            <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
                         </span>
                     </button>
                 </div>
