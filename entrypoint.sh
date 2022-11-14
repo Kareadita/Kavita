@@ -22,7 +22,7 @@ if [ ! -f "/kavita/config/appsettings.json" ]; then
 }' >> /kavita/config/appsettings.json
 fi
 
-chmod 0500 /kavita/Kavita
+chmod +x Kavita
 
 if [[ "$PUID" -eq 0 ]]; then
     # Run as root
