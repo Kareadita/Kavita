@@ -1481,11 +1481,9 @@ public class SeriesRepository : ISeriesRepository
         return await _context.AppUser
             .Where(user => user.Id == userId)
             .SelectMany(u => u.WantToRead)
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => s.Id == seriesId)
             .AsSplitQuery()
             .AsNoTracking()
-            .AnyAsync();
+            .AnyAsync(s => libraryIds.Contains(s.LibraryId) && s.Id == seriesId);
     }
 
     public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId)
