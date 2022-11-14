@@ -1535,40 +1535,4 @@ public class SeriesRepository : ISeriesRepository
             .OrderBy(s => s)
             .LastOrDefaultAsync();
     }
-
-    // private static IQueryable<Series> AddIncludesToQuery(IQueryable<Series> query, SeriesIncludes includeFlags)
-    // {
-    //     // TODO: Move this to an Extension Method
-    //     if (includeFlags.HasFlag(SeriesIncludes.Library))
-    //     {
-    //         query = query.Include(u => u.Library);
-    //     }
-    //
-    //     if (includeFlags.HasFlag(SeriesIncludes.Volumes))
-    //     {
-    //         query = query.Include(s => s.Volumes);
-    //     }
-    //
-    //     if (includeFlags.HasFlag(SeriesIncludes.Related))
-    //     {
-    //         query = query.Include(s => s.Relations)
-    //             .ThenInclude(r => r.TargetSeries)
-    //             .Include(s => s.RelationOf);
-    //     }
-    //
-    //     if (includeFlags.HasFlag(SeriesIncludes.Metadata))
-    //     {
-    //         query = query.Include(s => s.Metadata)
-    //             .ThenInclude(m => m.CollectionTags.OrderBy(g => g.NormalizedTitle))
-    //             .Include(s => s.Metadata)
-    //             .ThenInclude(m => m.Genres.OrderBy(g => g.NormalizedTitle))
-    //             .Include(s => s.Metadata)
-    //             .ThenInclude(m => m.People)
-    //             .Include(s => s.Metadata)
-    //             .ThenInclude(m => m.Tags.OrderBy(g => g.NormalizedTitle));
-    //     }
-    //
-    //
-    //     return query.AsSplitQuery();
-    // }
 }

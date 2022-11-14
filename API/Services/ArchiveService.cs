@@ -196,6 +196,7 @@ public class ArchiveService : IArchiveService
     /// <param name="archivePath"></param>
     /// <param name="fileName">File name to use based on context of entity.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
+    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
     /// <returns></returns>
     public string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false)
     {

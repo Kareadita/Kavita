@@ -478,6 +478,7 @@ public class BookService : IBookService
         return null;
     }
 
+    #nullable enable
     private static string ValidateLanguage(string? language)
     {
         if (string.IsNullOrEmpty(language)) return string.Empty;
@@ -486,13 +487,15 @@ public class BookService : IBookService
         {
             CultureInfo.GetCultureInfo(language);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return string.Empty;
         }
 
         return language;
     }
+    #nullable disable
+
     private bool IsValidFile(string filePath)
     {
         if (!File.Exists(filePath))
@@ -896,6 +899,7 @@ public class BookService : IBookService
     /// <param name="fileFilePath"></param>
     /// <param name="fileName">Name of the new file.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
+    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
     /// <returns></returns>
     public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false)
     {

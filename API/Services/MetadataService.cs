@@ -299,6 +299,7 @@ public class MetadataService : IMetadataService
     /// Generate Cover for a Series. This is used by Scan Loop and should not be invoked directly via User Interaction.
     /// </summary>
     /// <param name="series">A full Series, with metadata, chapters, etc</param>
+    /// <param name="convertToWebP">When saving the file, use WebP encoding instead of PNG</param>
     /// <param name="forceUpdate"></param>
     public async Task GenerateCoversForSeries(Series series, bool convertToWebP, bool forceUpdate = false)
     {
