@@ -79,6 +79,8 @@ public class Program
                     }
                 }
 
+                await MigrateSeriesRelationsExport.Migrate(context, logger);
+
                 await context.Database.MigrateAsync();
 
                 await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());

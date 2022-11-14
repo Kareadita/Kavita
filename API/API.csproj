@@ -48,6 +48,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="Docnet.Core" Version="2.4.0-alpha.4" />
     <PackageReference Include="ExCSS" Version="4.1.0" />
     <PackageReference Include="Flurl" Version="3.0.6" />
