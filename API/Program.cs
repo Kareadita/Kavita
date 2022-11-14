@@ -79,6 +79,7 @@ public class Program
                     }
                 }
 
+                // This must run before the migration
                 await MigrateSeriesRelationsExport.Migrate(context, logger);
 
                 await context.Database.MigrateAsync();

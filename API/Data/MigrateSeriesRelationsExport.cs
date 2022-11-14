@@ -29,10 +29,12 @@ public static class MigrateSeriesRelationsExport
 {
     public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {
+        // TODO: Put a version check in here
         if (new FileInfo("config/temp/relations.csv").Exists)
         {
             return;
         }
+
         logger.LogCritical("Running MigrateSeriesRelationsExport migration - Please be patient, this may take some time. This is not an error");
 
         var seriesWithRelationships = await dataContext.Series
