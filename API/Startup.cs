@@ -209,6 +209,7 @@ public class Startup
                     var readingListService = serviceProvider.GetRequiredService<IReadingListService>();
 
 
+                    logger.LogInformation("Running Migrations");
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
@@ -229,6 +230,7 @@ public class Startup
                     unitOfWork.SettingsRepository.Update(installVersion);
 
                     await unitOfWork.CommitAsync();
+                    logger.LogInformation("Running Migrations - done");
                 }).GetAwaiter()
                 .GetResult();
         }

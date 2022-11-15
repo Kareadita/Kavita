@@ -39,6 +39,8 @@ public class Program
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
+            .MinimumLevel
+            .Information()
             .CreateBootstrapLogger();
 
         var directoryService = new DirectoryService(null, new FileSystem());

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using CsvHelper;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -32,7 +34,9 @@ public static class MigrateSeriesRelationsExport
     public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {
         logger.LogCritical("Running MigrateSeriesRelationsExport migration - Please be patient, this may take some time. This is not an error");
-        if (new FileInfo(OutputFile).Exists || new FileInfo(CompleteOutputFile).Exists)
+        if (BuildInfo.Version > new Version(0, 6, 1, 3)
+            || new FileInfo(OutputFile).Exists
+            || new FileInfo(CompleteOutputFile).Exists)
         {
             logger.LogCritical("Running MigrateSeriesRelationsExport migration - complete. Nothing to do");
             return;
@@ -41,7 +45,6 @@ public static class MigrateSeriesRelationsExport
         var seriesWithRelationships = await dataContext.Series
             .Where(s => s.Relations.Any())
             .Include(s => s.Relations)
-            //.Include(s => s.RelationOf)
             .ThenInclude(r => r.TargetSeries)
             .ToListAsync();
 

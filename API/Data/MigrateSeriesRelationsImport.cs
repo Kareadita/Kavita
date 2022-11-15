@@ -23,7 +23,6 @@ public static class MigrateSeriesRelationsImport
     public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {
         logger.LogCritical("Running MigrateSeriesRelationsImport migration - Please be patient, this may take some time. This is not an error");
-        // TODO: Put a version check in here
         if (!new FileInfo(OutputFile).Exists)
         {
             logger.LogCritical("Running MigrateSeriesRelationsImport migration - complete. Nothing to do");
