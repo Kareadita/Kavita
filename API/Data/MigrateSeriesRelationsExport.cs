@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -29,47 +28,52 @@ internal sealed class SeriesRelationMigrationOutput
 public static class MigrateSeriesRelationsExport
 {
     private const string OutputFile = "config/relations.csv";
+    private const string CompleteOutputFile = "config/relations-imported.csv";
     public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {
         logger.LogCritical("Running MigrateSeriesRelationsExport migration - Please be patient, this may take some time. This is not an error");
-        // TODO: Put a version check in here
-        if (!new FileInfo(OutputFile).Exists)
+        if (new FileInfo(OutputFile).Exists || new FileInfo(CompleteOutputFile).Exists)
         {
-            var seriesWithRelationships = await dataContext.Series
+            logger.LogCritical("Running MigrateSeriesRelationsExport migration - complete. Nothing to do");
+            return;
+        }
+
+        var seriesWithRelationships = await dataContext.Series
             .Where(s => s.Relations.Any())
             .Include(s => s.Relations)
             //.Include(s => s.RelationOf)
             .ThenInclude(r => r.TargetSeries)
             .ToListAsync();
 
-            var records = new List<SeriesRelationMigrationOutput>();
-            var excludedRelationships = new List<RelationKind>()
+        var records = new List<SeriesRelationMigrationOutput>();
+        var excludedRelationships = new List<RelationKind>()
+        {
+            RelationKind.Parent,
+        };
+        foreach (var series in seriesWithRelationships)
+        {
+            foreach (var relationship in series.Relations.Where(r => !excludedRelationships.Contains(r.RelationKind)))
             {
-                RelationKind.Parent,
-            };
-            foreach (var series in seriesWithRelationships)
-            {
-                foreach (var relationship in series.Relations.Where(r => !excludedRelationships.Contains(r.RelationKind)))
+                records.Add(new SeriesRelationMigrationOutput()
                 {
-                    records.Add(new SeriesRelationMigrationOutput()
-                    {
-                        SeriesId = series.Id,
-                        SeriesName = series.Name,
-                        Relationship = relationship.RelationKind,
-                        TargetId = relationship.TargetSeriesId,
-                        TargetSeriesName = relationship.TargetSeries.Name
-                    });
-                }
+                    SeriesId = series.Id,
+                    SeriesName = series.Name,
+                    Relationship = relationship.RelationKind,
+                    TargetId = relationship.TargetSeriesId,
+                    TargetSeriesName = relationship.TargetSeries.Name
+                });
             }
-
-            await using var writer = new StreamWriter(OutputFile);
-            await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            {
-                await csv.WriteRecordsAsync(records);
-            }
-
-            logger.LogCritical("{OutputFile} has a backup of all data", OutputFile);
         }
+
+        await using var writer = new StreamWriter(OutputFile);
+        await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        {
+            await csv.WriteRecordsAsync(records);
+        }
+
+        await writer.DisposeAsync();
+
+        logger.LogCritical("{OutputFile} has a backup of all data", OutputFile);
 
         logger.LogCritical("Deleting all relationships in the DB. This is not an error");
         var entities = await dataContext.SeriesRelation
