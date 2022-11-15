@@ -1285,7 +1285,7 @@ public class SeriesServiceTests
         {
             await _context.SaveChangesAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Assert.Fail("Delete of Target Series Failed");
         }
@@ -1338,7 +1338,7 @@ public class SeriesServiceTests
         {
             await _context.SaveChangesAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Assert.Fail("Delete of Target Series Failed");
         }

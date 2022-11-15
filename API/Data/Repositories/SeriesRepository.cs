@@ -1257,15 +1257,6 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => !ids.Contains(s.Id))
             .ToListAsync();
 
-        // If the series to remove has Relation (related series), we must manually unlink due to the DB not being
-        // setup correctly (if this is not done, a foreign key constraint will be thrown)
-        // TODO: Fix Series Relations here
-        foreach (var sr in seriesToRemove)
-        {
-            sr.Relations = new List<SeriesRelation>();
-            Update(sr);
-        }
-
         _context.Series.RemoveRange(seriesToRemove);
 
         return seriesToRemove;
