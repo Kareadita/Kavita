@@ -1257,15 +1257,6 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => !ids.Contains(s.Id))
             .ToListAsync();
 
-        // If the series to remove has Relation (related series), we must manually unlink due to the DB not being
-        // setup correctly (if this is not done, a foreign key constraint will be thrown)
-
-        foreach (var sr in seriesToRemove)
-        {
-            sr.Relations = new List<SeriesRelation>();
-            Update(sr);
-        }
-
         _context.Series.RemoveRange(seriesToRemove);
 
         return seriesToRemove;
@@ -1387,14 +1378,26 @@ public class SeriesRepository : ISeriesRepository
             AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating),
             AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating),
             Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating),
-            Parent = await _context.Series
-                .SelectMany(s =>
-                    s.RelationOf.Where(r => r.TargetSeriesId == seriesId
-                                             && usersSeriesIds.Contains(r.TargetSeriesId)
-                                             && r.RelationKind != RelationKind.Prequel
-                                             && r.RelationKind != RelationKind.Sequel
-                                             && r.RelationKind != RelationKind.Edition)
-                        .Select(sr => sr.Series))
+            // Parent = await _context.Series
+            //     .SelectMany(s =>
+            //         s.TargetSeries.Where(r => r.TargetSeriesId == seriesId
+            //                                  && usersSeriesIds.Contains(r.TargetSeriesId)
+            //                                  && r.RelationKind != RelationKind.Prequel
+            //                                  && r.RelationKind != RelationKind.Sequel
+            //                                  && r.RelationKind != RelationKind.Edition)
+            //             .Select(sr => sr.Series))
+            //     .RestrictAgainstAgeRestriction(userRating)
+            //     .AsSplitQuery()
+            //     .AsNoTracking()
+            //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            //     .ToListAsync(),
+            Parent = await _context.SeriesRelation
+                .Where(r => r.TargetSeriesId == seriesId
+                                              && usersSeriesIds.Contains(r.TargetSeriesId)
+                                              && r.RelationKind != RelationKind.Prequel
+                                              && r.RelationKind != RelationKind.Sequel
+                                              && r.RelationKind != RelationKind.Edition)
+                        .Select(sr => sr.Series)
                 .RestrictAgainstAgeRestriction(userRating)
                 .AsSplitQuery()
                 .AsNoTracking()
@@ -1477,13 +1480,14 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)
     {
+        // BUG: This is always returning true for any series
         var libraryIds = GetLibraryIdsForUser(userId);
         return await _context.AppUser
             .Where(user => user.Id == userId)
-            .SelectMany(u => u.WantToRead)
+            .SelectMany(u => u.WantToRead.Where(s => s.Id == seriesId && libraryIds.Contains(s.LibraryId)))
             .AsSplitQuery()
             .AsNoTracking()
-            .AnyAsync(s => libraryIds.Contains(s.LibraryId) && s.Id == seriesId);
+            .AnyAsync();
     }
 
     public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId)

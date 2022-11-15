@@ -64,7 +64,7 @@
             </div>
             <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
             <div class="under-image mt-1" *ngIf="hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
-                From {{ContinuePointTitle}}
+                Continue {{ContinuePointTitle}}
             </div>
         </div>
         <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
@@ -78,14 +78,14 @@
                     </button>
                 </div>
                 <div class="col-auto ms-2">
-                    <button class="btn btn-secondary" (click)="toggleWantToRead()" placement="top" [closeDelay]="100000" ngbTooltip="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
+                    <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
                         <span>
-                            <i class="fa-{{isWantToRead ? 'solid' : 'regular'}} fa-star" aria-hidden="true"></i>
+                            <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
                         </span>
                     </button>
                 </div>
                 <div class="col-auto ms-2" *ngIf="isAdmin">
-                    <button class="btn btn-secondary" (click)="openEditSeriesModal()" placement="top" ngbTooltip="Edit Series information">
+                    <button class="btn btn-secondary" (click)="openEditSeriesModal()"  title="Edit Series information">
                         <span>
                             <i class="fa fa-pen" aria-hidden="true"></i>
                         </span>

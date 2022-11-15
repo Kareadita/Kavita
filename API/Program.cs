@@ -39,6 +39,8 @@ public class Program
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console()
+            .MinimumLevel
+            .Information()
             .CreateBootstrapLogger();
 
         var directoryService = new DirectoryService(null, new FileSystem());
@@ -78,6 +80,9 @@ public class Program
                         logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
                     }
                 }
+
+                // This must run before the migration
+                await MigrateSeriesRelationsExport.Migrate(context, logger);
 
                 await context.Database.MigrateAsync();
 

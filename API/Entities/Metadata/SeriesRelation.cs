@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using API.Entities.Enums;
+﻿using API.Entities.Enums;
 
 namespace API.Entities.Metadata;
 
