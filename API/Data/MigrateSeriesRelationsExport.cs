@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,49 +28,69 @@ internal sealed class SeriesRelationMigrationOutput
 /// </summary>
 public static class MigrateSeriesRelationsExport
 {
+    private const string OutputFile = "config/relations.csv";
     public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
     {
-        // TODO: Put a version check in here
-        if (new FileInfo("config/temp/relations.csv").Exists)
-        {
-            return;
-        }
-
         logger.LogCritical("Running MigrateSeriesRelationsExport migration - Please be patient, this may take some time. This is not an error");
-
-        var seriesWithRelationships = await dataContext.Series
+        // TODO: Put a version check in here
+        if (!new FileInfo(OutputFile).Exists)
+        {
+            var seriesWithRelationships = await dataContext.Series
             .Where(s => s.Relations.Any())
             .Include(s => s.Relations)
+            //.Include(s => s.RelationOf)
             .ThenInclude(r => r.TargetSeries)
-            .AsNoTracking()
             .ToListAsync();
 
-        var records = new List<SeriesRelationMigrationOutput>();
-        var excludedRelationships = new List<RelationKind>()
-        {
-            RelationKind.Parent,
-        };
-        foreach (var series in seriesWithRelationships)
-        {
-            foreach (var relationship in series.Relations.Where(r => !excludedRelationships.Contains(r.RelationKind)))
+            var records = new List<SeriesRelationMigrationOutput>();
+            var excludedRelationships = new List<RelationKind>()
             {
-                records.Add(new SeriesRelationMigrationOutput()
+                RelationKind.Parent,
+            };
+            foreach (var series in seriesWithRelationships)
+            {
+                foreach (var relationship in series.Relations.Where(r => !excludedRelationships.Contains(r.RelationKind)))
                 {
-                    SeriesId = series.Id,
-                    SeriesName = series.Name,
-                    Relationship = relationship.RelationKind,
-                    TargetId = relationship.TargetSeriesId,
-                    TargetSeriesName = relationship.TargetSeries.Name
-
-                });
+                    records.Add(new SeriesRelationMigrationOutput()
+                    {
+                        SeriesId = series.Id,
+                        SeriesName = series.Name,
+                        Relationship = relationship.RelationKind,
+                        TargetId = relationship.TargetSeriesId,
+                        TargetSeriesName = relationship.TargetSeries.Name
+                    });
+                }
             }
+
+            await using var writer = new StreamWriter(OutputFile);
+            await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                await csv.WriteRecordsAsync(records);
+            }
+
+            logger.LogCritical("{OutputFile} has a backup of all data", OutputFile);
         }
 
-        await using var writer = new StreamWriter("config/temp/relations.csv");
-        await using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+        logger.LogCritical("Deleting all relationships in the DB. This is not an error");
+        var entities = await dataContext.SeriesRelation
+            .Include(s => s.Series)
+            .Include(s => s.TargetSeries)
+            .Select(s => s)
+            .ToListAsync();
+
+        foreach (var seriesWithRelationship in entities)
         {
-            await csv.WriteRecordsAsync(records);
+            logger.LogCritical("Deleting {SeriesName} --{RelationshipKind}--> {TargetSeriesName}",
+                seriesWithRelationship.Series.Name, seriesWithRelationship.RelationKind, seriesWithRelationship.TargetSeries.Name);
+            dataContext.SeriesRelation.Remove(seriesWithRelationship);
+
+            await dataContext.SaveChangesAsync();
         }
+
+        // In case of corrupted entities (where series were deleted but their Id still existed, we delete the rest of the table)
+        dataContext.SeriesRelation.RemoveRange(dataContext.SeriesRelation);
+        await dataContext.SaveChangesAsync();
+
 
         logger.LogCritical("Running MigrateSeriesRelationsExport migration - Completed. This is not an error");
     }

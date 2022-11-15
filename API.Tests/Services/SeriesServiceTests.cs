@@ -1240,6 +1240,113 @@ public class SeriesServiceTests
         Assert.Empty(series1.Relations.Where(s => s.TargetSeriesId == 2));
     }
 
+
+    [Fact]
+    public async Task UpdateRelatedSeries_DeleteTargetSeries_ShouldSucceed()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Series A",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Series B",
+                    Volumes = new List<Volume>(){}
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = CreateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(2);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
+
+        _context.Series.Remove(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2));
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail("Delete of Target Series Failed");
+        }
+
+        // Remove relations
+        Assert.Empty((await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related)).Relations);
+    }
+
+    [Fact]
+    public async Task UpdateRelatedSeries_DeleteSourceSeries_ShouldSucceed()
+    {
+        await ResetDb();
+        _context.Library.Add(new Library()
+        {
+            AppUsers = new List<AppUser>()
+            {
+                new AppUser()
+                {
+                    UserName = "majora2007"
+                }
+            },
+            Name = "Test LIb",
+            Type = LibraryType.Book,
+            Series = new List<Series>()
+            {
+                new Series()
+                {
+                    Name = "Series A",
+                    Volumes = new List<Volume>(){}
+                },
+                new Series()
+                {
+                    Name = "Series B",
+                    Volumes = new List<Volume>(){}
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var series1 = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Related);
+        // Add relations
+        var addRelationDto = CreateRelationsDto(series1);
+        addRelationDto.Adaptations.Add(2);
+        await _seriesService.UpdateRelatedSeries(addRelationDto);
+        Assert.Equal(2, series1.Relations.Single(s => s.TargetSeriesId == 2).TargetSeriesId);
+
+        _context.Series.Remove(await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1));
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Assert.Fail("Delete of Target Series Failed");
+        }
+
+        // Remove relations
+        Assert.Empty((await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Related)).Relations);
+    }
+
     [Fact]
     public async Task UpdateRelatedSeries_ShouldNotAllowDuplicates()
     {
