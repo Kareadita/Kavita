@@ -859,16 +859,20 @@ public class AccountController : BaseApiController
         var emailLink = GenerateEmailLink(token, "confirm-email", user.Email);
         _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
         _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
-        await _emailService.SendMigrationEmail(new EmailMigrationDto()
+        var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
+        if (await _emailService.CheckIfAccessible(host))
         {
+            await _emailService.SendMigrationEmail(new EmailMigrationDto()
+            {
             EmailAddress = user.Email,
             Username = user.UserName,
             ServerConfirmationLink = emailLink,
             InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-        });
+            });
+            return Ok("Email sent");
+        }
 
-
-        return Ok(emailLink);
+        return Ok("Your server is not accessible. The Link to confirmation email is in the logs.");
     }
 
     private string GenerateEmailLink(string token, string routePart, string email, bool withHost = true)
