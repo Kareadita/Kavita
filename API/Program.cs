@@ -82,7 +82,14 @@ public class Program
                 }
 
                 // This must run before the migration
-                await MigrateSeriesRelationsExport.Migrate(context, logger);
+                try
+                {
+                    await MigrateSeriesRelationsExport.Migrate(context, logger);
+                }
+                catch (Exception ex)
+                {
+                    // If fresh install, could fail and we should just carry on as it's not applicable
+                }
 
                 await context.Database.MigrateAsync();
 
@@ -90,14 +97,6 @@ public class Program
                 await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedThemes(context);
                 await Seed.SeedUserApiKeys(context);
-
-                // NOTE: This check is from v0.4.8 (Nov 04, 2021). We can likely remove this
-                var isDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker;
-                if (isDocker && new FileInfo("data/appsettings.json").Exists)
-                {
-                    logger.LogCritical("WARNING! Mount point is incorrect, nothing here will persist. Please change your container mount from /kavita/data to /kavita/config");
-                    return;
-                }
             }
             catch (Exception ex)
             {
