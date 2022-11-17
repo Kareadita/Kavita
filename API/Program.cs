@@ -81,14 +81,14 @@ public class Program
                     }
                 }
 
-                // This must run before the migration (if version
+                // This must run before the migration
                 try
                 {
                     await MigrateSeriesRelationsExport.Migrate(context, logger);
                 }
                 catch (Exception ex)
                 {
-                    // If fresh install, this will fail
+                    // If fresh install, could fail and we should just carry on as it's not applicable
                 }
 
                 await context.Database.MigrateAsync();
