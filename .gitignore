@@ -526,6 +526,8 @@ API/config/stats/*
 API/config/stats/app_stats.json
 API/config/pre-metadata/
 API/config/post-metadata/
+API/config/relations-imported.csv
+API/config/relations.csv
 API.Tests/TestResults/
 UI/Web/.vscode/settings.json
 /API.Tests/Services/Test Data/ArchiveService/CoverImages/output/*
