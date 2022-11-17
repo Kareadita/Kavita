@@ -91,7 +91,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
   }
 
   editLibrary(library: Library) {
-    const modalRef = this.modalService.open(LibraryEditorModalComponent, {  size: 'xl' });
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
     modalRef.componentInstance.library = library;
     modalRef.closed.pipe(takeUntil(this.onDestroy)).subscribe(refresh => {
       if (refresh) {

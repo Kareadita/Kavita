@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -54,7 +55,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService, 
-    private libraryService: LibraryService) { }
+    private libraryService: LibraryService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
 
@@ -119,8 +120,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       model.type = parseInt(model.type, 10);
       this.libraryService.create(model).subscribe(() => {
-        this.toastr.success('Library created successfully.');
-        this.toastr.info('A scan has been started.');
+        this.toastr.success('Library created successfully. A scan has been started.');
         this.close(true);
       }, err => {
         this.errorMessage = err;

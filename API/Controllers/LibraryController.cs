@@ -323,6 +323,8 @@ public class LibraryController : BaseApiController
             await _libraryWatcher.RestartWatching();
             _taskScheduler.ScanLibrary(library.Id);
         }
+        await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
+            MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
 
         return Ok();
 
