@@ -10,6 +10,7 @@ namespace API.SignalR;
 
 public static class MessageFactoryEntityTypes
 {
+    public const string Library = "library";
     public const string Series = "series";
     public const string Volume = "volume";
     public const string Chapter = "chapter";

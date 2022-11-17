@@ -48,7 +48,8 @@ public interface ILibraryRepository
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync();
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
-    Library GetLibraryByFolder(string folder);
+    Task<string> GetLibraryCoverImageAsync(int libraryId);
+    Task<IList<string>> GetAllCoverImagesAsync();
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -377,12 +378,21 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Series.AnyAsync(s => normalized.Contains(s.FolderPath));
     }
 
-    public Library? GetLibraryByFolder(string folder)
+    public Task<string> GetLibraryCoverImageAsync(int libraryId)
     {
-        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         return _context.Library
-            .Include(l => l.Folders)
-            .AsSplitQuery()
-            .SingleOrDefault(l => l.Folders.Select(f => f.Path).Contains(normalized));
+            .Where(l => l.Id == libraryId)
+            .Select(l => l.CoverImage)
+            .SingleOrDefaultAsync();
+
+    }
+
+    public async Task<IList<string>> GetAllCoverImagesAsync()
+    {
+        return await _context.ReadingList
+            .Select(t => t.CoverImage)
+            .Where(t => !string.IsNullOrEmpty(t))
+            .AsNoTracking()
+            .ToListAsync();
     }
 }

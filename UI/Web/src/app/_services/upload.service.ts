@@ -38,6 +38,10 @@ export class UploadService {
     return this.httpClient.post<number>(this.baseUrl + 'upload/chapter', {id: chapterId, url: this._cleanBase64Url(url)});
   }
 
+  updateLibraryCoverImage(libraryId: number, url: string) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/library', {id: libraryId, url: this._cleanBase64Url(url)});
+  }
+
   resetChapterCoverLock(chapterId: number, ) {
     return this.httpClient.post<number>(this.baseUrl + 'upload/reset-chapter-lock', {id: chapterId, url: ''});
   }

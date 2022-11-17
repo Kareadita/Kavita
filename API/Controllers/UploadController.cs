@@ -267,6 +267,63 @@ public class UploadController : BaseApiController
     }
 
     /// <summary>
+    /// Replaces library cover image with a base64 encoded image. If empty string passed, will reset to null.
+    /// </summary>
+    /// <param name="uploadFileDto"></param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [RequestSizeLimit(8_000_000)]
+    [HttpPost("library")]
+    public async Task<ActionResult> UploadLibraryCoverImageFromUrl(UploadFileDto uploadFileDto)
+    {
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(uploadFileDto.Id);
+        if (library == null) return BadRequest("This library does not exist");
+
+        // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
+        // See if we can do this all in memory without touching underlying system
+        if (string.IsNullOrEmpty(uploadFileDto.Url))
+        {
+            library.CoverImage = null;
+            _unitOfWork.LibraryRepository.Update(library);
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.CommitAsync();
+                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(library.Id, MessageFactoryEntityTypes.Library), false);
+            }
+
+            return Ok();
+        }
+
+        try
+        {
+            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}");
+
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                library.CoverImage = filePath;
+                _unitOfWork.LibraryRepository.Update(library);
+            }
+
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.CommitAsync();
+                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(library.Id, MessageFactoryEntityTypes.Library), false);
+                return Ok();
+            }
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "There was an issue uploading cover image for Library {Id}", uploadFileDto.Id);
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return BadRequest("Unable to save cover image to Library");
+    }
+
+    /// <summary>
     /// Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.
     /// </summary>
     /// <param name="uploadFileDto">Does not use Url property</param>

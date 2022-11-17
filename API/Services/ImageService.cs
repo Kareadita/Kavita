@@ -168,6 +168,16 @@ public class ImageService : IImageService
     }
 
     /// <summary>
+    /// Returns the name format for a library cover image
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    public static string GetLibraryFormat(int libraryId)
+    {
+        return $"l{libraryId}";
+    }
+
+    /// <summary>
     /// Returns the name format for a series cover image
     /// </summary>
     /// <param name="seriesId"></param>

@@ -1,0 +1,47 @@
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Library Settings</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+</div>
+<div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+
+
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" 
+        orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+    
+        <li [ngbNavItem]="TabID.General">
+            <a ngbNavLink>{{TabID.General}}</a>
+            <ng-template ngbNavContent>
+            </ng-template>
+        </li>
+
+        <li [ngbNavItem]="TabID.Cover">
+            <a ngbNavLink>{{TabID.Cover}}</a>
+            <ng-template ngbNavContent>
+                <app-cover-image-chooser [(imageUrls)]="imageUrls" 
+                        [showReset]="false"
+                        [showApplyButton]="true"
+                        (applyCover)="applyCoverImage($event)"
+                        (resetCover)="resetCoverImage()"
+                        >
+                    </app-cover-image-chooser>
+            </ng-template>
+        </li>
+
+        <li [ngbNavItem]="TabID.Advanced">
+            <a ngbNavLink>{{TabID.Advanced}}</a>
+            <ng-template ngbNavContent>
+
+            </ng-template>
+        </li>
+    </ul>
+    <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+    <!-- High level information can show -->
+    <!-- Tab for the folders -->
+
+
+</div>
+<div class="modal-footer">
+    <!-- <a class="btn btn-icon" href="{{helpUrl}}" target="_blank" rel="noopener noreferrer">Help</a> -->
+    <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+</div>

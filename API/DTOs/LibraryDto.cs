@@ -13,5 +13,9 @@ public class LibraryDto
     /// </summary>
     public DateTime LastScanned { get; init; }
     public LibraryType Type { get; init; }
+    /// <summary>
+    /// An optional Cover Image or null
+    /// </summary>
+    public string CoverImage { get; init; }
     public ICollection<string> Folders { get; init; }
 }

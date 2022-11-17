@@ -6,8 +6,9 @@ import { SideNavComponent } from './side-nav/side-nav.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { CardsModule } from '../cards/cards.module';
 import { FormsModule } from '@angular/forms';
-import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
+import { LibrarySettingsModalComponent } from './_components/library-settings-modal/library-settings-modal.component';
 
 
 
@@ -15,7 +16,8 @@ import { RouterModule } from '@angular/router';
   declarations: [
     SideNavCompanionBarComponent,
     SideNavItemComponent,
-    SideNavComponent
+    SideNavComponent,
+    LibrarySettingsModalComponent
   ],
   imports: [
     CommonModule,
@@ -24,6 +26,7 @@ import { RouterModule } from '@angular/router';
     CardsModule,
     FormsModule,
     NgbTooltipModule,
+    NgbNavModule
   ],
   exports: [
     SideNavCompanionBarComponent,
