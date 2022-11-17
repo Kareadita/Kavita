@@ -2,9 +2,7 @@
 <form [formGroup]="libraryForm">
     <div class="modal-header">
         <h4 class="modal-title" id="modal-basic-title">{{this.library !== undefined ? 'Edit' : 'New'}} Library</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-        
-        </button>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
     </div>
     <div class="modal-body">
         <div class="alert alert-info" *ngIf="errorMessage !== ''">

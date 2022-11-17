@@ -5,7 +5,7 @@ import { SideNavItemComponent } from './side-nav-item/side-nav-item.component';
 import { SideNavComponent } from './side-nav/side-nav.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { CardsModule } from '../cards/cards.module';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { LibrarySettingsModalComponent } from './_components/library-settings-modal/library-settings-modal.component';
@@ -26,7 +26,8 @@ import { LibrarySettingsModalComponent } from './_components/library-settings-mo
     CardsModule,
     FormsModule,
     NgbTooltipModule,
-    NgbNavModule
+    NgbNavModule,
+    ReactiveFormsModule
   ],
   exports: [
     SideNavCompanionBarComponent,

@@ -26,9 +26,14 @@ public class Library : IEntityDate
     /// </summary>
     //public bool IncludeInRecommended { get; set; } = true;
     /// <summary>
+    /// Include library series in Search
+    /// </summary>
+    //public bool IncludeInSearch { get; set; } = true; // (NOTE: I might want to make this an Enum and use a button group in UI to manage, so user has more control and less DB work)
+    /// <summary>
     /// When performing a library scan, allow Image format Series
     /// </summary>
     //public bool AllowImageSeries { get; set; } = true;
+
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     /// <summary>
