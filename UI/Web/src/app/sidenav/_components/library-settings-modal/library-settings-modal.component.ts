@@ -40,7 +40,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   libraryForm: FormGroup = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    type: new FormControl<LibraryType>(0, { nonNullable: true, validators: [Validators.required] })
+    type: new FormControl<LibraryType>(LibraryType.Manga, { nonNullable: true, validators: [Validators.required] })
   });
 
   selectedFolders: string[] = [];
@@ -70,10 +70,9 @@ export class LibrarySettingsModalComponent implements OnInit {
     if (this.library === undefined) {
       this.isAddLibrary = true;
       this.cdRef.markForCheck();
-      return;
     }
 
-    if (this.library.coverImage != null && this.library.coverImage !== '') {
+    if (this.library?.coverImage != null && this.library?.coverImage !== '') {
       this.imageUrls.push(this.library.coverImage);
       this.cdRef.markForCheck();
     }
@@ -84,6 +83,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       switchMap(name => this.libraryService.libraryNameExists(name)),
       tap(exists => {
         const isExistingName = this.libraryForm.get('name')?.value === this.library?.name;
+        console.log('isExistingName', isExistingName)
         if (!exists || isExistingName) {
           this.libraryForm.get('name')?.setErrors(null);
         } else {

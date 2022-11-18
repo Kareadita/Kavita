@@ -304,7 +304,7 @@ public class LibraryController : BaseApiController
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> IsLibraryNameValid(string name)
     {
-        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(name));
+        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(name.Trim()));
     }
 
     /// <summary>
@@ -318,12 +318,12 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id, LibraryIncludes.Folders);
-        if (await _unitOfWork.LibraryRepository.LibraryExists(libraryForUserDto.Name))
+        if (await _unitOfWork.LibraryRepository.LibraryExists(libraryForUserDto.Name.Trim()))
             return BadRequest("Library name already exists");
 
         var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
-        library.Name = libraryForUserDto.Name;
+        library.Name = libraryForUserDto.Name.Trim();
         library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
 
         var typeUpdate = library.Type != libraryForUserDto.Type;
