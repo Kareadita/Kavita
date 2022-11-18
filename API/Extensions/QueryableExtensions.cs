@@ -163,23 +163,23 @@ public static class QueryableExtensions
     /// Applies restriction based on if the Library has restrictions (like include in search)
     /// </summary>
     /// <param name="query"></param>
-    /// <param name="type"></param>
+    /// <param name="context"></param>
     /// <returns></returns>
-    public static IQueryable<Library> IsRestricted(this IQueryable<Library> query, LibraryQueryType type)
+    public static IQueryable<Library> IsRestricted(this IQueryable<Library> query, QueryContext context)
     {
-        if (type.HasFlag(LibraryQueryType.None)) return query;
+        if (context.HasFlag(QueryContext.None)) return query;
 
-        if (type.HasFlag(LibraryQueryType.Dashboard))
+        if (context.HasFlag(QueryContext.Dashboard))
         {
             query = query.Where(l => l.IncludeInDashboard);
         }
 
-        if (type.HasFlag(LibraryQueryType.Recommended))
+        if (context.HasFlag(QueryContext.Recommended))
         {
             query = query.Where(l => l.IncludeInRecommended);
         }
 
-        if (type.HasFlag(LibraryQueryType.Search))
+        if (context.HasFlag(QueryContext.Search))
         {
             query = query.Where(l => l.IncludeInSearch);
         }

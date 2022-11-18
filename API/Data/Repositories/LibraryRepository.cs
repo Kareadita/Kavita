@@ -39,7 +39,7 @@ public interface ILibraryRepository
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
-    IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, LibraryQueryType queryType = LibraryQueryType.None);
+    IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
@@ -128,10 +128,10 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, LibraryQueryType queryType = LibraryQueryType.None)
+    public IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None)
     {
         return _context.Library
-            .IsRestricted(queryType)
+            .IsRestricted(queryContext)
             .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
             .Select(l => l.Id)
             .AsEnumerable();

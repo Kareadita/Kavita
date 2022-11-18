@@ -54,7 +54,7 @@ public class SearchController : BaseApiController
         queryString = Services.Tasks.Scanner.Parser.Parser.CleanQuery(queryString);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        var libraries = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, LibraryQueryType.Search).ToList();
+        var libraries = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search).ToList();
         if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
