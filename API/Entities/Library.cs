@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 
@@ -11,29 +9,24 @@ public class Library : IEntityDate
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public string CoverImage { get; set; } = null;
+    public string CoverImage { get; set; }
     public LibraryType Type { get; set; }
     /// <summary>
     /// If Folder Watching is enabled for this library
     /// </summary>
-    //public bool FolderWatching { get; set; } = true;
+    public bool FolderWatching { get; set; } = true;
     /// <summary>
     /// Include Library series on Dashboard Streams
     /// </summary>
-   // public bool IncludeInDashboard { get; set; } = true;
+    public bool IncludeInDashboard { get; set; } = true;
     /// <summary>
     /// Include Library series on Recommended Streams
     /// </summary>
-    //public bool IncludeInRecommended { get; set; } = true;
+    public bool IncludeInRecommended { get; set; } = true;
     /// <summary>
     /// Include library series in Search
     /// </summary>
-    //public bool IncludeInSearch { get; set; } = true; // (NOTE: I might want to make this an Enum and use a button group in UI to manage, so user has more control and less DB work)
-    /// <summary>
-    /// When performing a library scan, allow Image format Series
-    /// </summary>
-    //public bool AllowImageSeries { get; set; } = true;
-
+    public bool IncludeInSearch { get; set; } = true;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     /// <summary>

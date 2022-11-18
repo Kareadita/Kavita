@@ -9,6 +9,7 @@ using API.DTOs.JumpBar;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.Common.Extensions;
@@ -38,7 +39,7 @@ public interface ILibraryRepository
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
-    Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId);
+    IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, LibraryQueryType queryType = LibraryQueryType.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
@@ -127,12 +128,13 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId)
+    public IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, LibraryQueryType queryType = LibraryQueryType.None)
     {
-        return await _context.Library
+        return _context.Library
+            .IsRestricted(queryType)
             .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
             .Select(l => l.Id)
-            .ToListAsync();
+            .AsEnumerable();
     }
 
     public async Task<LibraryType> GetLibraryTypeAsync(int libraryId)

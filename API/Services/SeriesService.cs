@@ -473,7 +473,7 @@ public class SeriesService : ISeriesService
     public async Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-        var libraryIds = (await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId));
+        var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("User does not have access to the library this series belongs to");
 

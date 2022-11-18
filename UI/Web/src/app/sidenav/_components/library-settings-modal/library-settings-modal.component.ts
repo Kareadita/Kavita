@@ -40,11 +40,14 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   libraryForm: FormGroup = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true, validators: [Validators.required] }),
-    type: new FormControl<LibraryType>(LibraryType.Manga, { nonNullable: true, validators: [Validators.required] })
+    type: new FormControl<LibraryType>(LibraryType.Manga, { nonNullable: true, validators: [Validators.required] }),
+    folderWatching: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
   });
 
   selectedFolders: string[] = [];
-  errorMessage = '';
   madeChanges = false;
   libraryTypes: string[] = []
   
@@ -101,6 +104,10 @@ export class LibrarySettingsModalComponent implements OnInit {
     if (this.library !== undefined) {
       this.libraryForm.get('name')?.setValue(this.library.name);
       this.libraryForm.get('type')?.setValue(this.library.type);
+      this.libraryForm.get('folderWatching')?.setValue(this.library.folderWatching);
+      this.libraryForm.get('includeInDashboard')?.setValue(this.library.includeInDashboard);
+      this.libraryForm.get('includeInRecommended')?.setValue(this.library.includeInRecommended);
+      this.libraryForm.get('includeInSearch')?.setValue(this.library.includeInSearch);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
       this.cdRef.markForCheck();
@@ -139,8 +146,6 @@ export class LibrarySettingsModalComponent implements OnInit {
 
       this.libraryService.update(model).subscribe(() => {
         this.close(true);
-      }, err => {
-        this.errorMessage = err;
       });
     } else {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
@@ -148,8 +153,6 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryService.create(model).subscribe(() => {
         this.toastr.success('Library created successfully. A scan has been started.');
         this.close(true);
-      }, err => {
-        this.errorMessage = err;
       });
     }
   }

@@ -17,11 +17,6 @@
             <li [ngbNavItem]="TabID.General">
                 <a ngbNavLink>{{TabID.General}}</a>
                 <ng-template ngbNavContent>
-
-                    <div class="alert alert-info" *ngIf="errorMessage !== ''">
-                        <strong>Error: </strong> {{errorMessage}}
-                    </div>
-
                     <div class="mb-3">
                         <label for="library-name" class="form-label">Name</label>
                         <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="libraryForm.get('name')?.invalid && libraryForm.get('name')?.touched">
@@ -95,6 +90,58 @@
                 <a ngbNavLink>{{TabID.Advanced}}</a>
                 <ng-template ngbNavContent>
 
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                            <div class="mb-3 mt-1">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="lib-folder-watching" role="switch" formControlName="folderWatching" class="form-check-input" aria-labelledby="auto-close-label">
+                                    <label class="form-check-label" for="lib-folder-watching">Folder Watching</label>
+                                </div>
+                            </div>
+                            <p class="accent">
+                                Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                            <div class="mb-3 mt-1">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="include-dashboard" role="switch" formControlName="includeInDashboard" class="form-check-input" aria-labelledby="auto-close-label">
+                                    <label class="form-check-label" for="include-dashboard">Include in Dashboard</label>
+                                </div>
+                            </div>
+                            <p class="accent">
+                                Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                            <div class="mb-3 mt-1">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="include-recommended" role="switch" formControlName="includeInRecommended" class="form-check-input" aria-labelledby="auto-close-label">
+                                    <label class="form-check-label" for="include-recommended">Include in Recommended</label>
+                                </div>
+                            </div>
+                            <p class="accent">
+                                Should series from the library be included on the Recommended page.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                            <div class="mb-3 mt-1">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="include-search" role="switch" formControlName="includeInSearch" class="form-check-input" aria-labelledby="auto-close-label">
+                                    <label class="form-check-label" for="include-search">Include in Search</label>
+                                </div>
+                            </div>
+                            <p class="accent">
+                                Should series and any derived information (genres, people, files) from the library be included in search results.
+                            </p>
+                        </div>
+                    </div>
                 </ng-template>
             </li>
         </ul>

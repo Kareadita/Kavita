@@ -311,31 +311,42 @@ public class LibraryController : BaseApiController
     /// Updates an existing Library with new name, folders, and/or type.
     /// </summary>
     /// <remarks>Any folder or type change will invoke a scan.</remarks>
-    /// <param name="libraryForUserDto"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
-    public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
+    public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id, LibraryIncludes.Folders);
-        if (await _unitOfWork.LibraryRepository.LibraryExists(libraryForUserDto.Name.Trim()))
+        var newName = dto.Name.Trim();
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
+        if (await _unitOfWork.LibraryRepository.LibraryExists(newName) && !library.Name.Equals(newName))
             return BadRequest("Library name already exists");
 
         var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
-        library.Name = libraryForUserDto.Name.Trim();
-        library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
+        library.Name = newName;
+        library.Folders = dto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
 
-        var typeUpdate = library.Type != libraryForUserDto.Type;
-        library.Type = libraryForUserDto.Type;
+        var typeUpdate = library.Type != dto.Type;
+        var folderWatchingUpdate = library.FolderWatching != dto.FolderWatching;
+        library.Type = dto.Type;
+        library.FolderWatching = dto.FolderWatching;
+        library.IncludeInDashboard = dto.IncludeInDashboard;
+        library.IncludeInRecommended = dto.IncludeInRecommended;
+        library.IncludeInSearch = dto.IncludeInSearch;
 
         _unitOfWork.LibraryRepository.Update(library);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
-        if (originalFolders.Count != libraryForUserDto.Folders.Count() || typeUpdate)
+        if (originalFolders.Count != dto.Folders.Count() || typeUpdate)
         {
             await _libraryWatcher.RestartWatching();
             _taskScheduler.ScanLibrary(library.Id);
+        }
+
+        if (folderWatchingUpdate)
+        {
+            await _libraryWatcher.RestartWatching();
         }
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);

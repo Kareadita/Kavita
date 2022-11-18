@@ -89,6 +89,20 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.GlobalPageLayoutMode)
             .HasDefaultValue(PageLayoutMode.Cards);
+
+
+        builder.Entity<Library>()
+            .Property(b => b.FolderWatching)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.IncludeInDashboard)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.IncludeInRecommended)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.IncludeInSearch)
+            .HasDefaultValue(true);
     }
 
 

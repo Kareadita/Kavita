@@ -77,6 +77,7 @@ public class LibraryWatcher : ILibraryWatcher
         _logger.LogInformation("[LibraryWatcher] Starting file watchers");
 
         var libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+            .Where(l => l.FolderWatching)
             .SelectMany(l => l.Folders)
             .Distinct()
             .Select(Parser.Parser.NormalizePath)

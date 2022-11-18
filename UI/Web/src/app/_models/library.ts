@@ -11,9 +11,8 @@ export interface Library {
     type: LibraryType;
     folders: string[];
     coverImage?: string;
-    // TODO: Should I move these into extended Library to reduce overhead unless editing? 
     folderWatching: boolean;
     includeInDashboard: boolean;
     includeInRecommended: boolean;
-
+    includeInSearch: boolean;
 }
