@@ -1,7 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import { debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -27,7 +28,8 @@ enum StepID {
 @Component({
   selector: 'app-library-settings-modal',
   templateUrl: './library-settings-modal.component.html',
-  styleUrls: ['./library-settings-modal.component.scss']
+  styleUrls: ['./library-settings-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
@@ -55,23 +57,42 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService, 
-    private libraryService: LibraryService, private toastr: ToastrService) { }
+    private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
 
     this.settingService.getLibraryTypes().subscribe((types) => {
       this.libraryTypes = types;
+      this.cdRef.markForCheck();
     });
 
 
     if (this.library === undefined) {
       this.isAddLibrary = true;
+      this.cdRef.markForCheck();
       return;
     }
 
     if (this.library.coverImage != null && this.library.coverImage !== '') {
       this.imageUrls.push(this.library.coverImage);
+      this.cdRef.markForCheck();
     }
+
+    this.libraryForm.get('name')?.valueChanges.pipe(
+      debounceTime(100), 
+      distinctUntilChanged(),
+      switchMap(name => this.libraryService.libraryNameExists(name)),
+      tap(exists => {
+        const isExistingName = this.libraryForm.get('name')?.value === this.library?.name;
+        if (!exists || isExistingName) {
+          this.libraryForm.get('name')?.setErrors(null);
+        } else {
+          this.libraryForm.get('name')?.setErrors({duplicateName: true})  
+        }
+        this.cdRef.markForCheck();
+      })
+      ).subscribe();
+
 
     this.setValues();
   }
@@ -82,7 +103,12 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('type')?.setValue(this.library.type);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
+      this.cdRef.markForCheck();
     }
+  }
+
+  isDisabled() {
+    return !(this.libraryForm.valid && this.selectedFolders.length > 0);
   }
 
   reset() {
@@ -141,6 +167,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         this.active = TabID.Advanced;
         break;
     }
+    this.cdRef.markForCheck();
   }
 
   applyCoverImage(coverUrl: string) {
@@ -158,6 +185,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
           this.selectedFolders.push(closeResult.folderPath);
           this.madeChanges = true;
+          this.cdRef.markForCheck();
         }
       }
     });
@@ -166,6 +194,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   removeFolder(folder: string) {
     this.selectedFolders = this.selectedFolders.filter(item => item !== folder);
     this.madeChanges = true;
+    this.cdRef.markForCheck();
   }
 
   isNextDisabled() {
@@ -179,7 +208,6 @@ export class LibrarySettingsModalComponent implements OnInit {
       case StepID.Advanced:
         return false; // Advanced are optional
     }
-    return false;
   }
 
 }

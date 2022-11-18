@@ -24,7 +24,15 @@
 
                     <div class="mb-3">
                         <label for="library-name" class="form-label">Name</label>
-                        <input id="library-name" class="form-control" formControlName="name" type="text">
+                        <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="libraryForm.get('name')?.invalid && libraryForm.get('name')?.touched">
+                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="libraryForm.dirty || libraryForm.touched">
+                            <div *ngIf="libraryForm.get('name')?.errors?.required">
+                                This field is required
+                            </div>
+                            <div *ngIf="libraryForm.get('name')?.errors?.duplicateName">
+                                Library name must be unique
+                            </div>
+                        </div>
                     </div>
 
                     <div class="mb-3">
@@ -99,9 +107,9 @@
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
     
     <ng-container *ngIf="isAddLibrary && setupStep != 3; else editLibraryButton">
-        <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled()">Next</button>
+        <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">Next</button>
     </ng-container>
     <ng-template #editLibraryButton>
-        <button type="button" class="btn btn-primary" (click)="save()">Save</button>
+        <button type="button" class="btn btn-primary" [disabled]="isDisabled()" (click)="save()">Save</button>
     </ng-template>
 </div>

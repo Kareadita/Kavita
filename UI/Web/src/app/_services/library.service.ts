@@ -50,6 +50,10 @@ export class LibraryService {
     }));
   }
 
+  libraryNameExists(name: string) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'library/name-exists?name=' + name);
+  }
+
   listDirectories(rootPath: string) {
     let query = '';
     if (rootPath !== undefined && rootPath.length > 0) {

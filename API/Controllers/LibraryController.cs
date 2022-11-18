@@ -296,6 +296,18 @@ public class LibraryController : BaseApiController
     }
 
     /// <summary>
+    /// Checks if the library name exists or not
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("name-exists")]
+    public async Task<ActionResult<bool>> IsLibraryNameValid(string name)
+    {
+        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(name));
+    }
+
+    /// <summary>
     /// Updates an existing Library with new name, folders, and/or type.
     /// </summary>
     /// <remarks>Any folder or type change will invoke a scan.</remarks>
@@ -306,6 +318,8 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id, LibraryIncludes.Folders);
+        if (await _unitOfWork.LibraryRepository.LibraryExists(libraryForUserDto.Name))
+            return BadRequest("Library name already exists");
 
         var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
