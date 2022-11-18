@@ -158,4 +158,32 @@ public static class QueryableExtensions
 
         return query.AsSplitQuery();
     }
+
+    /// <summary>
+    /// Applies restriction based on if the Library has restrictions (like include in search)
+    /// </summary>
+    /// <param name="query"></param>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    public static IQueryable<Library> IsRestricted(this IQueryable<Library> query, QueryContext context)
+    {
+        if (context.HasFlag(QueryContext.None)) return query;
+
+        if (context.HasFlag(QueryContext.Dashboard))
+        {
+            query = query.Where(l => l.IncludeInDashboard);
+        }
+
+        if (context.HasFlag(QueryContext.Recommended))
+        {
+            query = query.Where(l => l.IncludeInRecommended);
+        }
+
+        if (context.HasFlag(QueryContext.Search))
+        {
+            query = query.Where(l => l.IncludeInSearch);
+        }
+
+        return query;
+    }
 }

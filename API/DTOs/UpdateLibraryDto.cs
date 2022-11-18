@@ -9,4 +9,9 @@ public class UpdateLibraryDto
     public string Name { get; init; }
     public LibraryType Type { get; set; }
     public IEnumerable<string> Folders { get; init; }
+    public bool FolderWatching { get; init; }
+    public bool IncludeInDashboard { get; init; }
+    public bool IncludeInRecommended { get; init; }
+    public bool IncludeInSearch { get; init; }
+
 }

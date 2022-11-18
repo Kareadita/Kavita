@@ -42,6 +42,22 @@ public class ImageController : BaseApiController
     }
 
     /// <summary>
+    /// Returns cover image for Library
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    [HttpGet("library-cover")]
+    [ResponseCache(CacheProfileName = "Images")]
+    public async Task<ActionResult> GetLibraryCoverImage(int libraryId)
+    {
+        var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
+    }
+
+    /// <summary>
     /// Returns cover image for Volume
     /// </summary>
     /// <param name="volumeId"></param>

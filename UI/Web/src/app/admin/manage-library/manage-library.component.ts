@@ -4,12 +4,12 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
+import { LibrarySettingsModalComponent } from 'src/app/sidenav/_components/library-settings-modal/library-settings-modal.component';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
 import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
-import { Library, LibraryType } from 'src/app/_models/library';
+import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
-import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/library-editor-modal.component';
 
 @Component({
   selector: 'app-manage-library',
@@ -20,7 +20,6 @@ import { LibraryEditorModalComponent } from '../_modals/library-editor-modal/lib
 export class ManageLibraryComponent implements OnInit, OnDestroy {
 
   libraries: Library[] = [];
-  createLibraryToggle = false;
   loading = false;
   /**
    * If a deletion is in progress for a library
@@ -90,7 +89,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
   }
 
   editLibrary(library: Library) {
-    const modalRef = this.modalService.open(LibraryEditorModalComponent);
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
     modalRef.componentInstance.library = library;
     modalRef.closed.pipe(takeUntil(this.onDestroy)).subscribe(refresh => {
       if (refresh) {
@@ -100,7 +99,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
   }
 
   addLibrary() {
-    const modalRef = this.modalService.open(LibraryEditorModalComponent);
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
     modalRef.closed.pipe(takeUntil(this.onDestroy)).subscribe(refresh => {
       if (refresh) {
         this.getLibraries();

@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../shared/_services/utility.service';
 import { Library, LibraryType } from '../../_models/library';
@@ -10,6 +12,7 @@ import { Action, ActionFactoryService, ActionItem } from '../../_services/action
 import { ActionService } from '../../_services/action.service';
 import { LibraryService } from '../../_services/library.service';
 import { NavService } from '../../_services/nav.service';
+import { LibrarySettingsModalComponent } from '../_components/library-settings-modal/library-settings-modal.component';
 
 @Component({
   selector: 'app-side-nav',
@@ -33,7 +36,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService, 
-    public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef) {
+    public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
+    private modalService: NgbModal, private imageService: ImageService) {
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd), 
@@ -64,7 +68,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
     this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
       this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
-        this.libraries = libraries;
+        this.libraries = [...libraries];
         this.cdRef.markForCheck();
       });
     });
@@ -86,6 +90,20 @@ export class SideNavComponent implements OnInit, OnDestroy {
       case (Action.AnalyzeFiles):
         this.actionService.analyzeFiles(library);
         break;
+      case (Action.Edit):
+        const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
+        modalRef.componentInstance.library = library;
+        modalRef.closed.subscribe((closeResult: {success: boolean, library: Library, coverImageUpdate: boolean}) => {
+          window.scrollTo(0, 0);
+          if (closeResult.success) {
+            
+          }
+
+          if (closeResult.coverImageUpdate) {
+            
+          }
+        });
+        break;
       default:
         break;
     }
@@ -106,6 +124,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
       case LibraryType.Manga:
         return 'fa-book-open';
     }
+  }
+
+  getLibraryImage(library: Library) {
+    if (library.coverImage) return this.imageService.getLibraryCoverImage(library.id);
+    return null;
   }
 
   toggleNavBar() {

@@ -21,7 +21,7 @@
             </div>
         </div>
         <app-side-nav-item *ngFor="let library of libraries | filter: filterLibrary" [link]="'/library/' + library.id + '/'"
-        [icon]="getLibraryTypeIcon(library.type)" [title]="library.name" [comparisonMethod]="'startsWith'">
+        [icon]="getLibraryTypeIcon(library.type)" [imageUrl]="getLibraryImage(library)" [title]="library.name" [comparisonMethod]="'startsWith'">
             <ng-container actions>
                 <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>
             </ng-container>

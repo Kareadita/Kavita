@@ -247,7 +247,6 @@ public class AccountController : BaseApiController
     [HttpGet("roles")]
     public ActionResult<IList<string>> GetRoles()
     {
-        // TODO: This should be moved to ServerController
         return typeof(PolicyConstants)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(string))

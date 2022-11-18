@@ -1012,6 +1012,17 @@ public static class Parser
     }
 
     /// <summary>
+    /// Cleans user query string input
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    public static string CleanQuery(string query)
+    {
+        return Uri.UnescapeDataString(query).Trim().Replace(@"%", string.Empty)
+            .Replace(":", string.Empty);
+    }
+
+    /// <summary>
     /// Normalizes the slashes in a path to be <see cref="Path.AltDirectorySeparatorChar"/>
     /// </summary>
     /// <example>/manga/1\1 -> /manga/1/1</example>

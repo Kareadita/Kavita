@@ -86,7 +86,7 @@ public class Program
                 {
                     await MigrateSeriesRelationsExport.Migrate(context, logger);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // If fresh install, could fail and we should just carry on as it's not applicable
                 }

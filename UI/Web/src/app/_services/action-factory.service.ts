@@ -212,6 +212,13 @@ export class ActionFactoryService {
           },
         ],
       },
+      {
+        action: Action.Edit,
+        title: 'Settings',
+        callback: this.dummyCallback,
+        requiresAdmin: true,
+        children: [],
+      },
     ];
 
     this.collectionTagActions = [
