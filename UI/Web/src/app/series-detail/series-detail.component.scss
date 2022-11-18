@@ -2,6 +2,20 @@
   font-style: italic;
 }
 
+.to-read-counter {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+}
+
+.under-image {
+  background-color: var(--breadcrumb-bg-color);
+  color: white;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  text-align: center;
+}
+
 .rating-star {
   margin-top: 2px;
   font-size: 1.5rem;

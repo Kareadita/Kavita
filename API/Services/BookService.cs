@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -31,7 +32,7 @@ namespace API.Services;
 public interface IBookService
 {
     int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory);
+    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false);
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 
     /// <summary>
@@ -432,7 +433,7 @@ public class BookService : IBookService
                 Year = year,
                 Title = epubBook.Title,
                 Genre = string.Join(",", epubBook.Schema.Package.Metadata.Subjects.Select(s => s.ToLower().Trim())),
-                LanguageISO = epubBook.Schema.Package.Metadata.Languages.FirstOrDefault() ?? string.Empty
+                LanguageISO = ValidateLanguage(epubBook.Schema.Package.Metadata.Languages.FirstOrDefault())
             };
             ComicInfo.CleanComicInfo(info);
 
@@ -476,6 +477,24 @@ public class BookService : IBookService
 
         return null;
     }
+
+    #nullable enable
+    private static string ValidateLanguage(string? language)
+    {
+        if (string.IsNullOrEmpty(language)) return string.Empty;
+
+        try
+        {
+            CultureInfo.GetCultureInfo(language);
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+
+        return language;
+    }
+    #nullable disable
 
     private bool IsValidFile(string filePath)
     {
@@ -880,14 +899,15 @@ public class BookService : IBookService
     /// <param name="fileFilePath"></param>
     /// <param name="fileName">Name of the new file.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
+    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
     /// <returns></returns>
-    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory)
+    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false)
     {
         if (!IsValidFile(fileFilePath)) return string.Empty;
 
         if (Tasks.Scanner.Parser.Parser.IsPdf(fileFilePath))
         {
-            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory);
+            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, saveAsWebP);
         }
 
         using var epubBook = EpubReader.OpenBook(fileFilePath, BookReaderOptions);
@@ -902,7 +922,7 @@ public class BookService : IBookService
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
         }
         catch (Exception ex)
         {
@@ -913,7 +933,7 @@ public class BookService : IBookService
     }
 
 
-    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory)
+    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP)
     {
         try
         {
@@ -923,7 +943,7 @@ public class BookService : IBookService
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
 
         }
         catch (Exception ex)

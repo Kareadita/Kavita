@@ -130,6 +130,13 @@ export class SeriesService {
     }));
   }
 
+  isWantToRead(seriesId: number) {
+    return this.httpClient.get<string>(this.baseUrl + 'want-to-read?seriesId=' + seriesId, {responseType: 'text' as 'json'})
+    .pipe(map(val => {
+      return val === 'true';
+    }));
+  }
+
   getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     const data = this.filterUtilitySerivce.createSeriesFilter(filter);
 

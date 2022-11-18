@@ -42,6 +42,7 @@ import { User } from '../_models/user';
 import { ScrollService } from '../_services/scroll.service';
 import { DeviceService } from '../_services/device.service';
 import { Device } from '../_models/device/device';
+import { ThisReceiver } from '@angular/compiler';
 
 interface RelatedSeris {
   series: Series;
@@ -107,6 +108,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
   readingLists: Array<ReadingList> = [];
+  isWantToRead: boolean = false;
+  unreadCount: number = 0;
+  totalCount: number = 0;
   /**
    * Poster image for the Series
    */
@@ -231,6 +235,26 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     const navbarHeight = navbar.offsetHeight;
     const totalHeight = companionHeight + navbarHeight + 21; //21px to account for padding
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
+  }
+
+  get ContinuePointTitle() {
+    if (this.currentlyReadingChapter === undefined || !this.hasReadingProgress) return '';
+
+    if (!this.currentlyReadingChapter.isSpecial) {
+      const vol = this.volumes.filter(v => v.id === this.currentlyReadingChapter?.volumeId);
+
+      // This is a lone chapter
+      if (vol.length === 0) {
+        return 'Ch ' + this.currentlyReadingChapter.number;
+      }
+
+      if (this.currentlyReadingChapter.number === "0") {
+        return 'Vol ' + vol[0].number;
+      }
+      return 'Vol ' + vol[0].number + ' Ch ' + this.currentlyReadingChapter.number;
+    }
+
+    return this.currentlyReadingChapter.title;
   }
 
   constructor(private route: ActivatedRoute, private seriesService: SeriesService,
@@ -454,6 +478,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       this.changeDetectionRef.markForCheck();
     });
 
+    this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {
+      this.isWantToRead = isWantToRead;
+      this.changeDetectionRef.markForCheck();
+    });
+
     this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
       this.readingLists = lists;
       this.changeDetectionRef.markForCheck();
@@ -508,6 +537,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         return of(null);
       })).subscribe(detail => {
         if (detail == null) return;
+        this.unreadCount = detail.unreadCount;
+        this.totalCount = detail.totalCount;
+        
         this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
 
@@ -760,5 +792,16 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     // }
 
     // this.filter.sortOptions.isAscending = this.isAscendingSort;
+  }
+
+  toggleWantToRead() {
+    if (this.isWantToRead) {
+      this.actionService.addMultipleSeriesToWantToReadList([this.series.id]);
+    } else {
+      this.actionService.removeMultipleSeriesFromWantToReadList([this.series.id]);
+    }
+   
+    this.isWantToRead = !this.isWantToRead;
+    this.changeDetectionRef.markForCheck();
   }
 }

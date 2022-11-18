@@ -101,6 +101,7 @@ public interface ISeriesRepository
     Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
+    Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
     Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
@@ -161,12 +162,10 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None)
     {
-        var query = _context.Series
-            .Where(s => s.LibraryId == libraryId);
-
-        query = AddIncludesToQuery(query, includes);
-
-        return await query.OrderBy(s => s.SortName).ToListAsync();
+        return await _context.Series
+            .Where(s => s.LibraryId == libraryId)
+            .Includes(includes)
+            .OrderBy(s => s.SortName).ToListAsync();
     }
 
     /// <summary>
@@ -427,13 +426,10 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
-        var query = _context.Series
+        return await _context.Series
             .Where(s => s.Id == seriesId)
-            .AsSplitQuery();
-
-        query = AddIncludesToQuery(query, includes);
-
-         return await query.SingleOrDefaultAsync();
+            .Includes(includes)
+            .SingleOrDefaultAsync();
     }
 
     /// <summary>
@@ -833,8 +829,8 @@ public class SeriesRepository : ISeriesRepository
     {
         var metadataDto = await _context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
-            .Include(m => m.Genres)
-            .Include(m => m.Tags)
+            .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
+            .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
             .Include(m => m.People)
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
@@ -848,6 +844,7 @@ public class SeriesRepository : ISeriesRepository
                 .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
+                .OrderBy(t => t.Title)
                 .AsSplitQuery()
                 .ToListAsync();
         }
@@ -1147,11 +1144,10 @@ public class SeriesRepository : ISeriesRepository
     public async Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
     {
         var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
-        var query = _context.Series.Where(s => s.FolderPath.Equals(normalized));
-
-        query = AddIncludesToQuery(query, includes);
-
-        return await query.SingleOrDefaultAsync();
+        return await _context.Series
+            .Where(s => s.FolderPath.Equals(normalized))
+            .Includes(includes)
+            .SingleOrDefaultAsync();
     }
 
     /// <summary>
@@ -1260,15 +1256,6 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.LibraryId == libraryId)
             .Where(s => !ids.Contains(s.Id))
             .ToListAsync();
-
-        // If the series to remove has Relation (related series), we must manually unlink due to the DB not being
-        // setup correctly (if this is not done, a foreign key constraint will be thrown)
-
-        foreach (var sr in seriesToRemove)
-        {
-            sr.Relations = new List<SeriesRelation>();
-            Update(sr);
-        }
 
         _context.Series.RemoveRange(seriesToRemove);
 
@@ -1391,14 +1378,26 @@ public class SeriesRepository : ISeriesRepository
             AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating),
             AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating),
             Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating),
-            Parent = await _context.Series
-                .SelectMany(s =>
-                    s.RelationOf.Where(r => r.TargetSeriesId == seriesId
-                                             && usersSeriesIds.Contains(r.TargetSeriesId)
-                                             && r.RelationKind != RelationKind.Prequel
-                                             && r.RelationKind != RelationKind.Sequel
-                                             && r.RelationKind != RelationKind.Edition)
-                        .Select(sr => sr.Series))
+            // Parent = await _context.Series
+            //     .SelectMany(s =>
+            //         s.TargetSeries.Where(r => r.TargetSeriesId == seriesId
+            //                                  && usersSeriesIds.Contains(r.TargetSeriesId)
+            //                                  && r.RelationKind != RelationKind.Prequel
+            //                                  && r.RelationKind != RelationKind.Sequel
+            //                                  && r.RelationKind != RelationKind.Edition)
+            //             .Select(sr => sr.Series))
+            //     .RestrictAgainstAgeRestriction(userRating)
+            //     .AsSplitQuery()
+            //     .AsNoTracking()
+            //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            //     .ToListAsync(),
+            Parent = await _context.SeriesRelation
+                .Where(r => r.TargetSeriesId == seriesId
+                                              && usersSeriesIds.Contains(r.TargetSeriesId)
+                                              && r.RelationKind != RelationKind.Prequel
+                                              && r.RelationKind != RelationKind.Sequel
+                                              && r.RelationKind != RelationKind.Edition)
+                        .Select(sr => sr.Series)
                 .RestrictAgainstAgeRestriction(userRating)
                 .AsSplitQuery()
                 .AsNoTracking()
@@ -1479,6 +1478,18 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
     }
 
+    public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)
+    {
+        // BUG: This is always returning true for any series
+        var libraryIds = GetLibraryIdsForUser(userId);
+        return await _context.AppUser
+            .Where(user => user.Id == userId)
+            .SelectMany(u => u.WantToRead.Where(s => s.Id == seriesId && libraryIds.Contains(s.LibraryId)))
+            .AsSplitQuery()
+            .AsNoTracking()
+            .AnyAsync();
+    }
+
     public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId)
     {
         var info = await _context.Series
@@ -1527,41 +1538,5 @@ public class SeriesRepository : ISeriesRepository
             .Select(s => s.Metadata.AgeRating)
             .OrderBy(s => s)
             .LastOrDefaultAsync();
-    }
-
-    private static IQueryable<Series> AddIncludesToQuery(IQueryable<Series> query, SeriesIncludes includeFlags)
-    {
-        // TODO: Move this to an Extension Method
-        if (includeFlags.HasFlag(SeriesIncludes.Library))
-        {
-            query = query.Include(u => u.Library);
-        }
-
-        if (includeFlags.HasFlag(SeriesIncludes.Volumes))
-        {
-            query = query.Include(s => s.Volumes);
-        }
-
-        if (includeFlags.HasFlag(SeriesIncludes.Related))
-        {
-            query = query.Include(s => s.Relations)
-                .ThenInclude(r => r.TargetSeries)
-                .Include(s => s.RelationOf);
-        }
-
-        if (includeFlags.HasFlag(SeriesIncludes.Metadata))
-        {
-            query = query.Include(s => s.Metadata)
-                .ThenInclude(m => m.CollectionTags)
-                .Include(s => s.Metadata)
-                .ThenInclude(m => m.Genres)
-                .Include(s => s.Metadata)
-                .ThenInclude(m => m.People)
-                .Include(s => s.Metadata)
-                .ThenInclude(m => m.Tags);
-        }
-
-
-        return query.AsSplitQuery();
     }
 }

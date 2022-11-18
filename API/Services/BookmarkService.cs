@@ -27,6 +27,7 @@ public interface IBookmarkService
 
 public class BookmarkService : IBookmarkService
 {
+    public const string Name = "BookmarkService";
     private readonly ILogger<BookmarkService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;

@@ -61,7 +61,7 @@ export class EditDeviceComponent implements OnInit, OnChanges, OnDestroy {
 
   addDevice() {
     if (this.device !== undefined) {
-      this.deviceService.updateDevice(this.device.id, this.settingsForm.value.name, this.settingsForm.value.platform, this.settingsForm.value.email).subscribe(() => {
+      this.deviceService.updateDevice(this.device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email).subscribe(() => {
         this.settingsForm.reset();
         this.toastr.success('Device updated');
         this.cdRef.markForCheck();
@@ -70,7 +70,7 @@ export class EditDeviceComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
-    this.deviceService.createDevice(this.settingsForm.value.name, this.settingsForm.value.platform, this.settingsForm.value.email).subscribe(() => {
+    this.deviceService.createDevice(this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email).subscribe(() => {
       this.settingsForm.reset();
       this.toastr.success('Device created');
       this.cdRef.markForCheck();

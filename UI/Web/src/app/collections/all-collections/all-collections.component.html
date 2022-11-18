@@ -16,6 +16,7 @@
         </ng-template>
 
         <ng-template #noData>
-            There are no collections. Try creating <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a>.
+            There are no collections.
+            <ng-container *ngIf="isAdmin$ | async"> Try creating <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a></ng-container>
         </ng-template>
 </app-card-detail-layout>

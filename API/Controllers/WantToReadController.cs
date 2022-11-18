@@ -41,6 +41,13 @@ public class WantToReadController : BaseApiController
         return Ok(pagedList);
     }
 
+    [HttpGet]
+    public async Task<ActionResult<bool>> GetWantToRead([FromQuery] int seriesId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        return Ok(await _unitOfWork.SeriesRepository.IsSeriesInWantToRead(user.Id, seriesId));
+    }
+
     /// <summary>
     /// Given a list of Series Ids, add them to the current logged in user's Want To Read list
     /// </summary>

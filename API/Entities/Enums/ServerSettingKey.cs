@@ -101,4 +101,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("TotalLogs")]
     TotalLogs = 18,
+    /// <summary>
+    /// If Kavita should save covers as WebP images
+    /// </summary>
+    [Description("ConvertCoverToWebP")]
+    ConvertCoverToWebP = 19,
 }

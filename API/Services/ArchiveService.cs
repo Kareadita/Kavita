@@ -20,7 +20,7 @@ public interface IArchiveService
 {
     void ExtractArchive(string archivePath, string extractPath);
     int GetNumberOfPagesFromArchive(string archivePath);
-    string GetCoverImage(string archivePath, string fileName, string outputDirectory);
+    string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false);
     bool IsValidArchive(string archivePath);
     ComicInfo GetComicInfo(string archivePath);
     ArchiveLibrary CanOpen(string archivePath);
@@ -196,8 +196,9 @@ public class ArchiveService : IArchiveService
     /// <param name="archivePath"></param>
     /// <param name="fileName">File name to use based on context of entity.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
+    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
     /// <returns></returns>
-    public string GetCoverImage(string archivePath, string fileName, string outputDirectory)
+    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false)
     {
         if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
         try
@@ -213,7 +214,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.FullName == entryName);
 
                     using var stream = entry.Open();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
@@ -224,7 +225,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
                     using var stream = entry.OpenEntryStream();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
                 }
                 case ArchiveLibrary.NotSupported:
                     _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);

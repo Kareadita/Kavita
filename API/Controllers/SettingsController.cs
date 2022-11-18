@@ -176,6 +176,12 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.ConvertCoverToWebP && updateSettingsDto.ConvertCoverToWebP + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.ConvertCoverToWebP + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
 
             if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
             {
