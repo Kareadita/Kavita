@@ -10,4 +10,9 @@ export interface Library {
     lastScanned: string;
     type: LibraryType;
     folders: string[];
+    coverImage?: string;
+    folderWatching: boolean;
+    includeInDashboard: boolean;
+    includeInRecommended: boolean;
+    includeInSearch: boolean;
 }

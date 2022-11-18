@@ -796,9 +796,9 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
 
   toggleWantToRead() {
     if (this.isWantToRead) {
-      this.actionService.addMultipleSeriesToWantToReadList([this.series.id]);
-    } else {
       this.actionService.removeMultipleSeriesFromWantToReadList([this.series.id]);
+    } else {
+      this.actionService.addMultipleSeriesToWantToReadList([this.series.id]);
     }
    
     this.isWantToRead = !this.isWantToRead;

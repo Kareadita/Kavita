@@ -14,6 +14,7 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
    * Icon to display next to item. ie) 'fa-home'
    */
   @Input() icon: string = '';
+  @Input() imageUrl: string | null = '';
   /**
    * Text for the item
    */

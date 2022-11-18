@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 
@@ -11,12 +9,24 @@ public class Library : IEntityDate
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    /// <summary>
-    /// This is not used, but planned once we build out a Library detail page
-    /// </summary>
-    [Obsolete("This has never been coded for. Likely we can remove it.")]
     public string CoverImage { get; set; }
     public LibraryType Type { get; set; }
+    /// <summary>
+    /// If Folder Watching is enabled for this library
+    /// </summary>
+    public bool FolderWatching { get; set; } = true;
+    /// <summary>
+    /// Include Library series on Dashboard Streams
+    /// </summary>
+    public bool IncludeInDashboard { get; set; } = true;
+    /// <summary>
+    /// Include Library series on Recommended Streams
+    /// </summary>
+    public bool IncludeInRecommended { get; set; } = true;
+    /// <summary>
+    /// Include library series in Search
+    /// </summary>
+    public bool IncludeInSearch { get; set; } = true;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     /// <summary>
@@ -27,4 +37,5 @@ public class Library : IEntityDate
     public ICollection<FolderPath> Folders { get; set; }
     public ICollection<AppUser> AppUsers { get; set; }
     public ICollection<Series> Series { get; set; }
+
 }

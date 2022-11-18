@@ -179,8 +179,6 @@ public class ServerController : BaseApiController
                     LastExecution = dto.LastExecution,
                 });
 
-        // For now, let's just do something simple
-        //var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs("default", 0, int.MaxValue);
         return Ok(recurringJobs);
 
     }

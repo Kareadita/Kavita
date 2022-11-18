@@ -25,6 +25,9 @@ hr {
     color: var(--accent-text-color) !important;
     box-shadow: inset 0px 0px 8px 1px var(--accent-bg-color) !important;
     font-size: var(--accent-text-size) !important;
+    font-style: italic;
+    padding: 10px;
+    border-radius: 6px;
 }
 
 .text-muted {
@@ -38,3 +41,4 @@ hr {
 .form-switch .form-check-input:checked {
     background-color: var(--primary-color);
 }
+
