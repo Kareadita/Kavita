@@ -297,7 +297,8 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}");
+            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
+                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", ImageService.LibraryThumbnailWidth);
 
             if (!string.IsNullOrEmpty(filePath))
             {
