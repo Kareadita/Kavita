@@ -153,10 +153,11 @@ export class ReadingListDetailComponent implements OnInit {
     this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => { /* No Operation */ });
   }
 
-  itemRemoved(event: ItemRemoveEvent) {
+  itemRemoved(item: ReadingListItem, position: number) {
     if (!this.readingList) return;
-    this.readingListService.deleteItem(this.readingList.id, event.item.id).subscribe(() => {
-      this.items.splice(event.position, 1);
+    this.readingListService.deleteItem(this.readingList.id, item.id).subscribe(() => {
+      this.items.splice(position, 1);
+      this.items = [...this.items];
       this.cdRef.markForCheck();
       this.toastr.success('Item removed');
     });

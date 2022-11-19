@@ -19,7 +19,6 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
     Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title);
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
-
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
     void Remove(ReadingListItem item);
@@ -137,6 +136,7 @@ public class ReadingListRepository : IReadingListRepository
             {
                 TotalPages = chapter.Pages,
                 ChapterNumber = chapter.Range,
+                ReleaseDate = chapter.ReleaseDate,
                 readingListItem = data
             })
             .Join(_context.Volume, s => s.readingListItem.VolumeId, volume => volume.Id, (data, volume) => new
@@ -144,6 +144,7 @@ public class ReadingListRepository : IReadingListRepository
                 data.readingListItem,
                 data.TotalPages,
                 data.ChapterNumber,
+                data.ReleaseDate,
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
@@ -157,7 +158,8 @@ public class ReadingListRepository : IReadingListRepository
                     data.TotalPages,
                     data.ChapterNumber,
                     data.VolumeNumber,
-                    data.VolumeId
+                    data.VolumeId,
+                    data.ReleaseDate,
                 })
             .Select(data => new ReadingListItemDto()
             {
@@ -172,7 +174,8 @@ public class ReadingListRepository : IReadingListRepository
                 VolumeNumber = data.VolumeNumber,
                 LibraryId = data.LibraryId,
                 VolumeId = data.VolumeId,
-                ReadingListId = data.readingListItem.ReadingListId
+                ReadingListId = data.readingListItem.ReadingListId,
+                ReleaseDate = data.ReleaseDate
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)

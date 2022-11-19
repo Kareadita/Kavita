@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using System;
+using API.Entities.Enums;
 
 namespace API.DTOs.ReadingLists;
 
@@ -17,6 +18,10 @@ public class ReadingListItemDto
     public int VolumeId { get; set; }
     public int LibraryId { get; set; }
     public string Title { get; set; }
+    /// <summary>
+    /// Release Date from Chapter
+    /// </summary>
+    public DateTime ReleaseDate { get; set; }
     /// <summary>
     /// Used internally only
     /// </summary>

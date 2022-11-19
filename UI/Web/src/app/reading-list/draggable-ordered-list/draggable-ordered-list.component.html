@@ -12,7 +12,7 @@
                 <label for="reorder-{{i}}" class="form-label visually-hidden">Reorder</label>
                 <input *ngIf="accessibilityMode" id="reorder-{{i}}" class="form-control" type="number" min="0" [max]="items.length - 1" [value]="i" style="width: 60px" (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
             </div>
-            <button class="btn btn-icon float-end" (click)="removeItem(item, i)">
+            <button class="btn btn-icon float-end" (click)="removeItem(item, i)" *ngIf="showRemoveButton">
                 <i class="fa fa-times" aria-hidden="true"></i>
                 <span class="visually-hidden" attr.aria-labelledby="item.id--{{i}}">Remove item</span>
             </button>

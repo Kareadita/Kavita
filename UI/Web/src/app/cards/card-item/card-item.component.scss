@@ -1,6 +1,5 @@
 
 
-$triangle-size: 30px;
 $image-height: 230px;
 $image-width: 160px;
 
@@ -75,7 +74,7 @@ $image-width: 160px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 $triangle-size $triangle-size 0;
+    border-width: 0 var(--card-progress-triangle-size) var(--card-progress-triangle-size) 0;
     border-color: transparent var(--primary-color) transparent transparent;
 }
 

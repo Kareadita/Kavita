@@ -22,6 +22,7 @@ export class ReadingListItemComponent implements OnInit {
   @Input() promoted: boolean = false;
 
   @Output() read: EventEmitter<ReadingListItem> = new EventEmitter();
+  @Output() remove: EventEmitter<ReadingListItem> = new EventEmitter();
 
   title: string = '';
 
@@ -64,5 +65,6 @@ export class ReadingListItemComponent implements OnInit {
   readChapter(item: ReadingListItem) {
     this.read.emit(item);
   }
+
 
 }
