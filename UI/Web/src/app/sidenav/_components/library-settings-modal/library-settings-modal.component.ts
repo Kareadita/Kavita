@@ -8,6 +8,7 @@ import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/admin/_
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Library, LibraryType } from 'src/app/_models/library';
+import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
@@ -60,7 +61,8 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService, 
-    private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
+    private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
+    private imageService: ImageService) { }
 
   ngOnInit(): void {
 
@@ -76,7 +78,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     }
 
     if (this.library?.coverImage != null && this.library?.coverImage !== '') {
-      this.imageUrls.push(this.library.coverImage);
+      this.imageUrls.push(this.imageService.getLibraryCoverImage(this.library.id));
       this.cdRef.markForCheck();
     }
 
