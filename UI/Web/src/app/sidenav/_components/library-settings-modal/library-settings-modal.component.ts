@@ -88,7 +88,6 @@ export class LibrarySettingsModalComponent implements OnInit {
       switchMap(name => this.libraryService.libraryNameExists(name)),
       tap(exists => {
         const isExistingName = this.libraryForm.get('name')?.value === this.library?.name;
-        console.log('isExistingName', isExistingName)
         if (!exists || isExistingName) {
           this.libraryForm.get('name')?.setErrors(null);
         } else {

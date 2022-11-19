@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, switchMap, tap } from 'rxjs';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { SelectionModel } from 'src/app/typeahead/typeahead.component';
@@ -17,8 +17,9 @@ import { UploadService } from 'src/app/_services/upload.service';
 
 
 enum TabID {
-  General = 0,
-  CoverImage = 1,
+  General = 'General',
+  CoverImage = 'Cover Image',
+  Series = 'Series'
 }
 
 @Component({
@@ -38,7 +39,6 @@ export class EditCollectionTagsComponent implements OnInit {
   selectAll: boolean = true;
   libraryNames!: any;
   collectionTagForm!: FormGroup;
-  tabs = [{title: 'General', id: TabID.General}, {title: 'Cover Image', id: TabID.CoverImage}];
   active = TabID.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
@@ -66,11 +66,28 @@ export class EditCollectionTagsComponent implements OnInit {
       this.pagination = {totalPages: 1, totalItems: 200, itemsPerPage: 200, currentPage: 0};
     }
     this.collectionTagForm = new FormGroup({
-      summary: new FormControl(this.tag.summary, []),
-      coverImageLocked: new FormControl(this.tag.coverImageLocked, []),
-      coverImageIndex: new FormControl(0, []),
-
+      title: new FormControl(this.tag.title, { nonNullable: true, validators: [Validators.required] }),
+      summary: new FormControl(this.tag.summary, { nonNullable: true, validators: [] }),
+      coverImageLocked: new FormControl(this.tag.coverImageLocked, { nonNullable: true, validators: [] }),
+      coverImageIndex: new FormControl(0, { nonNullable: true, validators: [] }),
+      promoted: new FormControl(this.tag.promoted, { nonNullable: true, validators: [] }),
     });
+
+    this.collectionTagForm.get('title')?.valueChanges.pipe(
+      debounceTime(100), 
+      distinctUntilChanged(),
+      switchMap(name => this.collectionService.tagNameExists(name)),
+      tap(exists => {
+        const isExistingName = this.collectionTagForm.get('title')?.value === this.tag.title;
+        if (!exists || isExistingName) {
+          this.collectionTagForm.get('title')?.setErrors(null);
+        } else {
+          this.collectionTagForm.get('title')?.setErrors({duplicateName: true})  
+        }
+        this.cdRef.markForCheck();
+      })
+      ).subscribe();
+
     this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag.id)));
     this.loadSeries();
   }
@@ -91,9 +108,9 @@ export class EditCollectionTagsComponent implements OnInit {
       this.libraryService.getLibraryNames()
     ]).subscribe(results => {
       const series = results[0];
-
       this.pagination = series.pagination;
       this.series = series.result;
+
       this.imageUrls.push(...this.series.map(s => this.imageService.getSeriesCoverImage(s.id)));
       this.selections = new SelectionModel<Series>(true, this.series);
       this.isLoading = false;
@@ -114,18 +131,6 @@ export class EditCollectionTagsComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  togglePromotion() {
-    const originalPromotion = this.tag.promoted;
-    this.tag.promoted = !this.tag.promoted;
-    this.cdRef.markForCheck();
-    this.collectionService.updateTag(this.tag).subscribe(res => {
-      this.toastr.success('Tag updated successfully');
-    }, err => {
-      this.tag.promoted = originalPromotion;
-      this.cdRef.markForCheck();
-    });
-  }
-
   libraryName(libraryId: number) {
     return this.libraryNames[libraryId];
   }
@@ -140,6 +145,7 @@ export class EditCollectionTagsComponent implements OnInit {
     const tag: CollectionTag = {...this.tag};
     tag.summary = this.collectionTagForm.get('summary')?.value;
     tag.coverImageLocked = this.collectionTagForm.get('coverImageLocked')?.value;
+    tag.promoted  = this.collectionTagForm.get('promoted')?.value;
     
     if (unselectedIds.length == this.series.length && !await this.confirmSerivce.confirm('Warning! No series are selected, saving will delete the tag. Are you sure you want to continue?')) {
       return;
@@ -153,7 +159,7 @@ export class EditCollectionTagsComponent implements OnInit {
       apis.push(this.uploadService.updateCollectionCoverImage(this.tag.id, this.selectedCover));
     }
   
-    forkJoin(apis).subscribe(results => {
+    forkJoin(apis).subscribe(() => {
       this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
       this.toastr.success('Tag updated');
     });
