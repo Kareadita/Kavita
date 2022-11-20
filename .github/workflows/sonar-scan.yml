@@ -22,9 +22,6 @@ jobs:
         with:
             dotnet-version: 6.0.x
 
-      - name: Install Tooling
-        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
-
       - name: Install dependencies
         run: dotnet restore
 
@@ -96,9 +93,12 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
+      - name: Test 2
+        run: ls
+
       - name: Build documentation
         shell: powershell
-        run: swagger tofile --output openapi.json API/bin/Release/net6.0/API.dll v1
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli && swagger tofile --output openapi.json API/bin/Release/net6.0/API.dll v1
 
   version:
     name: Bump version on Develop push
