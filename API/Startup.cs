@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
@@ -103,15 +105,20 @@ public class Startup
         services.AddIdentityServices(_config);
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo()
+            c.SwaggerDoc("v1", new OpenApiInfo
             {
+                Version = BuildInfo.Version.ToString(),
+                Title = "Kavita",
                 Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
-                Title = "Kavita API",
-                Version = "v1",
+                License = new OpenApiLicense
+                {
+                    Name = "GPL-3.0",
+                    Url = new Uri("https://github.com/Kareadita/Kavita/blob/develop/LICENSE")
+                }
             });
 
-
-            var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var filePath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             c.IncludeXmlComments(filePath, true);
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
                 In = ParameterLocation.Header,
@@ -119,6 +126,7 @@ public class Startup
                 Name = "Authorization",
                 Type = SecuritySchemeType.ApiKey
             });
+
             c.AddSecurityRequirement(new OpenApiSecurityRequirement {
                 {
                     new OpenApiSecurityScheme
@@ -133,30 +141,15 @@ public class Startup
                 }
             });
 
-            c.AddServer(new OpenApiServer()
+            c.AddServer(new OpenApiServer
             {
-                Description = "Custom Url",
-                Url = "/"
+                Url = "{protocol}://{hostpath}",
+                Variables = new Dictionary<string, OpenApiServerVariable>
+                {
+                    { "protocol", new OpenApiServerVariable { Default = "http", Enum = new List<string> { "http", "https" } } },
+                    { "hostpath", new OpenApiServerVariable { Default = "localhost:5000" } }
+                }
             });
-
-            c.AddServer(new OpenApiServer()
-            {
-                Description = "Local Server",
-                Url = "http://localhost:5000/",
-            });
-
-            c.AddServer(new OpenApiServer()
-            {
-                Url = "https://demo.kavitareader.com/",
-                Description = "Kavita Demo"
-            });
-
-            c.AddServer(new OpenApiServer()
-            {
-                Url = "http://" + GetLocalIpAddress() + ":5000/",
-                Description = "Local IP"
-            });
-
         });
         services.AddResponseCompression(options =>
         {
@@ -256,6 +249,7 @@ public class Startup
                 {
                     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
                 });
+
             }
         });
 
