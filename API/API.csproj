@@ -10,7 +10,7 @@
   </PropertyGroup>
     
   <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">
-      <Exec Command="swagger tofile --output openapi.json bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll v1" />
+      <Exec Command="swagger tofile --output ../openapi.json bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll v1" />
   </Target>  
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "1.0.0"
+    "version": "0.6.1.5"
   },
   "servers": [
     {
@@ -12237,7 +12237,8 @@
           },
           "enableSwaggerUi": {
             "type": "boolean",
-            "description": "If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT."
+            "description": "If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.",
+            "deprecated": true
           },
           "totalBackups": {
             "type": "integer",
