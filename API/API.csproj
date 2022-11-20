@@ -8,6 +8,10 @@
     <TieredPGO>true</TieredPGO>
     <TieredCompilation>true</TieredCompilation>
   </PropertyGroup>
+    
+  <Target Name="PostBuild" AfterTargets="Build">
+      <Exec Command="swagger tofile --output openapi.json bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll v1" />
+  </Target>  
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>false</DebugSymbols>
