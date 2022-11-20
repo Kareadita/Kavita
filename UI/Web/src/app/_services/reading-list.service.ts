@@ -87,4 +87,8 @@ export class ReadingListService {
     if (readingList?.promoted && !isAdmin) return false;
     return true;
   }
+  
+  nameExists(name: string) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'readinglist/name-exists?name=' + name);
+  }
 }

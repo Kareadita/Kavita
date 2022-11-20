@@ -25,6 +25,7 @@ export class ReadingListsComponent implements OnInit {
   pagination!: Pagination;
   isAdmin: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
+  actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
 
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService,
@@ -86,6 +87,8 @@ export class ReadingListsComponent implements OnInit {
       this.pagination = readingLists.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title);
       this.loadingLists = false;
+      this.actions = {};
+      this.lists.forEach(l => this.actions[l.id] = this.getActions(l));
       window.scrollTo(0, 0);
       this.cdRef.markForCheck();
     });

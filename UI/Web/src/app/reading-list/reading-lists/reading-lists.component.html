@@ -13,7 +13,7 @@
     [filteringDisabled]="true"
     >
     <ng-template #cardItem let-item let-position="idx" >
-        <app-card-item [title]="item.title" [entity]="item" [actions]="getActions(item)" 
+        <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]" 
             [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)" 
             (clicked)="handleClick(item)"></app-card-item>
     </ng-template>

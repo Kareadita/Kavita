@@ -9,7 +9,6 @@ using API.Extensions;
 using API.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers;
 
@@ -64,6 +63,19 @@ public class CollectionController : BaseApiController
     }
 
     /// <summary>
+    /// Checks if a collection exists with the name
+    /// </summary>
+    /// <param name="name">If empty or null, will return true as that is invalid</param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("name-exists")]
+    public async Task<ActionResult<bool>> DoesNameExists(string name)
+    {
+        if (string.IsNullOrEmpty(name.Trim())) return Ok(true);
+        return Ok(await _unitOfWork.CollectionTagRepository.TagExists(name));
+    }
+
+    /// <summary>
     /// Updates an existing tag with a new title, promotion status, and summary.
     /// <remarks>UI does not contain controls to update title</remarks>
     /// </summary>
@@ -71,14 +83,18 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
-    public async Task<ActionResult> UpdateTagPromotion(CollectionTagDto updatedTag)
+    public async Task<ActionResult> UpdateTag(CollectionTagDto updatedTag)
     {
         var existingTag = await _unitOfWork.CollectionTagRepository.GetTagAsync(updatedTag.Id);
         if (existingTag == null) return BadRequest("This tag does not exist");
+        var title = updatedTag.Title.Trim();
+        if (string.IsNullOrEmpty(title)) return BadRequest("Title cannot be empty");
+        if (!title.Equals(existingTag.Title) &&  await _unitOfWork.CollectionTagRepository.TagExists(updatedTag.Title))
+            return BadRequest("A tag with this name already exists");
 
+        existingTag.Title = title;
         existingTag.Promoted = updatedTag.Promoted;
-        existingTag.Title = updatedTag.Title.Trim();
-        existingTag.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(updatedTag.Title).ToUpper();
+        existingTag.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(updatedTag.Title);
         existingTag.Summary = updatedTag.Summary.Trim();
 
         if (_unitOfWork.HasChanges())

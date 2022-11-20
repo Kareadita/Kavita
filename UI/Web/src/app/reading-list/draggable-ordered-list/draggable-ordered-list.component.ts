@@ -21,6 +21,10 @@ export interface ItemRemoveEvent {
 export class DraggableOrderedListComponent implements OnInit {
 
   @Input() accessibilityMode: boolean = false;
+  /**
+   * Shows the remove button on the list item
+   */
+  @Input() showRemoveButton: boolean = true;
   @Input() items: Array<any> = [];
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using API.Services;
 
 namespace API.DTOs.Settings;
@@ -50,6 +51,7 @@ public class ServerSettingDto
     /// <summary>
     /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
     /// </summary>
+    [Obsolete("Being removed in v0.7 in favor of dedicated hosted api")]
     public bool EnableSwaggerUi { get; set; }
     /// <summary>
     /// The amount of Backups before cleanup

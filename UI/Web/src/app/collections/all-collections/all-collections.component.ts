@@ -67,7 +67,7 @@ export class AllCollectionsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.cdRef.markForCheck();
     this.collectionService.allTags().subscribe(tags => {
-      this.collections = tags;
+      this.collections = [...tags];
       this.isLoading = false;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(tags, (t: Tag) => t.title);
       this.cdRef.markForCheck();

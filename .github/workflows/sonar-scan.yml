@@ -22,6 +22,10 @@ jobs:
         with:
             dotnet-version: 6.0.x
 
+      - name: Install Swashbuckle CLI
+        shell: powershell
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
+
       - name: Install dependencies
         run: dotnet restore
 
@@ -34,29 +38,6 @@ jobs:
         with:
           name: csproj
           path: Kavita.Common/Kavita.Common.csproj
-
-  test:
-    name: Install Sonar & Test
-    needs: build
-    runs-on: windows-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-        with:
-            fetch-depth: 0
-
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
-        with:
-            dotnet-version: 6.0.x
-
-      - name: Install dependencies
-        run: dotnet restore
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.11
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
@@ -93,9 +74,10 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
+
   version:
     name: Bump version on Develop push
-    needs: [ build, test ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
@@ -107,6 +89,10 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
             dotnet-version: 6.0.x
+
+      - name: Install Swashbuckle CLI
+        shell: powershell
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
 
       - name: Install dependencies
         run: dotnet restore
@@ -194,6 +180,11 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
             dotnet-version: 6.0.x
+
+      - name: Install Swashbuckle CLI
+        shell: powershell
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
+
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
@@ -307,6 +298,10 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
             dotnet-version: 6.0.x
+      - name: Install Swashbuckle CLI
+        shell: powershell
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
+
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub

@@ -17,8 +17,9 @@ public interface IImageService
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
     /// <param name="fileName"></param>
+    /// <param name="thumbnailWidth">Width of thumbnail</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    string CreateThumbnailFromBase64(string encodedImage, string fileName);
+    string CreateThumbnailFromBase64(string encodedImage, string fileName, int thumbnailWidth = 0);
 
     string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false);
     /// <summary>
@@ -46,6 +47,10 @@ public class ImageService : IImageService
     /// Width of the Thumbnail generation
     /// </summary>
     private const int ThumbnailWidth = 320;
+    /// <summary>
+    /// Width of a cover for Library
+    /// </summary>
+    public const int LibraryThumbnailWidth = 32;
 
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
@@ -114,7 +119,6 @@ public class ImageService : IImageService
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + ".webp");
 
-
         using var sourceImage = await SixLabors.ImageSharp.Image.LoadAsync(filePath);
         await sourceImage.SaveAsWebpAsync(outputFile);
         return outputFile;
@@ -139,7 +143,7 @@ public class ImageService : IImageService
 
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, int thumbnailWidth = ThumbnailWidth)
     {
         try
         {

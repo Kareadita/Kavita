@@ -1,6 +1,5 @@
 $image-height: 230px;
 $image-width: 160px;
-$triangle-size: 30px;
 
 // with summary and cards, we have a height of 220px, we might want to default to 220px and let it grow from there to help with virtualization
 
@@ -34,12 +33,8 @@ $triangle-size: 30px;
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 $triangle-size $triangle-size 0;
+    border-width: 0 var(--card-progress-triangle-size) var(--card-progress-triangle-size) 0;
     border-color: transparent var(--primary-color) transparent transparent;
-}
-
-h5 {
-    margin-bottom: 0;
 }
 
 .subtitle-with-actionables {

@@ -12,6 +12,7 @@ export interface ReadingListItem {
     volumeNumber: string;
     libraryId: number;
     id: number;
+    releaseDate: string;
 }
 
 export interface ReadingList {
