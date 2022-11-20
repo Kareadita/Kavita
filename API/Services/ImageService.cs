@@ -119,7 +119,6 @@ public class ImageService : IImageService
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + ".webp");
 
-
         using var sourceImage = await SixLabors.ImageSharp.Image.LoadAsync(filePath);
         await sourceImage.SaveAsWebpAsync(outputFile);
         return outputFile;

@@ -88,7 +88,8 @@ export class ReadingListDetailComponent implements OnInit {
           this.isAdmin = this.accountService.hasAdminRole(user);
           this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
           
-          this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this)).filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
+          this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
+            .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
           this.cdRef.markForCheck();
         }
       });

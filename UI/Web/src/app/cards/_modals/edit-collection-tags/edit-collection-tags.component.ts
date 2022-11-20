@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, forkJoin, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { SelectionModel } from 'src/app/typeahead/typeahead.component';
@@ -28,7 +28,7 @@ enum TabID {
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditCollectionTagsComponent implements OnInit {
+export class EditCollectionTagsComponent implements OnInit, OnDestroy {
 
   @Input() tag!: CollectionTag;
   series: Array<Series> = [];
@@ -42,6 +42,8 @@ export class EditCollectionTagsComponent implements OnInit {
   active = TabID.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
+
+  private readonly onDestroy = new Subject<void>();
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
@@ -85,11 +87,17 @@ export class EditCollectionTagsComponent implements OnInit {
           this.collectionTagForm.get('title')?.setErrors({duplicateName: true})  
         }
         this.cdRef.markForCheck();
-      })
+      }),
+      takeUntil(this.onDestroy)
       ).subscribe();
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag.id)));
     this.loadSeries();
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   onPageChange(pageNum: number) {
@@ -100,6 +108,7 @@ export class EditCollectionTagsComponent implements OnInit {
   toggleAll() {
     this.selectAll = !this.selectAll;
     this.series.forEach(s => this.selections.toggle(s, this.selectAll));
+    this.cdRef.markForCheck();
   }
 
   loadSeries() {
@@ -151,7 +160,7 @@ export class EditCollectionTagsComponent implements OnInit {
       return;
     }
 
-    const apis = [this.collectionService.updateTag(this.tag),
+    const apis = [this.collectionService.updateTag(tag),
       this.collectionService.updateSeriesForTag(tag, this.selections.unselected().map(s => s.id))
     ];
     

@@ -28,6 +28,7 @@ public interface IReadingListRepository
     Task<int> Count();
     Task<string> GetCoverImageAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
+    Task<bool> ReadingListExists(string name);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -72,6 +73,13 @@ public class ReadingListRepository : IReadingListRepository
             .Where(t => !string.IsNullOrEmpty(t))
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<bool> ReadingListExists(string name)
+    {
+        var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+        return await _context.ReadingList
+            .AnyAsync(x => x.NormalizedTitle.Equals(normalized));
     }
 
     public void Remove(ReadingListItem item)

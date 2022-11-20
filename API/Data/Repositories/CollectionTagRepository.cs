@@ -104,7 +104,6 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<bool> TagExists(string title)
     {
-        if (string.IsNullOrEmpty(title)) return false;
         var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(title);
         return await _context.CollectionTag
             .AnyAsync(x => x.NormalizedTitle.Equals(normalized));

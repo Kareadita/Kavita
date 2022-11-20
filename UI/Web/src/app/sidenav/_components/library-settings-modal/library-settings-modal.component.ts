@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -32,7 +32,7 @@ enum StepID {
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LibrarySettingsModalComponent implements OnInit {
+export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
 
   @Input() library!: Library;
 
@@ -54,6 +54,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   
   isAddLibrary = false;
   setupStep = StepID.General;
+  private readonly onDestroy = new Subject<void>();
 
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
@@ -94,12 +95,19 @@ export class LibrarySettingsModalComponent implements OnInit {
           this.libraryForm.get('name')?.setErrors({duplicateName: true})  
         }
         this.cdRef.markForCheck();
-      })
+      }),
+      takeUntil(this.onDestroy)
       ).subscribe();
 
 
     this.setValues();
   }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
+  
 
   setValues() {
     if (this.library !== undefined) {

@@ -28,7 +28,7 @@
                             <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input"
                                 aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
                             <label class="form-check-label me-1" for="tag-promoted">Promote</label>
-                            <i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
+                            <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
                             <ng-template #promotedTooltip>Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.</ng-template>
                             <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip"></ng-container></span>
                         </div>
@@ -83,7 +83,6 @@
             </ng-template>
         </li>
     </ul>
-
 
     <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
 </div>

@@ -218,22 +218,15 @@ public class ReadingListController : BaseApiController
         }
 
         dto.Title = dto.Title.Trim();
-        if (!string.IsNullOrEmpty(dto.Title))
-        {
-            readingList.Summary = dto.Summary;
 
-            if (!readingList.Title.Equals(dto.Title))
-            {
-                var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));
-                if (hasExisting)
-                {
-                    return BadRequest("A list of this name already exists");
-                }
-                readingList.Title = dto.Title;
-                readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
-            }
-        }
+        if (string.IsNullOrEmpty(dto.Title)) return BadRequest("Title must be set");
+        if (!dto.Title.Equals(readingList.Title) && await _unitOfWork.ReadingListRepository.ReadingListExists(dto.Title))
+            return BadRequest("Reading list already exists");
 
+
+        readingList.Summary = dto.Summary;
+        readingList.Title = dto.Title;
+        readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
 
@@ -246,9 +239,9 @@ public class ReadingListController : BaseApiController
             _unitOfWork.ReadingListRepository.Update(readingList);
         }
 
-
-
         _unitOfWork.ReadingListRepository.Update(readingList);
+
+        if (!_unitOfWork.HasChanges()) return Ok("Updated");
 
         if (await _unitOfWork.CommitAsync())
         {
@@ -497,5 +490,18 @@ public class ReadingListController : BaseApiController
         }
 
         return Ok(-1);
+    }
+
+    /// <summary>
+    /// Checks if a reading list exists with the name
+    /// </summary>
+    /// <param name="name">If empty or null, will return true as that is invalid</param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("name-exists")]
+    public async Task<ActionResult<bool>> DoesNameExists(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return true;
+        return Ok(await _unitOfWork.ReadingListRepository.ReadingListExists(name));
     }
 }
