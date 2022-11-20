@@ -283,7 +283,7 @@ public class LibraryRepository : ILibraryRepository
     {
         return await _context.Library
             .AsNoTracking()
-            .AnyAsync(x => x.Name == libraryName);
+            .AnyAsync(x => x.Name.Equals(libraryName));
     }
 
     public async Task<IEnumerable<LibraryDto>> GetLibrariesForUserAsync(AppUser user)

@@ -33,6 +33,7 @@ public interface ICollectionTagRepository
     Task<int> RemoveTagsWithoutSeries();
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync();
     Task<IList<string>> GetAllCoverImagesAsync();
+    Task<bool> TagExists(string title);
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -99,6 +100,13 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Where(t => !string.IsNullOrEmpty(t))
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<bool> TagExists(string title)
+    {
+        var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(title);
+        return await _context.CollectionTag
+            .AnyAsync(x => x.NormalizedTitle.Equals(normalized));
     }
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()

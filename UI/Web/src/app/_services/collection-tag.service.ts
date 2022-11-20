@@ -36,4 +36,8 @@ export class CollectionTagService {
   addByMultiple(tagId: number, seriesIds: Array<number>, tagTitle: string = '') {
     return this.httpClient.post(this.baseUrl + 'collection/update-for-series', {collectionTagId: tagId, collectionTagTitle: tagTitle, seriesIds}, {responseType: 'text' as 'json'});
   }
+
+  tagNameExists(name: string) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'collection/name-exists?name=' + name);
+  }
 }

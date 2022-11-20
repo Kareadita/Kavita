@@ -298,13 +298,15 @@ public class LibraryController : BaseApiController
     /// <summary>
     /// Checks if the library name exists or not
     /// </summary>
-    /// <param name="name"></param>
+    /// <param name="name">If empty or null, will return true as that is invalid</param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> IsLibraryNameValid(string name)
     {
-        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(name.Trim()));
+        var trimmed = name.Trim();
+        if (string.IsNullOrEmpty(trimmed)) return Ok(true);
+        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(trimmed));
     }
 
     /// <summary>

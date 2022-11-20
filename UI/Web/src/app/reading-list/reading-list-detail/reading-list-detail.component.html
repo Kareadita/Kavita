@@ -54,7 +54,7 @@
     </div>
   </div>
 
-  <div class="row mb-3">
+  <div class="row mb-3" cdkScrollable>
     <div class="mx-auto" style="width: 200px;">
       <ng-container *ngIf="items.length === 0 && !isLoading">
         Nothing added
@@ -67,10 +67,10 @@
     </div>
 
     <!-- TODO: This needs virtualization -->
-    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" (itemRemove)="itemRemoved($event)" [accessibilityMode]="accessibilityMode">
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode" [showRemoveButton]="false">
         <ng-template #draggableItem let-item let-position="idx">
           <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
-            [promoted]="item.promoted" (read)="readChapter($event)"></app-reading-list-item>
+            [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>
         </ng-template>
     </app-draggable-ordered-list>
   </div>

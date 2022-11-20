@@ -10,7 +10,7 @@ import { ReadingListsComponent } from './reading-lists/reading-lists.component';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { SharedModule } from '../shared/shared.module';
-import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { ReadingListItemComponent } from './reading-list-item/reading-list-item.component';
 
@@ -30,6 +30,8 @@ import { ReadingListItemComponent } from './reading-list-item/reading-list-item.
     ReactiveFormsModule,
     DragDropModule,
     NgbNavModule,
+    NgbProgressbarModule,
+    NgbTooltipModule,
 
     PipeModule,
     SharedModule,

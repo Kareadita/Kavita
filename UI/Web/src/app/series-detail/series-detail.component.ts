@@ -173,7 +173,12 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     let chapterArray = this.storyChapters;
     if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters;
 
-    const selectedChapterIds = chapterArray.filter((_chapter, index: number) => selectedChapterIndexes.includes(index + ''));
+    // We must augment chapter indecies as Bulk Selection assumes all on one page, but Storyline has mixed
+    const chapterIndexModifier = this.activeTabId === TabID.Storyline ? this.volumes.length + 1 : 0;
+    const selectedChapterIds = chapterArray.filter((_chapter, index: number) => {
+      const mappedIndex = index + chapterIndexModifier;
+      return selectedChapterIndexes.includes(mappedIndex + '');
+    });
     const selectedVolumeIds = this.volumes.filter((_volume, index: number) => selectedVolumeIndexes.includes(index + ''));
     const selectedSpecials = this.specials.filter((_chapter, index: number) => selectedSpecialIndexes.includes(index + ''));
     const chapters = [...selectedChapterIds, ...selectedSpecials];

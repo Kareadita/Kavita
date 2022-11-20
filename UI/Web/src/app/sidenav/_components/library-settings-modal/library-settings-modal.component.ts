@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, filter, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Library, LibraryType } from 'src/app/_models/library';
+import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
@@ -31,7 +32,7 @@ enum StepID {
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LibrarySettingsModalComponent implements OnInit {
+export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
 
   @Input() library!: Library;
 
@@ -53,6 +54,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   
   isAddLibrary = false;
   setupStep = StepID.General;
+  private readonly onDestroy = new Subject<void>();
 
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
@@ -60,7 +62,8 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService, 
-    private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
+    private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
+    private imageService: ImageService) { }
 
   ngOnInit(): void {
 
@@ -76,7 +79,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     }
 
     if (this.library?.coverImage != null && this.library?.coverImage !== '') {
-      this.imageUrls.push(this.library.coverImage);
+      this.imageUrls.push(this.imageService.getLibraryCoverImage(this.library.id));
       this.cdRef.markForCheck();
     }
 
@@ -86,19 +89,25 @@ export class LibrarySettingsModalComponent implements OnInit {
       switchMap(name => this.libraryService.libraryNameExists(name)),
       tap(exists => {
         const isExistingName = this.libraryForm.get('name')?.value === this.library?.name;
-        console.log('isExistingName', isExistingName)
         if (!exists || isExistingName) {
           this.libraryForm.get('name')?.setErrors(null);
         } else {
           this.libraryForm.get('name')?.setErrors({duplicateName: true})  
         }
         this.cdRef.markForCheck();
-      })
+      }),
+      takeUntil(this.onDestroy)
       ).subscribe();
 
 
     this.setValues();
   }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
+  
 
   setValues() {
     if (this.library !== undefined) {

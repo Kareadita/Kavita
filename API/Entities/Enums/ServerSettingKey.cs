@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace API.Entities.Enums;
 
@@ -85,6 +86,7 @@ public enum ServerSettingKey
     /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
     /// </summary>
     [Description("EnableSwaggerUi")]
+    [Obsolete("Being removed in v0.7 in favor of dedicated hosted api")]
     EnableSwaggerUi = 15,
     /// <summary>
     /// Total Number of Backups to maintain before cleaning. Default 30, min 1.

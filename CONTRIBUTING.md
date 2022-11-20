@@ -12,8 +12,9 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 - Rider (optional to Visual Studio) (https://www.jetbrains.com/rider/)  
 - HTML/Javascript editor of choice (VS Code/Sublime Text/Webstorm/Atom/etc)
 - [Git](https://git-scm.com/downloads)
-- [NodeJS](https://nodejs.org/en/download/) (Node 14.X.X or higher)
-- .NET 5.0+ 
+- [NodeJS](https://nodejs.org/en/download/) (Node 16.X.X or higher)
+- .NET 6.0+
+- dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
 
 ### Getting started ###
 
@@ -47,8 +48,8 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 - You're probably going to get some comments or questions from us, they will be to ensure consistency and maintainability
 - We'll try to respond to pull requests as soon as possible, if its been a day or two, please reach out to us, we may have missed it
 - Each PR should come from its own [feature branch](http://martinfowler.com/bliki/FeatureBranch.html) not develop in your fork, it should have a meaningful branch name (what is being added/fixed)
-    - new-feature (Good)
-    - fix-bug (Good)
+    - new-feature (Bad)
+    - fix-bug (Bad)
     - patch (Bad)
     - develop (Bad)
     - feature/parser-enhancements (Great)
