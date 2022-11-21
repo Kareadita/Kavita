@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
         <AssemblyVersion>0.6.1.6</AssemblyVersion>
@@ -12,9 +12,9 @@
     <ItemGroup>
       <PackageReference Include="DotNet.Glob" Version="3.1.3" />
       <PackageReference Include="Flurl.Http" Version="3.2.4" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="8.47.0.55603">
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="8.48.0.56517">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
