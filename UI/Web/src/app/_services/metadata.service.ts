@@ -4,12 +4,12 @@ import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
-import { Genre } from '../_models/genre';
+import { Genre } from '../_models/metadata/genre';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
 import { Language } from '../_models/metadata/language';
 import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
-import { Person } from '../_models/person';
+import { Person } from '../_models/metadata/person';
 import { Tag } from '../_models/tag';
 
 @Injectable({

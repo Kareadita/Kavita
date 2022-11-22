@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { Person } from '../../_models/person';
+import { Person } from '../../_models/metadata/person';
 
 @Component({
   selector: 'app-person-badge',

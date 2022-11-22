@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CarouselReelComponent } from './carousel-reel/carousel-reel.component';
+import { CarouselReelComponent } from './_components/carousel-reel/carousel-reel.component';
 import { SwiperModule } from 'swiper/angular';
 
 

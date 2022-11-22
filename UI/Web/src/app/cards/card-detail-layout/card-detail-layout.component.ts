@@ -11,7 +11,7 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/metadata/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 

@@ -9,7 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 import { asyncScheduler, BehaviorSubject, Observable, tap, finalize, of, filter } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
-import { PageBookmark } from 'src/app/_models/page-bookmark';
+import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { switchMap, takeWhile, throttleTime } from 'rxjs/operators';
 import { AccountService } from 'src/app/_services/account.service';
 
