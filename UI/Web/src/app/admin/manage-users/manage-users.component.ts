@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, take } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
-import { Member } from 'src/app/_models/member';
+import { Member } from 'src/app/_models/auth/member';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ToastrService } from 'ngx-toastr';

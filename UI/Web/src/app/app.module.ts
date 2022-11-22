@@ -12,7 +12,7 @@ import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { SidenavModule } from './sidenav/sidenav.module';
 import { NavModule } from './nav/nav.module';
-import { DevicesComponent } from './devices/devices.component';
+import { DevicesComponent } from './_components/devices/devices.component';
 
 
 

@@ -6,15 +6,15 @@ import { environment } from 'src/environments/environment';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
-import { ChapterMetadata } from '../_models/chapter-metadata';
+import { ChapterMetadata } from '../_models/metadata/chapter-metadata';
 import { CollectionTag } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 import { SeriesDetail } from '../_models/series-detail/series-detail';
-import { SeriesFilter } from '../_models/series-filter';
+import { SeriesFilter } from '../_models/metadata/series-filter';
 import { SeriesGroup } from '../_models/series-group';
-import { SeriesMetadata } from '../_models/series-metadata';
+import { SeriesMetadata } from '../_models/metadata/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
 

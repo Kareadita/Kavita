@@ -9,7 +9,7 @@ import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { FilterEvent, SeriesFilter } from '../_models/series-filter';
+import { FilterEvent, SeriesFilter } from '../_models/metadata/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';

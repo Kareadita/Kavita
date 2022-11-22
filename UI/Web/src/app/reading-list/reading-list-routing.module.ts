@@ -1,8 +1,9 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
 import { AuthGuard } from "../_guards/auth.guard";
-import { ReadingListDetailComponent } from "./reading-list-detail/reading-list-detail.component";
-import { ReadingListsComponent } from "./reading-lists/reading-lists.component";
+import { ReadingListDetailComponent } from "./_components/reading-list-detail/reading-list-detail.component";
+import { ReadingListsComponent } from "./_components/reading-lists/reading-lists.component";
+
 
 const routes: Routes = [
   {

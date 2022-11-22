@@ -3,14 +3,14 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
-import { BookService } from 'src/app/book-reader/book.service';
+import { BookService } from 'src/app/book-reader/_services/book.service';
 import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes, pageLayoutModes } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
-import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
+import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { forkJoin, Subject } from 'rxjs';
 
 enum AccordionPanelID {
