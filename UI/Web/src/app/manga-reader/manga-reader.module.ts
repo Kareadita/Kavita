@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MangaReaderComponent } from './manga-reader.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { MangaReaderRoutingModule } from './manga-reader.router.module';
@@ -17,6 +16,7 @@ import { CanvasRendererComponent } from './_components/canvas-renderer/canvas-re
 import { SingleRendererComponent } from './_components/single-renderer/single-renderer.component';
 import { DoubleRendererComponent } from './_components/double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from './_components/double-reverse-renderer/double-reverse-renderer.component';
+import { MangaReaderComponent } from './_components/manga-reader/manga-reader.component';
 
 @NgModule({
   declarations: [

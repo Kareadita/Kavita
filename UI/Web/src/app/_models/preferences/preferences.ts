@@ -1,7 +1,7 @@
 
 import { LayoutMode } from 'src/app/manga-reader/_models/layout-mode';
 import { BookPageLayoutMode } from '../readers/book-page-layout-mode';
-import { PageLayoutMode } from '../readers/page-layout-mode';
+import { PageLayoutMode } from '../page-layout-mode';
 import { PageSplitOption } from './page-split-option';
 import { ReaderMode } from './reader-mode';
 import { ReadingDirection } from './reading-direction';
