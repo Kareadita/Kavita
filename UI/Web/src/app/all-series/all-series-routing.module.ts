@@ -1,7 +1,9 @@
 import { NgModule } from "@angular/core";
 import { Routes, RouterModule } from "@angular/router";
 import { AuthGuard } from "../_guards/auth.guard";
-import { AllSeriesComponent } from "./all-series.component";
+import { AllSeriesComponent } from "./_components/all-series/all-series.component";
+
+
 const routes: Routes = [
   {path: '**', component: AllSeriesComponent, pathMatch: 'full', canActivate: [AuthGuard]},
   {

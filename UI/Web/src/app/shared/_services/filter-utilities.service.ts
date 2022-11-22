@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router';
 import { Pagination } from 'src/app/_models/pagination';
-import { SeriesFilter, SortField } from 'src/app/_models/series-filter';
+import { SeriesFilter, SortField } from 'src/app/_models/metadata/series-filter';
 import { SeriesService } from 'src/app/_services/series.service';
 
 /**

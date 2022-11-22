@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { Subject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
-import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
-import { HourEstimateRange } from 'src/app/_models/hour-estimate-range';
+import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
+import { HourEstimateRange } from 'src/app/_models/series-detail/hour-estimate-range';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';

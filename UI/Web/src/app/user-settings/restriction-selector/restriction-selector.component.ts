@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { AgeRestriction } from 'src/app/_models/age-restriction';
-import { Member } from 'src/app/_models/member';
+import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
+import { Member } from 'src/app/_models/auth/member';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { User } from 'src/app/_models/user';

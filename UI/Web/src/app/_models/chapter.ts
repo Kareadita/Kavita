@@ -1,4 +1,4 @@
-import { HourEstimateRange } from './hour-estimate-range';
+import { HourEstimateRange } from './series-detail/hour-estimate-range';
 import { MangaFile } from './manga-file';
 import { AgeRating } from './metadata/age-rating';
 import { AgeRatingDto } from './metadata/age-rating-dto';

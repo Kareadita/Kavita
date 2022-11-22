@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
+import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 
 @Component({
   selector: 'app-chapter-metadata-detail',

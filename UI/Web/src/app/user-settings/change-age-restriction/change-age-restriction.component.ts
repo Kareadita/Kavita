@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, of, Subject, takeUntil, shareReplay, map, take } from 'rxjs';
-import { AgeRestriction } from 'src/app/_models/age-restriction';
+import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';

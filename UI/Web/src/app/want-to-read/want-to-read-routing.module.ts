@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from '../_guards/auth.guard';
-import { WantToReadComponent } from './want-to-read/want-to-read.component';
+import { WantToReadComponent } from './_components/want-to-read/want-to-read.component';
 
 const routes: Routes = [
     {path: '**', component: WantToReadComponent, pathMatch: 'full'},

@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
 import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
-import { LibrarySettingsModalComponent } from 'src/app/sidenav/_components/library-settings-modal/library-settings-modal.component';
+import { LibrarySettingsModalComponent } from 'src/app/sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
 import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
 import { Library } from 'src/app/_models/library';

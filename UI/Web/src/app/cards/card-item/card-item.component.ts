@@ -7,7 +7,7 @@ import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { PageBookmark } from 'src/app/_models/page-bookmark';
+import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { RecentlyAddedItem } from 'src/app/_models/recently-added-item';
 import { Series } from 'src/app/_models/series';
 import { User } from 'src/app/_models/user';

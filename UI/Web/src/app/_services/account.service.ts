@@ -8,11 +8,11 @@ import { User } from '../_models/user';
 import { Router } from '@angular/router';
 import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
-import { InviteUserResponse } from '../_models/invite-user-response';
+import { InviteUserResponse } from '../_models/auth/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { UpdateEmailResponse } from '../_models/email/update-email-response';
+import { UpdateEmailResponse } from '../_models/auth/update-email-response';
 import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRestriction } from '../_models/age-restriction';
+import { AgeRestriction } from '../_models/metadata/age-restriction';
 
 export enum Role {
   Admin = 'Admin',

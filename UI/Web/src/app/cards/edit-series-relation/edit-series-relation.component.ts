@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, In
 import { FormControl } from '@angular/forms';
 import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
-import { SearchResult } from 'src/app/_models/search-result';
+import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
+import { SearchResult } from 'src/app/_models/search/search-result';
 import { Series } from 'src/app/_models/series';
 import { RelationKind, RelationKinds } from 'src/app/_models/series-detail/relation-kind';
 import { ImageService } from 'src/app/_services/image.service';

@@ -5,12 +5,12 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { Chapter } from '../_models/chapter';
-import { HourEstimateRange } from '../_models/hour-estimate-range';
+import { HourEstimateRange } from '../_models/series-detail/hour-estimate-range';
 import { MangaFormat } from '../_models/manga-format';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
-import { PageBookmark } from '../_models/page-bookmark';
-import { ProgressBookmark } from '../_models/progress-bookmark';
-import { SeriesFilter } from '../_models/series-filter';
+import { PageBookmark } from '../_models/readers/page-bookmark';
+import { ProgressBookmark } from '../_models/readers/progress-bookmark';
+import { SeriesFilter } from '../_models/metadata/series-filter';
 import { UtilityService } from '../shared/_services/utility.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 
