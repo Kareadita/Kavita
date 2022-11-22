@@ -125,26 +125,6 @@ export class SelectionModel<T> {
       }
     }
     return true;
-
-    // if (object1 === undefined || object2 === undefined) return false;
-
-    // if (typeof(object1) === 'string' && typeof(object2) === 'string') return object1 === object2;
-
-    // const keys1 = Object.keys(object1);
-    // const keys2 = Object.keys(object2);
-
-    // if (keys1.length !== keys2.length) {
-    //   return false;
-    // }
-    
-
-    // for (let key of keys1) {
-    //   if ((object1 as any)[key] !== (object2 as any)[key]) {
-    //     return false;
-    //   }
-    // }
-
-    // return true;
   }
 }
 
