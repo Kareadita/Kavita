@@ -383,7 +383,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     console.log("++++currentImage4Ahead:", this.currentImage4Ahead);
     console.log("pagenums", this.pageNum);
     console.log("maxPages", this.maxPages);
-    // If prev page:
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {

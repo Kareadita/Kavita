@@ -1080,12 +1080,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
 
   renderPage() {
-    //console.log('[Manga Reader] renderPage()');
+    console.log('[Manga Reader] renderPage()');
 
-    this.canvasRenderer.renderPage([this.canvasImage]); 
-    this.singleRenderer.renderPage([this.canvasImage]);
-    this.doubleRenderer.renderPage([this.canvasImage]);
-    this.doubleReverseRenderer.renderPage([this.canvasImage]);
+    const page = [this.canvasImage];
+    this.canvasRenderer.renderPage(page); 
+    this.singleRenderer.renderPage(page);
+    this.doubleRenderer.renderPage(page);
+    this.doubleReverseRenderer.renderPage(page);
 
     if (this.getFit() !== FITTING_OPTION.HEIGHT) {
         this.readingArea.nativeElement.scroll(0,0);
