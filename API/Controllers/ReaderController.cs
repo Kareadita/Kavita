@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -56,7 +57,7 @@ public class ReaderController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("pdf")]
-    [ResponseCache(CacheProfileName = "Hour")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     public async Task<ActionResult> GetPdf(int chapterId)
     {
         var chapter = await _cacheService.Ensure(chapterId);
@@ -90,7 +91,7 @@ public class ReaderController : BaseApiController
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("image")]
-    [ResponseCache(CacheProfileName = "Hour")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     [AllowAnonymous]
     public async Task<ActionResult> GetImage(int chapterId, int page)
     {
@@ -122,7 +123,7 @@ public class ReaderController : BaseApiController
     /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
     /// <returns></returns>
     [HttpGet("bookmark-image")]
-    [ResponseCache(CacheProfileName = "Hour")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     [AllowAnonymous]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {

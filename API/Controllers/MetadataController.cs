@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Filtering;
@@ -84,7 +85,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "5Minute", VaryByQueryKeys = new [] {"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("age-ratings")]
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
@@ -107,7 +108,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all publication status</param>
     /// <remarks>This API is cached for 1 hour, varying by libraryIds</remarks>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = "5Minute", VaryByQueryKeys = new [] {"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new [] {"libraryIds"})]
     [HttpGet("publication-status")]
     public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {
