@@ -1142,10 +1142,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const pagesBefore = pages.filter(p => p >= 0 && p < this.pageNum).length;
     const pagesAfter = pages.filter(p => p >= 0 && p > this.pageNum).length;
     //console.log('Buffer Health: Before: ', pagesBefore, ' After: ', pagesAfter);
-    // console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
-    //   if (this.pageNum === p) return '[' + p + ']';
-    //   return '' + p
-    // }));
+    console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
+      if (this.pageNum === p) return '[' + p + ']';
+      return '' + p
+    }));
   }
 
 
