@@ -21,7 +21,6 @@ import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
 import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { Series } from 'src/app/_models/series';
 import { RelatedSeries } from 'src/app/_models/series-detail/related-series';
@@ -42,6 +41,7 @@ import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { ReviewSeriesModalComponent } from '../../_modals/review-series-modal/review-series-modal.component';
+import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
 
 interface RelatedSeris {
   series: Series;
