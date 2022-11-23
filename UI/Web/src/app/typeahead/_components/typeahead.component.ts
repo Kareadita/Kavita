@@ -62,14 +62,12 @@ export class SelectionModel<T> {
    * @returns boolean
    */
   isSelected(data: T, compareFn?: SelectionCompareFn<T>): boolean {
-    let dataItem: Array<any>;
-
     let lookupMethod = this.shallowEqual;
     if (compareFn != undefined || compareFn != null) {
       lookupMethod = compareFn;
     }
 
-    dataItem = this._data.filter(d => lookupMethod(d.value, data));
+    const dataItem = this._data.filter(d => lookupMethod(d.value, data));
 
     if (dataItem.length > 0) {
       return dataItem[0].selected;
@@ -114,24 +112,18 @@ export class SelectionModel<T> {
     return undefined;
   }
 
-  shallowEqual(object1: T, object2: T) {
-    if (object1 === undefined || object2 === undefined) return false;
+  shallowEqual(a: T, b: T) {
 
-    if (typeof(object1) === 'string' && typeof(object2) === 'string') return object1 === object2;
-
-    const keys1 = Object.keys(<object>object1);
-    const keys2 = Object.keys(<object>object2);
-
-    if (keys1.length !== keys2.length) {
-      return false;
-    }
-
-    for (let key of keys1) {
-      if ((object1 as any)[key] !== (object2 as any)[key]) {
+    for (let key in a) {
+      if (!(key in b) || a[key] !== b[key]) {
         return false;
       }
     }
-
+    for (let key in b) {
+      if (!(key in a)) {
+        return false;
+      }
+    }
     return true;
   }
 }

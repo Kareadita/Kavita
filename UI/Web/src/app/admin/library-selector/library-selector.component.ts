@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { SelectionModel } from 'src/app/typeahead/typeahead.component';
 import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/auth/member';
 import { LibraryService } from 'src/app/_services/library.service';
+import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
 
 @Component({
   selector: 'app-library-selector',

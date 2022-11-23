@@ -4,18 +4,10 @@ $side-width: 25%;
 $dash-width: 3px;
 $pointer-offset: 5px;
 
-img {
-  user-select: none;
-}
+@use '../../.././../manga-reader-common';
 
-@media(min-width: 600px) {
-    .overlay .left .i {
-        left: 20px;
-    }
-    .overlay .right .i {
-        right: 20px;
-    }
-} 
+
+
 
 .reading-area {
   position: relative;
@@ -24,55 +16,6 @@ img {
   //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
 }
 
-.image-container {
-  text-align: center;
-
-  // Original
-  //display: block;
-
-  // New (for centering in both axis)
-  //display: flex; // Leave this off as it can cutoff the image
-  align-items: center;
-
-    &.full-width {
-      width: 100vw;
-      height: calc(var(--vh)*100);
-      display: grid;
-    }
-
-    &.full-height {
-      height: 100vh;
-      display: inline-block;
-    }
-
-    &.original {
-      height: 100vh;
-      display: grid;
-    }
-
-  #image-1 {
-    &.double {
-      margin: 0 0 0 auto;
-    }
-  }
-
-  &.reverse {
-    overflow: unset;
-    display: flex;
-    align-content: center;
-    justify-content: center;
-
-    img {
-      margin: unset;
-    }
-  }
-  
-  #image-2 {
-    &.double {
-      margin: 0 auto 0 0;
-    }
-  }
-}
 
 .reader {
     background-color: var(--manga-reader-bg-color);
@@ -81,14 +24,6 @@ img {
     img {
         align-items: center;
     }
-}
-
-
-.loading {
-    position: absolute;
-    left: 48%;
-    top: 20%;
-    z-index: 1;
 }
 
 .title, .subtitle {
@@ -109,6 +44,15 @@ img {
   backdrop-filter: var(--manga-reader-overlay-filter); // BUG: This doesn't work on Firefox
   color: var(--manga-reader-overlay-text-color);
 }
+
+@media(min-width: 600px) {
+  .overlay .left .i {
+      left: 20px;
+  }
+  .overlay .right .i {
+      right: 20px;
+  }
+} 
 
 // Fitting Options
 
@@ -272,10 +216,11 @@ img {
       width: 100%;
   }
 
-  $pagination-bg: rgba(0, 0, 0, 0);
-  //$pagination-bg: rgba(0, 0, 255, 0.4); // DEBUG CODE
+
 
   .pagination-area {
+    $pagination-bg: rgba(0, 0, 0, 0);
+    //$pagination-bg: rgba(0, 0, 255, 0.4); // DEBUG CODE
     cursor: pointer;
     z-index: 100;
 
@@ -321,27 +266,3 @@ img {
     }
   }
 
-.highlight {
-  background-color: var(--manga-reader-next-highlight-bg-color) !important;
-  animation: fadein .5s both;
-  backdrop-filter: blur(10px);
-}
-.highlight-2 {
-  background-color: var(--manga-reader-prev-highlight-bg-color) !important;
-  animation: fadein .5s both;
-  backdrop-filter: blur(10px);
-}
-
-  
-.bookmark-effect {
-    animation: bookmark 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
-}
-
-@keyframes bookmark {
-    0%, 100% {
-        border: 0px;
-    }
-    50% {
-        border: 5px solid var(--primary-color);
-    }
-}

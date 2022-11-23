@@ -26,23 +26,28 @@
             </div>
         </div>
     </div>
-    <ng-container *ngIf="isLoading">
+    <!-- <ng-container *ngIf="isLoading">
         <div class="spinner-border text-secondary loading" role="status">
             <span class="invisible">Loading...</span>
         </div>
-    </ng-container>
-
+    </ng-container> -->
     <div class="reading-area" 
+            appSwipe (swipeEvent)="onSwipeEvent($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
+        
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
-            <div class="image-container" [ngClass]="{'d-none': !renderWithCanvas }" [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)'">
-                <canvas #content class="{{getFittingOptionClass()}}"
-                    ondragstart="return false;" onselectstart="return false;">
-                </canvas>
+
+            <div (dblclick)="bookmarkPage($event)">
+                <app-canvas-renderer 
+                    [readerSettings$]="readerSettings$"
+                    [image$]="currentImage$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$">
+                </app-canvas-renderer>
             </div>
 
+            <!-- Pagination controls and screen hints-->
             <div class="pagination-area">
-                <!-- Pagination controls and screen hints-->
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" 
                     [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%')}">
                     <div *ngIf="showClickOverlay">
@@ -61,33 +66,66 @@
                 </div>
             </div>
 
-            <div class="image-container {{getFittingOptionClass()}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
+            <div (dblclick)="bookmarkPage($event)">
+                <app-single-renderer [image$]="currentImage$" 
+                    [readerSettings$]="readerSettings$" 
+                    [imageFit$]="imageFit$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$">
+                </app-single-renderer>
+
+                <app-double-renderer [image$]="currentImage$" 
+                    [readerSettings$]="readerSettings$" 
+                    [imageFit$]="imageFit$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$"
+                    [pageNum$]="pageNum$"
+                    [getPage]="getPageFn">
+                </app-double-renderer>
+
+                <app-double-reverse-renderer [image$]="currentImage$" 
+                    [readerSettings$]="readerSettings$" 
+                    [imageFit$]="imageFit$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$"
+                    [pageNum$]="pageNum$"
+                    [getPage]="getPageFn">
+                </app-double-reverse-renderer>
+            </div>
+<!-- 
+            <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
                     'fit-to-width-double-offset' : FittingOption === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
                     'fit-to-height-double-offset': FittingOption === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
                     'original-double-offset' : FittingOption === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage}"
                     [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle" (dblclick)="bookmarkPage($event)">
-                <img alt=" " #image [src]="canvasImage.src" id="image-1"
-                    class="{{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}">
 
-                <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !isCoverImage())">
-                    <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{getFittingOptionClass()}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}"> <!--  {{ShouldRenderReverseDouble ? 'reverse' : ''}} -->
-                </ng-container>
-            </div>
+                    <app-single-renderer [image$]="currentImage$" 
+                        [readerSettings$]="readerSettings$" 
+                        [imageFit$]="imageFit$" 
+                        [bookmark$]="showBookmarkEffect$"
+                        (imageHeight)="updateImageHeight($event)">
+                    </app-single-renderer>
+                
+                    <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !mangaReaderService.isCoverImage(this.pageNum))">
+                        <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{imageFitClass$ | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}  {{ShouldRenderReverseDouble ? 'reverse' : ''}}"> 
+                    </ng-container>
+            </div> -->
 
         </ng-container>
 
         <ng-template #webtoon>
             <div class="webtoon-images" *ngIf="readerMode === ReaderMode.Webtoon && !isLoading && !inSetup">
                 <app-infinite-scroller [pageNum]="pageNum"
-                [bufferPages]="5"
-                [goToPage]="goToPageEvent"
-                (pageNumberChange)="handleWebtoonPageChange($event)"
-                [totalPages]="maxPages"
-                [urlProvider]="getPageUrl"
-                (loadNextChapter)="loadNextChapter()"
-                (loadPrevChapter)="loadPrevChapter()"
-                [bookmarkPage]="showBookmarkEffectEvent"
-                [fullscreenToggled]="fullscreenEvent"></app-infinite-scroller>
+                    [bufferPages]="5"
+                    [goToPage]="goToPageEvent"
+                    (pageNumberChange)="handleWebtoonPageChange($event)"
+                    [totalPages]="maxPages"
+                    [urlProvider]="getPageUrl"
+                    (loadNextChapter)="loadNextChapter()"
+                    (loadPrevChapter)="loadPrevChapter()"
+                    [bookmarkPage]="showBookmarkEffectEvent"
+                    [fullscreenToggled]="fullscreenEvent">
+                </app-infinite-scroller>
             </div>
         </ng-template>
 
@@ -95,6 +133,7 @@
     </div>
 
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
+
         <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
             <span class="visually-hidden" id="slider-info"></span>
             <div class="row g-0">

@@ -1254,9 +1254,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateReadingSectionHeight() {
     setTimeout(() => {
       if (this.immersiveMode) {
-        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
+        this.renderer?.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
       } else {
-        this.renderer.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
+        this.renderer?.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
       }
     });
   }
