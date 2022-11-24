@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
 using API.Data.Repositories;
@@ -185,5 +186,23 @@ public static class QueryableExtensions
         }
 
         return query;
+    }
+
+    /// <summary>
+    /// Returns all libraries for a given user
+    /// </summary>
+    /// <param name="library"></param>
+    /// <param name="userId"></param>
+    /// <param name="queryContext"></param>
+    /// <returns></returns>
+    public static IQueryable<int> GetUserLibraries(this IQueryable<Library> library, int userId, QueryContext queryContext = QueryContext.None)
+    {
+        return library
+            .Include(l => l.AppUsers)
+            .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
+            .IsRestricted(queryContext)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Select(lib => lib.Id);
     }
 }
