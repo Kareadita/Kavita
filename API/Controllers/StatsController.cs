@@ -69,4 +69,12 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetMangaFormatCount());
     }
 
+    [Authorize("RequireAdminRole")]
+    [HttpGet("server/file-size")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<MangaFormatCount>>> GetFileSize()
+    {
+        return Ok(await _statService.GetFileSize());
+    }
+
 }

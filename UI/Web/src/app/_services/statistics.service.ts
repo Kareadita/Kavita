@@ -49,4 +49,8 @@ export class StatisticsService {
       return {name: mangaFormatPipe.transform(spread.value), value: spread.count};
       })));
   }
+
+  getTotalSize() {
+    return this.httpClient.get<number>(this.baseUrl + 'stats/server/file-size', { responseType: 'text' as 'json'});
+  }
 }

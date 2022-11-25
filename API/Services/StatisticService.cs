@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -20,6 +21,7 @@ public interface IStatisticService
     Task<IEnumerable<MangaFormatCount>> GetMangaFormatCount();
 
     Task<ServerStatistics> GetServerStatistics();
+    Task<long> GetFileSize();
 }
 
 /// <summary>
@@ -30,11 +32,13 @@ public class StatisticService : IStatisticService
 {
     private readonly DataContext _context;
     private readonly ILogger<StatisticService> _logger;
+    private readonly IDirectoryService _directoryService;
 
-    public StatisticService(DataContext context, ILogger<StatisticService> logger)
+    public StatisticService(DataContext context, ILogger<StatisticService> logger, IDirectoryService directoryService)
     {
         _context = context;
         _logger = logger;
+        _directoryService = directoryService;
     }
 
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
@@ -131,5 +135,20 @@ public class StatisticService : IStatisticService
     public Task<ServerStatistics> GetServerStatistics()
     {
         return Task.FromResult(new ServerStatistics());
+    }
+
+    public async Task<long> GetFileSize()
+    {
+        // TODO: Uncomment this code, it's expensive
+        return 0;
+        var files = await _context.MangaFile.Select(f => f.FilePath)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .ToListAsync();
+        return files.Sum(f =>
+        {
+            var file = new FileInfo(f);
+            return !file.Exists ? 0 : file.Length;
+        });
     }
 }

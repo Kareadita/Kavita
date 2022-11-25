@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpEventType } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
@@ -235,7 +235,7 @@ export class DownloadService {
   }
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
-    return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
+    return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + DownloadService.humanFileSize(size) + '. Are you sure you want to continue?'));
   }
 
   private downloadBookmarks(bookmarks: PageBookmark[]) {
@@ -266,7 +266,7 @@ export class DownloadService {
  * 
  * Credit: https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
  */
-  private humanFileSize(bytes: number, si=true, dp=0) {
+  public static humanFileSize(bytes: number, si=true, dp=0) {
     const thresh = si ? 1000 : 1024;
 
     if (Math.abs(bytes) < thresh) {

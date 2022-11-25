@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { DownloadService } from 'src/app/shared/_services/download.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 
 @Component({
@@ -9,9 +9,10 @@ import { StatisticsService } from 'src/app/_services/statistics.service';
 })
 export class ServerStatsComponent implements OnInit {
 
+  size: string = '';
 
   constructor(private statService: StatisticsService) {
-    
+    //this.statService.getTotalSize().subscribe(s => this.size = DownloadService.humanFileSize(s));
   }
 
   ngOnInit(): void {
