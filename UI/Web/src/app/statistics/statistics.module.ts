@@ -7,6 +7,10 @@ import { SharedModule } from '../shared/shared.module';
 import { ServerStatsComponent } from './_components/server-stats/server-stats.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { ReleaseYearComponent } from './_components/release-year/release-year.component';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { PublicationStatusStatsComponent } from './_components/publication-status-stats/publication-status-stats.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MangaFormatStatsComponent } from './_components/manga-format-stats/manga-format-stats.component';
 
 
 @NgModule({
@@ -14,12 +18,16 @@ import { ReleaseYearComponent } from './_components/release-year/release-year.co
     UserStatsComponent,
     UserStatsInfoCardsComponent,
     ServerStatsComponent,
-    ReleaseYearComponent
+    ReleaseYearComponent,
+    PublicationStatusStatsComponent,
+    MangaFormatStatsComponent
   ],
   imports: [
     CommonModule,
     TableModule,
     SharedModule,
+    NgbTooltipModule,
+    ReactiveFormsModule,
 
     // Server only
     NgxChartsModule

@@ -1,7 +1,10 @@
 ﻿namespace API.DTOs.Statistics;
 
-public class YearSpread
+public class YearCount : ICount<int>
 {
-    public int ReleaseYear { get; set; }
+    /// <summary>
+    /// Release Year
+    /// </summary>
+    public int Value { get; set; }
     public int Count { get; set; }
 }

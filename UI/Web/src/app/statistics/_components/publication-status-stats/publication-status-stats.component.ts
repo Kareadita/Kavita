@@ -1,24 +1,25 @@
-import { Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
-import { Observable, map, Subject, takeUntil, BehaviorSubject, combineLatest } from 'rxjs';
+import { Observable, Subject, map, takeUntil, combineLatest, BehaviorSubject } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
-import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
+import { compare, SortableHeader, SortEvent } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { PieDataItem } from '../../_models/pie-data-item';
 
 @Component({
-  selector: 'app-release-year',
-  templateUrl: './release-year.component.html',
-  styleUrls: ['./release-year.component.scss']
+  selector: 'app-publication-status-stats',
+  templateUrl: './publication-status-stats.component.html',
+  styleUrls: ['./publication-status-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReleaseYearComponent implements OnInit, OnDestroy {
+export class PublicationStatusStatsComponent implements OnInit {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
-  releaseYears$!: Observable<Array<PieDataItem>>;
+  publicationStatues$!: Observable<Array<PieDataItem>>;
   private readonly onDestroy = new Subject<void>();
   
-  currentSort = new BehaviorSubject<SortEvent<PieDataItem>>({column: 'value', direction: 'desc'});
+  currentSort = new BehaviorSubject<SortEvent<PieDataItem>>({column: 'value', direction: 'asc'});
   currentSort$: Observable<SortEvent<PieDataItem>> = this.currentSort.asObservable();
 
   view: [number, number] = [700, 400];
@@ -35,7 +36,7 @@ export class ReleaseYearComponent implements OnInit, OnDestroy {
 
 
   constructor(private statService: StatisticsService) {
-    this.releaseYears$ = combineLatest([this.currentSort$, this.statService.getYearRange()]).pipe(
+    this.publicationStatues$ = combineLatest([this.currentSort$, this.statService.getPublicationStatus()]).pipe(
       map(([sortConfig, data]) => {
         return (sortConfig.column) ? data.sort((a: PieDataItem, b: PieDataItem) => {
           if (sortConfig.column === '') return 0;
@@ -67,5 +68,4 @@ export class ReleaseYearComponent implements OnInit, OnDestroy {
       }
     });
   }
-
 }

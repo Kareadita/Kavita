@@ -1,6 +1,6 @@
 <div class="row g-0 mb-2">
     <div class="col-8">
-        <h4><span>Release Years</span>
+        <h4><span>Format</span>
             <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0"></i>
         </h4>
     </div>
@@ -17,11 +17,11 @@
 <ng-template #tooltip></ng-template>
 
 
-<ng-container *ngIf="releaseYears$ | async as years">
+<ng-container *ngIf="formats$ | async as formats">
     <ng-container *ngIf="formControl.value; else tableLayout">
         <ngx-charts-pie-chart
         [view]="view"
-        [results]="years"
+        [results]="formats"
         [legend]="showLegend"
         [legendPosition]="legendPosition"
         [labels]="showLabels"
@@ -33,15 +33,16 @@
             <thead>
                 <tr>
                     <th scope="col" sortable="name" (sort)="onSort($event)">
-                        Year
+                        Format
                     </th>
                     <th scope="col" sortable="value" (sort)="onSort($event)">
                         Count
+        
                     </th>
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let item of years; let idx = index;">
+                <tr *ngFor="let item of formats; let idx = index;">
                     <td id="adhoctask--{{idx}}">
                       {{item.name}}
                     </td>

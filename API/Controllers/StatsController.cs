@@ -38,11 +38,35 @@ public class StatsController : BaseApiController
     }
 
     [Authorize("RequireAdminRole")]
-    [HttpGet("server/year")]
+    [HttpGet("server/stats")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<YearSpread>>> GetYearStatistics()
+    public async Task<ActionResult<IEnumerable<ServerStatistics>>> GetHighLevelStats()
     {
-        return Ok(await _statService.GetYearSpread());
+        return Ok(await _statService.GetServerStatistics());
+    }
+
+    [Authorize("RequireAdminRole")]
+    [HttpGet("server/count/year")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<YearCount>>> GetYearStatistics()
+    {
+        return Ok(await _statService.GetYearCount());
+    }
+
+    [Authorize("RequireAdminRole")]
+    [HttpGet("server/count/publication-status")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<PublicationCount>>> GetPublicationStatus()
+    {
+        return Ok(await _statService.GetPublicationCount());
+    }
+
+    [Authorize("RequireAdminRole")]
+    [HttpGet("server/count/manga-format")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<MangaFormatCount>>> GetMangaFormat()
+    {
+        return Ok(await _statService.GetMangaFormatCount());
     }
 
 }

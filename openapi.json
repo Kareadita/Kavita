@@ -7580,7 +7580,7 @@
         }
       }
     },
-    "/api/Stats/server/year": {
+    "/api/Stats/server/stats": {
       "get": {
         "tags": [
           "Stats"
@@ -7593,7 +7593,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearSpread"
+                    "$ref": "#/components/schemas/ServerStatistics"
                   }
                 }
               },
@@ -7601,7 +7601,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearSpread"
+                    "$ref": "#/components/schemas/ServerStatistics"
                   }
                 }
               },
@@ -7609,7 +7609,121 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearSpread"
+                    "$ref": "#/components/schemas/ServerStatistics"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/count/year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/count/publication-status": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/count/manga-format": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MangaFormatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MangaFormatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MangaFormatCount"
                   }
                 }
               }
@@ -10512,6 +10626,19 @@
         "description": "Represents the format of the file",
         "format": "int32"
       },
+      "MangaFormatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/MangaFormat"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "MarkMultipleSeriesAsReadDto": {
         "type": "object",
         "properties": {
@@ -10760,6 +10887,19 @@
             "type": "string",
             "description": "For Book reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "PublicationCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -12339,6 +12479,36 @@
         },
         "additionalProperties": false
       },
+      "ServerStatistics": {
+        "type": "object",
+        "properties": {
+          "chapterCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "volumeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "seriesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalFiles": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalReadingLists": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalWantToReadSeries": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SiteTheme": {
         "type": "object",
         "properties": {
@@ -13418,11 +13588,12 @@
         },
         "additionalProperties": false
       },
-      "YearSpread": {
+      "YearCount": {
         "type": "object",
         "properties": {
-          "releaseYear": {
+          "value": {
             "type": "integer",
+            "description": "Release Year",
             "format": "int32"
           },
           "count": {
