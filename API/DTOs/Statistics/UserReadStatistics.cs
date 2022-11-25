@@ -9,7 +9,12 @@ public class UserReadStatistics
     /// Total number of pages read
     /// </summary>
     public long TotalPagesRead { get; set; }
-    public ICollection<SeriesDto> AllReadSeries { get; set; }
+    /// <summary>
+    /// Total time spent reading based on estimates
+    /// </summary>
     public long TimeSpentReading { get; set; }
+    /// <summary>
+    /// A list of genres mapped with genre and number of series that fall into said genre
+    /// </summary>
     public ICollection<Tuple<string, long>> FavoriteGenres { get; set; }
 }

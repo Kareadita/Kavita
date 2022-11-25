@@ -1,0 +1,12 @@
+<ngx-charts-pie-chart
+    [view]="view"
+    [results]="releaseYears$ | async"
+    [gradient]="gradient"
+    [legend]="showLegend"
+    [legendPosition]="legendPosition"
+    [labels]="showLabels"
+    (select)="onSelect($event)"
+    (activate)="onActivate($event)"
+    (deactivate)="onDeactivate($event)"
+    >
+</ngx-charts-pie-chart>

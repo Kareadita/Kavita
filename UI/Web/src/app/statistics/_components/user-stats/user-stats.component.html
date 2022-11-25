@@ -1,1 +1,36 @@
-<p>user-stats works!</p>
+<div class="container-fluid">
+
+    <!-- High level stats (use same design as series metadata info cards)-->
+    <div class="row g-0">
+        <ng-container *ngIf="userStats$ | async as userStats">
+            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [timeSpentReading]="userStats.timeSpentReading"></app-user-stats-info-cards>
+        </ng-container>
+    </div>
+
+    <!-- Table of all series with progress -->
+    <table class="table table-light table-striped scrollable">
+        <thead>
+            <tr>
+                <th scope="col" sortable="progress" (sort)="onSort($event)">
+                    Read %
+                </th>
+                <th scope="col" sortable="name" (sort)="onSort($event)">
+                    Series Name
+
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let series of readSeries$ | async; let idx = index;">
+                <td id="adhoctask--{{idx}}">
+                  {{series.progress | number:'1.0-0'}}%
+                </td>
+                <td>
+                  {{series.name}}
+                </td>
+              </tr>
+        </tbody>
+    </table>
+
+    
+</div>

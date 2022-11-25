@@ -7540,6 +7540,84 @@
         }
       }
     },
+    "/api/Stats/user/{userId}/read": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadStatistics"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadStatistics"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadStatistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearSpread"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearSpread"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/YearSpread"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Tachiyomi/latest-chapter": {
       "get": {
         "tags": [
@@ -12368,6 +12446,20 @@
         "additionalProperties": false,
         "description": "Sorting Options for a query"
       },
+      "StringInt64Tuple": {
+        "type": "object",
+        "properties": {
+          "item1": {
+            "type": "string",
+            "nullable": true
+          },
+          "item2": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
       "Tag": {
         "type": "object",
         "properties": {
@@ -13176,6 +13268,30 @@
         },
         "additionalProperties": false
       },
+      "UserReadStatistics": {
+        "type": "object",
+        "properties": {
+          "totalPagesRead": {
+            "type": "integer",
+            "description": "Total number of pages read",
+            "format": "int64"
+          },
+          "timeSpentReading": {
+            "type": "integer",
+            "description": "Total time spent reading based on estimates",
+            "format": "int64"
+          },
+          "favoriteGenres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StringInt64Tuple"
+            },
+            "description": "A list of genres mapped with genre and number of series that fall into said genre",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Volume": {
         "type": "object",
         "properties": {
@@ -13296,6 +13412,20 @@
             "format": "int32"
           },
           "avgHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "YearSpread": {
+        "type": "object",
+        "properties": {
+          "releaseYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "count": {
             "type": "integer",
             "format": "int32"
           }

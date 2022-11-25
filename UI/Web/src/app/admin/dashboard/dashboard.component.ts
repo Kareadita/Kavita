@@ -14,7 +14,9 @@ enum TabID {
   System = 'system',
   Plugins = 'plugins',
   Tasks = 'tasks',
-  Logs = 'logs'
+  Logs = 'logs',
+  Statistics = 'statistics',
+
 }
 
 @Component({
@@ -33,6 +35,7 @@ export class DashboardComponent implements OnInit {
     {title: 'Email', fragment: TabID.Email},
     //{title: 'Plugins', fragment: TabID.Plugins},
     {title: 'Tasks', fragment: TabID.Tasks},
+    {title: 'Statistics', fragment: TabID.Statistics},
     {title: 'System', fragment: TabID.System},
   ];
   counter = this.tabs.length + 1;

@@ -17,6 +17,7 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-age-restriction.component';
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
+import { StatisticsModule } from '../statistics/statistics.module';
 
 
 @NgModule({
@@ -43,6 +44,8 @@ import { RestrictionSelectorComponent } from './restriction-selector/restriction
     NgbCollapseModule,
 
     ColorPickerModule, // User prefernces background color
+
+    StatisticsModule,
     
     PipeModule,
     SidenavModule,
