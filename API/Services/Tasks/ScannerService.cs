@@ -483,7 +483,7 @@ public class ScannerService : IScannerService
 
 
             seenSeries.Add(foundParsedSeries);
-            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library));
+            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate));
             return Task.CompletedTask;
         }
 
