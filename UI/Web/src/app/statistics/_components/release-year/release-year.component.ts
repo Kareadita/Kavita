@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, map, Subject, takeUntil, BehaviorSubject, combineLatest } from 'rxjs';
@@ -9,7 +9,8 @@ import { PieDataItem } from '../../_models/pie-data-item';
 @Component({
   selector: 'app-release-year',
   templateUrl: './release-year.component.html',
-  styleUrls: ['./release-year.component.scss']
+  styleUrls: ['./release-year.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReleaseYearComponent implements OnInit, OnDestroy {
 

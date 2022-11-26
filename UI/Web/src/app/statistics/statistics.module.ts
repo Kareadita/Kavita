@@ -12,6 +12,7 @@ import { PublicationStatusStatsComponent } from './_components/publication-statu
 import { ReactiveFormsModule } from '@angular/forms';
 import { MangaFormatStatsComponent } from './_components/manga-format-stats/manga-format-stats.component';
 import { FileBreakdownStatsComponent } from './_components/file-breakdown-stats/file-breakdown-stats.component';
+import { PipeModule } from '../pipe/pipe.module';
 
 
 @NgModule({
@@ -30,6 +31,7 @@ import { FileBreakdownStatsComponent } from './_components/file-breakdown-stats/
     SharedModule,
     NgbTooltipModule,
     ReactiveFormsModule,
+    PipeModule,
 
     // Server only
     NgxChartsModule

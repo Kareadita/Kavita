@@ -159,21 +159,5 @@ public class StatisticService : IStatisticService
                 .AsSplitQuery()
                 .SumAsync(f => f.Bytes)
         };
-        // var a = await _context.MangaFile
-        //     .AsSplitQuery()
-        //     .AsNoTracking()
-        //     .GroupBy(sm => sm.Extension)
-        //     .Select(mf => new FileExtensionDto()
-        //     {
-        //         Extension = mf.Key,
-        //         Format =_context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Select(mf2 => mf2.Format).Single(),
-        //         TotalSize = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Count()
-        //     })
-        //     .ToListAsync();
-        //
-        // return await _context.MangaFile
-        //     .AsNoTracking()
-        //     .AsSplitQuery()
-        //     .SumAsync(f => f.Bytes);
     }
 }

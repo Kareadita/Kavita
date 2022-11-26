@@ -1,1 +1,75 @@
-<p>file-breakdown-stats works!</p>
+<div class="row g-0 mb-2">
+    <div class="col-8">
+        <h4><span>Format</span>
+            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0"></i>
+        </h4>
+    </div>
+    <div class="col-4">
+        <form>
+            <div class="form-check form-switch mt-2">
+                <input id="pub-file-breakdown-viz" type="checkbox" class="form-check-input" [formControl]="formControl" role="switch">
+                <label for="pub-file-breakdown-viz" class="form-check-label">{{formControl.value ? 'Vizualization' : 'Data Table' }}</label>
+            </div>
+        </form>
+    </div>
+</div>
+
+<ng-template #tooltip></ng-template>
+
+
+<ng-container *ngIf="files$ | async as files">
+    <ng-container *ngIf="formControl.value; else tableLayout">
+        <ngx-charts-advanced-pie-chart
+        [view]="view"
+        [results]="vizData$ | async"
+        >
+        </ngx-charts-advanced-pie-chart>
+    </ng-container>
+    <ng-template #tableLayout>
+        <table class="table table-light table-striped table-hover scrollable">
+            <thead>
+                <tr>
+                    <th scope="col" sortable="extension" (sort)="onSort($event)">
+                        Extension
+                    </th>
+                    <th scope="col" sortable="format" (sort)="onSort($event)">
+                        Format
+                    </th>
+                    <th scope="col" sortable="totalSize" (sort)="onSort($event)">
+                        Total Size
+                    </th>
+                    <th scope="col" sortable="totalFiles" (sort)="onSort($event)">
+                        Total Files
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of files; let idx = index;">
+                    <td id="adhoctask--{{idx}}">
+                      {{item.extension}}
+                    </td>
+                    <td>
+                      {{item.format | mangaFormat}}
+                    </td>
+                    <td>
+                      {{item.totalSize | bytes}}
+                    </td>
+                    <td>
+                      {{item.totalFiles | number:'1.0-0'}}
+                    </td>
+                  </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total Files:</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{files</td>
+                </tr>
+            </tfoot>
+        </table>
+    </ng-template>
+</ng-container>
+
+
+

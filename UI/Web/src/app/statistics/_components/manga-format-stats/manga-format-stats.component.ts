@@ -1,4 +1,4 @@
-import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil } from 'rxjs';
@@ -9,7 +9,8 @@ import { PieDataItem } from '../../_models/pie-data-item';
 @Component({
   selector: 'app-manga-format-stats',
   templateUrl: './manga-format-stats.component.html',
-  styleUrls: ['./manga-format-stats.component.scss']
+  styleUrls: ['./manga-format-stats.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MangaFormatStatsComponent implements OnInit {
 

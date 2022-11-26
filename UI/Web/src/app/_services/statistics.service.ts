@@ -8,6 +8,7 @@ import { MangaFormatCount } from '../statistics/_models/manga-format-count';
 import { PublicationStatusPipe } from '../pipe/publication-status.pipe';
 import { map } from 'rxjs';
 import { MangaFormatPipe } from '../pipe/manga-format.pipe';
+import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
 
 
 const publicationStatusPipe = new PublicationStatusPipe();
@@ -53,8 +54,8 @@ export class StatisticsService {
   getTotalSize() {
     return this.httpClient.get<number>(this.baseUrl + 'stats/server/file-size', { responseType: 'text' as 'json'});
   }
-  
+
   getFileBreakdown() {
-    return this.httpClient.get<any>(this.baseUrl + 'stats/server/file-breakdown');
+    return this.httpClient.get<FileExtensionBreakdown>(this.baseUrl + 'stats/server/file-breakdown');
   }
 }
