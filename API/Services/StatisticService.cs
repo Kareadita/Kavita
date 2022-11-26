@@ -16,12 +16,12 @@ namespace API.Services;
 public interface IStatisticService
 {
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
-    Task<IEnumerable<YearCount>> GetYearCount();
-    Task<IEnumerable<PublicationCount>> GetPublicationCount();
-    Task<IEnumerable<MangaFormatCount>> GetMangaFormatCount();
+    Task<IEnumerable<YearCountDto>> GetYearCount();
+    Task<IEnumerable<PublicationCountDto>> GetPublicationCount();
+    Task<IEnumerable<MangaFormatCountDto>> GetMangaFormatCount();
 
     Task<ServerStatistics> GetServerStatistics();
-    Task<long> GetFileSize();
+    Task<FileExtensionBreakdownDto> GetFileBreakdown();
 }
 
 /// <summary>
@@ -91,13 +91,13 @@ public class StatisticService : IStatisticService
     /// Returns the Release Years and their count
     /// </summary>
     /// <returns></returns>
-    public async Task<IEnumerable<YearCount>> GetYearCount()
+    public async Task<IEnumerable<YearCountDto>> GetYearCount()
     {
         return await _context.SeriesMetadata
             .Where(sm => sm.ReleaseYear != 0)
             .AsSplitQuery()
             .GroupBy(sm => sm.ReleaseYear)
-            .Select(sm => new YearCount
+            .Select(sm => new YearCountDto
             {
                 Value = sm.Key,
                 Count = _context.SeriesMetadata.Where(sm2 => sm2.ReleaseYear == sm.Key).Distinct().Count()
@@ -106,12 +106,12 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PublicationCount>> GetPublicationCount()
+    public async Task<IEnumerable<PublicationCountDto>> GetPublicationCount()
     {
         return await _context.SeriesMetadata
             .AsSplitQuery()
             .GroupBy(sm => sm.PublicationStatus)
-            .Select(sm => new PublicationCount
+            .Select(sm => new PublicationCountDto
             {
                 Value = sm.Key,
                 Count = _context.SeriesMetadata.Where(sm2 => sm2.PublicationStatus == sm.Key).Distinct().Count()
@@ -119,12 +119,12 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<MangaFormatCount>> GetMangaFormatCount()
+    public async Task<IEnumerable<MangaFormatCountDto>> GetMangaFormatCount()
     {
         return await _context.MangaFile
             .AsSplitQuery()
             .GroupBy(sm => sm.Format)
-            .Select(mf => new MangaFormatCount
+            .Select(mf => new MangaFormatCountDto
             {
                 Value = mf.Key,
                 Count = _context.MangaFile.Where(mf2 => mf2.Format == mf.Key).Distinct().Count()
@@ -138,11 +138,42 @@ public class StatisticService : IStatisticService
         return Task.FromResult(new ServerStatistics());
     }
 
-    public async Task<long> GetFileSize()
+    public async Task<FileExtensionBreakdownDto> GetFileBreakdown()
     {
-        return await _context.MangaFile
-            .AsNoTracking()
-            .AsSplitQuery()
-            .SumAsync(f => f.Bytes);
+        return new FileExtensionBreakdownDto()
+        {
+            FileBreakdown = await _context.MangaFile
+                .AsSplitQuery()
+                .AsNoTracking()
+                .GroupBy(sm => sm.Extension)
+                .Select(mf => new FileExtensionDto()
+                {
+                    Extension = mf.Key,
+                    Format =_context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Select(mf2 => mf2.Format).Single(),
+                    TotalSize = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Sum(mf2 => mf2.Bytes),
+                    TotalFiles = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Count()
+                })
+                .ToListAsync(),
+            TotalFileSize = await _context.MangaFile
+                .AsNoTracking()
+                .AsSplitQuery()
+                .SumAsync(f => f.Bytes)
+        };
+        // var a = await _context.MangaFile
+        //     .AsSplitQuery()
+        //     .AsNoTracking()
+        //     .GroupBy(sm => sm.Extension)
+        //     .Select(mf => new FileExtensionDto()
+        //     {
+        //         Extension = mf.Key,
+        //         Format =_context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Select(mf2 => mf2.Format).Single(),
+        //         TotalSize = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Count()
+        //     })
+        //     .ToListAsync();
+        //
+        // return await _context.MangaFile
+        //     .AsNoTracking()
+        //     .AsSplitQuery()
+        //     .SumAsync(f => f.Bytes);
     }
 }

@@ -53,4 +53,8 @@ export class StatisticsService {
   getTotalSize() {
     return this.httpClient.get<number>(this.baseUrl + 'stats/server/file-size', { responseType: 'text' as 'json'});
   }
+  
+  getFileBreakdown() {
+    return this.httpClient.get<any>(this.baseUrl + 'stats/server/file-breakdown');
+  }
 }

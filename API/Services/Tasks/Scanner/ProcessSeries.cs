@@ -582,7 +582,7 @@ public class ProcessSeries : IProcessSeries
             existingFile.Format = info.Format;
             if (!forceUpdate && !_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
-            existingFile.Extension = fileInfo.Extension;
+            existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
             existingFile.Bytes = fileInfo.Length;
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }
@@ -590,7 +590,7 @@ public class ProcessSeries : IProcessSeries
         {
             var file = DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
             if (file == null) return;
-            file.Extension = fileInfo.Extension;
+            file.Extension = fileInfo.Extension.ToLowerInvariant();
             file.Bytes = fileInfo.Length;
             chapter.Files.Add(file);
         }

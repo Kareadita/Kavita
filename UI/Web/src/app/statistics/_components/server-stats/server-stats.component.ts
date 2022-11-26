@@ -12,7 +12,10 @@ export class ServerStatsComponent implements OnInit {
   size: string = '';
 
   constructor(private statService: StatisticsService) {
-    this.statService.getTotalSize().subscribe(s => this.size = DownloadService.humanFileSize(s));
+    //this.statService.getTotalSize().subscribe(s => this.size = DownloadService.humanFileSize(s));
+    this.statService.getFileBreakdown().subscribe(s => {
+      console.log('File breakdown: ', s);
+    });
   }
 
   ngOnInit(): void {

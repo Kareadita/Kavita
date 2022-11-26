@@ -48,7 +48,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/count/year")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<YearCount>>> GetYearStatistics()
+    public async Task<ActionResult<IEnumerable<YearCountDto>>> GetYearStatistics()
     {
         return Ok(await _statService.GetYearCount());
     }
@@ -56,7 +56,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/count/publication-status")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<PublicationCount>>> GetPublicationStatus()
+    public async Task<ActionResult<IEnumerable<PublicationCountDto>>> GetPublicationStatus()
     {
         return Ok(await _statService.GetPublicationCount());
     }
@@ -64,17 +64,17 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/count/manga-format")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<MangaFormatCount>>> GetMangaFormat()
+    public async Task<ActionResult<IEnumerable<MangaFormatCountDto>>> GetMangaFormat()
     {
         return Ok(await _statService.GetMangaFormatCount());
     }
 
     [Authorize("RequireAdminRole")]
-    [HttpGet("server/file-size")]
+    [HttpGet("server/file-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<MangaFormatCount>>> GetFileSize()
+    public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
     {
-        return Ok(await _statService.GetFileSize());
+        return Ok(await _statService.GetFileBreakdown());
     }
 
 }

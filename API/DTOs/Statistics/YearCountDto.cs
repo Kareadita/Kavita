@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.Statistics;
 
-public class YearCount : ICount<int>
+public class YearCountDto : ICount<int>
 {
     /// <summary>
     /// Release Year

@@ -7631,7 +7631,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCount"
+                    "$ref": "#/components/schemas/YearCountDto"
                   }
                 }
               },
@@ -7639,7 +7639,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCount"
+                    "$ref": "#/components/schemas/YearCountDto"
                   }
                 }
               },
@@ -7647,7 +7647,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCount"
+                    "$ref": "#/components/schemas/YearCountDto"
                   }
                 }
               }
@@ -7669,7 +7669,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PublicationCount"
+                    "$ref": "#/components/schemas/PublicationCountDto"
                   }
                 }
               },
@@ -7677,7 +7677,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PublicationCount"
+                    "$ref": "#/components/schemas/PublicationCountDto"
                   }
                 }
               },
@@ -7685,7 +7685,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PublicationCount"
+                    "$ref": "#/components/schemas/PublicationCountDto"
                   }
                 }
               }
@@ -7707,7 +7707,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCount"
+                    "$ref": "#/components/schemas/MangaFormatCountDto"
                   }
                 }
               },
@@ -7715,7 +7715,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCount"
+                    "$ref": "#/components/schemas/MangaFormatCountDto"
                   }
                 }
               },
@@ -7723,7 +7723,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCount"
+                    "$ref": "#/components/schemas/MangaFormatCountDto"
                   }
                 }
               }
@@ -7732,7 +7732,7 @@
         }
       }
     },
-    "/api/Stats/server/file-size": {
+    "/api/Stats/server/file-breakdown": {
       "get": {
         "tags": [
           "Stats"
@@ -7745,7 +7745,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCount"
+                    "$ref": "#/components/schemas/FileExtensionBreakdownDto"
                   }
                 }
               },
@@ -7753,7 +7753,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCount"
+                    "$ref": "#/components/schemas/FileExtensionBreakdownDto"
                   }
                 }
               },
@@ -7761,7 +7761,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCount"
+                    "$ref": "#/components/schemas/FileExtensionBreakdownDto"
                   }
                 }
               }
@@ -10019,6 +10019,45 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "FileExtensionBreakdownDto": {
+        "type": "object",
+        "properties": {
+          "totalFileSize": {
+            "type": "integer",
+            "description": "Total bytes for all files",
+            "format": "int64"
+          },
+          "fileBreakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileExtensionDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileExtensionDto": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "$ref": "#/components/schemas/MangaFormat"
+          },
+          "totalSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalFiles": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
       "FileFormatDto": {
         "type": "object",
         "properties": {
@@ -10674,7 +10713,7 @@
         "description": "Represents the format of the file",
         "format": "int32"
       },
-      "MangaFormatCount": {
+      "MangaFormatCountDto": {
         "type": "object",
         "properties": {
           "value": {
@@ -10939,7 +10978,7 @@
         },
         "additionalProperties": false
       },
-      "PublicationCount": {
+      "PublicationCountDto": {
         "type": "object",
         "properties": {
           "value": {
@@ -13636,7 +13675,7 @@
         },
         "additionalProperties": false
       },
-      "YearCount": {
+      "YearCountDto": {
         "type": "object",
         "properties": {
           "value": {

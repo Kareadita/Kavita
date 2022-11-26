@@ -11,6 +11,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PublicationStatusStatsComponent } from './_components/publication-status-stats/publication-status-stats.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MangaFormatStatsComponent } from './_components/manga-format-stats/manga-format-stats.component';
+import { FileBreakdownStatsComponent } from './_components/file-breakdown-stats/file-breakdown-stats.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { MangaFormatStatsComponent } from './_components/manga-format-stats/mang
     ServerStatsComponent,
     ReleaseYearComponent,
     PublicationStatusStatsComponent,
-    MangaFormatStatsComponent
+    MangaFormatStatsComponent,
+    FileBreakdownStatsComponent
   ],
   imports: [
     CommonModule,
