@@ -10602,6 +10602,16 @@
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
+          "bytes": {
+            "type": "integer",
+            "description": "How many bytes make up this file",
+            "format": "int64"
+          },
+          "extension": {
+            "type": "string",
+            "description": "File extension",
+            "nullable": true
+          },
           "created": {
             "type": "string",
             "format": "date-time"

@@ -23,7 +23,7 @@
         <tbody>
             <tr *ngFor="let series of readSeries$ | async; let idx = index;">
                 <td id="adhoctask--{{idx}}">
-                  {{series.progress | number:'1.0-0'}}%
+                  {{series.progress | percent}}
                 </td>
                 <td>
                   {{series.name}}

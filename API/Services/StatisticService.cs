@@ -132,6 +132,7 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
+
     public Task<ServerStatistics> GetServerStatistics()
     {
         return Task.FromResult(new ServerStatistics());
@@ -139,16 +140,9 @@ public class StatisticService : IStatisticService
 
     public async Task<long> GetFileSize()
     {
-        // TODO: Uncomment this code, it's expensive
-        return 0;
-        var files = await _context.MangaFile.Select(f => f.FilePath)
+        return await _context.MangaFile
             .AsNoTracking()
             .AsSplitQuery()
-            .ToListAsync();
-        return files.Sum(f =>
-        {
-            var file = new FileInfo(f);
-            return !file.Exists ? 0 : file.Length;
-        });
+            .SumAsync(f => f.Bytes);
     }
 }

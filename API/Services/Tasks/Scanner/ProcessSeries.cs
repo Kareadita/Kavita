@@ -576,18 +576,22 @@ public class ProcessSeries : IProcessSeries
     {
         chapter.Files ??= new List<MangaFile>();
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+        var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(info.FullFilePath);
         if (existingFile != null)
         {
             existingFile.Format = info.Format;
             if (!_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
+            existingFile.Extension = fileInfo.Extension;
+            existingFile.Bytes = fileInfo.Length;
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }
         else
         {
             var file = DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
             if (file == null) return;
-
+            file.Extension = fileInfo.Extension;
+            file.Bytes = fileInfo.Length;
             chapter.Files.Add(file);
         }
     }
