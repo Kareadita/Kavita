@@ -78,6 +78,21 @@ public class StatsController : BaseApiController
     }
 
     [Authorize("RequireAdminRole")]
+    [HttpGet("server/top/reads")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<TopReadsDto>>> GetTopReads(string username = "", int days = 0)
+    {
+        var userId = 0;
+        if (!string.IsNullOrEmpty(username))
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(
+                username);
+            if (user != null) userId = user.Id;
+        }
+        return Ok(await _statService.GetTopReads(userId, days));
+    }
+
+    [Authorize("RequireAdminRole")]
     [HttpGet("server/file-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()

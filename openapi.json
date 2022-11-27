@@ -7770,6 +7770,63 @@
         }
       }
     },
+    "/api/Stats/server/top/reads": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopReadsDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopReadsDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopReadsDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/server/file-breakdown": {
       "get": {
         "tags": [
@@ -12871,6 +12928,56 @@
           },
           "refreshToken": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TopReadDto": {
+        "type": "object",
+        "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "usersRead": {
+            "type": "integer",
+            "description": "How many distinct user (id) read events",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TopReadsDto": {
+        "type": "object",
+        "properties": {
+          "comics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopReadDto"
+            },
+            "nullable": true
+          },
+          "manga": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopReadDto"
+            },
+            "nullable": true
+          },
+          "books": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopReadDto"
+            },
             "nullable": true
           }
         },

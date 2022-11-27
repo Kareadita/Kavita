@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
-import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, tap } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, tap, shareReplay } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { StatisticsService } from 'src/app/_services/statistics.service';
@@ -48,7 +48,7 @@ export class FileBreakdownStatsComponent implements OnInit {
 
 
   constructor(private statService: StatisticsService) {
-    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntil(this.onDestroy));
+    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntil(this.onDestroy), shareReplay());
 
     this.files$ = combineLatest([this.currentSort$, this.rawData$]).pipe(
       map(([sortConfig, data]) => {

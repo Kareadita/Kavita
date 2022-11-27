@@ -9,6 +9,7 @@ import { PublicationStatusPipe } from '../pipe/publication-status.pipe';
 import { map } from 'rxjs';
 import { MangaFormatPipe } from '../pipe/manga-format.pipe';
 import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
+import { TopReads } from '../statistics/_models/top-reads';
 
 
 const publicationStatusPipe = new PublicationStatusPipe();
@@ -42,6 +43,17 @@ export class StatisticsService {
       map(spreads => spreads.map(spread => {
       return {name: spread.value + '', value: spread.count};
       })));
+  }
+
+  getTopReads(username: string = 'All users', days: number = 0) {
+    let params = '';
+    if (username !== 'All users' || days !== 0)  {
+      params = '?';
+      if (username !== 'All users') params += 'username=' + encodeURIComponent(username);
+      if (days !== 0) params += 'days=' + days;
+
+    }
+    return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/reads' + params);
   }
 
   getPublicationStatus() {
