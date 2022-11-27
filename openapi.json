@@ -8495,6 +8495,7 @@
         "tags": [
           "Users"
         ],
+        "summary": "Returns the preferences of the user",
         "responses": {
           "200": {
             "description": "Success",
@@ -8512,6 +8513,45 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserPreferencesDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/names": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Returns a list of the user names within the system",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }

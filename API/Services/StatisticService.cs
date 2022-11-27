@@ -23,6 +23,7 @@ public interface IStatisticService
 
     Task<ServerStatistics> GetServerStatistics();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
+
 }
 
 /// <summary>
@@ -122,6 +123,8 @@ public class StatisticService : IStatisticService
             .Take(5)
             .ToListAsync();
     }
+
+
 
     public async Task<IEnumerable<PublicationCountDto>> GetPublicationCount()
     {

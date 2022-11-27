@@ -49,8 +49,6 @@ export class ReleaseYearComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   ngOnDestroy(): void {

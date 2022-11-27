@@ -1,0 +1,50 @@
+<div class="row g-0 mb-2">
+    <div class="col-8">
+        <h4>Top Reads</h4>
+    </div>
+    <div class="col-4">
+        <form [formGroup]="formGroup">
+            <div class="form-check form-switch mt-2">
+                <label for="user-select-top-reads" class="form-check-label"></label>
+                <select id="user-select-top-reads" class="form-select" formControlName="member"
+                [class.is-invalid]="formGroup.get('member')?.invalid && formGroup.get('member')?.touched">
+                    <option *ngFor="let name of memberNames$ | async" [value]="name">{{name}}</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<ng-container>
+    <div class="row g-0">
+        <div class="col-md-3 me-1">
+            <h6>Comic</h6>
+            <ul class="list-group">
+                <li *ngFor="let item of fakeData" class="list-group-item">
+                    {{item.name}} <span class="float-end">{{item.value}}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-3 me-1">
+            <h6>Manga</h6>
+            <ul class="list-group">
+                <li *ngFor="let item of fakeData" class="list-group-item">
+                    {{item.name}} <span class="float-end">{{item.value}}</span>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-3">
+            <h6>Book</h6>
+            <ul class="list-group">
+                <li *ngFor="let item of fakeData" class="list-group-item">
+                    {{item.name}} <span class="float-end">{{item.value}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</ng-container>
+
+
+
