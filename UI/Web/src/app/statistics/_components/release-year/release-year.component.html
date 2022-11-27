@@ -1,16 +1,8 @@
 <div class="row g-0 mb-2">
-    <div class="col-8">
+    <div class="col-12">
         <h4><span>Release Years</span>
             <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0"></i>
         </h4>
-    </div>
-    <div class="col-4">
-        <form>
-            <div class="form-check form-switch mt-2">
-                <input id="pub-status-viz" type="checkbox" class="form-check-input" [formControl]="formControl" role="switch">
-                <label for="pub-status-viz" class="form-check-label">{{formControl.value ? 'Vizualization' : 'Data Table' }}</label>
-            </div>
-        </form>
     </div>
 </div>
 
@@ -18,40 +10,11 @@
 
 
 <ng-container *ngIf="releaseYears$ | async as years">
-    <ng-container *ngIf="formControl.value; else tableLayout">
-        <ngx-charts-pie-chart
-        [view]="view"
-        [results]="years"
-        [legend]="showLegend"
-        [legendPosition]="legendPosition"
-        [labels]="showLabels"
-        >
-        </ngx-charts-pie-chart>
-    </ng-container>
-    <ng-template #tableLayout>
-        <table class="table table-light table-striped table-hover scrollable">
-            <thead>
-                <tr>
-                    <th scope="col" sortable="name" (sort)="onSort($event)">
-                        Year
-                    </th>
-                    <th scope="col" sortable="value" (sort)="onSort($event)">
-                        Count
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let item of years; let idx = index;">
-                    <td id="adhoctask--{{idx}}">
-                      {{item.name}}
-                    </td>
-                    <td>
-                      {{item.value | number:'1.0-0'}}
-                    </td>
-                  </tr>
-            </tbody>
-        </table>
-    </ng-template>
+    <ul class="list-group">
+        <li *ngFor="let item of years" class="list-group-item">
+            {{item.name}} <span class="float-end">{{item.value}}</span>
+        </li>
+    </ul>
 </ng-container>
 
 

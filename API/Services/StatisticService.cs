@@ -17,6 +17,7 @@ public interface IStatisticService
 {
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
     Task<IEnumerable<YearCountDto>> GetYearCount();
+    Task<IEnumerable<YearCountDto>> GetTopYears();
     Task<IEnumerable<PublicationCountDto>> GetPublicationCount();
     Task<IEnumerable<MangaFormatCountDto>> GetMangaFormatCount();
 
@@ -103,6 +104,22 @@ public class StatisticService : IStatisticService
                 Count = _context.SeriesMetadata.Where(sm2 => sm2.ReleaseYear == sm.Key).Distinct().Count()
             })
             .OrderByDescending(d => d.Value)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<YearCountDto>> GetTopYears()
+    {
+        return await _context.SeriesMetadata
+            .Where(sm => sm.ReleaseYear != 0)
+            .AsSplitQuery()
+            .GroupBy(sm => sm.ReleaseYear)
+            .Select(sm => new YearCountDto
+            {
+                Value = sm.Key,
+                Count = _context.SeriesMetadata.Where(sm2 => sm2.ReleaseYear == sm.Key).Distinct().Count()
+            })
+            .OrderByDescending(d => d.Count)
+            .Take(5)
             .ToListAsync();
     }
 

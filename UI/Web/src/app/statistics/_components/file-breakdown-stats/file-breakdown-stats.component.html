@@ -19,11 +19,14 @@
 
 <ng-container *ngIf="files$ | async as files">
     <ng-container *ngIf="formControl.value; else tableLayout">
-        <ngx-charts-advanced-pie-chart
+        <ngx-charts-bar-vertical-stacked
         [view]="view"
         [results]="vizData$ | async"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        [showDataLabel]="true"
         >
-        </ngx-charts-advanced-pie-chart>
+        </ngx-charts-bar-vertical-stacked>
     </ng-container>
     <ng-template #tableLayout>
         <table class="table table-light table-striped table-hover scrollable">
@@ -46,7 +49,7 @@
             <tbody>
                 <tr *ngFor="let item of files; let idx = index;">
                     <td id="adhoctask--{{idx}}">
-                      {{item.extension}}
+                      {{item.extension || 'Not Classified'}}
                     </td>
                     <td>
                       {{item.format | mangaFormat}}
@@ -64,7 +67,7 @@
                     <td>Total Files:</td>
                     <td></td>
                     <td></td>
-                    <td>{{files</td>
+                    <td>XXX</td>
                 </tr>
             </tfoot>
         </table>

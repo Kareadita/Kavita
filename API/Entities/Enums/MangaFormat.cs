@@ -20,8 +20,9 @@ public enum MangaFormat
     [Description("Archive")]
     Archive = 1,
     /// <summary>
-    /// Unknown. Not used.
+    /// Unknown
     /// </summary>
+    /// <remarks>Default state for all files, but at end of processing, will never be Unknown.</remarks>
     [Description("Unknown")]
     Unknown = 2,
     /// <summary>

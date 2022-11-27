@@ -36,7 +36,7 @@ export class ReleaseYearComponent implements OnInit, OnDestroy {
 
 
   constructor(private statService: StatisticsService) {
-    this.releaseYears$ = combineLatest([this.currentSort$, this.statService.getYearRange()]).pipe(
+    this.releaseYears$ = combineLatest([this.currentSort$, this.statService.getTopYears()]).pipe(
       map(([sortConfig, data]) => {
         return (sortConfig.column) ? data.sort((a: PieDataItem, b: PieDataItem) => {
           if (sortConfig.column === '') return 0;

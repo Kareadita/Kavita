@@ -70,6 +70,14 @@ public class StatsController : BaseApiController
     }
 
     [Authorize("RequireAdminRole")]
+    [HttpGet("server/top/years")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<YearCountDto>>> GetTopYears()
+    {
+        return Ok(await _statService.GetTopYears());
+    }
+
+    [Authorize("RequireAdminRole")]
     [HttpGet("server/file-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()

@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
-import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, tap } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
-import { FileExtension } from '../../_models/file-breakdown';
+import { FileExtension, FileExtensionBreakdown } from '../../_models/file-breakdown';
 import { PieDataItem } from '../../_models/pie-data-item';
 
 export interface StackedBarChartDataItem {
@@ -26,6 +26,7 @@ export class FileBreakdownStatsComponent implements OnInit {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
+  rawData$!: Observable<FileExtensionBreakdown>;
   files$!: Observable<Array<FileExtension>>;
   vizData$!: Observable<Array<StackedBarChartDataItem>>;
   private readonly onDestroy = new Subject<void>();
@@ -47,7 +48,9 @@ export class FileBreakdownStatsComponent implements OnInit {
 
 
   constructor(private statService: StatisticsService) {
-    this.files$ = combineLatest([this.currentSort$, this.statService.getFileBreakdown()]).pipe(
+    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntil(this.onDestroy));
+
+    this.files$ = combineLatest([this.currentSort$, this.rawData$]).pipe(
       map(([sortConfig, data]) => {
         return {sortConfig, fileBreakdown: data.fileBreakdown};
       }),
@@ -65,9 +68,8 @@ export class FileBreakdownStatsComponent implements OnInit {
       const formats: {[key: string]: Array<PieDataItem>} = {};
       data.forEach(d => {
         let format = mangaFormatPipe.transform(d.format);
-        if (format === null) format = '';
         if (!formats.hasOwnProperty(format)) formats[format] = [];
-        formats[format].push({name: d.extension, value: d.totalFiles, extra: d.totalSize})
+        formats[format].push({name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize})
       });
 
       const ret: Array<StackedBarChartDataItem> = [];
@@ -78,6 +80,8 @@ export class FileBreakdownStatsComponent implements OnInit {
 
       return ret;
     }));
+
+    
   }
 
   ngOnInit(): void {

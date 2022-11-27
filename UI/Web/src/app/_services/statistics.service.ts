@@ -37,6 +37,13 @@ export class StatisticsService {
       })));
   }
 
+  getTopYears() {
+    return this.httpClient.get<YearCount[]>(this.baseUrl + 'stats/server/top/years').pipe(
+      map(spreads => spreads.map(spread => {
+      return {name: spread.value + '', value: spread.count};
+      })));
+  }
+
   getPublicationStatus() {
     return this.httpClient.get<PublicationCount[]>(this.baseUrl + 'stats/server/count/publication-status').pipe(
       map(spreads => spreads.map(spread => {
