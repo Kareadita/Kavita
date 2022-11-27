@@ -19,14 +19,10 @@
 
 <ng-container *ngIf="publicationStatues$ | async as statuses">
     <ng-container *ngIf="formControl.value; else tableLayout">
-        <ngx-charts-pie-chart
-        [view]="view"
+        <ngx-charts-advanced-pie-chart
         [results]="statuses"
-        [legend]="showLegend"
-        [legendPosition]="legendPosition"
-        [labels]="showLabels"
         >
-        </ngx-charts-pie-chart>
+        </ngx-charts-advanced-pie-chart>
     </ng-container>
     <ng-template #tableLayout>
         <table class="table table-light table-hover table-striped scrollable">

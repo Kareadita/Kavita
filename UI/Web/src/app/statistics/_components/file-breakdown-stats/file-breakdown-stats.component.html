@@ -64,10 +64,10 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td>Total Files:</td>
+                    <td>Total File Size:</td>
                     <td></td>
                     <td></td>
-                    <td>XXX</td>
+                    <td>{{((rawData$ | async)?.totalFileSize || 0) | bytes}}</td>
                 </tr>
             </tfoot>
         </table>

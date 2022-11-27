@@ -76,12 +76,9 @@ export class FileBreakdownStatsComponent implements OnInit {
       Object.keys(formats).filter(k => formats.hasOwnProperty(k)).forEach(key => {
         ret.push({name: key, series: formats[key]});
       });
-      console.log('processed data: ', ret);
 
       return ret;
     }));
-
-    
   }
 
   ngOnInit(): void {
