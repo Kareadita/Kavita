@@ -1,10 +1,9 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { combineLatest, from, map, Observable, of, shareReplay, startWith, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { map, Observable, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 import { ImageService } from 'src/app/_services/image.service';
 import { MemberService } from 'src/app/_services/member.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
-import { PieDataItem } from '../../_models/pie-data-item';
 import { TopRead, TopReads } from '../../_models/top-reads';
 
 @Component({
@@ -15,7 +14,6 @@ import { TopRead, TopReads } from '../../_models/top-reads';
 })
 export class TopReadsByExtensionComponent implements OnInit, OnDestroy {
 
-  fakeData: Array<PieDataItem> = [{name: 'Accel World', value: 1, extra: {users: 1, seriesId: 1}}, {name: 'Mob Psycho 100', value: 1, extra: {users: 3, seriesId: 3}}];
   formGroup: FormGroup;
   memberNames$: Observable<string[]>;
   timePeriods: Array<{title: string, value: number}> = [{title: 'Last 7 Days', value: 7}, {title: 'Last 30 Days', value: 30}, {title: 'Last 90 Days', value: 90}, {title: 'Last Year', value: 365}, {title: 'All Time', value: 0}];

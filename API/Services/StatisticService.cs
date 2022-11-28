@@ -194,7 +194,6 @@ public class StatisticService : IStatisticService
             Manga = GetTopReadDtosForFormat(userId, days, LibraryType.Manga).AsEnumerable(),
             Comics = GetTopReadDtosForFormat(userId, days, LibraryType.Comic).AsEnumerable(),
             Books = GetTopReadDtosForFormat(userId, days, LibraryType.Book).AsEnumerable(),
-
         });
     }
 

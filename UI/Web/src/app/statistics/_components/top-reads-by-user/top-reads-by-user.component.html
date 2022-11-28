@@ -1,0 +1,48 @@
+<div class="row g-0 mb-2">
+    <div class="col-4">
+        <h4>Top Reads</h4>
+    </div>
+    <div class="col-8">
+        <form [formGroup]="formGroup" class="d-inline-flex float-end">
+            <div class="form-check form-switch" style="width: 200px">
+                <label for="user-select-top-reads" class="form-check-label"></label>
+                <select id="user-select-top-reads" class="form-select" formControlName="member"
+                [class.is-invalid]="formGroup.get('member')?.invalid && formGroup.get('member')?.touched">
+                    <option *ngFor="let name of memberNames$ | async" [value]="name">{{name}}</option>
+                </select>
+            </div>
+            <div class="form-check form-switch ms-1" style="width: 200px">
+                <label for="time-select-top-reads" class="form-check-label"></label>
+                <select id="time-select-top-reads" class="form-select" formControlName="days"
+                [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
+                    <option *ngFor="let item of timePeriods" [value]="item.value">{{item.title}}</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+<ng-template #userListItem>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Comics
+        </li>
+        <li class="list-group-item">
+            Manga
+        </li>
+        <li class="list-group-item">
+            Manga
+        </li>
+    </ul>
+</ng-template>
+
+<ng-container>
+    <div class="row g-0">
+        <div class="col-md-3 me-1" *ngFor="let user of (users$ | async)">
+            <ng-container [ngTemplateOutlet]="userListItem" [ngTemplateOutletContext]="{ $implicit: user }"></ng-container>
+        </div>
+    </div>
+</ng-container>
+
+
+

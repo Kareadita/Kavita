@@ -92,6 +92,19 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetTopReads(userId, days));
     }
 
+    /// <summary>
+    /// Returns
+    /// </summary>
+    /// <param name="days"></param>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("server/top/users")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<TopReadsDto>>> GetTopReads(int days = 0)
+    {
+        return Ok(await _statService.GetTopUsers(days));
+    }
+
     [Authorize("RequireAdminRole")]
     [HttpGet("server/file-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]

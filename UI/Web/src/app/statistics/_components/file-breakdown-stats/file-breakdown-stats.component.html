@@ -19,15 +19,7 @@
 
 <ng-container *ngIf="files$ | async as files">
     <ng-container *ngIf="formControl.value; else tableLayout">
-        <!-- This might actually be better as a pie chart advanced but with a dropdown to select the different format type -->
-        <ngx-charts-bar-vertical-stacked
-        [view]="view"
-        [results]="vizData$ | async"
-        [showXAxisLabel]="true"
-        [showYAxisLabel]="true"
-        [showDataLabel]="true"
-        >
-        </ngx-charts-bar-vertical-stacked>
+        <ngx-charts-advanced-pie-chart [results]="vizData2$ | async"></ngx-charts-advanced-pie-chart>
     </ng-container>
     <ng-template #tableLayout>
         <table class="table table-light table-striped table-hover scrollable">

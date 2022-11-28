@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
-import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, tap, shareReplay } from 'rxjs';
+import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, shareReplay } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { StatisticsService } from 'src/app/_services/statistics.service';
@@ -29,6 +29,7 @@ export class FileBreakdownStatsComponent implements OnInit {
   rawData$!: Observable<FileExtensionBreakdown>;
   files$!: Observable<Array<FileExtension>>;
   vizData$!: Observable<Array<StackedBarChartDataItem>>;
+  vizData2$!: Observable<Array<PieDataItem>>;
   private readonly onDestroy = new Subject<void>();
   
   currentSort = new BehaviorSubject<SortEvent<FileExtension>>({column: 'extension', direction: 'asc'});
@@ -64,21 +65,25 @@ export class FileBreakdownStatsComponent implements OnInit {
       takeUntil(this.onDestroy)
     );
 
-    this.vizData$ = this.files$.pipe(takeUntil(this.onDestroy), map(data => {
-      const formats: {[key: string]: Array<PieDataItem>} = {};
-      data.forEach(d => {
-        let format = mangaFormatPipe.transform(d.format);
-        if (!formats.hasOwnProperty(format)) formats[format] = [];
-        formats[format].push({name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize})
-      });
+    // this.vizData$ = this.files$.pipe(takeUntil(this.onDestroy), map(data => {
+    //   const formats: {[key: string]: Array<PieDataItem>} = {};
+    //   data.forEach(d => {
+    //     let format = mangaFormatPipe.transform(d.format);
+    //     if (!formats.hasOwnProperty(format)) formats[format] = [];
+    //     formats[format].push({name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize})
+    //   });
 
-      const ret: Array<StackedBarChartDataItem> = [];
-      Object.keys(formats).filter(k => formats.hasOwnProperty(k)).forEach(key => {
-        ret.push({name: key, series: formats[key]});
-      });
+    //   const ret: Array<StackedBarChartDataItem> = [];
+    //   Object.keys(formats).filter(k => formats.hasOwnProperty(k)).forEach(key => {
+    //     ret.push({name: key, series: formats[key]});
+    //   });
 
-      return ret;
-    }));
+    //   return ret;
+    // }));
+
+    this.vizData2$ = this.files$.pipe(takeUntil(this.onDestroy), map(data => data.map(d => {
+      return {name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize};
+    })));
   }
 
   ngOnInit(): void {

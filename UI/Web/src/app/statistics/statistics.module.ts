@@ -14,6 +14,7 @@ import { MangaFormatStatsComponent } from './_components/manga-format-stats/mang
 import { FileBreakdownStatsComponent } from './_components/file-breakdown-stats/file-breakdown-stats.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { TopReadsByExtensionComponent } from './_components/top-reads-by-extension/top-reads-by-extension.component';
+import { TopReadsByUserComponent } from './_components/top-reads-by-user/top-reads-by-user.component';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { TopReadsByExtensionComponent } from './_components/top-reads-by-extensi
     PublicationStatusStatsComponent,
     MangaFormatStatsComponent,
     FileBreakdownStatsComponent,
-    TopReadsByExtensionComponent
+    TopReadsByExtensionComponent,
+    TopReadsByUserComponent
   ],
   imports: [
     CommonModule,
