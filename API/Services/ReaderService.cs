@@ -103,6 +103,7 @@ public class ReaderService : IReaderService
     public async Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters)
     {
         var seenVolume = new Dictionary<int, bool>();
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -114,7 +115,8 @@ public class ReaderService : IReaderService
                     PagesRead = chapter.Pages,
                     VolumeId = chapter.VolumeId,
                     SeriesId = seriesId,
-                    ChapterId = chapter.Id
+                    ChapterId = chapter.Id,
+                    LibraryId = series.LibraryId
                 });
             }
             else
