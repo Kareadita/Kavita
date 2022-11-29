@@ -106,8 +106,8 @@ export class ReaderService {
     return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
   }
 
-  saveProgress(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
-    return this.httpClient.post(this.baseUrl + 'reader/progress', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
+  saveProgress(libraryId: number, seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
+    return this.httpClient.post(this.baseUrl + 'reader/progress', {libraryId, seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
   }
 
   markVolumeRead(seriesId: number, volumeId: number) {

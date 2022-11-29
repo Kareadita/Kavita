@@ -216,13 +216,17 @@ public class StatisticService : IStatisticService
     //     {
     //         p.PagesRead,
     //         p.AppUserId,
-    //         p.SeriesId
-    //     })
+    //         p.SeriesId,
+    //         p.LibraryId,
+    //     });
     //
-    //     var allMangaSeriesIds = query.Select(p => p.SeriesId).AsEnumerable();
+    //
+    //
+    //     //var allMangaSeriesIds = query.Select(p => p.SeriesId).AsEnumerable();
     //
     //     return _context.Series
-    //         .Where(s => allMangaSeriesIds.Contains(s.Id) && s.Library.Type == type)
+    //         //.Where(s => allMangaSeriesIds.Contains(s.Id) && s.Library.Type == type)
+    //         .Where(s => s.Library.Type == type)
     //         .Select(s => new TopReadDto()
     //         {
     //
