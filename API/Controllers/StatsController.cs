@@ -77,21 +77,6 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetTopYears());
     }
 
-    [Authorize("RequireAdminRole")]
-    [HttpGet("server/top/reads")]
-    [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<TopReadsDto>>> GetTopReads(string username = "", int days = 0)
-    {
-        var userId = 0;
-        if (!string.IsNullOrEmpty(username))
-        {
-            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(
-                username);
-            if (user != null) userId = user.Id;
-        }
-        return Ok(await _statService.GetTopReads(userId, days));
-    }
-
     /// <summary>
     /// Returns
     /// </summary>
@@ -100,7 +85,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/top/users")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<TopReadsDto>>> GetTopReads(int days = 0)
+    public async Task<ActionResult<IEnumerable<TopReadDto>>> GetTopReads(int days = 0)
     {
         return Ok(await _statService.GetTopUsers(days));
     }

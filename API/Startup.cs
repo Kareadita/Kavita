@@ -223,6 +223,9 @@ public class Startup
                     // v0.6.2 or v0.7
                     await MigrateSeriesRelationsImport.Migrate(dataContext, logger);
 
+                    // v0.6.8 or v0.7
+                    await MigrateUserProgressLibraryId.Migrate(unitOfWork, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();

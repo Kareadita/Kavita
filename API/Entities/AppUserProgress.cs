@@ -7,7 +7,6 @@ namespace API.Entities;
 /// <summary>
 /// Represents the progress a single user has on a given Chapter.
 /// </summary>
-//[Index(nameof(SeriesId), nameof(VolumeId), nameof(ChapterId), nameof(AppUserId), IsUnique = true)]
 public class AppUserProgress : IEntityDate
 {
     /// <summary>
@@ -26,6 +25,10 @@ public class AppUserProgress : IEntityDate
     /// Series belonging to Chapter
     /// </summary>
     public int SeriesId { get; set; }
+    /// <summary>
+    /// Library belonging to Chapter
+    /// </summary>
+    public int LibraryId { get; set; }
     /// <summary>
     /// Chapter
     /// </summary>

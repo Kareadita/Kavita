@@ -4,18 +4,16 @@ namespace API.DTOs.Statistics;
 
 public class TopReadDto
 {
-    public string SeriesName { get; set; }
-    public int SeriesId { get; set; }
-    public int LibraryId { get; set; }
+    public int UserId { get; set; }
+    public string Username { get; set; }
     /// <summary>
-    /// How many distinct user (id) read events
+    /// Amount of time read on Comic libraries
     /// </summary>
-    public int UsersRead { get; set; }
+    public long ComicsTime { get; set; }
+    /// <summary>
+    /// Amount of time read on
+    /// </summary>
+    public long BooksTime { get; set; }
+    public long MangaTime { get; set; }
 }
 
-public class TopReadsDto
-{
-    public IEnumerable<TopReadDto> Comics { get; set; }
-    public IEnumerable<TopReadDto> Manga { get; set; }
-    public IEnumerable<TopReadDto> Books { get; set; }
-}

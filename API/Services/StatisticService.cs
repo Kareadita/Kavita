@@ -22,8 +22,7 @@ public interface IStatisticService
     Task<IEnumerable<MangaFormatCountDto>> GetMangaFormatCount();
     Task<ServerStatistics> GetServerStatistics();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
-    Task<TopReadsDto> GetTopReads(int userId, int days);
-
+    Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
 }
 
 /// <summary>
@@ -187,43 +186,55 @@ public class StatisticService : IStatisticService
     /// <param name="userId">If 0, all users will be returned back</param>
     /// <param name="days">If 0, a date clamp will not take place</param>
     /// <returns></returns>
-    public Task<TopReadsDto> GetTopReads(int userId = 0, int days = 0)
+    // public Task<TopReadsDto> GetTopReads(int userId = 0, int days = 0)
+    // {
+    //     return Task.FromResult(new TopReadsDto()
+    //     {
+    //         Manga = GetTopReadDtosForFormat(userId, days, LibraryType.Manga).AsEnumerable(),
+    //         Comics = GetTopReadDtosForFormat(userId, days, LibraryType.Comic).AsEnumerable(),
+    //         Books = GetTopReadDtosForFormat(userId, days, LibraryType.Book).AsEnumerable(),
+    //     });
+    // }
+
+    public Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
     {
-        return Task.FromResult(new TopReadsDto()
-        {
-            Manga = GetTopReadDtosForFormat(userId, days, LibraryType.Manga).AsEnumerable(),
-            Comics = GetTopReadDtosForFormat(userId, days, LibraryType.Comic).AsEnumerable(),
-            Books = GetTopReadDtosForFormat(userId, days, LibraryType.Book).AsEnumerable(),
-        });
+        throw new NotImplementedException();
     }
 
-    private IEnumerable<TopReadDto> GetTopReadDtosForFormat(int userId, int days, LibraryType type)
-    {
-        var minDate = DateTime.Now.Subtract(TimeSpan.FromDays(days));
-        var manga = _context.AppUserProgresses
-            .AsSplitQuery()
-            .AsNoTracking();
-
-        if (userId > 0) manga = manga.Where(p => p.AppUserId == userId);
-        if (days > 0) manga = manga.Where(p => p.LastModified > minDate);
-
-        var allMangaSeriesIds = manga.Select(p => p.SeriesId).AsEnumerable();
-
-        return _context.Series
-            .Where(s => allMangaSeriesIds.Contains(s.Id) && s.Library.Type == type)
-            .Select(s => new TopReadDto()
-            {
-                SeriesId = s.Id,
-                SeriesName = s.Name,
-                LibraryId = s.LibraryId,
-                UsersRead = _context.AppUserProgresses
-                    .Where(p => p.SeriesId == s.Id)
-                    .Select(p => p.AppUserId)
-                    .Distinct()
-                    .Count()
-            })
-            .OrderBy(d => d.UsersRead)
-            .Take(5);
-
-    }
+    // private IEnumerable<TopReadDto> GetTopReadDtosForFormat(int days, LibraryType type)
+    // {
+    //     var minDate = DateTime.Now.Subtract(TimeSpan.FromDays(days));
+    //     var query = _context.AppUserProgresses
+    //         .AsSplitQuery()
+    //         .AsNoTracking();
+    //
+    //     if (days > 0) query = query.Where(p => p.LastModified > minDate);
+    //
+    //     var users = query.Select(p => new
+    //     {
+    //         p.PagesRead,
+    //         p.AppUserId,
+    //         p.SeriesId
+    //     })
+    //
+    //     var allMangaSeriesIds = query.Select(p => p.SeriesId).AsEnumerable();
+    //
+    //     return _context.Series
+    //         .Where(s => allMangaSeriesIds.Contains(s.Id) && s.Library.Type == type)
+    //         .Select(s => new TopReadDto()
+    //         {
+    //
+    //             SeriesId = s.Id,
+    //             SeriesName = s.Name,
+    //             LibraryId = s.LibraryId,
+    //             UsersRead = _context.AppUserProgresses
+    //                 .Where(p => p.SeriesId == s.Id)
+    //                 .Select(p => p.AppUserId)
+    //                 .Distinct()
+    //                 .Count()
+    //         })
+    //         .OrderBy(d => d.UsersRead)
+    //         .Take(5);
+    //
+    // }
 }

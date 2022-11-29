@@ -7770,23 +7770,17 @@
         }
       }
     },
-    "/api/Stats/server/top/reads": {
+    "/api/Stats/server/top/users": {
       "get": {
         "tags": [
           "Stats"
         ],
+        "summary": "Returns",
         "parameters": [
-          {
-            "name": "username",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          },
           {
             "name": "days",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -7802,7 +7796,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/TopReadsDto"
+                    "$ref": "#/components/schemas/TopReadDto"
                   }
                 }
               },
@@ -7810,7 +7804,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/TopReadsDto"
+                    "$ref": "#/components/schemas/TopReadDto"
                   }
                 }
               },
@@ -7818,7 +7812,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/TopReadsDto"
+                    "$ref": "#/components/schemas/TopReadDto"
                   }
                 }
               }
@@ -9201,6 +9195,11 @@
           "seriesId": {
             "type": "integer",
             "description": "Series belonging to Chapter",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "Library belonging to Chapter",
             "format": "int32"
           },
           "chapterId": {
@@ -12936,49 +12935,27 @@
       "TopReadDto": {
         "type": "object",
         "properties": {
-          "seriesName": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": {
             "type": "string",
             "nullable": true
           },
-          "seriesId": {
+          "comicsTime": {
             "type": "integer",
-            "format": "int32"
+            "description": "Amount of time read on Comic libraries",
+            "format": "int64"
           },
-          "libraryId": {
+          "booksTime": {
             "type": "integer",
-            "format": "int32"
+            "description": "Amount of time read on",
+            "format": "int64"
           },
-          "usersRead": {
+          "mangaTime": {
             "type": "integer",
-            "description": "How many distinct user (id) read events",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "TopReadsDto": {
-        "type": "object",
-        "properties": {
-          "comics": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TopReadDto"
-            },
-            "nullable": true
-          },
-          "manga": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TopReadDto"
-            },
-            "nullable": true
-          },
-          "books": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TopReadDto"
-            },
-            "nullable": true
+            "format": "int64"
           }
         },
         "additionalProperties": false

@@ -119,6 +119,11 @@ public interface ISeriesRepository
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
+    /// <summary>
+    /// This is only used for <see cref="MigrateUserProgressLibraryId"/>
+    /// </summary>
+    /// <returns></returns>
+    Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -501,6 +506,21 @@ public class SeriesRepository : ISeriesRepository
                 }
                 seriesChapters[v.SeriesId].Add(c.Id);
             }
+        }
+
+        return seriesChapters;
+    }
+
+    public async Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync()
+    {
+        var seriesChapters = new Dictionary<int, int>();
+        var series = await _context.Series.Select(s => new
+        {
+            Id = s.Id, LibraryId = s.LibraryId
+        }).ToListAsync();
+        foreach (var s in series)
+        {
+            seriesChapters.Add(s.Id, s.LibraryId);
         }
 
         return seriesChapters;
