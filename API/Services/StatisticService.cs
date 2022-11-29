@@ -51,10 +51,12 @@ public class StatisticService : IStatisticService
         // Total Pages Read
         var totalPagesRead = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
+            .Where(p => libraryIds.Contains(p.LibraryId))
             .SumAsync(p => p.PagesRead);
 
         var ids = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
+            .Where(p => libraryIds.Contains(p.LibraryId))
             .Where(p => p.PagesRead > 0)
             .Select(p => new {p.ChapterId, p.SeriesId})
             .ToListAsync();
@@ -78,7 +80,7 @@ public class StatisticService : IStatisticService
         // How many series of each format have you read? (Epub, Archive, etc)
 
         // Percentage of libraries read. For each library, get the total pages vs read
-        var allLibraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        //var allLibraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
 
         return new UserReadStatistics()
