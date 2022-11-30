@@ -10,6 +10,8 @@ import { map } from 'rxjs';
 import { MangaFormatPipe } from '../pipe/manga-format.pipe';
 import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
 import { TopReads } from '../statistics/_models/top-reads';
+import { ReadHistoryEvent } from '../statistics/_models/read-history-event';
+import { ServerStatistics } from '../statistics/_models/server-statistics';
 
 
 const publicationStatusPipe = new PublicationStatusPipe();
@@ -29,6 +31,10 @@ export class StatisticsService {
     if (libraryIds.length > 0) url += '?libraryIds=' + libraryIds.join(',');
     
     return this.httpClient.get<UserReadStatistics>(this.baseUrl + url);
+  }
+
+  getServerStatistics() {
+    return this.httpClient.get<ServerStatistics>(this.baseUrl + 'stats/server/stats');
   }
 
   getYearRange() {
@@ -54,6 +60,10 @@ export class StatisticsService {
 
     }
     return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/reads' + params);
+  }
+
+  getReadingHistory(userId: number) {
+    return this.httpClient.get<ReadHistoryEvent[]>(this.baseUrl + 'stats/user/reading-history?userId=' + userId);
   }
 
   getPublicationStatus() {

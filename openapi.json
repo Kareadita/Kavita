@@ -7859,6 +7859,54 @@
         }
       }
     },
+    "/api/Stats/user/reading-history": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Tachiyomi/latest-chapter": {
       "get": {
         "tags": [
@@ -11082,6 +11130,7 @@
       "ProgressDto": {
         "required": [
           "chapterId",
+          "libraryId",
           "pageNum",
           "seriesId",
           "volumeId"
@@ -11101,6 +11150,10 @@
             "format": "int32"
           },
           "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
             "type": "integer",
             "format": "int32"
           },
@@ -11135,6 +11188,45 @@
         ],
         "type": "integer",
         "format": "int32"
+      },
+      "ReadHistoryEvent": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "readDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a single User's reading event"
       },
       "ReadStatus": {
         "type": "object",
@@ -12719,13 +12811,21 @@
             "type": "integer",
             "format": "int64"
           },
-          "totalReadingLists": {
+          "totalSize": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
-          "totalWantToReadSeries": {
+          "totalGenres": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
+          },
+          "totalTags": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPeople": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -13707,6 +13807,18 @@
             },
             "description": "A list of genres mapped with genre and number of series that fall into said genre",
             "nullable": true
+          },
+          "chaptersRead": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "avgHoursPerWeekSpentReading": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false

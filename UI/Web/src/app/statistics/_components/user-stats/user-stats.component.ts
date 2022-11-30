@@ -6,6 +6,7 @@ import { UserReadStatistics } from 'src/app/statistics/_models/user-read-statist
 import { SeriesService } from 'src/app/_services/series.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent } from 'src/app/_single-module/table/_directives/sortable-header.directive';
+import { ReadHistoryEvent } from '../../_models/read-history-event';
 
 type SeriesWithProgress = Series & {progress: number};
 
@@ -22,7 +23,7 @@ export class UserStatsComponent implements OnInit, OnDestroy {
   @ViewChildren(SortableHeader) headers!: QueryList<SortableHeader<SeriesWithProgress>>;
 
   userStats$!: Observable<UserReadStatistics>;
-  readSeries$!: Observable<SeriesWithProgress[]>;
+  readSeries$!: Observable<ReadHistoryEvent[]>;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -33,20 +34,8 @@ export class UserStatsComponent implements OnInit, OnDestroy {
     const filter = this.filterService.createSeriesFilter();
     filter.readStatus = {read: true, notRead: false, inProgress: true};
     this.userStats$ = this.statService.getUserStatistics(this.userId).pipe(takeUntil(this.onDestroy));
-    this.readSeries$ = this.seriesService.getAllSeries(undefined, undefined, filter).pipe(
+    this.readSeries$ = this.statService.getReadingHistory(this.userId).pipe(
       takeUntil(this.onDestroy), 
-      map(paginated => paginated.result),
-      map(series => series.map(s => {
-        const ret =  {...s};
-        ret.progress = ((s.pagesRead * 1.0) / s.pages) * 100;
-        return ret;
-      })
-      ),
-      map(data => {
-        return data.sort((a: SeriesWithProgress, b: SeriesWithProgress) => {
-          return 0;
-        })
-      })
     );
   }
 

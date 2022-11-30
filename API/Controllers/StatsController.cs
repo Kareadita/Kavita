@@ -40,7 +40,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/stats")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<ServerStatistics>>> GetHighLevelStats()
+    public async Task<ActionResult<ServerStatistics>> GetHighLevelStats()
     {
         return Ok(await _statService.GetServerStatistics());
     }
@@ -96,6 +96,16 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
     {
         return Ok(await _statService.GetFileBreakdown());
+    }
+
+
+    [HttpGet("user/reading-history")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
+    {
+        // TODO: Put a check in if the calling user is said userId or has admin
+
+        return Ok(await _statService.GetReadingHistory(userId));
     }
 
 }

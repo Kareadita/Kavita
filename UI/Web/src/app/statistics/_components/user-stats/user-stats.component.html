@@ -3,7 +3,8 @@
     <!-- High level stats (use same design as series metadata info cards)-->
     <div class="row g-0">
         <ng-container *ngIf="userStats$ | async as userStats">
-            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [timeSpentReading]="userStats.timeSpentReading"></app-user-stats-info-cards>
+            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [timeSpentReading]="userStats.timeSpentReading"
+             [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive"></app-user-stats-info-cards>
         </ng-container>
     </div>
 
@@ -12,32 +13,38 @@
         Number of bookmarks
         Last Active Time
         Average days reading on server a week
+        Total Series in want to read list? 
     </div>
 
     <!-- Table of all series with progress -->
-    <!-- <table class="table table-light table-striped scrollable">
+    <table class="table table-light table-striped scrollable">
         <thead>
             <tr>
-                <th scope="col" sortable="progress" (sort)="onSort($event)">
-                    Read %
+                <th scope="col">
+                    Chapter Number
                 </th>
-                <th scope="col" sortable="name" (sort)="onSort($event)">
+                <th scope="col">
                     Series Name
-
+                </th>
+                <th scope="col">
+                    Read Date
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let series of readSeries$ | async; let idx = index;">
+            <tr *ngFor="let evt of readSeries$ | async; let idx = index;">
                 <td id="adhoctask--{{idx}}">
-                  {{series.progress | percent}}
+                  {{evt.chapterNumber}}
                 </td>
                 <td>
-                  {{series.name}}
+                  <a href="/library/{{evt.libraryId}}/series/{{evt.seriesId}}" target="_blank">{{evt.seriesName}}</a>
                 </td>
+                <td>
+                    {{evt.readDate}}
+                  </td>
               </tr>
         </tbody>
-    </table> -->
+    </table>
 
     
 </div>

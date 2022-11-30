@@ -8,6 +8,9 @@ public class ServerStatistics
     public long VolumeCount { get; set; }
     public long SeriesCount { get; set; }
     public long TotalFiles { get; set; }
-    public int TotalReadingLists { get; set; }
-    public int TotalWantToReadSeries { get; set; }
+    public long TotalSize { get; set; }
+    public long TotalGenres { get; set; }
+    public long TotalTags { get; set; }
+    public long TotalPeople { get; set; }
+
 }

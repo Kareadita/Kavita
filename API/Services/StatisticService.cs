@@ -23,6 +23,7 @@ public interface IStatisticService
     Task<ServerStatistics> GetServerStatistics();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
+    Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
 }
 
 /// <summary>
@@ -82,11 +83,26 @@ public class StatisticService : IStatisticService
         // Percentage of libraries read. For each library, get the total pages vs read
         //var allLibraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
+        var chaptersRead = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Where(p => libraryIds.Contains(p.LibraryId))
+            .Where(p => p.PagesRead >= _context.Chapter.Single(c => c.Id == p.ChapterId).Pages)
+            .CountAsync();
+
+        var lastActive = await _context.AppUserProgresses
+            .OrderByDescending(p => p.LastModified)
+            .Select(p => p.LastModified)
+            .FirstOrDefaultAsync();
+
+        //var
 
         return new UserReadStatistics()
         {
             TotalPagesRead = totalPagesRead,
-            TimeSpentReading = timeSpentReading
+            TimeSpentReading = timeSpentReading,
+            ChaptersRead = chaptersRead,
+            LastActive = lastActive,
+            //AvgHoursPerWeekSpentReading =
         };
     }
 
@@ -154,9 +170,19 @@ public class StatisticService : IStatisticService
     }
 
 
-    public Task<ServerStatistics> GetServerStatistics()
+    public async Task<ServerStatistics> GetServerStatistics()
     {
-        return Task.FromResult(new ServerStatistics());
+        return new ServerStatistics()
+        {
+            ChapterCount = await _context.Chapter.CountAsync(),
+            SeriesCount = await _context.Series.CountAsync(),
+            TotalFiles = await _context.MangaFile.CountAsync(),
+            TotalGenres = await _context.Genre.CountAsync(),
+            TotalPeople = await _context.Person.CountAsync(),
+            TotalSize = await _context.MangaFile.SumAsync(m => m.Bytes),
+            TotalTags = await _context.Tag.CountAsync(),
+            VolumeCount = await _context.Volume.Where(v => v.Number != 0).CountAsync()
+        };
     }
 
     public async Task<FileExtensionBreakdownDto> GetFileBreakdown()
@@ -182,6 +208,27 @@ public class StatisticService : IStatisticService
         };
     }
 
+    public async Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId)
+    {
+        return await _context.AppUserProgresses
+            .Where(u => u.AppUserId == userId)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Select(u => new ReadHistoryEvent
+            {
+                UserId = u.AppUserId,
+                UserName = _context.AppUser.Single(u => u.Id == userId).UserName,
+                SeriesName = _context.Series.Single(s => s.Id == u.SeriesId).Name,
+                SeriesId = u.SeriesId,
+                LibraryId = u.LibraryId,
+                ReadDate = u.LastModified,
+                ChapterId = u.ChapterId,
+                ChapterNumber = _context.Chapter.Single(c => c.Id == u.ChapterId).Number
+            })
+            .OrderByDescending(d => d.ReadDate)
+            .ToListAsync();
+    }
+
     /// <summary>
     ///
     /// </summary>
@@ -200,6 +247,7 @@ public class StatisticService : IStatisticService
 
     public Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
     {
+
         throw new NotImplementedException();
     }
 
@@ -211,6 +259,25 @@ public class StatisticService : IStatisticService
     //         .AsNoTracking();
     //
     //     if (days > 0) query = query.Where(p => p.LastModified > minDate);
+    //
+    //     // Goal: Get a list of users ordered by read time for a given library type
+    //     query.Join(_context.Series, p => p.SeriesId, s => s.Id, (progress, series) => new
+    //     {
+    //
+    //     });
+    //
+    //     _context.Series
+    //         .Where(s => s.Library.Type == type)
+    //         .AsSplitQuery()
+    //         .GroupBy(s => s.Format)
+    //         .Select(sm => new
+    //         {
+    //             Format = sm.Key,
+    //             Count = _context.SeriesMetadata.Where(sm2 => sm2.ReleaseYear == sm.Key).Distinct().Count()
+    //         })
+    //         .OrderByDescending(d => d.Count)
+    //         .Take(5)
+    //         .ToListAsync();
     //
     //     var users = query.Select(p => new
     //     {

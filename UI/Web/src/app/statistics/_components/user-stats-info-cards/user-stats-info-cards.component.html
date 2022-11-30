@@ -17,50 +17,30 @@
         <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
-    <!-- <ng-container *ngIf="totalPages > 0">
+    <ng-container>
         <div class="col-auto mb-2">
-            <app-icon-and-title label="Length" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
-                {{totalPages | compactNumber}} Pages
+            <app-icon-and-title label="Chapters/Books Read" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Chapters/Books Read">
+                {{chaptersRead | compactNumber}} Chapters
             </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
-    <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && totalWordCount > 0">
+    <ng-container>
         <div class="col-auto mb-2">
-            <app-icon-and-title label="Word Count" [clickable]="false" fontClasses="fa-solid fa-book-open">
-                {{totalWordCount | compactNumber}} Words
+            <app-icon-and-title label="Last Active" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Last Active">
+                {{lastActive | date:'short'}}
             </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
-    <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && totalWordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
+    <ng-container>
         <div class="col-auto mb-2">
-            <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                <ng-container *ngIf="readingTime.maxHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
-                <ng-template #normalReadTime>
-                    {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
-                </ng-template>
+            <app-icon-and-title label="Avg Hours Reading per Week" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Avg Hours Reading per Week">
+                {{avgHoursPerWeekSpentReading}} hrs
             </app-icon-and-title>
         </div>
-    </ng-container>
-
-    <ng-container *ngIf="showExtendedProperties && chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
         <div class="vr d-none d-lg-block m-2"></div>
-        <div class="col-auto">
-            <app-icon-and-title label="Date Added" [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
-                {{chapter.created | date:'short' || '-'}}
-            </app-icon-and-title>
-        </div>
     </ng-container>
-
-    <ng-container *ngIf="showExtendedProperties">
-        <div class="vr d-none d-lg-block m-2"></div>
-        <div class="col-auto">
-            <app-icon-and-title label="ID" [clickable]="false" fontClasses="fa-solid fa-fingerprint" title="ID">
-                {{entity.id}}
-            </app-icon-and-title>
-        </div>
-    </ng-container> -->
 </div>

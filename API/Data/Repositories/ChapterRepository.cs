@@ -45,6 +45,7 @@ public class ChapterRepository : IChapterRepository
 
     public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds)
     {
+        // TODO: Give this an Includes treatment as TimeLeft isn't using Volume
         return await _context.Chapter
             .Where(c => chapterIds.Contains(c.Id))
             .Include(c => c.Volume)
