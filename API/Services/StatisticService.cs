@@ -21,10 +21,10 @@ public interface IStatisticService
 {
     Task<ServerStatistics> GetServerStatistics();
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
-    Task<IEnumerable<YearCountDto>> GetYearCount();
-    Task<IEnumerable<YearCountDto>> GetTopYears();
-    Task<IEnumerable<PublicationCountDto>> GetPublicationCount();
-    Task<IEnumerable<MangaFormatCountDto>> GetMangaFormatCount();
+    Task<IEnumerable<StatCount<int>>> GetYearCount();
+    Task<IEnumerable<StatCount<int>>> GetTopYears();
+    Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount();
+    Task<IEnumerable<StatCount<MangaFormat>>> GetMangaFormatCount();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
@@ -118,13 +118,13 @@ public class StatisticService : IStatisticService
     /// Returns the Release Years and their count
     /// </summary>
     /// <returns></returns>
-    public async Task<IEnumerable<YearCountDto>> GetYearCount()
+    public async Task<IEnumerable<StatCount<int>>> GetYearCount()
     {
         return await _context.SeriesMetadata
             .Where(sm => sm.ReleaseYear != 0)
             .AsSplitQuery()
             .GroupBy(sm => sm.ReleaseYear)
-            .Select(sm => new YearCountDto
+            .Select(sm => new StatCount<int>
             {
                 Value = sm.Key,
                 Count = _context.SeriesMetadata.Where(sm2 => sm2.ReleaseYear == sm.Key).Distinct().Count()
@@ -133,13 +133,13 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<YearCountDto>> GetTopYears()
+    public async Task<IEnumerable<StatCount<int>>> GetTopYears()
     {
         return await _context.SeriesMetadata
             .Where(sm => sm.ReleaseYear != 0)
             .AsSplitQuery()
             .GroupBy(sm => sm.ReleaseYear)
-            .Select(sm => new YearCountDto
+            .Select(sm => new StatCount<int>
             {
                 Value = sm.Key,
                 Count = _context.SeriesMetadata.Where(sm2 => sm2.ReleaseYear == sm.Key).Distinct().Count()
@@ -151,12 +151,12 @@ public class StatisticService : IStatisticService
 
 
 
-    public async Task<IEnumerable<PublicationCountDto>> GetPublicationCount()
+    public async Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount()
     {
         return await _context.SeriesMetadata
             .AsSplitQuery()
             .GroupBy(sm => sm.PublicationStatus)
-            .Select(sm => new PublicationCountDto
+            .Select(sm => new StatCount<PublicationStatus>
             {
                 Value = sm.Key,
                 Count = _context.SeriesMetadata.Where(sm2 => sm2.PublicationStatus == sm.Key).Distinct().Count()
@@ -164,12 +164,12 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<MangaFormatCountDto>> GetMangaFormatCount()
+    public async Task<IEnumerable<StatCount<MangaFormat>>> GetMangaFormatCount()
     {
         return await _context.MangaFile
             .AsSplitQuery()
             .GroupBy(sm => sm.Format)
-            .Select(mf => new MangaFormatCountDto
+            .Select(mf => new StatCount<MangaFormat>
             {
                 Value = mf.Key,
                 Count = _context.MangaFile.Where(mf2 => mf2.Format == mf.Key).Distinct().Count()

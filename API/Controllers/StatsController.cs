@@ -5,6 +5,7 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Statistics;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -48,7 +49,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/count/year")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<YearCountDto>>> GetYearStatistics()
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetYearStatistics()
     {
         return Ok(await _statService.GetYearCount());
     }
@@ -56,7 +57,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/count/publication-status")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<PublicationCountDto>>> GetPublicationStatus()
+    public async Task<ActionResult<IEnumerable<StatCount<PublicationStatus>>>> GetPublicationStatus()
     {
         return Ok(await _statService.GetPublicationCount());
     }
@@ -64,7 +65,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/count/manga-format")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<MangaFormatCountDto>>> GetMangaFormat()
+    public async Task<ActionResult<IEnumerable<StatCount<MangaFormat>>>> GetMangaFormat()
     {
         return Ok(await _statService.GetMangaFormatCount());
     }
@@ -72,7 +73,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/top/years")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<YearCountDto>>> GetTopYears()
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetTopYears()
     {
         return Ok(await _statService.GetTopYears());
     }

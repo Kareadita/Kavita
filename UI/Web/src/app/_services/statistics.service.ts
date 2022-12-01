@@ -1,10 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { YearCount } from '../statistics/_models/year-count';
 import { UserReadStatistics } from '../statistics/_models/user-read-statistics';
-import { PublicationCount } from '../statistics/_models/publication-count';
-import { MangaFormatCount } from '../statistics/_models/manga-format-count';
 import { PublicationStatusPipe } from '../pipe/publication-status.pipe';
 import { map } from 'rxjs';
 import { MangaFormatPipe } from '../pipe/manga-format.pipe';
@@ -12,6 +9,9 @@ import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
 import { TopReads, TopUserRead } from '../statistics/_models/top-reads';
 import { ReadHistoryEvent } from '../statistics/_models/read-history-event';
 import { ServerStatistics } from '../statistics/_models/server-statistics';
+import { StatCount } from '../statistics/_models/stat-count';
+import { PublicationStatus } from '../_models/metadata/publication-status';
+import { MangaFormat } from '../_models/manga-format';
 
 
 const publicationStatusPipe = new PublicationStatusPipe();
@@ -39,14 +39,14 @@ export class StatisticsService {
   }
 
   getYearRange() {
-    return this.httpClient.get<YearCount[]>(this.baseUrl + 'stats/server/count/year').pipe(
+    return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/server/count/year').pipe(
       map(spreads => spreads.map(spread => {
       return {name: spread.value + '', value: spread.count};
       })));
   }
 
   getTopYears() {
-    return this.httpClient.get<YearCount[]>(this.baseUrl + 'stats/server/top/years').pipe(
+    return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/server/top/years').pipe(
       map(spreads => spreads.map(spread => {
       return {name: spread.value + '', value: spread.count};
       })));
@@ -71,14 +71,14 @@ export class StatisticsService {
   }
 
   getPublicationStatus() {
-    return this.httpClient.get<PublicationCount[]>(this.baseUrl + 'stats/server/count/publication-status').pipe(
+    return this.httpClient.get<StatCount<PublicationStatus>[]>(this.baseUrl + 'stats/server/count/publication-status').pipe(
       map(spreads => spreads.map(spread => {
       return {name: publicationStatusPipe.transform(spread.value), value: spread.count};
       })));
   }
 
   getMangaFormat() {
-    return this.httpClient.get<MangaFormatCount[]>(this.baseUrl + 'stats/server/count/manga-format').pipe(
+    return this.httpClient.get<StatCount<MangaFormat>[]>(this.baseUrl + 'stats/server/count/manga-format').pipe(
       map(spreads => spreads.map(spread => {
       return {name: mangaFormatPipe.transform(spread.value), value: spread.count};
       })));
