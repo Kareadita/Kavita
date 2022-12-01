@@ -236,30 +236,15 @@ public class StatisticService : IStatisticService
             .AsSplitQuery()
             .OrderByDescending(d => d.LastModified)
             .Select(d => d.SeriesId)
-            .Distinct()
             .ToListAsync())
+            .Distinct()
             .Take(5);
-
-        _logger.LogInformation("Series IDs: {SeriesIds}", seriesIds);
 
         var recentlyRead = _context.Series
             .AsSplitQuery()
             .Where(s => seriesIds.Contains(s.Id))
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
-        // var recentlyRead = _context.AppUserProgresses
-        //     .AsSplitQuery()
-        //     .OrderBy(d => d.LastModified)
-        //     .Join(_context.Series, s => s.SeriesId, s => s.Id, (grouping, series) => new
-        //     {
-        //         Series = series
-        //     })
-        //     .Select(sm => sm.Series)
-        //     .Distinct()
-        //     .Take(5)
-        //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-        //     .AsEnumerable();
-
 
         return new ServerStatistics()
         {
