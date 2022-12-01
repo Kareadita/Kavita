@@ -29,7 +29,7 @@
     
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Files" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Total Files">
+                <app-icon-and-title label="Total Files" [clickable]="false" fontClasses="fa-regular fa-file" title="Total Files">
                     {{stats.totalFiles | compactNumber}} Files
                 </app-icon-and-title>
             </div>
@@ -38,7 +38,7 @@
     
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Size" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Total Size">
+                <app-icon-and-title label="Total Size" [clickable]="false" fontClasses="fa-solid fa-weight-scale" title="Total Size">
                     {{stats.totalSize | bytes}}
                 </app-icon-and-title>
             </div>
@@ -47,7 +47,7 @@
 
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Genres" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Total Genres">
+                <app-icon-and-title label="Total Genres" [clickable]="false" fontClasses="fa-solid fa-tags" title="Total Genres">
                     {{stats.totalGenres | compactNumber}} Genres
                 </app-icon-and-title>
             </div>
@@ -56,7 +56,7 @@
 
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Tags" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Total Tags">
+                <app-icon-and-title label="Total Tags" [clickable]="false" fontClasses="fa-solid fa-tags" title="Total Tags">
                     {{stats.totalTags | compactNumber}} Tags
                 </app-icon-and-title>
             </div>
@@ -65,12 +65,34 @@
 
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total People" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Total People">
-                    {{stats.totalPeople | compactNumber}} Genres
+                <app-icon-and-title label="Total People" [clickable]="false" fontClasses="fa-solid fa-user-tag" title="Total People">
+                    {{stats.totalPeople | compactNumber}} People
                 </app-icon-and-title>
             </div>
             <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
+    </div>
+
+    <div class="row g-0">
+        <div class="col-md-2 col-sm-12">
+            <app-stat-list [data$]="releaseYears$" title="Release Years"></app-stat-list>
+        </div>
+        <div class="col-md-2 col-sm-12">
+            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users"></app-stat-list>
+        </div>
+        <div class="col-md-2 col-sm-12">
+            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries"></app-stat-list>
+        </div>
+        <div class="col-md-2 col-sm-12">
+            <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
+        </div>
+        <div class="col-md-2 col-sm-12">
+            <app-stat-list [data$]="recentlyRead$" title="Recently Read"></app-stat-list>
+        </div>
+    </div>
+
+    <div class="row g-0 mb-3">
+        <app-top-reads-by-user></app-top-reads-by-user>
     </div>
 
     <div class="row g-0" style="height: 242px">
@@ -79,33 +101,6 @@
         </div>
         <div class="col-md-6 col-sm-12">
             <app-publication-status-stats></app-publication-status-stats>
-        </div>
-    </div>
-
-    <div class="row g-0 mb-3">
-        <app-top-reads-by-user></app-top-reads-by-user>
-    </div>
-
-    <div class="row g-0">
-        <div class="col-md-4 col-sm-12">
-            <app-stat-list [data$]="releaseYears$" title="Release Years"></app-stat-list>
-        </div>
-        <div class="col-md-4 col-sm-12">
-            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users"></app-stat-list>
-        </div>
-        <div class="col-md-4 col-sm-12">
-            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries"></app-stat-list>
-        </div>
-    </div>
-    <div class="row g-0">
-        <div class="col-md-4 col-sm-12">
-            <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
-        </div>
-        <div class="col-md-4 col-sm-12">
-            <app-stat-list [data$]="recentlyRead$" title="Recently Read"></app-stat-list>
-        </div>
-        <div class="col-md-4 col-sm-12">
-            
         </div>
     </div>
     

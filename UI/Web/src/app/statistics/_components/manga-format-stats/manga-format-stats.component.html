@@ -29,7 +29,7 @@
         </ngx-charts-pie-chart>
     </ng-container>
     <ng-template #tableLayout>
-        <table class="table table-light table-striped table-hover scrollable">
+        <table class="table table-light table-striped table-hover table-sm scrollable">
             <thead>
                 <tr>
                     <th scope="col" sortable="name" (sort)="onSort($event)">
@@ -37,7 +37,6 @@
                     </th>
                     <th scope="col" sortable="value" (sort)="onSort($event)">
                         Count
-        
                     </th>
                 </tr>
             </thead>
