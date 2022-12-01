@@ -15,25 +15,26 @@
     </div>
 </div>
 
-<ng-template #userListItem>
-    <ul class="list-group">
-        <li class="list-group-item">
-            Comics
-        </li>
-        <li class="list-group-item">
-            Manga
-        </li>
-        <li class="list-group-item">
-            Manga
-        </li>
-    </ul>
-</ng-template>
 
 <ng-container>
     <div class="row g-0">
-        <!-- <div class="col-md-3 me-1" *ngFor="let user of (users$ | async)">
-            <ng-container [ngTemplateOutlet]="userListItem" [ngTemplateOutletContext]="{ $implicit: user }"></ng-container>
-        </div> -->
+        <div class="col-md-3 me-1" *ngFor="let user of (users$ | async)">
+            {{user.username}}
+            <ul class="list-group">
+                <li class="list-group-item">
+                    Comics
+                    {{user.comicsTime}} hrs
+                </li>
+                <li class="list-group-item">
+                    Manga
+                    {{user.mangaTime}} hrs
+                </li>
+                <li class="list-group-item">
+                    Books
+                    {{user.booksTime}} hrs
+                </li>
+            </ul>
+        </div>
     </div>
 </ng-container>
 

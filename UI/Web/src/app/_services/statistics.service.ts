@@ -9,7 +9,7 @@ import { PublicationStatusPipe } from '../pipe/publication-status.pipe';
 import { map } from 'rxjs';
 import { MangaFormatPipe } from '../pipe/manga-format.pipe';
 import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
-import { TopReads } from '../statistics/_models/top-reads';
+import { TopReads, TopUserRead } from '../statistics/_models/top-reads';
 import { ReadHistoryEvent } from '../statistics/_models/read-history-event';
 import { ServerStatistics } from '../statistics/_models/server-statistics';
 
@@ -63,7 +63,7 @@ export class StatisticsService {
   }
 
   getTopUsers() {
-    return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/users');
+    return this.httpClient.get<TopUserRead[]>(this.baseUrl + 'stats/server/top/users');
   }
 
   getReadingHistory(userId: number) {

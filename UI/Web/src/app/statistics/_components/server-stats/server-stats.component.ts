@@ -49,8 +49,6 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       })),
       takeUntil(this.onDestroy)
     );
-
-    this.statService.getTopUsers().subscribe(() => {});
   }
 
   ngOnInit(): void {
