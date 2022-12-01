@@ -7591,26 +7591,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ServerStatistics"
-                  }
+                  "$ref": "#/components/schemas/ServerStatistics"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ServerStatistics"
-                  }
+                  "$ref": "#/components/schemas/ServerStatistics"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ServerStatistics"
-                  }
+                  "$ref": "#/components/schemas/ServerStatistics"
                 }
               }
             }
@@ -10780,6 +10771,19 @@
         },
         "additionalProperties": false
       },
+      "LibraryDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/LibraryDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "LibraryType": {
         "enum": [
           0,
@@ -12196,6 +12200,19 @@
         },
         "additionalProperties": false
       },
+      "SeriesDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/SeriesDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SeriesMetadata": {
         "type": "object",
         "properties": {
@@ -12826,6 +12843,35 @@
           "totalPeople": {
             "type": "integer",
             "format": "int64"
+          },
+          "mostReadSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDtoICount"
+            },
+            "nullable": true
+          },
+          "mostPopularSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDtoICount"
+            },
+            "description": "Total users who have started/reading/read per series",
+            "nullable": true
+          },
+          "mostActiveUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDtoICount"
+            },
+            "nullable": true
+          },
+          "mostActiveLibraries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryDtoICount"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -13670,6 +13716,19 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

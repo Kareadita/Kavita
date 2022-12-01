@@ -4,10 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.DTOs.Statistics;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -15,12 +18,12 @@ namespace API.Services;
 
 public interface IStatisticService
 {
+    Task<ServerStatistics> GetServerStatistics();
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
     Task<IEnumerable<YearCountDto>> GetYearCount();
     Task<IEnumerable<YearCountDto>> GetTopYears();
     Task<IEnumerable<PublicationCountDto>> GetPublicationCount();
     Task<IEnumerable<MangaFormatCountDto>> GetMangaFormatCount();
-    Task<ServerStatistics> GetServerStatistics();
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
@@ -34,13 +37,13 @@ public class StatisticService : IStatisticService
 {
     private readonly DataContext _context;
     private readonly ILogger<StatisticService> _logger;
-    private readonly IDirectoryService _directoryService;
+    private readonly IMapper _mapper;
 
-    public StatisticService(DataContext context, ILogger<StatisticService> logger, IDirectoryService directoryService)
+    public StatisticService(DataContext context, ILogger<StatisticService> logger, IMapper mapper)
     {
         _context = context;
         _logger = logger;
-        _directoryService = directoryService;
+        _mapper = mapper;
     }
 
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
@@ -172,6 +175,59 @@ public class StatisticService : IStatisticService
 
     public async Task<ServerStatistics> GetServerStatistics()
     {
+        var mostActiveUsers = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsEnumerable()
+            .GroupBy(sm => sm.AppUserId)
+            .Select(sm => new StatCount<UserDto>
+            {
+                Value = _context.AppUser.Where(u => u.Id == sm.Key).ProjectTo<UserDto>(_mapper.ConfigurationProvider)
+                    .Single(),
+                Count = _context.AppUserProgresses.Where(u => u.AppUserId == sm.Key).Distinct().Count()
+            })
+            .OrderByDescending(d => d.Count)
+            .Take(5);
+
+        var mostActiveLibrary = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsEnumerable()
+            .GroupBy(sm => sm.LibraryId)
+            .Select(sm => new StatCount<LibraryDto>
+            {
+                Value = _context.Library.Where(u => u.Id == sm.Key).ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+                    .Single(),
+                Count = _context.AppUserProgresses.Where(u => u.LibraryId == sm.Key).Distinct().Count()
+            })
+            .OrderByDescending(d => d.Count)
+            .Take(5);
+
+        var mostPopularSeries = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsEnumerable()
+            .GroupBy(sm => sm.SeriesId)
+            .Select(sm => new StatCount<SeriesDto>
+            {
+                Value = _context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                    .Single(),
+                Count = _context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).Distinct().Count()
+            })
+            .OrderByDescending(d => d.Count)
+            .Take(5);
+
+        var mostReadSeries = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsEnumerable()
+            .GroupBy(sm => sm.SeriesId)
+            .Select(sm => new StatCount<SeriesDto>
+            {
+                Value = _context.Series.Where(u => u.Id == sm.Key).ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                    .Single(),
+                Count = _context.AppUserProgresses.Where(u => u.SeriesId == sm.Key).AsEnumerable().DistinctBy(p => p.AppUserId).Count()
+            })
+            .OrderByDescending(d => d.Count)
+            .Take(5);
+
+
         return new ServerStatistics()
         {
             ChapterCount = await _context.Chapter.CountAsync(),
@@ -181,7 +237,11 @@ public class StatisticService : IStatisticService
             TotalPeople = await _context.Person.CountAsync(),
             TotalSize = await _context.MangaFile.SumAsync(m => m.Bytes),
             TotalTags = await _context.Tag.CountAsync(),
-            VolumeCount = await _context.Volume.Where(v => v.Number != 0).CountAsync()
+            VolumeCount = await _context.Volume.Where(v => v.Number != 0).CountAsync(),
+            MostActiveUsers = mostActiveUsers,
+            MostActiveLibraries = mostActiveLibrary,
+            MostPopularSeries = mostPopularSeries,
+            MostReadSeries = mostReadSeries
         };
     }
 

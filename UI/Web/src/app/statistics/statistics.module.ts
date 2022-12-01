@@ -6,7 +6,7 @@ import { UserStatsInfoCardsComponent } from './_components/user-stats-info-cards
 import { SharedModule } from '../shared/shared.module';
 import { ServerStatsComponent } from './_components/server-stats/server-stats.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { ReleaseYearComponent } from './_components/release-year/release-year.component';
+import { StatListComponent } from './_components/stat-list/stat-list.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PublicationStatusStatsComponent } from './_components/publication-status-stats/publication-status-stats.component';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -22,7 +22,7 @@ import { TopReadsByUserComponent } from './_components/top-reads-by-user/top-rea
     UserStatsComponent,
     UserStatsInfoCardsComponent,
     ServerStatsComponent,
-    ReleaseYearComponent,
+    StatListComponent,
     PublicationStatusStatsComponent,
     MangaFormatStatsComponent,
     FileBreakdownStatsComponent,

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { YearCount } from '../statistics/_models/year-count';
@@ -27,6 +27,7 @@ export class StatisticsService {
   constructor(private httpClient: HttpClient) { }
 
   getUserStatistics(userId: number, libraryIds: Array<number> = []) {
+    // TODO: Convert to httpParams object
     let url = 'stats/user/' + userId + '/read';
     if (libraryIds.length > 0) url += '?libraryIds=' + libraryIds.join(',');
     
@@ -52,14 +53,13 @@ export class StatisticsService {
   }
 
   getTopReads(username: string = 'All users', days: number = 0) {
-    let params = '';
+    const params = new HttpParams();
     if (username !== 'All users' || days !== 0)  {
-      params = '?';
-      if (username !== 'All users') params += 'username=' + encodeURIComponent(username);
-      if (days !== 0) params += 'days=' + days;
-
+      if (username !== 'All users') params.append('username', encodeURIComponent(username));
+      if (days !== 0) params.append('days', days);
     }
-    return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/reads' + params);
+    
+    return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/reads', {params: params});
   }
 
   getReadingHistory(userId: number) {

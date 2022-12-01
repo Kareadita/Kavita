@@ -55,7 +55,7 @@ export class FileBreakdownStatsComponent implements OnInit {
       map(([sortConfig, data]) => {
         return {sortConfig, fileBreakdown: data.fileBreakdown};
       }),
-      map(({ sortConfig, fileBreakdown}) => {
+      map(({ sortConfig, fileBreakdown }) => {
         return (sortConfig.column) ? fileBreakdown.sort((a: FileExtension, b: FileExtension) => {
           if (sortConfig.column === '') return 0;
           const res = compare(a[sortConfig.column], b[sortConfig.column]);
@@ -65,21 +65,6 @@ export class FileBreakdownStatsComponent implements OnInit {
       takeUntil(this.onDestroy)
     );
 
-    // this.vizData$ = this.files$.pipe(takeUntil(this.onDestroy), map(data => {
-    //   const formats: {[key: string]: Array<PieDataItem>} = {};
-    //   data.forEach(d => {
-    //     let format = mangaFormatPipe.transform(d.format);
-    //     if (!formats.hasOwnProperty(format)) formats[format] = [];
-    //     formats[format].push({name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize})
-    //   });
-
-    //   const ret: Array<StackedBarChartDataItem> = [];
-    //   Object.keys(formats).filter(k => formats.hasOwnProperty(k)).forEach(key => {
-    //     ret.push({name: key, series: formats[key]});
-    //   });
-
-    //   return ret;
-    // }));
 
     this.vizData2$ = this.files$.pipe(takeUntil(this.onDestroy), map(data => data.map(d => {
       return {name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize};

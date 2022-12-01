@@ -84,10 +84,24 @@
         </div>
     </div>
     <div class="row g-0">
-        <div class="col-md-6 col-sm-12">
-            <app-release-year></app-release-year>
+        <div class="col-md-4 col-sm-12">
+            <app-stat-list [data$]="releaseYears$" title="Release Years"></app-stat-list>
         </div>
-        <div class="col-md-6 col-sm-12">
+        <div class="col-md-4 col-sm-12">
+            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users"></app-stat-list>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries"></app-stat-list>
+        </div>
+    </div>
+    <div class="row g-0">
+        <div class="col-md-4 col-sm-12">
+            <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            
+        </div>
+        <div class="col-md-4 col-sm-12">
             
         </div>
     </div>
