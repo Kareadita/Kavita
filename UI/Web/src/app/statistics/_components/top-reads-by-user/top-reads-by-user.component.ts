@@ -34,7 +34,7 @@ export class TopReadsByUserComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Needed so that other pipes work
-    this.users$.subscribe();
+    //this.users$.subscribe();
   }
 
   ngOnDestroy(): void {

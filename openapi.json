@@ -12872,6 +12872,14 @@
               "$ref": "#/components/schemas/LibraryDtoICount"
             },
             "nullable": true
+          },
+          "recentlyRead": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "description": "Last 5 Series read",
+            "nullable": true
           }
         },
         "additionalProperties": false

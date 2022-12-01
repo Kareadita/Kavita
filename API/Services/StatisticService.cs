@@ -232,6 +232,34 @@ public class StatisticService : IStatisticService
             .OrderByDescending(d => d.Count)
             .Take(5);
 
+        var seriesIds = (await _context.AppUserProgresses
+            .AsSplitQuery()
+            .OrderByDescending(d => d.LastModified)
+            .Select(d => d.SeriesId)
+            .Distinct()
+            .ToListAsync())
+            .Take(5);
+
+        _logger.LogInformation("Series IDs: {SeriesIds}", seriesIds);
+
+        var recentlyRead = _context.Series
+            .AsSplitQuery()
+            .Where(s => seriesIds.Contains(s.Id))
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .AsEnumerable();
+        // var recentlyRead = _context.AppUserProgresses
+        //     .AsSplitQuery()
+        //     .OrderBy(d => d.LastModified)
+        //     .Join(_context.Series, s => s.SeriesId, s => s.Id, (grouping, series) => new
+        //     {
+        //         Series = series
+        //     })
+        //     .Select(sm => sm.Series)
+        //     .Distinct()
+        //     .Take(5)
+        //     .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+        //     .AsEnumerable();
+
 
         return new ServerStatistics()
         {
@@ -246,7 +274,8 @@ public class StatisticService : IStatisticService
             MostActiveUsers = mostActiveUsers,
             MostActiveLibraries = mostActiveLibrary,
             MostPopularSeries = mostPopularSeries,
-            MostReadSeries = mostReadSeries
+            MostReadSeries = mostReadSeries,
+            RecentlyRead = recentlyRead
         };
     }
 

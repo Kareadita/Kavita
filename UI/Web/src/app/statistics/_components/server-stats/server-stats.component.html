@@ -1,5 +1,5 @@
 <div class="container-fluid">
-    <div class="row g-0 mt-4 mb-3" *ngIf="stats$ | async as stats">
+    <div class="row g-0 mt-4 mb-3 d-flex justify-content-center" *ngIf="stats$ | async as stats">
         <ng-container>
             <div class="col-auto mb-2">
                 <app-icon-and-title label="Total Series" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Total Series">
@@ -72,10 +72,8 @@
             <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
     </div>
-    <div class="row g-0 mb-3">
-        <app-top-reads-by-user></app-top-reads-by-user>
-    </div>
-    <div class="row g-0">
+
+    <div class="row g-0" style="height: 242px">
         <div class="col-md-6 col-sm-12">
             <app-file-breakdown-stats></app-file-breakdown-stats>
         </div>
@@ -83,6 +81,11 @@
             <app-publication-status-stats></app-publication-status-stats>
         </div>
     </div>
+
+    <div class="row g-0 mb-3">
+        <app-top-reads-by-user></app-top-reads-by-user>
+    </div>
+
     <div class="row g-0">
         <div class="col-md-4 col-sm-12">
             <app-stat-list [data$]="releaseYears$" title="Release Years"></app-stat-list>
@@ -99,7 +102,7 @@
             <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
         </div>
         <div class="col-md-4 col-sm-12">
-            
+            <app-stat-list [data$]="recentlyRead$" title="Recently Read"></app-stat-list>
         </div>
         <div class="col-md-4 col-sm-12">
             

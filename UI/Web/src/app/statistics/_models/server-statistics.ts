@@ -15,5 +15,5 @@ export interface ServerStatistics {
     mostActiveUsers: Array<StatCount<User>>;
     mostActiveLibraries: Array<StatCount<Library>>;
     mostActiveSeries: Array<StatCount<Series>>;
-
+    recentlyRead: Array<Series>;
 }

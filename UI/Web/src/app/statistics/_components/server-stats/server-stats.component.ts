@@ -20,6 +20,7 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
   mostActiveUsers$!: Observable<Array<PieDataItem>>;
   mostActiveLibrary$!: Observable<Array<PieDataItem>>;
   mostActiveSeries$!: Observable<Array<PieDataItem>>;
+  recentlyRead$!: Observable<Array<PieDataItem>>;
   stats$!: Observable<ServerStatistics>;
   private readonly onDestroy = new Subject<void>();
 
@@ -49,6 +50,16 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       })),
       takeUntil(this.onDestroy)
     );
+
+    this.recentlyRead$ = this.stats$.pipe(
+      map(d => d.recentlyRead),
+      map(counts => counts.map(count => {
+        return {name: count.name, value: -1};
+      })),
+      takeUntil(this.onDestroy)
+    );
+
+    
   }
 
   ngOnInit(): void {

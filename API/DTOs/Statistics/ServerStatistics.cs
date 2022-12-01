@@ -13,7 +13,6 @@ public class ServerStatistics
     public long TotalGenres { get; set; }
     public long TotalTags { get; set; }
     public long TotalPeople { get; set; }
-
     public IEnumerable<ICount<SeriesDto>> MostReadSeries { get; set; }
     /// <summary>
     /// Total users who have started/reading/read per series
@@ -21,6 +20,10 @@ public class ServerStatistics
     public IEnumerable<ICount<SeriesDto>> MostPopularSeries { get; set; }
     public IEnumerable<ICount<UserDto>> MostActiveUsers { get; set; }
     public IEnumerable<ICount<LibraryDto>> MostActiveLibraries { get; set; }
+    /// <summary>
+    /// Last 5 Series read
+    /// </summary>
+    public IEnumerable<SeriesDto> RecentlyRead { get; set; }
 
 
 }
