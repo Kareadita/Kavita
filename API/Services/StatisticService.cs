@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Statistics;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
@@ -38,12 +39,16 @@ public class StatisticService : IStatisticService
     private readonly DataContext _context;
     private readonly ILogger<StatisticService> _logger;
     private readonly IMapper _mapper;
+    private readonly IReaderService _readerService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public StatisticService(DataContext context, ILogger<StatisticService> logger, IMapper mapper)
+    public StatisticService(DataContext context, ILogger<StatisticService> logger, IMapper mapper, IReaderService readerService, IUnitOfWork unitOfWork)
     {
         _context = context;
         _logger = logger;
         _mapper = mapper;
+        _readerService = readerService;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds)
@@ -305,10 +310,61 @@ public class StatisticService : IStatisticService
     //     });
     // }
 
-    public Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
+    public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
     {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        var users = (await _unitOfWork.UserRepository.GetAllUsersAsync()).ToList();
+        // top 5 users with a sum of their reading history per format
+        // I can do this in memory. I can get a list of users and sort by count of ChapterIds
+        //
+        var userChapters = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsEnumerable()
+            //.GroupBy(sm => sm.AppUserId)
+            .Select(sm => new
+            {
+                User = _context.AppUser.Single(u => u.Id == sm.AppUserId),
+                LibraryId = sm.LibraryId,
+                Chapter = _context.Chapter.Single(c => c.Id == sm.ChapterId),
+                IsEpub = _context.Series.Where(s => s.Id == sm.SeriesId).Select(s => s.Format == MangaFormat.Epub).Single(),
+                Count = _context.AppUserProgresses.Where(u => u.AppUserId == sm.AppUserId).Distinct().Count()
+            })
+            .OrderByDescending(d => d.Count)
+            .Take(5)
+            .AsEnumerable()
+            .ToList();
 
-        throw new NotImplementedException();
+        // This needs to work for each user
+        var user = new Dictionary<int, Dictionary<LibraryType, long>>();
+        // var libraryTimes = new Dictionary<LibraryType, long>();
+        var ret = new List<TopReadDto>();
+        foreach (var userChapter in userChapters)
+        {
+            if (!user.ContainsKey(userChapter.User.Id)) user.Add(userChapter.User.Id, new Dictionary<LibraryType, long>());
+            var libraryTimes = user[userChapter.User.Id];
+
+            var library = libraries.First(l => l.Id == userChapter.LibraryId);
+            if (!libraryTimes.ContainsKey(library.Type)) libraryTimes.Add(library.Type, 0L);
+            var existingHours = libraryTimes[library.Type];
+            libraryTimes[library.Type] = existingHours +
+                                         _readerService.GetTimeEstimate(userChapter.Chapter.WordCount, userChapter.Chapter.Pages, userChapter.IsEpub).AvgHours;
+
+            user[userChapter.User.Id] = libraryTimes;
+        }
+
+        foreach (var userId in user.Keys)
+        {
+            ret.Add(new TopReadDto()
+            {
+                UserId = userId,
+                Username = users.First(u => u.Id == userId).UserName,
+                BooksTime = user[userId].ContainsKey(LibraryType.Book) ? user[userId][LibraryType.Book] : 0,
+                ComicsTime = user[userId].ContainsKey(LibraryType.Comic) ? user[userId][LibraryType.Comic] : 0,
+                MangaTime = user[userId].ContainsKey(LibraryType.Manga) ? user[userId][LibraryType.Manga] : 0,
+            });
+        }
+
+        return ret;
     }
 
     // private IEnumerable<TopReadDto> GetTopReadDtosForFormat(int days, LibraryType type)

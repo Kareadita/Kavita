@@ -62,6 +62,10 @@ export class StatisticsService {
     return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/reads', {params: params});
   }
 
+  getTopUsers() {
+    return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/users');
+  }
+
   getReadingHistory(userId: number) {
     return this.httpClient.get<ReadHistoryEvent[]>(this.baseUrl + 'stats/user/reading-history?userId=' + userId);
   }
