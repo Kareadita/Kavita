@@ -340,7 +340,7 @@ public class StatisticService : IStatisticService
 
         // var records = firstOfWeek.Range(7)
         //     .GroupJoin(groupedReadingDays, wd => wd.Day, lg => lg.Key, (_, lg) => lg.Any() ? lg.First().Count() : 0).ToArray();
-        return null;
+        return Task.FromResult<IEnumerable<ReadHistoryEvent>>(null);
     }
 
 
