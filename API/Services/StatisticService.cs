@@ -325,7 +325,7 @@ public class StatisticService : IStatisticService
                 Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
                     .Where(u => u.AppUserId == sm.Key)
                     .Where(p => p.PagesRead > 0)
-                    .Where(p => days == 0 || p.LastModified >= minDate)
+                    .Where(p => days == 0 || (p.Created >= minDate && p.LastModified >= minDate))
                     .Select(p => p.ChapterId)
                     .Distinct()
                     .Contains(c.Id))
