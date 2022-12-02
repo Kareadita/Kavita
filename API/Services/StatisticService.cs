@@ -338,6 +338,7 @@ public class StatisticService : IStatisticService
                 User = _context.AppUser.Single(u => u.Id == sm.Key),
                 Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
                     .Where(u => u.AppUserId == sm.Key)
+                    .Where(p => p.PagesRead > 0)
                     .Select(p => p.ChapterId)
                     .Distinct()
                     .Contains(c.Id))
