@@ -7622,7 +7622,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCountDto"
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               },
@@ -7630,7 +7630,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCountDto"
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               },
@@ -7638,7 +7638,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCountDto"
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               }
@@ -7660,7 +7660,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PublicationCountDto"
+                    "$ref": "#/components/schemas/PublicationStatusStatCount"
                   }
                 }
               },
@@ -7668,7 +7668,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PublicationCountDto"
+                    "$ref": "#/components/schemas/PublicationStatusStatCount"
                   }
                 }
               },
@@ -7676,7 +7676,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PublicationCountDto"
+                    "$ref": "#/components/schemas/PublicationStatusStatCount"
                   }
                 }
               }
@@ -7698,7 +7698,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCountDto"
+                    "$ref": "#/components/schemas/MangaFormatStatCount"
                   }
                 }
               },
@@ -7706,7 +7706,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCountDto"
+                    "$ref": "#/components/schemas/MangaFormatStatCount"
                   }
                 }
               },
@@ -7714,7 +7714,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MangaFormatCountDto"
+                    "$ref": "#/components/schemas/MangaFormatStatCount"
                   }
                 }
               }
@@ -7736,7 +7736,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCountDto"
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               },
@@ -7744,7 +7744,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCountDto"
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               },
@@ -7752,7 +7752,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/YearCountDto"
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               }
@@ -10540,6 +10540,20 @@
         "additionalProperties": false,
         "description": "Represents a range between two int/float/double"
       },
+      "Int32StatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "InviteUserDto": {
         "required": [
           "email"
@@ -10899,7 +10913,7 @@
         "description": "Represents the format of the file",
         "format": "int32"
       },
-      "MangaFormatCountDto": {
+      "MangaFormatStatCount": {
         "type": "object",
         "properties": {
           "value": {
@@ -11169,7 +11183,18 @@
         },
         "additionalProperties": false
       },
-      "PublicationCountDto": {
+      "PublicationStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "PublicationStatusStatCount": {
         "type": "object",
         "properties": {
           "value": {
@@ -11181,17 +11206,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "PublicationStatus": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "ReadHistoryEvent": {
         "type": "object",
@@ -14010,21 +14024,6 @@
             "format": "int32"
           },
           "avgHoursToRead": {
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "YearCountDto": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "integer",
-            "description": "Release Year",
-            "format": "int32"
-          },
-          "count": {
             "type": "integer",
             "format": "int32"
           }

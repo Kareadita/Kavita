@@ -328,44 +328,58 @@ public class StatisticService : IStatisticService
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         var users = (await _unitOfWork.UserRepository.GetAllUsersAsync()).ToList();
-        // top 5 users with a sum of their reading history per format
-        // I can do this in memory. I can get a list of users and sort by count of ChapterIds
-        //
-        var userChapters = _context.AppUserProgresses
+
+        var allUsers = _context.AppUserProgresses
             .AsSplitQuery()
             .AsEnumerable()
-            //.GroupBy(sm => sm.AppUserId)
+            .GroupBy(sm => sm.AppUserId)
             .Select(sm => new
             {
-                User = _context.AppUser.Single(u => u.Id == sm.AppUserId),
-                LibraryId = sm.LibraryId,
-                Chapter = _context.Chapter.Single(c => c.Id == sm.ChapterId),
-                IsEpub = _context.Series.Where(s => s.Id == sm.SeriesId).Select(s => s.Format == MangaFormat.Epub).Single(),
-                Count = _context.AppUserProgresses.Where(u => u.AppUserId == sm.AppUserId).Distinct().Count()
+                User = _context.AppUser.Single(u => u.Id == sm.Key),
+                Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
+                    .Where(u => u.AppUserId == sm.Key)
+                    .Select(p => p.ChapterId)
+                    .Distinct()
+                    .Contains(c.Id))
             })
-            .OrderByDescending(d => d.Count)
+            .OrderByDescending(d => d.Chapters.Sum(c => c.AvgHoursToRead))
             .Take(5)
-            .AsEnumerable()
             .ToList();
 
-        // This needs to work for each user
+
+        // Need a mapping of Library to chapter ids
+        var chapterIdWithLibraryId = allUsers.SelectMany(u => u.Chapters.Select(c => c.Id)).Select(d => new
+        {
+            LibraryId = _context.Chapter.Where(c => c.Id == d).AsSplitQuery().Select(c => c.Volume).Select(v => v.Series).Select(s => s.LibraryId).Single(),
+            ChapterId = d
+        }).ToList();
+
+        var chapterLibLookup = new Dictionary<int, int>();
+        foreach (var cl in chapterIdWithLibraryId)
+        {
+            if (!chapterLibLookup.ContainsKey(cl.ChapterId)) chapterLibLookup.Add(cl.ChapterId, cl.LibraryId);
+        }
+
         var user = new Dictionary<int, Dictionary<LibraryType, long>>();
-        // var libraryTimes = new Dictionary<LibraryType, long>();
-        var ret = new List<TopReadDto>();
-        foreach (var userChapter in userChapters)
+        foreach (var userChapter in allUsers)
         {
             if (!user.ContainsKey(userChapter.User.Id)) user.Add(userChapter.User.Id, new Dictionary<LibraryType, long>());
             var libraryTimes = user[userChapter.User.Id];
 
-            var library = libraries.First(l => l.Id == userChapter.LibraryId);
-            if (!libraryTimes.ContainsKey(library.Type)) libraryTimes.Add(library.Type, 0L);
-            var existingHours = libraryTimes[library.Type];
-            libraryTimes[library.Type] = existingHours +
-                                         _readerService.GetTimeEstimate(userChapter.Chapter.WordCount, userChapter.Chapter.Pages, userChapter.IsEpub).AvgHours;
+            foreach (var chapter in userChapter.Chapters)
+            {
+                var library = libraries.First(l => l.Id == chapterLibLookup[chapter.Id]);
+                if (!libraryTimes.ContainsKey(library.Type)) libraryTimes.Add(library.Type, 0L);
+                var existingHours = libraryTimes[library.Type];
+                libraryTimes[library.Type] = existingHours + chapter.AvgHoursToRead;
+            }
+
+
 
             user[userChapter.User.Id] = libraryTimes;
         }
 
+        var ret = new List<TopReadDto>();
         foreach (var userId in user.Keys)
         {
             ret.Add(new TopReadDto()

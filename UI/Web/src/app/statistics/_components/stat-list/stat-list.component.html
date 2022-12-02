@@ -6,7 +6,7 @@
         </div>
         <ul class="list-group list-group-flush">
           <li class="list-group-item" *ngFor="let item of data">
-            {{item.name}} <span class="float-end" *ngIf="item.value >= 0">{{item.value}}</span>
+            {{item.name}} <span class="float-end" *ngIf="item.value >= 0">{{item.value}} {{label}}</span>
           </li>
         </ul>
     </div>

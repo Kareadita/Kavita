@@ -10,7 +10,17 @@ import { PieDataItem } from '../../_models/pie-data-item';
 })
 export class StatListComponent {
 
+  /**
+   * Title of list
+   */
   @Input() title: string = ''
+  /**
+   * Optional label to render after value
+   */
+  @Input() label: string = ''
+  /**
+   * Optional data to put in tooltip
+   */
   @Input() description: string = '';
   @Input() data$!: Observable<PieDataItem[]>;
 
