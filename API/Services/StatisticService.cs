@@ -308,28 +308,14 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="userId">If 0, all users will be returned back</param>
-    /// <param name="days">If 0, a date clamp will not take place</param>
-    /// <returns></returns>
-    // public Task<TopReadsDto> GetTopReads(int userId = 0, int days = 0)
-    // {
-    //     return Task.FromResult(new TopReadsDto()
-    //     {
-    //         Manga = GetTopReadDtosForFormat(userId, days, LibraryType.Manga).AsEnumerable(),
-    //         Comics = GetTopReadDtosForFormat(userId, days, LibraryType.Comic).AsEnumerable(),
-    //         Books = GetTopReadDtosForFormat(userId, days, LibraryType.Book).AsEnumerable(),
-    //     });
-    // }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         var users = (await _unitOfWork.UserRepository.GetAllUsersAsync()).ToList();
+        var minDate = DateTime.Now.Subtract(TimeSpan.FromDays(days));
 
-        var allUsers = _context.AppUserProgresses
+        var topUsersAndReadChapters = _context.AppUserProgresses
             .AsSplitQuery()
             .AsEnumerable()
             .GroupBy(sm => sm.AppUserId)
@@ -339,6 +325,7 @@ public class StatisticService : IStatisticService
                 Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
                     .Where(u => u.AppUserId == sm.Key)
                     .Where(p => p.PagesRead > 0)
+                    .Where(p => days == 0 || p.LastModified >= minDate)
                     .Select(p => p.ChapterId)
                     .Distinct()
                     .Contains(c.Id))
@@ -349,20 +336,24 @@ public class StatisticService : IStatisticService
 
 
         // Need a mapping of Library to chapter ids
-        var chapterIdWithLibraryId = allUsers.SelectMany(u => u.Chapters.Select(c => c.Id)).Select(d => new
-        {
-            LibraryId = _context.Chapter.Where(c => c.Id == d).AsSplitQuery().Select(c => c.Volume).Select(v => v.Series).Select(s => s.LibraryId).Single(),
-            ChapterId = d
-        }).ToList();
+        var chapterIdWithLibraryId = topUsersAndReadChapters
+            .SelectMany(u => u.Chapters
+                .Select(c => c.Id)).Select(d => new
+                    {
+                        LibraryId = _context.Chapter.Where(c => c.Id == d).AsSplitQuery().Select(c => c.Volume).Select(v => v.Series).Select(s => s.LibraryId).Single(),
+                        ChapterId = d
+                    })
+            .ToList();
 
         var chapterLibLookup = new Dictionary<int, int>();
         foreach (var cl in chapterIdWithLibraryId)
         {
-            if (!chapterLibLookup.ContainsKey(cl.ChapterId)) chapterLibLookup.Add(cl.ChapterId, cl.LibraryId);
+            if (chapterLibLookup.ContainsKey(cl.ChapterId)) continue;
+            chapterLibLookup.Add(cl.ChapterId, cl.LibraryId);
         }
 
         var user = new Dictionary<int, Dictionary<LibraryType, long>>();
-        foreach (var userChapter in allUsers)
+        foreach (var userChapter in topUsersAndReadChapters)
         {
             if (!user.ContainsKey(userChapter.User.Id)) user.Add(userChapter.User.Id, new Dictionary<LibraryType, long>());
             var libraryTimes = user[userChapter.User.Id];
@@ -374,8 +365,6 @@ public class StatisticService : IStatisticService
                 var existingHours = libraryTimes[library.Type];
                 libraryTimes[library.Type] = existingHours + chapter.AvgHoursToRead;
             }
-
-
 
             user[userChapter.User.Id] = libraryTimes;
         }
@@ -395,64 +384,4 @@ public class StatisticService : IStatisticService
 
         return ret;
     }
-
-    // private IEnumerable<TopReadDto> GetTopReadDtosForFormat(int days, LibraryType type)
-    // {
-    //     var minDate = DateTime.Now.Subtract(TimeSpan.FromDays(days));
-    //     var query = _context.AppUserProgresses
-    //         .AsSplitQuery()
-    //         .AsNoTracking();
-    //
-    //     if (days > 0) query = query.Where(p => p.LastModified > minDate);
-    //
-    //     // Goal: Get a list of users ordered by read time for a given library type
-    //     query.Join(_context.Series, p => p.SeriesId, s => s.Id, (progress, series) => new
-    //     {
-    //
-    //     });
-    //
-    //     _context.Series
-    //         .Where(s => s.Library.Type == type)
-    //         .AsSplitQuery()
-    //         .GroupBy(s => s.Format)
-    //         .Select(sm => new
-    //         {
-    //             Format = sm.Key,
-    //             Count = _context.SeriesMetadata.Where(sm2 => sm2.ReleaseYear == sm.Key).Distinct().Count()
-    //         })
-    //         .OrderByDescending(d => d.Count)
-    //         .Take(5)
-    //         .ToListAsync();
-    //
-    //     var users = query.Select(p => new
-    //     {
-    //         p.PagesRead,
-    //         p.AppUserId,
-    //         p.SeriesId,
-    //         p.LibraryId,
-    //     });
-    //
-    //
-    //
-    //     //var allMangaSeriesIds = query.Select(p => p.SeriesId).AsEnumerable();
-    //
-    //     return _context.Series
-    //         //.Where(s => allMangaSeriesIds.Contains(s.Id) && s.Library.Type == type)
-    //         .Where(s => s.Library.Type == type)
-    //         .Select(s => new TopReadDto()
-    //         {
-    //
-    //             SeriesId = s.Id,
-    //             SeriesName = s.Name,
-    //             LibraryId = s.LibraryId,
-    //             UsersRead = _context.AppUserProgresses
-    //                 .Where(p => p.SeriesId == s.Id)
-    //                 .Select(p => p.AppUserId)
-    //                 .Distinct()
-    //                 .Count()
-    //         })
-    //         .OrderBy(d => d.UsersRead)
-    //         .Take(5);
-    //
-    // }
 }
