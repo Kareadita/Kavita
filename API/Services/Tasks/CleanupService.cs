@@ -198,7 +198,7 @@ public class CleanupService : ICleanupService
         var dayThreshold = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalLogs;
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
         var allLogs = _directoryService.GetFiles(_directoryService.LogDirectory).ToList();
-        var expiredLogs = allLogs.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+        var expiredLogs = allLogs.Select(filename => _directoryService.FileSystem.FileInfo.New(filename))
             .Where(f => f.CreationTime < deltaTime)
             .ToList();
 

@@ -62,7 +62,7 @@ public class BackupService : IBackupService
     public IEnumerable<string> GetLogFiles(bool rollFiles = LogLevelOptions.LogRollingEnabled)
     {
         var multipleFileRegex = rollFiles ? @"\d*" : string.Empty;
-        var fi = _directoryService.FileSystem.FileInfo.FromFileName(LogLevelOptions.LogFile);
+        var fi = _directoryService.FileSystem.FileInfo.New(LogLevelOptions.LogFile);
 
         var files = rollFiles
             ? _directoryService.GetFiles(_directoryService.LogDirectory,

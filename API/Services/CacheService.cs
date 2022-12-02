@@ -82,7 +82,7 @@ public class CacheService : ICacheService
     {
         var extractPath = GetCachePath(chapter.Id);
         var path = Path.Join(extractPath, _directoryService.FileSystem.Path.GetFileName(chapter.Files.First().FilePath));
-        if (!(_directoryService.FileSystem.FileInfo.FromFileName(path).Exists))
+        if (!(_directoryService.FileSystem.FileInfo.New(path).Exists))
         {
             path = chapter.Files.First().FilePath;
         }
@@ -120,7 +120,7 @@ public class CacheService : ICacheService
         var removeNonImages = true;
         var fileCount = files.Count;
         var extraPath = "";
-        var extractDi = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(extractPath);
+        var extractDi = _directoryService.FileSystem.DirectoryInfo.New(extractPath);
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)
         {

@@ -281,7 +281,7 @@ public class ArchiveService : IArchiveService
         var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
 
         var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
-        var potentialExistingFile = _directoryService.FileSystem.FileInfo.FromFileName(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip"));
+        var potentialExistingFile = _directoryService.FileSystem.FileInfo.New(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip"));
         if (potentialExistingFile.Exists)
         {
             // A previous download exists, just return it immediately

@@ -115,7 +115,7 @@ public class ImageService : IImageService
 
     public async Task<string> ConvertToWebP(string filePath, string outputPath)
     {
-        var file = _directoryService.FileSystem.FileInfo.FromFileName(filePath);
+        var file = _directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + ".webp");
 

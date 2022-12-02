@@ -134,7 +134,7 @@ public class DefaultParser : IDefaultParser
 
         if (fallbackFolders.Count == 0)
         {
-            var rootFolderName = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(rootPath).Name;
+            var rootFolderName = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
             var series = Parser.ParseSeries(rootFolderName);
 
             if (string.IsNullOrEmpty(series))

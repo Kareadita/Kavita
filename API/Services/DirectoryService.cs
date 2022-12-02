@@ -170,7 +170,8 @@ public class DirectoryService : IDirectoryService
 
         while (FileSystem.Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
         {
-            var folder = FileSystem.DirectoryInfo.FromDirectoryName(path).Name;
+
+            var folder = FileSystem.DirectoryInfo.New(path).Name;
             paths.Add(folder);
             path = path.Substring(0, path.LastIndexOf(separator));
         }
@@ -185,7 +186,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public bool Exists(string directory)
     {
-        var di = FileSystem.DirectoryInfo.FromDirectoryName(directory);
+        var di = FileSystem.DirectoryInfo.New(directory);
         return di.Exists;
     }
 
@@ -227,7 +228,7 @@ public class DirectoryService : IDirectoryService
     {
         try
         {
-            var fileInfo = FileSystem.FileInfo.FromFileName(fullFilePath);
+            var fileInfo = FileSystem.FileInfo.New(fullFilePath);
             if (!fileInfo.Exists) return;
 
             ExistOrCreate(targetDirectory);
@@ -252,7 +253,7 @@ public class DirectoryService : IDirectoryService
         if (string.IsNullOrEmpty(sourceDirName)) return false;
 
         // Get the subdirectories for the specified directory.
-        var dir = FileSystem.DirectoryInfo.FromDirectoryName(sourceDirName);
+        var dir = FileSystem.DirectoryInfo.New(sourceDirName);
 
         if (!dir.Exists)
         {
@@ -267,7 +268,7 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(destDirName);
 
         // Get the files in the directory and copy them to the new location.
-        var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => FileSystem.FileInfo.FromFileName(n));
+        var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => FileSystem.FileInfo.New(n));
         foreach (var file in files)
         {
             var tempPath = FileSystem.Path.Combine(destDirName, file.Name);
@@ -291,7 +292,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public bool IsDriveMounted(string path)
     {
-        return FileSystem.DirectoryInfo.FromDirectoryName(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
+        return FileSystem.DirectoryInfo.New(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
     }
 
 
@@ -322,7 +323,7 @@ public class DirectoryService : IDirectoryService
     /// <returns>Total bytes</returns>
     public long GetTotalSize(IEnumerable<string> paths)
     {
-        return paths.Sum(path => FileSystem.FileInfo.FromFileName(path).Length);
+        return paths.Sum(path => FileSystem.FileInfo.New(path).Length);
     }
 
     /// <summary>
@@ -332,7 +333,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public bool ExistOrCreate(string directoryPath)
     {
-        var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
+        var di = FileSystem.DirectoryInfo.New(directoryPath);
         if (di.Exists) return true;
         try
         {
@@ -367,7 +368,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public void ClearDirectory(string directoryPath)
     {
-        var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
+        var di = FileSystem.DirectoryInfo.New(directoryPath);
         if (!di.Exists) return;
         try
         {
@@ -410,8 +411,8 @@ public class DirectoryService : IDirectoryService
                     _logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
                     continue;
                 }
-                var fileInfo = FileSystem.FileInfo.FromFileName(file);
-                var targetFile = FileSystem.FileInfo.FromFileName(RenameFileForCopy(file, directoryPath, prepend));
+                var fileInfo = FileSystem.FileInfo.New(file);
+                var targetFile = FileSystem.FileInfo.New(RenameFileForCopy(file, directoryPath, prepend));
 
                 fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, targetFile.Name));
             }
@@ -449,8 +450,8 @@ public class DirectoryService : IDirectoryService
                     _logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
                     continue;
                 }
-                var fileInfo = FileSystem.FileInfo.FromFileName(file);
-                var targetFile = FileSystem.FileInfo.FromFileName(RenameFileForCopy(newFilenames[index] + fileInfo.Extension, directoryPath));
+                var fileInfo = FileSystem.FileInfo.New(file);
+                var targetFile = FileSystem.FileInfo.New(RenameFileForCopy(newFilenames[index] + fileInfo.Extension, directoryPath));
 
                 fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, targetFile.Name));
                 index++;
@@ -477,10 +478,10 @@ public class DirectoryService : IDirectoryService
     {
         while (true)
         {
-            var fileInfo = FileSystem.FileInfo.FromFileName(fileToCopy);
+            var fileInfo = FileSystem.FileInfo.New(fileToCopy);
             var filename = prepend + fileInfo.Name;
 
-            var targetFile = FileSystem.FileInfo.FromFileName(FileSystem.Path.Join(directoryPath, filename));
+            var targetFile = FileSystem.FileInfo.New(FileSystem.Path.Join(directoryPath, filename));
             if (!targetFile.Exists)
             {
                 return targetFile.FullName;
@@ -512,7 +513,7 @@ public class DirectoryService : IDirectoryService
     {
         if (!FileSystem.Directory.Exists(rootPath)) return ImmutableList<DirectoryDto>.Empty;
 
-        var di = FileSystem.DirectoryInfo.FromDirectoryName(rootPath);
+        var di = FileSystem.DirectoryInfo.New(rootPath);
         var dirs = di.GetDirectories()
             .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
             .Select(d => new DirectoryDto()
@@ -598,7 +599,7 @@ public class DirectoryService : IDirectoryService
 
         return GetDirectories(folderPath)
             .Where(folder => !matcher.ExcludeMatches(
-                $"{FileSystem.DirectoryInfo.FromDirectoryName(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
+                $"{FileSystem.DirectoryInfo.New(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
     }
 
     /// <summary>
@@ -678,7 +679,7 @@ public class DirectoryService : IDirectoryService
         {
             var foundFiles = GetFilesWithCertainExtensions(folderPath,
                     Tasks.Scanner.Parser.Parser.SupportedExtensions)
-                .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.FromFileName(file).Name));
+                .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name));
             files.AddRange(foundFiles);
         }
 
@@ -828,7 +829,7 @@ public class DirectoryService : IDirectoryService
         {
             try
             {
-                FileSystem.FileInfo.FromFileName(file).Delete();
+                FileSystem.FileInfo.New(file).Delete();
             }
             catch (Exception)
             {
@@ -931,7 +932,7 @@ public class DirectoryService : IDirectoryService
     {
         if (string.IsNullOrEmpty(directoryName) || !FileSystem.Directory.Exists(directoryName)) return;
 
-        var directory = FileSystem.DirectoryInfo.FromDirectoryName(directoryName);
+        var directory = FileSystem.DirectoryInfo.New(directoryName);
 
         var index = 0;
         FlattenDirectory(directory, directory, ref index);

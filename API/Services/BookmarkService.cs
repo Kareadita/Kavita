@@ -90,7 +90,7 @@ public class BookmarkService : IBookmarkService
                 return true;
             }
 
-            var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(imageToBookmark);
+            var fileInfo = _directoryService.FileSystem.FileInfo.New(imageToBookmark);
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var targetFolderStem = BookmarkStem(userWithBookmarks.Id, bookmarkDto.SeriesId, bookmarkDto.ChapterId);
             var targetFilepath = Path.Join(settings.BookmarksDirectory, targetFolderStem);
