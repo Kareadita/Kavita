@@ -42,6 +42,7 @@ public interface IScannerService
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
     Task ScanFolder(string folder);
+    Task AnalyzeFiles();
 
 }
 
@@ -95,6 +96,35 @@ public class ScannerService : IScannerService
         _readingItemService = readingItemService;
         _processSeries = processSeries;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+    }
+
+    /// <summary>
+    /// This is only used for v0.7 to get files analyzed
+    /// </summary>
+    public async Task AnalyzeFiles()
+    {
+        _logger.LogInformation("Starting Analyze Files task");
+        var missingExtensions = await _unitOfWork.MangaFileRepository.GetAllWithMissingExtension();
+        if (missingExtensions.Count == 0)
+        {
+            _logger.LogInformation("Nothing to do");
+            return;
+        }
+
+        var sw = Stopwatch.StartNew();
+
+        foreach (var file in missingExtensions)
+        {
+            var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(file.FilePath);
+            if (!fileInfo.Exists)continue;
+            file.Extension = fileInfo.Extension.ToLowerInvariant();
+            file.Bytes = fileInfo.Length;
+            _unitOfWork.MangaFileRepository.Update(file);
+        }
+
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Completed Analyze Files task in {ElapsedTime}", sw.Elapsed);
     }
 
     /// <summary>

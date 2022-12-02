@@ -6995,6 +6995,19 @@
         }
       }
     },
+    "/api/Server/analyze-files": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "This is a one time task that needs to be ran for v0.7 statistics to work",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Server/server-info": {
       "get": {
         "tags": [
