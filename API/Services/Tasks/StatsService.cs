@@ -249,6 +249,7 @@ public class StatsService : IStatsService
 
     private IEnumerable<FileFormatDto> AllFormats()
     {
+        // TODO: Rewrite this with new migration code in feature/basic-stats
         var results =  _context.MangaFile
             .AsNoTracking()
             .AsEnumerable()

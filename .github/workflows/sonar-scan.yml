@@ -20,7 +20,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 6.0.x
+            dotnet-version: 7.0.x
 
       - name: Install Swashbuckle CLI
         shell: powershell
@@ -88,7 +88,7 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 6.0.x
+            dotnet-version: 7.0.x
 
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
@@ -178,7 +178,7 @@ jobs:
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 6.0.x
+            dotnet-version: 7.0.x
 
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
@@ -295,7 +295,7 @@ jobs:
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 6.0.x
+            dotnet-version: 7.0.x
       - name: Install Swashbuckle CLI
         run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
 
