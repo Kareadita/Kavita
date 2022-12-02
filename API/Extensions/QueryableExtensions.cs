@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
@@ -205,4 +206,7 @@ public static class QueryableExtensions
             .AsSplitQuery()
             .Select(lib => lib.Id);
     }
+
+    public static IEnumerable<DateTime> Range(this DateTime startDate, int numberOfDays) =>
+        Enumerable.Range(0, numberOfDays).Select(e => startDate.AddDays(e));
 }

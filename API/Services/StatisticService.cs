@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Statistics;
-using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +26,7 @@ public interface IStatisticService
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
+    Task<IEnumerable<ReadHistoryEvent>> GetHistory();
 }
 
 /// <summary>
@@ -306,6 +305,42 @@ public class StatisticService : IStatisticService
             })
             .OrderByDescending(d => d.ReadDate)
             .ToListAsync();
+    }
+
+    public Task<IEnumerable<ReadHistoryEvent>> GetHistory()
+    {
+        // _context.AppUserProgresses
+        //     .AsSplitQuery()
+        //     .AsEnumerable()
+        //     .GroupBy(sm => sm.LastModified)
+        //     .Select(sm => new
+        //     {
+        //         User = _context.AppUser.Single(u => u.Id == sm.Key),
+        //         Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
+        //             .Where(u => u.AppUserId == sm.Key)
+        //             .Where(p => p.PagesRead > 0)
+        //             .Select(p => p.ChapterId)
+        //             .Distinct()
+        //             .Contains(c.Id))
+        //     })
+        //     .OrderByDescending(d => d.Chapters.Sum(c => c.AvgHoursToRead))
+        //     .Take(5)
+        //     .ToList();
+
+        var firstOfWeek = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
+        var groupedReadingDays = _context.AppUserProgresses
+            .Where(x => x.LastModified >= firstOfWeek)
+            .GroupBy(x => x.LastModified.Day)
+            .Select(g => new StatCount<int>()
+            {
+                Value = g.Key,
+                Count = _context.AppUserProgresses.Where(p => p.LastModified.Day == g.Key).Select(p => p.ChapterId).Distinct().Count()
+            })
+            .AsEnumerable();
+
+        // var records = firstOfWeek.Range(7)
+        //     .GroupJoin(groupedReadingDays, wd => wd.Day, lg => lg.Key, (_, lg) => lg.Any() ? lg.First().Count() : 0).ToArray();
+        return null;
     }
 
 
