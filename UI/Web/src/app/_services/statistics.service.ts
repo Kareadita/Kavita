@@ -6,7 +6,7 @@ import { PublicationStatusPipe } from '../pipe/publication-status.pipe';
 import { map } from 'rxjs';
 import { MangaFormatPipe } from '../pipe/manga-format.pipe';
 import { FileExtensionBreakdown } from '../statistics/_models/file-breakdown';
-import { TopReads, TopUserRead } from '../statistics/_models/top-reads';
+import { TopUserRead } from '../statistics/_models/top-reads';
 import { ReadHistoryEvent } from '../statistics/_models/read-history-event';
 import { ServerStatistics } from '../statistics/_models/server-statistics';
 import { StatCount } from '../statistics/_models/stat-count';
@@ -52,18 +52,8 @@ export class StatisticsService {
       })));
   }
 
-  getTopReads(username: string = 'All users', days: number = 0) {
-    const params = new HttpParams();
-    if (username !== 'All users' || days !== 0)  {
-      if (username !== 'All users') params.append('username', encodeURIComponent(username));
-      if (days !== 0) params.append('days', days);
-    }
-    
-    return this.httpClient.get<TopReads>(this.baseUrl + 'stats/server/top/reads', {params: params});
-  }
-
-  getTopUsers() {
-    return this.httpClient.get<TopUserRead[]>(this.baseUrl + 'stats/server/top/users');
+  getTopUsers(days: number = 0) {
+    return this.httpClient.get<TopUserRead[]>(this.baseUrl + 'stats/server/top/users?days=' + days);
   }
 
   getReadingHistory(userId: number) {

@@ -13,8 +13,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MangaFormatStatsComponent } from './_components/manga-format-stats/manga-format-stats.component';
 import { FileBreakdownStatsComponent } from './_components/file-breakdown-stats/file-breakdown-stats.component';
 import { PipeModule } from '../pipe/pipe.module';
-import { TopReadsByExtensionComponent } from './_components/top-reads-by-extension/top-reads-by-extension.component';
-import { TopReadsByUserComponent } from './_components/top-reads-by-user/top-reads-by-user.component';
+import { TopReadersComponent } from './_components/top-readers/top-readers.component';
+
 
 
 @NgModule({
@@ -26,8 +26,7 @@ import { TopReadsByUserComponent } from './_components/top-reads-by-user/top-rea
     PublicationStatusStatsComponent,
     MangaFormatStatsComponent,
     FileBreakdownStatsComponent,
-    TopReadsByExtensionComponent,
-    TopReadsByUserComponent
+    TopReadersComponent
   ],
   imports: [
     CommonModule,
