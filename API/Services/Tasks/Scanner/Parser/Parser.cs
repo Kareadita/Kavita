@@ -39,11 +39,23 @@ public static partial class Parser
     private const string Number = @"\d+(\.\d)?";
     private const string NumberRange = Number + @"(-" + Number + @")?";
 
-    // Some generic reuse regex patterns:
-    // - non greedy matching of a string where parenthesis are balanced
+    /// <summary>
+    /// non greedy matching of a string where parenthesis are balanced
+    /// </summary>
     public const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
-    // - non greedy matching of a string where square brackets are balanced
+    /// <summary>
+    /// non greedy matching of a string where square brackets are balanced
+    /// </summary>
     public const string BalancedBracket = @"(?:[^\[\]]|(?<open>\[)|(?<-open>\]))*?(?(open)(?!))";
+    /// <summary>
+    /// Matches [Complete], release tags like [kmts] but not [ Complete ] or [kmts ]
+    /// </summary>
+    private const string TagsInBrackets = $@"\[(?!\s){BalancedBracket}(?<!\s)\]";
+    /// <summary>
+    /// Common regex patterns present in both Comics and Mangas
+    /// </summary>
+    private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
+
 
     /// <summary>
     /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
@@ -578,24 +590,17 @@ public static partial class Parser
     };
 
 
-    private static readonly Regex MangaEditionRegex = new Regex(
-        // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
-        // To Love Ru v01 Uncensored (Ch.001-007)
-        @"\b(?:Omnibus(?:\s?Edition)?|Uncensored)\b",
-        MatchOptions, RegexTimeout
-    );
+    // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
+    // To Love Ru v01 Uncensored (Ch.001-007)
+    [GeneratedRegex(@"\b(?:Omnibus(?:\s?Edition)?|Uncensored)\b", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex MangaEditionRegex();
 
-    // Matches [Complete], release tags like [kmts] but not [ Complete ] or [kmts ]
-    private const string TagsInBrackets = $@"\[(?!\s){BalancedBracket}(?<!\s)\]";
-
-    // Matches anything between balanced parenthesis, tags between brackets, {} and {Complete}
-    private static readonly Regex CleanupRegex = new Regex(
-        $@"(?:\({BalancedParen}\)|{TagsInBrackets}|\{{\}}|\{{Complete\}})",
-        MatchOptions, RegexTimeout
-    );
-
-    // Common regex patterns present in both Comics and Mangas
-    private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
+    /// <summary>
+    /// Matches anything between balanced parenthesis, tags between brackets, {} and {Complete}
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex($@"(?:\({BalancedParen}\)|{TagsInBrackets}|\{{\}}|\{{Complete\}})", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex CleanupRegex();
 
     /// <summary>
     /// All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
@@ -645,7 +650,7 @@ public static partial class Parser
     public static string ParseEdition(string filePath)
     {
         filePath = ReplaceUnderscores(filePath);
-        var match = MangaEditionRegex.Match(filePath);
+        var match = MangaEditionRegex().Match(filePath);
         return match.Success ? match.Value : string.Empty;
     }
 
@@ -800,9 +805,9 @@ public static partial class Parser
 
     private static string RemoveEditionTagHolders(string title)
     {
-        title = CleanupRegex.Replace(title, string.Empty);
+        title = CleanupRegex().Replace(title, string.Empty);
 
-        title = MangaEditionRegex.Replace(title, string.Empty);
+        title = MangaEditionRegex().Replace(title, string.Empty);
 
         return title;
     }
