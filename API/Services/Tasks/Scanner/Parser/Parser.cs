@@ -7,11 +7,12 @@ using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
 
-public static class Parser
+public static partial class Parser
 {
     public const string DefaultChapter = "0";
     public const string DefaultVolume = "0";
     private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
+    private const int RegexTimeoutMs = 5000000;
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
@@ -45,21 +46,40 @@ public static class Parser
 
 
     private const string XmlRegexExtensions = @"\.xml";
-    private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
-        MatchOptions, RegexTimeout);
-    private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
-        MatchOptions, RegexTimeout);
-    private static readonly Regex ComicInfoArchiveRegex = new Regex(@"\.cbz|\.cbr|\.cb7|\.cbt",
-        MatchOptions, RegexTimeout);
-    private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
-        MatchOptions, RegexTimeout);
-    private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
-        MatchOptions, RegexTimeout);
-    private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
-        MatchOptions, RegexTimeout);
 
-    private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+!]",
-        MatchOptions, RegexTimeout);
+
+    [GeneratedRegex(ImageFileExtensions, MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex ImageRegex();
+
+    [GeneratedRegex(ArchiveFileExtensions, MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex ArchiveFileRegex();
+    [GeneratedRegex(@"\.cbz|\.cbr|\.cb7|\.cbt", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex ComicInfoArchiveRegex();
+    [GeneratedRegex(XmlRegexExtensions, MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex XmlRegex();
+    [GeneratedRegex(BookFileExtensions, MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex BookFileRegex();
+
+    [GeneratedRegex(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex CoverImageRegex();
+    [GeneratedRegex(@"[^\p{L}0-9\+!]", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex NormalizeRegex();
+
+    // private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
+    //     MatchOptions, RegexTimeout);
+    // private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
+    //     MatchOptions, RegexTimeout);
+    // private static readonly Regex ComicInfoArchiveRegex = new Regex(@"\.cbz|\.cbr|\.cb7|\.cbt",
+    //     MatchOptions, RegexTimeout);
+    // private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
+    //     MatchOptions, RegexTimeout);
+    // private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
+    //     MatchOptions, RegexTimeout);
+    // private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
+    //     MatchOptions, RegexTimeout);
+    //
+    // private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+!]",
+    //     MatchOptions, RegexTimeout);
 
     /// <summary>
     /// Recognizes the Special token only
@@ -84,7 +104,7 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // NEEDLESS_Vol.4_-Simeon_6_v2[SugoiSugoi].rar
         new Regex(
-            @"(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])",
+            """(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])""",
             MatchOptions, RegexTimeout),
         // TODO: In .NET 7, update this to use raw literal strings and apply the NumberRange everywhere
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
@@ -93,11 +113,11 @@ public static class Parser
             MatchOptions, RegexTimeout),
         // Kodomo no Jikan vol. 10, [dmntsf.net] One Piece - Digital Colored Comics Vol. 20.5-21.5 Ch. 177
         new Regex(
-            @"(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)",
+            """(?<Series>.*)(\b|_)(vol\.? ?)(?<Volume>\d+(\.\d)?(-\d+)?(\.\d)?)""",
             MatchOptions, RegexTimeout),
         // Killing Bites Vol. 0001 Ch. 0001 - Galactica Scanlations (gb)
         new Regex(
-            @"(vol\.? ?)(?<Volume>\d+(\.\d)?)",
+            """(vol\.? ?)(?<Volume>\d+(\.\d)?)""",
             MatchOptions, RegexTimeout),
         // Tonikaku Cawaii [Volume 11].cbz
         new Regex(
@@ -588,34 +608,57 @@ public static class Parser
     // Common regex patterns present in both Comics and Mangas
     private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
 
-    private static readonly Regex MangaSpecialRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|Omake)\b",
-        MatchOptions, RegexTimeout
-    );
+    /// <summary>
+    /// All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex($@"\b(?:{CommonSpecial}|Omake)\b", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex MangaSpecialRegex();
 
-    private static readonly Regex ComicSpecialRegex = new Regex(
-    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
-        MatchOptions, RegexTimeout
-    );
+    // private static readonly Regex MangaSpecialRegex = new Regex(
+    //
+    //     $@"\b(?:{CommonSpecial}|Omake)\b",
+    //     MatchOptions, RegexTimeout
+    // );
 
-    private static readonly Regex EuropeanComicRegex = new Regex(
-        // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-        @"\b(?:Bd[-\s]Fr)\b",
-        MatchOptions, RegexTimeout
-    );
+    /// <summary>
+    /// All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+    /// </summary>
+    [GeneratedRegex($@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex ComicSpecialRegex();
 
-    // If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
-    private static readonly Regex SpecialMarkerRegex = new Regex(
-        @"SP\d+",
-        MatchOptions, RegexTimeout
-    );
+    // private static readonly Regex ComicSpecialRegex = new Regex(
+    // // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+    //     $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
+    //     MatchOptions, RegexTimeout
+    // );
 
-    private static readonly Regex EmptySpaceRegex = new Regex(
-        @"\s{2,}",
-        MatchOptions, RegexTimeout
-    );
+    /// <summary>
+    /// All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+    /// </summary>
+    [GeneratedRegex(@"\b(?:Bd[-\s]Fr)\b", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex EuropeanComicRegex();
+    // private static readonly Regex EuropeanComicRegex = new Regex(
+    //     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+    //     @"\b(?:Bd[-\s]Fr)\b",
+    //     MatchOptions, RegexTimeout
+    // );
+
+    /// <summary>
+    /// If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex(@"SP\d+", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex SpecialMarkerRegex();
+
+
+    [GeneratedRegex(@"\s{2,}", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex EmptySpaceRegex();
+
+    // private static readonly Regex EmptySpaceRegex = new Regex(
+    //     @"\s{2,}",
+    //     MatchOptions, RegexTimeout
+    // );
 
     private static readonly ImmutableArray<string> FormatTagSpecialKeywords = ImmutableArray.Create(
         "Special", "Reference", "Director's Cut", "Box Set", "Box-Set", "Annual", "Anthology", "Epilogue",
@@ -649,19 +692,19 @@ public static class Parser
     /// <returns></returns>
     public static bool HasSpecialMarker(string filePath)
     {
-        return SpecialMarkerRegex.IsMatch(filePath);
+        return SpecialMarkerRegex().IsMatch(filePath);
     }
 
     public static bool IsMangaSpecial(string filePath)
     {
         filePath = ReplaceUnderscores(filePath);
-        return  MangaSpecialRegex.IsMatch(filePath);
+        return  MangaSpecialRegex().IsMatch(filePath);
     }
 
     public static bool IsComicSpecial(string filePath)
     {
         filePath = ReplaceUnderscores(filePath);
-        return ComicSpecialRegex.IsMatch(filePath);
+        return ComicSpecialRegex().IsMatch(filePath);
     }
 
     public static string ParseSeries(string filename)
@@ -802,17 +845,17 @@ public static class Parser
 
     private static string RemoveMangaSpecialTags(string title)
     {
-        return MangaSpecialRegex.Replace(title, string.Empty);
+        return MangaSpecialRegex().Replace(title, string.Empty);
     }
 
     private static string RemoveEuropeanTags(string title)
     {
-        return EuropeanComicRegex.Replace(title, string.Empty);
+        return EuropeanComicRegex().Replace(title, string.Empty);
     }
 
     private static string RemoveComicSpecialTags(string title)
     {
-        return ComicSpecialRegex.Replace(title, string.Empty);
+        return ComicSpecialRegex().Replace(title, string.Empty);
     }
 
 
@@ -846,7 +889,7 @@ public static class Parser
 
         title = title.Trim(SpacesAndSeparators);
 
-        title = EmptySpaceRegex.Replace(title, " ");
+        title = EmptySpaceRegex().Replace(title, " ");
 
         return title;
     }
@@ -885,25 +928,25 @@ public static class Parser
 
     public static bool IsArchive(string filePath)
     {
-        return ArchiveFileRegex.IsMatch(Path.GetExtension(filePath));
+        return ArchiveFileRegex().IsMatch(Path.GetExtension(filePath));
     }
     public static bool IsComicInfoExtension(string filePath)
     {
-        return ComicInfoArchiveRegex.IsMatch(Path.GetExtension(filePath));
+        return ComicInfoArchiveRegex().IsMatch(Path.GetExtension(filePath));
     }
     public static bool IsBook(string filePath)
     {
-        return BookFileRegex.IsMatch(Path.GetExtension(filePath));
+        return BookFileRegex().IsMatch(Path.GetExtension(filePath));
     }
 
     public static bool IsImage(string filePath)
     {
-        return !filePath.StartsWith(".") && ImageRegex.IsMatch(Path.GetExtension(filePath));
+        return !filePath.StartsWith('.') && ImageRegex().IsMatch(Path.GetExtension(filePath));
     }
 
     public static bool IsXml(string filePath)
     {
-        return XmlRegex.IsMatch(Path.GetExtension(filePath));
+        return XmlRegex().IsMatch(Path.GetExtension(filePath));
     }
 
 
@@ -911,6 +954,7 @@ public static class Parser
     {
         try
         {
+            // TODO: Convert this into a compiled Regex
             if (!Regex.IsMatch(range, @"^[\d\-.]+$"))
             {
                 return (float) 0.0;
@@ -945,7 +989,7 @@ public static class Parser
 
     public static string Normalize(string name)
     {
-        return NormalizeRegex.Replace(name, string.Empty).ToLower();
+        return NormalizeRegex().Replace(name, string.Empty).ToLower();
     }
 
     /// <summary>
@@ -975,7 +1019,7 @@ public static class Parser
     /// <returns></returns>
     public static bool IsCoverImage(string filename)
     {
-        return IsImage(filename) && CoverImageRegex.IsMatch(filename);
+        return IsImage(filename) && CoverImageRegex().IsMatch(filename);
     }
 
     /// <summary>
@@ -1044,5 +1088,5 @@ public static class Parser
         return FormatTagSpecialKeywords.Contains(comicInfoFormat);
     }
 
-    private static string ReplaceUnderscores(string name) => name?.Replace("_", " ");
+    private static string ReplaceUnderscores(string name) => name?.Replace('_', ' ');
 }

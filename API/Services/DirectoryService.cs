@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
@@ -11,7 +10,6 @@ using API.DTOs.System;
 using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common.Helpers;
-using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
