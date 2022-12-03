@@ -73,7 +73,7 @@ public interface IDirectoryService
     GlobMatcher CreateMatcherFromFile(string filePath);
 #nullable disable
 }
-public class DirectoryService : IDirectoryService
+public partial class DirectoryService : IDirectoryService
 {
     public const string KavitaIgnoreFile = ".kavitaignore";
     public IFileSystem FileSystem { get; }
@@ -85,12 +85,23 @@ public class DirectoryService : IDirectoryService
     public string BookmarkDirectory { get; }
     public string SiteThemeDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
+    private const int RegexTimeoutMs = 5000000;
+    private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
-    private static readonly Regex ExcludeDirectories = new Regex(
-        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-    private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
+        MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex ExcludeDirectoriesRegex();
+
+    [GeneratedRegex(@"\(\d+\)",
+        MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex FileCopyAppendRegex();
+
+    // private static readonly Regex ExcludeDirectories = new Regex(
+    //     @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
+    //     RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    // private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
+    //     RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
     public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
@@ -486,9 +497,9 @@ public class DirectoryService : IDirectoryService
             }
 
             var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
-            if (FileCopyAppend.IsMatch(noExtension))
+            if (FileCopyAppendRegex().IsMatch(noExtension))
             {
-                var match = FileCopyAppend.Match(noExtension).Value;
+                var match = FileCopyAppendRegex().Match(noExtension).Value;
                 var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
                 noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
             }
@@ -582,7 +593,7 @@ public class DirectoryService : IDirectoryService
     {
         if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
         return FileSystem.Directory.GetDirectories(folderPath)
-            .Where(path => ExcludeDirectories.Matches(path).Count == 0);
+            .Where(path => ExcludeDirectoriesRegex().Matches(path).Count == 0);
     }
 
     /// <summary>

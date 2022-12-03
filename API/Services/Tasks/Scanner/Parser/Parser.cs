@@ -660,6 +660,9 @@ public static partial class Parser
     //     MatchOptions, RegexTimeout
     // );
 
+    [GeneratedRegex(@"^[\d\-.]+$", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    private static partial Regex NumberRangeRegex();
+
     private static readonly ImmutableArray<string> FormatTagSpecialKeywords = ImmutableArray.Create(
         "Special", "Reference", "Director's Cut", "Box Set", "Box-Set", "Annual", "Anthology", "Epilogue",
         "One Shot", "One-Shot", "Prologue", "TPB", "Trade Paper Back", "Omnibus", "Compendium", "Absolute", "Graphic Novel",
@@ -954,8 +957,7 @@ public static partial class Parser
     {
         try
         {
-            // TODO: Convert this into a compiled Regex
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$"))
+            if (!NumberRangeRegex().IsMatch(range))
             {
                 return (float) 0.0;
             }
@@ -973,7 +975,7 @@ public static partial class Parser
     {
         try
         {
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$"))
+            if (!NumberRangeRegex().IsMatch(range))
             {
                 return (float) 0.0;
             }
