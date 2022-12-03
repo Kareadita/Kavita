@@ -72,20 +72,20 @@
         </ng-container>
     </div>
 
-    <div class="row g-0 pt-2 pb-2 d-flex justify-content-around">
-        <div class="col-md-2 col-sm-12">
+    <div class="grid row g-0 pt-2 pb-2">
+        <div class="col-auto">
             <app-stat-list [data$]="releaseYears$" title="Release Years"></app-stat-list>
         </div>
-        <div class="col-md-2 col-sm-12">
+        <div class="col-auto">
             <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users" label="events"></app-stat-list>
         </div>
-        <div class="col-md-2 col-sm-12">
+        <div class="col-auto">
             <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries" label="events"></app-stat-list>
         </div>
-        <div class="col-md-2 col-sm-12">
+        <div class="col-auto">
             <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
         </div>
-        <div class="col-md-2 col-sm-12">
+        <div class="col-auto">
             <app-stat-list [data$]="recentlyRead$" title="Recently Read"></app-stat-list>
         </div>
     </div>

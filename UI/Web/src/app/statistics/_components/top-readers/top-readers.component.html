@@ -1,10 +1,10 @@
-<div class="row g-0 mb-2">
+<div class="row g-0 mb-2 align-items-center">
     <div class="col-4">
         <h4>Top Readers</h4>
     </div>
     <div class="col-8">
         <form [formGroup]="formGroup" class="d-inline-flex float-end">
-            <div class="form-check form-switch ms-1" style="width: 200px">
+            <div class="d-flex">
                 <label for="time-select-top-reads" class="form-check-label"></label>
                 <select id="time-select-top-reads" class="form-select" formControlName="days"
                 [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
@@ -17,7 +17,7 @@
 
 
 <ng-container>
-    <div class="row g-0 d-flex justify-content-around">
+    <div class="grid row g-0">
         <div class="card" style="width: 12rem;" *ngFor="let user of (users$ | async)">
             <div class="card-header text-center">
               {{user.username}}
