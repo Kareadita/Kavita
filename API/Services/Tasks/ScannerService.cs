@@ -290,7 +290,8 @@ public class ScannerService : IScannerService
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
     {
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
-            .Select(f => _directoryService.FileSystem.FileInfo.New(f.FilePath).Directory.FullName)
+            .Select(f => _directoryService.FileSystem.FileInfo.New(f.FilePath).Directory?.FullName)
+            .Where(f => !string.IsNullOrEmpty(f))
             .Distinct()
             .ToList();
 

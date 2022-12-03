@@ -173,7 +173,7 @@ public class Program
             {
                 webBuilder.UseKestrel((opts) =>
                 {
-                    opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                    opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
                 });
 
                 webBuilder.UseStartup<Startup>();

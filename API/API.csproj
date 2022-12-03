@@ -7,11 +7,12 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <TieredPGO>true</TieredPGO>
     <TieredCompilation>true</TieredCompilation>
+    <Nullable>warnings</Nullable>
   </PropertyGroup>
-    
+
   <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">
       <Exec Command="swagger tofile --output ../openapi.json bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll v1" />
-  </Target>  
+  </Target>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <DebugSymbols>false</DebugSymbols>

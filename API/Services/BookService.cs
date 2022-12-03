@@ -168,7 +168,7 @@ public class BookService : IBookService
         // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
         var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
         var importBuilder = new StringBuilder();
-        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
 
@@ -205,7 +205,7 @@ public class BookService : IBookService
         foreach (var styleRule in stylesheet.StyleRules)
         {
             if (styleRule.Selector.Text == CssScopeClass) continue;
-            if (styleRule.Selector.Text.Contains(","))
+            if (styleRule.Selector.Text.Contains(','))
             {
                 styleRule.Text = styleRule.Text.Replace(styleRule.SelectorText,
                     string.Join(", ",
@@ -219,7 +219,7 @@ public class BookService : IBookService
 
     private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
@@ -229,7 +229,7 @@ public class BookService : IBookService
 
     private static void EscapeFontFamilyReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex().Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
@@ -239,7 +239,7 @@ public class BookService : IBookService
 
     private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
     {
-        var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
+        var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex().Matches(stylesheetHtml);
         foreach (Match match in matches)
         {
             if (!match.Success) continue;
@@ -401,7 +401,7 @@ public class BookService : IBookService
         {
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
             var publicationDate =
-                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(date => date.Event == "publication")?.Date;
+                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(d => d.Event == "publication")?.Date;
 
             if (string.IsNullOrEmpty(publicationDate))
             {

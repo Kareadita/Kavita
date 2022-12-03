@@ -17,6 +17,7 @@ public static partial class Parser
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
     private const string BookFileExtensions = @"\.epub|\.pdf";
+    private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
 
     public const string SupportedExtensions =
@@ -25,28 +26,45 @@ public static partial class Parser
     private const RegexOptions MatchOptions =
         RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;
 
+    private static readonly ImmutableArray<string> FormatTagSpecialKeywords = ImmutableArray.Create(
+        "Special", "Reference", "Director's Cut", "Box Set", "Box-Set", "Annual", "Anthology", "Epilogue",
+        "One Shot", "One-Shot", "Prologue", "TPB", "Trade Paper Back", "Omnibus", "Compendium", "Absolute", "Graphic Novel",
+        "GN", "FCBD");
+
+    private static readonly char[] LeadingZeroesTrimChars = new[] { '0' };
+
+    private static readonly char[] SpacesAndSeparators = { '\0', '\t', '\r', ' ', '-', ','};
+
+
+    private const string Number = @"\d+(\.\d)?";
+    private const string NumberRange = Number + @"(-" + Number + @")?";
+
+    // Some generic reuse regex patterns:
+    // - non greedy matching of a string where parenthesis are balanced
+    public const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
+    // - non greedy matching of a string where square brackets are balanced
+    public const string BalancedBracket = @"(?:[^\[\]]|(?<open>\[)|(?<-open>\]))*?(?(open)(?!))";
+
     /// <summary>
     /// Matches against font-family css syntax. Does not match if url import has data: starting, as that is binary data
     /// </summary>
     /// <remarks>See here for some examples https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face</remarks>
-    public static readonly Regex FontSrcUrlRegex = new Regex(@"(?<Start>(?:src:\s?)?(?:url|local)\((?!data:)" + "(?:[\"']?)" + @"(?!data:))"
-                                                             + "(?<Filename>(?!data:)[^\"']+?)" + "(?<End>[\"']?" + @"\);?)",
-        MatchOptions, RegexTimeout);
+    [GeneratedRegex(@"(?<Start>(?:src:\s?)?(?:url|local)\((?!data:)" + "(?:[\"']?)" + @"(?!data:))"
+                    + "(?<Filename>(?!data:)[^\"']+?)" + "(?<End>[\"']?" + @"\);?)", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    public static partial Regex FontSrcUrlRegex();
+
     /// <summary>
     /// https://developer.mozilla.org/en-US/docs/Web/CSS/@import
     /// </summary>
-    public static readonly Regex CssImportUrlRegex = new Regex("(@import\\s([\"|']|url\\([\"|']))(?<Filename>[^'\"]+)([\"|']\\)?);",
-        MatchOptions | RegexOptions.Multiline, RegexTimeout);
+    [GeneratedRegex("(@import\\s([\"|']|url\\([\"|']))(?<Filename>[^'\"]+)([\"|']\\)?);", MatchOptions | RegexOptions.Multiline, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    public static partial Regex CssImportUrlRegex();
+
     /// <summary>
     /// Misc css image references, like background-image: url(), border-image, or list-style-image
     /// </summary>
     /// Original prepend: (background|border|list-style)-image:\s?)?
-    public static readonly Regex CssImageUrlRegex = new Regex(@"(url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(.\))",
-        MatchOptions, RegexTimeout);
-
-
-    private const string XmlRegexExtensions = @"\.xml";
-
+    [GeneratedRegex(@"(url\((?!data:).(?!data:))" + "(?<Filename>(?!data:)[^\"']*)" + @"(.\))", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    public static partial Regex CssImageUrlRegex();
 
     [GeneratedRegex(ImageFileExtensions, MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex ImageRegex();
@@ -65,36 +83,6 @@ public static partial class Parser
     [GeneratedRegex(@"[^\p{L}0-9\+!]", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex NormalizeRegex();
 
-    // private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
-    //     MatchOptions, RegexTimeout);
-    // private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
-    //     MatchOptions, RegexTimeout);
-    // private static readonly Regex ComicInfoArchiveRegex = new Regex(@"\.cbz|\.cbr|\.cb7|\.cbt",
-    //     MatchOptions, RegexTimeout);
-    // private static readonly Regex XmlRegex = new Regex(XmlRegexExtensions,
-    //     MatchOptions, RegexTimeout);
-    // private static readonly Regex BookFileRegex = new Regex(BookFileExtensions,
-    //     MatchOptions, RegexTimeout);
-    // private static readonly Regex CoverImageRegex = new Regex(@"(?<![[a-z]\d])(?:!?)(?<!back)(?<!back_)(?<!back-)(cover|folder)(?![\w\d])",
-    //     MatchOptions, RegexTimeout);
-    //
-    // private static readonly Regex NormalizeRegex = new Regex(@"[^\p{L}0-9\+!]",
-    //     MatchOptions, RegexTimeout);
-
-    /// <summary>
-    /// Recognizes the Special token only
-    /// </summary>
-    private static readonly Regex SpecialTokenRegex = new Regex(@"SP\d+",
-        MatchOptions, RegexTimeout);
-
-    private const string Number = @"\d+(\.\d)?";
-    private const string NumberRange = Number + @"(-" + Number + @")?";
-
-    // Some generic reusage regex patterns:
-    // - non greedy matching of a string where parenthesis are balanced
-    public const string BalancedParen = @"(?:[^()]|(?<open>\()|(?<-open>\)))*?(?(open)(?!))";
-    // - non greedy matching of a string where square brackets are balanced
-    public const string BalancedBrack = @"(?:[^\[\]]|(?<open>\[)|(?<-open>\]))*?(?(open)(?!))";
 
     private static readonly Regex[] MangaVolumeRegex = new[]
     {
@@ -589,6 +577,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
     };
 
+
     private static readonly Regex MangaEditionRegex = new Regex(
         // Tenjo Tenge {Full Contact Edition} v01 (2011) (Digital) (ASTC).cbz
         // To Love Ru v01 Uncensored (Ch.001-007)
@@ -597,7 +586,7 @@ public static partial class Parser
     );
 
     // Matches [Complete], release tags like [kmts] but not [ Complete ] or [kmts ]
-    private const string TagsInBrackets = $@"\[(?!\s){BalancedBrack}(?<!\s)\]";
+    private const string TagsInBrackets = $@"\[(?!\s){BalancedBracket}(?<!\s)\]";
 
     // Matches anything between balanced parenthesis, tags between brackets, {} and {Complete}
     private static readonly Regex CleanupRegex = new Regex(
@@ -615,38 +604,22 @@ public static partial class Parser
     [GeneratedRegex($@"\b(?:{CommonSpecial}|Omake)\b", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex MangaSpecialRegex();
 
-    // private static readonly Regex MangaSpecialRegex = new Regex(
-    //
-    //     $@"\b(?:{CommonSpecial}|Omake)\b",
-    //     MatchOptions, RegexTimeout
-    // );
-
     /// <summary>
     /// All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
     /// </summary>
     [GeneratedRegex($@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex ComicSpecialRegex();
 
-    // private static readonly Regex ComicSpecialRegex = new Regex(
-    // // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-    //     $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
-    //     MatchOptions, RegexTimeout
-    // );
-
     /// <summary>
     /// All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
     /// </summary>
     [GeneratedRegex(@"\b(?:Bd[-\s]Fr)\b", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex EuropeanComicRegex();
-    // private static readonly Regex EuropeanComicRegex = new Regex(
-    //     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
-    //     @"\b(?:Bd[-\s]Fr)\b",
-    //     MatchOptions, RegexTimeout
-    // );
 
     /// <summary>
-    /// If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.
+    /// Recognizes the Special token only
     /// </summary>
+    /// <remarks>If SP\d+ is in the filename, we force treat it as a special regardless if volume or chapter might have been found.</remarks>
     /// <returns></returns>
     [GeneratedRegex(@"SP\d+", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex SpecialMarkerRegex();
@@ -655,22 +628,10 @@ public static partial class Parser
     [GeneratedRegex(@"\s{2,}", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex EmptySpaceRegex();
 
-    // private static readonly Regex EmptySpaceRegex = new Regex(
-    //     @"\s{2,}",
-    //     MatchOptions, RegexTimeout
-    // );
-
     [GeneratedRegex(@"^[\d\-.]+$", MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
     private static partial Regex NumberRangeRegex();
 
-    private static readonly ImmutableArray<string> FormatTagSpecialKeywords = ImmutableArray.Create(
-        "Special", "Reference", "Director's Cut", "Box Set", "Box-Set", "Annual", "Anthology", "Epilogue",
-        "One Shot", "One-Shot", "Prologue", "TPB", "Trade Paper Back", "Omnibus", "Compendium", "Absolute", "Graphic Novel",
-        "GN", "FCBD");
 
-    private static readonly char[] LeadingZeroesTrimChars = new[] { '0' };
-
-    private static readonly char[] SpacesAndSeparators = { '\0', '\t', '\r', ' ', '-', ','};
 
     public static MangaFormat ParseFormat(string filePath)
     {
@@ -1002,7 +963,7 @@ public static partial class Parser
     public static string CleanSpecialTitle(string name)
     {
         if (string.IsNullOrEmpty(name)) return name;
-        var cleaned = SpecialTokenRegex.Replace(name.Replace('_', ' '), string.Empty).Trim();
+        var cleaned = SpecialMarkerRegex().Replace(name.Replace('_', ' '), string.Empty).Trim();
         var lastIndex = cleaned.LastIndexOf('.');
         if (lastIndex > 0)
         {
