@@ -18,7 +18,7 @@
 
 <ng-container>
     <div class="grid row g-0">
-        <div class="card" style="width: 12rem;" *ngFor="let user of (users$ | async)">
+        <div class="card" *ngFor="let user of (users$ | async)">
             <div class="card-header text-center">
               {{user.username}}
             </div>
