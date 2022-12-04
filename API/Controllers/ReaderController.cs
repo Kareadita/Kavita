@@ -156,9 +156,9 @@ public class ReaderController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
-    public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
+    public async Task<ActionResult<ChapterInfoDto?>> GetChapterInfo(int chapterId)
     {
-        if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
+        if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
         var chapter = await _cacheService.Ensure(chapterId);
         if (chapter == null) return BadRequest("Could not find Chapter");
 
@@ -216,6 +216,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
+
         var totalPages = await _cacheService.CacheBookmarkForSeries(user.Id, seriesId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
 
@@ -239,6 +241,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
@@ -256,6 +259,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
@@ -272,6 +276,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters);
@@ -295,6 +300,7 @@ public class ReaderController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+        if (user == null) return Unauthorized();
         await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
             MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,

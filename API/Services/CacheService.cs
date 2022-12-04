@@ -19,7 +19,7 @@ public interface ICacheService
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
-    Task<Chapter> Ensure(int chapterId);
+    Task<Chapter?> Ensure(int chapterId);
     /// <summary>
     /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
     /// </summary>
@@ -93,7 +93,7 @@ public class CacheService : ICacheService
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns>This will always return the Chapter for the chapterId</returns>
-    public async Task<Chapter> Ensure(int chapterId)
+    public async Task<Chapter?> Ensure(int chapterId)
     {
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
@@ -113,11 +113,12 @@ public class CacheService : ICacheService
     /// <param name="extractPath"></param>
     /// <param name="files"></param>
     /// <returns></returns>
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files)
+    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files)
     {
+        if (files == null) return;
         var removeNonImages = true;
         var fileCount = files.Count;
-        var extraPath = "";
+        var extraPath = string.Empty;
         var extractDi = _directoryService.FileSystem.DirectoryInfo.New(extractPath);
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)

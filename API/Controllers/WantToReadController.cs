@@ -36,6 +36,7 @@ public class WantToReadController : BaseApiController
     {
         userParams ??= new UserParams();
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id, userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
         return Ok(pagedList);
@@ -45,6 +46,7 @@ public class WantToReadController : BaseApiController
     public async Task<ActionResult<bool>> GetWantToRead([FromQuery] int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
         return Ok(await _unitOfWork.SeriesRepository.IsSeriesInWantToRead(user.Id, seriesId));
     }
 

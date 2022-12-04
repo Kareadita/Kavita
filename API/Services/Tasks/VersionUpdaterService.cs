@@ -15,32 +15,32 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
 
-internal class GithubReleaseMetadata
+internal abstract class GithubReleaseMetadata
 {
     /// <summary>
     /// Name of the Tag
     /// <example>v0.4.3</example>
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public string Tag_Name { get; init; }
+    public required string Tag_Name { get; init; }
     /// <summary>
     /// Name of the Release
     /// </summary>
-    public string Name { get; init; }
+    public required string Name { get; init; }
     /// <summary>
     /// Body of the Release
     /// </summary>
-    public string Body { get; init; }
+    public required string Body { get; init; }
     /// <summary>
     /// Url of the release on Github
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public string Html_Url { get; init; }
+    public required string Html_Url { get; init; }
     /// <summary>
     /// Date Release was Published
     /// </summary>
     // ReSharper disable once InconsistentNaming
-    public string Published_At { get; init; }
+    public required string Published_At { get; init; }
 }
 
 public interface IVersionUpdaterService
@@ -88,7 +88,7 @@ public class VersionUpdaterService : IVersionUpdaterService
         return updates.Select(CreateDto);
     }
 
-    private UpdateNotificationDto CreateDto(GithubReleaseMetadata update)
+    private UpdateNotificationDto CreateDto(GithubReleaseMetadata? update)
     {
         if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
@@ -106,7 +106,7 @@ public class VersionUpdaterService : IVersionUpdaterService
         };
     }
 
-    public async Task PushUpdate(UpdateNotificationDto update)
+    public async Task PushUpdate(UpdateNotificationDto? update)
     {
         if (update == null) return;
 

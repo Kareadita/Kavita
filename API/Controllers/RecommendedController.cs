@@ -27,7 +27,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams userParams)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
+        if (user == null) return Unauthorized();
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetQuickReads(user.Id, libraryId, userParams);
 
@@ -45,7 +45,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams userParams)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
+        if (user == null) return Unauthorized();
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(user.Id, libraryId, userParams);
 
@@ -63,7 +63,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams userParams)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
+        if (user == null) return Unauthorized();
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetHighlyRated(user.Id, libraryId, userParams);
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
@@ -82,7 +82,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams userParams)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
+        if (user == null) return Unauthorized();
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetMoreIn(user.Id, libraryId, genreId, userParams);
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(user.Id, series);
@@ -101,7 +101,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams userParams)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
+        if (user == null) return Unauthorized();
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetRediscover(user.Id, libraryId, userParams);
 

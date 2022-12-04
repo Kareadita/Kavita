@@ -1037,7 +1037,7 @@ public static partial class Parser
     /// <example>/manga/1\1 -> /manga/1/1</example>
     /// <param name="path"></param>
     /// <returns></returns>
-    public static string NormalizePath(string path)
+    public static string NormalizePath(string? path)
     {
         return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             .Replace(@"//", Path.AltDirectorySeparatorChar + string.Empty);

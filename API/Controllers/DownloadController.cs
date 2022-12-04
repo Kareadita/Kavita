@@ -112,6 +112,7 @@ public class DownloadController : BaseApiController
     private async Task<bool> HasDownloadPermission()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return false;
         return await _accountService.HasDownloadPermission(user);
     }
 

@@ -33,5 +33,5 @@ public class LibraryDto
     /// Include library series in Search
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;
-    public ICollection<string?> Folders { get; init; } = new List<string?>();
+    public ICollection<string> Folders { get; init; } = new List<string>();
 }

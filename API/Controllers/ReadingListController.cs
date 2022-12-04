@@ -180,8 +180,8 @@ public class ReadingListController : BaseApiController
     [HttpPost("create")]
     public async Task<ActionResult<ReadingListDto>> CreateList(CreateReadingListDto dto)
     {
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.ReadingListsWithItems);
+        if (user == null) return Unauthorized();
 
         // When creating, we need to make sure Title is unique
         var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));

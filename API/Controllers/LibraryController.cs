@@ -209,6 +209,7 @@ public class LibraryController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
 
         // Validate user has Admin privileges
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
@@ -244,13 +245,15 @@ public class LibraryController : BaseApiController
 
         try
         {
-            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 return BadRequest(
                     "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");
             }
+
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+            if (library == null) return BadRequest("Library no longer exists");
 
             // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
             // Aka SeriesRelation has an invalid foreign key
@@ -317,8 +320,10 @@ public class LibraryController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
-        var newName = dto.Name.Trim();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
+        if (library == null) return BadRequest("Library doesn't exist");
+
+        var newName = dto.Name.Trim();
         if (await _unitOfWork.LibraryRepository.LibraryExists(newName) && !library.Name.Equals(newName))
             return BadRequest("Library name already exists");
 

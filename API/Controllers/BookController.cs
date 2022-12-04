@@ -10,6 +10,7 @@ using API.Services;
 using Kavita.Common;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using VersOne.Epub;
 
@@ -39,6 +40,7 @@ public class BookController : BaseApiController
     public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
     {
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
+        if (dto == null) return BadRequest("Chapter does not exist");
         var bookTitle = string.Empty;
         switch (dto.SeriesFormat)
         {

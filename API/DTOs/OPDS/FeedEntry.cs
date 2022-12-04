@@ -10,13 +10,13 @@ public class FeedEntry
     public string Updated { get; init; } = DateTime.UtcNow.ToString("s");
 
     [XmlElement("id")]
-    public string Id { get; set; }
+    public required string Id { get; set; }
 
     [XmlElement("title")]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [XmlElement("summary")]
-    public string Summary { get; set; }
+    public string? Summary { get; set; }
 
     /// <summary>
     /// Represents Size of the Entry
@@ -24,20 +24,20 @@ public class FeedEntry
     /// <example>2 MB</example>
     /// </summary>
     [XmlElement("extent", Namespace = "http://purl.org/dc/terms/")]
-    public string Extent { get; set; }
+    public string? Extent { get; set; }
 
     /// <summary>
     /// Format of the file
     /// https://dublincore.org/specifications/dublin-core/dcmi-terms/
     /// </summary>
     [XmlElement("format", Namespace = "http://purl.org/dc/terms/format")]
-    public required string Format { get; set; }
+    public string? Format { get; set; }
 
     [XmlElement("language", Namespace = "http://purl.org/dc/terms/")]
-    public required string Language { get; set; }
+    public string? Language { get; set; }
 
     [XmlElement("content")]
-    public required FeedEntryContent Content { get; set; }
+    public FeedEntryContent? Content { get; set; }
 
     [XmlElement("link")]
     public List<FeedLink> Links = new List<FeedLink>();
