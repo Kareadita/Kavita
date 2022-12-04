@@ -13,11 +13,11 @@ namespace API.Data.Repositories;
 public interface IReadingListRepository
 {
     Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams);
-    Task<ReadingList> GetReadingListByIdAsync(int readingListId);
+    Task<ReadingList?> GetReadingListByIdAsync(int readingListId);
     Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId);
-    Task<ReadingListDto> GetReadingListDtoByIdAsync(int readingListId, int userId);
+    Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
-    Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title);
+    Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title);
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
@@ -26,7 +26,7 @@ public interface IReadingListRepository
     void BulkRemove(IEnumerable<ReadingListItem> items);
     void Update(ReadingList list);
     Task<int> Count();
-    Task<string> GetCoverImageAsync(int readingListId);
+    Task<string?> GetCoverImageAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
 }
@@ -57,29 +57,27 @@ public class ReadingListRepository : IReadingListRepository
         return await _context.ReadingList.CountAsync();
     }
 
-    public async Task<string> GetCoverImageAsync(int readingListId)
+    public async Task<string?> GetCoverImageAsync(int readingListId)
     {
         return await _context.ReadingList
             .Where(c => c.Id == readingListId)
             .Select(c => c.CoverImage)
-            .AsNoTracking()
             .SingleOrDefaultAsync();
     }
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
     {
-        return await _context.ReadingList
+        return (await _context.ReadingList
             .Select(t => t.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
-            .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync())!;
     }
 
     public async Task<bool> ReadingListExists(string name)
     {
         var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
         return await _context.ReadingList
-            .AnyAsync(x => x.NormalizedTitle.Equals(normalized));
+            .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
     }
 
     public void Remove(ReadingListItem item)
@@ -119,7 +117,7 @@ public class ReadingListRepository : IReadingListRepository
         return await query.ToListAsync();
     }
 
-    public async Task<ReadingList> GetReadingListByIdAsync(int readingListId)
+    public async Task<ReadingList?> GetReadingListByIdAsync(int readingListId)
     {
         return await _context.ReadingList
             .Where(r => r.Id == readingListId)
@@ -144,7 +142,7 @@ public class ReadingListRepository : IReadingListRepository
             {
                 TotalPages = chapter.Pages,
                 ChapterNumber = chapter.Range,
-                ReleaseDate = chapter.ReleaseDate,
+                chapter.ReleaseDate,
                 readingListItem = data
             })
             .Join(_context.Volume, s => s.readingListItem.VolumeId, volume => volume.Id, (data, volume) => new
@@ -209,7 +207,7 @@ public class ReadingListRepository : IReadingListRepository
         return items;
     }
 
-    public async Task<ReadingListDto> GetReadingListDtoByIdAsync(int readingListId, int userId)
+    public async Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId)
     {
         return await _context.ReadingList
             .Where(r => r.Id == readingListId && (r.AppUserId == userId || r.Promoted))
@@ -234,7 +232,7 @@ public class ReadingListRepository : IReadingListRepository
         return items;
     }
 
-    public async Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title)
+    public async Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title)
     {
         return await _context.ReadingList
             .Where(r => r.Title.Equals(title) && r.AppUserId == userId)

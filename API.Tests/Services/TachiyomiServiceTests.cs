@@ -114,6 +114,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -172,6 +173,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -236,6 +238,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -299,6 +302,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -363,6 +367,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("1", new List<Chapter>()
@@ -421,6 +426,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -488,6 +494,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -545,6 +552,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -609,6 +617,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -672,6 +681,7 @@ public class TachiyomiServiceTests
         var series = new Series
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Volumes = new List<Volume>()
             {
                 EntityFactory.CreateVolume("0", new List<Chapter>()

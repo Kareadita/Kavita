@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using API.Data;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
@@ -18,8 +19,11 @@ public class QueryableExtensionsTests
     {
         var items = new List<Series>()
         {
+
             new Series()
             {
+                Name = "Test 1",
+                NormalizedName = "Test 1".Normalize(),
                 Metadata = new SeriesMetadata()
                 {
                     AgeRating = AgeRating.Teen,
@@ -27,6 +31,8 @@ public class QueryableExtensionsTests
             },
             new Series()
             {
+                Name = "Test 2",
+                NormalizedName = "Test 2".Normalize(),
                 Metadata = new SeriesMetadata()
                 {
                     AgeRating = AgeRating.Unknown,
@@ -34,6 +40,8 @@ public class QueryableExtensionsTests
             },
             new Series()
             {
+                Name = "Test 3",
+                NormalizedName = "Test 3".Normalize(),
                 Metadata = new SeriesMetadata()
                 {
                     AgeRating = AgeRating.X18Plus,
@@ -58,6 +66,7 @@ public class QueryableExtensionsTests
         {
             new CollectionTag()
             {
+                Title = "Test",
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -68,6 +77,7 @@ public class QueryableExtensionsTests
             },
             new CollectionTag()
             {
+                Title = "Test",
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -82,6 +92,7 @@ public class QueryableExtensionsTests
             },
             new CollectionTag()
             {
+                Title = "Test",
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -160,6 +171,8 @@ public class QueryableExtensionsTests
         {
             new Tag()
             {
+                Title = "Test 1",
+                NormalizedTitle = "Test 1".Normalize(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -170,6 +183,8 @@ public class QueryableExtensionsTests
             },
             new Tag()
             {
+                Title = "Test 2",
+                NormalizedTitle = "Test 2".Normalize(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -184,6 +199,8 @@ public class QueryableExtensionsTests
             },
             new Tag()
             {
+                Title = "Test 3",
+                NormalizedTitle = "Test 3".Normalize(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -258,20 +275,12 @@ public class QueryableExtensionsTests
     [InlineData(false, 1)]
     public void RestrictAgainstAgeRestriction_ReadingList_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
+
         var items = new List<ReadingList>()
         {
-            new ReadingList()
-            {
-                AgeRating = AgeRating.Teen,
-            },
-            new ReadingList()
-            {
-                AgeRating = AgeRating.Unknown,
-            },
-            new ReadingList()
-            {
-                AgeRating = AgeRating.X18Plus
-            },
+            DbFactory.ReadingList("Test List", null, false, AgeRating.Teen),
+            DbFactory.ReadingList("Test List", null, false, AgeRating.Unknown),
+            DbFactory.ReadingList("Test List", null, false, AgeRating.X18Plus),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()

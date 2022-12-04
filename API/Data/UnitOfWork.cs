@@ -60,7 +60,7 @@ public class UnitOfWork : IUnitOfWork
     public IGenreRepository GenreRepository => new GenreRepository(_context, _mapper);
     public ITagRepository TagRepository => new TagRepository(_context, _mapper);
     public ISiteThemeRepository SiteThemeRepository => new SiteThemeRepository(_context, _mapper);
-    public IMangaFileRepository MangaFileRepository => new MangaFileRepository(_context, _mapper);
+    public IMangaFileRepository MangaFileRepository => new MangaFileRepository(_context);
     public IDeviceRepository DeviceRepository => new DeviceRepository(_context, _mapper);
 
     /// <summary>

@@ -13,7 +13,7 @@ public class SeriesMetadata : IHasConcurrencyToken
 
     public string Summary { get; set; } = string.Empty;
 
-    public ICollection<CollectionTag> CollectionTags { get; set; }
+    public ICollection<CollectionTag> CollectionTags { get; set; } = null!;
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
@@ -71,7 +71,7 @@ public class SeriesMetadata : IHasConcurrencyToken
 
 
     // Relationship
-    public Series Series { get; set; }
+    public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }
 
     /// <inheritdoc />

@@ -123,6 +123,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -131,10 +132,12 @@ public class ReaderServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         }
                     }
@@ -162,6 +165,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -170,10 +174,12 @@ public class ReaderServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         }
                     }
@@ -211,6 +217,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -219,10 +226,12 @@ public class ReaderServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         }
                     }
@@ -277,6 +286,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -285,14 +295,17 @@ public class ReaderServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         },
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 2
                         }
                     }
@@ -327,6 +340,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -335,14 +349,17 @@ public class ReaderServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         },
                         new Chapter()
                         {
+                            Number = "1",
                             Pages = 2
                         }
                     }
@@ -386,6 +403,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -432,6 +450,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -479,6 +498,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -526,6 +546,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -569,6 +590,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -614,6 +636,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -655,6 +678,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -691,6 +715,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -732,6 +757,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -775,6 +801,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -814,6 +841,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -856,6 +884,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -904,6 +933,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -951,6 +981,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -997,6 +1028,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1051,6 +1083,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1098,6 +1131,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1141,6 +1175,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1177,6 +1212,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1212,6 +1248,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1252,6 +1289,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1306,6 +1344,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1342,6 +1381,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1385,6 +1425,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1429,6 +1470,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1479,6 +1521,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1551,6 +1594,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1629,6 +1673,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1698,6 +1743,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1740,6 +1786,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1806,6 +1853,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1869,6 +1917,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1914,6 +1963,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -1975,6 +2025,7 @@ public class ReaderServiceTests
         var series = new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -2034,6 +2085,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -2076,6 +2128,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -2120,6 +2173,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -2161,6 +2215,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -2238,6 +2293,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -2246,28 +2302,34 @@ public class ReaderServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         },
                         new Chapter()
                         {
+                            Number = "1",
                             Pages = 2
                         }
                     }
                 },
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         },
                         new Chapter()
                         {
+                            Number = "1",
                             Pages = 2
                         }
                     }
@@ -2303,6 +2365,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -2311,14 +2374,17 @@ public class ReaderServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
+                            Number = "0",
                             Pages = 1
                         },
                         new Chapter()
                         {
+                            Number = "1",
                             Pages = 2
                         }
                     }
@@ -2395,6 +2461,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -2458,6 +2525,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,

@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using API.Data;
+using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
 namespace API.Entities;
@@ -67,11 +68,12 @@ public class AppUserPreferences
     /// Book Reader Option: What direction should the next/prev page buttons go
     /// </summary>
     public ReadingDirection BookReaderReadingDirection { get; set; } = ReadingDirection.LeftToRight;
+
     /// <summary>
     /// UI Site Global Setting: The UI theme the user should use.
     /// </summary>
     /// <remarks>Should default to Dark</remarks>
-    public SiteTheme Theme { get; set; }
+    public required SiteTheme Theme { get; set; } = Seed.DefaultThemes[0];
     /// <summary>
     /// Book Reader Option: The color theme to decorate the book contents
     /// </summary>
@@ -107,6 +109,6 @@ public class AppUserPreferences
     /// </summary>
     public bool NoTransitions { get; set; } = false;
 
-    public AppUser AppUser { get; set; }
+    public AppUser AppUser { get; set; } = null!;
     public int AppUserId { get; set; }
 }

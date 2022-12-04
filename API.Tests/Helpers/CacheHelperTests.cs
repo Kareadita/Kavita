@@ -156,6 +156,7 @@ public class CacheHelperTests
 
         var chapter = new Chapter()
         {
+            Number = "1",
             Created = filesystemFile.LastWriteTime.DateTime,
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
@@ -186,6 +187,7 @@ public class CacheHelperTests
 
         var chapter = new Chapter()
         {
+            Number = "1",
             Created = filesystemFile.LastWriteTime.DateTime,
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
@@ -216,6 +218,7 @@ public class CacheHelperTests
 
         var chapter = new Chapter()
         {
+            Number = "1",
             Created = filesystemFile.LastWriteTime.DateTime,
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
@@ -247,6 +250,7 @@ public class CacheHelperTests
 
         var chapter = new Chapter()
         {
+            Number = "1",
             Created = DateTime.Now.Subtract(TimeSpan.FromMinutes(10)),
             LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(10))
         };
@@ -277,6 +281,7 @@ public class CacheHelperTests
 
         var chapter = new Chapter()
         {
+            Number = "1",
             Created = DateTime.Now.Subtract(TimeSpan.FromMinutes(10)),
             LastModified = DateTime.Now
         };

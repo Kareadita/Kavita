@@ -90,27 +90,30 @@ public static class DbFactory
         };
     }
 
-    public static CollectionTag CollectionTag(int id, string? title, string? summary, bool promoted)
+    public static CollectionTag CollectionTag(int id, string title, string? summary, bool promoted)
     {
+        title = title.Trim();
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
-            Title = title?.Trim(),
+            NormalizedTitle = title.Normalize().ToUpper(),
+            Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted
         };
     }
 
-    public static ReadingList ReadingList(string title, string summary, bool promoted)
+    public static ReadingList ReadingList(string title, string? summary = null, bool promoted = false, AgeRating rating = AgeRating.Unknown)
     {
+        title = title.Trim();
         return new ReadingList()
         {
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
-            Title = title?.Trim(),
+            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title).ToUpper(),
+            Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted,
-            Items = new List<ReadingListItem>()
+            Items = new List<ReadingListItem>(),
+            AgeRating = rating
         };
     }
 
@@ -121,7 +124,7 @@ public static class DbFactory
             Order = index,
             ChapterId = chapterId,
             SeriesId = seriesId,
-            VolumeId = volumeId
+            VolumeId = volumeId,
         };
     }
 

@@ -216,6 +216,7 @@ public class CleanupServiceTests
         var v = DbFactory.Volume("1");
         v.Chapters.Add(new Chapter()
         {
+            Number = "0",
             CoverImage = "v01_c01.jpg"
         });
         v.CoverImage = "v01_c01.jpg";
@@ -228,6 +229,7 @@ public class CleanupServiceTests
         v = DbFactory.Volume("1");
         v.Chapters.Add(new Chapter()
         {
+            Number = "0",
             CoverImage = "v01_c03.jpg"
         });
         v.CoverImage = "v01_c03jpg";
@@ -317,14 +319,16 @@ public class CleanupServiceTests
                 new ReadingList()
                 {
                     Title = "Something",
-                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something"),
-                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg"
+                    NormalizedTitle = "Something".Normalize(),
+                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg",
+                    AgeRating = AgeRating.Unknown
                 },
                 new ReadingList()
                 {
                     Title = "Something 2",
                     NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something 2"),
-                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg"
+                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg",
+                    AgeRating = AgeRating.Unknown
                 }
             }
         });
@@ -479,6 +483,7 @@ public class CleanupServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -532,6 +537,7 @@ public class CleanupServiceTests
         var s = new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library()
             {
                 Name = "Test LIb",

@@ -6,6 +6,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
 using API.Entities;
+using API.Entities.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -141,7 +142,8 @@ public class ReadingListService : IReadingListService
     private async Task CalculateReadingListAgeRating(ReadingList readingList, IEnumerable<int> seriesIds)
     {
         var ageRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
-        readingList.AgeRating = ageRating;
+        if (ageRating == null) readingList.AgeRating = AgeRating.Unknown;
+        else readingList.AgeRating = (AgeRating) ageRating;
     }
 
     /// <summary>

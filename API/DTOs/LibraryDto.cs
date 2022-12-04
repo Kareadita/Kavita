@@ -7,7 +7,7 @@ namespace API.DTOs;
 public class LibraryDto
 {
     public int Id { get; init; }
-    public string Name { get; init; }
+    public string? Name { get; init; }
     /// <summary>
     /// Last time Library was scanned
     /// </summary>
@@ -16,7 +16,7 @@ public class LibraryDto
     /// <summary>
     /// An optional Cover Image or null
     /// </summary>
-    public string CoverImage { get; init; }
+    public string? CoverImage { get; init; }
     /// <summary>
     /// If Folder Watching is enabled for this library
     /// </summary>
@@ -33,5 +33,5 @@ public class LibraryDto
     /// Include library series in Search
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;
-    public ICollection<string> Folders { get; init; }
+    public ICollection<string?> Folders { get; init; } = new List<string?>();
 }

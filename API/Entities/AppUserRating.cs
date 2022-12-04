@@ -11,11 +11,11 @@ public class AppUserRating
     /// <summary>
     /// A short summary the user can write when giving their review.
     /// </summary>
-    public string Review { get; set; }
+    public string? Review { get; set; }
     public int SeriesId { get; set; }
 
 
     // Relationships
     public int AppUserId { get; set; }
-    public AppUser AppUser { get; set; }
+    public AppUser AppUser { get; set; } = null!;
 }

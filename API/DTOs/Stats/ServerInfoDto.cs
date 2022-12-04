@@ -42,7 +42,7 @@ public class ServerInfoDto
     /// The site theme the install is using
     /// </summary>
     /// <remarks>Introduced in v0.5.2</remarks>
-    public string ActiveSiteTheme { get; set; }
+    public string? ActiveSiteTheme { get; set; }
     /// <summary>
     /// The reading mode the main user has as a preference
     /// </summary>

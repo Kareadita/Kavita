@@ -23,7 +23,7 @@ public class AppUserBookmark : IEntityDate
 
     // Relationships
     [JsonIgnore]
-    public AppUser AppUser { get; set; }
+    public AppUser AppUser { get; set; } = null!;
     public int AppUserId { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }

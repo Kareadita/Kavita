@@ -17,13 +17,13 @@ public interface IChapterRepository
     Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds);
     Task<IChapterInfoDto?> GetChapterInfoDtoAsync(int chapterId);
     Task<int> GetChapterTotalPagesAsync(int chapterId);
-    Task<Chapter> GetChapterAsync(int chapterId);
-    Task<ChapterDto> GetChapterDtoAsync(int chapterId);
-    Task<ChapterMetadataDto> GetChapterMetadataDtoAsync(int chapterId);
+    Task<Chapter?> GetChapterAsync(int chapterId);
+    Task<ChapterDto?> GetChapterDtoAsync(int chapterId);
+    Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId);
     Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId);
     Task<IList<Chapter>> GetChaptersAsync(int volumeId);
     Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds);
-    Task<string> GetChapterCoverImageAsync(int chapterId);
+    Task<string?> GetChapterCoverImageAsync(int chapterId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
 }
@@ -112,7 +112,7 @@ public class ChapterRepository : IChapterRepository
             .Select(c => c.Pages)
             .SingleOrDefaultAsync();
     }
-    public async Task<ChapterDto> GetChapterDtoAsync(int chapterId)
+    public async Task<ChapterDto?> GetChapterDtoAsync(int chapterId)
     {
         var chapter = await _context.Chapter
             .Include(c => c.Files)
@@ -124,7 +124,7 @@ public class ChapterRepository : IChapterRepository
         return chapter;
     }
 
-    public async Task<ChapterMetadataDto> GetChapterMetadataDtoAsync(int chapterId)
+    public async Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId)
     {
         var chapter = await _context.Chapter
             .Include(c => c.Files)
@@ -154,7 +154,7 @@ public class ChapterRepository : IChapterRepository
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    public async Task<Chapter> GetChapterAsync(int chapterId)
+    public async Task<Chapter?> GetChapterAsync(int chapterId)
     {
         return await _context.Chapter
             .Include(c => c.Files)
@@ -179,23 +179,20 @@ public class ChapterRepository : IChapterRepository
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    public async Task<string> GetChapterCoverImageAsync(int chapterId)
+    public async Task<string?> GetChapterCoverImageAsync(int chapterId)
     {
-
         return await _context.Chapter
             .Where(c => c.Id == chapterId)
             .Select(c => c.CoverImage)
-            .AsNoTracking()
             .SingleOrDefaultAsync();
     }
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
     {
-        return await _context.Chapter
+        return (await _context.Chapter
             .Select(c => c.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
-            .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync())!;
     }
 
     /// <summary>
@@ -204,12 +201,11 @@ public class ChapterRepository : IChapterRepository
     /// <returns></returns>
     public async Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync()
     {
-        return await _context.Chapter
+        return (await _context.Chapter
             .Where(c => c.CoverImageLocked)
             .Select(c => c.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
-            .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync())!;
     }
 
     /// <summary>

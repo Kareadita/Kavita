@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -13,7 +12,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace API.Data.Repositories;
 
@@ -38,32 +36,32 @@ public interface IUserRepository
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
     void Add(AppUserBookmark bookmark);
-    public void Delete(AppUser user);
+    public void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
     Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
     Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser user);
-    Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId);
-    Task<AppUserPreferences> GetPreferencesAsync(string username);
+    Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
+    Task<AppUserPreferences?> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
     Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter);
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
-    Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId);
-    Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId);
+    Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int userId);
+    Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
     Task<int> GetUserIdByApiKeyAsync(string apiKey);
-    Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
-    Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
+    Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None);
+    Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
-    Task<AppUser> GetUserByEmailAsync(string email);
+    Task<AppUser?> GetUserByEmailAsync(string email);
     Task<IEnumerable<AppUser>> GetAllUsers();
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
-    Task<AppUser> GetUserByConfirmationToken(string token);
+    Task<AppUser?> GetUserByConfirmationToken(string token);
 }
 
 public class UserRepository : IUserRepository
@@ -99,8 +97,9 @@ public class UserRepository : IUserRepository
         _context.AppUserBookmark.Add(bookmark);
     }
 
-    public void Delete(AppUser user)
+    public void Delete(AppUser? user)
     {
+        if (user == null) return;
         _context.AppUser.Remove(user);
     }
 
@@ -115,7 +114,7 @@ public class UserRepository : IUserRepository
     /// <param name="username"></param>
     /// <param name="includeFlags">Includes() you want. Pass multiple with flag1 | flag2 </param>
     /// <returns></returns>
-    public async Task<AppUser> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None)
+    public async Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None)
     {
         var query = _context.Users
             .Where(x => x.UserName == username);
@@ -131,7 +130,7 @@ public class UserRepository : IUserRepository
     /// <param name="userId"></param>
     /// <param name="includeFlags">Includes() you want. Pass multiple with flag1 | flag2 </param>
     /// <returns></returns>
-    public async Task<AppUser> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None)
+    public async Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None)
     {
         var query = _context.Users
             .Where(x => x.Id == userId);
@@ -146,14 +145,14 @@ public class UserRepository : IUserRepository
         return await _context.AppUserBookmark.ToListAsync();
     }
 
-    public async Task<AppUserBookmark> GetBookmarkForPage(int page, int chapterId, int userId)
+    public async Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int userId)
     {
         return await _context.AppUserBookmark
             .Where(b => b.Page == page && b.ChapterId == chapterId && b.AppUserId == userId)
             .SingleOrDefaultAsync();
     }
 
-    public async Task<AppUserBookmark> GetBookmarkAsync(int bookmarkId)
+    public async Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId)
     {
         return await _context.AppUserBookmark
             .Where(b => b.Id == bookmarkId)
@@ -162,6 +161,7 @@ public class UserRepository : IUserRepository
 
     private static IQueryable<AppUser> AddIncludesToQuery(IQueryable<AppUser> query, AppUserIncludes includeFlags)
     {
+        // TODO: Move this to Extension
         if (includeFlags.HasFlag(AppUserIncludes.Bookmarks))
         {
             query = query.Include(u => u.Bookmarks);
@@ -179,7 +179,8 @@ public class UserRepository : IUserRepository
 
         if (includeFlags.HasFlag(AppUserIncludes.ReadingListsWithItems))
         {
-            query = query.Include(u => u.ReadingLists).ThenInclude(r => r.Items);
+            query = query.Include(u => u.ReadingLists)
+                .ThenInclude(r => r.Items);
         }
 
         if (includeFlags.HasFlag(AppUserIncludes.Ratings))
@@ -202,9 +203,7 @@ public class UserRepository : IUserRepository
             query = query.Include(u => u.Devices);
         }
 
-
-
-        return query;
+        return query.AsSplitQuery();
     }
 
 
@@ -235,10 +234,10 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<AppUser> GetUserByEmailAsync(string email)
+    public async Task<AppUser?> GetUserByEmailAsync(string email)
     {
         var lowerEmail = email.ToLower();
-        return await _context.AppUser.SingleOrDefaultAsync(u => u.Email.ToLower().Equals(lowerEmail));
+        return await _context.AppUser.SingleOrDefaultAsync(u => u.Email != null && u.Email.ToLower().Equals(lowerEmail));
     }
 
     public async Task<IEnumerable<AppUser>> GetAllUsers()
@@ -266,13 +265,14 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags)
     {
-        var query = AddIncludesToQuery(_context.Users.AsQueryable(), includeFlags);
+        var query = AddIncludesToQuery(_context.AppUser.AsQueryable(), includeFlags);
         return await query.ToListAsync();
     }
 
-    public async Task<AppUser> GetUserByConfirmationToken(string token)
+    public async Task<AppUser?> GetUserByConfirmationToken(string token)
     {
-        return await _context.AppUser.SingleOrDefaultAsync(u => u.ConfirmationToken.Equals(token));
+        return await _context.AppUser
+            .SingleOrDefaultAsync(u => u.ConfirmationToken != null && u.ConfirmationToken.Equals(token));
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
@@ -285,14 +285,14 @@ public class UserRepository : IUserRepository
         return await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
     }
 
-    public async Task<AppUserRating> GetUserRatingAsync(int seriesId, int userId)
+    public async Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId)
     {
         return await _context.AppUserRating
             .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();
     }
 
-    public async Task<AppUserPreferences> GetPreferencesAsync(string username)
+    public async Task<AppUserPreferences?> GetPreferencesAsync(string username)
     {
         return await _context.AppUserPreferences
             .Include(p => p.AppUser)
@@ -355,10 +355,10 @@ public class UserRepository : IUserRepository
                 bookmark,
                 series
             })
-            .Where(o => EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%")
-                        || EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%")
-                        || EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%")
-                        || EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%")
+            .Where(o => (EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%"))
+                        || (o.series.OriginalName != null && EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%"))
+                        || (o.series.LocalizedName != null && EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%"))
+                        || (EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%"))
             );
 
         query = filterSeriesQuery.Select(o => o.bookmark);
@@ -377,7 +377,7 @@ public class UserRepository : IUserRepository
     public async Task<int> GetUserIdByApiKeyAsync(string apiKey)
     {
         return await _context.AppUser
-            .Where(u => u.ApiKey.Equals(apiKey))
+            .Where(u => u.ApiKey != null && u.ApiKey.Equals(apiKey))
             .Select(u => u.Id)
             .SingleOrDefaultAsync();
     }
@@ -398,7 +398,7 @@ public class UserRepository : IUserRepository
                 Email = u.Email,
                 Created = u.Created,
                 LastActive = u.LastActive,
-                Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                Roles = u.UserRoles.Select(r => r.Role.Name).ToList()!,
                 AgeRestriction = new AgeRestrictionDto()
                 {
                     AgeRating = u.AgeRestriction,
@@ -436,7 +436,7 @@ public class UserRepository : IUserRepository
                 Email = u.Email,
                 Created = u.Created,
                 LastActive = u.LastActive,
-                Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                Roles = u.UserRoles.Select(r => r.Role.Name).ToList()!,
                 AgeRestriction = new AgeRestrictionDto()
                 {
                     AgeRating = u.AgeRestriction,

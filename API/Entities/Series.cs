@@ -12,27 +12,27 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// The UI visible Name of the Series. This may or may not be the same as the OriginalName
     /// </summary>
-    public string Name { get; set; }
+    public required string Name { get; set; }
     /// <summary>
     /// Used internally for name matching. <see cref="Services.Tasks.Scanner.Parser.Parser.Normalize"/>
     /// </summary>
-    public string NormalizedName { get; set; }
+    public required string NormalizedName { get; set; }
     /// <summary>
     /// Used internally for localized name matching. <see cref="Services.Tasks.Scanner.Parser.Parser.Normalize"/>
     /// </summary>
-    public string NormalizedLocalizedName { get; set; }
+    public string? NormalizedLocalizedName { get; set; }
     /// <summary>
     /// The name used to sort the Series. By default, will be the same as Name.
     /// </summary>
-    public string SortName { get; set; }
+    public string? SortName { get; set; }
     /// <summary>
     /// Name in original language (Japanese for Manga). By default, will be same as Name.
     /// </summary>
-    public string LocalizedName { get; set; }
+    public string? LocalizedName { get; set; }
     /// <summary>
     /// Original Name on disk. Not exposed to UI.
     /// </summary>
-    public string OriginalName { get; set; }
+    public string? OriginalName { get; set; }
     /// <summary>
     /// Time of creation
     /// </summary>
@@ -45,7 +45,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// Absolute path to the (managed) image file
     /// </summary>
     /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
-    public string CoverImage { get; set; }
+    public string? CoverImage { get; set; }
     /// <summary>
     /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
     /// </summary>
@@ -87,21 +87,21 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     public int MaxHoursToRead { get; set; }
     public int AvgHoursToRead { get; set; }
 
-    public SeriesMetadata Metadata { get; set; }
+    public SeriesMetadata Metadata { get; set; } = null!;
 
-    public ICollection<AppUserRating> Ratings { get; set; } = new List<AppUserRating>();
-    public ICollection<AppUserProgress> Progress { get; set; } = new List<AppUserProgress>();
+    public ICollection<AppUserRating> Ratings { get; set; } = null!;
+    public ICollection<AppUserProgress> Progress { get; set; } = null!;
 
     /// <summary>
     /// Relations to other Series, like Sequels, Prequels, etc
     /// </summary>
     /// <remarks>1 to Many relationship</remarks>
-    public virtual ICollection<SeriesRelation> Relations { get; set; } = new List<SeriesRelation>();
-    public virtual ICollection<SeriesRelation> RelationOf { get; set; } = new List<SeriesRelation>();
+    public ICollection<SeriesRelation> Relations { get; set; } = null!;
+    public ICollection<SeriesRelation> RelationOf { get; set; } = null!;
 
 
     // Relationships
-    public List<Volume> Volumes { get; set; }
-    public Library Library { get; set; }
+    public List<Volume> Volumes { get; set; } = null!;
+    public Library Library { get; set; } = null!;
     public int LibraryId { get; set; }
 }

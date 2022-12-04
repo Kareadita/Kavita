@@ -18,11 +18,11 @@ public class ParsedSeries
     /// <summary>
     /// Name of the Series
     /// </summary>
-    public string Name { get; init; }
+    public string? Name { get; init; }
     /// <summary>
     /// Normalized Name of the Series
     /// </summary>
-    public string NormalizedName { get; init; }
+    public string? NormalizedName { get; init; }
     /// <summary>
     /// Format of the Series
     /// </summary>
@@ -31,11 +31,11 @@ public class ParsedSeries
 
 public class SeriesModified
 {
-    public string FolderPath { get; set; }
-    public string SeriesName { get; set; }
+    public string? FolderPath { get; set; }
+    public string? SeriesName { get; set; }
     public DateTime LastScanned { get; set; }
     public MangaFormat Format { get; set; }
-    public IEnumerable<string> LibraryRoots { get; set; }
+    public IEnumerable<string> LibraryRoots { get; set; } = ArraySegment<string>.Empty;
 }
 
 /// <summary>

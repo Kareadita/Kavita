@@ -14,7 +14,7 @@ public class CollectionTag
     /// <summary>
     /// Visible title of the Tag
     /// </summary>
-    public string Title { get; set; }
+    public required string Title { get; set; }
     /// <summary>
     /// Absolute path to the (managed) image file
     /// </summary>
@@ -28,18 +28,18 @@ public class CollectionTag
     /// <summary>
     /// A description of the tag
     /// </summary>
-    public string Summary { get; set; }
+    public string? Summary { get; set; }
 
     /// <summary>
     /// A normalized string used to check if the tag already exists in the DB
     /// </summary>
-    public string NormalizedTitle { get; set; }
+    public string? NormalizedTitle { get; set; }
     /// <summary>
     /// A promoted collection tag will allow all linked seriesMetadata's Series to show for all users.
     /// </summary>
     public bool Promoted { get; set; }
 
-    public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
+    public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
 
     /// <summary>
     /// Not Used due to not using concurrency update

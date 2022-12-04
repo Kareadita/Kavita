@@ -216,10 +216,13 @@ public class AccountController : BaseApiController
         var dto = _mapper.Map<UserDto>(user);
         dto.Token = await _tokenService.CreateToken(user);
         dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
-        var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName);
+        var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
+        if (pref == null) return Ok(dto);
+
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
-        return dto;
+
+        return Ok(dto);
     }
 
     /// <summary>

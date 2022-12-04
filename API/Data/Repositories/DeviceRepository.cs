@@ -13,7 +13,7 @@ public interface IDeviceRepository
 {
     void Update(Device device);
     Task<IEnumerable<DeviceDto>> GetDevicesForUserAsync(int userId);
-    Task<Device> GetDeviceById(int deviceId);
+    Task<Device?> GetDeviceById(int deviceId);
 }
 
 public class DeviceRepository : IDeviceRepository
@@ -41,7 +41,7 @@ public class DeviceRepository : IDeviceRepository
             .ToListAsync();
     }
 
-    public async Task<Device> GetDeviceById(int deviceId)
+    public async Task<Device?> GetDeviceById(int deviceId)
     {
         return await _context.Device
             .Where(d => d.Id == deviceId)

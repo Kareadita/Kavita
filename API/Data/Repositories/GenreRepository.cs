@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Data.Misc;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
@@ -15,7 +14,7 @@ public interface IGenreRepository
 {
     void Attach(Genre genre);
     void Remove(Genre genre);
-    Task<Genre> FindByNameAsync(string genreName);
+    Task<Genre?> FindByNameAsync(string genreName);
     Task<IList<Genre>> GetAllGenresAsync();
     Task<IList<GenreTagDto>> GetAllGenreDtosAsync(int userId);
     Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false);
@@ -44,11 +43,11 @@ public class GenreRepository : IGenreRepository
         _context.Genre.Remove(genre);
     }
 
-    public async Task<Genre> FindByNameAsync(string genreName)
+    public async Task<Genre?> FindByNameAsync(string genreName)
     {
         var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(genreName);
         return await _context.Genre
-            .FirstOrDefaultAsync(g => g.NormalizedTitle.Equals(normalizedName));
+            .FirstOrDefaultAsync(g => g.NormalizedTitle != null && g.NormalizedTitle.Equals(normalizedName));
     }
 
     public async Task RemoveAllGenreNoLongerAssociated(bool removeExternal = false)

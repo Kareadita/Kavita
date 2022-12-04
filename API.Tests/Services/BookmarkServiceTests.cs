@@ -139,6 +139,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -147,11 +148,12 @@ public class BookmarkServiceTests
             {
                 new Volume()
                 {
+                    Name = "0",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-
+                            Number = "1"
                         }
                     }
                 }
@@ -197,6 +199,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -205,11 +208,12 @@ public class BookmarkServiceTests
             {
                 new Volume()
                 {
+                    Name = "1",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-
+                            Number = "0"
                         }
                     }
                 }
@@ -273,6 +277,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -281,11 +286,12 @@ public class BookmarkServiceTests
             {
                 new Volume()
                 {
+                    Name = "1",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-
+                            Number = "1"
                         }
                     }
                 }
@@ -360,6 +366,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -368,11 +375,12 @@ public class BookmarkServiceTests
             {
                 new Volume()
                 {
+                    Name = "1",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-
+                            Number = "1"
                         }
                     }
                 }
@@ -422,6 +430,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -430,11 +439,12 @@ public class BookmarkServiceTests
             {
                 new Volume()
                 {
+                    Name = "1",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-
+                            Number = "1"
                         }
                     }
                 }
@@ -486,6 +496,7 @@ public class BookmarkServiceTests
         var series = new Series()
         {
             Name = "Test",
+            NormalizedName = "Test".Normalize(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -495,11 +506,12 @@ public class BookmarkServiceTests
             {
                 new Volume()
                 {
+                    Name = "1",
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-
+                            Number = "1"
                         }
                     }
                 }

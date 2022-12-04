@@ -117,7 +117,7 @@ public interface ISeriesRepository
     Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
-    Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
+    Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -188,17 +188,18 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams)
     {
+        #nullable  disable
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
 
             .Include(s => s.Metadata)
-            .ThenInclude(m => m.People)
+            .ThenInclude(m => m!.People)
 
             .Include(s => s.Metadata)
-            .ThenInclude(m => m.Genres)
+            .ThenInclude(m => m!.Genres)
 
             .Include(s => s.Metadata)
-            .ThenInclude(m => m.Tags)
+            .ThenInclude(m => m!.Tags)
 
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
@@ -212,11 +213,12 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Tags)
 
-            .Include(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
+            .Include(s => s.Volumes)!
+            .ThenInclude(v => v.Chapters)!
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
             .OrderBy(s => s.SortName);
+        #nullable  enable
 
         return await PagedList<Series>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
@@ -228,6 +230,7 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId)
     {
+        #nullable  disable
         return await _context.Series
             .Where(s => s.Id == seriesId)
             .Include(s => s.Relations)
@@ -257,6 +260,7 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
             .SingleOrDefaultAsync();
+        #nullable  enable
     }
 
     /// <summary>
@@ -314,7 +318,7 @@ public class SeriesRepository : ISeriesRepository
 
         result.Libraries = await _context.Library
             .Where(l => libraryIds.Contains(l.Id))
-            .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
+            .Where(l => l.Name != null && EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .IsRestricted(QueryContext.Search)
             .OrderBy(l => l.Name)
             .AsSplitQuery()
@@ -328,11 +332,11 @@ public class SeriesRepository : ISeriesRepository
 
         result.Series = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.OriginalName, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%")
-                        || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")
-                        || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
+            .Where(s => (EF.Functions.Like(s.Name, $"%{searchQuery}%")
+                         || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
+                         || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
+                         || (EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%"))
+                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison)))
             .RestrictAgainstAgeRestriction(userRating)
             .Include(s => s.Library)
             .OrderBy(s => s.SortName)
@@ -352,8 +356,8 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
 
         result.Collections =  await _context.CollectionTag
-            .Where(c => EF.Functions.Like(c.Title, $"%{searchQuery}%")
-                        || EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%"))
+            .Where(c => (c.Title != null && EF.Functions.Like(c.Title, $"%{searchQuery}%"))
+                                    || (c.NormalizedTitle != null && EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%")))
             .Where(c => c.Promoted || isAdmin)
             .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(s => s.Title)
@@ -366,7 +370,7 @@ public class SeriesRepository : ISeriesRepository
 
         result.Persons = await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.People.Where(t => EF.Functions.Like(t.Name, $"%{searchQuery}%")))
+            .SelectMany(sm => sm.People.Where(t => t.Name != null && EF.Functions.Like(t.Name, $"%{searchQuery}%")))
             .AsSplitQuery()
             .Take(maxRecords)
             .Distinct()
@@ -375,7 +379,7 @@ public class SeriesRepository : ISeriesRepository
 
         result.Genres = await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
+            .SelectMany(sm => sm.Genres.Where(t => t.Title != null && EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
             .OrderBy(t => t.Title)
             .Distinct()
@@ -547,7 +551,6 @@ public class SeriesRepository : ISeriesRepository
         return await _context.Series
             .Where(s => s.Id == seriesId)
             .Select(s => s.CoverImage)
-            .AsNoTracking()
             .SingleOrDefaultAsync();
     }
 
@@ -727,9 +730,9 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
                         && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
             .Where(s => !hasSeriesNameFilter ||
-                        EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"));
+                        (EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%"))
+                                             || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%"))
+                                             || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%")));
         if (userRating.AgeRating != AgeRating.NotApplicable)
         {
             query = query.RestrictAgainstAgeRestriction(userRating);
@@ -800,8 +803,8 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
             .Where(s => !hasSeriesNameFilter ||
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
+                        || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%"))
+                        || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%")))
             .AsNoTracking();
 
         // If no sort options, default to using SortName
@@ -921,20 +924,18 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
     {
-        return await _context.Series
+        return (await _context.Series
             .Select(s => s.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
-            .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync())!;
     }
 
     public async Task<IEnumerable<string>> GetLockedCoverImagesAsync()
     {
-        return await _context.Series
+        return (await _context.Series
             .Where(s => s.CoverImageLocked && !string.IsNullOrEmpty(s.CoverImage))
             .Select(s => s.CoverImage)
-            .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync())!;
     }
 
     /// <summary>
@@ -1014,31 +1015,33 @@ public class SeriesRepository : ISeriesRepository
         var items = (await GetRecentlyAddedChaptersQuery(userId));
         if (userRating.AgeRating != AgeRating.NotApplicable)
         {
-         items = items.RestrictAgainstAgeRestriction(userRating);
+            items = items.RestrictAgainstAgeRestriction(userRating);
         }
+
         foreach (var item in items)
         {
-         if (seriesMap.Keys.Count == pageSize) break;
+            if (seriesMap.Keys.Count == pageSize) break;
 
-         if (seriesMap.ContainsKey(item.SeriesName))
-         {
-             seriesMap[item.SeriesName].Count += 1;
-         }
-         else
-         {
-             seriesMap[item.SeriesName] = new GroupedSeriesDto()
-             {
-                 LibraryId = item.LibraryId,
-                 LibraryType = item.LibraryType,
-                 SeriesId = item.SeriesId,
-                 SeriesName = item.SeriesName,
-                 Created = item.Created,
-                 Id = index,
-                 Format = item.Format,
-                 Count = 1,
-             };
-             index += 1;
-         }
+            if (item.SeriesName == null) continue;
+            if (seriesMap.ContainsKey(item.SeriesName))
+            {
+                seriesMap[item.SeriesName].Count += 1;
+            }
+            else
+            {
+                seriesMap[item.SeriesName] = new GroupedSeriesDto()
+                {
+                    LibraryId = item.LibraryId,
+                    LibraryType = item.LibraryType,
+                    SeriesId = item.SeriesId,
+                    SeriesName = item.SeriesName,
+                    Created = item.Created,
+                    Id = index,
+                    Format = item.Format,
+                    Count = 1,
+                };
+                index += 1;
+            }
         }
 
         return seriesMap.Values.AsEnumerable();
@@ -1159,7 +1162,7 @@ public class SeriesRepository : ISeriesRepository
     {
         var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         return await _context.Series
-            .Where(s => s.FolderPath.Equals(normalized))
+            .Where(s => s.FolderPath != null && s.FolderPath.Equals(normalized))
             .Includes(includes)
             .SingleOrDefaultAsync();
     }
@@ -1182,13 +1185,14 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
-                        || (s.NormalizedLocalizedName.Equals(normalizedSeries) && s.NormalizedLocalizedName != string.Empty)
-                        || s.OriginalName.Equals(seriesName));
+                               || (!string.IsNullOrEmpty(s.NormalizedLocalizedName) && s.NormalizedLocalizedName.Equals(normalizedSeries))
+                               || (s.OriginalName != null && s.OriginalName.Equals(seriesName)));
 
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {
             query = query.Where(s =>
-                s.NormalizedName.Equals(normalizedLocalized) || s.NormalizedLocalizedName.Equals(normalizedLocalized));
+                s.NormalizedName.Equals(normalizedLocalized)
+                || (s.NormalizedLocalizedName != null && s.NormalizedLocalizedName.Equals(normalizedLocalized)));
         }
 
         if (!withFullIncludes)
@@ -1196,10 +1200,13 @@ public class SeriesRepository : ISeriesRepository
             return query.SingleOrDefaultAsync();
         }
 
+        #nullable disable
         return query.Include(s => s.Metadata)
             .ThenInclude(m => m.People)
+
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
+
             .Include(s => s.Library)
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
@@ -1222,6 +1229,7 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
             .SingleOrDefaultAsync();
+    #nullable enable
     }
 
 
@@ -1523,12 +1531,13 @@ public class SeriesRepository : ISeriesRepository
                 SeriesName = s.Name,
                 FolderPath = s.FolderPath,
                 Format = s.Format,
-                LibraryRoots = s.Library.Folders.Select(f => f.Path)
+                LibraryRoots = s.Library.Folders.Select(f => f.Path)!
             }).ToListAsync();
 
         var map = new Dictionary<string, IList<SeriesModified>>();
         foreach (var series in info)
         {
+            if (series.FolderPath == null) continue;
             if (!map.ContainsKey(series.FolderPath))
             {
                 map.Add(series.FolderPath, new List<SeriesModified>()
@@ -1551,7 +1560,7 @@ public class SeriesRepository : ISeriesRepository
     /// </summary>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
-    public async Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds)
+    public async Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds)
     {
         return await _context.Series
             .Where(s => seriesIds.Contains(s.Id))

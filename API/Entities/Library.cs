@@ -34,8 +34,8 @@ public class Library : IEntityDate
     /// </summary>
     /// <remarks>Time stored in UTC</remarks>
     public DateTime LastScanned { get; set; }
-    public ICollection<FolderPath>? Folders { get; set; }
-    public ICollection<AppUser>? AppUsers { get; set; }
-    public ICollection<Series>? Series { get; set; }
+    public ICollection<FolderPath> Folders { get; set; } = null!;
+    public ICollection<AppUser> AppUsers { get; set; } = null!;
+    public ICollection<Series> Series { get; set; } = null!;
 
 }

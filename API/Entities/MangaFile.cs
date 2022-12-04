@@ -15,7 +15,7 @@ public class MangaFile : IEntityDate
     /// <summary>
     /// Absolute path to the archive file
     /// </summary>
-    public string FilePath { get; set; }
+    public required string FilePath { get; set; }
 
     /// <summary>
     /// Number of pages for the given file
@@ -37,7 +37,7 @@ public class MangaFile : IEntityDate
 
 
     // Relationship Mapping
-    public Chapter Chapter { get; set; }
+    public Chapter Chapter { get; set; } = null!;
     public int ChapterId { get; set; }
 
 
@@ -46,6 +46,6 @@ public class MangaFile : IEntityDate
     /// </summary>
     public void UpdateLastModified()
     {
-        LastModified = File.GetLastWriteTime(FilePath);
+        if (FilePath != null) LastModified = File.GetLastWriteTime(FilePath);
     }
 }

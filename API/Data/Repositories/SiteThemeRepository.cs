@@ -15,11 +15,11 @@ public interface ISiteThemeRepository
     void Remove(SiteTheme theme);
     void Update(SiteTheme siteTheme);
     Task<IEnumerable<SiteThemeDto>> GetThemeDtos();
-    Task<SiteThemeDto> GetThemeDto(int themeId);
-    Task<SiteThemeDto> GetThemeDtoByName(string themeName);
-    Task<SiteTheme> GetDefaultTheme();
+    Task<SiteThemeDto?> GetThemeDto(int themeId);
+    Task<SiteThemeDto?> GetThemeDtoByName(string themeName);
+    Task<SiteTheme?> GetDefaultTheme();
     Task<IEnumerable<SiteTheme>> GetThemes();
-    Task<SiteTheme> GetThemeById(int themeId);
+    Task<SiteTheme?> GetThemeById(int themeId);
 }
 
 public class SiteThemeRepository : ISiteThemeRepository
@@ -55,7 +55,7 @@ public class SiteThemeRepository : ISiteThemeRepository
             .ToListAsync();
     }
 
-    public async Task<SiteThemeDto> GetThemeDtoByName(string themeName)
+    public async Task<SiteThemeDto?> GetThemeDtoByName(string themeName)
     {
         return await _context.SiteTheme
             .Where(t => t.Name.Equals(themeName))
@@ -67,7 +67,7 @@ public class SiteThemeRepository : ISiteThemeRepository
     /// Returns default theme, if the default theme is not available, returns the dark theme
     /// </summary>
     /// <returns></returns>
-    public async Task<SiteTheme> GetDefaultTheme()
+    public async Task<SiteTheme?> GetDefaultTheme()
     {
         var result =  await _context.SiteTheme
             .Where(t => t.IsDefault)
@@ -89,14 +89,14 @@ public class SiteThemeRepository : ISiteThemeRepository
             .ToListAsync();
     }
 
-    public async Task<SiteTheme> GetThemeById(int themeId)
+    public async Task<SiteTheme?> GetThemeById(int themeId)
     {
         return await _context.SiteTheme
             .Where(t => t.Id == themeId)
             .SingleOrDefaultAsync();
     }
 
-    public async Task<SiteThemeDto> GetThemeDto(int themeId)
+    public async Task<SiteThemeDto?> GetThemeDto(int themeId)
     {
         return await _context.SiteTheme
             .Where(t => t.Id == themeId)

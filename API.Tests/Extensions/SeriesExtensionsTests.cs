@@ -96,6 +96,8 @@ public class SeriesExtensionsTests
     {
         var series = new Series()
         {
+            Name = "Test 1",
+            NormalizedName = "Test 1".Normalize(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -131,6 +133,8 @@ public class SeriesExtensionsTests
     {
         var series = new Series()
         {
+            Name = "Test 1",
+            NormalizedName = "Test 1".Normalize(),
             Format = MangaFormat.Epub,
             Volumes = new List<Volume>()
             {
@@ -165,6 +169,8 @@ public class SeriesExtensionsTests
     {
         var series = new Series()
         {
+            Name = "Test 1",
+            NormalizedName = "Test 1".Normalize(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -204,6 +210,8 @@ public class SeriesExtensionsTests
     {
         var series = new Series()
         {
+            Name = "Test 1",
+            NormalizedName = "Test 1".Normalize(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -249,6 +257,8 @@ public class SeriesExtensionsTests
     {
         var series = new Series()
         {
+            Name = "Test 1",
+            NormalizedName = "Test 1".Normalize(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -309,6 +319,8 @@ public class SeriesExtensionsTests
     {
         var series = new Series()
         {
+            Name = "Test 1",
+            NormalizedName = "Test 1".Normalize(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {

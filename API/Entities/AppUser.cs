@@ -12,35 +12,36 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
 {
     public DateTime Created { get; set; } = DateTime.Now;
     public DateTime LastActive { get; set; }
-    public ICollection<Library> Libraries { get; set; }
-    public ICollection<AppUserRole> UserRoles { get; set; }
-    public ICollection<AppUserProgress> Progresses { get; set; }
-    public ICollection<AppUserRating> Ratings { get; set; }
-    public AppUserPreferences UserPreferences { get; set; }
+    public ICollection<Library> Libraries { get; set; } = null!;
+    public ICollection<AppUserRole> UserRoles { get; set; } = null!;
+    public ICollection<AppUserProgress> Progresses { get; set; } = null!;
+    public ICollection<AppUserRating> Ratings { get; set; } = null!;
+    public AppUserPreferences UserPreferences { get; set; } = null!;
+
     /// <summary>
     /// Bookmarks associated with this User
     /// </summary>
-    public ICollection<AppUserBookmark> Bookmarks { get; set; }
+    public ICollection<AppUserBookmark> Bookmarks { get; set; } = null!;
     /// <summary>
     /// Reading lists associated with this user
     /// </summary>
-    public ICollection<ReadingList> ReadingLists { get; set; }
+    public ICollection<ReadingList> ReadingLists { get; set; } = null!;
     /// <summary>
     /// A list of Series the user want's to read
     /// </summary>
-    public ICollection<Series> WantToRead { get; set; }
+    public ICollection<Series> WantToRead { get; set; } = null!;
     /// <summary>
     /// A list of Devices which allows the user to send files to
     /// </summary>
-    public ICollection<Device> Devices { get; set; }
+    public ICollection<Device> Devices { get; set; } = null!;
     /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>
-    public string ApiKey { get; set; }
+    public string? ApiKey { get; set; }
     /// <summary>
     /// The confirmation token for the user (invite). This will be set to null after the user confirms.
     /// </summary>
-    public string ConfirmationToken { get; set; }
+    public string? ConfirmationToken { get; set; }
     /// <summary>
     /// The highest age rating the user has access to. Not applicable for admins
     /// </summary>

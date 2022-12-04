@@ -65,6 +65,7 @@ public class SeriesService : ISeriesService
         {
             var seriesId = updateSeriesMetadataDto.SeriesMetadata.SeriesId;
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+            if (series == null) return false;
             var allCollectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).ToList();
             var allGenres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToList();
             var allPeople = (await _unitOfWork.PersonRepository.GetAllPeople()).ToList();

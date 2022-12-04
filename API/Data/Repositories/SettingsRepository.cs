@@ -5,7 +5,6 @@ using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -14,7 +13,7 @@ public interface ISettingsRepository
 {
     void Update(ServerSetting settings);
     Task<ServerSettingDto> GetSettingsDtoAsync();
-    Task<ServerSetting> GetSettingAsync(ServerSettingKey key);
+    Task<ServerSetting?> GetSettingAsync(ServerSettingKey key);
     Task<IEnumerable<ServerSetting>> GetSettingsAsync();
 }
 public class SettingsRepository : ISettingsRepository
@@ -42,7 +41,7 @@ public class SettingsRepository : ISettingsRepository
         return _mapper.Map<ServerSettingDto>(settings);
     }
 
-    public Task<ServerSetting> GetSettingAsync(ServerSettingKey key)
+    public Task<ServerSetting?> GetSettingAsync(ServerSettingKey key)
     {
         return _context.ServerSetting.SingleOrDefaultAsync(x => x.Key == key);
     }

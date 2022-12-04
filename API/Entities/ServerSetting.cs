@@ -11,7 +11,7 @@ public class ServerSetting : IHasConcurrencyToken
     /// <summary>
     /// The value of the Setting. Converter knows how to convert to the correct type
     /// </summary>
-    public string Value { get; set; }
+    public string? Value { get; set; }
 
     /// <inheritdoc />
     [ConcurrencyCheck]

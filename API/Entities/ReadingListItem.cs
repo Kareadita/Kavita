@@ -12,12 +12,12 @@ public class ReadingListItem
     public int Order { get; set; }
 
     // Relationship
-    public ReadingList ReadingList { get; set; }
+    public ReadingList ReadingList { get; set; } = null!;
     public int ReadingListId { get; set; }
 
     // Keep these for easy join statements
-    public Series Series { get; set; }
-    public Volume Volume { get; set; }
-    public Chapter Chapter { get; set; }
+    public Series Series { get; set; } = null!;
+    public Volume Volume { get; set; } = null!;
+    public Chapter Chapter { get; set; } = null!;
 
 }
