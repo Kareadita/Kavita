@@ -156,14 +156,14 @@ public class SeriesController : BaseApiController
         }
 
         series.Name = updateSeries.Name.Trim();
-        series.NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name);
+        series.NormalizedName = series.Name.Normalize();
         if (!string.IsNullOrEmpty(updateSeries.SortName.Trim()))
         {
             series.SortName = updateSeries.SortName.Trim();
         }
 
         series.LocalizedName = updateSeries.LocalizedName.Trim();
-        series.NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(series.LocalizedName);
+        series.NormalizedLocalizedName = series.LocalizedName.Normalize();
 
         series.NameLocked = updateSeries.NameLocked;
         series.SortNameLocked = updateSeries.SortNameLocked;

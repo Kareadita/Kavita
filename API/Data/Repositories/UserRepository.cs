@@ -300,7 +300,7 @@ public class UserRepository : IUserRepository
                 .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
-        var seriesNameQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(filter.SeriesNameQuery);
+        var seriesNameQueryNormalized = filter.SeriesNameQuery.Normalize();
         var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
             {
                 bookmark,

@@ -98,7 +98,7 @@ public class Startup
         {
             options.ForwardedHeaders = ForwardedHeaders.All;
             foreach(var proxy in _config.GetSection("KnownProxies").AsEnumerable().Where(c => c.Value != null)) {
-                options.KnownProxies.Add(IPAddress.Parse(proxy.Value));
+                options.KnownProxies.Add(IPAddress.Parse(proxy.Value!));
             }
         });
         services.AddCors();

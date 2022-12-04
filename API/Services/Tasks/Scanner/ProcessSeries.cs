@@ -123,7 +123,7 @@ public class ProcessSeries : IProcessSeries
             UpdateVolumes(series, parsedInfos);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
-            series.NormalizedName = Parser.Parser.Normalize(series.Name);
+            series.NormalizedName = series.Name.Normalize();
             series.OriginalName ??= firstParsedInfo.Series;
             if (series.Format == MangaFormat.Unknown)
             {
@@ -148,7 +148,7 @@ public class ProcessSeries : IProcessSeries
             if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
             {
                 series.LocalizedName = localizedSeries;
-                series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
+                series.NormalizedLocalizedName = series.LocalizedName.Normalize();
             }
 
             UpdateSeriesMetadata(series, library.Type);
@@ -744,7 +744,7 @@ public class ProcessSeries : IProcessSeries
 
         foreach (var name in names)
         {
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.Normalize();
             var person = allPeopleTypeRole.FirstOrDefault(p =>
                 p.NormalizedName.Equals(normalizedName));
             if (person == null)
@@ -772,7 +772,7 @@ public class ProcessSeries : IProcessSeries
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.Normalize();
             var genre = _genres.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)
@@ -801,7 +801,7 @@ public class ProcessSeries : IProcessSeries
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
             var added = false;
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.Normalize();
 
             var tag = _tags.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);

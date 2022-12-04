@@ -18,15 +18,15 @@ public class ParsedSeries
     /// <summary>
     /// Name of the Series
     /// </summary>
-    public string? Name { get; init; }
+    public required string Name { get; init; }
     /// <summary>
     /// Normalized Name of the Series
     /// </summary>
-    public string? NormalizedName { get; init; }
+    public required string NormalizedName { get; init; }
     /// <summary>
     /// Format of the Series
     /// </summary>
-    public MangaFormat Format { get; init; }
+    public required MangaFormat Format { get; init; }
 }
 
 public class SeriesModified
@@ -173,9 +173,9 @@ public class ParseScannedFiles
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
 
-        var normalizedSeries = Parser.Parser.Normalize(info.Series);
-        var normalizedSortSeries = Parser.Parser.Normalize(info.SeriesSort);
-        var normalizedLocalizedSeries = Parser.Parser.Normalize(info.LocalizedSeries);
+        var normalizedSeries = info.Series.Normalize();
+        var normalizedSortSeries = info.SeriesSort.Normalize();
+        var normalizedLocalizedSeries = info.LocalizedSeries.Normalize();
 
         try
         {
@@ -224,19 +224,19 @@ public class ParseScannedFiles
     /// <returns>Series Name to group this info into</returns>
     private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
     {
-        var normalizedSeries = Parser.Parser.Normalize(info.Series);
-        var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
+        var normalizedSeries = info.Series.Normalize();
+        var normalizedLocalSeries = info.LocalizedSeries.Normalize();
 
         try
         {
             var existingName =
                 scannedSeries.SingleOrDefault(p =>
-                        (Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedSeries) ||
-                         Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedLocalSeries)) &&
+                        (p.Key.NormalizedName.Normalize().Equals(normalizedSeries) ||
+                         p.Key.NormalizedName.Normalize().Equals(normalizedLocalSeries)) &&
                         p.Key.Format == info.Format)
                     .Key;
 
-            if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
+            if (!string.IsNullOrEmpty(existingName.Name))
             {
                 return existingName.Name;
             }
@@ -245,8 +245,8 @@ public class ParseScannedFiles
         {
             _logger.LogCritical(ex, "[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
             var values = scannedSeries.Where(p =>
-                (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
-                 Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                (p.Key.NormalizedName.Normalize() == normalizedSeries ||
+                 p.Key.NormalizedName.Normalize() == normalizedLocalSeries) &&
                 p.Key.Format == info.Format);
             foreach (var pair in values)
             {
@@ -389,7 +389,7 @@ public class ParseScannedFiles
         if (string.IsNullOrEmpty(localizedSeries)) return;
 
         // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
-        string nonLocalizedSeries;
+        string? nonLocalizedSeries;
         // Normalize this as many of the cases is a capitalization difference
         var nonLocalizedSeriesFound = infos
             .Where(i => !i.IsSpecial)
@@ -408,11 +408,11 @@ public class ParseScannedFiles
             nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
         }
 
-        if (string.IsNullOrEmpty(nonLocalizedSeries)) return;
+        if (nonLocalizedSeries == null) return;
 
-        var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
+        var normalizedNonLocalizedSeries = nonLocalizedSeries.Normalize();
         foreach (var infoNeedingMapping in infos.Where(i =>
-                     !Parser.Parser.Normalize(i.Series).Equals(normalizedNonLocalizedSeries)))
+                     !i.Series.Normalize().Equals(normalizedNonLocalizedSeries)))
         {
             infoNeedingMapping.Series = nonLocalizedSeries;
             infoNeedingMapping.LocalizedSeries = localizedSeries;

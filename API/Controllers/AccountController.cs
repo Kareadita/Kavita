@@ -254,7 +254,7 @@ public class AccountController : BaseApiController
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(string))
             .ToDictionary(f => f.Name,
-                f => (string) f.GetValue(null)).Values.ToList();
+                f => (string) f.GetValue(null)!).Values.ToList();
     }
 
 
@@ -266,6 +266,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> ResetApiKey()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
 
         user.ApiKey = HashUtil.ApiKey();
 
@@ -295,7 +296,7 @@ public class AccountController : BaseApiController
         if (dto == null || string.IsNullOrEmpty(dto.Email)) return BadRequest("Invalid payload");
 
         // Validate no other users exist with this email
-        if (user.Email.Equals(dto.Email)) return Ok("Nothing to do");
+        if (user.Email!.Equals(dto.Email)) return Ok("Nothing to do");
 
         // Check if email is used by another user
         var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
@@ -332,7 +333,7 @@ public class AccountController : BaseApiController
                     {
                         EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
                         InstallId = BuildInfo.Version.ToString(),
-                        InvitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName,
+                        InvitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName!,
                         ServerConfirmationLink = emailLink
                     });
                 }
@@ -354,7 +355,7 @@ public class AccountController : BaseApiController
         }
 
 
-        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
         return Ok();
     }
@@ -399,6 +400,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
     {
         var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (adminUser == null) return Unauthorized();
         if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized("You do not have permission");
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId);
@@ -485,6 +487,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> GetInviteUrl(int userId, bool withBaseUrl)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
         if (user.EmailConfirmed)
             return BadRequest("User is already confirmed");
         if (string.IsNullOrEmpty(user.ConfirmationToken))
@@ -517,8 +520,8 @@ public class AccountController : BaseApiController
             if (emailValidationErrors.Any())
             {
                 var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-                if (await _userManager.IsEmailConfirmedAsync(invitedUser))
-                    return BadRequest($"User is already registered as {invitedUser.UserName}");
+                if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
+                    return BadRequest($"User is already registered as {invitedUser!.UserName}");
                 return BadRequest("User is already invited under this email and has yet to accepted invite.");
             }
         }

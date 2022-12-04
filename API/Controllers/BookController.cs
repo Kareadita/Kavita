@@ -95,6 +95,7 @@ public class BookController : BaseApiController
     {
         if (chapterId <= 0) return BadRequest("Chapter is not valid");
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        if (chapter == null) return BadRequest("Chapter is not valid");
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
         var key = BookService.CleanContentKeys(file);
@@ -118,8 +119,9 @@ public class BookController : BaseApiController
     public async Task<ActionResult<ICollection<BookChapterItem>>> GetBookChapters(int chapterId)
     {
         if (chapterId <= 0) return BadRequest("Chapter is not valid");
-
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        if (chapter == null) return BadRequest("Chapter is not valid");
+
         try
         {
             return Ok(await _bookService.GenerateTableOfContents(chapter));

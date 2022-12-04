@@ -254,7 +254,7 @@ public class ParseScannedFilesTests
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = parsedFiles.First().Series.Normalize(),
                 Format = parsedFiles.First().Format
             };
 

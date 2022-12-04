@@ -27,9 +27,9 @@ public static class PersonHelper
 
         foreach (var name in names)
         {
-            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+            var normalizedName = name.Normalize();
             var person = allPeopleTypeRole.FirstOrDefault(p =>
-                p.NormalizedName.Equals(normalizedName));
+                p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)
             {
                 person = DbFactory.Person(name, role);
@@ -100,7 +100,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
     {
         var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
+            p.NormalizedName == person.Name?.Normalize() && p.Role == person.Role);
         if (existingPerson == null)
         {
             metadataPeople.Add(person);
@@ -115,7 +115,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(BlockingCollection<Person> metadataPeople, Person person)
     {
         var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
+            p.NormalizedName == person.Name?.Normalize() && p.Role == person.Role);
         if (existingPerson == null)
         {
             metadataPeople.Add(person);

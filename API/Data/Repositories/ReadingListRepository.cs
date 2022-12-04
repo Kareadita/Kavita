@@ -75,7 +75,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<bool> ReadingListExists(string name)
     {
-        var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+        var normalized = name.Normalize();
         return await _context.ReadingList
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
     }

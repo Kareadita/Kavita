@@ -29,7 +29,7 @@ public static class Seed
             new()
             {
                 Name = "Dark",
-                NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize("Dark"),
+                NormalizedName = "Dark".Normalize(),
                 Provider = ThemeProvider.System,
                 FileName = "dark.scss",
                 IsDefault = true,
@@ -42,13 +42,13 @@ public static class Seed
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(string))
             .ToDictionary(f => f.Name,
-                f => (string) f.GetValue(null)).Values
+                f => (string) f.GetValue(null)!).Values
             .Select(policyName => new AppRole() {Name = policyName})
             .ToList();
 
         foreach (var role in roles)
         {
-            var exists = await roleManager.RoleExistsAsync(role.Name);
+            var exists = await roleManager.RoleExistsAsync(role.Name!);
             if (!exists)
             {
                 await roleManager.CreateAsync(role);

@@ -19,10 +19,11 @@ public class ChapterInfoDto : IChapterInfoDto
     /// Volume entity Id
     /// </summary>
     public int VolumeId { get; set; }
+
     /// <summary>
     /// Series Name
     /// </summary>
-    public string? SeriesName { get; set; }
+    public string SeriesName { get; set; } = null!;
     /// <summary>
     /// Series Format
     /// </summary>

@@ -53,8 +53,8 @@ public static class DbFactory
             Name = name,
             OriginalName = name,
             LocalizedName = localizedName,
-            NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName),
+            NormalizedName = name.Normalize(),
+            NormalizedLocalizedName = localizedName.Normalize(),
             SortName = name,
             Volumes = new List<Volume>(),
             Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
@@ -119,7 +119,7 @@ public static class DbFactory
         title = title.Trim();
         return new ReadingList()
         {
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title).ToUpper(),
+            NormalizedTitle = title.Normalize().ToUpper(),
             Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted,
@@ -144,7 +144,7 @@ public static class DbFactory
         return new Genre()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedTitle = name.Normalize(),
             ExternalTag = external
         };
     }
@@ -154,7 +154,7 @@ public static class DbFactory
         return new Tag()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedTitle = name.Normalize(),
             ExternalTag = external
         };
     }
@@ -164,7 +164,7 @@ public static class DbFactory
         return new Person()
         {
             Name = name.Trim(),
-            NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedName = name.Normalize(),
             Role = role
         };
     }

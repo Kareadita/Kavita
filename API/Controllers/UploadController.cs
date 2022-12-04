@@ -141,6 +141,7 @@ public class UploadController : BaseApiController
         {
             var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
             var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
+            if (tag == null) return BadRequest("Invalid Tag id");
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -188,6 +189,7 @@ public class UploadController : BaseApiController
         {
             var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}");
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
+            if (readingList == null) return BadRequest("Reading list is not valid");
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -234,6 +236,7 @@ public class UploadController : BaseApiController
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
+            if (chapter == null) return BadRequest("Invalid Chapter");
             var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}");
 
             if (!string.IsNullOrEmpty(filePath))
@@ -242,8 +245,11 @@ public class UploadController : BaseApiController
                 chapter.CoverImageLocked = true;
                 _unitOfWork.ChapterRepository.Update(chapter);
                 var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
-                volume.CoverImage = chapter.CoverImage;
-                _unitOfWork.VolumeRepository.Update(volume);
+                if (volume != null)
+                {
+                    volume.CoverImage = chapter.CoverImage;
+                    _unitOfWork.VolumeRepository.Update(volume);
+                }
             }
 
             if (_unitOfWork.HasChanges())

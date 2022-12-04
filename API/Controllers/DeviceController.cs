@@ -39,6 +39,7 @@ public class DeviceController : BaseApiController
     public async Task<ActionResult> CreateOrUpdateDevice(CreateDeviceDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        if (user == null) return Unauthorized();
         var device = await _deviceService.Create(dto, user);
 
         if (device == null) return BadRequest("There was an error when creating the device");
@@ -50,6 +51,7 @@ public class DeviceController : BaseApiController
     public async Task<ActionResult> UpdateDevice(UpdateDeviceDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        if (user == null) return Unauthorized();
         var device = await _deviceService.Update(dto, user);
 
         if (device == null) return BadRequest("There was an error when updating the device");
@@ -67,6 +69,7 @@ public class DeviceController : BaseApiController
     {
         if (deviceId <= 0) return BadRequest("Not a valid deviceId");
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
+        if (user == null) return Unauthorized();
         if (await _deviceService.Delete(user, deviceId)) return Ok();
 
         return BadRequest("Could not delete device");

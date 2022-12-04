@@ -326,7 +326,7 @@ public class CleanupServiceTests
                 new ReadingList()
                 {
                     Title = "Something 2",
-                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something 2"),
+                    NormalizedTitle = "Something 2".Normalize(),
                     CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg",
                     AgeRating = AgeRating.Unknown
                 }

@@ -36,7 +36,7 @@ public class ScannerServiceTests
                         Name = "1"
                     }
                 },
-                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
+                NormalizedName = "Darker Than Black".Normalize(),
                 Metadata = new SeriesMetadata(),
                 Format = MangaFormat.Epub
             }
@@ -61,7 +61,7 @@ public class ScannerServiceTests
                 Name = "Cage of Eden",
                 LocalizedName = "Cage of Eden",
                 OriginalName = "Cage of Eden",
-                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Cage of Eden"),
+                NormalizedName = "Darker Than Black".Normalize(),
                 Metadata = new SeriesMetadata(),
                 Format = MangaFormat.Archive
             },
@@ -70,7 +70,7 @@ public class ScannerServiceTests
                 Name = "Darker Than Black",
                 LocalizedName = "Darker Than Black",
                 OriginalName = "Darker Than Black",
-                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
+                NormalizedName = "Darker Than Black".Normalize(),
                 Metadata = new SeriesMetadata(),
                 Format = MangaFormat.Archive
             }

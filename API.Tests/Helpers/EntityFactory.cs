@@ -18,7 +18,7 @@ public static class EntityFactory
             Name = name,
             SortName = name,
             LocalizedName = name,
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedName = name.Normalize(),
             Volumes = new List<Volume>(),
             Metadata = new SeriesMetadata()
         };
@@ -73,7 +73,7 @@ public static class EntityFactory
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize(title).ToUpper(),
+            NormalizedTitle = title.Normalize().ToUpper(),
             Title = title,
             Summary = summary,
             Promoted = promoted

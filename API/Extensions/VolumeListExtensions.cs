@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
@@ -15,12 +16,15 @@ public static class VolumeListExtensions
     /// <param name="volumes"></param>
     /// <param name="seriesFormat"></param>
     /// <returns></returns>
-    public static Volume GetCoverImage(this IList<Volume> volumes, MangaFormat seriesFormat)
+    public static Volume? GetCoverImage(this IList<Volume> volumes, MangaFormat seriesFormat)
     {
+        if (volumes == null) throw new ArgumentException("Volumes cannot be null");
+
         if (seriesFormat == MangaFormat.Epub || seriesFormat == MangaFormat.Pdf)
         {
             return volumes.MinBy(x => x.Number);
         }
+
 
         if (volumes.Any(x => x.Number != 0))
         {

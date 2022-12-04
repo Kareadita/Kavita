@@ -216,12 +216,12 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = parsedFiles.First().Series.Normalize(),
                 Format = parsedFiles.First().Format
             };
 
             // For Scan Series, we need to filter out anything that isn't our Series
-            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(Scanner.Parser.Parser.Normalize(series.OriginalName)))
+            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName.Normalize()))
             {
                 return;
             }
@@ -434,7 +434,7 @@ public class ScannerService : IScannerService
     {
         var sw = Stopwatch.StartNew();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders);
-        var libraryFolderPaths = library.Folders.Select(fp => fp.Path).ToList();
+        var libraryFolderPaths = library!.Folders.Select(fp => fp.Path).ToList();
         if (!await CheckMounts(library.Name, libraryFolderPaths)) return;
 
 

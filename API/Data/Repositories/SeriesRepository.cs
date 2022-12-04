@@ -307,7 +307,7 @@ public class SeriesRepository : ISeriesRepository
     {
         const int maxRecords = 15;
         var result = new SearchResultGroupDto();
-        var searchQueryNormalized = Services.Tasks.Scanner.Parser.Parser.Normalize(searchQuery);
+        var searchQueryNormalized = searchQuery.Normalize();
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var seriesIds = _context.Series
@@ -1179,8 +1179,8 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
     {
-        var normalizedSeries = Services.Tasks.Scanner.Parser.Parser.Normalize(seriesName);
-        var normalizedLocalized = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName);
+        var normalizedSeries = seriesName.Normalize();
+        var normalizedLocalized = localizedName.Normalize();
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)

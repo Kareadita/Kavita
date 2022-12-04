@@ -13085,7 +13085,8 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
-          "showScreenHints"
+          "showScreenHints",
+          "theme"
         ],
         "type": "object",
         "properties": {

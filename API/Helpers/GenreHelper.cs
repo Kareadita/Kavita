@@ -23,9 +23,9 @@ public static class GenreHelper
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+            var normalizedName = name.Normalize();
             var genre = allGenres.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+                p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)
             {
                 genre = DbFactory.Genre(name, false);
@@ -37,12 +37,12 @@ public static class GenreHelper
     }
 
 
-    public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre> action = null)
+    public static void KeepOnlySameGenreBetweenLists(ICollection<Genre> existingGenres, ICollection<Genre> removeAllExcept, Action<Genre>? action = null)
     {
         var existing = existingGenres.ToList();
         foreach (var genre in existing)
         {
-            var existingPerson = removeAllExcept.FirstOrDefault(g => g.ExternalTag == genre.ExternalTag && genre.NormalizedTitle.Equals(g.NormalizedTitle));
+            var existingPerson = removeAllExcept.FirstOrDefault(g => genre.NormalizedTitle != null && g.ExternalTag == genre.ExternalTag && genre.NormalizedTitle.Equals(g.NormalizedTitle));
             if (existingPerson != null) continue;
             existingGenres.Remove(genre);
             action?.Invoke(genre);
@@ -58,7 +58,7 @@ public static class GenreHelper
     public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
     {
         var existingGenre = metadataGenres.FirstOrDefault(p =>
-            p.NormalizedTitle == Services.Tasks.Scanner.Parser.Parser.Normalize(genre.Title));
+            p.NormalizedTitle == genre.Title?.Normalize());
         if (existingGenre == null)
         {
             metadataGenres.Add(genre);

@@ -5,6 +5,6 @@ namespace API.DTOs;
 
 public class UpdateSeriesMetadataDto
 {
-    public SeriesMetadataDto SeriesMetadata { get; set; }
-    public ICollection<CollectionTagDto> CollectionTags { get; set; }
+    public SeriesMetadataDto? SeriesMetadata { get; set; }
+    public ICollection<CollectionTagDto>? CollectionTags { get; set; }
 }

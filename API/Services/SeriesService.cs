@@ -105,13 +105,13 @@ public class SeriesService : ISeriesService
 
             if (series.Metadata.Summary != updateSeriesMetadataDto.SeriesMetadata.Summary.Trim())
             {
-                series.Metadata.Summary = updateSeriesMetadataDto.SeriesMetadata?.Summary.Trim();
+                series.Metadata.Summary = updateSeriesMetadataDto.SeriesMetadata?.Summary.Trim() ?? string.Empty;
                 series.Metadata.SummaryLocked = true;
             }
 
             if (series.Metadata.Language != updateSeriesMetadataDto.SeriesMetadata?.Language)
             {
-                series.Metadata.Language = updateSeriesMetadataDto.SeriesMetadata?.Language;
+                series.Metadata.Language = updateSeriesMetadataDto.SeriesMetadata?.Language ?? string.Empty;
                 series.Metadata.LanguageLocked = true;
             }
 
@@ -128,7 +128,7 @@ public class SeriesService : ISeriesService
             }, () => series.Metadata.GenresLocked = true);
 
             series.Metadata.Tags ??= new List<Tag>();
-            TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata.Tags, series, allTags, (tag) =>
+            TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags, series, allTags, (tag) =>
             {
                 series.Metadata.Tags.Add(tag);
             }, () => series.Metadata.TagsLocked = true);
@@ -211,13 +211,11 @@ public class SeriesService : ISeriesService
     }
 
 
-    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series,
+    private static void UpdateRelatedList(ICollection<CollectionTagDto>? tags, Series series,
         IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
-        // TODO: Move UpdateRelatedList to a helper so we can easily test
         if (tags == null) return;
-        var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();
         foreach (var existing in existingTags)
@@ -226,7 +224,6 @@ public class SeriesService : ISeriesService
             {
                 // Remove tag
                 series.Metadata.CollectionTags.Remove(existing);
-                isModified = true;
             }
         }
 

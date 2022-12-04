@@ -128,7 +128,7 @@ public class CollectionTagRepository : ICollectionTagRepository
     }
 
 
-    public async Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata)
+    public async Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None)
     {
         return await _context.CollectionTag
             .Where(c => c.Id == tagId)

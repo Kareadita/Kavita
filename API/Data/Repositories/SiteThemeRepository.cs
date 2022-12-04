@@ -17,7 +17,7 @@ public interface ISiteThemeRepository
     Task<IEnumerable<SiteThemeDto>> GetThemeDtos();
     Task<SiteThemeDto?> GetThemeDto(int themeId);
     Task<SiteThemeDto?> GetThemeDtoByName(string themeName);
-    Task<SiteTheme?> GetDefaultTheme();
+    Task<SiteTheme> GetDefaultTheme();
     Task<IEnumerable<SiteTheme>> GetThemes();
     Task<SiteTheme?> GetThemeById(int themeId);
 }
@@ -67,7 +67,7 @@ public class SiteThemeRepository : ISiteThemeRepository
     /// Returns default theme, if the default theme is not available, returns the dark theme
     /// </summary>
     /// <returns></returns>
-    public async Task<SiteTheme?> GetDefaultTheme()
+    public async Task<SiteTheme> GetDefaultTheme()
     {
         var result =  await _context.SiteTheme
             .Where(t => t.IsDefault)
@@ -76,8 +76,8 @@ public class SiteThemeRepository : ISiteThemeRepository
         if (result == null)
         {
             return await _context.SiteTheme
-                .Where(t => t.NormalizedName == "dark")
-                .SingleOrDefaultAsync();
+                .Where(t => t.NormalizedName == Seed.DefaultThemes[0].NormalizedName)
+                .SingleAsync();
         }
 
         return result;

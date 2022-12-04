@@ -680,11 +680,10 @@ public static partial class Parser
         foreach (var regex in MangaSeriesRegex)
         {
             var matches = regex.Matches(filename);
-            foreach (var group in matches.Select(match => match.Groups["Series"])
-                         .Where(group => group.Success && group != Match.Empty))
-            {
-                return CleanTitle(group.Value);
-            }
+            var group = matches
+                .Select(match => match.Groups["Series"])
+                .FirstOrDefault(group => group.Success && group != Match.Empty);
+            if (group != null) return CleanTitle(group.Value);
         }
 
         return string.Empty;
@@ -694,11 +693,10 @@ public static partial class Parser
         foreach (var regex in ComicSeriesRegex)
         {
             var matches = regex.Matches(filename);
-            foreach (var group in matches.Select(match => match.Groups["Series"])
-                         .Where(group => group.Success && group != Match.Empty))
-            {
-                return CleanTitle(group.Value, true);
-            }
+            var group = matches
+                .Select(match => match.Groups["Series"])
+                .FirstOrDefault(group => group.Success && group != Match.Empty);
+            if (group != null) return CleanTitle(group.Value, true);
         }
 
         return string.Empty;

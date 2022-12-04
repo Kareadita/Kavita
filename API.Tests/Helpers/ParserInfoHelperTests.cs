@@ -34,7 +34,7 @@ public class ParserInfoHelperTests
                     Name = "1"
                 }
             },
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
+            NormalizedName = "Darker Than Black".Normalize(),
             Metadata = new SeriesMetadata(),
             Format = MangaFormat.Epub
         };
@@ -63,7 +63,7 @@ public class ParserInfoHelperTests
                     Name = "1"
                 }
             },
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
+            NormalizedName = "Darker Than Black".Normalize(),
             Metadata = new SeriesMetadata(),
             Format = MangaFormat.Epub
         };

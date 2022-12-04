@@ -106,7 +106,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     }
 
 
-    private static void OnEntityTracked(object sender, EntityTrackedEventArgs e)
+    private static void OnEntityTracked(object? sender, EntityTrackedEventArgs e)
     {
         if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
         {
@@ -116,7 +116,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
     }
 
-    private static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
+    private static void OnEntityStateChanged(object? sender, EntityStateChangedEventArgs e)
     {
         if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
             entity.LastModified = DateTime.Now;

@@ -24,7 +24,7 @@ public static class TagHelper
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
             var added = false;
-            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+            var normalizedName = name.Normalize();
 
             var genre = allTags.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
@@ -60,7 +60,7 @@ public static class TagHelper
     public static void AddTagIfNotExists(ICollection<Tag> metadataTags, Tag tag)
     {
         var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == Services.Tasks.Scanner.Parser.Parser.Normalize(tag.Title));
+            p.NormalizedTitle == tag.Title.Normalize());
         if (existingGenre == null)
         {
             metadataTags.Add(tag);
@@ -70,7 +70,7 @@ public static class TagHelper
     public static void AddTagIfNotExists(BlockingCollection<Tag> metadataTags, Tag tag)
     {
         var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == Services.Tasks.Scanner.Parser.Parser.Normalize(tag.Title));
+            p.NormalizedTitle == tag.Title.Normalize());
         if (existingGenre == null)
         {
             metadataTags.Add(tag);

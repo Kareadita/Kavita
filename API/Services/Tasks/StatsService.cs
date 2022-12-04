@@ -139,9 +139,9 @@ public class StatsService : IStatsService
 
         var usersWithPref = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences)).ToList();
         serverInfo.UsersOnCardLayout =
-            usersWithPref.Count(u => u.UserPreferences != null && u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.Cards);
+            usersWithPref.Count(u => u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.Cards);
         serverInfo.UsersOnListLayout =
-            usersWithPref.Count(u => u.UserPreferences != null && u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.List);
+            usersWithPref.Count(u => u.UserPreferences.GlobalPageLayoutMode == PageLayoutMode.List);
 
         var firstAdminUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).FirstOrDefault();
 

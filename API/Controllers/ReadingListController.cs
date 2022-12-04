@@ -226,7 +226,7 @@ public class ReadingListController : BaseApiController
 
         readingList.Summary = dto.Summary;
         readingList.Title = dto.Title;
-        readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
+        readingList.NormalizedTitle = readingList.Title.Normalize();
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
 

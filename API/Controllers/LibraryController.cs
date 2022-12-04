@@ -247,8 +247,6 @@ public class LibraryController : BaseApiController
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
-                // TODO: Figure out how to cancel a job
-
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 return BadRequest(
                     "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");

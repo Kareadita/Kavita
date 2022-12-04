@@ -33,16 +33,17 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<IEnumerable<CollectionTagDto>> GetAllTags()
+    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> GetAllTags()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (isAdmin)
         {
-            return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
+            return Ok(await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync());
         }
 
-        return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id);
+        return Ok(await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id));
     }
 
     /// <summary>
@@ -53,14 +54,15 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("search")]
-    public async Task<IEnumerable<CollectionTagDto>> SearchTags(string queryString)
+    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> SearchTags(string queryString)
     {
         queryString ??= "";
         queryString = queryString.Replace(@"%", string.Empty);
         if (queryString.Length == 0) return await GetAllTags();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, user.Id);
+        if (user == null) return Unauthorized();
+        return Ok(await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, user.Id));
     }
 
     /// <summary>
@@ -95,7 +97,7 @@ public class CollectionController : BaseApiController
 
         existingTag.Title = title;
         existingTag.Promoted = updatedTag.Promoted;
-        existingTag.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(updatedTag.Title);
+        existingTag.NormalizedTitle = updatedTag.Title.Normalize();
         existingTag.Summary = updatedTag.Summary.Trim();
 
         if (_unitOfWork.HasChanges())

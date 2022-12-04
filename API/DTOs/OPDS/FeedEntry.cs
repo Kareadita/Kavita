@@ -31,13 +31,13 @@ public class FeedEntry
     /// https://dublincore.org/specifications/dublin-core/dcmi-terms/
     /// </summary>
     [XmlElement("format", Namespace = "http://purl.org/dc/terms/format")]
-    public string Format { get; set; }
+    public required string Format { get; set; }
 
     [XmlElement("language", Namespace = "http://purl.org/dc/terms/")]
-    public string Language { get; set; }
+    public required string Language { get; set; }
 
     [XmlElement("content")]
-    public FeedEntryContent Content { get; set; }
+    public required FeedEntryContent Content { get; set; }
 
     [XmlElement("link")]
     public List<FeedLink> Links = new List<FeedLink>();
