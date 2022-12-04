@@ -31,7 +31,7 @@ public interface ILibraryRepository
 {
     void Add(Library library);
     void Update(Library library);
-    void Delete(Library library);
+    void Delete(Library? library);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
     Task<bool> LibraryExists(string libraryName);
     Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
@@ -73,8 +73,9 @@ public class LibraryRepository : ILibraryRepository
         _context.Entry(library).State = EntityState.Modified;
     }
 
-    public void Delete(Library library)
+    public void Delete(Library? library)
     {
+        if (library == null) return;
         _context.Library.Remove(library);
     }
 

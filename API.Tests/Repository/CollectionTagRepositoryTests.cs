@@ -18,7 +18,7 @@ using Xunit;
 
 namespace API.Tests.Repository;
 
-public class SeriesRepositoryTests
+public class CollectionTagRepositoryTests
 {
     private readonly IUnitOfWork _unitOfWork;
 
@@ -30,7 +30,7 @@ public class SeriesRepositoryTests
     private const string BackupDirectory = "C:/kavita/config/backups/";
     private const string DataDirectory = "C:/data/";
 
-    public SeriesRepositoryTests()
+    public CollectionTagRepositoryTests()
     {
         var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
         _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
@@ -113,48 +113,65 @@ public class SeriesRepositoryTests
 
     #endregion
 
-    private async Task SetupSeriesData()
+    #region RemoveTagsWithoutSeries
+
+    [Fact]
+    public async Task RemoveTagsWithoutSeries_ShouldRemoveTags()
     {
-        var library = new Library()
-        {
-            Name = "Manga",
-            Type = LibraryType.Manga,
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath() {Path = "C:/data/manga/"}
-            }
-        };
+        var library = DbFactory.Library("Test", LibraryType.Manga);
+        var series = DbFactory.Series("Test 1");
+        var commonTag = DbFactory.CollectionTag(0, "Tag 1");
+        series.Metadata.CollectionTags.Add(commonTag);
+        series.Metadata.CollectionTags.Add(DbFactory.CollectionTag(0, "Tag 2"));
 
-        var s = DbFactory.Series("The Idaten Deities Know Only Peace", "Heion Sedai no Idaten-tachi");
-        s.Format = MangaFormat.Archive;
-
-        library.Series = new List<Series>()
-        {
-            s,
-        };
-
+        var series2 = DbFactory.Series("Test 1");
+        series2.Metadata.CollectionTags.Add(commonTag);
+        library.Series.Add(series);
+        library.Series.Add(series2);
         _unitOfWork.LibraryRepository.Add(library);
         await _unitOfWork.CommitAsync();
+
+        Assert.Equal(2, series.Metadata.CollectionTags.Count);
+        Assert.Single(series2.Metadata.CollectionTags);
+
+        // Delete both series
+        _unitOfWork.SeriesRepository.Remove(series);
+        _unitOfWork.SeriesRepository.Remove(series2);
+
+        await _unitOfWork.CommitAsync();
+
+        // Validate that both tags exist
+        Assert.Equal(2, (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count());
+
+        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+
+        Assert.Empty(await _unitOfWork.CollectionTagRepository.GetAllTagsAsync());
     }
 
-
-    [Theory]
-    [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Archive, "", "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
-    [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Pdf, "", null)]
-    public async Task GetFullSeriesByAnyName_Should(string seriesName, MangaFormat format, string localizedName, string? expected)
+    [Fact]
+    public async Task RemoveTagsWithoutSeries_ShouldNotRemoveTags()
     {
-        var series =
-            await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
-                1, format);
-        if (expected == null)
-        {
-            Assert.Null(series);
-        }
-        else
-        {
-            Assert.NotNull(series);
-            Assert.Equal(expected, series.Name);
-        }
+        var library = DbFactory.Library("Test", LibraryType.Manga);
+        var series = DbFactory.Series("Test 1");
+        var commonTag = DbFactory.CollectionTag(0, "Tag 1");
+        series.Metadata.CollectionTags.Add(commonTag);
+        series.Metadata.CollectionTags.Add(DbFactory.CollectionTag(0, "Tag 2"));
+
+        var series2 = DbFactory.Series("Test 1");
+        series2.Metadata.CollectionTags.Add(commonTag);
+        library.Series.Add(series);
+        library.Series.Add(series2);
+        _unitOfWork.LibraryRepository.Add(library);
+        await _unitOfWork.CommitAsync();
+
+        Assert.Equal(2, series.Metadata.CollectionTags.Count);
+        Assert.Single(series2.Metadata.CollectionTags);
+
+        await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+
+        // Validate that both tags exist
+        Assert.Equal(2, (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count());
     }
 
+    #endregion
 }

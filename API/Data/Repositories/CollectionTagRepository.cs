@@ -65,7 +65,6 @@ public class CollectionTagRepository : ICollectionTagRepository
     /// </summary>
     public async Task<int> RemoveTagsWithoutSeries()
     {
-        // TODO: Write a Unit test to validate this works
         var tagsToDelete = await _context.CollectionTag
             .Include(c => c.SeriesMetadatas)
             .Where(c => c.SeriesMetadatas.Count == 0)
@@ -101,7 +100,7 @@ public class CollectionTagRepository : ICollectionTagRepository
 
     public async Task<bool> TagExists(string title)
     {
-        var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(title);
+        var normalized = title.Normalize();
         return await _context.CollectionTag
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
     }

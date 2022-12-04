@@ -16,6 +16,17 @@ namespace API.Data;
 /// </summary>
 public static class DbFactory
 {
+    public static Library Library(string name, LibraryType type)
+    {
+        return new Library()
+        {
+            Name = name,
+            Type = type,
+            Series = new List<Series>(),
+            Folders = new List<FolderPath>(),
+            AppUsers = new List<AppUser>()
+        };
+    }
     public static Series Series(string name)
     {
         return new Series
@@ -23,11 +34,11 @@ public static class DbFactory
             Name = name,
             OriginalName = name,
             LocalizedName = name,
-            NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedName = name.Normalize(),
+            NormalizedLocalizedName = name.Normalize(),
             SortName = name,
             Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
+            Metadata = SeriesMetadata(new List<CollectionTag>())
         };
     }
 
@@ -90,7 +101,7 @@ public static class DbFactory
         };
     }
 
-    public static CollectionTag CollectionTag(int id, string title, string? summary, bool promoted)
+    public static CollectionTag CollectionTag(int id, string title, string? summary = null, bool promoted = false)
     {
         title = title.Trim();
         return new CollectionTag()

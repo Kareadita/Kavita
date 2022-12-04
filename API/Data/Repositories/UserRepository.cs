@@ -8,6 +8,7 @@ using API.DTOs.Account;
 using API.DTOs.Filtering;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -116,12 +117,10 @@ public class UserRepository : IUserRepository
     /// <returns></returns>
     public async Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None)
     {
-        var query = _context.Users
-            .Where(x => x.UserName == username);
-
-        query = AddIncludesToQuery(query, includeFlags);
-
-        return await query.SingleOrDefaultAsync();
+        return await _context.Users
+            .Where(x => x.UserName == username)
+            .Includes(includeFlags)
+            .SingleOrDefaultAsync();
     }
 
     /// <summary>
@@ -132,12 +131,10 @@ public class UserRepository : IUserRepository
     /// <returns></returns>
     public async Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None)
     {
-        var query = _context.Users
-            .Where(x => x.Id == userId);
-
-        query = AddIncludesToQuery(query, includeFlags);
-
-        return await query.SingleOrDefaultAsync();
+        return await _context.Users
+            .Where(x => x.Id == userId)
+            .Includes(includeFlags)
+            .SingleOrDefaultAsync();
     }
 
     public async Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync()
@@ -157,53 +154,6 @@ public class UserRepository : IUserRepository
         return await _context.AppUserBookmark
             .Where(b => b.Id == bookmarkId)
             .SingleOrDefaultAsync();
-    }
-
-    private static IQueryable<AppUser> AddIncludesToQuery(IQueryable<AppUser> query, AppUserIncludes includeFlags)
-    {
-        // TODO: Move this to Extension
-        if (includeFlags.HasFlag(AppUserIncludes.Bookmarks))
-        {
-            query = query.Include(u => u.Bookmarks);
-        }
-
-        if (includeFlags.HasFlag(AppUserIncludes.Progress))
-        {
-            query = query.Include(u => u.Progresses);
-        }
-
-        if (includeFlags.HasFlag(AppUserIncludes.ReadingLists))
-        {
-            query = query.Include(u => u.ReadingLists);
-        }
-
-        if (includeFlags.HasFlag(AppUserIncludes.ReadingListsWithItems))
-        {
-            query = query.Include(u => u.ReadingLists)
-                .ThenInclude(r => r.Items);
-        }
-
-        if (includeFlags.HasFlag(AppUserIncludes.Ratings))
-        {
-            query = query.Include(u => u.Ratings);
-        }
-
-        if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
-        {
-            query = query.Include(u => u.UserPreferences);
-        }
-
-        if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
-        {
-            query = query.Include(u => u.WantToRead);
-        }
-
-        if (includeFlags.HasFlag(AppUserIncludes.Devices))
-        {
-            query = query.Include(u => u.Devices);
-        }
-
-        return query.AsSplitQuery();
     }
 
 
@@ -265,8 +215,9 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags)
     {
-        var query = AddIncludesToQuery(_context.AppUser.AsQueryable(), includeFlags);
-        return await query.ToListAsync();
+        return await _context.AppUser
+            .Includes(includeFlags)
+            .ToListAsync();
     }
 
     public async Task<AppUser?> GetUserByConfirmationToken(string token)

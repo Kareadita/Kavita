@@ -1509,7 +1509,6 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)
     {
-        // BUG: This is always returning true for any series
         var libraryIds = GetLibraryIdsForUser(userId);
         return await _context.AppUser
             .Where(user => user.Id == userId)

@@ -122,13 +122,13 @@ public class SeriesService : ISeriesService
             });
 
             series.Metadata.Genres ??= new List<Genre>();
-            UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, (genre) =>
+            GenreHelper.UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, (genre) =>
             {
                 series.Metadata.Genres.Add(genre);
             }, () => series.Metadata.GenresLocked = true);
 
             series.Metadata.Tags ??= new List<Tag>();
-            UpdateTagList(updateSeriesMetadataDto.SeriesMetadata.Tags, series, allTags, (tag) =>
+            TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata.Tags, series, allTags, (tag) =>
             {
                 series.Metadata.Tags.Add(tag);
             }, () => series.Metadata.TagsLocked = true);
@@ -140,25 +140,25 @@ public class SeriesService : ISeriesService
             }
 
             series.Metadata.People ??= new List<Person>();
-            UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.WriterLocked = true);
-            UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.CharacterLocked = true);
-            UpdatePeopleList(PersonRole.Colorist, updateSeriesMetadataDto.SeriesMetadata.Colorists, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Colorist, updateSeriesMetadataDto.SeriesMetadata.Colorists, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.ColoristLocked = true);
-            UpdatePeopleList(PersonRole.Editor, updateSeriesMetadataDto.SeriesMetadata.Editors, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Editor, updateSeriesMetadataDto.SeriesMetadata.Editors, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.EditorLocked = true);
-            UpdatePeopleList(PersonRole.Inker, updateSeriesMetadataDto.SeriesMetadata.Inkers, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Inker, updateSeriesMetadataDto.SeriesMetadata.Inkers, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.InkerLocked = true);
-            UpdatePeopleList(PersonRole.Letterer, updateSeriesMetadataDto.SeriesMetadata.Letterers, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Letterer, updateSeriesMetadataDto.SeriesMetadata.Letterers, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.LettererLocked = true);
-            UpdatePeopleList(PersonRole.Penciller, updateSeriesMetadataDto.SeriesMetadata.Pencillers, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Penciller, updateSeriesMetadataDto.SeriesMetadata.Pencillers, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.PencillerLocked = true);
-            UpdatePeopleList(PersonRole.Publisher, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Publisher, updateSeriesMetadataDto.SeriesMetadata.Publishers, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.PublisherLocked = true);
-            UpdatePeopleList(PersonRole.Translator, updateSeriesMetadataDto.SeriesMetadata.Translators, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Translator, updateSeriesMetadataDto.SeriesMetadata.Translators, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.TranslatorLocked = true);
-            UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.CoverArtist, updateSeriesMetadataDto.SeriesMetadata.CoverArtists, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.CoverArtistLocked = true);
 
             series.Metadata.AgeRatingLocked = updateSeriesMetadataDto.SeriesMetadata.AgeRatingLocked;
@@ -211,11 +211,13 @@ public class SeriesService : ISeriesService
     }
 
 
-    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
+    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series,
+        IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
         // TODO: Move UpdateRelatedList to a helper so we can easily test
         if (tags == null) return;
+        var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();
         foreach (var existing in existingTags)
@@ -224,6 +226,7 @@ public class SeriesService : ISeriesService
             {
                 // Remove tag
                 series.Metadata.CollectionTags.Remove(existing);
+                isModified = true;
             }
         }
 
@@ -246,142 +249,13 @@ public class SeriesService : ISeriesService
         }
     }
 
-    private static void UpdateGenreList(ICollection<GenreTagDto> tags, Series series, IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
-    {
-        if (tags == null) return;
-        var isModified = false;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = series.Metadata.Genres.ToList();
-        foreach (var existing in existingTags)
-        {
-            // NOTE: Why don't I use a NormalizedName here (outside of memory pressure from string creation)?
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
-            {
-                // Remove tag
-                series.Metadata.Genres.Remove(existing);
-                isModified = true;
-            }
-        }
-
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => t.Title))
-        {
-            var normalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(tagTitle);
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
-            if (existingTag != null)
-            {
-                if (series.Metadata.Genres.All(t => t.NormalizedTitle != normalizedTitle))
-                {
-                    handleAdd(existingTag);
-                    isModified = true;
-                }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(DbFactory.Genre(tagTitle, false));
-                isModified = true;
-            }
-        }
-
-        if (isModified)
-        {
-            onModified();
-        }
-    }
-
-    private static void UpdateTagList(ICollection<TagDto> tags, Series series, IReadOnlyCollection<Tag> allTags, Action<Tag> handleAdd, Action onModified)
-    {
-        if (tags == null) return;
-
-        var isModified = false;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = series.Metadata.Tags.ToList();
-        foreach (var existing in existingTags.Where(existing => tags.SingleOrDefault(t => t.Id == existing.Id) == null))
-        {
-            // Remove tag
-            series.Metadata.Tags.Remove(existing);
-            isModified = true;
-        }
-
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tagTitle in tags.Select(t => t.Title))
-        {
-            var normalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(tagTitle);
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
-            if (existingTag != null)
-            {
-                if (series.Metadata.Tags.All(t => t.NormalizedTitle != normalizedTitle))
-                {
-
-                    handleAdd(existingTag);
-                    isModified = true;
-                }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(DbFactory.Tag(tagTitle, false));
-                isModified = true;
-            }
-        }
-
-        if (isModified)
-        {
-            onModified();
-        }
-    }
-
-    private static void UpdatePeopleList(PersonRole role, ICollection<PersonDto> tags, Series series, IReadOnlyCollection<Person> allTags,
-        Action<Person> handleAdd, Action onModified)
-    {
-        if (tags == null) return;
-        var isModified = false;
-        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
-        var existingTags = series.Metadata.People.Where(p => p.Role == role).ToList();
-        foreach (var existing in existingTags)
-        {
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null) // This needs to check against role
-            {
-                // Remove tag
-                series.Metadata.People.Remove(existing);
-                isModified = true;
-            }
-        }
-
-        // At this point, all tags that aren't in dto have been removed.
-        foreach (var tag in tags)
-        {
-            var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
-            if (existingTag != null)
-            {
-                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => !t.Name.Equals(tag.Name)))
-                {
-                    handleAdd(existingTag);
-                    isModified = true;
-                }
-            }
-            else
-            {
-                // Add new tag
-                handleAdd(DbFactory.Person(tag.Name, role));
-                isModified = true;
-            }
-        }
-
-        if (isModified)
-        {
-            onModified();
-        }
-    }
-
     /// <summary>
     ///
     /// </summary>
     /// <param name="user">User with Ratings includes</param>
     /// <param name="updateSeriesRatingDto"></param>
     /// <returns></returns>
-    public async Task<bool> UpdateRating(AppUser user, UpdateSeriesRatingDto updateSeriesRatingDto)
+    public async Task<bool> UpdateRating(AppUser? user, UpdateSeriesRatingDto updateSeriesRatingDto)
     {
         if (user == null)
         {

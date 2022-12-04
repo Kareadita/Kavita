@@ -11,8 +11,8 @@ public static partial class Parser
 {
     public const string DefaultChapter = "0";
     public const string DefaultVolume = "0";
+    private const int RegexTimeoutMs = 5000000; // 500 ms
     private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
-    private const int RegexTimeoutMs = 5000000;
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
@@ -106,7 +106,6 @@ public static partial class Parser
         new Regex(
             """(?<Series>.*)(\b|_)(?!\[)(vol\.?)(?<Volume>\d+(-\d+)?)(?!\])""",
             MatchOptions, RegexTimeout),
-        // TODO: In .NET 7, update this to use raw literal strings and apply the NumberRange everywhere
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
         new Regex(
             @"(?<Series>.*)(\b|_)(?!\[)v(?<Volume>" + NumberRange + @")(?!\])",

@@ -76,56 +76,6 @@ public class ScannerServiceTests
             }
         };
 
-
-
         Assert.Empty(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
     }
-
-
-    // TODO: Figure out how to do this with ParseScannedFiles
-    // [Theory]
-    // [InlineData(new [] {"Darker than Black"}, "Darker than Black", "Darker than Black")]
-    // [InlineData(new [] {"Darker than Black"}, "Darker Than Black", "Darker than Black")]
-    // [InlineData(new [] {"Darker than Black"}, "Darker Than Black!", "Darker than Black")]
-    // [InlineData(new [] {""}, "Runaway Jack", "Runaway Jack")]
-    // public void MergeNameTest(string[] existingSeriesNames, string parsedInfoName, string expected)
-    // {
-    //     var collectedSeries = new ConcurrentDictionary<ParsedSeries, List<ParserInfo>>();
-    //     foreach (var seriesName in existingSeriesNames)
-    //     {
-    //         AddToParsedInfo(collectedSeries, new ParserInfo() {Series = seriesName, Format = MangaFormat.Archive});
-    //     }
-    //
-    //     var actualName = new ParseScannedFiles(_bookService, _logger).MergeName(collectedSeries, new ParserInfo()
-    //     {
-    //         Series = parsedInfoName,
-    //         Format = MangaFormat.Archive
-    //     });
-    //
-    //     Assert.Equal(expected, actualName);
-    // }
-
-    // [Fact]
-    // public void RemoveMissingSeries_Should_RemoveSeries()
-    // {
-    //     var existingSeries = new List<Series>()
-    //     {
-    //         EntityFactory.CreateSeries("Darker than Black Vol 1"),
-    //         EntityFactory.CreateSeries("Darker than Black"),
-    //         EntityFactory.CreateSeries("Beastars"),
-    //     };
-    //     var missingSeries = new List<Series>()
-    //     {
-    //         EntityFactory.CreateSeries("Darker than Black Vol 1"),
-    //     };
-    //     existingSeries = ScannerService.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
-    //
-    //     Assert.DoesNotContain(missingSeries[0].Name, existingSeries.Select(s => s.Name));
-    //     Assert.Equal(missingSeries.Count, removeCount);
-    // }
-
-
-    // TODO: I want a test for UpdateSeries where if I have chapter 10 and now it's mapping into Vol 2 Chapter 10,
-    // if I can do it without deleting the underlying chapter (aka id change)
-
 }

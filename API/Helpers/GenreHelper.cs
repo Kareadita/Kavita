@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
+using API.DTOs.Metadata;
 using API.Entities;
 
 namespace API.Helpers;
@@ -61,6 +62,53 @@ public static class GenreHelper
         if (existingGenre == null)
         {
             metadataGenres.Add(genre);
+        }
+    }
+
+
+
+    public static void UpdateGenreList(ICollection<GenreTagDto>? tags, Series series,
+        IReadOnlyCollection<Genre> allTags, Action<Genre> handleAdd, Action onModified)
+    {
+        if (tags == null) return;
+        var isModified = false;
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = series.Metadata.Genres.ToList();
+        foreach (var existing in existingTags)
+        {
+            // NOTE: Why don't I use a NormalizedName here (outside of memory pressure from string creation)?
+            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+            {
+                // Remove tag
+                series.Metadata.Genres.Remove(existing);
+                isModified = true;
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tagTitle in tags.Select(t => t.Title))
+        {
+            var normalizedTitle = tagTitle.Normalize();
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
+            if (existingTag != null)
+            {
+                if (series.Metadata.Genres.All(t => t.NormalizedTitle != normalizedTitle))
+                {
+                    handleAdd(existingTag);
+                    isModified = true;
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(DbFactory.Genre(tagTitle, false));
+                isModified = true;
+            }
+        }
+
+        if (isModified)
+        {
+            onModified();
         }
     }
 }

@@ -159,6 +159,52 @@ public static class QueryableExtensions
         return query.AsSplitQuery();
     }
 
+    public static IQueryable<AppUser> Includes(this IQueryable<AppUser> query, AppUserIncludes includeFlags)
+    {
+        if (includeFlags.HasFlag(AppUserIncludes.Bookmarks))
+        {
+            query = query.Include(u => u.Bookmarks);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.Progress))
+        {
+            query = query.Include(u => u.Progresses);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.ReadingLists))
+        {
+            query = query.Include(u => u.ReadingLists);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.ReadingListsWithItems))
+        {
+            query = query.Include(u => u.ReadingLists)
+                .ThenInclude(r => r.Items);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.Ratings))
+        {
+            query = query.Include(u => u.Ratings);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.UserPreferences))
+        {
+            query = query.Include(u => u.UserPreferences);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.WantToRead))
+        {
+            query = query.Include(u => u.WantToRead);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.Devices))
+        {
+            query = query.Include(u => u.Devices);
+        }
+
+        return query.AsSplitQuery();
+    }
+
     /// <summary>
     /// Applies restriction based on if the Library has restrictions (like include in search)
     /// </summary>

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using API.Data;
+using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 
@@ -118,6 +119,49 @@ public static class PersonHelper
         if (existingPerson == null)
         {
             metadataPeople.Add(person);
+        }
+    }
+
+    public static void UpdatePeopleList(PersonRole role, ICollection<PersonDto>? tags, Series series, IReadOnlyCollection<Person> allTags,
+        Action<Person> handleAdd, Action onModified)
+    {
+        if (tags == null) return;
+        var isModified = false;
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = series.Metadata.People.Where(p => p.Role == role).ToList();
+        foreach (var existing in existingTags)
+        {
+            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null) // This needs to check against role
+            {
+                // Remove tag
+                series.Metadata.People.Remove(existing);
+                isModified = true;
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tag in tags)
+        {
+            var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
+            if (existingTag != null)
+            {
+                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => !t.Name.Equals(tag.Name)))
+                {
+                    handleAdd(existingTag);
+                    isModified = true;
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(DbFactory.Person(tag.Name, role));
+                isModified = true;
+            }
+        }
+
+        if (isModified)
+        {
+            onModified();
         }
     }
 }
