@@ -58,7 +58,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// Highest path (that is under library root) that contains the series.
     /// </summary>
     /// <remarks><see cref="Services.Tasks.Scanner.Parser.Parser.NormalizePath"/> must be used before setting</remarks>
-    public string FolderPath { get; set; }
+    public string? FolderPath { get; set; }
     /// <summary>
     /// Last time the folder was scanned
     /// </summary>

@@ -12,7 +12,7 @@ public interface IAppUserProgressRepository
     void Update(AppUserProgress userProgress);
     Task<int> CleanupAbandonedChapters();
     Task<bool> UserHasProgress(LibraryType libraryType, int userId);
-    Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId);
+    Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId);
     Task<bool> HasAnyProgressOnSeriesAsync(int seriesId, int userId);
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
 }
@@ -98,7 +98,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .ToListAsync();
     }
 
-    public async Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId)
+    public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses
             .Where(p => p.ChapterId == chapterId && p.AppUserId == userId)

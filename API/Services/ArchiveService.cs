@@ -22,7 +22,7 @@ public interface IArchiveService
     int GetNumberOfPagesFromArchive(string archivePath);
     string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false);
     bool IsValidArchive(string archivePath);
-    ComicInfo GetComicInfo(string archivePath);
+    ComicInfo? GetComicInfo(string archivePath);
     ArchiveLibrary CanOpen(string archivePath);
     bool ArchiveNeedsFlattening(ZipArchive archive);
     /// <summary>

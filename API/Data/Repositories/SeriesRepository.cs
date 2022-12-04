@@ -77,7 +77,7 @@ public interface ISeriesRepository
     Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
     Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
-    Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
+    Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
     Task<IDictionary<int, IList<int>>> GetChapterIdWithSeriesIdForSeriesAsync(int[] seriesIds);
@@ -88,20 +88,19 @@ public interface ISeriesRepository
     /// <param name="series"></param>
     /// <returns></returns>
     Task AddSeriesModifiers(int userId, List<SeriesDto> series);
-    Task<string> GetSeriesCoverImageAsync(int seriesId);
+    Task<string?> GetSeriesCoverImageAsync(int seriesId);
     Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter);
     Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
-    Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId);
+    Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
     Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesDtoForIdsAsync(IEnumerable<int> seriesIds, int userId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IEnumerable<string>> GetLockedCoverImagesAsync();
     Task<PagedList<Series>> GetFullSeriesForLibraryIdAsync(int libraryId, UserParams userParams);
-    Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId);
+    Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId);
     Task<Chunk> GetChunkInfo(int libraryId = 0);
     Task<IList<SeriesMetadata>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds);
-
     Task<IEnumerable<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, int pageSize = 30);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind);
@@ -110,12 +109,12 @@ public interface ISeriesRepository
     Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams);
     Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams);
-    Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId);
-    Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId);
+    Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId);
+    Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
-    Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
-    Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
+    Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
+    Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
@@ -177,7 +176,8 @@ public class SeriesRepository : ISeriesRepository
         return await _context.Series
             .Where(s => s.LibraryId == libraryId)
             .Includes(includes)
-            .OrderBy(s => s.SortName).ToListAsync();
+            .OrderBy(s => s.SortName)
+            .ToListAsync();
     }
 
     /// <summary>
@@ -226,7 +226,7 @@ public class SeriesRepository : ISeriesRepository
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    public async Task<Series> GetFullSeriesForSeriesIdAsync(int seriesId)
+    public async Task<Series?> GetFullSeriesForSeriesIdAsync(int seriesId)
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
@@ -438,7 +438,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="seriesId"></param>
     /// <param name="includes"></param>
     /// <returns></returns>
-    public async Task<Series> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
+    public async Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata)
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
@@ -542,7 +542,7 @@ public class SeriesRepository : ISeriesRepository
         }
     }
 
-    public async Task<string> GetSeriesCoverImageAsync(int seriesId)
+    public async Task<string?> GetSeriesCoverImageAsync(int seriesId)
     {
         return await _context.Series
             .Where(s => s.Id == seriesId)
@@ -723,8 +723,8 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
-                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
-                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
+                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange!.Min)
+                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
                         && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
             .Where(s => !hasSeriesNameFilter ||
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
@@ -795,8 +795,8 @@ public class SeriesRepository : ISeriesRepository
                         && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
                         && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
                         && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
-                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
-                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
+                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange!.Min)
+                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
                         && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
             .Where(s => !hasSeriesNameFilter ||
                         EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
@@ -839,7 +839,7 @@ public class SeriesRepository : ISeriesRepository
         return query;
     }
 
-    public async Task<SeriesMetadataDto> GetSeriesMetadata(int seriesId)
+    public async Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId)
     {
         var metadataDto = await _context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
@@ -1117,7 +1117,7 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
-    public async Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId)
+    public async Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId)
     {
         var libraryIds = GetLibraryIdsForUser(userId, 0, QueryContext.Search);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
@@ -1134,7 +1134,7 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId)
+    public async Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId)
     {
         var libraryIds = GetLibraryIdsForUser(userId);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
@@ -1155,7 +1155,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="folder">This will be normalized in the query</param>
     /// <param name="includes">Additional relationships to include with the base query</param>
     /// <returns></returns>
-    public async Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
+    public async Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None)
     {
         var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         return await _context.Series
@@ -1174,7 +1174,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="format"></param>
     /// <param name="withFullIncludes">Defaults to true. This will query against all foreign keys (deep). If false, just the series will come back</param>
     /// <returns></returns>
-    public Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
+    public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
     {
         var normalizedSeries = Services.Tasks.Scanner.Parser.Parser.Normalize(seriesName);
         var normalizedLocalized = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName);

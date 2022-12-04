@@ -46,32 +46,24 @@ public interface IDirectoryService
     void ClearAndDeleteDirectory(string directoryPath);
     string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
     bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "");
-
     Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
         IList<string> filePaths);
-
     IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
-
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
-
     bool ExistOrCreate(string directoryPath);
     void DeleteFiles(IEnumerable<string> files);
     void RemoveNonImages(string directoryName);
     void Flatten(string directoryName);
     Task<bool> CheckWriteAccess(string directoryName);
-
     IEnumerable<string> GetFilesWithCertainExtensions(string path,
         string searchPatternExpression = "",
         SearchOption searchOption = SearchOption.TopDirectoryOnly);
-
     IEnumerable<string> GetDirectories(string folderPath);
     IEnumerable<string> GetDirectories(string folderPath, GlobMatcher matcher);
     string GetParentDirectoryName(string fileOrFolder);
-#nullable enable
     IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
     DateTime GetLastWriteTime(string folderPath);
     GlobMatcher CreateMatcherFromFile(string filePath);
-#nullable disable
 }
 public partial class DirectoryService : IDirectoryService
 {

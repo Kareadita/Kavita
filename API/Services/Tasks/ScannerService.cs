@@ -290,7 +290,7 @@ public class ScannerService : IScannerService
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
     {
         var seriesFolderPaths = (await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
-            .Select(f => _directoryService.FileSystem.FileInfo.New(f.FilePath).Directory?.FullName)
+            .Select(f => _directoryService.FileSystem.FileInfo.New(f.FilePath).Directory?.FullName ?? string.Empty)
             .Where(f => !string.IsNullOrEmpty(f))
             .Distinct()
             .ToList();
@@ -560,7 +560,7 @@ public class ScannerService : IScannerService
     }
 
     private async Task<long> ScanFiles(Library library, IEnumerable<string> dirs,
-        bool isLibraryScan, Func<Tuple<bool, IList<ParserInfo>>, Task> processSeriesInfos = null, bool forceChecks = false)
+        bool isLibraryScan, Func<Tuple<bool, IList<ParserInfo>>, Task>? processSeriesInfos = null, bool forceChecks = false)
     {
         var scanner = new ParseScannedFiles(_logger, _directoryService, _readingItemService, _eventHub);
         var scanWatch = Stopwatch.StartNew();

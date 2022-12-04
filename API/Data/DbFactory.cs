@@ -90,7 +90,7 @@ public static class DbFactory
         };
     }
 
-    public static CollectionTag CollectionTag(int id, string title, string summary, bool promoted)
+    public static CollectionTag CollectionTag(int id, string? title, string? summary, bool promoted)
     {
         return new CollectionTag()
         {

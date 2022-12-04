@@ -16,6 +16,7 @@ public class MangaFile : IEntityDate
     /// Absolute path to the archive file
     /// </summary>
     public string FilePath { get; set; }
+
     /// <summary>
     /// Number of pages for the given file
     /// </summary>

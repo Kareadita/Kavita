@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.CollectionTags;
 using API.Entities.Metadata;
 using API.Extensions;
@@ -121,7 +122,7 @@ public class CollectionController : BaseApiController
     [HttpPost("update-for-series")]
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
-        var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(dto.CollectionTagId);
+        var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(dto.CollectionTagId, CollectionTagIncludes.SeriesMetadata);
         if (tag == null)
         {
             tag = DbFactory.CollectionTag(0, dto.CollectionTagTitle, String.Empty, false);
@@ -158,7 +159,7 @@ public class CollectionController : BaseApiController
     {
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(updateSeriesForTagDto.Tag.Id);
+            var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(updateSeriesForTagDto.Tag.Id, CollectionTagIncludes.SeriesMetadata);
             if (tag == null) return BadRequest("Not a valid Tag");
             tag.SeriesMetadatas ??= new List<SeriesMetadata>();
 

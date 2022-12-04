@@ -27,8 +27,7 @@ public interface ICollectionTagRepository
     Task<IEnumerable<CollectionTagDto>> SearchTagDtosAsync(string searchQuery, int userId);
     Task<string> GetCoverImageAsync(int collectionTagId);
     Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
-    Task<CollectionTag> GetTagAsync(int tagId);
-    Task<CollectionTag> GetFullTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata);
+    Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.None);
     void Update(CollectionTag tag);
     Task<int> RemoveTagsWithoutSeries();
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync();
@@ -131,14 +130,8 @@ public class CollectionTagRepository : ICollectionTagRepository
             .ToListAsync();
     }
 
-    public async Task<CollectionTag> GetTagAsync(int tagId)
-    {
-        return await _context.CollectionTag
-            .Where(c => c.Id == tagId)
-            .SingleOrDefaultAsync();
-    }
 
-    public async Task<CollectionTag> GetFullTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata)
+    public async Task<CollectionTag?> GetTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata)
     {
         return await _context.CollectionTag
             .Where(c => c.Id == tagId)

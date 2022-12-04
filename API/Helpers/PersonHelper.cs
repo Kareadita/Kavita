@@ -47,7 +47,7 @@ public static class PersonHelper
     /// <param name="people">People from metadata</param>
     /// <param name="role">Role to filter on</param>
     /// <param name="action">Callback which will be executed for each person removed</param>
-    public static void RemovePeople(ICollection<Person> existingPeople, IEnumerable<string> people, PersonRole role, Action<Person> action = null)
+    public static void RemovePeople(ICollection<Person> existingPeople, IEnumerable<string> people, PersonRole role, Action<Person>? action = null)
     {
         var normalizedPeople = people.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
         if (normalizedPeople.Count == 0)
@@ -78,7 +78,7 @@ public static class PersonHelper
     /// <param name="existingPeople"></param>
     /// <param name="removeAllExcept"></param>
     /// <param name="action">Callback for all entities that should be removed</param>
-    public static void KeepOnlySamePeopleBetweenLists(IEnumerable<Person> existingPeople, ICollection<Person> removeAllExcept, Action<Person> action = null)
+    public static void KeepOnlySamePeopleBetweenLists(IEnumerable<Person> existingPeople, ICollection<Person> removeAllExcept, Action<Person>? action = null)
     {
         foreach (var person in existingPeople)
         {

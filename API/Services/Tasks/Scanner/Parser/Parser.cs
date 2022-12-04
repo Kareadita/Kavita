@@ -1056,5 +1056,8 @@ public static partial class Parser
         return FormatTagSpecialKeywords.Contains(comicInfoFormat);
     }
 
-    private static string ReplaceUnderscores(string name) => name?.Replace('_', ' ');
+    private static string? ReplaceUnderscores(string? name)
+    {
+        return string.IsNullOrEmpty(name) ? name : name.Replace('_', ' ');
+    }
 }

@@ -478,7 +478,6 @@ public class BookService : IBookService
         return null;
     }
 
-    #nullable enable
     private static string ValidateLanguage(string? language)
     {
         if (string.IsNullOrEmpty(language)) return string.Empty;
@@ -494,7 +493,6 @@ public class BookService : IBookService
 
         return language;
     }
-    #nullable disable
 
     private bool IsValidFile(string filePath)
     {

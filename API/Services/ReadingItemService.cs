@@ -8,7 +8,7 @@ namespace API.Services;
 
 public interface IReadingItemService
 {
-    ComicInfo GetComicInfo(string filePath);
+    ComicInfo? GetComicInfo(string filePath);
     int GetNumberOfPages(string filePath, MangaFormat format);
     string GetCoverImage(string filePath, string fileName, MangaFormat format, bool saveAsWebP);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);

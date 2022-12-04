@@ -45,7 +45,7 @@ internal class GithubReleaseMetadata
 
 public interface IVersionUpdaterService
 {
-    Task<UpdateNotificationDto> CheckForUpdate();
+    Task<UpdateNotificationDto?> CheckForUpdate();
     Task PushUpdate(UpdateNotificationDto update);
     Task<IEnumerable<UpdateNotificationDto>> GetAllReleases();
 }

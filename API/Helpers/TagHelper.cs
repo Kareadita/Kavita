@@ -38,7 +38,7 @@ public static class TagHelper
         }
     }
 
-    public static void KeepOnlySameTagBetweenLists(ICollection<Tag> existingTags, ICollection<Tag> removeAllExcept, Action<Tag> action = null)
+    public static void KeepOnlySameTagBetweenLists(ICollection<Tag> existingTags, ICollection<Tag> removeAllExcept, Action<Tag>? action = null)
     {
         var existing = existingTags.ToList();
         foreach (var genre in existing)
@@ -84,7 +84,7 @@ public static class TagHelper
     /// <param name="tags">Tags from metadata</param>
     /// <param name="isExternal">Remove external tags?</param>
     /// <param name="action">Callback which will be executed for each tag removed</param>
-    public static void RemoveTags(ICollection<Tag> existingTags, IEnumerable<string> tags, bool isExternal, Action<Tag> action = null)
+    public static void RemoveTags(ICollection<Tag> existingTags, IEnumerable<string> tags, bool isExternal, Action<Tag>? action = null)
     {
         var normalizedTags = tags.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
         foreach (var person in normalizedTags)

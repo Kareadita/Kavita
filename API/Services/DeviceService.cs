@@ -15,8 +15,8 @@ namespace API.Services;
 
 public interface IDeviceService
 {
-    Task<Device> Create(CreateDeviceDto dto, AppUser userWithDevices);
-    Task<Device> Update(UpdateDeviceDto dto, AppUser userWithDevices);
+    Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices);
+    Task<Device?> Update(UpdateDeviceDto dto, AppUser userWithDevices);
     Task<bool> Delete(AppUser userWithDevices, int deviceId);
     Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId);
 }
@@ -33,7 +33,7 @@ public class DeviceService : IDeviceService
         _logger = logger;
         _emailService = emailService;
     }
-    #nullable enable
+
     public async Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices)
     {
         try
@@ -84,7 +84,6 @@ public class DeviceService : IDeviceService
 
         return null;
     }
-    #nullable disable
 
     public async Task<bool> Delete(AppUser userWithDevices, int deviceId)
     {

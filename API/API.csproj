@@ -7,7 +7,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <TieredPGO>true</TieredPGO>
     <TieredCompilation>true</TieredCompilation>
-    <Nullable>warnings</Nullable>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">

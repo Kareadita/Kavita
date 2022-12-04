@@ -873,7 +873,7 @@ public class OpdsController : BaseApiController
         return link;
     }
 
-    private static FeedLink CreateLink(string rel, string type, string href, string title = null)
+    private static FeedLink CreateLink(string rel, string type, string href, string? title = null)
     {
         return new FeedLink()
         {

@@ -19,7 +19,7 @@ public class CollectionTag
     /// Absolute path to the (managed) image file
     /// </summary>
     /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
-    public string CoverImage { get; set; }
+    public string? CoverImage { get; set; }
     /// <summary>
     /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
     /// </summary>

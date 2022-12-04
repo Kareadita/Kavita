@@ -297,7 +297,7 @@ public class ReaderController : BaseApiController
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markVolumeReadDto.SeriesId,
+            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
 
         if (await _unitOfWork.CommitAsync())

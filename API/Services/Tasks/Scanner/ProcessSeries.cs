@@ -592,7 +592,6 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    #nullable enable
     private void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
@@ -729,7 +728,6 @@ public class ProcessSeries : IProcessSeries
         }
         return ImmutableList<string>.Empty;
     }
-    #nullable disable
 
     /// <summary>
     /// Given a list of all existing people, this will check the new names and roles and if it doesn't exist in allPeople, will create and

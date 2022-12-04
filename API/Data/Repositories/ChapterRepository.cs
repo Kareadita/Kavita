@@ -15,7 +15,7 @@ public interface IChapterRepository
 {
     void Update(Chapter chapter);
     Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds);
-    Task<IChapterInfoDto> GetChapterInfoDtoAsync(int chapterId);
+    Task<IChapterInfoDto?> GetChapterInfoDtoAsync(int chapterId);
     Task<int> GetChapterTotalPagesAsync(int chapterId);
     Task<Chapter> GetChapterAsync(int chapterId);
     Task<ChapterDto> GetChapterDtoAsync(int chapterId);
@@ -56,7 +56,7 @@ public class ChapterRepository : IChapterRepository
     /// Populates a partial IChapterInfoDto
     /// </summary>
     /// <returns></returns>
-    public async Task<IChapterInfoDto> GetChapterInfoDtoAsync(int chapterId)
+    public async Task<IChapterInfoDto?> GetChapterInfoDtoAsync(int chapterId)
     {
         var chapterInfo = await _context.Chapter
             .Where(c => c.Id == chapterId)

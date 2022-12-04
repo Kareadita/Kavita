@@ -19,7 +19,7 @@ public static class EnumerableExtensions
     /// <param name="stringComparer">Defaults to CurrentCulture</param>
     /// <typeparam name="T"></typeparam>
     /// <returns>Sorted Enumerable</returns>
-    public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> items, Func<T, string> selector, StringComparer stringComparer = null)
+    public static IEnumerable<T> OrderByNatural<T>(this IEnumerable<T> items, Func<T, string> selector, StringComparer? stringComparer = null)
     {
         var list = items.ToList();
         var maxDigits = list

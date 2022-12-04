@@ -284,7 +284,7 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns>Returns just if the email was sent or server isn't reachable</returns>
     [HttpPost("update/email")]
-    public async Task<ActionResult> UpdateEmail(UpdateEmailDto dto)
+    public async Task<ActionResult> UpdateEmail(UpdateEmailDto? dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized("You do not have permission");
@@ -402,7 +402,7 @@ public class AccountController : BaseApiController
         if (user == null) return BadRequest("User does not exist");
 
         // Check if username is changing
-        if (!user.UserName.Equals(dto.Username))
+        if (!user.UserName!.Equals(dto.Username))
         {
             // Validate username change
             var errors = await _accountService.ValidateUsername(dto.Username);
