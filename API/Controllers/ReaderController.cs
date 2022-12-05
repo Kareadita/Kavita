@@ -12,7 +12,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
-using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;

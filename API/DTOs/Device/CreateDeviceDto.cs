@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
 using API.Entities.Enums.Device;
 
 namespace API.DTOs.Device;

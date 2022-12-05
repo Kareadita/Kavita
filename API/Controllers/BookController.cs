@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,9 +7,7 @@ using API.DTOs.Reader;
 using API.Entities.Enums;
 using API.Services;
 using Kavita.Common;
-using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using VersOne.Epub;
 

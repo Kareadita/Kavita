@@ -3,10 +3,7 @@ using System.Linq;
 using API.Comparators;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Extensions;
-using API.Parser;
-using API.Services.Tasks.Scanner;
 using Xunit;
 
 namespace API.Tests.Extensions;

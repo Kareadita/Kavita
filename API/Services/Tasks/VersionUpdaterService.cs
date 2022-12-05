@@ -4,12 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Update;
 using API.SignalR;
-using API.SignalR.Presence;
 using Flurl.Http;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using MarkdownDeep;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 

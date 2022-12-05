@@ -5,18 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
-using API.Data.Metadata;
-using API.Data.Repositories;
-using API.Data.Scanner;
-using API.DTOs.Metadata;
 using API.Entities;
-using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
-using API.Services.Tasks.Metadata;
 using API.SignalR;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;

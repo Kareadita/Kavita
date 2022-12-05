@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using API.Entities.Enums;
 
 namespace API.DTOs.SeriesDetail;
 

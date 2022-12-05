@@ -5,7 +5,6 @@ using API.DTOs.Device;
 using API.Entities;
 using API.Entities.Enums.Device;
 using API.Services;
-using API.Services.Tasks;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;

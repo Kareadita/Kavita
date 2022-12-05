@@ -17,9 +17,10 @@ public interface IImageService
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
     /// <param name="fileName"></param>
+    /// <param name="saveAsWebP">Convert and save as webp</param>
     /// <param name="thumbnailWidth">Width of thumbnail</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    string CreateThumbnailFromBase64(string encodedImage, string fileName, int thumbnailWidth = 0);
+    string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = 320);
 
     string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false);
     /// <summary>
@@ -41,7 +42,6 @@ public class ImageService : IImageService
     public const string SeriesCoverImageRegex = @"series\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
-
 
     /// <summary>
     /// Width of the Thumbnail generation
@@ -143,12 +143,12 @@ public class ImageService : IImageService
 
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, int thumbnailWidth = ThumbnailWidth)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = ThumbnailWidth)
     {
         try
         {
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), ThumbnailWidth);
-            var filename = fileName + ".png";
+            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
+            var filename = fileName + (saveAsWebP ? ".webp" : ".png");
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName + ".png"));
             return filename;
         }

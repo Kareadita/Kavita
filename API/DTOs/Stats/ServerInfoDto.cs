@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using API.Entities.Enums;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace API.DTOs.Stats;
 

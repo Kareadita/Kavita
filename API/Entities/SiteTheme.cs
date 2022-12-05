@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using API.Entities.Enums.Theme;
 using API.Entities.Interfaces;
 using API.Services;

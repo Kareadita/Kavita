@@ -1,5 +1,4 @@
 using System.IO.Abstractions.TestingHelpers;
-using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using API.Data;
 using API.SignalR.Presence;
 using Microsoft.AspNetCore.SignalR;
-using SQLitePCL;
 
 namespace API.SignalR;
 

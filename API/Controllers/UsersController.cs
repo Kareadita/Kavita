@@ -4,14 +4,10 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.Filtering;
-using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

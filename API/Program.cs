@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,7 +10,6 @@ using API.Logging;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -127,7 +125,7 @@ public class Program
 
     private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
     {
-        string currentVersion = null;
+        string? currentVersion = null;
         try
         {
             if (!await context.ServerSetting.AnyAsync()) return "vUnknown";

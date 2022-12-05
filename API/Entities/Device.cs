@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Net;
 using API.Entities.Enums.Device;
 using API.Entities.Interfaces;
 

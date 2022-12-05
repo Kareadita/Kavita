@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.DTOs.Metadata;
-using API.DTOs.Reader;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
 

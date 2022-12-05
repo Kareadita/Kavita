@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using API.DTOs.CollectionTags;
 using API.DTOs.Metadata;
 using API.Entities.Enums;

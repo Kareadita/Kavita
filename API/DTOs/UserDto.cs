@@ -1,6 +1,5 @@
 ﻿
 using API.DTOs.Account;
-using API.Entities.Enums;
 
 namespace API.DTOs;
 

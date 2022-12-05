@@ -8,14 +8,12 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
-using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
 using API.SignalR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -464,8 +462,10 @@ public class SeriesService : ISeriesService
     }
 
 
-    private static string FormatChapterTitle(bool isSpecial, LibraryType libraryType, string chapterTitle, bool withHash)
+    private static string FormatChapterTitle(bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
     {
+        if (string.IsNullOrEmpty(chapterTitle)) throw new ArgumentException("Chapter Title cannot be null");
+
         if (isSpecial)
         {
             return Tasks.Scanner.Parser.Parser.CleanSpecialTitle(chapterTitle);
@@ -521,6 +521,7 @@ public class SeriesService : ISeriesService
     public async Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, SeriesIncludes.Related);
+        if (series == null) return false;
 
         UpdateRelationForKind(dto.Adaptations, series.Relations.Where(r => r.RelationKind == RelationKind.Adaptation).ToList(), series, RelationKind.Adaptation);
         UpdateRelationForKind(dto.Characters, series.Relations.Where(r => r.RelationKind == RelationKind.Character).ToList(), series, RelationKind.Character);

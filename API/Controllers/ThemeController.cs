@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Theme;
-using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
 using Kavita.Common;

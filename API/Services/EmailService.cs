@@ -78,13 +78,13 @@ public class EmailService : IEmailService
 
     public async Task<bool> IsDefaultEmailService()
     {
-        return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value
+        return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value!
             .Equals(DefaultApiUrl);
     }
 
     public async Task SendEmailChangeEmail(ConfirmationEmailDto data)
     {
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value;
         var success = await SendEmailWithPost(emailLink + "/api/account/email-change", data);
         if (!success)
         {

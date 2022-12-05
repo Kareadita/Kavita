@@ -6,12 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Logging;
 using API.SignalR;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;

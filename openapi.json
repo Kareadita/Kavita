@@ -13021,12 +13021,15 @@
         "additionalProperties": false
       },
       "UploadUrlDto": {
+        "required": [
+          "url"
+        ],
         "type": "object",
         "properties": {
           "url": {
+            "minLength": 1,
             "type": "string",
-            "description": "External url",
-            "nullable": true
+            "description": "External url"
           }
         },
         "additionalProperties": false

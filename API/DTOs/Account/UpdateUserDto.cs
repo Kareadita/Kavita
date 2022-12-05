@@ -1,7 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using API.Entities.Enums;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace API.DTOs.Account;
 

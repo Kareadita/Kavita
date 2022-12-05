@@ -15,7 +15,7 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// The minimum number in the Name field in Int form
     /// </summary>
-    public int Number { get; set; }
+    public required int Number { get; set; }
     public IList<Chapter> Chapters { get; set; } = null!;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }

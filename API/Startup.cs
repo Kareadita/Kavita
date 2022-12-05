@@ -18,8 +18,6 @@ using API.Services.HostedServices;
 using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
-using Hangfire.MemoryStorage;
-using Hangfire.Storage.SQLite;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;

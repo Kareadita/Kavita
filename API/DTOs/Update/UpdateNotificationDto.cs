@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace API.DTOs.Update;
+﻿namespace API.DTOs.Update;
 
 /// <summary>
 /// Update Notification denoting a new release available for user to update to
