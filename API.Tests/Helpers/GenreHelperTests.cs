@@ -39,7 +39,6 @@ public class GenreHelperTests
 
         };
         var genreAdded = new List<Genre>();
-
         GenreHelper.UpdateGenre(allGenres, new[] {"Action", "Scifi"}, false, genre =>
         {
             genreAdded.Add(genre);

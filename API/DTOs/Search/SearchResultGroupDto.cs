@@ -10,15 +10,15 @@ namespace API.DTOs.Search;
 /// </summary>
 public class SearchResultGroupDto
 {
-    public IEnumerable<LibraryDto> Libraries { get; set; }
-    public IEnumerable<SearchResultDto> Series { get; set; }
-    public IEnumerable<CollectionTagDto> Collections { get; set; }
-    public IEnumerable<ReadingListDto> ReadingLists { get; set; }
-    public IEnumerable<PersonDto> Persons { get; set; }
-    public IEnumerable<GenreTagDto> Genres { get; set; }
-    public IEnumerable<TagDto> Tags { get; set; }
-    public IEnumerable<MangaFileDto> Files { get; set; }
-    public IEnumerable<ChapterDto> Chapters { get; set; }
+    public IEnumerable<LibraryDto> Libraries { get; set; } = default!;
+    public IEnumerable<SearchResultDto> Series { get; set; } = default!;
+    public IEnumerable<CollectionTagDto> Collections { get; set; } = default!;
+    public IEnumerable<ReadingListDto> ReadingLists { get; set; } = default!;
+    public IEnumerable<PersonDto> Persons { get; set; } = default!;
+    public IEnumerable<GenreTagDto> Genres { get; set; } = default!;
+    public IEnumerable<TagDto> Tags { get; set; } = default!;
+    public IEnumerable<MangaFileDto> Files { get; set; } = default!;
+    public IEnumerable<ChapterDto> Chapters { get; set; } = default!;
 
 
 }

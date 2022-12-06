@@ -8,15 +8,15 @@ public class ResetPasswordDto
     /// The Username of the User
     /// </summary>
     [Required]
-    public string UserName { get; init; }
+    public string UserName { get; init; } = default!;
     /// <summary>
     /// The new password
     /// </summary>
     [Required]
     [StringLength(32, MinimumLength = 6)]
-    public string Password { get; init; }
+    public string Password { get; init; } = default!;
     /// <summary>
     /// The old, existing password. If an admin is performing the change, this is not required. Otherwise, it is.
     /// </summary>
-    public string OldPassword { get; init; }
+    public string OldPassword { get; init; } = default!;
 }

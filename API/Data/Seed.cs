@@ -8,6 +8,7 @@ using API.Constants;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
+using API.Extensions;
 using API.Services;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -29,7 +30,7 @@ public static class Seed
             new()
             {
                 Name = "Dark",
-                NormalizedName = "Dark".Normalize(),
+                NormalizedName = "Dark".ToNormalized(),
                 Provider = ThemeProvider.System,
                 FileName = "dark.scss",
                 IsDefault = true,

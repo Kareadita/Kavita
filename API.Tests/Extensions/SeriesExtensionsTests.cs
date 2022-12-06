@@ -16,7 +16,7 @@ public class SeriesExtensionsTests
         var series = new Series()
         {
             Name = "Test 1",
-            NormalizedName = "Test 1".Normalize(),
+            NormalizedName = "Test 1".ToNormalized(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -30,12 +30,14 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = true,
                             Number = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+                            Range = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
                             CoverImage = "Special 1",
                         },
                         new Chapter()
                         {
                             IsSpecial = true,
                             Number = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+                            Range = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
                             CoverImage = "Special 2",
                         }
                     },
@@ -53,7 +55,7 @@ public class SeriesExtensionsTests
         var series = new Series()
         {
             Name = "Test 1",
-            NormalizedName = "Test 1".Normalize(),
+            NormalizedName = "Test 1".ToNormalized(),
             Format = MangaFormat.Epub,
             Volumes = new List<Volume>()
             {
@@ -67,12 +69,14 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = true,
                             Number = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+                            Range = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
                             CoverImage = "Special 1",
                         },
                         new Chapter()
                         {
                             IsSpecial = true,
                             Number = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+                            Range = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
                             CoverImage = "Special 2",
                         }
                     },
@@ -89,7 +93,7 @@ public class SeriesExtensionsTests
         var series = new Series()
         {
             Name = "Test 1",
-            NormalizedName = "Test 1".Normalize(),
+            NormalizedName = "Test 1".ToNormalized(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -103,12 +107,14 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = false,
                             Number = "2.5",
+                            Range = "2.5",
                             CoverImage = "Special 1",
                         },
                         new Chapter()
                         {
                             IsSpecial = false,
                             Number = "2",
+                            Range = "2",
                             CoverImage = "Special 2",
                         }
                     },
@@ -130,7 +136,7 @@ public class SeriesExtensionsTests
         var series = new Series()
         {
             Name = "Test 1",
-            NormalizedName = "Test 1".Normalize(),
+            NormalizedName = "Test 1".ToNormalized(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -144,18 +150,21 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = false,
                             Number = "2.5",
+                            Range = "2.5",
                             CoverImage = "Special 1",
                         },
                         new Chapter()
                         {
                             IsSpecial = false,
                             Number = "2",
+                            Range = "2",
                             CoverImage = "Special 2",
                         },
                         new Chapter()
                         {
                             IsSpecial = true,
                             Number = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+                            Range = "0",
                             CoverImage = "Special 3",
                         }
                     },
@@ -177,7 +186,7 @@ public class SeriesExtensionsTests
         var series = new Series()
         {
             Name = "Test 1",
-            NormalizedName = "Test 1".Normalize(),
+            NormalizedName = "Test 1".ToNormalized(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -191,18 +200,21 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = false,
                             Number = "2.5",
+                            Range = "2.5",
                             CoverImage = "Special 1",
                         },
                         new Chapter()
                         {
                             IsSpecial = false,
                             Number = "2",
+                            Range = "2",
                             CoverImage = "Special 2",
                         },
                         new Chapter()
                         {
                             IsSpecial = true,
                             Number = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+                            Range = "0",
                             CoverImage = "Special 3",
                         }
                     },
@@ -217,6 +229,7 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = false,
                             Number = "0",
+                            Range = "0",
                             CoverImage = "Volume 1",
                         },
 
@@ -239,7 +252,7 @@ public class SeriesExtensionsTests
         var series = new Series()
         {
             Name = "Test 1",
-            NormalizedName = "Test 1".Normalize(),
+            NormalizedName = "Test 1".ToNormalized(),
             Format = MangaFormat.Archive,
             Volumes = new List<Volume>()
             {
@@ -253,18 +266,21 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = false,
                             Number = "2.5",
+                            Range = "2.5",
                             CoverImage = "Special 1",
                         },
                         new Chapter()
                         {
                             IsSpecial = false,
                             Number = "2",
+                            Range = "2",
                             CoverImage = "Special 2",
                         },
                         new Chapter()
                         {
                             IsSpecial = true,
                             Number = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+                            Range = "0",
                             CoverImage = "Special 3",
                         }
                     },
@@ -279,6 +295,7 @@ public class SeriesExtensionsTests
                         {
                             IsSpecial = false,
                             Number = "0",
+                            Range = "0",
                             CoverImage = "Volume 1",
                         },
 

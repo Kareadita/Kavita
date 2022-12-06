@@ -4,8 +4,8 @@
 /// </summary>
 public class Range<T>
 {
-    public T? Min { get; set; }
-    public T? Max { get; set; }
+    public T? Min { get; init; }
+    public T? Max { get; init; }
 
     public override string ToString()
     {

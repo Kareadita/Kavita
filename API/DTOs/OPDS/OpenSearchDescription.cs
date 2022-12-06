@@ -8,15 +8,15 @@ public class OpenSearchDescription
     /// <summary>
     /// Contains a brief human-readable title that identifies this search engine.
     /// </summary>
-    public string ShortName { get; set; }
+    public string ShortName { get; set; } = default!;
     /// <summary>
     /// Contains an extended human-readable title that identifies this search engine.
     /// </summary>
-    public string LongName { get; set; }
+    public string LongName { get; set; } = default!;
     /// <summary>
     /// Contains a human-readable text description of the search engine.
     /// </summary>
-    public string Description { get; set; }
+    public string Description { get; set; } = default!;
     /// <summary>
     /// https://github.com/dewitt/opensearch/blob/master/opensearch-1-1-draft-6.md#the-url-element
     /// </summary>
@@ -30,7 +30,7 @@ public class OpenSearchDescription
     /// Contains a URL that identifies the location of an image that can be used in association with this search content.
     /// <example><Image height="64" width="64" type="image/png">http://example.com/websearch.png</Image></example>
     /// </summary>
-    public string Image { get; set; }
+    public string Image { get; set; } = default!;
     public string InputEncoding { get; set; } = "UTF-8";
     public string OutputEncoding { get; set; } = "UTF-8";
     /// <summary>

@@ -9,6 +9,7 @@ using API.Data.Repositories;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
@@ -138,7 +139,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -148,11 +149,13 @@ public class BookmarkServiceTests
                 new Volume()
                 {
                     Name = "0",
+                    Number = 0,
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-                            Number = "1"
+                            Number = "1",
+                            Range = "1",
                         }
                     }
                 }
@@ -198,7 +201,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -208,11 +211,13 @@ public class BookmarkServiceTests
                 new Volume()
                 {
                     Name = "1",
+                    Number = 1,
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-                            Number = "0"
+                            Number = "0",
+                            Range = "0",
                         }
                     }
                 }
@@ -276,7 +281,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -286,11 +291,13 @@ public class BookmarkServiceTests
                 new Volume()
                 {
                     Name = "1",
+                    Number = 1,
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-                            Number = "1"
+                            Number = "1",
+                            Range = "1",
                         }
                     }
                 }
@@ -365,7 +372,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -375,11 +382,13 @@ public class BookmarkServiceTests
                 new Volume()
                 {
                     Name = "1",
+                    Number = 1,
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-                            Number = "1"
+                            Number = "1",
+                            Range = "1",
                         }
                     }
                 }
@@ -429,7 +438,7 @@ public class BookmarkServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -439,11 +448,13 @@ public class BookmarkServiceTests
                 new Volume()
                 {
                     Name = "1",
+                    Number = 1,
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-                            Number = "1"
+                            Number = "1",
+                            Range = "1",
                         }
                     }
                 }
@@ -495,7 +506,7 @@ public class BookmarkServiceTests
         var series = new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -506,11 +517,13 @@ public class BookmarkServiceTests
                 new Volume()
                 {
                     Name = "1",
+                    Number = 1,
                     Chapters = new List<Chapter>()
                     {
                         new Chapter()
                         {
-                            Number = "1"
+                            Number = "1",
+                            Range = "1",
                         }
                     }
                 }

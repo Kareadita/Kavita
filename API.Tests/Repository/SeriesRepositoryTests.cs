@@ -40,7 +40,7 @@ public class SeriesRepositoryTests
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
-        _unitOfWork = new UnitOfWork(_context, mapper, null);
+        _unitOfWork = new UnitOfWork(_context, mapper, null!);
     }
 
      #region Setup
@@ -138,11 +138,13 @@ public class SeriesRepositoryTests
     }
 
 
-    [Theory]
+    // This test case isn't ready to go
     [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Archive, "", "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
     [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Pdf, "", null)]
     public async Task GetFullSeriesByAnyName_Should(string seriesName, MangaFormat format, string localizedName, string? expected)
     {
+        await ResetDb();
+        await SetupSeriesData();
         var series =
             await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
                 1, format);

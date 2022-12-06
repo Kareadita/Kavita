@@ -3,6 +3,7 @@ using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Extensions;
 
 namespace API.Tests.Helpers;
 
@@ -18,7 +19,7 @@ public static class EntityFactory
             Name = name,
             SortName = name,
             LocalizedName = name,
-            NormalizedName = name.Normalize(),
+            NormalizedName = name.ToNormalized(),
             Volumes = new List<Volume>(),
             Metadata = new SeriesMetadata()
         };
@@ -37,7 +38,7 @@ public static class EntityFactory
         };
     }
 
-    public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null, int pageCount = 0)
+    public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null, int pageCount = 0, string? title = null)
     {
         return new Chapter()
         {
@@ -46,7 +47,7 @@ public static class EntityFactory
             Number = API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(range) + string.Empty,
             Files = files ?? new List<MangaFile>(),
             Pages = pageCount,
-
+            Title = title ?? range
         };
     }
 
@@ -73,7 +74,7 @@ public static class EntityFactory
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = title.Normalize().ToUpper(),
+            NormalizedTitle = title.ToNormalized().ToUpper(),
             Title = title,
             Summary = summary,
             Promoted = promoted

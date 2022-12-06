@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
 using API.Entities;
+using API.Extensions;
 using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -75,7 +76,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<bool> ReadingListExists(string name)
     {
-        var normalized = name.Normalize();
+        var normalized = name.ToNormalized();
         return await _context.ReadingList
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
     }

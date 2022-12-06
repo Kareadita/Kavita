@@ -4,5 +4,5 @@ namespace API.DTOs;
 
 public class DeleteSeriesDto
 {
-    public IList<int> SeriesIds { get; set; }
+    public IList<int> SeriesIds { get; set; } = default!;
 }

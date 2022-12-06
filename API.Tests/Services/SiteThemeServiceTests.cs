@@ -7,6 +7,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
+using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
@@ -123,6 +124,8 @@ public class SiteThemeServiceTests
     {
         _context.SiteTheme.RemoveRange(_context.SiteTheme);
         await _context.SaveChangesAsync();
+        // Recreate defaults
+        await Seed.SeedThemes(_context);
     }
 
     #endregion
@@ -155,7 +158,7 @@ public class SiteThemeServiceTests
         await siteThemeService.Scan();
 
         var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
-            t.Name.Normalize().Equals("custom".Normalize()));
+            t.Name.ToNormalized().Equals("custom".ToNormalized()));
         Assert.Single(customThemes);
     }
 
@@ -175,7 +178,7 @@ public class SiteThemeServiceTests
         await siteThemeService.Scan();
 
         var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
-            t.Name.Normalize().Equals("custom".Normalize()));
+            t.Name.ToNormalized().Equals("custom".ToNormalized()));
 
         Assert.Empty(customThemes);
     }
@@ -192,7 +195,7 @@ public class SiteThemeServiceTests
         _context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
-            NormalizedName = "Custom".Normalize(),
+            NormalizedName = "Custom".ToNormalized(),
             Provider = ThemeProvider.User,
             FileName = "custom.css",
             IsDefault = false
@@ -217,7 +220,7 @@ public class SiteThemeServiceTests
         _context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
-            NormalizedName = "Custom".Normalize(),
+            NormalizedName = "Custom".ToNormalized(),
             Provider = ThemeProvider.User,
             FileName = "custom.css",
             IsDefault = false
@@ -245,7 +248,7 @@ public class SiteThemeServiceTests
         _context.SiteTheme.Add(new SiteTheme()
         {
             Name = "Custom",
-            NormalizedName = "Custom".Normalize(),
+            NormalizedName = "Custom".ToNormalized(),
             Provider = ThemeProvider.User,
             FileName = "custom.css",
             IsDefault = false

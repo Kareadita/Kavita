@@ -6,6 +6,7 @@ using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 
 namespace API.Helpers;
 
@@ -27,7 +28,7 @@ public static class PersonHelper
 
         foreach (var name in names)
         {
-            var normalizedName = name.Normalize();
+            var normalizedName = name.ToNormalized();
             var person = allPeopleTypeRole.FirstOrDefault(p =>
                 p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)
@@ -100,7 +101,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
     {
         var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == person.Name?.Normalize() && p.Role == person.Role);
+            p.NormalizedName == person.Name?.ToNormalized() && p.Role == person.Role);
         if (existingPerson == null)
         {
             metadataPeople.Add(person);
@@ -115,7 +116,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(BlockingCollection<Person> metadataPeople, Person person)
     {
         var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == person.Name?.Normalize() && p.Role == person.Role);
+            p.NormalizedName == person.Name?.ToNormalized() && p.Role == person.Role);
         if (existingPerson == null)
         {
             metadataPeople.Add(person);

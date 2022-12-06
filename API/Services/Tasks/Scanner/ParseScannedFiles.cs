@@ -173,9 +173,9 @@ public class ParseScannedFiles
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
 
-        var normalizedSeries = info.Series.Normalize();
-        var normalizedSortSeries = info.SeriesSort.Normalize();
-        var normalizedLocalizedSeries = info.LocalizedSeries.Normalize();
+        var normalizedSeries = info.Series.ToNormalized();
+        var normalizedSortSeries = info.SeriesSort.ToNormalized();
+        var normalizedLocalizedSeries = info.LocalizedSeries.ToNormalized();
 
         try
         {
@@ -224,15 +224,15 @@ public class ParseScannedFiles
     /// <returns>Series Name to group this info into</returns>
     private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
     {
-        var normalizedSeries = info.Series.Normalize();
-        var normalizedLocalSeries = info.LocalizedSeries.Normalize();
+        var normalizedSeries = info.Series.ToNormalized();
+        var normalizedLocalSeries = info.LocalizedSeries.ToNormalized();
 
         try
         {
             var existingName =
                 scannedSeries.SingleOrDefault(p =>
-                        (p.Key.NormalizedName.Normalize().Equals(normalizedSeries) ||
-                         p.Key.NormalizedName.Normalize().Equals(normalizedLocalSeries)) &&
+                        (p.Key.NormalizedName.ToNormalized().Equals(normalizedSeries) ||
+                         p.Key.NormalizedName.ToNormalized().Equals(normalizedLocalSeries)) &&
                         p.Key.Format == info.Format)
                     .Key;
 
@@ -245,8 +245,8 @@ public class ParseScannedFiles
         {
             _logger.LogCritical(ex, "[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
             var values = scannedSeries.Where(p =>
-                (p.Key.NormalizedName.Normalize() == normalizedSeries ||
-                 p.Key.NormalizedName.Normalize() == normalizedLocalSeries) &&
+                (p.Key.NormalizedName.ToNormalized() == normalizedSeries ||
+                 p.Key.NormalizedName.ToNormalized() == normalizedLocalSeries) &&
                 p.Key.Format == info.Format);
             foreach (var pair in values)
             {
@@ -410,9 +410,9 @@ public class ParseScannedFiles
 
         if (nonLocalizedSeries == null) return;
 
-        var normalizedNonLocalizedSeries = nonLocalizedSeries.Normalize();
+        var normalizedNonLocalizedSeries = nonLocalizedSeries.ToNormalized();
         foreach (var infoNeedingMapping in infos.Where(i =>
-                     !i.Series.Normalize().Equals(normalizedNonLocalizedSeries)))
+                     !i.Series.ToNormalized().Equals(normalizedNonLocalizedSeries)))
         {
             infoNeedingMapping.Series = nonLocalizedSeries;
             infoNeedingMapping.LocalizedSeries = localizedSeries;

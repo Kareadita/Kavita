@@ -47,7 +47,7 @@ public class SeriesDto : IHasReadTimeEstimate
     public long WordCount { get; set; }
 
     public int LibraryId { get; set; }
-    public string LibraryName { get; set; }
+    public string LibraryName { get; set; } = default!;
     /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
     public int MinHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.MaxHoursToRead"/>
@@ -57,7 +57,7 @@ public class SeriesDto : IHasReadTimeEstimate
     /// <summary>
     /// The highest level folder for this Series
     /// </summary>
-    public string FolderPath { get; set; }
+    public string FolderPath { get; set; } = default!;
     /// <summary>
     /// The last time the folder for this series was scanned
     /// </summary>

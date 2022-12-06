@@ -5,12 +5,12 @@ namespace API.DTOs.Account;
 public class ConfirmEmailDto
 {
     [Required]
-    public string Email { get; set; }
+    public string Email { get; set; } = default!;
     [Required]
-    public string Token { get; set; }
+    public string Token { get; set; } = default!;
     [Required]
     [StringLength(32, MinimumLength = 6)]
-    public string Password { get; set; }
+    public string Password { get; set; } = default!;
     [Required]
-    public string Username { get; set; }
+    public string Username { get; set; } = default!;
 }

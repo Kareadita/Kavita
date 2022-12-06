@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner;
@@ -250,7 +251,7 @@ public class ParseScannedFilesTests
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = parsedFiles.First().Series.Normalize(),
+                NormalizedName = parsedFiles.First().Series.ToNormalized(),
                 Format = parsedFiles.First().Format
             };
 

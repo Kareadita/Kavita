@@ -9,6 +9,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Parser;
 using API.Services.Tasks.Metadata;
@@ -217,12 +218,12 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = parsedFiles.First().Series.Normalize(),
+                NormalizedName = parsedFiles.First().Series.ToNormalized(),
                 Format = parsedFiles.First().Format
             };
 
             // For Scan Series, we need to filter out anything that isn't our Series
-            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.Normalize()))
+            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
             {
                 return;
             }

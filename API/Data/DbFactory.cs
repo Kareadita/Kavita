@@ -35,8 +35,8 @@ public static class DbFactory
             Name = name,
             OriginalName = name,
             LocalizedName = name,
-            NormalizedName = name.Normalize(),
-            NormalizedLocalizedName = name.Normalize(),
+            NormalizedName = name.ToNormalized(),
+            NormalizedLocalizedName = name.ToNormalized(),
             SortName = name,
             Volumes = new List<Volume>(),
             Metadata = SeriesMetadata(new List<CollectionTag>())
@@ -54,8 +54,8 @@ public static class DbFactory
             Name = name,
             OriginalName = name,
             LocalizedName = localizedName,
-            NormalizedName = name.Normalize(),
-            NormalizedLocalizedName = localizedName.Normalize(),
+            NormalizedName = name.ToNormalized(),
+            NormalizedLocalizedName = localizedName.ToNormalized(),
             SortName = name,
             Volumes = new List<Volume>(),
             Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
@@ -108,7 +108,7 @@ public static class DbFactory
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = title.Normalize().ToUpper(),
+            NormalizedTitle = title.ToNormalized().ToUpper(),
             Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted
@@ -120,7 +120,7 @@ public static class DbFactory
         title = title.Trim();
         return new ReadingList()
         {
-            NormalizedTitle = title.Normalize().ToUpper(),
+            NormalizedTitle = title.ToNormalized().ToUpper(),
             Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted,
@@ -145,7 +145,7 @@ public static class DbFactory
         return new Genre()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = name.Normalize(),
+            NormalizedTitle = name.ToNormalized(),
             ExternalTag = external
         };
     }
@@ -155,7 +155,7 @@ public static class DbFactory
         return new Tag()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = name.Normalize(),
+            NormalizedTitle = name.ToNormalized(),
             ExternalTag = external
         };
     }
@@ -165,7 +165,7 @@ public static class DbFactory
         return new Person()
         {
             Name = name.Trim(),
-            NormalizedName = name.Normalize(),
+            NormalizedName = name.ToNormalized(),
             Role = role
         };
     }

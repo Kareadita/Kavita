@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Parser;
 using API.Services.Tasks.Scanner;
 
@@ -29,12 +30,12 @@ public static class ParserInfoFactory
     public static void AddToParsedInfo(IDictionary<ParsedSeries, IList<ParserInfo>> collectedSeries, ParserInfo info)
     {
         var existingKey = collectedSeries.Keys.FirstOrDefault(ps =>
-            ps.Format == info.Format && ps.NormalizedName == info.Series.Normalize());
+            ps.Format == info.Format && ps.NormalizedName == info.Series.ToNormalized());
         existingKey ??= new ParsedSeries()
         {
             Format = info.Format,
             Name = info.Series,
-            NormalizedName = info.Series.Normalize()
+            NormalizedName = info.Series.ToNormalized()
         };
         if (collectedSeries.GetType() == typeof(ConcurrentDictionary<,>))
         {

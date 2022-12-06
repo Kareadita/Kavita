@@ -8,6 +8,7 @@ using API.Data.Repositories;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
@@ -41,7 +42,7 @@ public class ReadingListServiceTests
 
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
-        _unitOfWork = new UnitOfWork(_context, mapper, null);
+        _unitOfWork = new UnitOfWork(_context, mapper, null!);
 
         _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>());
     }
@@ -124,28 +125,32 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
-                            NormalizedName = "Test".Normalize(),
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                             AgeRating = AgeRating.Everyone,
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                             AgeRating = AgeRating.X18Plus
                                         },
                                         new Chapter()
                                         {
                                             Number = "3",
+                                            Range = "3",
                                             AgeRating = AgeRating.X18Plus
                                         }
                                     }
@@ -206,23 +211,26 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
-                            NormalizedName = "Test".Normalize(),
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                             AgeRating = AgeRating.Everyone
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                             AgeRating = AgeRating.X18Plus
                                         }
                                     }
@@ -279,30 +287,34 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
-                            NormalizedName = "Test".Normalize(),
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                             AgeRating = AgeRating.Everyone,
                                             Pages = 1
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                             AgeRating = AgeRating.X18Plus,
                                             Pages = 1
                                         },
                                         new Chapter()
                                         {
                                             Number = "3",
+                                            Range = "3",
                                             AgeRating = AgeRating.X18Plus,
                                             Pages = 1
                                         }
@@ -367,22 +379,25 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
-                            NormalizedName = "Test".Normalize(),
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                         }
                                     }
                                 }
@@ -431,22 +446,25 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
-                            NormalizedName = "Test".Normalize(),
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                         }
                                     }
                                 }

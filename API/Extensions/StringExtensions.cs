@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace API.Extensions;
 
@@ -16,9 +17,9 @@ public static class StringExtensions
     /// </summary>
     /// <param name="value"></param>
     /// <returns></returns>
-    public static string? Normalize(this string? value)
+    public static string ToNormalized(this string? value)
     {
-        if (string.IsNullOrEmpty(value)) return value;
+        if (string.IsNullOrEmpty(value)) return string.Empty;
         return Services.Tasks.Scanner.Parser.Parser.Normalize(value);
     }
 }

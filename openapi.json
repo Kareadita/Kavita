@@ -10559,9 +10559,6 @@
           "password": {
             "type": "string",
             "nullable": true
-          },
-          "sendEmail": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false

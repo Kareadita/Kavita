@@ -223,7 +223,7 @@ public class ReadingListController : BaseApiController
 
         readingList.Summary = dto.Summary;
         readingList.Title = dto.Title;
-        readingList.NormalizedTitle = readingList.Title.Normalize();
+        readingList.NormalizedTitle = readingList.Title.ToNormalized();
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
 

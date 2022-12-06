@@ -5,6 +5,7 @@ using System.Linq;
 using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
+using API.Extensions;
 
 namespace API.Helpers;
 
@@ -24,7 +25,7 @@ public static class TagHelper
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
             var added = false;
-            var normalizedName = name.Normalize();
+            var normalizedName = name.ToNormalized();
 
             var genre = allTags.FirstOrDefault(p =>
                 p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
@@ -60,7 +61,7 @@ public static class TagHelper
     public static void AddTagIfNotExists(ICollection<Tag> metadataTags, Tag tag)
     {
         var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == tag.Title.Normalize());
+            p.NormalizedTitle == tag.Title.ToNormalized());
         if (existingGenre == null)
         {
             metadataTags.Add(tag);
@@ -70,7 +71,7 @@ public static class TagHelper
     public static void AddTagIfNotExists(BlockingCollection<Tag> metadataTags, Tag tag)
     {
         var existingGenre = metadataTags.FirstOrDefault(p =>
-            p.NormalizedTitle == tag.Title.Normalize());
+            p.NormalizedTitle == tag.Title.ToNormalized());
         if (existingGenre == null)
         {
             metadataTags.Add(tag);
@@ -116,7 +117,7 @@ public static class TagHelper
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var normalizedTitle = tagTitle.Normalize();
+            var normalizedTitle = tagTitle.ToNormalized();
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
             if (existingTag != null)
             {

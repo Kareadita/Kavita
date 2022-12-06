@@ -23,7 +23,7 @@ public class QueryableExtensionsTests
             new Series()
             {
                 Name = "Test 1",
-                NormalizedName = "Test 1".Normalize(),
+                NormalizedName = "Test 1".ToNormalized(),
                 Metadata = new SeriesMetadata()
                 {
                     AgeRating = AgeRating.Teen,
@@ -32,7 +32,7 @@ public class QueryableExtensionsTests
             new Series()
             {
                 Name = "Test 2",
-                NormalizedName = "Test 2".Normalize(),
+                NormalizedName = "Test 2".ToNormalized(),
                 Metadata = new SeriesMetadata()
                 {
                     AgeRating = AgeRating.Unknown,
@@ -41,7 +41,7 @@ public class QueryableExtensionsTests
             new Series()
             {
                 Name = "Test 3",
-                NormalizedName = "Test 3".Normalize(),
+                NormalizedName = "Test 3".ToNormalized(),
                 Metadata = new SeriesMetadata()
                 {
                     AgeRating = AgeRating.X18Plus,
@@ -172,7 +172,7 @@ public class QueryableExtensionsTests
             new Tag()
             {
                 Title = "Test 1",
-                NormalizedTitle = "Test 1".Normalize(),
+                NormalizedTitle = "Test 1".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -184,7 +184,7 @@ public class QueryableExtensionsTests
             new Tag()
             {
                 Title = "Test 2",
-                NormalizedTitle = "Test 2".Normalize(),
+                NormalizedTitle = "Test 2".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -200,7 +200,7 @@ public class QueryableExtensionsTests
             new Tag()
             {
                 Title = "Test 3",
-                NormalizedTitle = "Test 3".Normalize(),
+                NormalizedTitle = "Test 3".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()

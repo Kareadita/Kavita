@@ -5,13 +5,13 @@ namespace API.DTOs.Settings;
 
 public class ServerSettingDto
 {
-    public string CacheDirectory { get; set; }
-    public string TaskScan { get; set; }
+    public string CacheDirectory { get; set; } = default!;
+    public string TaskScan { get; set; } = default!;
     /// <summary>
     /// Logging level for server. Managed in appsettings.json.
     /// </summary>
-    public string LoggingLevel { get; set; }
-    public string TaskBackup { get; set; }
+    public string LoggingLevel { get; set; } = default!;
+    public string TaskBackup { get; set; } = default!;
     /// <summary>
     /// Port the server listens on. Managed in appsettings.json.
     /// </summary>
@@ -27,22 +27,22 @@ public class ServerSettingDto
     /// <summary>
     /// Base Url for the kavita. Requires restart to take effect.
     /// </summary>
-    public string BaseUrl { get; set; }
+    public string BaseUrl { get; set; } = default!;
     /// <summary>
     /// Where Bookmarks are stored.
     /// </summary>
     /// <remarks>If null or empty string, will default back to default install setting aka <see cref="DirectoryService.BookmarkDirectory"/></remarks>
-    public string BookmarksDirectory { get; set; }
+    public string BookmarksDirectory { get; set; } = default!;
     /// <summary>
     /// Email service to use for the invite user flow, forgot password, etc.
     /// </summary>
     /// <remarks>If null or empty string, will default back to default install setting aka <see cref="EmailService.DefaultApiUrl"/></remarks>
-    public string EmailServiceUrl { get; set; }
-    public string InstallVersion { get; set; }
+    public string EmailServiceUrl { get; set; } = default!;
+    public string InstallVersion { get; set; } = default!;
     /// <summary>
     /// Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.
     /// </summary>
-    public string InstallId { get; set; }
+    public string InstallId { get; set; } = default!;
     /// <summary>
     /// If the server should save bookmarks as WebP encoding
     /// </summary>

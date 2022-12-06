@@ -171,13 +171,13 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("0", new List<Chapter>()
                         {
-                            EntityFactory.CreateChapter("Omake", true, new List<MangaFile>()),
-                            EntityFactory.CreateChapter("Something SP02", true, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("Omake", true, new List<MangaFile>(), title: "Omake"),
+                            EntityFactory.CreateChapter("Something SP02", true, new List<MangaFile>(), title: "Something"),
                         }),
                         EntityFactory.CreateVolume("2", new List<Chapter>()
                         {
@@ -226,7 +226,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -281,7 +281,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -334,7 +334,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -390,16 +390,16 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("2", new List<Chapter>()
                         {
-                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("0", false),
                         }),
                         EntityFactory.CreateVolume("3", new List<Chapter>()
                         {
-                            EntityFactory.CreateChapter("0", false, new List<MangaFile>()),
+                            EntityFactory.CreateChapter("0", false),
                         }),
                     }
                 }
@@ -437,7 +437,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("0", new List<Chapter>()
@@ -491,7 +491,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("2", new List<Chapter>()
@@ -547,7 +547,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("1", new List<Chapter>()
@@ -602,7 +602,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("1", new List<Chapter>()
@@ -674,7 +674,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("1", new List<Chapter>()
@@ -727,7 +727,7 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         EntityFactory.CreateVolume("1", new List<Chapter>()
@@ -767,7 +767,7 @@ public class SeriesServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Book,
@@ -800,7 +800,7 @@ public class SeriesServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Book,
@@ -843,7 +843,7 @@ public class SeriesServiceTests
         var s = new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -883,7 +883,7 @@ public class SeriesServiceTests
         var s = new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -922,7 +922,7 @@ public class SeriesServiceTests
         var s = new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -965,7 +965,7 @@ public class SeriesServiceTests
         var s = new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -1003,7 +1003,7 @@ public class SeriesServiceTests
         var s = new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -1045,7 +1045,7 @@ public class SeriesServiceTests
         var s = new Series()
         {
             Name = "Test",
-                    NormalizedName = "Test".Normalize(),
+                    NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -1087,7 +1087,7 @@ public class SeriesServiceTests
         return new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",
@@ -1180,19 +1180,19 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test Series",
-                    NormalizedName = "Test Series".Normalize(),
+                    NormalizedName = "Test Series".ToNormalized(),
                     Volumes = new List<Volume>(){}
                 },
                 new Series()
                 {
                     Name = "Test Series Prequels",
-                    NormalizedName = "Test Series Prequels".Normalize(),
+                    NormalizedName = "Test Series Prequels".ToNormalized(),
                     Volumes = new List<Volume>(){}
                 },
                 new Series()
                 {
                     Name = "Test Series Sequels",
-                    NormalizedName = "Test Series Sequels".Normalize(),
+                    NormalizedName = "Test Series Sequels".ToNormalized(),
                     Volumes = new List<Volume>(){}
                 }
             }
@@ -1495,17 +1495,19 @@ public class SeriesServiceTests
                 new Series()
                 {
                     Name = "Test Series",
-                    NormalizedName = "Test Series".Normalize(),
+                    NormalizedName = "Test Series".ToNormalized(),
                     Volumes = new List<Volume>()
                     {
                         new Volume()
                         {
                             Name = "0",
+                            Number = 0,
                             Chapters = new List<Chapter>()
                             {
                                 new Chapter()
                                 {
                                     Number = "1",
+                                    Range = "1",
                                     Files = new List<MangaFile>()
                                     {
                                         new MangaFile()

@@ -10,7 +10,7 @@ public class ChapterMetadataDto
 {
     public int Id { get; set; }
     public int ChapterId { get; set; }
-    public string Title { get; set; }
+    public string Title { get; set; } = default!;
     public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> CoverArtists { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();
@@ -29,16 +29,16 @@ public class ChapterMetadataDto
     /// </summary>
     public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
     public AgeRating AgeRating { get; set; }
-    public string ReleaseDate { get; set; }
+    public string? ReleaseDate { get; set; }
     public PublicationStatus PublicationStatus { get; set; }
     /// <summary>
     /// Summary for the Chapter/Issue
     /// </summary>
-    public string Summary { get; set; }
+    public string? Summary { get; set; }
     /// <summary>
     /// Language for the Chapter/Issue
     /// </summary>
-    public string Language { get; set; }
+    public string? Language { get; set; }
     /// <summary>
     /// Number in the TotalCount of issues
     /// </summary>

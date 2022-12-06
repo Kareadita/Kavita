@@ -45,7 +45,7 @@ public class GenreRepository : IGenreRepository
 
     public async Task<Genre?> FindByNameAsync(string genreName)
     {
-        var normalizedName = genreName.Normalize();
+        var normalizedName = genreName.ToNormalized();
         return await _context.Genre
             .FirstOrDefaultAsync(g => g.NormalizedTitle != null && g.NormalizedTitle.Equals(normalizedName));
     }

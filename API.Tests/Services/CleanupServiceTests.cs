@@ -10,6 +10,7 @@ using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
@@ -214,6 +215,7 @@ public class CleanupServiceTests
         v.Chapters.Add(new Chapter()
         {
             Number = "0",
+            Range = "0",
             CoverImage = "v01_c01.jpg"
         });
         v.CoverImage = "v01_c01.jpg";
@@ -227,6 +229,7 @@ public class CleanupServiceTests
         v.Chapters.Add(new Chapter()
         {
             Number = "0",
+            Range = "0",
             CoverImage = "v01_c03.jpg"
         });
         v.CoverImage = "v01_c03jpg";
@@ -316,14 +319,14 @@ public class CleanupServiceTests
                 new ReadingList()
                 {
                     Title = "Something",
-                    NormalizedTitle = "Something".Normalize(),
+                    NormalizedTitle = "Something".ToNormalized(),
                     CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg",
                     AgeRating = AgeRating.Unknown
                 },
                 new ReadingList()
                 {
                     Title = "Something 2",
-                    NormalizedTitle = "Something 2".Normalize(),
+                    NormalizedTitle = "Something 2".ToNormalized(),
                     CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg",
                     AgeRating = AgeRating.Unknown
                 }
@@ -480,7 +483,7 @@ public class CleanupServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,
@@ -534,7 +537,7 @@ public class CleanupServiceTests
         var s = new Series()
         {
             Name = "Test",
-            NormalizedName = "Test".Normalize(),
+            NormalizedName = "Test".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",

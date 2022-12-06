@@ -15,11 +15,11 @@ public class ChapterDto : IHasReadTimeEstimate
     /// <summary>
     /// Range of chapters. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
     /// </summary>
-    public string Range { get; init; }
+    public string Range { get; init; } = default!;
     /// <summary>
     /// Smallest number of the Range.
     /// </summary>
-    public string Number { get; init; }
+    public string Number { get; init; } = default!;
     /// <summary>
     /// Total number of pages in all MangaFiles
     /// </summary>
@@ -31,11 +31,11 @@ public class ChapterDto : IHasReadTimeEstimate
     /// <summary>
     /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
     /// </summary>
-    public string Title { get; set; }
+    public string Title { get; set; } = default!;
     /// <summary>
     /// The files that represent this Chapter
     /// </summary>
-    public ICollection<MangaFileDto> Files { get; init; }
+    public ICollection<MangaFileDto> Files { get; init; } = default!;
     /// <summary>
     /// Calculated at API time. Number of pages read for this Chapter for logged in user.
     /// </summary>
@@ -61,12 +61,12 @@ public class ChapterDto : IHasReadTimeEstimate
     /// Title of the Chapter/Issue
     /// </summary>
     /// <remarks>Metadata field</remarks>
-    public string TitleName { get; set; }
+    public string TitleName { get; set; } = default!;
     /// <summary>
     /// Summary of the Chapter
     /// </summary>
     /// <remarks>This is not set normally, only for Series Detail</remarks>
-    public string Summary { get; init; }
+    public string Summary { get; init; } = default!;
     /// <summary>
     /// Age Rating for the issue/chapter
     /// </summary>

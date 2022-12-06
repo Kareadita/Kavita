@@ -307,7 +307,7 @@ public class SeriesRepository : ISeriesRepository
     {
         const int maxRecords = 15;
         var result = new SearchResultGroupDto();
-        var searchQueryNormalized = searchQuery.Normalize();
+        var searchQueryNormalized = searchQuery.ToNormalized();
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var seriesIds = _context.Series
@@ -1179,14 +1179,14 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
     {
-        var normalizedSeries = seriesName.Normalize();
-        var normalizedLocalized = localizedName.Normalize();
+        var normalizedSeries = seriesName.ToNormalized();
+        var normalizedLocalized = localizedName.ToNormalized();
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
             .Where(s => s.NormalizedName.Equals(normalizedSeries)
-                               || (!string.IsNullOrEmpty(s.NormalizedLocalizedName) && s.NormalizedLocalizedName.Equals(normalizedSeries))
-                               || (s.OriginalName != null && s.OriginalName.Equals(seriesName)));
+                               || (s.NormalizedLocalizedName == normalizedSeries)
+                               || (s.OriginalName == seriesName));
 
         if (!string.IsNullOrEmpty(normalizedLocalized))
         {

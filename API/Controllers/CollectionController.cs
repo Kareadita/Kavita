@@ -97,7 +97,7 @@ public class CollectionController : BaseApiController
 
         existingTag.Title = title;
         existingTag.Promoted = updatedTag.Promoted;
-        existingTag.NormalizedTitle = updatedTag.Title.Normalize();
+        existingTag.NormalizedTitle = updatedTag.Title.ToNormalized();
         existingTag.Summary = updatedTag.Summary.Trim();
 
         if (_unitOfWork.HasChanges())

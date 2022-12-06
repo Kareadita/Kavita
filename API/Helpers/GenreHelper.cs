@@ -4,6 +4,7 @@ using System.Linq;
 using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
+using API.Extensions;
 
 namespace API.Helpers;
 
@@ -22,7 +23,7 @@ public static class GenreHelper
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var normalizedName = name.Normalize();
+            var normalizedName = name.ToNormalized();
             var genre = allGenres.FirstOrDefault(p =>
                 p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)
@@ -57,7 +58,7 @@ public static class GenreHelper
     public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
     {
         var existingGenre = metadataGenres.FirstOrDefault(p =>
-            p.NormalizedTitle == genre.Title?.Normalize());
+            p.NormalizedTitle == genre.Title?.ToNormalized());
         if (existingGenre == null)
         {
             metadataGenres.Add(genre);
@@ -87,7 +88,7 @@ public static class GenreHelper
         // At this point, all tags that aren't in dto have been removed.
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
-            var normalizedTitle = tagTitle.Normalize();
+            var normalizedTitle = tagTitle.ToNormalized();
             var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
             if (existingTag != null)
             {
