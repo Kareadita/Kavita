@@ -32,9 +32,7 @@ public static class HttpExtensions
     public static void AddCacheHeader(this HttpResponse response, byte[] content)
     {
         if (content is not {Length: > 0}) return;
-        using var sha1 = SHA256.Create();
-
-        response.Headers.Add(HeaderNames.ETag, string.Concat(sha1.ComputeHash(content).Select(x => x.ToString("X2"))));
+        response.Headers.Add(HeaderNames.ETag, string.Concat(SHA256.HashData(content).Select(x => x.ToString("X2"))));
         response.Headers.CacheControl =  $"private,max-age=100";
     }
 
@@ -48,8 +46,7 @@ public static class HttpExtensions
     {
         if (filename is not {Length: > 0}) return;
         var hashContent = filename + File.GetLastWriteTimeUtc(filename);
-        using var sha1 = SHA256.Create();
-        response.Headers.Add("ETag", string.Concat(sha1.ComputeHash(Encoding.UTF8.GetBytes(hashContent)).Select(x => x.ToString("X2"))));
+        response.Headers.Add("ETag", string.Concat(SHA256.HashData(Encoding.UTF8.GetBytes(hashContent)).Select(x => x.ToString("X2"))));
         if (maxAge != 10)
         {
             response.Headers.CacheControl =  $"max-age={maxAge}";

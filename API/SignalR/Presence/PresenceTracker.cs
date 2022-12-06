@@ -43,9 +43,9 @@ public class PresenceTracker : IPresenceTracker
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         lock (OnlineUsers)
         {
-            if (OnlineUsers.ContainsKey(username))
+            if (OnlineUsers.TryGetValue(username, out var detail))
             {
-                OnlineUsers[username].ConnectionIds.Add(connectionId);
+                detail.ConnectionIds.Add(connectionId);
             }
             else
             {

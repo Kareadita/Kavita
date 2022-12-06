@@ -7,7 +7,7 @@ public class JobDto
     /// <summary>
     /// Job Id
     /// </summary>
-    public string Id { get; set; }
+    public string Id { get; set; } = default!;
     /// <summary>
     /// Human Readable title for the Job
     /// </summary>

@@ -367,6 +367,7 @@ public class AccountController : BaseApiController
         if (user == null) return Unauthorized("You do not have permission");
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        if (!await _accountService.HasChangeRestrictionRole(user)) return BadRequest("You do not have permission");
 
         user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRating;
         user.AgeRestrictionIncludeUnknowns = isAdmin || dto.IncludeUnknowns;

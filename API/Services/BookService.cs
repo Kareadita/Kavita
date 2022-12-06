@@ -60,7 +60,7 @@ public interface IBookService
     Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl);
 }
 
-public class BookService : IBookService
+public partial class BookService : IBookService
 {
     private readonly ILogger<BookService> _logger;
     private readonly IDirectoryService _directoryService;
@@ -76,6 +76,26 @@ public class BookService : IBookService
             IgnoreMissingToc = true
         }
     };
+
+    [GeneratedRegex(@"/\*[\d\D]*?\*/", RegexOptions.Compiled)]
+    private static partial Regex CssComment();
+
+    [GeneratedRegex(@"[a-zA-Z]+#", RegexOptions.Compiled)]
+    private static partial Regex WhiteSpace1();
+    [GeneratedRegex(@"[\n\r]+\s*", RegexOptions.Compiled)]
+    private static partial Regex WhiteSpace2();
+    [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
+    private static partial Regex WhiteSpace3();
+    [GeneratedRegex(@"\s?([:,;{}])\s?", RegexOptions.Compiled)]
+    private static partial Regex WhiteSpace4();
+    [GeneratedRegex(@"([\s:]0)(px|pt|%|em)", RegexOptions.Compiled)]
+    private static partial Regex UnitPadding();
+
+    [GeneratedRegex(@"<script(.*)(/>)", RegexOptions.Compiled)]
+    private static partial Regex StartingScriptTag();
+    [GeneratedRegex(@"<title(.*)(/>)", RegexOptions.Compiled)]
+    private static partial Regex StartingTitleTag();
+
 
     public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
     {
@@ -490,8 +510,6 @@ public class BookService : IBookService
         {
             return string.Empty;
         }
-
-        return language;
     }
 
     private bool IsValidFile(string filePath)
@@ -533,8 +551,8 @@ public class BookService : IBookService
 
     public static string EscapeTags(string content)
     {
-        content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>");
-        content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>");
+        content = StartingScriptTag().Replace(content, "<script$1></script>");
+        content = StartingTitleTag().Replace(content, "<title$1></title>");
         return content;
     }
 
@@ -981,12 +999,12 @@ public class BookService : IBookService
         }
 
         // Remove comments from CSS
-        body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty);
+        body = CssComment().Replace(body, string.Empty);
 
-        body = Regex.Replace(body, @"[a-zA-Z]+#", "#");
-        body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty);
-        body = Regex.Replace(body, @"\s+", " ");
-        body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1");
+        body = WhiteSpace1().Replace(body, "#");
+        body = WhiteSpace2().Replace(body, string.Empty);
+        body = WhiteSpace3().Replace(body, " ");
+        body = WhiteSpace4().Replace(body, "$1");
         try
         {
             body = body.Replace(";}", "}");
@@ -996,8 +1014,7 @@ public class BookService : IBookService
             //Swallow exception. Some css don't have style rules ending in ';'
         }
 
-        body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1");
-
+        body = UnitPadding().Replace(body, "$1");
 
         return body;
     }

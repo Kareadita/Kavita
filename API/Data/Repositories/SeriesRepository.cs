@@ -120,10 +120,15 @@ public interface ISeriesRepository
     Task<AgeRating?> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
 }
 
-public class SeriesRepository : ISeriesRepository
+public partial class SeriesRepository : ISeriesRepository
 {
     private readonly DataContext _context;
     private readonly IMapper _mapper;
+
+
+    [GeneratedRegex(@"\d{4}", RegexOptions.Compiled, 50000)]
+    private static partial Regex YearRegex();
+
     public SeriesRepository(DataContext context, IMapper mapper)
     {
         _context = context;
@@ -326,7 +331,7 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var justYear = Regex.Match(searchQuery, @"\d{4}").Value;
+        var justYear = YearRegex().Match(searchQuery).Value;
         var hasYearInQuery = !string.IsNullOrEmpty(justYear);
         var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
 
@@ -1023,9 +1028,11 @@ public class SeriesRepository : ISeriesRepository
             if (seriesMap.Keys.Count == pageSize) break;
 
             if (item.SeriesName == null) continue;
-            if (seriesMap.ContainsKey(item.SeriesName))
+
+
+            if (seriesMap.TryGetValue(item.SeriesName, out var value))
             {
-                seriesMap[item.SeriesName].Count += 1;
+                value.Count += 1;
             }
             else
             {

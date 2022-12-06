@@ -42,7 +42,7 @@ public interface IUserRepository
     Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
     Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync();
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
-    Task<bool> IsUserAdminAsync(AppUser user);
+    Task<bool> IsUserAdminAsync(AppUser? user);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
     Task<AppUserPreferences?> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
@@ -231,8 +231,9 @@ public class UserRepository : IUserRepository
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
     }
 
-    public async Task<bool> IsUserAdminAsync(AppUser user)
+    public async Task<bool> IsUserAdminAsync(AppUser? user)
     {
+        if (user == null) return false;
         return await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
     }
 

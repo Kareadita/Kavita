@@ -1,15 +1,15 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace API.Extensions;
 
-public static class StringExtensions
+public static partial class StringExtensions
 {
-    private static readonly Regex SentenceCaseRegex = new Regex(@"(^[a-z])|\.\s+(.)", RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+    [GeneratedRegex(@"(^[a-z])|\.\s+(.)", RegexOptions.ExplicitCapture | RegexOptions.Compiled)]
+    private static partial Regex SentenceCaseRegex();
 
     public static string SentenceCase(this string value)
     {
-        return SentenceCaseRegex.Replace(value.ToLower(), s => s.Value.ToUpper());
+        return SentenceCaseRegex().Replace(value.ToLower(), s => s.Value.ToUpper());
     }
 
     /// <summary>

@@ -324,7 +324,7 @@ public class DirectoryServiceTests
         ds.CopyFileToDirectory($"{testDirectory}file/data-0.txt", "/manga/output/");
         Assert.True(fileSystem.FileExists("/manga/output/data-0.txt"));
         Assert.True(fileSystem.FileExists("/manga/file/data-0.txt"));
-        Assert.True(fileSystem.FileInfo.FromFileName("/manga/file/data-0.txt").Length == fileSystem.FileInfo.FromFileName("/manga/output/data-0.txt").Length);
+        Assert.True(fileSystem.FileInfo.New("/manga/file/data-0.txt").Length == fileSystem.FileInfo.New("/manga/output/data-0.txt").Length);
     }
     #endregion
 

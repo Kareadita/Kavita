@@ -354,7 +354,7 @@ public class BookmarkServiceTests
 
 
         Assert.Equal(2, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
-        Assert.False(ds.FileSystem.FileInfo.FromFileName(Path.Join(BookmarkDirectory, "1/1/1/0001.jpg")).Exists);
+        Assert.False(ds.FileSystem.FileInfo.New(Path.Join(BookmarkDirectory, "1/1/1/0001.jpg")).Exists);
     }
     #endregion
 

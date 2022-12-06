@@ -77,6 +77,7 @@ public class VersionUpdaterService : IVersionUpdaterService
     {
         var update = await GetGithubRelease();
         var dto = CreateDto(update);
+        if (dto == null) return null;
         return new Version(dto.UpdateVersion) <= new Version(dto.CurrentVersion) ? null : dto;
     }
 

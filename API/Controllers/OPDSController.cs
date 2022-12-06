@@ -568,7 +568,7 @@ public class OpdsController : BaseApiController
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                 _chapterSortComparer);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(libraryType)}s");
         foreach (var chapter in chapters)
         {
@@ -596,11 +596,12 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        if (chapter == null) return BadRequest("Chapter doesn't exist");
+        var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
@@ -755,7 +756,7 @@ public class OpdsController : BaseApiController
             DirectoryService.GetHumanReadableBytes(_directoryService.GetTotalSize(new List<string>()
                 {mangaFile.FilePath}));
         var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
-        var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
+        var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath));
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, await GetUser(apiKey));
 
