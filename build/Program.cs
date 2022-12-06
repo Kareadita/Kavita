@@ -123,4 +123,9 @@ Target(
     }
 );
 
+foreach (var runtime in Runtimes)
+{
+    Target(runtime, DependsOn(Build, Angular), () => PackageRuntime("net6.0", runtime));
+}
+
 await RunTargetsAndExitAsync(args);
