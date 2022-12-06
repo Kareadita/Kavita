@@ -8,43 +8,13 @@
         </ng-container>
     </div>
 
-    <div class="row g-0">
+    <!-- <div class="row g-0">
         Books Read (this can be chapters read fully)
         Number of bookmarks
         Last Active Time
         Average days reading on server a week
         Total Series in want to read list? 
-    </div>
-
-    <!-- Table of all series with progress -->
-    <table class="table table-light table-striped scrollable">
-        <thead>
-            <tr>
-                <th scope="col">
-                    Chapter Number
-                </th>
-                <th scope="col">
-                    Series Name
-                </th>
-                <th scope="col">
-                    Read Date
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let evt of readSeries$ | async; let idx = index;">
-                <td id="adhoctask--{{idx}}">
-                  {{evt.chapterNumber}}
-                </td>
-                <td>
-                  <a href="/library/{{evt.libraryId}}/series/{{evt.seriesId}}" target="_blank">{{evt.seriesName}}</a>
-                </td>
-                <td>
-                    {{evt.readDate}}
-                  </td>
-              </tr>
-        </tbody>
-    </table>
+    </div> -->
 
     
 </div>
