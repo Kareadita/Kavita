@@ -484,7 +484,7 @@ public class BookService : IBookService
 
         try
         {
-            CultureInfo.GetCultureInfo(language);
+            return CultureInfo.GetCultureInfo(language).ToString();
         }
         catch (Exception)
         {
