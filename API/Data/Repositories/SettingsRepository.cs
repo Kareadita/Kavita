@@ -13,7 +13,7 @@ public interface ISettingsRepository
 {
     void Update(ServerSetting settings);
     Task<ServerSettingDto> GetSettingsDtoAsync();
-    Task<ServerSetting?> GetSettingAsync(ServerSettingKey key);
+    Task<ServerSetting> GetSettingAsync(ServerSettingKey key);
     Task<IEnumerable<ServerSetting>> GetSettingsAsync();
 }
 public class SettingsRepository : ISettingsRepository
@@ -41,9 +41,9 @@ public class SettingsRepository : ISettingsRepository
         return _mapper.Map<ServerSettingDto>(settings);
     }
 
-    public Task<ServerSetting?> GetSettingAsync(ServerSettingKey key)
+    public Task<ServerSetting> GetSettingAsync(ServerSettingKey key)
     {
-        return _context.ServerSetting.SingleOrDefaultAsync(x => x.Key == key);
+        return _context.ServerSetting.SingleOrDefaultAsync(x => x.Key == key)!;
     }
 
     public async Task<IEnumerable<ServerSetting>> GetSettingsAsync()

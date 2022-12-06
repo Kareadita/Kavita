@@ -38,7 +38,7 @@ public class DeviceService : IDeviceService
         try
         {
             userWithDevices.Devices ??= new List<Device>();
-            var existingDevice = userWithDevices.Devices.SingleOrDefault(d => d.Name.Equals(dto.Name));
+            var existingDevice = userWithDevices.Devices.SingleOrDefault(d => d.Name!.Equals(dto.Name));
             if (existingDevice != null) throw new KavitaException("A device with this name already exists");
 
             existingDevice = DbFactory.Device(dto.Name);
@@ -114,7 +114,7 @@ public class DeviceService : IDeviceService
         await _unitOfWork.CommitAsync();
         var success = await _emailService.SendFilesToEmail(new SendToDto()
         {
-            DestinationEmail = device.EmailAddress,
+            DestinationEmail = device.EmailAddress!,
             FilePaths = files.Select(m => m.FilePath)
         });
 

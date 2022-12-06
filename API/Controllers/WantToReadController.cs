@@ -59,6 +59,7 @@ public class WantToReadController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.WantToRead);
+        if (user == null) return Unauthorized();
 
         var existingIds = user.WantToRead.Select(s => s.Id).ToList();
         existingIds.AddRange(dto.SeriesIds);

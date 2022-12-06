@@ -222,7 +222,7 @@ public class ReaderController : BaseApiController
 
         return Ok(new BookmarkInfoDto()
         {
-            SeriesName = series.Name,
+            SeriesName = series!.Name,
             SeriesFormat = series.Format,
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
@@ -323,6 +323,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleAsRead(MarkVolumesReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
@@ -351,6 +352,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleAsUnread(MarkVolumesReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
@@ -378,6 +380,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleSeriesAsRead(MarkMultipleSeriesAsReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
@@ -403,6 +406,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleSeriesAsUnread(MarkMultipleSeriesAsReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
@@ -435,7 +439,7 @@ public class ReaderController : BaseApiController
             VolumeId = 0,
             SeriesId = 0
         };
-        if (user.Progresses == null) return Ok(progressBookmark);
+        if (user?.Progresses == null) return Ok(progressBookmark);
         var progress = user.Progresses.FirstOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
 
         if (progress != null)
@@ -457,7 +461,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
+        if (user == null) return Unauthorized();
         if (await _readerService.SaveReadingProgress(progressDto, user.Id)) return Ok(true);
 
         return BadRequest("Could not save progress");
@@ -498,6 +502,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         // Tachiyomi sends chapter 0.0f when there's no chapters read.
@@ -535,6 +540,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
     }
@@ -548,6 +554,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(FilterDto filterDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
         return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id, filterDto));
@@ -562,6 +569,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> RemoveBookmarks(RemoveBookmarkForSeriesDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok("Nothing to remove");
 
         try
@@ -601,7 +609,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> BulkRemoveBookmarks(BulkRemoveBookmarkForSeriesDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user.Bookmarks == null) return Ok("Nothing to remove");
+        if (user == null) return Unauthorized();
+        if (user?.Bookmarks == null) return Ok("Nothing to remove");
 
         try
         {
@@ -637,7 +646,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+        if (user == null) return Unauthorized();
+        if (user?.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
     }
 
@@ -650,7 +660,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+        if (user == null) return Unauthorized();
+        if (user?.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
     }

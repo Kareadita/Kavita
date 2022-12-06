@@ -31,8 +31,8 @@ public class ParsedSeries
 
 public class SeriesModified
 {
-    public string? FolderPath { get; set; }
-    public string? SeriesName { get; set; }
+    public required string FolderPath { get; set; }
+    public required string SeriesName { get; set; }
     public DateTime LastScanned { get; set; }
     public MangaFormat Format { get; set; }
     public IEnumerable<string> LibraryRoots { get; set; } = ArraySegment<string>.Empty;
@@ -166,9 +166,9 @@ public class ParseScannedFiles
     /// </summary>
     /// <param name="scannedSeries">A localized list of a series' parsed infos</param>
     /// <param name="info"></param>
-    private void TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
+    private void TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo? info)
     {
-        if (info.Series == string.Empty) return;
+        if (info == null || info.Series == string.Empty) return;
 
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
@@ -309,7 +309,7 @@ public class ParseScannedFiles
                 .ToList();
 
 
-            MergeLocalizedSeriesWithSeries(infos);
+            MergeLocalizedSeriesWithSeries(infos!);
 
             foreach (var info in infos)
             {
@@ -321,7 +321,7 @@ public class ParseScannedFiles
                 {
                     _logger.LogError(ex,
                         "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
-                        info.FullFilePath);
+                        info?.FullFilePath);
                 }
             }
 

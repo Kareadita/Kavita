@@ -45,7 +45,7 @@ public interface IDirectoryService
     void ClearDirectory(string directoryPath);
     void ClearAndDeleteDirectory(string directoryPath);
     string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
-    bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "");
+    bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "");
     Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
         IList<string> filePaths);
     IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
@@ -59,11 +59,11 @@ public interface IDirectoryService
         string searchPatternExpression = "",
         SearchOption searchOption = SearchOption.TopDirectoryOnly);
     IEnumerable<string> GetDirectories(string folderPath);
-    IEnumerable<string> GetDirectories(string folderPath, GlobMatcher matcher);
+    IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher);
     string GetParentDirectoryName(string fileOrFolder);
     IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
     DateTime GetLastWriteTime(string folderPath);
-    GlobMatcher CreateMatcherFromFile(string filePath);
+    GlobMatcher? CreateMatcherFromFile(string filePath);
 }
 public partial class DirectoryService : IDirectoryService
 {
@@ -243,7 +243,7 @@ public partial class DirectoryService : IDirectoryService
     /// <param name="searchPattern">Defaults to all files</param>
     /// <returns>If was successful</returns>
     /// <exception cref="DirectoryNotFoundException">Thrown when source directory does not exist</exception>
-    public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
+    public bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "")
     {
         if (string.IsNullOrEmpty(sourceDirName)) return false;
 
@@ -394,7 +394,7 @@ public partial class DirectoryService : IDirectoryService
     public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
     {
         ExistOrCreate(directoryPath);
-        string currentFile = null;
+        string? currentFile = null;
         try
         {
             foreach (var file in filePaths)
@@ -432,7 +432,7 @@ public partial class DirectoryService : IDirectoryService
     public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, IList<string> newFilenames)
     {
         ExistOrCreate(directoryPath);
-        string currentFile = null;
+        string? currentFile = null;
         var index = 0;
         try
         {
@@ -588,7 +588,7 @@ public partial class DirectoryService : IDirectoryService
     /// <param name="folderPath"></param>
     /// <param name="matcher">A set of glob rules that will filter directories out</param>
     /// <returns>List of directory paths, empty if path doesn't exist</returns>
-    public IEnumerable<string> GetDirectories(string folderPath, GlobMatcher matcher)
+    public IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher)
     {
         if (matcher == null) return GetDirectories(folderPath);
 
@@ -700,7 +700,7 @@ public partial class DirectoryService : IDirectoryService
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public GlobMatcher CreateMatcherFromFile(string filePath)
+    public GlobMatcher? CreateMatcherFromFile(string filePath)
     {
         if (!FileSystem.File.Exists(filePath))
         {

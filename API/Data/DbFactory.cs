@@ -8,6 +8,7 @@ using API.Entities.Metadata;
 using API.Extensions;
 using API.Parser;
 using API.Services.Tasks;
+using Kavita.Common;
 
 namespace API.Data;
 
@@ -188,4 +189,17 @@ public static class DbFactory
         };
     }
 
+    public static AppUser AppUser(string username, string email, SiteTheme defaultTheme)
+    {
+        return new AppUser()
+        {
+            UserName = username,
+            Email = email,
+            ApiKey = HashUtil.ApiKey(),
+            UserPreferences = new AppUserPreferences
+            {
+                Theme = defaultTheme
+            }
+        };
+    }
 }

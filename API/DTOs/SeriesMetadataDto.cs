@@ -9,18 +9,21 @@ public class SeriesMetadataDto
 {
     public int Id { get; set; }
     public string Summary { get; set; } = string.Empty;
+
     /// <summary>
     /// Collections the Series belongs to
     /// </summary>
-    public ICollection<CollectionTagDto> CollectionTags { get; set; }
+    public ICollection<CollectionTagDto> CollectionTags { get; set; } = new List<CollectionTagDto>();
+
     /// <summary>
     /// Genres for the Series
     /// </summary>
-    public ICollection<GenreTagDto> Genres { get; set; }
+    public ICollection<GenreTagDto> Genres { get; set; } = new List<GenreTagDto>();
+
     /// <summary>
     /// Collection of all Tags from underlying chapters for a Series
     /// </summary>
-    public ICollection<TagDto> Tags { get; set; }
+    public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
     public ICollection<PersonDto> Writers { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> CoverArtists { get; set; } = new List<PersonDto>();
     public ICollection<PersonDto> Publishers { get; set; } = new List<PersonDto>();

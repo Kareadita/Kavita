@@ -7,7 +7,7 @@ namespace API.Helpers;
 
 public interface ICacheHelper
 {
-    bool ShouldUpdateCoverImage(string coverPath, MangaFile firstFile, DateTime chapterCreated,
+    bool ShouldUpdateCoverImage(string coverPath, MangaFile? firstFile, DateTime chapterCreated,
         bool forceUpdate = false,
         bool isCoverLocked = false);
 
@@ -37,7 +37,7 @@ public class CacheHelper : ICacheHelper
     /// <param name="forceUpdate">If the user has told us to force the refresh</param>
     /// <param name="isCoverLocked">If cover has been locked by user. This will force false</param>
     /// <returns></returns>
-    public bool ShouldUpdateCoverImage(string coverPath, MangaFile firstFile, DateTime chapterCreated, bool forceUpdate = false,
+    public bool ShouldUpdateCoverImage(string coverPath, MangaFile? firstFile, DateTime chapterCreated, bool forceUpdate = false,
         bool isCoverLocked = false)
     {
 

@@ -316,6 +316,7 @@ public class TaskScheduler : ITaskScheduler
     public async Task CheckForUpdate()
     {
         var update = await _versionUpdaterService.CheckForUpdate();
+        if (update == null) return;
         await _versionUpdaterService.PushUpdate(update);
     }
 

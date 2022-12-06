@@ -14,9 +14,9 @@ namespace API.Data;
 
 internal sealed class SeriesRelationMigrationOutput
 {
-    public string SeriesName { get; set; }
+    public required string SeriesName { get; set; }
     public int SeriesId { get; set; }
-    public string TargetSeriesName { get; set; }
+    public required string TargetSeriesName { get; set; }
     public int TargetId { get; set; }
     public RelationKind Relationship { get; set; }
 }

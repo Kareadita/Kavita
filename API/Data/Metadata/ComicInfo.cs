@@ -104,7 +104,7 @@ public class ComicInfo
             .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
     }
 
-    public static void CleanComicInfo(ComicInfo info)
+    public static void CleanComicInfo(ComicInfo? info)
     {
         if (info == null) return;
 

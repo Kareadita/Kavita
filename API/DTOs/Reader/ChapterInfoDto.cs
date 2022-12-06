@@ -10,11 +10,11 @@ public class ChapterInfoDto : IChapterInfoDto
     /// <summary>
     /// The Chapter Number
     /// </summary>
-    public string? ChapterNumber { get; set; }
+    public string ChapterNumber { get; set; } = default! ;
     /// <summary>
     /// The Volume Number
     /// </summary>
-    public string? VolumeNumber { get; set; }
+    public string VolumeNumber { get; set; } = default! ;
     /// <summary>
     /// Volume entity Id
     /// </summary>
@@ -64,6 +64,6 @@ public class ChapterInfoDto : IChapterInfoDto
     /// Series Title
     /// </summary>
     /// <remarks>Usually just series name, but can include chapter title</remarks>
-    public string? Title { get; set; }
+    public string Title { get; set; } = default! ;
 
 }

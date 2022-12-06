@@ -4,6 +4,6 @@ namespace API.DTOs;
 
 public class UpdateLibraryForUserDto
 {
-    public string Username { get; init; }
-    public IEnumerable<LibraryDto> SelectedLibraries { get; init; }
+    public required string Username { get; init; }
+    public required IEnumerable<LibraryDto> SelectedLibraries { get; init; } = new List<LibraryDto>();
 }

@@ -345,19 +345,20 @@ public class UploadController : BaseApiController
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
+            if (chapter == null) return BadRequest("Chapter no longer exists");
             var originalFile = chapter.CoverImage;
             chapter.CoverImage = string.Empty;
             chapter.CoverImageLocked = false;
             _unitOfWork.ChapterRepository.Update(chapter);
-            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
+            var volume = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
             volume.CoverImage = chapter.CoverImage;
             _unitOfWork.VolumeRepository.Update(volume);
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+            var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId))!;
 
             if (_unitOfWork.HasChanges())
             {
                 await _unitOfWork.CommitAsync();
-                System.IO.File.Delete(originalFile);
+                if (originalFile != null) System.IO.File.Delete(originalFile);
                 _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 return Ok();
             }

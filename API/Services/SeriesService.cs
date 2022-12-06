@@ -50,7 +50,7 @@ public class SeriesService : ISeriesService
     /// <param name="series"></param>
     /// <param name="isBookLibrary"></param>
     /// <returns></returns>
-    public static Chapter GetFirstChapterForMetadata(Series series, bool isBookLibrary)
+    public static Chapter? GetFirstChapterForMetadata(Series series, bool isBookLibrary)
     {
         return series.Volumes.OrderBy(v => v.Number, ChapterSortComparer.Default)
             .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default))
@@ -69,7 +69,7 @@ public class SeriesService : ISeriesService
             var allPeople = (await _unitOfWork.PersonRepository.GetAllPeople()).ToList();
             var allTags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToList();
 
-            series.Metadata ??= DbFactory.SeriesMetadata(updateSeriesMetadataDto.CollectionTags
+            series.Metadata ??= DbFactory.SeriesMetadata((updateSeriesMetadataDto.CollectionTags ?? new List<CollectionTagDto>())
                 .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
 
             if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
@@ -138,7 +138,7 @@ public class SeriesService : ISeriesService
             }
 
             series.Metadata.People ??= new List<Person>();
-            PersonHelper.UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata.Writers, series, allPeople,
+            PersonHelper.UpdatePeopleList(PersonRole.Writer, updateSeriesMetadataDto.SeriesMetadata!.Writers, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.WriterLocked = true);
             PersonHelper.UpdatePeopleList(PersonRole.Character, updateSeriesMetadataDto.SeriesMetadata.Characters, series, allPeople,
                 HandleAddPerson,  () => series.Metadata.CharacterLocked = true);
@@ -182,7 +182,7 @@ public class SeriesService : ISeriesService
                 return true;
             }
 
-            if (await _unitOfWork.CommitAsync())
+            if (await _unitOfWork.CommitAsync() && updateSeriesMetadataDto.CollectionTags != null)
             {
                 foreach (var tag in updateSeriesMetadataDto.CollectionTags)
                 {
@@ -348,10 +348,10 @@ public class SeriesService : ISeriesService
             throw new UnauthorizedAccessException("User does not have access to the library this series belongs to");
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user.AgeRestriction != AgeRating.NotApplicable)
+        if (user!.AgeRestriction != AgeRating.NotApplicable)
         {
             var seriesMetadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
-            if (seriesMetadata.AgeRating > user.AgeRestriction)
+            if (seriesMetadata!.AgeRating > user.AgeRestriction)
                 throw new UnauthorizedAccessException("User is not allowed to view this series due to age restrictions");
         }
 

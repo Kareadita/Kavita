@@ -11,8 +11,8 @@ public class ServerInfoDto
     /// <summary>
     /// Unique Id that represents a unique install
     /// </summary>
-    public string InstallId { get; set; }
-    public string Os { get; set; }
+    public required string InstallId { get; set; }
+    public required string Os { get; set; }
     /// <summary>
     /// If the Kavita install is using Docker
     /// </summary>
@@ -20,11 +20,11 @@ public class ServerInfoDto
     /// <summary>
     /// Version of .NET instance is running
     /// </summary>
-    public string DotnetVersion { get; set; }
+    public required string DotnetVersion { get; set; }
     /// <summary>
     /// Version of Kavita
     /// </summary>
-    public string KavitaVersion { get; set; }
+    public required string KavitaVersion { get; set; }
     /// <summary>
     /// Number of Cores on the instance
     /// </summary>
@@ -123,22 +123,22 @@ public class ServerInfoDto
     /// A list of background colors set on the instance
     /// </summary>
     /// <remarks>Introduced in v0.6.0</remarks>
-    public IEnumerable<string> MangaReaderBackgroundColors { get; set; }
+    public required IEnumerable<string> MangaReaderBackgroundColors { get; set; }
     /// <summary>
     /// A list of Page Split defaults being used on the instance
     /// </summary>
     /// <remarks>Introduced in v0.6.0</remarks>
-    public IEnumerable<PageSplitOption> MangaReaderPageSplittingModes { get; set; }
+    public required IEnumerable<PageSplitOption> MangaReaderPageSplittingModes { get; set; }
     /// <summary>
     /// A list of Layout Mode defaults being used on the instance
     /// </summary>
     /// <remarks>Introduced in v0.6.0</remarks>
-    public IEnumerable<LayoutMode> MangaReaderLayoutModes { get; set; }
+    public required IEnumerable<LayoutMode> MangaReaderLayoutModes { get; set; }
     /// <summary>
     /// A list of file formats existing in the instance
     /// </summary>
     /// <remarks>Introduced in v0.6.0</remarks>
-    public IEnumerable<FileFormatDto> FileFormats { get; set; }
+    public required IEnumerable<FileFormatDto> FileFormats { get; set; }
     /// <summary>
     /// If there is at least one user that is using an age restricted profile on the instance
     /// </summary>

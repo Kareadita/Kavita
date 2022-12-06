@@ -83,10 +83,10 @@ public class VersionUpdaterService : IVersionUpdaterService
     public async Task<IEnumerable<UpdateNotificationDto>> GetAllReleases()
     {
         var updates = await GetGithubReleases();
-        return updates.Select(CreateDto);
+        return updates.Select(CreateDto).Where(d => d != null)!;
     }
 
-    private UpdateNotificationDto CreateDto(GithubReleaseMetadata? update)
+    private UpdateNotificationDto? CreateDto(GithubReleaseMetadata? update)
     {
         if (update == null || string.IsNullOrEmpty(update.Tag_Name)) return null;
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));

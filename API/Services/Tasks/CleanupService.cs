@@ -173,7 +173,7 @@ public class CleanupService : ICleanupService
 
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
         var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
-        var expiredBackups = allBackups.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+        var expiredBackups = allBackups.Select(filename => _directoryService.FileSystem.FileInfo.New(filename))
             .Where(f => f.CreationTime < deltaTime)
             .ToList();
 

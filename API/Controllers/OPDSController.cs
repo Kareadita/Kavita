@@ -194,6 +194,7 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         IEnumerable<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
@@ -230,6 +231,7 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         IEnumerable <CollectionTagDto> tags;
@@ -309,7 +311,8 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
-        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName, AppUserIncludes.ReadingListsWithItems);
+        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user!.UserName!, AppUserIncludes.ReadingListsWithItems);
+        if (userWithLists == null) return Unauthorized();
         var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
         if (readingList == null)
         {
@@ -426,9 +429,9 @@ public class OpdsController : BaseApiController
             return BadRequest("You must pass a query parameter");
         }
         query = query.Replace(@"%", "");
+
         // Get libraries user has access to
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
-
         if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);

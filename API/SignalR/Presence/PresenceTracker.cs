@@ -8,8 +8,8 @@ namespace API.SignalR.Presence;
 
 public interface IPresenceTracker
 {
-    Task UserConnected(string username, string connectionId);
-    Task UserDisconnected(string username, string connectionId);
+    Task UserConnected(string? username, string connectionId);
+    Task UserDisconnected(string? username, string connectionId);
     Task<string[]> GetOnlineAdmins();
     Task<List<string>> GetConnectionsForUser(string username);
 
@@ -17,7 +17,7 @@ public interface IPresenceTracker
 
 internal class ConnectionDetail
 {
-    public List<string> ConnectionIds { get; set; }
+    public List<string> ConnectionIds { get; set; } = new List<string>();
     public bool IsAdmin { get; set; }
 }
 
@@ -35,8 +35,9 @@ public class PresenceTracker : IPresenceTracker
         _unitOfWork = unitOfWork;
     }
 
-    public async Task UserConnected(string username, string connectionId)
+    public async Task UserConnected(string? username, string connectionId)
     {
+        if (username == null) return;
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
         if (user == null) return;
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
@@ -61,8 +62,9 @@ public class PresenceTracker : IPresenceTracker
         await _unitOfWork.CommitAsync();
     }
 
-    public Task UserDisconnected(string username, string connectionId)
+    public Task UserDisconnected(string? username, string connectionId)
     {
+        if (username == null) return Task.CompletedTask;
         lock (OnlineUsers)
         {
             if (!OnlineUsers.ContainsKey(username)) return Task.CompletedTask;
@@ -102,7 +104,7 @@ public class PresenceTracker : IPresenceTracker
 
     public Task<List<string>> GetConnectionsForUser(string username)
     {
-        List<string> connectionIds;
+        List<string>? connectionIds;
         lock (OnlineUsers)
         {
             connectionIds = OnlineUsers.GetValueOrDefault(username)?.ConnectionIds;

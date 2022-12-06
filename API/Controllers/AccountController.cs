@@ -365,7 +365,6 @@ public class AccountController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized("You do not have permission");
-        if (dto == null) return BadRequest("Invalid payload");
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
@@ -385,7 +384,7 @@ public class AccountController : BaseApiController
             return BadRequest("There was an error updating the age restriction");
         }
 
-        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
         return Ok();
     }
@@ -493,7 +492,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.ConfirmationToken))
             return BadRequest("Manual setup is unable to be completed. Please cancel and recreate the invite.");
 
-        return GenerateEmailLink(user.ConfirmationToken, "confirm-email", user.Email, withBaseUrl);
+        return GenerateEmailLink(user.ConfirmationToken, "confirm-email", user.Email!, withBaseUrl);
     }
 
 
@@ -527,16 +526,7 @@ public class AccountController : BaseApiController
         }
 
         // Create a new user
-        var user = new AppUser()
-        {
-            UserName = dto.Email,
-            Email = dto.Email,
-            ApiKey = HashUtil.ApiKey(),
-            UserPreferences = new AppUserPreferences
-            {
-                Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
-            }
-        };
+        var user = DbFactory.AppUser(dto.Email, dto.Email, await _unitOfWork.SiteThemeRepository.GetDefaultTheme());
 
         try
         {
@@ -601,6 +591,11 @@ public class AccountController : BaseApiController
 
         try
         {
+            if (string.IsNullOrEmpty(user.ConfirmationToken))
+            {
+                _logger.LogCritical("Confirmation token is null when it should be valid for confirm email flow");
+                return BadRequest("There was an error setting up your account. Please check the logs");
+            }
             var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
             _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, user.ConfirmationToken);
@@ -613,7 +608,7 @@ public class AccountController : BaseApiController
                     await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                     {
                         EmailAddress = dto.Email,
-                        InvitingUser = adminUser.UserName,
+                        InvitingUser = adminUser.UserName!,
                         ServerConfirmationLink = emailLink
                     });
                 }
@@ -681,14 +676,14 @@ public class AccountController : BaseApiController
         await _unitOfWork.CommitAsync();
 
 
-        user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
-            AppUserIncludes.UserPreferences);
+        user = (await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
+            AppUserIncludes.UserPreferences))!;
 
         // Perform Login code
         return new UserDto
         {
-            Username = user.UserName,
-            Email = user.Email,
+            Username = user.UserName!,
+            Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
@@ -732,7 +727,7 @@ public class AccountController : BaseApiController
 
         // For the user's connected devices to pull the new information in
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
-            MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+            MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
         // Perform Login code
         return Ok();
@@ -834,14 +829,14 @@ public class AccountController : BaseApiController
 
         await _unitOfWork.CommitAsync();
 
-        user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
+        user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName!,
             AppUserIncludes.UserPreferences);
 
         // Perform Login code
         return new UserDto
         {
-            Username = user.UserName,
-            Email = user.Email,
+            Username = user!.UserName!,
+            Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
@@ -867,7 +862,7 @@ public class AccountController : BaseApiController
         await _emailService.SendMigrationEmail(new EmailMigrationDto()
         {
             EmailAddress = user.Email,
-            Username = user.UserName,
+            Username = user.UserName!,
             ServerConfirmationLink = emailLink,
             InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
         });
@@ -901,8 +896,8 @@ public class AccountController : BaseApiController
         if (emailValidationErrors.Any())
         {
             var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (await _userManager.IsEmailConfirmedAsync(invitedUser))
-                return BadRequest($"User is already registered as {invitedUser.UserName}");
+            if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
+                return BadRequest($"User is already registered as {invitedUser!.UserName}");
 
             _logger.LogInformation("A user is attempting to login, but hasn't accepted email invite");
             return BadRequest("User is already invited under this email and has yet to accepted invite.");

@@ -209,12 +209,12 @@ public class DownloadController : BaseApiController
 
         var files = await _bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
-        var filename = $"{series.Name} - Bookmarks.zip";
+        var filename = $"{series!.Name} - Bookmarks.zip";
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 0F));
         var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());
         var filePath =  _archiveService.CreateZipForDownload(files,
-            $"download_{user.Id}_{seriesIds}_bookmarks");
+            $"download_{user!.Id}_{seriesIds}_bookmarks");
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 1F));
 

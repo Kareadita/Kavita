@@ -44,8 +44,8 @@ public interface IBookService
     /// <param name="book">Book Reference, needed for if you expect Import statements</param>
     /// <returns></returns>
     Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
-    ComicInfo GetComicInfo(string filePath);
-    ParserInfo ParseInfo(string filePath);
+    ComicInfo? GetComicInfo(string filePath);
+    ParserInfo? ParseInfo(string filePath);
     /// <summary>
     /// Extracts a PDF file's pages as images to an target directory
     /// </summary>
@@ -265,7 +265,7 @@ public class BookService : IBookService
         foreach (var image in images)
         {
 
-            string key = null;
+            string? key = null;
             if (image.Attributes["src"] != null)
             {
                 key = "src";
@@ -393,7 +393,7 @@ public class BookService : IBookService
         }
     }
 
-    public ComicInfo GetComicInfo(string filePath)
+    public ComicInfo? GetComicInfo(string filePath)
     {
         if (!IsValidFile(filePath) || Tasks.Scanner.Parser.Parser.IsPdf(filePath)) return null;
 
@@ -568,7 +568,7 @@ public class BookService : IBookService
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public ParserInfo ParseInfo(string filePath)
+    public ParserInfo? ParseInfo(string filePath)
     {
         if (!Tasks.Scanner.Parser.Parser.IsEpub(filePath)) return null;
 
@@ -636,7 +636,7 @@ public class BookService : IBookService
                         Edition = string.Empty,
                         Format = MangaFormat.Epub,
                         Filename = Path.GetFileName(filePath),
-                        Title = specialName?.Trim(),
+                        Title = specialName?.Trim() ?? string.Empty,
                         FullFilePath = filePath,
                         IsSpecial = false,
                         Series = series.Trim(),

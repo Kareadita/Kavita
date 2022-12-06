@@ -132,7 +132,7 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-        if (!await _seriesService.UpdateRating(user, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
+        if (!await _seriesService.UpdateRating(user!, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
         return Ok();
     }
 
@@ -155,13 +155,13 @@ public class SeriesController : BaseApiController
 
         series.Name = updateSeries.Name.Trim();
         series.NormalizedName = series.Name.Normalize();
-        if (!string.IsNullOrEmpty(updateSeries.SortName.Trim()))
+        if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
             series.SortName = updateSeries.SortName.Trim();
         }
 
-        series.LocalizedName = updateSeries.LocalizedName.Trim();
-        series.NormalizedLocalizedName = series.LocalizedName.Normalize();
+        series.LocalizedName = updateSeries.LocalizedName?.Trim();
+        series.NormalizedLocalizedName = series.LocalizedName?.Normalize();
 
         series.NameLocked = updateSeries.NameLocked;
         series.SortNameLocked = updateSeries.SortNameLocked;

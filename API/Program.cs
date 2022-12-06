@@ -41,7 +41,7 @@ public class Program
             .Information()
             .CreateBootstrapLogger();
 
-        var directoryService = new DirectoryService(null, new FileSystem());
+        var directoryService = new DirectoryService(null!, new FileSystem());
 
         // Before anything, check if JWT has been generated properly or if user still has default
         if (!Configuration.CheckIfJwtTokenSet() &&

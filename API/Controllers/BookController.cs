@@ -143,6 +143,7 @@ public class BookController : BaseApiController
     public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
     {
         var chapter = await _cacheService.Ensure(chapterId);
+        if (chapter == null) return BadRequest("Could not find Chapter");
         var path = _cacheService.GetCachedFile(chapter);
 
         var baseUrl = "//" + Request.Host + Request.PathBase + "/api/";

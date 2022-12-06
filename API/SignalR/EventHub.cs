@@ -55,7 +55,7 @@ public class EventHub : IEventHub
     public async Task SendMessageToAsync(string method, SignalRMessage message, int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId) ?? throw new InvalidOperationException();
-        await _messageHub.Clients.User(user.UserName).SendAsync(method, message);
+        await _messageHub.Clients.User(user.UserName!).SendAsync(method, message);
     }
 
 }

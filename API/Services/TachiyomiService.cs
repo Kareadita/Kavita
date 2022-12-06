@@ -15,7 +15,7 @@ namespace API.Services;
 
 public interface ITachiyomiService
 {
-    Task<ChapterDto> GetLatestChapter(int seriesId, int userId);
+    Task<ChapterDto?> GetLatestChapter(int seriesId, int userId);
     Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber);
 }
 
@@ -49,10 +49,8 @@ public class TachiyomiService : ITachiyomiService
     /// If its a chapter, return the chapterDto as is.
     /// If it's a volume, the volume number gets returned in the 'Number' attribute of a chapterDto encoded.
     /// The volume number gets divided by 10,000 because that's how Tachiyomi interprets volumes</returns>
-    public async Task<ChapterDto> GetLatestChapter(int seriesId, int userId)
+    public async Task<ChapterDto?> GetLatestChapter(int seriesId, int userId)
     {
-
-
         var currentChapter = await _readerService.GetContinuePoint(seriesId, userId);
 
         var prevChapterId =
@@ -95,7 +93,8 @@ public class TachiyomiService : ITachiyomiService
         }
 
         // There is progress, we now need to figure out the highest volume or chapter and return that.
-        var prevChapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId);
+        var prevChapter = (await _unitOfWork.ChapterRepository.GetChapterDtoAsync(prevChapterId))!;
+
         var volumeWithProgress = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(prevChapter.VolumeId, userId);
         // We only encode for single-file volumes
         if (volumeWithProgress.Number != 0 && volumeWithProgress.Chapters.Count == 1)

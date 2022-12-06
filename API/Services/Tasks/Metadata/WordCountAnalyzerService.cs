@@ -50,7 +50,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (library == null) return;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, string.Empty));

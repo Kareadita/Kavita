@@ -6,9 +6,9 @@ namespace API.DTOs;
 public class UpdateLibraryDto
 {
     public int Id { get; init; }
-    public string Name { get; init; }
+    public required string Name { get; init; }
     public LibraryType Type { get; set; }
-    public IEnumerable<string> Folders { get; init; }
+    public required IEnumerable<string> Folders { get; init; }
     public bool FolderWatching { get; init; }
     public bool IncludeInDashboard { get; init; }
     public bool IncludeInRecommended { get; init; }

@@ -62,6 +62,10 @@ public class ProcessSeries : IProcessSeries
         _fileService = fileService;
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+
+        _genres = new List<Genre>();
+        _tags = new List<Tag>();
+        _people = new List<Person>();
     }
 
     /// <summary>
@@ -87,7 +91,7 @@ public class ProcessSeries : IProcessSeries
 
         // Check if there is a Series
         var firstInfo = parsedInfos.First();
-        Series series;
+        Series? series;
         try
         {
             series =
@@ -267,12 +271,12 @@ public class ProcessSeries : IProcessSeries
             }
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.Summary) && !series.Metadata.SummaryLocked)
+        if (!string.IsNullOrEmpty(firstChapter?.Summary) && !series.Metadata.SummaryLocked)
         {
             series.Metadata.Summary = firstChapter.Summary;
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.Language) && !series.Metadata.LanguageLocked)
+        if (!string.IsNullOrEmpty(firstChapter?.Language) && !series.Metadata.LanguageLocked)
         {
             series.Metadata.Language = firstChapter.Language;
         }
@@ -438,7 +442,7 @@ public class ProcessSeries : IProcessSeries
         foreach (var volumeNumber in distinctVolumes)
         {
             _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
-            Volume volume;
+            Volume? volume;
             try
             {
                 volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
@@ -518,7 +522,7 @@ public class ProcessSeries : IProcessSeries
         {
             // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
             // also are treated like specials for UI grouping.
-            Chapter chapter;
+            Chapter? chapter;
             try
             {
                 chapter = volume.Chapters.GetChapterByRange(info);
@@ -745,7 +749,7 @@ public class ProcessSeries : IProcessSeries
         {
             var normalizedName = name.Normalize();
             var person = allPeopleTypeRole.FirstOrDefault(p =>
-                p.NormalizedName.Equals(normalizedName));
+                p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)
             {
                 person = DbFactory.Person(name, role);
@@ -773,7 +777,7 @@ public class ProcessSeries : IProcessSeries
 
             var normalizedName = name.Normalize();
             var genre = _genres.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+                p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
             if (genre == null)
             {
                 genre = DbFactory.Genre(name, false);

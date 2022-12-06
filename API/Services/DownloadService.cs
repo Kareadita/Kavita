@@ -51,7 +51,7 @@ public class DownloadService : IDownloadService
             };
         }
 
-        return contentType;
+        return contentType!;
     }
 
 

@@ -58,8 +58,9 @@ public class ImageService : IImageService
         _directoryService = directoryService;
     }
 
-    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1)
+    public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
     {
+        if (string.IsNullOrEmpty(fileFilePath)) return;
         _directoryService.ExistOrCreate(targetDirectory);
         if (fileCount == 1)
         {
@@ -67,7 +68,7 @@ public class ImageService : IImageService
         }
         else
         {
-            _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(fileFilePath), targetDirectory,
+            _directoryService.CopyDirectoryToDirectory(_directoryService.FileSystem.Path.GetDirectoryName(fileFilePath), targetDirectory,
                 Tasks.Scanner.Parser.Parser.ImageFileExtensions);
         }
     }

@@ -7,6 +7,7 @@ using API.Data.Repositories;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -64,6 +65,7 @@ public class ReadingListService : IReadingListService
             _unitOfWork.ReadingListRepository.BulkRemove(listItems);
 
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
+            if (readingList == null) return true;
             await CalculateReadingListAgeRating(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
@@ -87,8 +89,11 @@ public class ReadingListService : IReadingListService
     {
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
         var item = items.Find(r => r.Id == dto.ReadingListItemId);
-        items.Remove(item);
-        items.Insert(dto.ToPosition, item);
+        if (item != null)
+        {
+            items.Remove(item);
+            items.Insert(dto.ToPosition, item);
+        }
 
         for (var i = 0; i < items.Count; i++)
         {
@@ -108,6 +113,7 @@ public class ReadingListService : IReadingListService
     public async Task<bool> DeleteReadingListItem(UpdateReadingListPosition dto)
     {
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
+        if (readingList == null) return false;
         readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).ToList();
 
         var index = 0;
@@ -156,6 +162,7 @@ public class ReadingListService : IReadingListService
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username,
             AppUserIncludes.ReadingListsWithItems);
+        if (user == null) return null;
         if (user.ReadingLists.SingleOrDefault(rl => rl.Id == readingListId) == null && !await _unitOfWork.UserRepository.IsUserAdminAsync(user))
         {
             return null;
@@ -173,6 +180,7 @@ public class ReadingListService : IReadingListService
     public async Task<bool> DeleteReadingList(int readingListId, AppUser user)
     {
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
+        if (readingList == null) return true;
         user.ReadingLists.Remove(readingList);
 
         if (!_unitOfWork.HasChanges()) return true;
@@ -193,7 +201,7 @@ public class ReadingListService : IReadingListService
         var lastOrder = 0;
         if (readingList.Items.Any())
         {
-            lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
+            lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli!.Order);
         }
 
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();

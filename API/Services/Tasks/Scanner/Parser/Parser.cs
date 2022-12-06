@@ -1039,7 +1039,7 @@ public static partial class Parser
     /// <returns></returns>
     public static string NormalizePath(string? path)
     {
-        return path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+        return string.IsNullOrEmpty(path) ? string.Empty : path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             .Replace(@"//", Path.AltDirectorySeparatorChar + string.Empty);
     }
 
@@ -1053,8 +1053,8 @@ public static partial class Parser
         return FormatTagSpecialKeywords.Contains(comicInfoFormat);
     }
 
-    private static string? ReplaceUnderscores(string? name)
+    private static string ReplaceUnderscores(string name)
     {
-        return string.IsNullOrEmpty(name) ? name : name.Replace('_', ' ');
+        return string.IsNullOrEmpty(name) ? string.Empty : name.Replace('_', ' ');
     }
 }

@@ -129,7 +129,7 @@ public class ArchiveService : IArchiveService
     /// </summary>
     /// <param name="entryFullNames"></param>
     /// <returns>Entry name of match, null if no match</returns>
-    public static string FindFolderEntry(IEnumerable<string> entryFullNames)
+    public static string? FindFolderEntry(IEnumerable<string> entryFullNames)
     {
         var result = entryFullNames
             .Where(path => !(Path.EndsInDirectorySeparator(path) || Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(path) || path.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith)))
@@ -163,7 +163,7 @@ public class ArchiveService : IArchiveService
 
         // Check the first folder and sort within that to see if we can find a file, else fallback to first file with basic sort.
         // Get first folder, then sort within that
-        var firstDirectoryFile = fullNames.OrderByNatural(Path.GetDirectoryName).FirstOrDefault();
+        var firstDirectoryFile = fullNames.OrderByNatural(Path.GetDirectoryName!).FirstOrDefault();
         if (!string.IsNullOrEmpty(firstDirectoryFile))
         {
             var firstDirectory = Path.GetDirectoryName(firstDirectoryFile);
@@ -249,7 +249,7 @@ public class ArchiveService : IArchiveService
     /// <param name="archivePath"></param>
     /// <param name="entryNames"></param>
     /// <returns></returns>
-    public static string FindCoverImageFilename(string archivePath, IEnumerable<string> entryNames)
+    public static string? FindCoverImageFilename(string archivePath, IEnumerable<string> entryNames)
     {
         var entryName = FindFolderEntry(entryNames) ?? FirstFileEntry(entryNames, Path.GetFileName(archivePath));
         return entryName;
@@ -329,8 +329,9 @@ public class ArchiveService : IArchiveService
         return false;
     }
 
-    private static bool IsComicInfoArchiveEntry(string fullName, string name)
+    private static bool IsComicInfoArchiveEntry(string? fullName, string name)
     {
+        if (fullName == null) return false;
         return !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(fullName)
                && name.EndsWith(ComicInfoFilename, StringComparison.OrdinalIgnoreCase)
                && !name.StartsWith(Tasks.Scanner.Parser.Parser.MacOsMetadataFileStartsWith);
@@ -362,7 +363,7 @@ public class ArchiveService : IArchiveService
                     {
                         using var stream = entry.Open();
                         var serializer = new XmlSerializer(typeof(ComicInfo));
-                        var info = (ComicInfo) serializer.Deserialize(stream);
+                        var info = (ComicInfo?) serializer.Deserialize(stream);
                         ComicInfo.CleanComicInfo(info);
                         return info;
                     }
@@ -380,7 +381,7 @@ public class ArchiveService : IArchiveService
                     {
                         using var stream = entry.OpenEntryStream();
                         var serializer = new XmlSerializer(typeof(ComicInfo));
-                        var info = (ComicInfo) serializer.Deserialize(stream);
+                        var info = (ComicInfo?) serializer.Deserialize(stream);
                         ComicInfo.CleanComicInfo(info);
                         return info;
                     }

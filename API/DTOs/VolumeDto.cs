@@ -11,8 +11,9 @@ public class VolumeDto : IHasReadTimeEstimate
     public int Id { get; set; }
     /// <inheritdoc cref="Volume.Number"/>
     public int Number { get; set; }
+
     /// <inheritdoc cref="Volume.Name"/>
-    public string? Name { get; set; }
+    public string Name { get; set; } = default!;
     public int Pages { get; set; }
     public int PagesRead { get; set; }
     public DateTime LastModified { get; set; }

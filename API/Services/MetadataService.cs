@@ -67,11 +67,13 @@ public class MetadataService : IMetadataService
     private Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate, bool convertToWebPOnWrite)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
+        if (firstFile == null) return Task.FromResult(false);
 
-        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage), firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
+        if (!_cacheHelper.ShouldUpdateCoverImage(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, chapter.CoverImage),
+                firstFile, chapter.Created, forceUpdate, chapter.CoverImageLocked))
             return Task.FromResult(false);
 
-        if (firstFile == null) return Task.FromResult(false);
+
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
 
@@ -95,7 +97,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="volume"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private Task<bool> UpdateVolumeCoverImage(Volume volume, bool forceUpdate)
+    private Task<bool> UpdateVolumeCoverImage(Volume? volume, bool forceUpdate)
     {
         // We need to check if Volume coverImage matches first chapters if forceUpdate is false
         if (volume == null || !_cacheHelper.ShouldUpdateCoverImage(
@@ -118,7 +120,7 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private Task UpdateSeriesCoverImage(Series series, bool forceUpdate)
+    private Task UpdateSeriesCoverImage(Series? series, bool forceUpdate)
     {
         if (series == null) return Task.CompletedTask;
 
@@ -192,6 +194,7 @@ public class MetadataService : IMetadataService
     public async Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (library == null) return;
         _logger.LogInformation("[MetadataService] Beginning cover generation refresh of {LibraryName}", library.Name);
 
         _updateEvents.Clear();

@@ -104,7 +104,7 @@ public class ScannerService : IScannerService
     /// <param name="folder"></param>
     public async Task ScanFolder(string folder)
     {
-        Series series = null;
+        Series? series = null;
         try
         {
             series = await _unitOfWork.SeriesRepository.GetSeriesByFolderPath(folder, SeriesIncludes.Library);
@@ -163,6 +163,7 @@ public class ScannerService : IScannerService
         if (series == null) return; // This can occur when UI deletes a series but doesn't update and user re-requests update
         var chapterIds = await _unitOfWork.SeriesRepository.GetChapterIdsForSeriesAsync(new[] {seriesId});
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId, LibraryIncludes.Folders);
+        if (library == null) return;
         var libraryPaths = library.Folders.Select(f => f.Path).ToList();
         if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
         {
@@ -186,7 +187,7 @@ public class ScannerService : IScannerService
             folderPath = seriesDirs.Keys.FirstOrDefault();
 
             // We should check if folderPath is a library folder path and if so, return early and tell user to correct their setup.
-            if (libraryPaths.Contains(folderPath))
+            if (!string.IsNullOrEmpty(folderPath) && libraryPaths.Contains(folderPath))
             {
                 _logger.LogCritical("[ScannerSeries] {SeriesName} scan aborted. Files for series are not in a nested folder under library path. Correct this and rescan", series.Name);
                 await _eventHub.SendMessageAsync(MessageFactory.Error, MessageFactory.ErrorEvent($"{series.Name} scan aborted", "Files for series are not in a nested folder under library path. Correct this and rescan."));
@@ -221,7 +222,7 @@ public class ScannerService : IScannerService
             };
 
             // For Scan Series, we need to filter out anything that isn't our Series
-            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName.Normalize()))
+            if (!foundParsedSeries.NormalizedName.Equals(series.NormalizedName) && !foundParsedSeries.NormalizedName.Equals(series.OriginalName?.Normalize()))
             {
                 return;
             }
@@ -245,9 +246,7 @@ public class ScannerService : IScannerService
          if (parsedSeries.Count == 0)
          {
              var seriesFiles = (await _unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
-             var anyFilesExist = seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath));
-
-             if (!anyFilesExist)
+             if (!string.IsNullOrEmpty(series.FolderPath) && !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
              {
                  try
                  {

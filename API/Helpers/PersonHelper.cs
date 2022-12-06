@@ -84,7 +84,7 @@ public static class PersonHelper
         foreach (var person in existingPeople)
         {
             var existingPerson = removeAllExcept
-                .FirstOrDefault(p => p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
+                .FirstOrDefault(p => person.NormalizedName != null && p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
             if (existingPerson == null)
             {
                 action?.Invoke(person);
@@ -145,7 +145,7 @@ public static class PersonHelper
             var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
             if (existingTag != null)
             {
-                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => !t.Name.Equals(tag.Name)))
+                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => t.Name != null && !t.Name.Equals(tag.Name)))
                 {
                     handleAdd(existingTag);
                     isModified = true;

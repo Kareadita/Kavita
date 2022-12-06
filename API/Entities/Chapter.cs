@@ -12,7 +12,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Range of numbers. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
     /// </summary>
-    public string? Range { get; set; }
+    public required string Range { get; set; }
     /// <summary>
     /// Smallest number of the Range. Can be a partial like Chapter 4.5
     /// </summary>
