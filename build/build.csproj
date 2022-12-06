@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="Bullseye" Version="4.2.0" />
-    <PackageReference Include="Glob" Version="1.1.9" />
     <PackageReference Include="SimpleExec" Version="11.0.0" />
   </ItemGroup>
 

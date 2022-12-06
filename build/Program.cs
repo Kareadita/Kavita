@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using GlobExpressions;
 using static Bullseye.Targets;
 using static SimpleExec.Command;
 
-const string Clean = "clean";
 const string Build = "build";
 const string Test = "test";
 const string Angular = "angular";
@@ -63,31 +59,6 @@ static void PackageRuntime(string framework, string runtime)
     Run("tar", $" -czvf kavita-{runtime}.tar.gz Kavita", workingDir);
 }
 
-Target(
-    Clean,
-    ForEach("**/node_modules", "./publish", "**/bin", "**/obj"),
-    dir =>
-    {
-        IEnumerable<string> GetDirectories(string d)
-        {
-            return Glob.Directories(".", d);
-        }
-
-        void RemoveDirectory(string d)
-        {
-            if (Directory.Exists(d))
-            {
-                Console.WriteLine(d);
-                Directory.Delete(d, true);
-            }
-        }
-
-        foreach (var d in GetDirectories(dir))
-        {
-            RemoveDirectory(d);
-        }
-    }
-);
 Target(
     Build,
     () =>
