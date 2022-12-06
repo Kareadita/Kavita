@@ -1,0 +1,23 @@
+name: Kavita - Angular
+
+on:
+  push:
+    branches:
+      - 'develop'
+  pull_request:
+    types: [ opened, synchronize, reopened, ready_for_review ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.402
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - name: Build & Test
+        run: dotnet run --project build/build.csproj -- angular
+        timeout-minutes: 30

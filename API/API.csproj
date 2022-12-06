@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <AnalysisMode>Default</AnalysisMode>
-    <TargetFramework>net6.0</TargetFramework>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <TieredPGO>true</TieredPGO>
