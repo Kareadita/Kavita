@@ -226,6 +226,7 @@ public class ReaderService : IReaderService
 
         try
         {
+            // TODO: Rewrite this code to just pull user object with progress for that particiular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
@@ -242,8 +243,7 @@ public class ReaderService : IReaderService
                     SeriesId = progressDto.SeriesId,
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
-                    BookScrollId = progressDto.BookScrollId,
-                    LastModified = DateTime.Now
+                    BookScrollId = progressDto.BookScrollId
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }

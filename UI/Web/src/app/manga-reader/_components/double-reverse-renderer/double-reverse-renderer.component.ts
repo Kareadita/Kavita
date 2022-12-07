@@ -432,19 +432,24 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
 
-        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
-          console.log('Moving forward 1 page as prev page is wide');
-          return 1;
-        }
-        
-        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages-1)) {
-          console.log('Moving forward 1 page as 1 page left');
-          return 1;
+        if (this.mangaReaderService.isLastImage(this.readerService.imageUrlToPageNum(this.rightImage.src), this.maxPages)) {
+          console.log('Moving forward 2 pages as right image is the last page and we just rendered double page');
+          return 2;
         }
 
         if (this.pageNum === this.maxPages - 1) {
           console.log('Moving forward 0 page as on last page');
           return 0;
+        }
+
+        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
+          console.log('Moving forward 1 page as prev page is wide');
+          return 1;
+        }
+
+        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+          console.log('Moving forward 1 page as 1 page left');
+          return 1;
         }
         
         console.log('Moving forward 2 pages');
