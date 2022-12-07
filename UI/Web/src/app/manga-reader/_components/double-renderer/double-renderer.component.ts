@@ -246,9 +246,9 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     '[', this.readerService.imageUrlToPageNum(this.currentImage.src), ']',
     this.readerService.imageUrlToPageNum(this.currentImageNext.src), this.readerService.imageUrlToPageNum(this.currentImage2Ahead.src))
     
-
-    if (!this.shouldRenderDouble()) {
-      this.imageHeight.emit(this.currentImage.height);
+    // First load, switching from double manga -> double, this is 0 and thus not rendering
+    if (!this.shouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {
+      this.imageHeight.emit(this.currentImage.height || img[0].height);
       return;
     }
     

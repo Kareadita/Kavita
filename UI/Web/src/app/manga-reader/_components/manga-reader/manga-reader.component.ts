@@ -1156,6 +1156,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readerMode === ReaderMode.Webtoon) return;
     
     this.isLoading = true;
+    this.setPageNum(this.pageNum);
     this.setCanvasImage();
     this.cdRef.markForCheck();
 
