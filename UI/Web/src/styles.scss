@@ -2,6 +2,7 @@
 
 
 // Import themes which define the css variables we use to customize the app
+@import './theme/themes/light';
 @import './theme/themes/dark';
 
 // Import colors for overrides of bootstrap theme
@@ -36,6 +37,7 @@
 @import './theme/components/sidenav';
 @import './theme/components/carousel';
 @import './theme/components/offcanvas';
+@import './theme/components/table';
 
 
 @import './theme/utilities/utilities';

@@ -245,8 +245,8 @@ export class ActionService implements OnDestroy {
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes
    */
-  markChapterAsRead(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+  markChapterAsRead(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
+    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = chapter.pages;
       this.toastr.success('Marked as Read');
       if (callback) {
@@ -261,8 +261,8 @@ export class ActionService implements OnDestroy {
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes
    */
-  markChapterAsUnread(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
+  markChapterAsUnread(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
+    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
       this.toastr.success('Marked as Unread');
       if (callback) {

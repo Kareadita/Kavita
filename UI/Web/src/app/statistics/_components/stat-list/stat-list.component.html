@@ -1,0 +1,14 @@
+<ng-container *ngIf="data$ | async as data">
+    <div class="card" style="width: 18rem;">
+        <div class="card-header text-center">
+          {{title}}
+          <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0" *ngIf="description && description.length > 0"></i>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item" *ngFor="let item of data">
+            {{item.name}} <span class="float-end" *ngIf="item.value >= 0">{{item.value}} {{label}}</span>
+          </li>
+        </ul>
+    </div>
+</ng-container>
+<ng-template #tooltip></ng-template>

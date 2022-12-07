@@ -195,7 +195,7 @@ public class ReadingListService : IReadingListService
         }
 
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
-        var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds))
+        var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ChapterIncludes.Volumes))
             .OrderBy(c => Tasks.Scanner.Parser.Parser.MinNumberFromRange(c.Volume.Name))
             .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting)
             .ToList();

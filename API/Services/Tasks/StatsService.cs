@@ -121,7 +121,7 @@ public class StatsService : IStatsService
             NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
             NumberOfReadingLists = await _unitOfWork.ReadingListRepository.Count(),
             OPDSEnabled = serverSettings.EnableOpds,
-            NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsers()).Count(),
+            NumberOfUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Count(),
             TotalFiles = await _unitOfWork.LibraryRepository.GetTotalFiles(),
             TotalGenres = await _unitOfWork.GenreRepository.GetCountAsync(),
             TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync(),

@@ -60,7 +60,7 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
         return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
     }
 
@@ -115,11 +115,26 @@ public class UsersController : BaseApiController
         return BadRequest("There was an issue saving preferences.");
     }
 
+    /// <summary>
+    /// Returns the preferences of the user
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("get-preferences")]
     public async Task<ActionResult<UserPreferencesDto>> GetPreferences()
     {
         return _mapper.Map<UserPreferencesDto>(
             await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername()));
 
+    }
+
+    /// <summary>
+    /// Returns a list of the user names within the system
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("names")]
+    public async Task<ActionResult<IEnumerable<string>>> GetUserNames()
+    {
+        return Ok((await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(u => u.UserName));
     }
 }

@@ -135,6 +135,10 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
     this.modal.close(returnVal);
   }
 
+  forceScan() {
+    this.libraryService.scan(this.library.id, true).subscribe(() => this.toastr.info('A forced scan has been started for ' + this.library.name));
+  }
+
   async save() {
     const model = this.libraryForm.value;
     model.folders = this.selectedFolders;

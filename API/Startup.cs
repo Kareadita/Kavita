@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
@@ -59,35 +60,40 @@ public class Startup
 
         services.AddControllers(options =>
         {
-            options.CacheProfiles.Add("Images",
+            options.CacheProfiles.Add(ResponseCacheProfiles.Images,
                 new CacheProfile()
                 {
                     Duration = 60,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
                 });
-            options.CacheProfiles.Add("Hour",
+            options.CacheProfiles.Add(ResponseCacheProfiles.Hour,
                 new CacheProfile()
                 {
                     Duration = 60 * 60,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
                 });
-            options.CacheProfiles.Add("10Minute",
+            options.CacheProfiles.Add(ResponseCacheProfiles.TenMinute,
                 new CacheProfile()
                 {
                     Duration = 60 * 10,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
                 });
-            options.CacheProfiles.Add("5Minute",
+            options.CacheProfiles.Add(ResponseCacheProfiles.FiveMinute,
                 new CacheProfile()
                 {
                     Duration = 60 * 5,
                     Location = ResponseCacheLocation.None,
                 });
-            // Instant is a very quick cache, because we can't bust based on the query params, but rather body
-            options.CacheProfiles.Add("Instant",
+            options.CacheProfiles.Add(ResponseCacheProfiles.Statistics,
+                new CacheProfile()
+                {
+                    Duration = 60 * 60 * 6,
+                    Location = ResponseCacheLocation.None,
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.Instant,
                 new CacheProfile()
                 {
                     Duration = 30,
@@ -216,6 +222,9 @@ public class Startup
 
                     // v0.6.2 or v0.7
                     await MigrateSeriesRelationsImport.Migrate(dataContext, logger);
+
+                    // v0.6.8 or v0.7
+                    await MigrateUserProgressLibraryId.Migrate(unitOfWork, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

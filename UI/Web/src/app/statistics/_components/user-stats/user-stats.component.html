@@ -1,0 +1,20 @@
+<div class="container-fluid">
+
+    <!-- High level stats (use same design as series metadata info cards)-->
+    <div class="row g-0">
+        <ng-container *ngIf="userStats$ | async as userStats">
+            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [timeSpentReading]="userStats.timeSpentReading"
+             [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive"></app-user-stats-info-cards>
+        </ng-container>
+    </div>
+
+    <!-- <div class="row g-0">
+        Books Read (this can be chapters read fully)
+        Number of bookmarks
+        Last Active Time
+        Average days reading on server a week
+        Total Series in want to read list? 
+    </div> -->
+
+    
+</div>

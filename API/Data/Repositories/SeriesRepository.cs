@@ -119,6 +119,11 @@ public interface ISeriesRepository
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
     Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds);
+    /// <summary>
+    /// This is only used for <see cref="MigrateUserProgressLibraryId"/>
+    /// </summary>
+    /// <returns></returns>
+    Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -283,14 +288,7 @@ public class SeriesRepository : ISeriesRepository
     {
         if (libraryId == 0)
         {
-            return await _context.Library
-                .Include(l => l.AppUsers)
-                .Where(library => library.AppUsers.Any(user => user.Id == userId))
-                .IsRestricted(queryContext)
-                .AsNoTracking()
-                .AsSplitQuery()
-                .Select(library => library.Id)
-                .ToListAsync();
+            return await _context.Library.GetUserLibraries(userId, queryContext).ToListAsync();
         }
 
         return new List<int>()
@@ -513,6 +511,21 @@ public class SeriesRepository : ISeriesRepository
         return seriesChapters;
     }
 
+    public async Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync()
+    {
+        var seriesChapters = new Dictionary<int, int>();
+        var series = await _context.Series.Select(s => new
+        {
+            Id = s.Id, LibraryId = s.LibraryId
+        }).ToListAsync();
+        foreach (var s in series)
+        {
+            seriesChapters.Add(s.Id, s.LibraryId);
+        }
+
+        return seriesChapters;
+    }
+
     public async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
     {
         var userProgress = await _context.AppUserProgresses
@@ -672,7 +685,8 @@ public class SeriesRepository : ISeriesRepository
         var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
         var cutoffLastAddedPoint = DateTime.Now - TimeSpan.FromDays(7);
 
-        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Dashboard);
+        var libraryIds = _context.Library.GetUserLibraries(userId, QueryContext.Dashboard)
+            .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 
 
@@ -1046,7 +1060,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind)
     {
-        var libraryIds = GetLibraryIdsForUser(userId);
+        var libraryIds = _context.Library.GetUserLibraries(userId);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         var usersSeriesIds = _context.Series
@@ -1073,7 +1087,8 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended);
+        var libraryIds = _context.Library.GetUserLibraries(userId, QueryContext.Recommended)
+            .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
@@ -1100,7 +1115,8 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended);
+        var libraryIds = _context.Library.GetUserLibraries(userId, QueryContext.Recommended)
+            .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
         var distinctSeriesIdsWithProgress = _context.AppUserProgresses
             .Where(s => usersSeriesIds.Contains(s.SeriesId))
@@ -1119,7 +1135,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<SeriesDto> GetSeriesForMangaFile(int mangaFileId, int userId)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, 0, QueryContext.Search);
+        var libraryIds = _context.Library.GetUserLibraries(userId, QueryContext.Search);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.MangaFile
@@ -1136,7 +1152,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<SeriesDto> GetSeriesForChapter(int chapterId, int userId)
     {
-        var libraryIds = GetLibraryIdsForUser(userId);
+        var libraryIds = _context.Library.GetUserLibraries(userId);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.Chapter
             .Where(m => m.Id == chapterId)
@@ -1278,7 +1294,8 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended);
+        var libraryIds = _context.Library.GetUserLibraries(userId, QueryContext.Recommended)
+            .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
         var distinctSeriesIdsWithHighRating = _context.AppUserRating
             .Where(s => usersSeriesIds.Contains(s.SeriesId) && s.Rating > 4)
@@ -1299,7 +1316,8 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended);
+        var libraryIds = _context.Library.GetUserLibraries(userId, QueryContext.Recommended)
+            .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
         var distinctSeriesIdsWithProgress = _context.AppUserProgresses
             .Where(s => usersSeriesIds.Contains(s.SeriesId))
@@ -1325,7 +1343,8 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended);
+        var libraryIds = _context.Library.GetUserLibraries(userId, QueryContext.Recommended)
+            .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
         var distinctSeriesIdsWithProgress = _context.AppUserProgresses
             .Where(s => usersSeriesIds.Contains(s.SeriesId))
@@ -1350,37 +1369,9 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
-    /// <summary>
-    /// Returns all library ids for a user
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="libraryId">0 for no library filter</param>
-    /// <param name="queryContext">Defaults to None - The context behind this query, so appropriate restrictions can be placed</param>
-    /// <returns></returns>
-    private IQueryable<int> GetLibraryIdsForUser(int userId, int libraryId = 0, QueryContext queryContext = QueryContext.None)
-    {
-        var user = _context.AppUser
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Where(u => u.Id == userId)
-            .AsSingleQuery();
-
-        if (libraryId == 0)
-        {
-            return user.SelectMany(l => l.Libraries)
-                .IsRestricted(queryContext)
-                .Select(lib => lib.Id);
-        }
-
-        return user.SelectMany(l => l.Libraries)
-            .Where(lib => lib.Id == libraryId)
-            .IsRestricted(queryContext)
-            .Select(lib => lib.Id);
-    }
-
     public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId)
     {
-        var libraryIds = GetLibraryIdsForUser(userId);
+        var libraryIds = _context.Library.GetUserLibraries(userId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
@@ -1486,7 +1477,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter)
     {
-        var libraryIds = GetLibraryIdsForUser(userId);
+        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
         var query = _context.AppUser
             .Where(user => user.Id == userId)
             .SelectMany(u => u.WantToRead)
@@ -1501,8 +1492,7 @@ public class SeriesRepository : ISeriesRepository
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)
     {
-        // BUG: This is always returning true for any series
-        var libraryIds = GetLibraryIdsForUser(userId);
+        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
         return await _context.AppUser
             .Where(user => user.Id == userId)
             .SelectMany(u => u.WantToRead.Where(s => s.Id == seriesId && libraryIds.Contains(s.LibraryId)))

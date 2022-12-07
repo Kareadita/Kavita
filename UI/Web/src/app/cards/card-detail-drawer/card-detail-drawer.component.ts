@@ -194,7 +194,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       return;
     }
     
-    this.actionService.markChapterAsRead(this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
+    this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
   }
 
   markChapterAsUnread(chapter: Chapter) {
@@ -202,7 +202,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.actionService.markChapterAsUnread(this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
+    this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
   }
 
   handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {

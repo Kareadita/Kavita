@@ -103,6 +103,7 @@ public class ReaderService : IReaderService
     public async Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters)
     {
         var seenVolume = new Dictionary<int, bool>();
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -114,7 +115,8 @@ public class ReaderService : IReaderService
                     PagesRead = chapter.Pages,
                     VolumeId = chapter.VolumeId,
                     SeriesId = seriesId,
-                    ChapterId = chapter.Id
+                    ChapterId = chapter.Id,
+                    LibraryId = series.LibraryId
                 });
             }
             else
@@ -239,6 +241,7 @@ public class ReaderService : IReaderService
                     VolumeId = progressDto.VolumeId,
                     SeriesId = progressDto.SeriesId,
                     ChapterId = progressDto.ChapterId,
+                    LibraryId = progressDto.LibraryId,
                     BookScrollId = progressDto.BookScrollId,
                     LastModified = DateTime.Now
                 });
@@ -249,6 +252,7 @@ public class ReaderService : IReaderService
                 userProgress.PagesRead = progressDto.PageNum;
                 userProgress.SeriesId = progressDto.SeriesId;
                 userProgress.VolumeId = progressDto.VolumeId;
+                userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
                 userProgress.LastModified = DateTime.Now;
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);

@@ -64,6 +64,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: ''
     },
     {
+      name: 'Analyze Files', 
+      description: 'Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release.',
+      api: this.serverService.analyzeFiles(), 
+      successMessage: 'File analysis has been queued'
+    },
+    {
       name: 'Check for Updates', 
       description: 'See if there are any Stable releases ahead of your version',
       api: this.serverService.checkForUpdate(), 
