@@ -36,17 +36,13 @@ public interface IStatisticService
 public class StatisticService : IStatisticService
 {
     private readonly DataContext _context;
-    private readonly ILogger<StatisticService> _logger;
     private readonly IMapper _mapper;
-    private readonly IReaderService _readerService;
     private readonly IUnitOfWork _unitOfWork;
 
-    public StatisticService(DataContext context, ILogger<StatisticService> logger, IMapper mapper, IReaderService readerService, IUnitOfWork unitOfWork)
+    public StatisticService(DataContext context, IMapper mapper, IUnitOfWork unitOfWork)
     {
         _context = context;
-        _logger = logger;
         _mapper = mapper;
-        _readerService = readerService;
         _unitOfWork = unitOfWork;
     }
 
@@ -70,7 +66,6 @@ public class StatisticService : IStatisticService
             .ToListAsync();
 
         var chapterIds = ids.Select(id => id.ChapterId);
-        var seriesIds = ids.Select(id => id.SeriesId);
 
         var timeSpentReading = await _context.Chapter
             .Where(c => chapterIds.Contains(c.Id))

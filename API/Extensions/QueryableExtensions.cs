@@ -125,6 +125,17 @@ public static class QueryableExtensions
         return queryable.AsSplitQuery();
     }
 
+    public static IQueryable<Chapter> Includes(this IQueryable<Chapter> queryable,
+        ChapterIncludes includes)
+    {
+        if (includes.HasFlag(ChapterIncludes.Volumes))
+        {
+            queryable = queryable.Include(v => v.Volume);
+        }
+
+        return queryable.AsSplitQuery();
+    }
+
     public static IQueryable<Series> Includes(this IQueryable<Series> query,
         SeriesIncludes includeFlags)
     {

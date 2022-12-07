@@ -1,20 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 
+[Flags]
+public enum ChapterIncludes
+{
+    None = 1,
+    Volumes = 2,
+}
+
 public interface IChapterRepository
 {
     void Update(Chapter chapter);
-    Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds);
+    Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None);
     Task<IChapterInfoDto> GetChapterInfoDtoAsync(int chapterId);
     Task<int> GetChapterTotalPagesAsync(int chapterId);
     Task<Chapter> GetChapterAsync(int chapterId);
@@ -43,12 +52,11 @@ public class ChapterRepository : IChapterRepository
         _context.Entry(chapter).State = EntityState.Modified;
     }
 
-    public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds)
+    public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes)
     {
-        // TODO: Give this an Includes treatment as TimeLeft isn't using Volume
         return await _context.Chapter
             .Where(c => chapterIds.Contains(c.Id))
-            .Include(c => c.Volume)
+            .Includes(includes)
             .AsSplitQuery()
             .ToListAsync();
     }
