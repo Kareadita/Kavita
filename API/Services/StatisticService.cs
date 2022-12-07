@@ -109,7 +109,6 @@ public class StatisticService : IStatisticService
             TimeSpentReading = timeSpentReading,
             ChaptersRead = chaptersRead,
             LastActive = lastActive,
-            //AvgHoursPerWeekSpentReading =
         };
     }
 
@@ -195,6 +194,7 @@ public class StatisticService : IStatisticService
         var mostActiveLibrary = _context.AppUserProgresses
             .AsSplitQuery()
             .AsEnumerable()
+            .Where(sm => sm.LibraryId > 0)
             .GroupBy(sm => sm.LibraryId)
             .Select(sm => new StatCount<LibraryDto>
             {
