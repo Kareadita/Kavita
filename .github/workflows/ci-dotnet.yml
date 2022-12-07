@@ -1,9 +1,6 @@
 name: Kavita - CSharp
 
 on:
-  push:
-    branches:
-      - 'develop'
   pull_request:
     types: [ opened, synchronize, reopened, ready_for_review ]
 
@@ -15,7 +12,6 @@ jobs:
       - uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 6.0.402
-      - name: Build & Test
+      - name: Build & Test C#
         run: dotnet run --project build/build.csproj -- csharp
-        timeout-minutes: 30
 

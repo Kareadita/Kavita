@@ -1,9 +1,6 @@
 name: Kavita - Angular
 
 on:
-  push:
-    branches:
-      - 'develop'
   pull_request:
     types: [ opened, synchronize, reopened, ready_for_review ]
 
@@ -18,6 +15,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '16.x'
-      - name: Build & Test
+      - name: Build & Test WebUI
         run: dotnet run --project build/build.csproj -- angular
         timeout-minutes: 30

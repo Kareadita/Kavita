@@ -6,10 +6,15 @@ const string Build = "build";
 const string Test = "test";
 const string Angular = "angular";
 const string CSharp = "csharp";
-const string Package = "package";
+const string PackageClean = "package-clean";
+const string PackageAll = "package-all";
+const string PackageMonoRepo = "package-monorepo";
+const string Tools = "tools";
+const string Swagger = "swagger";
 
 const string OutputFolder = "_output";
-var Runtimes = new[]
+const string TargetFramework = "net6.0";
+var AllRuntimes = new[]
 {
     "win-x64",
     "win-x86",
@@ -18,6 +23,12 @@ var Runtimes = new[]
     "linux-arm64",
     "linux-musl-x64",
     "osx-x64"
+};
+var MonoRepoRuntimes = new[]
+{
+    "linux-x64",
+    "linux-arm",
+    "linux-arm64"
 };
 
 static void PackageRuntime(string framework, string runtime)
@@ -63,7 +74,6 @@ Target(
     Build,
     () =>
     {
-        Run("rm", $"-rf {OutputFolder}");
         Run("dotnet", "build Kavita.sln -c Release", ".");
     }
 );
@@ -74,7 +84,22 @@ Target(
 );
 Target("default", DependsOn(CSharp, Angular), () => { });
 
-Target(Package, DependsOn(Build, Angular), Runtimes, r => PackageRuntime("net6.0", r));
+Target(PackageClean, () =>
+{
+    Run("rm", $"-rf {OutputFolder}");
+});
+Target(PackageAll, DependsOn(Build, Angular, PackageClean), AllRuntimes, r => PackageRuntime(TargetFramework, r));
+Target(PackageMonoRepo, DependsOn(Build, Angular, PackageClean), MonoRepoRuntimes, r => PackageRuntime(TargetFramework, r));
+
+Target(Tools, () =>
+{
+    Run("dotnet", "tool restore", ".");
+});
+
+Target(Swagger, DependsOn(Build, Tools), () =>
+{
+    Run("dotnet", $"swagger tofile --output openapi.json API/bin/Release/{TargetFramework}/API.dll v1", ".");
+});
 
 Target(CSharp, DependsOn(Build));
 Target(
@@ -93,10 +118,5 @@ Target(
         Run("cp", "-R dist/ ../../API/wwwroot", path);
     }
 );
-
-foreach (var runtime in Runtimes)
-{
-    Target(runtime, DependsOn(Build, Angular), () => PackageRuntime("net6.0", runtime));
-}
 
 await RunTargetsAndExitAsync(args);
