@@ -1234,7 +1234,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (!this.incognitoMode && !this.bookmarkMode) {
-      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
   }
 
@@ -1382,7 +1382,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     window.history.replaceState({}, '', newRoute);
     this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
     if (!this.bookmarkMode) {
-      this.readerService.saveProgress(this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
   }
 

@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpEventType } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
@@ -12,8 +12,11 @@ import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { switchMap, takeWhile, throttleTime } from 'rxjs/operators';
 import { AccountService } from 'src/app/_services/account.service';
+import { BytesPipe } from 'src/app/pipe/bytes.pipe';
 
 export const DEBOUNCE_TIME = 100;
+
+const bytesPipe = new BytesPipe();
 
 export interface DownloadEvent {
   /**
@@ -235,7 +238,7 @@ export class DownloadService {
   }
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
-    return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + this.humanFileSize(size) + '. Are you sure you want to continue?'));
+    return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + bytesPipe.transform(size) + '. Are you sure you want to continue?'));
   }
 
   private downloadBookmarks(bookmarks: PageBookmark[]) {
@@ -252,39 +255,5 @@ export class DownloadService {
               tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
             );
-  }
-
-  /**
- * Format bytes as human-readable text.
- * 
- * @param bytes Number of bytes.
- * @param si True to use metric (SI) units, aka powers of 1000. False to use 
- *           binary (IEC), aka powers of 1024.
- * @param dp Number of decimal places to display.
- * 
- * @return Formatted string.
- * 
- * Credit: https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string
- */
-  private humanFileSize(bytes: number, si=true, dp=0) {
-    const thresh = si ? 1000 : 1024;
-
-    if (Math.abs(bytes) < thresh) {
-      return bytes + ' B';
-    }
-
-    const units = si 
-      ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] 
-      : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
-    let u = -1;
-    const r = 10**dp;
-
-    do {
-      bytes /= thresh;
-      ++u;
-    } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
-
-
-    return bytes.toFixed(dp) + ' ' + units[u];
   }
 }

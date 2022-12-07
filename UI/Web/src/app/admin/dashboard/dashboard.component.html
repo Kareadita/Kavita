@@ -29,6 +29,9 @@
           <ng-container *ngIf="tab.fragment === TabID.System">
             <app-manage-system></app-manage-system>
           </ng-container>
+          <ng-container *ngIf="tab.fragment === TabID.Statistics">
+            <app-server-stats></app-server-stats>
+          </ng-container>
           <ng-container *ngIf="tab.fragment === TabID.Tasks">
             <app-manage-tasks-settings></app-manage-tasks-settings>
           </ng-container>

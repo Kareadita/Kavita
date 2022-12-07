@@ -1,0 +1,35 @@
+<div class="row g-0 mb-2 align-items-center">
+    <div class="col-4">
+        <h4>Top Readers</h4>
+    </div>
+    <div class="col-8">
+        <form [formGroup]="formGroup" class="d-inline-flex float-end">
+            <div class="d-flex">
+                <label for="time-select-top-reads" class="form-check-label"></label>
+                <select id="time-select-top-reads" class="form-select" formControlName="days"
+                [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
+                    <option *ngFor="let item of timePeriods" [value]="item.value">{{item.title}}</option>
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<ng-container>
+    <div class="grid row g-0">
+        <div class="card" *ngFor="let user of (users$ | async)">
+            <div class="card-header text-center">
+              {{user.username}}
+            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">Comics: {{user.comicsTime}} hrs</li>
+              <li class="list-group-item">Manga: {{user.mangaTime}} hrs</li>
+              <li class="list-group-item">Books: {{user.booksTime}} hrs</li>
+            </ul>
+        </div>
+    </div>
+</ng-container>
+
+
+

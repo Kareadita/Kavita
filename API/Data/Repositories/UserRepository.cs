@@ -59,10 +59,9 @@ public interface IUserRepository
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
     Task<AppUser> GetUserByEmailAsync(string email);
-    Task<IEnumerable<AppUser>> GetAllUsers();
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
-    Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
+    Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser> GetUserByConfirmationToken(string token);
 }
 
@@ -241,11 +240,6 @@ public class UserRepository : IUserRepository
         return await _context.AppUser.SingleOrDefaultAsync(u => u.Email.ToLower().Equals(lowerEmail));
     }
 
-    public async Task<IEnumerable<AppUser>> GetAllUsers()
-    {
-        return await _context.AppUser
-            .ToListAsync();
-    }
 
     public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId)
     {
@@ -264,7 +258,7 @@ public class UserRepository : IUserRepository
             .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId));
     }
 
-    public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags)
+    public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None)
     {
         var query = AddIncludesToQuery(_context.Users.AsQueryable(), includeFlags);
         return await query.ToListAsync();

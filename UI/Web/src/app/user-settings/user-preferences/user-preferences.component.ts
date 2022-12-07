@@ -25,6 +25,7 @@ enum FragmentID {
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',
+  Stats = 'stats',
 
 }
 
@@ -60,6 +61,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: '3rd Party Clients', fragment: FragmentID.Clients},
     {title: 'Theme', fragment: FragmentID.Theme},
     {title: 'Devices', fragment: FragmentID.Devices},
+    {title: 'Stats', fragment: FragmentID.Stats},
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;

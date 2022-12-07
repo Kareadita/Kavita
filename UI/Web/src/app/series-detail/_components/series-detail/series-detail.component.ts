@@ -639,7 +639,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       return;
     }
 
-    this.actionService.markChapterAsRead(this.seriesId, chapter, () => {
+    this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, () => {
       this.setContinuePoint();
     });
   }
@@ -649,7 +649,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       return;
     }
 
-    this.actionService.markChapterAsUnread(this.seriesId, chapter, () => {
+    this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, () => {
       this.setContinuePoint();
     });
   }

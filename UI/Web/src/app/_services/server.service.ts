@@ -34,6 +34,10 @@ export class ServerService {
     return this.httpClient.post(this.baseUrl + 'server/backup-db', {});
   }
 
+  analyzeFiles() {
+    return this.httpClient.post(this.baseUrl + 'server/analyze-files', {});
+  }
+
   checkForUpdate() {
     return this.httpClient.get<UpdateVersionEvent>(this.baseUrl + 'server/check-update', {});
   }

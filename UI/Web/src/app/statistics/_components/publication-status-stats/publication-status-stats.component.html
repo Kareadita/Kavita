@@ -1,0 +1,54 @@
+<div class="row g-0 mb-2">
+    <div class="col-8">
+        <h4><span>Publication Status</span>
+            <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0"></i>
+        </h4>
+    </div>
+    <div class="col-4">
+        <form>
+            <div class="form-check form-switch mt-2">
+                <input id="pub-status-viz" type="checkbox" class="form-check-input" [formControl]="formControl" role="switch">
+                <label for="pub-status-viz" class="form-check-label">{{formControl.value ? 'Vizualization' : 'Data Table' }}</label>
+            </div>
+        </form>
+    </div>
+</div>
+
+<ng-template #tooltip></ng-template>
+
+
+<ng-container *ngIf="publicationStatues$ | async as statuses">
+    <ng-container *ngIf="formControl.value; else tableLayout">
+        <ngx-charts-advanced-pie-chart
+        [results]="statuses"
+        >
+        </ngx-charts-advanced-pie-chart>
+    </ng-container>
+    <ng-template #tableLayout>
+        <table class="table table-light table-hover table-striped table-sm scrollable">
+            <thead>
+                <tr>
+                    <th scope="col" sortable="name" (sort)="onSort($event)">
+                        Year
+                    </th>
+                    <th scope="col" sortable="value" (sort)="onSort($event)">
+                        Count
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of statuses; let idx = index;">
+                    <td id="adhoctask--{{idx}}">
+                      {{item.name}}
+                    </td>
+                    <td>
+                      {{item.value | number:'1.0-0'}}
+                    </td>
+                  </tr>
+            </tbody>
+        </table>
+    </ng-template>
+</ng-container>
+
+
+

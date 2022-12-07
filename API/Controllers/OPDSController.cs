@@ -787,7 +787,7 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                 // We can't not include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
                 accLink,
-                CreatePageStreamLink(seriesId, volumeId, chapterId, mangaFile, apiKey)
+                CreatePageStreamLink(series.LibraryId,seriesId, volumeId, chapterId, mangaFile, apiKey)
             },
             Content = new FeedEntryContent()
             {
@@ -800,7 +800,7 @@ public class OpdsController : BaseApiController
     }
 
     [HttpGet("{apiKey}/image")]
-    public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int seriesId, [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
+    public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
     {
         if (pageNumber < 0) return BadRequest("Page cannot be less than 0");
         var chapter = await _cacheService.Ensure(chapterId);
@@ -823,7 +823,8 @@ public class OpdsController : BaseApiController
                 ChapterId = chapterId,
                 PageNum = pageNumber,
                 SeriesId = seriesId,
-                VolumeId = volumeId
+                VolumeId = volumeId,
+                LibraryId =libraryId
             }, await GetUser(apiKey));
 
             return File(content, "image/" + format);
@@ -866,9 +867,9 @@ public class OpdsController : BaseApiController
         throw new KavitaException("User does not exist");
     }
 
-    private static FeedLink CreatePageStreamLink(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey)
+    private static FeedLink CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey)
     {
-        var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
+        var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
         link.TotalPages = mangaFile.Pages;
         return link;
     }

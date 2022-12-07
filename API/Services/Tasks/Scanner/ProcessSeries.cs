@@ -27,7 +27,7 @@ public interface IProcessSeries
     /// </summary>
     /// <returns></returns>
     Task Prime();
-    Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library);
+    Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false);
     void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false);
 }
 
@@ -75,7 +75,7 @@ public class ProcessSeries : IProcessSeries
         _tags = await _unitOfWork.TagRepository.GetAllTagsAsync();
     }
 
-    public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library)
+    public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false)
     {
         if (!parsedInfos.Any()) return;
 
@@ -120,7 +120,7 @@ public class ProcessSeries : IProcessSeries
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
-            UpdateVolumes(series, parsedInfos);
+            UpdateVolumes(series, parsedInfos, forceUpdate);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
             series.NormalizedName = Parser.Parser.Normalize(series.Name);
@@ -430,7 +430,7 @@ public class ProcessSeries : IProcessSeries
             });
     }
 
-    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos)
+    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         var startingVolumeCount = series.Volumes.Count;
         // Add new volumes and update chapters per volume
@@ -465,7 +465,7 @@ public class ProcessSeries : IProcessSeries
 
             _logger.LogDebug("[ScannerService] Parsing {SeriesName} - Volume {VolumeNumber}", series.Name, volume.Name);
             var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
-            UpdateChapters(series, volume, infos);
+            UpdateChapters(series, volume, infos, forceUpdate);
             volume.Pages = volume.Chapters.Sum(c => c.Pages);
 
             // Update all the metadata on the Chapters
@@ -512,7 +512,7 @@ public class ProcessSeries : IProcessSeries
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
-    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos)
+    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -546,7 +546,7 @@ public class ProcessSeries : IProcessSeries
             if (chapter == null) continue;
             // Add files
             var specialTreatment = info.IsSpecialInfo();
-            AddOrUpdateFileForChapter(chapter, info);
+            AddOrUpdateFileForChapter(chapter, info, forceUpdate);
             chapter.Number = Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty;
             chapter.Range = specialTreatment ? info.Filename : info.Chapters;
         }
@@ -572,22 +572,26 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info)
+    private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= new List<MangaFile>();
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
+        var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(info.FullFilePath);
         if (existingFile != null)
         {
             existingFile.Format = info.Format;
-            if (!_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
+            if (!forceUpdate && !_fileService.HasFileBeenModifiedSince(existingFile.FilePath, existingFile.LastModified) && existingFile.Pages != 0) return;
             existingFile.Pages = _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format);
+            existingFile.Extension = fileInfo.Extension.ToLowerInvariant();
+            existingFile.Bytes = fileInfo.Length;
             // We skip updating DB here with last modified time so that metadata refresh can do it
         }
         else
         {
             var file = DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
             if (file == null) return;
-
+            file.Extension = fileInfo.Extension.ToLowerInvariant();
+            file.Bytes = fileInfo.Length;
             chapter.Files.Add(file);
         }
     }

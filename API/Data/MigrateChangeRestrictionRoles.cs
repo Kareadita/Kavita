@@ -24,7 +24,7 @@ public static class MigrateChangeRestrictionRoles
 
         logger.LogCritical("Running MigrateChangeRestrictionRoles migration");
 
-        var allUsers = await unitOfWork.UserRepository.GetAllUsers();
+        var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync();
         foreach (var user in allUsers)
         {
             await userManager.RemoveFromRoleAsync(user, PolicyConstants.ChangeRestrictionRole);

@@ -14,7 +14,13 @@ public interface IAppUserProgressRepository
     Task<bool> UserHasProgress(LibraryType libraryType, int userId);
     Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId);
     Task<bool> HasAnyProgressOnSeriesAsync(int seriesId, int userId);
+    /// <summary>
+    /// This is built exclusively for <see cref="MigrateUserProgressLibraryId"/>
+    /// </summary>
+    /// <returns></returns>
+    Task<AppUserProgress> GetAnyProgress();
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
+    Task<IEnumerable<AppUserProgress>> GetAllProgress();
 }
 
 public class AppUserProgressRepository : IAppUserProgressRepository
@@ -85,6 +91,11 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .AnyAsync(aup => aup.PagesRead > 0 && aup.AppUserId == userId && aup.SeriesId == seriesId);
     }
 
+    public async Task<AppUserProgress> GetAnyProgress()
+    {
+        return await _context.AppUserProgresses.FirstOrDefaultAsync();
+    }
+
     /// <summary>
     /// This will return any user progress. This filters out progress rows that have no pages read.
     /// </summary>
@@ -96,6 +107,11 @@ public class AppUserProgressRepository : IAppUserProgressRepository
         return await _context.AppUserProgresses
             .Where(p => p.SeriesId == seriesId && p.AppUserId == userId && p.PagesRead > 0)
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<AppUserProgress>> GetAllProgress()
+    {
+        return await _context.AppUserProgresses.ToListAsync();
     }
 
     public async Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId)

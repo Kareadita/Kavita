@@ -20,7 +20,7 @@ public static class MigrateChangePasswordRoles
         var usersWithRole = await userManager.GetUsersInRoleAsync(PolicyConstants.ChangePasswordRole);
         if (usersWithRole.Count != 0) return;
 
-        var allUsers = await unitOfWork.UserRepository.GetAllUsers();
+        var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync();
         foreach (var user in allUsers)
         {
             await userManager.RemoveFromRoleAsync(user, "ChangePassword");
