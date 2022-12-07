@@ -13,7 +13,7 @@ import { Breakpoint, UtilityService, KEY_CODES } from 'src/app/shared/_services/
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { scalingOptions, pageSplitOptions, layoutModes } from 'src/app/_models/preferences/preferences';
+import { scalingOptions, pageSplitOptions, layoutModes, Preferences } from 'src/app/_models/preferences/preferences';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
@@ -30,6 +30,7 @@ import { CanvasRendererComponent } from '../canvas-renderer/canvas-renderer.comp
 import { DoubleRendererComponent } from '../double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
+import { mode } from 'd3';
 
 
 const PREFETCH_PAGES = 10;
@@ -1402,4 +1403,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {key: 'SPACE', description: 'Toggle Menu'},
     ];
   }
+
+  // menu only code
+  savePref() {
+    const modelSettings = this.generalSettingsForm.value;
+    // Get latest preferences from user, overwrite with what we manage in this UI, then save
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (!user) return;
+      const data = {...user.preferences};
+      data.layoutMode = parseInt(modelSettings.layoutMode, 10);
+      data.readerMode = this.readerMode;
+      data.autoCloseMenu = this.autoCloseMenu;
+      data.readingDirection = this.readingDirection;
+      this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+        this.toastr.success('Server settings updated');
+        if (this.user) {
+          this.user.preferences = updatedPrefs;
+          this.cdRef.markForCheck();
+        }
+      })
+    });
+  } 
 }
