@@ -217,7 +217,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success('Server settings updated');
+      this.toastr.success('User preferences updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
         this.cdRef.markForCheck();

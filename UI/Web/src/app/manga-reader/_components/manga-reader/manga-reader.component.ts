@@ -1416,7 +1416,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.autoCloseMenu = this.autoCloseMenu;
       data.readingDirection = this.readingDirection;
       this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-        this.toastr.success('Server settings updated');
+        this.toastr.success('User preferences updated');
         if (this.user) {
           this.user.preferences = updatedPrefs;
           this.cdRef.markForCheck();
