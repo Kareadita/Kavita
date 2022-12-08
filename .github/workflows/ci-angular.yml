@@ -16,5 +16,5 @@ jobs:
         with:
           node-version: '16.x'
       - name: Build & Test WebUI
-        run: dotnet run --project build/build.csproj -- angular
+        run: ./build.sh angular
         timeout-minutes: 30

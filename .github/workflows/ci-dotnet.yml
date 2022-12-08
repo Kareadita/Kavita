@@ -13,5 +13,5 @@ jobs:
         with:
             dotnet-version: 6.0.402
       - name: Build & Test C#
-        run: dotnet run --project build/build.csproj -- csharp
+        run: ./build.sh csharp
 
