@@ -134,9 +134,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     this.shouldRenderDouble$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       filter(_ => this.isValid()),
-      map((_) => {
-        return this.shouldRenderDouble();
-      })
+      map((_) => this.shouldRenderDouble())
     );
 
     this.layoutClass$ = zip(this.shouldRenderDouble$, this.imageFit$).pipe(
@@ -226,11 +224,27 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   shouldRenderDouble() {
     if (this.layoutMode !== LayoutMode.Double) return false;
 
-    return !(
-      this.mangaReaderService.isCoverImage(this.pageNum)
-      || this.mangaReaderService.isWideImage(this.currentImage)
-      || this.mangaReaderService.isWideImage(this.currentImageNext)
-      );
+    if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+      console.log('Not rendering double as current page is cover image');
+      return false;
+    }
+
+    if (this.mangaReaderService.isWideImage(this.currentImage)) {
+      console.log('Not rendering double as current page is wide image');
+      return false;
+    }
+
+    if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
+      console.log('Not rendering double as next page is wide image');
+      return false;
+    }
+
+    return true;
+    // return !(
+    //   this.mangaReaderService.isCoverImage(this.pageNum)
+    //   || this.mangaReaderService.isWideImage(this.currentImage)
+    //   || this.mangaReaderService.isWideImage(this.currentImageNext)
+    //   );
   }
 
   isValid() {
@@ -268,7 +282,15 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.Double) return 0;
 
-    // If prev page:
+    // console.log('[getPageAmount for double reverse]: ', allImages.map(img => {
+    //   const page = this.readerService.imageUrlToPageNum(img.src);
+    //   if (page === this.pageNum) return '[' + page;
+    //   if (page === this.pageNum + 1) return page + ']';
+    //   return page + '';
+    // }));
+    console.log("Current Page: ", this.pageNum);
+    console.log("Total Pages: ", this.maxPages);
+
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {

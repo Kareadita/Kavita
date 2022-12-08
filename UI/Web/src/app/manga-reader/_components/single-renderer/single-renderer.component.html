@@ -1,4 +1,4 @@
-<ng-container *ngIf="isValid()">
+<ng-container *ngIf="isValid() && !this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)">
     <div class="image-container {{imageFitClass$ | async}}" 
         [style.filter]="(darkenss$ | async)  ?? '' | safeStyle">
         <ng-container *ngIf="currentImage">

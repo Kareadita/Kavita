@@ -322,18 +322,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       return false;
     }
 
-
     return true;
-
-
-    // const result =  !(
-    //   this.mangaReaderService.isCoverImage(this.pageNum) 
-    //   || this.mangaReaderService.isCoverImage(this.pageNum - 1)  // This is because we use prev page and hence the cover will re-show
-    //   || this.mangaReaderService.isWideImage(this.leftImage) 
-    //   || this.mangaReaderService.isWideImage(this.currentImageNext)
-    //   );
-    
-    // return result;
   }
 
   isWide(img: HTMLImageElement) {
@@ -380,16 +369,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   }
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.DoubleReversed) return 0;
-    // console.log("----currentImage4Behind:", this.currentImage4Behind);
-    // console.log("---currentImage3Behind:", this.currentImage3Behind);
-    // console.log("--currentImage2Behind:", this.currentImage2Behind);
-    // console.log("-currentImagePrev:", this.currentImagePrev);
-    // console.log("leftImage", this.leftImage);
-    // console.log("rightImage", this.rightImage);
-    // console.log("+currentImageNext:", this.currentImageNext);
-    // console.log("++currentImage2Ahead:", this.currentImage2Ahead);
-    // console.log("+++currentImage3Ahead:", this.currentImage3Ahead);
-    // console.log("++++currentImage4Ahead:", this.currentImage4Ahead);
 
     const allImages = [
       this.currentImage4Behind, this.currentImage3Behind, this.currentImage2Behind, this.currentImagePrev,
@@ -413,7 +392,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
 
-        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages-1)) {
+        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) { // ?! I think this should be maxPages only
           console.log('Moving forward 1 page as 2 pages left');
           return 1;
         }

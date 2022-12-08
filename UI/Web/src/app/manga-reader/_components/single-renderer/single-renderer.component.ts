@@ -41,7 +41,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   get ReaderMode() {return ReaderMode;} 
   get LayoutMode() {return LayoutMode;} 
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, 
+  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService, 
     @Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {

@@ -64,7 +64,7 @@ export class ManagaReaderService {
    * If the current page is second to last image
    */
   isSecondLastImage(pageNum: number, maxPages: number) {
-    return maxPages - 1 - pageNum === 2;
+    return maxPages - 2 === pageNum;
   }
 
   /**

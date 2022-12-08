@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { map, Observable, of, Subject, takeUntil, tap } from 'rxjs';
+import { map, Observable, of, Subject, takeUntil, takeWhile, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
@@ -68,6 +68,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
     this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
+      //takeWhile(() => this.isValid()),
       map(values => values.fitting),
       map(fit => {
         if (fit === FITTING_OPTION.WIDTH || this.layoutMode === LayoutMode.Single) return fit;
@@ -94,7 +95,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
         if (!this.canvas) return;
 
         const elements = [this.canvas?.nativeElement];
-        console.log('Applying bookmark on ', elements);
         this.mangaReaderService.applyBookmarkEffect(elements);
       })
     ).subscribe(() => {});
@@ -158,6 +158,10 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
       }
     }
     return needsSplitting;
+  }
+
+  isValid() {
+    return this.renderWithCanvas;
   }
 
   /**
