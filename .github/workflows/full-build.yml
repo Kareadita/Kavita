@@ -215,6 +215,16 @@ jobs:
       - name: Build & Test Web UI
         run: ./build.sh angular
 
+      - name: Generate openapi.json
+        run: ./build.sh swagger
+
+      - name: Commit openapi.json
+        run: |
+        git config --global user.name "GitHub Actions"
+        git add openapi.json
+        git commit -m "chore: Update openapi.json" || echo "No changes to commit"
+        git push origin HEAD:master
+
       - name: Get csproj Version
         uses: naminodarie/get-net-sdk-project-versions-action@v1
         id: get-version
