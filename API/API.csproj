@@ -101,21 +101,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Condition=" '$(Configuration)' == 'Release' " Remove="appsettings.Development.json" />
-    <Content Update="appsettings.json">
+    <Content Update="config\appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="bin\$(Configuration)\$(AssemblyName).xml">
+    <Content Condition=" '$(Configuration)' != 'Release'"  Update="config\appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Drawing.Common" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="config\themes" />
-  </ItemGroup>
-
 </Project>

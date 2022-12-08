@@ -62,9 +62,6 @@ static void PackageRuntime(string framework, string runtime)
         Run("mv", $"{outputFolder}/API {outputFolder}/Kavita");
     }
 
-    Console.WriteLine("Copying appsettings.json");
-    Run("cp", $" API/config/appsettings.json {outputFolder}/config/appsettings.json");
-
     Console.WriteLine("Creating tar");
     var workingDir = $"{OutputFolder}/{runtime}/";
     Run("tar", $" -czvf kavita-{runtime}.tar.gz Kavita", workingDir);
