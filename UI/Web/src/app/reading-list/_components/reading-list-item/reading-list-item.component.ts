@@ -24,8 +24,6 @@ export class ReadingListItemComponent implements OnInit {
   @Output() read: EventEmitter<ReadingListItem> = new EventEmitter();
   @Output() remove: EventEmitter<ReadingListItem> = new EventEmitter();
 
-  title: string = '';
-
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
   }
@@ -33,34 +31,7 @@ export class ReadingListItemComponent implements OnInit {
   constructor(public imageService: ImageService, private utilityService: UtilityService, 
     private readonly cdRef: ChangeDetectorRef) { }
 
-  ngOnInit(): void {
-    this.formatTitle(this.item);
-  }
-
-  formatTitle(item: ReadingListItem) {
-    if (item.chapterNumber === '0') {
-      this.title = 'Volume ' + item.volumeNumber;
-    }
-
-    if (item.seriesFormat === MangaFormat.EPUB) {
-      const specialTitle = this.utilityService.cleanSpecialTitle(item.chapterNumber);
-      if (specialTitle === '0') {
-        this.title = 'Volume ' + this.utilityService.cleanSpecialTitle(item.volumeNumber);
-      } else {
-        this.title = 'Volume ' + specialTitle;
-      }
-    }
-
-    let chapterNum = item.chapterNumber;
-    if (!item.chapterNumber.match(/^\d+$/)) {
-      chapterNum = this.utilityService.cleanSpecialTitle(item.chapterNumber);
-    }
-
-    if (this.title === '') {
-      this.title = this.utilityService.formatChapterName(this.libraryTypes[item.libraryId], true, true) + chapterNum;
-    }
-    this.cdRef.markForCheck();
-  }
+  ngOnInit(): void {}
 
   readChapter(item: ReadingListItem) {
     this.read.emit(item);

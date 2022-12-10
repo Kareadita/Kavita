@@ -321,9 +321,11 @@ public class OpdsController : BaseApiController
         SetFeedId(feed, $"reading-list-{readingListId}");
 
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
+        var libraryTypes =
+            await _unitOfWork.LibraryRepository.GetLibraryTypesForIdsAsync(items.Select(s => s.LibraryId).Distinct());
         foreach (var item in items)
         {
-            feed.Entries.Add(CreateChapter(apiKey, $"{item.Order} - {item.SeriesName} Chapter {item.ChapterNumber}", string.Empty, item.ChapterId, item.VolumeId, item.SeriesId));
+            feed.Entries.Add(CreateChapter(apiKey, $"{item.Order} - {item.SeriesName}: {item.Title}", string.Empty, item.ChapterId, item.VolumeId, item.SeriesId));
         }
         return CreateXmlResult(SerializeXml(feed));
     }

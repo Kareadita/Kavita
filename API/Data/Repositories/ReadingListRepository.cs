@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -145,36 +146,41 @@ public class ReadingListRepository : IReadingListRepository
                 TotalPages = chapter.Pages,
                 ChapterNumber = chapter.Range,
                 ReleaseDate = chapter.ReleaseDate,
-                readingListItem = data
+                ReadingListItem = data,
+                ChapterTitleName = chapter.TitleName,
+
             })
-            .Join(_context.Volume, s => s.readingListItem.VolumeId, volume => volume.Id, (data, volume) => new
+            .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
             {
-                data.readingListItem,
+                data.ReadingListItem,
                 data.TotalPages,
                 data.ChapterNumber,
                 data.ReleaseDate,
+                data.ChapterTitleName,
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
-            .Join(_context.Series, s => s.readingListItem.SeriesId, series => series.Id,
+            .Join(_context.Series, s => s.ReadingListItem.SeriesId, series => series.Id,
                 (data, s) => new
                 {
                     SeriesName = s.Name,
                     SeriesFormat = s.Format,
                     s.LibraryId,
-                    data.readingListItem,
+                    data.ReadingListItem,
                     data.TotalPages,
                     data.ChapterNumber,
                     data.VolumeNumber,
                     data.VolumeId,
                     data.ReleaseDate,
+                    data.ChapterTitleName,
+                    LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
                 })
             .Select(data => new ReadingListItemDto()
             {
-                Id = data.readingListItem.Id,
-                ChapterId = data.readingListItem.ChapterId,
-                Order = data.readingListItem.Order,
-                SeriesId = data.readingListItem.SeriesId,
+                Id = data.ReadingListItem.Id,
+                ChapterId = data.ReadingListItem.ChapterId,
+                Order = data.ReadingListItem.Order,
+                SeriesId = data.ReadingListItem.SeriesId,
                 SeriesName = data.SeriesName,
                 SeriesFormat = data.SeriesFormat,
                 PagesTotal = data.TotalPages,
@@ -182,14 +188,21 @@ public class ReadingListRepository : IReadingListRepository
                 VolumeNumber = data.VolumeNumber,
                 LibraryId = data.LibraryId,
                 VolumeId = data.VolumeId,
-                ReadingListId = data.readingListItem.ReadingListId,
-                ReleaseDate = data.ReleaseDate
+                ReadingListId = data.ReadingListItem.ReadingListId,
+                ReleaseDate = data.ReleaseDate,
+                LibraryType = data.LibraryType,
+                ChapterTitleName = data.ChapterTitleName
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
+
+        foreach (var item in items)
+        {
+            item.Title = ReadingListHelper.FormatTitle(item);
+        }
 
         // Attach progress information
         var fetchedChapterIds = items.Select(i => i.ChapterId);
