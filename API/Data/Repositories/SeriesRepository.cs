@@ -125,7 +125,7 @@ public interface ISeriesRepository
     /// <returns></returns>
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 
-    Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> select);
+    Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
 }
 
 public class SeriesRepository : ISeriesRepository
