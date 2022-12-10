@@ -20,8 +20,9 @@ public interface ICacheService
     /// cache operations (except cleanup).
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <param name="extractPdfToImages">Extracts a PDF into images for a different reading experience</param>
     /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
-    Task<Chapter> Ensure(int chapterId);
+    Task<Chapter> Ensure(int chapterId, bool extractPdfToImages = false);
     /// <summary>
     /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
     /// </summary>
@@ -31,7 +32,7 @@ public interface ICacheService
     string GetCachedPagePath(Chapter chapter, int page);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
+    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
     Task<int> CacheBookmarkForSeries(int userId, int seriesId);
     void CleanupBookmarkCache(int seriesId);
 }
@@ -95,7 +96,7 @@ public class CacheService : ICacheService
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns>This will always return the Chapter for the chapterId</returns>
-    public async Task<Chapter> Ensure(int chapterId)
+    public async Task<Chapter> Ensure(int chapterId, bool extractPdfToImages = false)
     {
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
@@ -103,7 +104,7 @@ public class CacheService : ICacheService
 
         if (_directoryService.Exists(extractPath)) return chapter;
         var files = chapter?.Files.ToList();
-        ExtractChapterFiles(extractPath, files);
+        ExtractChapterFiles(extractPath, files, extractPdfToImages);
 
         return  chapter;
     }
@@ -114,8 +115,9 @@ public class CacheService : ICacheService
     /// </summary>
     /// <param name="extractPath"></param>
     /// <param name="files"></param>
+    /// <param name="extractPdfImages">Defaults to false, if true, will extract the images from the PDF renderer and not move the pdf file</param>
     /// <returns></returns>
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files)
+    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false)
     {
         var removeNonImages = true;
         var fileCount = files.Count;
@@ -143,12 +145,17 @@ public class CacheService : ICacheService
                 case MangaFormat.Epub:
                 case MangaFormat.Pdf:
                 {
-                    removeNonImages = false;
                     if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
                     {
                         _logger.LogError("{File} does not exist on disk", files[0].FilePath);
                         throw new KavitaException($"{files[0].FilePath} does not exist on disk");
                     }
+                    if (extractPdfImages)
+                    {
+                        _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
+                        break;
+                    }
+                    removeNonImages = false;
 
                     _directoryService.ExistOrCreate(extractPath);
                     _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
