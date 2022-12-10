@@ -35,7 +35,7 @@ public static class ReadingListHelper
         }
 
         var chapterNum = item.ChapterNumber;
-        if (!JustNumbers.Match(item.ChapterNumber).Success) {
+        if (!string.IsNullOrEmpty(chapterNum) && !JustNumbers.Match(item.ChapterNumber).Success) {
             chapterNum = Services.Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.ChapterNumber);
         }
 
