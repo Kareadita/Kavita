@@ -42,9 +42,9 @@ public class FeedEntry
     [XmlElement("link")]
     public List<FeedLink> Links = new List<FeedLink>();
 
-    // [XmlElement("author")]
-    // public List<FeedAuthor> Authors = new List<FeedAuthor>();
+    [XmlElement("author")]
+    public List<FeedAuthor> Authors = new List<FeedAuthor>();
 
-    // [XmlElement("category")]
-    // public List<FeedCategory> Categories = new List<FeedCategory>();
+    [XmlElement("category")]
+    public List<FeedCategory> Categories = new List<FeedCategory>();
 }

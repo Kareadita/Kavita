@@ -124,6 +124,8 @@ public interface ISeriesRepository
     /// </summary>
     /// <returns></returns>
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
+
+    Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> select);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -524,6 +526,19 @@ public class SeriesRepository : ISeriesRepository
         }
 
         return seriesChapters;
+    }
+
+    public async Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds)
+    {
+        return await _context.SeriesMetadata
+            .Where(metadata => seriesIds.Contains(metadata.SeriesId))
+            .Include(m => m.Genres.OrderBy(g => g.NormalizedTitle))
+            .Include(m => m.Tags.OrderBy(g => g.NormalizedTitle))
+            .Include(m => m.People)
+            .AsNoTracking()
+            .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
+            .ToListAsync();
     }
 
     public async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
