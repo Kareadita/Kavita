@@ -40,11 +40,11 @@ public class FeedEntry
     public FeedEntryContent Content { get; set; }
 
     [XmlElement("link")]
-    public List<FeedLink> Links = new List<FeedLink>();
+    public List<FeedLink> Links { get; set; } = new List<FeedLink>();
 
-    // [XmlElement("author")]
-    // public List<FeedAuthor> Authors = new List<FeedAuthor>();
+    [XmlElement("author")]
+    public List<FeedAuthor> Authors { get; set; } = new List<FeedAuthor>();
 
-    // [XmlElement("category")]
-    // public List<FeedCategory> Categories = new List<FeedCategory>();
+    [XmlElement("category")]
+    public List<FeedCategory> Categories { get; set; } = new List<FeedCategory>();
 }

@@ -11490,6 +11490,10 @@
             "type": "string",
             "nullable": true
           },
+          "chapterTitleName": {
+            "type": "string",
+            "nullable": true
+          },
           "volumeNumber": {
             "type": "string",
             "nullable": true
@@ -11501,6 +11505,9 @@
           "libraryId": {
             "type": "integer",
             "format": "int32"
+          },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
           },
           "title": {
             "type": "string",

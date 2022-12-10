@@ -11,7 +11,7 @@ public static class Parser
 {
     public const string DefaultChapter = "0";
     public const string DefaultVolume = "0";
-    private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
+    public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
