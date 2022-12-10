@@ -717,6 +717,21 @@ public class BookService : IBookService
         return PrepareFinalHtml(doc, body);
     }
 
+    private string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
+    {
+        if (!mappings.ContainsKey(CleanContentKeys(key)))
+        {
+            // Fallback to searching for key (bad epub metadata)
+            var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+            if (!string.IsNullOrEmpty(correctedKey))
+            {
+                key = correctedKey;
+            }
+        }
+
+        return key;
+    }
+
     /// <summary>
     /// This will return a list of mappings from ID -> page num. ID will be the xhtml key and page num will be the reading order
     /// this is used to rewrite anchors in the book text so that we always load properly in our reader.
@@ -743,7 +758,7 @@ public class BookService : IBookService
 
             foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
             {
-                var key = BookService.CleanContentKeys(nestedChapter.Link.ContentFileName);
+                var key = CoalesceKey(book, mappings, nestedChapter.Link.ContentFileName);
                 if (mappings.ContainsKey(key))
                 {
                     nestedChapters.Add(new BookChapterItem()
@@ -775,7 +790,7 @@ public class BookService : IBookService
         {
             if (!anchor.Attributes.Contains("href")) continue;
 
-            var key = BookService.CleanContentKeys(anchor.Attributes["href"].Value).Split("#")[0];
+            var key = CleanContentKeys(anchor.Attributes["href"].Value).Split("#")[0];
             if (!mappings.ContainsKey(key))
             {
                 // Fallback to searching for key (bad epub metadata)
