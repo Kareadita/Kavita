@@ -24,10 +24,10 @@ export class ManagaReaderService {
   isWideImage(elem: HTMLImageElement) {
     if (!elem) return false;
     if (elem) {
+      if (elem.src === '') return false;
       elem.addEventListener('load', () => {
         return elem.width > elem.height;
-      }, false);
-      if (elem.src === '') return false;
+      }, false); 
     }
     return elem.width > elem.height;
   }

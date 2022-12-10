@@ -328,15 +328,16 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           console.log('Moving back 1 page as prev page is wide');
           return 1;
         }
+        // ?! On fresh load, there is a timing issue with this. 
         if (this.mangaReaderService.isWideImage(this.currentImage2Behind)) {
           console.log('Moving back 1 page as 2 pages back is wide');
           return 1;
         }
         // Not sure about this condition on moving backwards
-        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
-          console.log('Moving back 1 page as 2 pages left');
-          return 1;
-        }
+        // if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+        //   console.log('Moving back 1 page as 2 pages left');
+        //   return 1;
+        // }
         console.log('Moving back 2 pages');
         return 2;
     }
