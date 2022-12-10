@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.7"
+    "version": "0.6.1.8"
   },
   "servers": [
     {
@@ -3411,7 +3411,7 @@
           {
             "name": "chapterId",
             "in": "query",
-            "description": "",
+            "description": "Chapter Id",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3420,10 +3420,19 @@
           {
             "name": "page",
             "in": "query",
-            "description": "",
+            "description": "Page in question",
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "Should Kavita extract pdf into images. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -3490,6 +3499,15 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "Should Kavita extract pdf into images. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],

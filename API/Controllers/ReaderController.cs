@@ -87,16 +87,17 @@ public class ReaderController : BaseApiController
     /// Returns an image for a given chapter. Will perform bounding checks
     /// </summary>
     /// <remarks>This will cache the chapter images for reading</remarks>
-    /// <param name="chapterId"></param>
-    /// <param name="page"></param>
+    /// <param name="chapterId">Chapter Id</param>
+    /// <param name="page">Page in question</param>
+    /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("image")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     [AllowAnonymous]
-    public async Task<ActionResult> GetImage(int chapterId, int page)
+    public async Task<ActionResult> GetImage(int chapterId, int page, bool extractPdf = false)
     {
         if (page < 0) page = 0;
-        var chapter = await _cacheService.Ensure(chapterId);
+        var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
         try
@@ -155,12 +156,13 @@ public class ReaderController : BaseApiController
     /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
-    public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId)
+    public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false)
     {
         if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
-        var chapter = await _cacheService.Ensure(chapterId);
+        var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("Could not find Chapter");
 
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);

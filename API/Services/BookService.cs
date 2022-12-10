@@ -49,9 +49,9 @@ public interface IBookService
     /// <summary>
     /// Extracts a PDF file's pages as images to an target directory
     /// </summary>
+    /// <remarks>This method relies on Docnet which has explict patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
     /// <param name="fileFilePath"></param>
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
-    [Obsolete("This method of reading is no longer supported. Please use native pdf reader")]
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
 
     Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
