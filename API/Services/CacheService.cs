@@ -74,13 +74,13 @@ public class CacheService : ICacheService
         for (var i = 0; i < files.Length; i++)
         {
             var file = files[i];
-            //using var image = SixLabors.ImageSharp.Image.Load(file);
             using var image = Image.NewFromStream(File.OpenRead(file), access: Enums.Access.SequentialUnbuffered);
             dimensions.Add(new FileDimensionDto()
             {
                 PageNumber = i,
                 Height = image.Height,
-                Width = image.Width
+                Width = image.Width,
+                FileName = file
             });
         }
 
