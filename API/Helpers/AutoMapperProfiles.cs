@@ -145,7 +145,6 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<ReadingList, ReadingListDto>();
         CreateMap<ReadingListItem, ReadingListItemDto>();
-            //.AfterMap((src, dest) => dest.Title = ReadingListHelper.FormatTitle(dest));
 
         CreateMap<Series, SearchResultDto>()
             .ForMember(dest => dest.SeriesId,

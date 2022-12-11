@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.8"
+    "version": "0.6.1.9"
   },
   "servers": [
     {
@@ -12842,11 +12842,6 @@
           "convertBookmarkToWebP": {
             "type": "boolean",
             "description": "If the server should save bookmarks as WebP encoding"
-          },
-          "enableSwaggerUi": {
-            "type": "boolean",
-            "description": "If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.",
-            "deprecated": true
           },
           "totalBackups": {
             "type": "integer",

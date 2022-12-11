@@ -3,6 +3,9 @@ using System.ComponentModel;
 
 namespace API.Entities.Enums;
 
+/// <summary>
+/// 15 is blocked as it was EnableSwaggerUi, which is no longer used
+/// </summary>
 public enum ServerSettingKey
 {
     /// <summary>
@@ -82,12 +85,6 @@ public enum ServerSettingKey
     /// </summary>
     [Description("ConvertBookmarkToWebP")]
     ConvertBookmarkToWebP = 14,
-    /// <summary>
-    /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
-    /// </summary>
-    [Description("EnableSwaggerUi")]
-    [Obsolete("Being removed in v0.7 in favor of dedicated hosted api")]
-    EnableSwaggerUi = 15,
     /// <summary>
     /// Total Number of Backups to maintain before cleaning. Default 30, min 1.
     /// </summary>
