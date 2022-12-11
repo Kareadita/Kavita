@@ -319,9 +319,9 @@ export class CardItemComponent implements OnInit, OnDestroy {
       this.actions = this.actionFactoryService.filterSendToAction(this.actions, vol.chapters[0]);
     } else if (this.utilityService.isSeries(this.entity)) {
       const series = (this.entity as Series);
-      if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
-        this.actions = this.actions.filter(a => a.title !== 'Send To');
-      }
+      // if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
+      //   this.actions = this.actions.filter(a => a.title !== 'Send To');
+      // }
     }
   }
 }
