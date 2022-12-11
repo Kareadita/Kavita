@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.10"
+    "version": "0.6.1.11"
   },
   "servers": [
     {
@@ -3481,6 +3481,66 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Reader/file-dimensions": {
+      "get": {
+        "tags": [
+          "Reader"
+        ],
+        "summary": "Returns the file dimensions for all pages in a chapter. If the underlying chapter is PDF, use extractPDF to unpack as images.",
+        "description": "This has a side effect of caching the images.\r\n            This will only be populated on archive filetypes and not in bookmark mode",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -9829,14 +9889,6 @@
             "type": "string",
             "description": "Series Title",
             "nullable": true
-          },
-          "fileDimensions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FileDimensionDto"
-            },
-            "description": "A list of images and their dimensions to be used with double page readers",
-            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -10253,6 +10305,12 @@
           "pageNumber": {
             "type": "integer",
             "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "The filename of the cached file. If this was nested in a subfolder, the foldername will be appended with _",
+            "nullable": true,
+            "example": "chapter01_page01.png"
           }
         },
         "additionalProperties": false

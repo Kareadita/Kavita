@@ -174,10 +174,10 @@ export class ActionFactoryService {
   dummyCallback(action: ActionItem<any>, data: any) {}
 
   filterSendToAction(actions: Array<ActionItem<Chapter>>, chapter: Chapter) {
-    if (chapter.files.filter(f => f.format === MangaFormat.EPUB || f.format === MangaFormat.PDF).length !== chapter.files.length) {
-      // Remove Send To as it doesn't apply
-      return actions.filter(item => item.title !== 'Send To');
-    }
+    // if (chapter.files.filter(f => f.format === MangaFormat.EPUB || f.format === MangaFormat.PDF).length !== chapter.files.length) {
+    //   // Remove Send To as it doesn't apply
+    //   return actions.filter(item => item.title !== 'Send To');
+    // }
     return actions;
   }
 
