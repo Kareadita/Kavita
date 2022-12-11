@@ -47,7 +47,6 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
-      this.settingsForm.addControl('enableSwaggerUi', new FormControl(this.serverSettings.enableSwaggerUi, [Validators.required]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('totalLogs', new FormControl(this.serverSettings.totalLogs, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
@@ -66,7 +65,6 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds);
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
-    this.settingsForm.get('enableSwaggerUi')?.setValue(this.serverSettings.enableSwaggerUi);
     this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups);
     this.settingsForm.get('totalLogs')?.setValue(this.serverSettings.totalLogs);
     this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching);

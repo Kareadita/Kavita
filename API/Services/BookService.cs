@@ -49,9 +49,9 @@ public interface IBookService
     /// <summary>
     /// Extracts a PDF file's pages as images to an target directory
     /// </summary>
+    /// <remarks>This method relies on Docnet which has explict patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
     /// <param name="fileFilePath"></param>
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
-    [Obsolete("This method of reading is no longer supported. Please use native pdf reader")]
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
 
     Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
@@ -717,6 +717,20 @@ public class BookService : IBookService
         return PrepareFinalHtml(doc, body);
     }
 
+    private static string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
+    {
+        if (mappings.ContainsKey(CleanContentKeys(key))) return key;
+
+        // Fallback to searching for key (bad epub metadata)
+        var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+        if (!string.IsNullOrEmpty(correctedKey))
+        {
+            key = correctedKey;
+        }
+
+        return key;
+    }
+
     /// <summary>
     /// This will return a list of mappings from ID -> page num. ID will be the xhtml key and page num will be the reading order
     /// this is used to rewrite anchors in the book text so that we always load properly in our reader.
@@ -743,7 +757,7 @@ public class BookService : IBookService
 
             foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
             {
-                var key = BookService.CleanContentKeys(nestedChapter.Link.ContentFileName);
+                var key = CoalesceKey(book, mappings, nestedChapter.Link.ContentFileName);
                 if (mappings.ContainsKey(key))
                 {
                     nestedChapters.Add(new BookChapterItem()
@@ -760,7 +774,7 @@ public class BookService : IBookService
         }
 
         if (chaptersList.Count != 0) return chaptersList;
-        // Generate from TOC
+        // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
         var tocPage = book.Content.Html.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
         if (tocPage == null) return chaptersList;
 
@@ -775,16 +789,7 @@ public class BookService : IBookService
         {
             if (!anchor.Attributes.Contains("href")) continue;
 
-            var key = BookService.CleanContentKeys(anchor.Attributes["href"].Value).Split("#")[0];
-            if (!mappings.ContainsKey(key))
-            {
-                // Fallback to searching for key (bad epub metadata)
-                var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
-                if (!string.IsNullOrEmpty(correctedKey))
-                {
-                    key = correctedKey;
-                }
-            }
+            var key = CoalesceKey(book, mappings, anchor.Attributes["href"].Value.Split("#")[0]);
 
             if (string.IsNullOrEmpty(key) || !mappings.ContainsKey(key)) continue;
             var part = string.Empty;

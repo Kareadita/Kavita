@@ -32,7 +32,6 @@ public interface IReaderService
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
-    string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false);
 }
 
 public class ReaderService : IReaderService
@@ -612,7 +611,7 @@ public class ReaderService : IReaderService
     /// <param name="includeHash">For comics only, includes a # which is used for numbering on cards</param>
     /// <param name="includeSpace">Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.</param>
     /// <returns></returns>
-    public string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false)
+    public static string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false)
     {
         switch(libraryType)
         {

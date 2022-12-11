@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.7"
+    "version": "0.6.1.11"
   },
   "servers": [
     {
@@ -3411,7 +3411,7 @@
           {
             "name": "chapterId",
             "in": "query",
-            "description": "",
+            "description": "Chapter Id",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3420,10 +3420,19 @@
           {
             "name": "page",
             "in": "query",
-            "description": "",
+            "description": "Page in question",
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "Should Kavita extract pdf into images. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -3476,6 +3485,66 @@
         }
       }
     },
+    "/api/Reader/file-dimensions": {
+      "get": {
+        "tags": [
+          "Reader"
+        ],
+        "summary": "Returns the file dimensions for all pages in a chapter. If the underlying chapter is PDF, use extractPDF to unpack as images.",
+        "description": "This has a side effect of caching the images.\r\n            This will only be populated on archive filetypes and not in bookmark mode",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Reader/chapter-info": {
       "get": {
         "tags": [
@@ -3490,6 +3559,15 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "Should Kavita extract pdf into images. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -10213,6 +10291,30 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "FileDimensionDto": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "The filename of the cached file. If this was nested in a subfolder, the foldername will be appended with _",
+            "nullable": true,
+            "example": "chapter01_page01.png"
+          }
+        },
+        "additionalProperties": false
+      },
       "FileExtensionBreakdownDto": {
         "type": "object",
         "properties": {
@@ -11472,6 +11574,10 @@
             "type": "string",
             "nullable": true
           },
+          "chapterTitleName": {
+            "type": "string",
+            "nullable": true
+          },
           "volumeNumber": {
             "type": "string",
             "nullable": true
@@ -11483,6 +11589,9 @@
           "libraryId": {
             "type": "integer",
             "format": "int32"
+          },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
           },
           "title": {
             "type": "string",
@@ -12817,11 +12926,6 @@
           "convertBookmarkToWebP": {
             "type": "boolean",
             "description": "If the server should save bookmarks as WebP encoding"
-          },
-          "enableSwaggerUi": {
-            "type": "boolean",
-            "description": "If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.",
-            "deprecated": true
           },
           "totalBackups": {
             "type": "integer",
