@@ -23,7 +23,7 @@ export class CompactNumberPipe implements PipeTransform {
   transform(value: number): string {
 
     if (value < 1000) return value + '';
-    if (specialCases.includes(value + ''.length)) { // from 4, every 3 will have a case where we need to override
+    if (specialCases.includes((value + '').length)) { // from 4, every 3 will have a case where we need to override
       return formatterForDoublePercision.format(value);
     }
     
