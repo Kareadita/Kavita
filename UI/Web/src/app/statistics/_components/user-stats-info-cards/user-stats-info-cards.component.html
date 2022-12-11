@@ -29,7 +29,7 @@
     <ng-container>
         <div class="col-auto mb-2">
             <app-icon-and-title label="Last Active" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Last Active">
-                {{lastActive | date:'short'}}
+                {{lastActive | timeAgo}}
             </app-icon-and-title>
         </div>
     </ng-container>
