@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services;
 
 namespace API.Helpers;
 
@@ -40,35 +41,9 @@ public static class ReadingListHelper
         }
 
         if (title == string.Empty) {
-            title = FormatChapterName(item.LibraryType, true, true) + chapterNum;
+            title = ReaderService.FormatChapterName(item.LibraryType, true, true) + chapterNum;
         }
         return title;
-    }
-
-    /// <summary>
-    /// Formats a Chapter name based on the library it's in
-    /// </summary>
-    /// <param name="libraryType"></param>
-    /// <param name="includeHash">For comics only, includes a # which is used for numbering on cards</param>
-    /// <param name="includeSpace">Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.</param>
-    /// <returns></returns>
-    private static string FormatChapterName(LibraryType libraryType, bool includeHash = false,
-        bool includeSpace = false)
-    {
-        switch (libraryType)
-        {
-            case LibraryType.Manga:
-                return "Chapter" + (includeSpace ? " " : string.Empty);
-            case LibraryType.Comic:
-                if (includeHash) {
-                    return "Issue #";
-                }
-                return "Issue" + (includeSpace ? " " : string.Empty);
-            case LibraryType.Book:
-                return "Book" + (includeSpace ? " " : string.Empty);
-            default:
-                throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);
-        }
     }
 
 }

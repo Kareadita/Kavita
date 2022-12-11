@@ -13,6 +13,7 @@ import { ProgressBookmark } from '../_models/readers/progress-bookmark';
 import { SeriesFilter } from '../_models/metadata/series-filter';
 import { UtilityService } from '../shared/_services/utility.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
+import { FileDimension } from '../manga-reader/_models/file-dimension';
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -104,6 +105,10 @@ export class ReaderService {
 
   getChapterInfo(chapterId: number) {
     return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
+  }
+
+  getFileDimensions(chapterId: number) {
+    return this.httpClient.get<Array<FileDimension>>(this.baseUrl + 'reader/file-dimensions?chapterId=' + chapterId);
   }
 
   saveProgress(libraryId: number, seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {

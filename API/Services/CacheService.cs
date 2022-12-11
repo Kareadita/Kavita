@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Services;
 
@@ -29,7 +31,8 @@ public interface ICacheService
     /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
     void CleanupChapters(IEnumerable<int> chapterIds);
     void CleanupBookmarks(IEnumerable<int> seriesIds);
-    string GetCachedPagePath(Chapter chapter, int page);
+    string GetCachedPagePath(int chapterId, int page);
+    IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
@@ -53,6 +56,35 @@ public class CacheService : ICacheService
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _bookmarkService = bookmarkService;
+    }
+
+    public IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId)
+    {
+        var path = GetCachePath(chapterId);
+        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
+            .OrderByNatural(Path.GetFileNameWithoutExtension)
+            .ToArray();
+
+        if (files.Length == 0)
+        {
+            return ArraySegment<FileDimensionDto>.Empty;
+        }
+
+        var dimensions = new List<FileDimensionDto>();
+        for (var i = 0; i < files.Length; i++)
+        {
+            var file = files[i];
+            //using var image = SixLabors.ImageSharp.Image.Load(file);
+            using var image = Image.NewFromStream(File.OpenRead(file), access: Enums.Access.SequentialUnbuffered);
+            dimensions.Add(new FileDimensionDto()
+            {
+                PageNumber = i,
+                Height = image.Height,
+                Width = image.Width
+            });
+        }
+
+        return dimensions;
     }
 
     public string GetCachedBookmarkPagePath(int seriesId, int page)
@@ -208,13 +240,13 @@ public class CacheService : ICacheService
     /// <summary>
     /// Returns the absolute path of a cached page.
     /// </summary>
-    /// <param name="chapter">Chapter entity with Files populated.</param>
+    /// <param name="chapterId">Chapter id with Files populated.</param>
     /// <param name="page">Page number to look for</param>
     /// <returns>Page filepath or empty if no files found.</returns>
-    public string GetCachedPagePath(Chapter chapter, int page)
+    public string GetCachedPagePath(int chapterId, int page)
     {
         // Calculate what chapter the page belongs to
-        var path = GetCachePath(chapter.Id);
+        var path = GetCachePath(chapterId);
         // TODO: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
         var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)

@@ -824,7 +824,7 @@ public class OpdsController : BaseApiController
 
         try
         {
-            var path = _cacheService.GetCachedPagePath(chapter, pageNumber);
+            var path = _cacheService.GetCachedPagePath(chapter.Id, pageNumber);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {pageNumber}");
 
             var content = await _directoryService.ReadFileAsync(path);
