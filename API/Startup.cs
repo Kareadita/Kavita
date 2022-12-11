@@ -246,21 +246,14 @@ public class Startup
 
         app.UseMiddleware<ExceptionMiddleware>();
 
-        Task.Run(async () =>
+        if (env.IsDevelopment())
         {
-            var allowSwaggerUi = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync())
-                .EnableSwaggerUi;
-
-            if (env.IsDevelopment() || allowSwaggerUi)
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
-                });
-
-            }
-        });
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+            });
+        }
 
         if (env.IsDevelopment())
         {

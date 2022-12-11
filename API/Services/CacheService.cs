@@ -90,12 +90,6 @@ public class CacheService : ICacheService
         return path;
     }
 
-
-    /// <summary>
-    /// Caches the files for the given chapter to CacheDirectory
-    /// </summary>
-    /// <param name="chapterId"></param>
-    /// <returns>This will always return the Chapter for the chapterId</returns>
     public async Task<Chapter> Ensure(int chapterId, bool extractPdfToImages = false)
     {
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);

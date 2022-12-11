@@ -12843,11 +12843,6 @@
             "type": "boolean",
             "description": "If the server should save bookmarks as WebP encoding"
           },
-          "enableSwaggerUi": {
-            "type": "boolean",
-            "description": "If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.",
-            "deprecated": true
-          },
           "totalBackups": {
             "type": "integer",
             "description": "The amount of Backups before cleanup",

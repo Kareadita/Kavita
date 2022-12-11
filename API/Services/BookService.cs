@@ -717,16 +717,15 @@ public class BookService : IBookService
         return PrepareFinalHtml(doc, body);
     }
 
-    private string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
+    private static string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
     {
-        if (!mappings.ContainsKey(CleanContentKeys(key)))
+        if (mappings.ContainsKey(CleanContentKeys(key))) return key;
+
+        // Fallback to searching for key (bad epub metadata)
+        var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+        if (!string.IsNullOrEmpty(correctedKey))
         {
-            // Fallback to searching for key (bad epub metadata)
-            var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
-            if (!string.IsNullOrEmpty(correctedKey))
-            {
-                key = correctedKey;
-            }
+            key = correctedKey;
         }
 
         return key;

@@ -11,7 +11,6 @@ export interface ServerSettings {
     emailServiceUrl: string;
     convertBookmarkToWebP: boolean;
     convertCoverToWebP: boolean;
-    enableSwaggerUi: boolean;
     totalBackups: number;
     totalLogs: number;
     enableFolderWatching: boolean;

@@ -213,12 +213,6 @@ public class SettingsController : BaseApiController
                 }
             }
 
-            if (setting.Key == ServerSettingKey.EnableSwaggerUi && updateSettingsDto.EnableSwaggerUi + string.Empty != setting.Value)
-            {
-                setting.Value = updateSettingsDto.EnableSwaggerUi + string.Empty;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
             if (setting.Key == ServerSettingKey.TotalBackups && updateSettingsDto.TotalBackups + string.Empty != setting.Value)
             {
                 if (updateSettingsDto.TotalBackups > 30 || updateSettingsDto.TotalBackups < 1)
