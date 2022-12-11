@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.9"
+    "version": "0.6.1.10"
   },
   "servers": [
     {
@@ -9829,6 +9829,14 @@
             "type": "string",
             "description": "Series Title",
             "nullable": true
+          },
+          "fileDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileDimensionDto"
+            },
+            "description": "A list of images and their dimensions to be used with double page readers",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -10230,6 +10238,24 @@
         },
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
+      },
+      "FileDimensionDto": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "FileExtensionBreakdownDto": {
         "type": "object",
