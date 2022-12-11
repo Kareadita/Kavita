@@ -775,7 +775,7 @@ public class BookService : IBookService
         }
 
         if (chaptersList.Count != 0) return chaptersList;
-        // Generate from TOC
+        // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
         var tocPage = book.Content.Html.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
         if (tocPage == null) return chaptersList;
 
@@ -790,16 +790,7 @@ public class BookService : IBookService
         {
             if (!anchor.Attributes.Contains("href")) continue;
 
-            var key = CleanContentKeys(anchor.Attributes["href"].Value).Split("#")[0];
-            if (!mappings.ContainsKey(key))
-            {
-                // Fallback to searching for key (bad epub metadata)
-                var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
-                if (!string.IsNullOrEmpty(correctedKey))
-                {
-                    key = correctedKey;
-                }
-            }
+            var key = CoalesceKey(book, mappings, anchor.Attributes["href"].Value.Split("#")[0]);
 
             if (string.IsNullOrEmpty(key) || !mappings.ContainsKey(key)) continue;
             var part = string.Empty;
