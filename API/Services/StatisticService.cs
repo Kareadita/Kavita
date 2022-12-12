@@ -240,13 +240,21 @@ public class StatisticService : IStatisticService
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
 
+        var distinctPeople = _context.Person
+            .AsSplitQuery()
+            .AsEnumerable()
+            .GroupBy(sm => sm.NormalizedName)
+            .Select(sm => sm.Key)
+            .Distinct()
+            .Count();
+
         return new ServerStatistics()
         {
             ChapterCount = await _context.Chapter.CountAsync(),
             SeriesCount = await _context.Series.CountAsync(),
             TotalFiles = await _context.MangaFile.CountAsync(),
             TotalGenres = await _context.Genre.CountAsync(),
-            TotalPeople = await _context.Person.CountAsync(),
+            TotalPeople = distinctPeople,
             TotalSize = await _context.MangaFile.SumAsync(m => m.Bytes),
             TotalTags = await _context.Tag.CountAsync(),
             VolumeCount = await _context.Volume.Where(v => v.Number != 0).CountAsync(),

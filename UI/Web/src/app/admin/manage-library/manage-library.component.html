@@ -21,7 +21,7 @@
                 Last Scanned: 
                 <span *ngIf="library.lastScanned == '0001-01-01T00:00:00'; else activeDate">Never</span>
                 <ng-template #activeDate>
-                    {{library.lastScanned | date: 'short'}}
+                    {{library.lastScanned | timeAgo}}
                 </ng-template>
             </div>
         </li>
