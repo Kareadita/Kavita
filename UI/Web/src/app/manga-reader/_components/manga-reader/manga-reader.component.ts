@@ -755,7 +755,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (page > this.maxPages) {
         page = this.maxPages - 1;
       }
-      this.setPageNum(page);
+      this.setPageNum(page); // first call
       this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
       // Due to change detection rules in Angular, we need to re-create the options object to apply the change

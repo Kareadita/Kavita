@@ -25,6 +25,7 @@ export class ManagaReaderService {
     if (!elem) return false;
     if (elem) {
       if (elem.src === '') return false;
+      // ?! BUG: This can cause issues when image isn't loaded
       elem.addEventListener('load', () => {
         return elem.width > elem.height;
       }, false); 
