@@ -44,6 +44,11 @@ export class ManagaReaderService {
     return this.pageDimensions[this.readerService.imageUrlToPageNum(elem.src)] === 'W'
   }
 
+  isWidePage(pageNum: number) {
+    if (!this.pageDimensions.hasOwnProperty(pageNum)) return false;
+    return this.pageDimensions[pageNum] === 'W'
+  }
+
 
 
   /**

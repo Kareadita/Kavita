@@ -327,7 +327,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
   isWide(img: HTMLImageElement) {
     const page = this.readerService.imageUrlToPageNum(img.src);
-    return this.mangaReaderService.isWideImage(img) || this.pageSpreadMap.hasOwnProperty(page) && this.pageSpreadMap[page] === 'W';
+    return this.mangaReaderService.isWidePage(page) || this.mangaReaderService.isWideImage(img) || this.pageSpreadMap.hasOwnProperty(page) && this.pageSpreadMap[page] === 'W';
   }
 
   isValid() {
