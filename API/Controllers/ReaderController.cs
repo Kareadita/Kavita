@@ -161,6 +161,7 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf"></param>
     /// <returns></returns>
     [HttpGet("file-dimensions")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf"})]
     public async Task<ActionResult<IEnumerable<FileDimensionDto>>> GetFileDimensions(int chapterId, bool extractPdf = false)
     {
         if (chapterId <= 0) return null;
@@ -176,6 +177,7 @@ public class ReaderController : BaseApiController
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf"})]
     public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false)
     {
         if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
