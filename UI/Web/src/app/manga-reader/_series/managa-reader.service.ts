@@ -91,7 +91,7 @@ export class ManagaReaderService {
    * @returns 
    */
   shouldSplit(img: HTMLImageElement, pageSplitOption: PageSplitOption) {
-    const needsSplitting = this.isWidePage(this.readerService.imageUrlToPageNum(img.src));
+    const needsSplitting = this.isWidePage(this.readerService.imageUrlToPageNum(img?.src));
     return !(this.isNoSplit(pageSplitOption) || !needsSplitting)
   }
 
