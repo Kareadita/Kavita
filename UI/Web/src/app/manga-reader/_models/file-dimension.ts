@@ -3,3 +3,5 @@ export interface FileDimension {
     width: number;
     height: number;
 }
+
+export type DimensionMap = {[key: number]: 'W'|'S'};

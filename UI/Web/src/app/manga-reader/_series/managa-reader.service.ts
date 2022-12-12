@@ -3,6 +3,7 @@ import { ElementRef, Inject, Injectable, Renderer2, RendererFactory2 } from '@an
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { ReaderService } from 'src/app/_services/reader.service';
+import { DimensionMap } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 
 @Injectable({
@@ -32,6 +33,8 @@ export class ManagaReaderService {
     }
     return elem.width > elem.height;
   }
+
+
 
   /**
    * If pagenumber is 0 aka first page, which on double page rendering should always render as a single. 

@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, shareReplay, Subject, take, takeUntil, tap } from 'rxjs';
 import { LabelType, ChangeContext, Options } from '@angular-slider/ngx-slider';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
@@ -31,6 +31,7 @@ import { DoubleRendererComponent } from '../double-renderer/double-renderer.comp
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
 import { mode } from 'd3';
+import { DimensionMap, FileDimension } from '../../_models/file-dimension';
 
 
 const PREFETCH_PAGES = 10;
@@ -41,8 +42,6 @@ const CHAPTER_ID_DOESNT_EXIST = -1;
 const ANIMATION_SPEED = 200;
 const OVERLAY_AUTO_CLOSE_TIME = 3000;
 const CLICK_OVERLAY_TIMEOUT = 3000;
-
-
 
 @Component({
   selector: 'app-manga-reader',
@@ -323,6 +322,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
+
+  fileDimensions: DimensionMap = {};
   
 
   bookmarkPageHandler = this.bookmarkPage.bind(this);
@@ -518,7 +519,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
         this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
 
-        const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+        //const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+        const needsSplitting = this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W';
         // If we need to split on a menu change, then we need to re-render.
         if (needsSplitting) {
           // If we need to re-render, to ensure things layout properly, let's update paging direction & reset render
@@ -767,9 +769,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.title = results.chapterInfo.title;
       this.subtitle = results.chapterInfo.subtitle;
 
-      this.readerService.getFileDimensions(this.chapterId).subscribe(dimensions => {
-        console.log('dimensions: ', dimensions);
-      });
+      this.readerService.getFileDimensions(this.chapterId).subscribe(dims => {
+        this.fileDimensions = {};
+        dims.forEach(d => {
+          this.fileDimensions[d.pageNumber] = d.width > d.height ? 'W' : 'S';
+        });
+        console.log('Page Dimensions: ', this.fileDimensions);
+        this.cdRef.markForCheck();
+      })
 
 
       this.inSetup = false;
@@ -836,7 +843,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     if (
-      this.mangaReaderService.isWideImage(this.canvasImage) &&
+      //this.mangaReaderService.isWideImage(this.canvasImage) &&
+      this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W' &&
       this.layoutMode === LayoutMode.Single &&
       val !== FITTING_OPTION.WIDTH &&
       this.mangaReaderService.shouldRenderAsFitSplit(this.generalSettingsForm.get('pageSplitOption')?.value)
@@ -848,7 +856,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // TODO: Move this to double renderer
-    if (this.mangaReaderService.isWideImage(this.canvasImage) && this.layoutMode !== LayoutMode.Single) {
+    //if (this.mangaReaderService.isWideImage(this.canvasImage) && this.layoutMode !== LayoutMode.Single) {
+    if (this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W' && this.layoutMode !== LayoutMode.Single) {
       this.imageFitClass.next(val + ' wide double');
       return val + ' wide double';
     }
@@ -1087,7 +1096,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               || document.documentElement.clientHeight
               || document.body.clientHeight;
 
-      const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+      //const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+      const needsSplitting = this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W';
       let newScale = this.FittingOption;
       const widthRatio = windowWidth / (this.canvasImage.width / (needsSplitting ? 2 : 1));
       const heightRatio = windowHeight / (this.canvasImage.height);

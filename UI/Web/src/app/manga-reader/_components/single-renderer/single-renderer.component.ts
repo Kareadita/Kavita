@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, In
 import { filter, map, Observable, of, Subject, takeUntil, tap, zip } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
+import { ReaderService } from 'src/app/_services/reader.service';
+import { DimensionMap } from '../../_models/file-dimension';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
@@ -17,6 +19,7 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
 })
 export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer {
 
+  @Input() pageDimensions!: DimensionMap;
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
   /**
@@ -42,7 +45,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   get LayoutMode() {return LayoutMode;} 
 
   constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService, 
-    @Inject(DOCUMENT) private document: Document) { }
+    @Inject(DOCUMENT) private document: Document, private readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
@@ -90,7 +93,8 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       map(values => values[0].fitting),
       map(fit => {
         if (
-          this.mangaReaderService.isWideImage(this.currentImage) &&
+          //this.mangaReaderService.isWideImage(this.currentImage) &&
+          this.pageDimensions[this.readerService.imageUrlToPageNum(this.currentImage.src)] == 'W' &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
