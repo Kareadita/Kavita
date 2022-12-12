@@ -124,7 +124,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   updateSplitPage() {
     if (this.canvasImage == null) return;
     const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
-    //const needsSplitting = this.pageDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W';
     
     if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
@@ -203,7 +202,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   getPageAmount(direction: PAGING_DIRECTION) {
     if (this.canvasImage === null) return 1;
     if (!this.mangaReaderService.isWideImage(this.canvasImage)) return 1;
-    //if (this.pageDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'S') return 1;
+    if (!this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src))) return 1;
     switch(direction) {
       case PAGING_DIRECTION.FORWARD:
         return this.shouldMoveNext() ? 1 : 0;
@@ -214,11 +213,13 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   shouldMoveNext() {
     if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
+    //console.log('[CanvasRenderer] Should Move next: Current Split: ', this.currentImageSplitPart);
     return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
   }
 
   shouldMovePrev() {
     if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
+    //console.log('[CanvasRenderer] Should Move Prev: Current Split: ', this.currentImageSplitPart);
     return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
   }
 
@@ -229,7 +230,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
    setCanvasSize() {
     if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) { return; }
-    // TODO: Move this somewhere else (maybe canvas renderer?)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const isSafari = [
