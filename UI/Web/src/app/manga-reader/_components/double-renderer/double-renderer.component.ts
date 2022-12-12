@@ -41,6 +41,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   layoutClass$!: Observable<string>;
   shouldRenderSecondPage$!: Observable<boolean>;
   darkenss$: Observable<string> = of('brightness(100%)');
+  emulateBookClass$: Observable<string> = of('');
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
   pageNum: number = 0;
@@ -91,6 +92,12 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.darkenss$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'), 
+      filter(_ => this.isValid()),
+      takeUntil(this.onDestroy)
+    );
+
+    this.emulateBookClass$ = this.readerSettings$.pipe(
+      map(enabled => enabled ? 'book-shadow' : ''), 
       filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );

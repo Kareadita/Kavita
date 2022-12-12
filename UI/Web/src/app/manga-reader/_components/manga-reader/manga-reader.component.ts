@@ -436,7 +436,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         pageSplitOption: new FormControl(this.pageSplitOption),
         fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
         layoutMode: new FormControl(this.layoutMode),
-        darkness: new FormControl(100)
+        darkness: new FormControl(100),
+        emulateBook: new FormControl(this.user.preferences.emulateBook)
       });
 
       this.readerModeSubject.next(this.readerMode);
@@ -614,7 +615,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       layoutMode: this.layoutMode,
       darkness: 100,
       pagingDirection: this.pagingDirection,
-      readerMode: this.readerMode
+      readerMode: this.readerMode,
+      emulateBook: this.generalSettingsForm.get('emulateBook')?.value,
     };
   }
 
@@ -1371,6 +1373,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.readerMode = this.readerMode;
       data.autoCloseMenu = this.autoCloseMenu;
       data.readingDirection = this.readingDirection;
+      data.emulateBook = modelSettings.emulateBook;
       this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
         this.toastr.success('User preferences updated');
         if (this.user) {

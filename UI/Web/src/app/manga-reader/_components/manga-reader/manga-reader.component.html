@@ -241,13 +241,22 @@
                             <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
                         </select>
                     </div>
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-3 col-sm-12">
                         <div class="mb-3">
-                            <label id="auto-close-label" class="form-label"></label>
                             <div class="mb-3">
                                 <div class="form-check form-switch">
-                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true">
                                     <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-12">
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="emulate-book" formControlName="emulateBook" class="form-check-input" [value]="true">
+                                    <label class="form-check-label" for="emulate-book">Emulate comic book</label>
                                 </div>
                             </div>
                         </div>
