@@ -175,10 +175,11 @@ public class ReaderController : BaseApiController
     /// </summary>
     /// <param name="chapterId"></param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
+    /// <param name="includeDimensions">Include file dimensions. Only useful for image based reading</param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf"})]
-    public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf", "includeDimensions"})]
+    public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
     {
         if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
@@ -203,6 +204,7 @@ public class ReaderController : BaseApiController
             ChapterTitle = dto.ChapterTitle ?? string.Empty,
             Subtitle = string.Empty,
             Title = dto.SeriesName,
+            PageDimensions = _cacheService.GetCachedFileDimensions(chapterId)
         };
 
         if (info.ChapterTitle is {Length: > 0}) {

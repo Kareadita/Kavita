@@ -103,8 +103,8 @@ export class ReaderService {
     return this.baseUrl + 'reader/bookmark-image?seriesId=' + seriesId + '&page=' + page + '&apiKey=' + encodeURIComponent(apiKey);
   }
 
-  getChapterInfo(chapterId: number) {
-    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
+  getChapterInfo(chapterId: number, includeDimensions = false) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&includeDimensions=' + includeDimensions);
   }
 
   getFileDimensions(chapterId: number) {

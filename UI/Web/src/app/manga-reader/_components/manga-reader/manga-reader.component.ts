@@ -736,9 +736,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     forkJoin({
       progress: this.readerService.getProgress(this.chapterId),
-      chapterInfo: this.readerService.getChapterInfo(this.chapterId),
+      chapterInfo: this.readerService.getChapterInfo(this.chapterId, true),
       bookmarks: this.readerService.getBookmarks(this.chapterId),
-      dimensions: this.readerService.getFileDimensions(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
       if (this.readingListMode && (results.chapterInfo.seriesFormat === MangaFormat.EPUB || results.chapterInfo.seriesFormat === MangaFormat.PDF)) {
         // Redirect to the book reader.
@@ -747,7 +746,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      this.mangaReaderService.loadPageDimensions(results.dimensions);
+      this.mangaReaderService.loadPageDimensions(results.chapterInfo.pageDimensions);
 
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
@@ -766,13 +765,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.libraryType = results.chapterInfo.libraryType;
       this.title = results.chapterInfo.title;
       this.subtitle = results.chapterInfo.subtitle;
-
-      // this.readerService.getFileDimensions(this.chapterId).subscribe(dims => {
-      //   this.mangaReaderService.loadPageDimensions(dims);
-        
-      //   this.cdRef.markForCheck();
-      // });
-
 
       this.inSetup = false;
 
@@ -1066,8 +1058,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   
 
   renderPage() {
-    console.log('[Manga Reader] renderPage()');
-
     const page = [this.canvasImage];
     this.canvasRenderer.renderPage(page); 
     this.singleRenderer.renderPage(page);
