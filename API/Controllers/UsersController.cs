@@ -85,6 +85,7 @@ public class UsersController : BaseApiController
         existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
         existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
         existingPreferences.ShowScreenHints = preferencesDto.ShowScreenHints;
+        existingPreferences.EmulateBook = preferencesDto.EmulateBook;
         existingPreferences.ReaderMode = preferencesDto.ReaderMode;
         existingPreferences.LayoutMode = preferencesDto.LayoutMode;
         existingPreferences.BackgroundColor = string.IsNullOrEmpty(preferencesDto.BackgroundColor) ? "#000000" : preferencesDto.BackgroundColor;

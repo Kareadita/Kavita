@@ -36,6 +36,10 @@ public class AppUserPreferences
     /// </summary>
     public bool ShowScreenHints { get; set; } = true;
     /// <summary>
+    /// Manga Reader Option: Emulate a book by applying a shadow effect on the pages
+    /// </summary>
+    public bool EmulateBook { get; set; } = false;
+    /// <summary>
     /// Manga Reader Option: How many pages to display in the reader at once
     /// </summary>
     public LayoutMode LayoutMode { get; set; } = LayoutMode.Single;

@@ -9246,6 +9246,10 @@
             "type": "boolean",
             "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
           },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+          },
           "layoutMode": {
             "$ref": "#/components/schemas/LayoutMode"
           },
@@ -13910,6 +13914,7 @@
           "bookReaderReadingDirection",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
+          "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
           "noTransitions",
@@ -13936,6 +13941,10 @@
           },
           "layoutMode": {
             "$ref": "#/components/schemas/LayoutMode"
+          },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
           },
           "backgroundColor": {
             "minLength": 1,
