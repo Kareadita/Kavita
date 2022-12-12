@@ -3569,6 +3569,15 @@
               "type": "boolean",
               "default": false
             }
+          },
+          {
+            "name": "includeDimensions",
+            "in": "query",
+            "description": "Include file dimensions. Only useful for image based reading",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -9888,6 +9897,13 @@
           "title": {
             "type": "string",
             "description": "Series Title",
+            "nullable": true
+          },
+          "pageDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileDimensionDto"
+            },
             "nullable": true
           }
         },

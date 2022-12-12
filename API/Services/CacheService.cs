@@ -76,7 +76,7 @@ public class CacheService : ICacheService
         for (var i = 0; i < files.Length; i++)
         {
             var file = files[i];
-            using var image = Image.NewFromStream(File.OpenRead(file), access: Enums.Access.SequentialUnbuffered);
+            using var image = Image.NewFromFile(file, memory:false, access: Enums.Access.SequentialUnbuffered);
             dimensions.Add(new FileDimensionDto()
             {
                 PageNumber = i,
