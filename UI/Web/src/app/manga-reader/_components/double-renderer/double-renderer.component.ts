@@ -97,6 +97,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     );
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
+      map(data => data.emulateBook),
       map(enabled => enabled ? 'book-shadow' : ''), 
       filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
