@@ -1,5 +1,4 @@
-import { DOCUMENT } from '@angular/common';
-import { ElementRef, Inject, Injectable, OnDestroy, Renderer2, RendererFactory2 } from '@angular/core';
+import { ElementRef, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -13,7 +12,7 @@ export class ManagaReaderService {
 
   private pageDimensions: DimensionMap = {};
   private renderer: Renderer2;
-  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private readerService: ReaderService) {
+  constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 
@@ -27,14 +26,8 @@ export class ManagaReaderService {
 
   /**
    * If the image's width is greater than it's height
-   * @param elem Image
+   * @param pageNum Page number - Expected to call loadPageDimensions before this call
    */
-  // isWideImage(elem: HTMLImageElement) {
-  //   if (!elem) return false;
-  //   if (elem.src === '') return false;
-  //   return this.pageDimensions[this.readerService.imageUrlToPageNum(elem.src)] === 'W'
-  // }
-
   isWidePage(pageNum: number) {
     if (!this.pageDimensions.hasOwnProperty(pageNum)) return false;
     return this.pageDimensions[pageNum] === 'W'
