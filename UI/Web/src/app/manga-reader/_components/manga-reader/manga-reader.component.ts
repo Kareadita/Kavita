@@ -860,14 +860,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   getFit() {
-    // TODO: getFit can be refactored with typed form controls so we don't need this
-    // can't this also just be this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT
-    let value = FITTING_OPTION.HEIGHT;
-    const formControl = this.generalSettingsForm.get('fittingOption');
-    if (formControl !== undefined) {
-      value = formControl?.value;
-    }
-    return value;
+    return this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT;
   }
 
   cancelMenuCloseTimer() {
