@@ -57,25 +57,10 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     */
   currentImage2 = new Image();
    /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the previous image to currentImage
-    * @see currentImage
-    */
-  currentImagePrev = new Image();
-   /**
     * Used solely for LayoutMode.Double rendering. Will always hold the next image to currentImage
     * @see currentImage
     */
   currentImageNext = new Image();
-  /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the current - 2 image to currentImage
-    * @see currentImage
-    */
-  currentImage2Behind = new Image();
-  /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the current + 2 image to currentImage
-   * @see currentImage
-   */
-  currentImage2Ahead = new Image();
 
   /**
    * Determines if we should render a double page.
@@ -127,10 +112,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         this.currentImage2 = this.getPage(this.pageNum + 1);
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
-        this.currentImagePrev = this.getPage(this.pageNum - 1);
-
-        this.currentImage2Behind = this.getPage(this.pageNum - 2);
-        this.currentImage2Ahead = this.getPage(this.pageNum + 2);
         this.cdRef.markForCheck();
       })).subscribe(() => {});
 
@@ -236,11 +217,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
-
-    console.log('[DoubleRenderer] renderPage(): ', this.pageNum);
-    console.log(this.readerService.imageUrlToPageNum(this.currentImage2Behind.src), this.readerService.imageUrlToPageNum(this.currentImagePrev.src),
-    '[', this.readerService.imageUrlToPageNum(this.currentImage.src), ']',
-    this.readerService.imageUrlToPageNum(this.currentImageNext.src), this.readerService.imageUrlToPageNum(this.currentImage2Ahead.src))
     
     // First load, switching from double manga -> double, this is 0 and thus not rendering
     if (!this.shouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {

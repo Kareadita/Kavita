@@ -381,9 +381,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private formBuilder: FormBuilder, private navService: NavService,
               private toastr: ToastrService, private memberService: MemberService,
-              public utilityService: UtilityService, private renderer: Renderer2,
-              @Inject(DOCUMENT) private document: Document, private modalService: NgbModal,
-              private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService) {
+              public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document, 
+              private modalService: NgbModal, private readonly cdRef: ChangeDetectorRef, 
+              public mangaReaderService: ManagaReaderService) {
                 this.navService.hideNavBar();
                 this.navService.hideSideNav();
                 this.cdRef.markForCheck();

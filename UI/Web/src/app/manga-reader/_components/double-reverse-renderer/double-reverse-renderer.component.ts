@@ -59,25 +59,10 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     */
   rightImage = new Image();
    /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the previous image to currentImage
-    * @see currentImage
-    */
-  currentImagePrev = new Image();
-   /**
     * Used solely for LayoutMode.Double rendering. Will always hold the next image to currentImage
     * @see currentImage
     */
   currentImageNext = new Image();
-  /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the current - 2 image to currentImage
-    * @see currentImage
-    */
-  currentImage2Behind = new Image();
-  /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the current + 2 image to currentImage
-   * @see currentImage
-   */
-  currentImage2Ahead = new Image();
 
   /**
    * Determines if we should render a double page.
@@ -129,10 +114,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
         this.rightImage = this.getPage(this.pageNum + 1);
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
-        this.currentImagePrev = this.getPage(this.pageNum - 1);
-
-        this.currentImage2Behind = this.getPage(this.pageNum - 2);
-        this.currentImage2Ahead = this.getPage(this.pageNum + 2);
       })).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
@@ -157,36 +138,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     this.shouldRenderSecondPage$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       filter(_ => this.isValid()),
-      map(_ => {
-
-        return this.shouldRenderDouble();
-
-        // if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-        //   console.log('Not rendering second page as on cover image');
-        //   return false;
-        // }
-        // if (this.readerService.imageUrlToPageNum(this.rightImage.src) > this.maxPages - 1) {
-        //   console.log('Not rendering second page as 2nd image is on last page');
-        //   return false;
-        // }
-        // if (this.isWide(this.leftImage)) {
-        //   console.log('Not rendering second page as right page is wide');
-        //   return false;
-        // }
-        // if (this.isWide(this.rightImage)) {
-        //   console.log('Not rendering second page as right page is wide');
-        //   return false;
-        // }
-        // if (this.isWide(this.currentImageNext)) {
-        //   console.log('Not rendering second page as next page is wide');
-        //   return false;
-        // }
-        // if (this.isWide(this.currentImagePrev) && (this.isWide(this.currentImage3Ahead))) {
-        //   console.log('Not rendering second page as prev page is wide');
-        //   return false;
-        // }
-        // return true;
-      }),
+      map(_ => this.shouldRenderDouble()),
     );
 
     this.readerSettings$.pipe(
@@ -265,26 +217,10 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
-
-    console.log('[DoubleRenderer] renderPage(): ', this.pageNum);
-
-    const allImages = [
-      this.currentImage2Behind, this.currentImagePrev,
-      this.leftImage, 
-      this.currentImageNext, this.currentImage2Ahead
-    ];
-
-    console.log('DoubleRenderer buffered pages: ', allImages.map(img => {
-      const page = this.readerService.imageUrlToPageNum(img.src);
-      if (page === this.pageNum) return '[' + page + ']';
-      return page;
-    }).join(', '));
-
     
     this.rightImage = this.currentImageNext;
-
-    
     this.cdRef.markForCheck();
+
     this.imageHeight.emit(Math.max(this.leftImage.height, this.rightImage.height));
     this.cdRef.markForCheck();
   }
@@ -297,21 +233,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   }
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.DoubleReversed) return 0;
-
-    const allImages = [
-      this.currentImage2Behind, this.currentImagePrev,
-      this.leftImage, this.rightImage,
-      this.currentImageNext, this.currentImage2Ahead
-    ];
-
-    console.log('[getPageAmount for double reverse]: ', allImages.map(img => {
-      const page = this.readerService.imageUrlToPageNum(img.src);
-      if (page === this.pageNum) return '[' + page;
-      if (page === this.pageNum + 1) return page + ']';
-      return page + '';
-    }));
-    console.log("Current Page: ", this.pageNum);
-    console.log("Total Pages: ", this.maxPages);
 
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
