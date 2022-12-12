@@ -345,11 +345,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 0;
         }
 
-        if (this.mangaReaderService.isWidePage(this.pageNum  - 1)) {
-          console.log('Moving forward 1 page as prev page is wide');
-          return 1;
-        }
-
         if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
           console.log('Moving forward 1 page as 1 page left');
           return 1;
@@ -366,6 +361,16 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
         if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
           console.log('Moving back 2 page as right page is wide');
           return 2;
+        }
+
+        if (this.mangaReaderService.isWidePage(this.pageNum + 2)) {
+          console.log('Moving back 1 page as coming from wide page');
+          return 1;
+        }
+
+        if (this.mangaReaderService.isWidePage(this.pageNum)) {
+          console.log('Moving back 1 page as left page is wide');
+          return 1;
         }
 
         if (this.mangaReaderService.isWidePage(this.pageNum) && (!this.mangaReaderService.isWidePage(this.pageNum - 4))) {
