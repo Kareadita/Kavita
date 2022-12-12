@@ -156,6 +156,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       takeUntil(this.onDestroy),
       filter(_ => this.isValid()),
       map(_ => {
+        return this.shouldRenderDouble();
         // if (this.currentImage2.src === '') {
         //   console.log('Not rendering second page as 2nd image is empty');
         //   return false;
@@ -182,27 +183,27 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         //   console.log('Not rendering second page as prev page is wide');
         //   return false;
         // }
-        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-          console.log('Not rendering double as current page is cover image');
-          return false;
-        }
+        // if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+        //   console.log('Not rendering double as current page is cover image');
+        //   return false;
+        // }
     
-        if (this.mangaReaderService.isWideImage(this.currentImage) || this.mangaReaderService.isWidePage(this.pageNum) ) {
-          console.log('Not rendering double as current page is wide image');
-          return false;
-        }
+        // if (this.mangaReaderService.isWideImage(this.currentImage) || this.mangaReaderService.isWidePage(this.pageNum) ) {
+        //   console.log('Not rendering double as current page is wide image');
+        //   return false;
+        // }
     
-        //  && this.maxPages % 2 !== 0 We can check if we have an odd number of pairs
-        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
-          console.log('Not rendering double as current page is last and there are an odd number of pages');
-          return false;
-        }
+        // //  && this.maxPages % 2 !== 0 We can check if we have an odd number of pairs
+        // if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+        //   console.log('Not rendering double as current page is last and there are an odd number of pages');
+        //   return false;
+        // }
     
-        if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
-          console.log('Not rendering double as next page is wide image');
-          return false;
-        }
-        return true;
+        // if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
+        //   console.log('Not rendering double as next page is wide image');
+        //   return false;
+        // }
+        // return true;
       })
     );
 
@@ -256,7 +257,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       return false;
     }
 
-    if (this.mangaReaderService.isWideImage(this.currentImage) || this.mangaReaderService.isWidePage(this.pageNum) ) {
+    if (this.mangaReaderService.isWidePage(this.pageNum) ) {
       console.log('Not rendering double as current page is wide image');
       return false;
     }
@@ -272,25 +273,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       return false;
     }
 
-
-
-    // if (this.mangaReaderService.isWidePage(this.pageNum) && this.mangaReaderService.isWidePage(this.pageNum + 1)) {
-    //   return false;
-    // }
-
-    
-
-    // if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
-    //   console.log('Not rendering double as next page is wide image');
-    //   return false;
-    // }
-
     return true;
-    // return !(
-    //   this.mangaReaderService.isCoverImage(this.pageNum)
-    //   || this.mangaReaderService.isWideImage(this.currentImage)
-    //   || this.mangaReaderService.isWideImage(this.currentImageNext)
-    //   );
   }
 
   isValid() {

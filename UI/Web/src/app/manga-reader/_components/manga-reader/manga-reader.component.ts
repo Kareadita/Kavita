@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, shareReplay, Subject, take, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
 import { LabelType, ChangeContext, Options } from '@angular-slider/ngx-slider';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
@@ -13,7 +13,7 @@ import { Breakpoint, UtilityService, KEY_CODES } from 'src/app/shared/_services/
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { scalingOptions, pageSplitOptions, layoutModes, Preferences } from 'src/app/_models/preferences/preferences';
+import { scalingOptions, pageSplitOptions, layoutModes } from 'src/app/_models/preferences/preferences';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
@@ -30,8 +30,6 @@ import { CanvasRendererComponent } from '../canvas-renderer/canvas-renderer.comp
 import { DoubleRendererComponent } from '../double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
-import { mode } from 'd3';
-import { DimensionMap, FileDimension } from '../../_models/file-dimension';
 
 
 const PREFETCH_PAGES = 10;
@@ -740,6 +738,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       progress: this.readerService.getProgress(this.chapterId),
       chapterInfo: this.readerService.getChapterInfo(this.chapterId),
       bookmarks: this.readerService.getBookmarks(this.chapterId),
+      dimensions: this.readerService.getFileDimensions(this.chapterId)
     }).pipe(take(1)).subscribe(results => {
       if (this.readingListMode && (results.chapterInfo.seriesFormat === MangaFormat.EPUB || results.chapterInfo.seriesFormat === MangaFormat.PDF)) {
         // Redirect to the book reader.
@@ -747,6 +746,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.router.navigate(this.readerService.getNavigationArray(results.chapterInfo.libraryId, results.chapterInfo.seriesId, this.chapterId, results.chapterInfo.seriesFormat), {queryParams: params});
         return;
       }
+
+      this.mangaReaderService.loadPageDimensions(results.dimensions);
 
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
@@ -766,11 +767,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.title = results.chapterInfo.title;
       this.subtitle = results.chapterInfo.subtitle;
 
-      this.readerService.getFileDimensions(this.chapterId).subscribe(dims => {
-        this.mangaReaderService.loadPageDimensions(dims);
+      // this.readerService.getFileDimensions(this.chapterId).subscribe(dims => {
+      //   this.mangaReaderService.loadPageDimensions(dims);
         
-        this.cdRef.markForCheck();
-      })
+      //   this.cdRef.markForCheck();
+      // });
 
 
       this.inSetup = false;

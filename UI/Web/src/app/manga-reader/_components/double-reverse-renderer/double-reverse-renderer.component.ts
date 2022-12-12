@@ -300,25 +300,46 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   shouldRenderDouble() {
     if (!this.isValid()) return false;
 
+    // if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+    //   console.log('Not rendering right image as is cover image');
+    //   return false;
+    // }
+    // if (this.mangaReaderService.isCoverImage(this.pageNum + 1)) {
+    //   console.log('Not rendering right image as current - 1 is cover image');
+    //   return false;
+    // }
+    // if (this.isWide(this.leftImage)) {
+    //   console.log('Not rendering right image as left is wide');
+    //   //return false;
+    // }
+    // if (this.isWide(this.rightImage)) {
+    //   console.log('Not rendering right image as it is wide');
+    //   return false;
+    // }
+
+    // if (this.isWide(this.currentImageNext)) {
+    //   console.log('Not rendering right image as it is wide');
+    //   return false;
+    // }
+
     if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-      console.log('Not rendering right image as is cover image');
-      return false;
-    }
-    if (this.mangaReaderService.isCoverImage(this.pageNum + 1)) {
-      console.log('Not rendering right image as current - 1 is cover image');
-      return false;
-    }
-    if (this.isWide(this.leftImage)) {
-      console.log('Not rendering right image as left is wide');
-      //return false;
-    }
-    if (this.isWide(this.rightImage)) {
-      console.log('Not rendering right image as it is wide');
+      console.log('Not rendering double as current page is cover image');
       return false;
     }
 
-    if (this.isWide(this.currentImageNext)) {
-      console.log('Not rendering right image as it is wide');
+    if (this.mangaReaderService.isWidePage(this.pageNum)) {
+      console.log('Not rendering double as current page is wide image');
+      return false;
+    }
+
+    if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
+      console.log('Not rendering double as next page is wide image');
+      return false;
+    }
+
+    //  && this.maxPages % 2 !== 0 We can check if we have an odd number of pairs
+    if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+      console.log('Not rendering double as current page is last and there are an odd number of pages');
       return false;
     }
 
