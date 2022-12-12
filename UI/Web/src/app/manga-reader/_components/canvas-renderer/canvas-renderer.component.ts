@@ -1,6 +1,8 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { map, Observable, of, Subject, takeUntil, takeWhile, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
+import { ReaderService } from 'src/app/_services/reader.service';
+import { DimensionMap } from '../../_models/file-dimension';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
@@ -15,6 +17,7 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy, ImageRenderer {
 
+  @Input() pageDimensions!: DimensionMap;
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
   @Input() bookmark$!: Observable<number>;
@@ -47,7 +50,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   
 
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
+  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerSettings$.pipe(takeUntil(this.onDestroy), tap(value => {
@@ -76,7 +79,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Would this ever execute given that we perform splitting only in this renderer? 
         if (
-          this.mangaReaderService.isWideImage(this.canvasImage) &&
+          //this.mangaReaderService.isWideImage(this.canvasImage) &&
+          this.pageDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W' &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
@@ -122,7 +126,9 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   updateSplitPage() {
     if (this.canvasImage == null) return;
-    const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+    //const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+    const needsSplitting = this.pageDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W';
+    
     if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return needsSplitting;
@@ -199,7 +205,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   getPageAmount(direction: PAGING_DIRECTION) {
     if (this.canvasImage === null) return 1;
-    if (!this.mangaReaderService.isWideImage(this.canvasImage)) return 1;
+    //if (!this.mangaReaderService.isWideImage(this.canvasImage)) return 1;
+    if (this.pageDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'S') return 1;
     switch(direction) {
       case PAGING_DIRECTION.FORWARD:
         return this.shouldMoveNext() ? 1 : 0;
