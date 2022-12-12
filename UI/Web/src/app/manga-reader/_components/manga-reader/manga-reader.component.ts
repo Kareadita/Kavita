@@ -859,19 +859,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  getFittingIcon() {
-    const value = this.getFit();
-    // TODO: This can be a pipe
-    switch(value) {
-      case FITTING_OPTION.HEIGHT:
-        return 'fa-arrows-alt-v';
-      case FITTING_OPTION.WIDTH:
-        return 'fa-arrows-alt-h';
-      case FITTING_OPTION.ORIGINAL:
-        return 'fa-expand-arrows-alt';
-    }
-  }
-
   getFit() {
     // TODO: getFit can be refactored with typed form controls so we don't need this
     // can't this also just be this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT
@@ -959,7 +946,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD),
     this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
     const notInSplit = this.canvasRenderer.shouldMovePrev(); // TODO: Make this generic like above, but by default only canvasRenderer will have logic
-    //console.log('Next Page, in split: ', !notInSplit, ' page amt: ', pageAmount, ' page: ', this.canvasImage.src);
 
     if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) { 
       // Move to next volume/chapter automatically
@@ -985,7 +971,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
 
     const notInSplit = this.canvasRenderer.shouldMovePrev();
-    //console.log('Prev Page, not in split: ', notInSplit, ' page amt: ', pageAmount);
 
     if ((this.pageNum - 1 < 0 && notInSplit)) {
       // Move to next volume/chapter automatically
@@ -1005,7 +990,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasImage = this.getPage(this.pageNum, this.chapterId, this.layoutMode !== LayoutMode.Single);
     this.canvasImage.addEventListener('load', () => {
       this.currentImage.next(this.canvasImage);
-      //this.renderPage(); // This can execute before cachedImages are ready
     }, false);
     
     this.cdRef.markForCheck();

@@ -191,7 +191,7 @@
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
+                        <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="{{getFit() | fittingIcon}}" aria-hidden="true"></i>
                         <select class="form-control" id="page-fitting" formControlName="fittingOption">
                             <option value="full-height">Height</option>
                             <option value="full-width">Width</option>
