@@ -767,6 +767,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.title = results.chapterInfo.title;
       this.subtitle = results.chapterInfo.subtitle;
 
+      this.readerService.getFileDimensions(this.chapterId).subscribe(dimensions => {
+        console.log('dimensions: ', dimensions);
+      });
+
+
       this.inSetup = false;
 
 
