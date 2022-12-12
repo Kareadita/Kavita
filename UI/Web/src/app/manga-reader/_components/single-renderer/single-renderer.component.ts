@@ -91,8 +91,6 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       map(fit => {
         if (
           this.mangaReaderService.isWideImage(this.currentImage) &&
-          this.layoutMode === LayoutMode.Single &&
-          fit !== FITTING_OPTION.WIDTH &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image

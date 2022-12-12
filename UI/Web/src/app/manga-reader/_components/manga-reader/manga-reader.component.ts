@@ -821,6 +821,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getFittingOptionClass() {
+    // TODO: Figure out if this is needed still and where to put the code
     const formControl = this.generalSettingsForm.get('fittingOption');
     let val = FITTING_OPTION.HEIGHT;
     if (formControl === undefined) {
