@@ -19,7 +19,6 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
 })
 export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer {
 
-  @Input() pageDimensions!: DimensionMap;
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
   /**
@@ -89,12 +88,11 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.imageFitClass$ = zip(this.readerSettings$, this.image$).pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
+      //filter(_ => this.isValid()), // This can cause fit to screen to fail as it stops processing
       map(values => values[0].fitting),
       map(fit => {
         if (
-          //this.mangaReaderService.isWideImage(this.currentImage) &&
-          this.pageDimensions[this.readerService.imageUrlToPageNum(this.currentImage.src)] == 'W' &&
+          this.mangaReaderService.isWideImage(this.currentImage) &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image

@@ -322,8 +322,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
-
-  fileDimensions: DimensionMap = {};
   
 
   bookmarkPageHandler = this.bookmarkPage.bind(this);
@@ -519,8 +517,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
         this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
 
-        //const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
-        const needsSplitting = this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W';
+        const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
         // If we need to split on a menu change, then we need to re-render.
         if (needsSplitting) {
           // If we need to re-render, to ensure things layout properly, let's update paging direction & reset render
@@ -770,11 +767,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.subtitle = results.chapterInfo.subtitle;
 
       this.readerService.getFileDimensions(this.chapterId).subscribe(dims => {
-        this.fileDimensions = {};
-        dims.forEach(d => {
-          this.fileDimensions[d.pageNumber] = d.width > d.height ? 'W' : 'S';
-        });
-        console.log('Page Dimensions: ', this.fileDimensions);
+        this.mangaReaderService.loadPageDimensions(dims);
+        
         this.cdRef.markForCheck();
       })
 
@@ -843,8 +837,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     if (
-      //this.mangaReaderService.isWideImage(this.canvasImage) &&
-      this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W' &&
+      this.mangaReaderService.isWideImage(this.canvasImage) &&
       this.layoutMode === LayoutMode.Single &&
       val !== FITTING_OPTION.WIDTH &&
       this.mangaReaderService.shouldRenderAsFitSplit(this.generalSettingsForm.get('pageSplitOption')?.value)
@@ -856,8 +849,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // TODO: Move this to double renderer
-    //if (this.mangaReaderService.isWideImage(this.canvasImage) && this.layoutMode !== LayoutMode.Single) {
-    if (this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W' && this.layoutMode !== LayoutMode.Single) {
+    if (this.mangaReaderService.isWideImage(this.canvasImage) && this.layoutMode !== LayoutMode.Single) {
       this.imageFitClass.next(val + ' wide double');
       return val + ' wide double';
     }
@@ -1096,8 +1088,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               || document.documentElement.clientHeight
               || document.body.clientHeight;
 
-      //const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
-      const needsSplitting = this.fileDimensions[this.readerService.imageUrlToPageNum(this.canvasImage.src)] == 'W';
+      const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
       let newScale = this.FittingOption;
       const widthRatio = windowWidth / (this.canvasImage.width / (needsSplitting ? 2 : 1));
       const heightRatio = windowHeight / (this.canvasImage.height);

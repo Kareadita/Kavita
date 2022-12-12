@@ -1,9 +1,9 @@
 import { DOCUMENT } from '@angular/common';
-import { ElementRef, Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
+import { ElementRef, Inject, Injectable, OnDestroy, Renderer2, RendererFactory2 } from '@angular/core';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { ReaderService } from 'src/app/_services/reader.service';
-import { DimensionMap } from '../_models/file-dimension';
+import { DimensionMap, FileDimension } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 
 @Injectable({
@@ -11,12 +11,19 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 })
 export class ManagaReaderService {
 
+  private pageDimensions: DimensionMap = {};
   private renderer: Renderer2;
   constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 
 
+  loadPageDimensions(dims: Array<FileDimension>) {
+    this.pageDimensions = {};
+    dims.forEach(d => {
+      this.pageDimensions[d.pageNumber] = d.width > d.height ? 'W' : 'S';
+    });
+  }
 
   /**
    * If the image's width is greater than it's height
@@ -24,14 +31,17 @@ export class ManagaReaderService {
    */
   isWideImage(elem: HTMLImageElement) {
     if (!elem) return false;
-    if (elem) {
-      if (elem.src === '') return false;
-      // ?! BUG: This can cause issues when image isn't loaded
-      elem.addEventListener('load', () => {
-        return elem.width > elem.height;
-      }, false); 
-    }
-    return elem.width > elem.height;
+    if (elem.src === '') return false;
+    // if (elem) {
+
+    //   return this.pageDimensions[this.readerService.imageUrlToPageNum(elem.src)] === 'W'
+    //   // ?! BUG: This can cause issues when image isn't loaded
+    //   elem.addEventListener('load', () => {
+    //     return elem.width > elem.height;
+    //   }, false); 
+    // }
+    // return elem.width > elem.height;
+    return this.pageDimensions[this.readerService.imageUrlToPageNum(elem.src)] === 'W'
   }
 
 
