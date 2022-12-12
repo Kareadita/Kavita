@@ -86,7 +86,7 @@
             <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
         </div>
         <div class="col-auto">
-            <app-stat-list [data$]="recentlyRead$" title="Recently Read"></app-stat-list>
+            <app-stat-list [data$]="recentlyRead$" title="Recently Read" [handleClick]="handleRecentlyReadClick"></app-stat-list>
         </div>
     </div>
 

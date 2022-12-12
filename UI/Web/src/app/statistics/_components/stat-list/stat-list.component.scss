@@ -1,3 +1,8 @@
 .card {
     border: var(--bs-card-border-width) solid var(--bs-card-border-color);
 }
+
+.underline {
+    text-decoration: underline;
+    cursor: pointer;
+}
