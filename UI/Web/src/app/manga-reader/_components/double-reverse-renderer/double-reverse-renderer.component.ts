@@ -78,26 +78,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
    * @see currentImage
    */
   currentImage2Ahead = new Image();
-  /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the current - 3 image to currentImage
-    * @see currentImage
-    */
-   currentImage3Behind = new Image();
-   /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the current + 3 image to currentImage
-    * @see currentImage
-    */
-   currentImage3Ahead = new Image();
-  /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the current - 4 image to currentImage
-    * @see currentImage
-    */
-   currentImage4Behind = new Image();
-   /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the current + 4 image to currentImage
-    * @see currentImage
-    */
-   currentImage4Ahead = new Image();
 
   /**
    * Determines if we should render a double page.
@@ -106,8 +86,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
    * @remarks This will always fail if the window's width is greater than the height
   */
   shouldRenderDouble$!: Observable<boolean>;
-
-  pageSpreadMap: {[key: number]: 'W'|'S'} = {};
 
   private readonly onDestroy = new Subject<void>();
 
@@ -155,43 +133,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
         this.currentImage2Behind = this.getPage(this.pageNum - 2);
         this.currentImage2Ahead = this.getPage(this.pageNum + 2);
-
-        this.currentImage3Behind = this.getPage(this.pageNum - 3);
-        this.currentImage3Ahead = this.getPage(this.pageNum + 3);
-
-        this.currentImage4Behind = this.getPage(this.pageNum - 4);
-        this.currentImage4Ahead = this.getPage(this.pageNum + 4);
-
-        this.leftImage.addEventListener('load', () => {
-          this.updatePageMap(this.leftImage)
-        });
-        this.rightImage.addEventListener('load', () => {
-          this.updatePageMap(this.rightImage)
-        });
-        this.currentImageNext.addEventListener('load', () => {
-          this.updatePageMap(this.currentImageNext)
-        });
-        this.currentImagePrev.addEventListener('load', () => {
-          this.updatePageMap(this.currentImagePrev)
-        });
-        this.currentImage2Behind.addEventListener('load', () => {
-          this.updatePageMap(this.currentImage2Behind)
-        });
-        this.currentImage2Ahead.addEventListener('load', () => {
-          this.updatePageMap(this.currentImage2Ahead)
-        });
-        this.currentImage3Behind.addEventListener('load', () => {
-          this.updatePageMap(this.currentImage3Behind)
-        });
-        this.currentImage3Ahead.addEventListener('load', () => {
-          this.updatePageMap(this.currentImage3Ahead)
-        });
-        this.currentImage4Behind.addEventListener('load', () => {
-          this.updatePageMap(this.currentImage4Behind)
-        });
-        this.currentImage4Ahead.addEventListener('load', () => {
-          this.updatePageMap(this.currentImage4Ahead)
-        });
       })).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
@@ -217,31 +158,34 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       takeUntil(this.onDestroy),
       filter(_ => this.isValid()),
       map(_ => {
-        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-          console.log('Not rendering second page as on cover image');
-          return false;
-        }
-        if (this.readerService.imageUrlToPageNum(this.rightImage.src) > this.maxPages - 1) {
-          console.log('Not rendering second page as 2nd image is on last page');
-          return false;
-        }
-        if (this.isWide(this.leftImage)) {
-          console.log('Not rendering second page as right page is wide');
-          return false;
-        }
-        if (this.isWide(this.rightImage)) {
-          console.log('Not rendering second page as right page is wide');
-          return false;
-        }
-        if (this.isWide(this.currentImageNext)) {
-          console.log('Not rendering second page as next page is wide');
-          return false;
-        }
-        if (this.isWide(this.currentImagePrev) && (this.isWide(this.currentImage3Ahead))) {
-          console.log('Not rendering second page as prev page is wide');
-          return false;
-        }
-        return true;
+
+        return this.shouldRenderDouble();
+
+        // if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+        //   console.log('Not rendering second page as on cover image');
+        //   return false;
+        // }
+        // if (this.readerService.imageUrlToPageNum(this.rightImage.src) > this.maxPages - 1) {
+        //   console.log('Not rendering second page as 2nd image is on last page');
+        //   return false;
+        // }
+        // if (this.isWide(this.leftImage)) {
+        //   console.log('Not rendering second page as right page is wide');
+        //   return false;
+        // }
+        // if (this.isWide(this.rightImage)) {
+        //   console.log('Not rendering second page as right page is wide');
+        //   return false;
+        // }
+        // if (this.isWide(this.currentImageNext)) {
+        //   console.log('Not rendering second page as next page is wide');
+        //   return false;
+        // }
+        // if (this.isWide(this.currentImagePrev) && (this.isWide(this.currentImage3Ahead))) {
+        //   console.log('Not rendering second page as prev page is wide');
+        //   return false;
+        // }
+        // return true;
       }),
     );
 
@@ -283,12 +227,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     this.onDestroy.complete();
   }
 
-  updatePageMap(img: HTMLImageElement) {
-    const page = this.readerService.imageUrlToPageNum(img.src);
-    if (!this.pageSpreadMap.hasOwnProperty(page)) {
-      this.pageSpreadMap[page] = this.mangaReaderService.isWideImage(img) ? 'W' : 'S';
-    }
-  }
 
   /**
    * We should Render 2 pages if:
@@ -348,7 +286,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
   isWide(img: HTMLImageElement) {
     const page = this.readerService.imageUrlToPageNum(img.src);
-    return this.mangaReaderService.isWidePage(page) || this.mangaReaderService.isWideImage(img) || this.pageSpreadMap.hasOwnProperty(page) && this.pageSpreadMap[page] === 'W';
+    return this.mangaReaderService.isWidePage(page);
   }
 
   isValid() {
@@ -362,9 +300,9 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     console.log('[DoubleRenderer] renderPage(): ', this.pageNum);
 
     const allImages = [
-      this.currentImage4Behind, this.currentImage3Behind, this.currentImage2Behind, this.currentImagePrev,
+      this.currentImage2Behind, this.currentImagePrev,
       this.leftImage, 
-      this.currentImageNext, this.currentImage2Ahead, this.currentImage3Ahead, this.currentImage4Ahead
+      this.currentImageNext, this.currentImage2Ahead
     ];
 
     console.log('DoubleRenderer buffered pages: ', allImages.map(img => {
@@ -392,9 +330,9 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     if (this.layoutMode !== LayoutMode.DoubleReversed) return 0;
 
     const allImages = [
-      this.currentImage4Behind, this.currentImage3Behind, this.currentImage2Behind, this.currentImagePrev,
+      this.currentImage2Behind, this.currentImagePrev,
       this.leftImage, this.rightImage,
-      this.currentImageNext, this.currentImage2Ahead, this.currentImage3Ahead, this.currentImage4Ahead
+      this.currentImageNext, this.currentImage2Ahead
     ];
 
     console.log('[getPageAmount for double reverse]: ', allImages.map(img => {
@@ -418,21 +356,17 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
 
-        if (this.mangaReaderService.isWideImage(this.rightImage)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
           console.log('Moving forward 1 page as current page is wide');
           return 1;
         }
 
-        if (this.mangaReaderService.isWideImage(this.leftImage)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum)) {
           console.log('Moving forward 1 page as current page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
-          console.log('Moving forward 1 page as next page is wide');
-          return 1;
-        }
 
-        if (this.mangaReaderService.isLastImage(this.readerService.imageUrlToPageNum(this.rightImage.src), this.maxPages)) {
+        if (this.mangaReaderService.isLastImage(this.pageNum + 1, this.maxPages)) {
           console.log('Moving forward 2 pages as right image is the last page and we just rendered double page');
           return 2;
         }
@@ -442,7 +376,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 0;
         }
 
-        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum  - 1)) {
           console.log('Moving forward 1 page as prev page is wide');
           return 1;
         }
@@ -460,32 +394,27 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
 
-        if (this.isWide(this.rightImage)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
           console.log('Moving back 2 page as right page is wide');
           return 2;
         }
 
-        if (this.isWide(this.leftImage) && (!this.isWide(this.currentImage4Behind))) {
+        if (this.mangaReaderService.isWidePage(this.pageNum) && (!this.mangaReaderService.isWidePage(this.pageNum - 4))) {
           console.log('Moving back 1 page as left page is wide');
           return 1;
         }
 
-        if (this.isWide(this.currentImageNext)) {
-          console.log('Moving back 2 page as prev page is wide');
-          return 1;
-        }
-
-        if (this.isWide(this.currentImagePrev)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
           console.log('Moving back 1 page as prev page is wide');
           return 1;
         }
 
-        if (this.isWide(this.currentImage2Behind)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum - 2)) {
           console.log('Moving back 1 page as 2 pages back is wide');
           return 1;
         }
 
-        if (this.isWide(this.currentImage2Ahead)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum + 2)) {
           console.log('Moving back 2 page as 2 pages back is wide');
           return 1;
         }

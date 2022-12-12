@@ -77,7 +77,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Would this ever execute given that we perform splitting only in this renderer? 
         if (
-          this.mangaReaderService.isWideImage(this.canvasImage) &&
+          this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src)) &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
@@ -123,7 +123,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   updateSplitPage() {
     if (this.canvasImage == null) return;
-    const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+    const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
     
     if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
@@ -201,7 +201,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   getPageAmount(direction: PAGING_DIRECTION) {
     if (this.canvasImage === null) return 1;
-    if (!this.mangaReaderService.isWideImage(this.canvasImage)) return 1;
     if (!this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src))) return 1;
     switch(direction) {
       case PAGING_DIRECTION.FORWARD:

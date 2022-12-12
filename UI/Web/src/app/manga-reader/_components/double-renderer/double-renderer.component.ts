@@ -157,53 +157,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       filter(_ => this.isValid()),
       map(_ => {
         return this.shouldRenderDouble();
-        // if (this.currentImage2.src === '') {
-        //   console.log('Not rendering second page as 2nd image is empty');
-        //   return false;
-        // }
-        // if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-        //   console.log('Not rendering second page as on cover image');
-        //   return false;
-        // }
-        // if (this.readerService.imageUrlToPageNum(this.currentImage2.src) > this.maxPages - 1) {
-        //   console.log('Not rendering second page as 2nd image is on last page');
-        //   return false;
-        // }
-        // if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
-        //   console.log('Not rendering second page as next page is wide');
-        //   return false;
-        // }
-
-        // if (this.mangaReaderService.isWideImage(this.currentImage)) {
-        //   console.log('Not rendering second page as next page is wide');
-        //   return false;
-        // }
-
-        // if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
-        //   console.log('Not rendering second page as prev page is wide');
-        //   return false;
-        // }
-        // if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-        //   console.log('Not rendering double as current page is cover image');
-        //   return false;
-        // }
-    
-        // if (this.mangaReaderService.isWideImage(this.currentImage) || this.mangaReaderService.isWidePage(this.pageNum) ) {
-        //   console.log('Not rendering double as current page is wide image');
-        //   return false;
-        // }
-    
-        // //  && this.maxPages % 2 !== 0 We can check if we have an odd number of pairs
-        // if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
-        //   console.log('Not rendering double as current page is last and there are an odd number of pages');
-        //   return false;
-        // }
-    
-        // if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
-        //   console.log('Not rendering double as next page is wide image');
-        //   return false;
-        // }
-        // return true;
       })
     );
 
@@ -311,26 +264,17 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.Double) return 0;
 
-    // console.log('[getPageAmount for double reverse]: ', allImages.map(img => {
-    //   const page = this.readerService.imageUrlToPageNum(img.src);
-    //   if (page === this.pageNum) return '[' + page;
-    //   if (page === this.pageNum + 1) return page + ']';
-    //   return page + '';
-    // }));
-    console.log("Current Page: ", this.pageNum);
-    console.log("Total Pages: ", this.maxPages);
-
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {
           console.log('Moving forward 1 page as on cover image');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImage)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum)) {
           console.log('Moving forward 1 page as current page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
           console.log('Moving forward 1 page as next page is wide');
           return 1;
         }
@@ -349,24 +293,19 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           console.log('Moving back 1 page as on cover image');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImage)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum)) {
           console.log('Moving back 1 page as current page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
           console.log('Moving back 1 page as prev page is wide');
           return 1;
         }
-        // ?! On fresh load, there is a timing issue with this. 
-        if (this.mangaReaderService.isWideImage(this.currentImage2Behind)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum - 2)) {
           console.log('Moving back 1 page as 2 pages back is wide');
           return 1;
         }
-        // Not sure about this condition on moving backwards
-        // if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
-        //   console.log('Moving back 1 page as 2 pages left');
-        //   return 1;
-        // }
+
         console.log('Moving back 2 pages');
         return 2;
     }

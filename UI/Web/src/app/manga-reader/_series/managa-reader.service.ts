@@ -29,20 +29,11 @@ export class ManagaReaderService {
    * If the image's width is greater than it's height
    * @param elem Image
    */
-  isWideImage(elem: HTMLImageElement) {
-    if (!elem) return false;
-    if (elem.src === '') return false;
-    // if (elem) {
-
-    //   return this.pageDimensions[this.readerService.imageUrlToPageNum(elem.src)] === 'W'
-    //   // ?! BUG: This can cause issues when image isn't loaded
-    //   elem.addEventListener('load', () => {
-    //     return elem.width > elem.height;
-    //   }, false); 
-    // }
-    // return elem.width > elem.height;
-    return this.pageDimensions[this.readerService.imageUrlToPageNum(elem.src)] === 'W'
-  }
+  // isWideImage(elem: HTMLImageElement) {
+  //   if (!elem) return false;
+  //   if (elem.src === '') return false;
+  //   return this.pageDimensions[this.readerService.imageUrlToPageNum(elem.src)] === 'W'
+  // }
 
   isWidePage(pageNum: number) {
     if (!this.pageDimensions.hasOwnProperty(pageNum)) return false;
@@ -100,7 +91,7 @@ export class ManagaReaderService {
    * @returns 
    */
   shouldSplit(img: HTMLImageElement, pageSplitOption: PageSplitOption) {
-    const needsSplitting = this.isWideImage(img);
+    const needsSplitting = this.isWidePage(this.readerService.imageUrlToPageNum(img.src));
     return !(this.isNoSplit(pageSplitOption) || !needsSplitting)
   }
 
