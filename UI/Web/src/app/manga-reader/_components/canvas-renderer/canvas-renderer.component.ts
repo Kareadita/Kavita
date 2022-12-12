@@ -81,7 +81,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
-          console.log('Fit (override): ', fit);
           return FITTING_OPTION.WIDTH;
         }
         return fit;
@@ -179,7 +178,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     this.cdRef.markForCheck();
     
     const needsSplitting = this.updateSplitPage();
-    //console.log('split: ',this.currentImageSplitPart);
     if (!needsSplitting) return;
     if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
 
@@ -212,13 +210,11 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   shouldMoveNext() {
     if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
-    //console.log('[CanvasRenderer] Should Move next: Current Split: ', this.currentImageSplitPart);
     return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
   }
 
   shouldMovePrev() {
     if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
-    //console.log('[CanvasRenderer] Should Move Prev: Current Split: ', this.currentImageSplitPart);
     return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.RIGHT_PART : SPLIT_PAGE_PART.LEFT_PART);
   }
 

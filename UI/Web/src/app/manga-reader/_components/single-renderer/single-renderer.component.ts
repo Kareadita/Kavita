@@ -96,7 +96,6 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
-          console.log('overridding for fit to screen');
           return FITTING_OPTION.WIDTH;
         }
         return fit;

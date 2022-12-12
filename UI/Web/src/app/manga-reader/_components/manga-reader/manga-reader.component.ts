@@ -370,32 +370,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  get ReaderMode() {
-    return ReaderMode;
-  }
-  get LayoutMode() {
-    return LayoutMode;
-  }
-
-  get ReadingDirection() {
-    return ReadingDirection;
-  }
-
-  get PageSplitOption() {
-    return PageSplitOption;
-  }
-
-  get Breakpoint() {
-    return Breakpoint;
-  }
-
-  get FITTING_OPTION() {
-    return FITTING_OPTION;
-  }
-
-  get FittingOption() {
-    return this.generalSettingsForm.get('fittingOption')?.value;
-  }
+  get ReaderMode() { return ReaderMode; }
+  get LayoutMode() { return LayoutMode; }
+  get ReadingDirection() { return ReadingDirection; }
+  get PageSplitOption() { return PageSplitOption; }
+  get Breakpoint() { return Breakpoint; }
+  get FITTING_OPTION() { return FITTING_OPTION; }
+  get FittingOption() { return this.generalSettingsForm.get('fittingOption')?.value; }
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private formBuilder: FormBuilder, private navService: NavService,
@@ -1118,10 +1099,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const pagesBefore = pages.filter(p => p >= 0 && p < this.pageNum).length;
     const pagesAfter = pages.filter(p => p >= 0 && p > this.pageNum).length;
     //console.log('Buffer Health: Before: ', pagesBefore, ' After: ', pagesAfter);
-    console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
-      if (this.pageNum === p) return '[' + p + ']';
-      return '' + p
-    }));
+    // console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
+    //   if (this.pageNum === p) return '[' + p + ']';
+    //   return '' + p
+    // }));
   }
 
 
