@@ -39,6 +39,7 @@ export class ManagaReaderService {
 
       i++;
     });
+    console.log('pairs: ', this.pairs);
   }
 
   adjustForDoubleReader(page: number) {
@@ -94,7 +95,7 @@ export class ManagaReaderService {
    * If the current page is second to last image
    */
   isSecondLastImage(pageNum: number, maxPages: number) {
-    return maxPages - 2 === pageNum;
+    return (maxPages - 2) === pageNum;
   }
 
   /**

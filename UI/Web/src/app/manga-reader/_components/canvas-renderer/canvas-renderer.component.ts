@@ -162,6 +162,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     return needsSplitting;
   }
 
+
   isValid() {
     return this.renderWithCanvas;
   }

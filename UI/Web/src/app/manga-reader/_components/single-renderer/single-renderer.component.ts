@@ -58,6 +58,8 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
+
+        // TODO: Put this here this.currentImage = this.getPagez
       }),
     ).subscribe(() => {});
 
@@ -125,11 +127,6 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
     
-    // This seems to cause a problem after rendering a split
-    //if (this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)) return;
-
-
-
     this.currentImage = img[0];
     this.cdRef.markForCheck();
     this.imageHeight.emit(this.currentImage.height);
