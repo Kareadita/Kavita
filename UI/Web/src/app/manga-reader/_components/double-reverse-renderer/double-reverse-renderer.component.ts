@@ -41,7 +41,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   layoutClass$!: Observable<string>;
-  shouldRenderSecondPage$!: Observable<boolean>;
   darkenss$: Observable<string> = of('brightness(100%)');
   emulateBookClass$: Observable<string> = of('');
   layoutMode: LayoutMode = LayoutMode.Single;
@@ -144,11 +143,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       filter(_ => this.isValid()),
     );
 
-    this.shouldRenderSecondPage$ = this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
-      map(_ => this.shouldRenderDouble()),
-      filter(_ => this.isValid()),
-    );
 
     this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
