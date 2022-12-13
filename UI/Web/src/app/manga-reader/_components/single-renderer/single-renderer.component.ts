@@ -27,6 +27,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   @Input() imageFit$!: Observable<FITTING_OPTION>;  
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
+  @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
 
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
@@ -37,6 +38,9 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   currentImage!: HTMLImageElement;
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
+
+  pageNum: number = 0;
+  maxPages: number = 1;
 
   private readonly onDestroy = new Subject<void>();
 
@@ -54,16 +58,25 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       takeUntil(this.onDestroy)
     );
 
-    this.darkenss$ = this.readerSettings$.pipe(
+    this.pageNum$.pipe(
+      takeUntil(this.onDestroy),
       filter(_ => this.isValid()),
+      tap(pageInfo => {
+        this.pageNum = pageInfo.pageNum;
+        this.maxPages = pageInfo.maxPages;
+      }),
+    ).subscribe(() => {});
+
+    this.darkenss$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'), 
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      filter(_ => this.isValid()),
       map(showOverlay => showOverlay ? 'blur' : ''), 
-      takeUntil(this.onDestroy)
+      takeUntil(this.onDestroy),
+      filter(_ => this.isValid()),
     );
 
     this.readerSettings$.pipe(
@@ -77,22 +90,21 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.bookmark$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
         if (image1 != null) elements.push(image1);
         this.mangaReaderService.applyBookmarkEffect(elements);
-      })
+      }),
+      filter(_ => this.isValid()),
     ).subscribe(() => {});
 
     this.imageFitClass$ = zip(this.readerSettings$, this.image$).pipe(
       takeUntil(this.onDestroy),
-      //filter(_ => this.isValid()), // This can cause fit to screen to fail as it stops processing
       map(values => values[0].fitting),
       map(fit => {
         if (
-          this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.currentImage.src)) &&
+          this.mangaReaderService.isWidePage(this.pageNum) &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image

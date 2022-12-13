@@ -1225,6 +1225,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readerMode !== ReaderMode.Webtoon) {
       this.canvasImage = this.cachedImages[this.pageNum & this.cachedImages.length];
       this.currentImage.next(this.canvasImage);
+      this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
+      console.log('Emitting page number: ', this.pageNum);
       this.isLoading = true;
     }
 

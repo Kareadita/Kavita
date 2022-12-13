@@ -84,9 +84,9 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
-      filter(_ => this.isValid()),
       map(values => values.readerMode), 
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
@@ -111,7 +111,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -121,32 +120,34 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
         this.cdRef.markForCheck();
-      })).subscribe(() => {});
+      }),
+      filter(_ => this.isValid()),
+    ).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
+      map((_) => this.shouldRenderDouble()),
       filter(_ => this.isValid()),
-      map((_) => this.shouldRenderDouble())
     );
 
     this.layoutClass$ = zip(this.shouldRenderDouble$, this.imageFit$).pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       map((value) =>  {
         if (!value[0]) return 'd-none';
         if (value[0] && value[1] === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
         if (value[0] && value[1] === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
         if (value[0] && value[1] === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
         return '';
-      })
+      }),
+      filter(_ => this.isValid()),
     );
 
     this.shouldRenderSecondPage$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       map(_ => {
         return this.shouldRenderDouble();
-      })
+      }),
+      filter(_ => this.isValid()),
     );
 
     this.readerSettings$.pipe(
@@ -160,7 +161,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.bookmark$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -170,14 +170,15 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         if (image2 != null) elements.push(image2);
   
         this.mangaReaderService.applyBookmarkEffect(elements);
-      })
+      }),
+      filter(_ => this.isValid()),
     ).subscribe(() => {});
 
 
     this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       map(values => values.fitting),
+      filter(_ => this.isValid()),
       shareReplay()
     );
   }

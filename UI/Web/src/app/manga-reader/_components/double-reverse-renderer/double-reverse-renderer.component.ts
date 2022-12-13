@@ -93,8 +93,8 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     );
 
     this.darkenss$ = this.readerSettings$.pipe(
-      filter(_ => this.isValid()),
       map(values => 'brightness(' + values.darkness + '%)'), 
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
@@ -106,14 +106,13 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      filter(_ => this.isValid()),
       map(showOverlay => showOverlay ? 'blur' : ''), 
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
     this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -122,31 +121,33 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
         this.rightImage = this.getPage(this.pageNum + 1);
 
         this.currentImageNext = this.getPage(this.pageNum + 1);
-      })).subscribe(() => {});
+      }),
+      filter(_ => this.isValid()),
+    ).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       map((_) => this.shouldRenderDouble()),
+      filter(_ => this.isValid()),
       shareReplay()
     );
 
     this.layoutClass$ = zip(this.shouldRenderDouble$, this.imageFit$).pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       map((value) =>  {
         if (!value[0]) return 'd-none';
         if (value[0] && value[1] === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
         if (value[0] && value[1] === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
         if (value[0] && value[1] === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
         return '';
-      })
+      }),
+      filter(_ => this.isValid()),
     );
 
     this.shouldRenderSecondPage$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       map(_ => this.shouldRenderDouble()),
+      filter(_ => this.isValid()),
     );
 
     this.readerSettings$.pipe(
@@ -160,7 +161,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
     this.bookmark$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -170,14 +170,15 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           if (image2 != null) elements.push(image2);
 
         this.mangaReaderService.applyBookmarkEffect(elements);
-      })
+      }),
+      filter(_ => this.isValid()),
     ).subscribe(() => {});
 
 
     this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       map(values => values.fitting),
+      filter(_ => this.isValid()),
       shareReplay()
     );
   }

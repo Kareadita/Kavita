@@ -71,6 +71,7 @@
                     [readerSettings$]="readerSettings$" 
                     [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
+                    [pageNum$]="pageNum$"
                     [showClickOverlay$]="showClickOverlay$">
                 </app-single-renderer>
 
@@ -92,24 +93,6 @@
                     [getPage]="getPageFn">
                 </app-double-reverse-renderer>
             </div>
-<!-- 
-            <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
-                    'fit-to-width-double-offset' : FittingOption === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
-                    'fit-to-height-double-offset': FittingOption === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
-                    'original-double-offset' : FittingOption === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage}"
-                    [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle" (dblclick)="bookmarkPage($event)">
-
-                    <app-single-renderer [image$]="currentImage$" 
-                        [readerSettings$]="readerSettings$" 
-                        [imageFit$]="imageFit$" 
-                        [bookmark$]="showBookmarkEffect$"
-                        (imageHeight)="updateImageHeight($event)">
-                    </app-single-renderer>
-                
-                    <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !mangaReaderService.isCoverImage(this.pageNum))">
-                        <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{imageFitClass$ | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}  {{ShouldRenderReverseDouble ? 'reverse' : ''}}"> 
-                    </ng-container>
-            </div> -->
 
         </ng-container>
 

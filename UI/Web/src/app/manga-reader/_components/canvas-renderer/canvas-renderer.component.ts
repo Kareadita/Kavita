@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { map, Observable, of, Subject, takeUntil, takeWhile, tap } from 'rxjs';
+import { filter, map, Observable, of, Subject, takeUntil, takeWhile, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
@@ -64,12 +64,12 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
     this.darkenss$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'), 
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
     this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
-      //takeWhile(() => this.isValid()),
       map(values => values.fitting),
       map(fit => {
         if (fit === FITTING_OPTION.WIDTH || this.layoutMode === LayoutMode.Single) return fit;
@@ -84,7 +84,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
           return FITTING_OPTION.WIDTH;
         }
         return fit;
-      })
+      }),
+      //takeWhile(() => this.isValid()),
     );
 
 
