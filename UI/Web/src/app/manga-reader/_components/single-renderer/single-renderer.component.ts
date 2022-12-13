@@ -143,8 +143,4 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return 1;
   }
   reset(): void {}
-
-  getPageNum(pageNum: number): number {
-    return pageNum;
-  }
 }

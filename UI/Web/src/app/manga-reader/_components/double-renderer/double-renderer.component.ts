@@ -29,7 +29,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   @Input() getPage!: (pageNum: number) => HTMLImageElement;
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
-  debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
   imageFitClass$!: Observable<string>;
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
@@ -281,10 +281,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     }
   }
   reset(): void {}
-
-  getPageNum(pageNum: number): number {
-    return pageNum; // TODO
-  }
 
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;

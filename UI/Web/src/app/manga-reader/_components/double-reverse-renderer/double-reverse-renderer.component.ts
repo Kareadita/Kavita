@@ -182,6 +182,11 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       return false;
     }
 
+    if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+      this.debugLog('Not rendering double as current page is last');
+      return false;
+    }
+
     if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
       this.debugLog('Not rendering double as next page is wide image');
       return false;
@@ -223,11 +228,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
 
-        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
-          this.debugLog('Moving forward 1 page as 2 pages left');
-          return 1;
-        }
-
         if (this.mangaReaderService.isWidePage(this.pageNum)) {
           this.debugLog('Moving forward 1 page as current page is wide');
           return 1;
@@ -238,21 +238,16 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
 
-        if (this.mangaReaderService.isLastImage(this.pageNum + 1, this.maxPages)) {
+        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+          this.debugLog('Moving forward 1 page as 2 pages left');
+          return 1;
+        }
+
+        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
           this.debugLog('Moving forward 2 pages as right image is the last page and we just rendered double page');
           return 2;
         }
 
-        if (this.pageNum === this.maxPages - 1) {
-          this.debugLog('Moving forward 0 page as on last page');
-          return 0;
-        }
-
-        if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
-          this.debugLog('Moving forward 1 page as 1 page left');
-          return 1;
-        }
-        
         this.debugLog('Moving forward 2 pages');
         return 2;
       case PAGING_DIRECTION.BACKWARDS:
@@ -261,18 +256,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
           return 1;
         }
 
-        if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
-          this.debugLog('Moving back 2 page as right page is wide');
-          return 2;
-        }
-
-        if (this.mangaReaderService.isWidePage(this.pageNum + 2)) {
-          this.debugLog('Moving back 1 page as coming from wide page');
-          return 1;
-        }
-
-        // ?! Not tested
-        if (this.mangaReaderService.adjustForDoubleReader(this.pageNum - 1) != this.pageNum - 1) {
+        if (this.mangaReaderService.adjustForDoubleReader(this.pageNum - 1) != this.pageNum - 1 && !this.mangaReaderService.isWidePage(this.pageNum - 2)) {
           this.debugLog('Moving back 2 pages as previous pair should be in a pair');
           return 2;
         }
@@ -311,10 +295,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     }
   }
   reset(): void {}
-
-  getPageNum(pageNum: number): number {
-    return pageNum; // TODO
-  }
 
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
