@@ -755,7 +755,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.inSetup = false;
 
-      //this.disableDoubleRendererIfScreenTooSmall();
+      this.disableDoubleRendererIfScreenTooSmall();
 
 
       // From bookmarks, create map of pages to make lookup time O(1)
