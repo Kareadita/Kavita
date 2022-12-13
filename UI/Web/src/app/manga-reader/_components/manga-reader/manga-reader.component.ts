@@ -629,7 +629,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Gets a page from cache else gets a brand new Image
    * @param pageNum Page Number to load
    * @param forceNew Forces to fetch a new image
-   * @param chapterId ChapterId to fetch page from. Defaults to current chapterId. Does not search against cached images with chapterId
+   * @param chapterId ChapterId to fetch page from. Defaults to current chapterId
    * @returns 
    */
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
