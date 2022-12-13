@@ -36,7 +36,6 @@
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
-
             <div (dblclick)="bookmarkPage($event)">
                 <app-canvas-renderer 
                     [readerSettings$]="readerSettings$"

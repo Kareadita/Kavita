@@ -45,6 +45,10 @@ img {
     vertical-align: top;
     max-width: fit-content;
   }
+
+  .fit-to-screen.full-width {
+    max-height: calc(var(--vh)*100);
+  }
 }
 
 
