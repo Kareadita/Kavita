@@ -484,6 +484,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.generalSettingsForm.get('pageSplitOption')?.disable();
           this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
           this.generalSettingsForm.get('fittingOption')?.disable();
+
+          // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
+          if (this.readerMode !== ReaderMode.Webtoon) {
+            this.setPageNum(this.mangaReaderService.adjustForDoubleReader(this.pageNum));
+          }
         }
         this.cdRef.markForCheck();
 
@@ -741,6 +746,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (page > this.maxPages) {
         page = this.maxPages - 1;
       }
+
+      // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
+      if (this.layoutMode !== LayoutMode.Single && this.readerMode !== ReaderMode.Webtoon) {
+        page = this.mangaReaderService.adjustForDoubleReader(page);
+      }
+
       this.setPageNum(page); // first call
       this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
@@ -785,7 +796,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.getPage(1000000, this.prevChapterId);
         }
       });
-
 
       this.render();
     }, () => {

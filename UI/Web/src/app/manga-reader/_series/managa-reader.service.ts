@@ -11,6 +11,7 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 export class ManagaReaderService {
 
   private pageDimensions: DimensionMap = {};
+  private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
   constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
@@ -19,13 +20,30 @@ export class ManagaReaderService {
 
   loadPageDimensions(dims: Array<FileDimension>) {
     this.pageDimensions = {};
+    let counter = 0;
+    let i = 0;
     dims.forEach(d => {
+      const isWide = (d.width > d.height);
       this.pageDimensions[d.pageNumber] = {
         height: d.height,
         width: d.width,
-        isWide: d.width > d.height
+        isWide: isWide
       };
+
+      if (isWide) {
+        this.pairs[d.pageNumber] = d.pageNumber;
+      } else {
+        this.pairs[d.pageNumber] =  counter % 2 === 0 ? Math.max(i - 1, 0) : counter;
+        counter++;
+      }
+
+      i++;
     });
+  }
+
+  adjustForDoubleReader(page: number) {
+    if (!this.pairs.hasOwnProperty(page)) return page;
+    return this.pairs[page];
   }
 
   getPageDimensions(pageNum: number) {
