@@ -346,9 +346,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ImageHeight() {
     // ?! This doesn't work reliably
+    // ?! BUG: Moving from double to single, the scaling options no longer work when on a wide image due to height being too large
     //console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight)
     //console.log('Image 1 Height: ', this.document.querySelector('#image-1')?.clientHeight || 0)
     //return 'calc(100*var(--vh))';
+    console.log('Image Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px');
     return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
   }
 
@@ -376,7 +378,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get PageSplitOption() { return PageSplitOption; }
   get Breakpoint() { return Breakpoint; }
   get FITTING_OPTION() { return FITTING_OPTION; }
-  get FittingOption() { return this.generalSettingsForm.get('fittingOption')?.value; }
+  get FittingOption() { return this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT; }
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private formBuilder: FormBuilder, private navService: NavService,
@@ -477,6 +479,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.layoutMode = parseInt(val, 10);
 
         if (this.layoutMode === LayoutMode.Single) {
+          this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
           this.generalSettingsForm.get('pageSplitOption')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
         } else {
@@ -802,50 +805,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  getFittingOptionClass() {
-    // TODO: Figure out if this is needed still and where to put the code
-    const formControl = this.generalSettingsForm.get('fittingOption');
-    let val = FITTING_OPTION.HEIGHT;
-    if (formControl === undefined) {
-      val = FITTING_OPTION.HEIGHT;
-    }
-    val = formControl?.value;
-
-
-    if (
-      this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src)) &&
-      this.layoutMode === LayoutMode.Single &&
-      val !== FITTING_OPTION.WIDTH &&
-      this.mangaReaderService.shouldRenderAsFitSplit(this.generalSettingsForm.get('pageSplitOption')?.value)
-      ) {
-      // Rewriting to fit to width for this cover image
-      this.imageFitClass.next(FITTING_OPTION.WIDTH);
-      this.imageFit.next(FITTING_OPTION.WIDTH);
-      return FITTING_OPTION.WIDTH;
-    }
-
-    // TODO: Move this to double renderer
-    if (this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src)) && this.layoutMode !== LayoutMode.Single) {
-      this.imageFitClass.next(val + ' wide double');
-      return val + ' wide double';
-    }
-
-    // TODO: Move this to double renderer
-    if (this.mangaReaderService.isCoverImage(this.pageNum) && this.layoutMode !== LayoutMode.Single) {
-      this.imageFitClass.next(val + ' cover double');
-      return val + ' cover double';
-    }
-
-    this.imageFitClass.next(val);
-    this.imageFit.next(val);
-    return val;
-  }
-
-
-  getFit() {
-    return this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT;
-  }
-
   cancelMenuCloseTimer() {
     if (this.menuTimeout) {
       clearTimeout(this.menuTimeout);
@@ -1047,7 +1006,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.doubleRenderer?.renderPage(page);
     this.doubleReverseRenderer?.renderPage(page);
 
-    if (this.getFit() !== FITTING_OPTION.HEIGHT) {
+    if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
         this.readingArea.nativeElement.scroll(0,0);
     }
 
