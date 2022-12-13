@@ -68,7 +68,6 @@
             <div (dblclick)="bookmarkPage($event)">
                 <app-single-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
-                    [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
                     [pageNum$]="pageNum$"
                     [showClickOverlay$]="showClickOverlay$">
@@ -76,7 +75,6 @@
 
                 <app-double-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
-                    [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
@@ -85,7 +83,6 @@
 
                 <app-double-reverse-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
-                    [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"

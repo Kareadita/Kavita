@@ -25,10 +25,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
-  /**
-   * The image fit class
-   */
-  @Input() imageFit$!: Observable<FITTING_OPTION>;  
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
   @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
@@ -54,15 +50,10 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
    */
   leftImage = new Image();
    /**
-    * Used solely for LayoutMode.Double rendering. 
+    * Used solely for LayoutMode.Double rendering. Will always hold the next image to currentImage
     * @remarks Used for rendering to screen.
     */
   rightImage = new Image();
-   /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the next image to currentImage
-    * @see currentImage
-    */
-  currentImageNext = new Image();
 
   /**
    * Determines if we should render a double page.
@@ -118,8 +109,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
         this.leftImage = this.getPage(this.pageNum);
         this.rightImage = this.getPage(this.pageNum + 1);
-
-        this.currentImageNext = this.getPage(this.pageNum + 1);
       }),
       filter(_ => this.isValid()),
     ).subscribe(() => {});
@@ -131,13 +120,20 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       shareReplay()
     );
 
-    this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.imageFit$]).pipe(
+    this.imageFitClass$ = this.readerSettings$.pipe(
+      takeUntil(this.onDestroy),
+      map(values => values.fitting),
+      filter(_ => this.isValid()),
+      shareReplay()
+    );
+
+    this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
       takeUntil(this.onDestroy),
       map((value) =>  {
         if (!value[0]) return 'd-none';
-        if (value[0] && value[1] === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
-        if (value[0] && value[1] === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
-        if (value[0] && value[1] === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
         return '';
       }),
       filter(_ => this.isValid()),
@@ -167,14 +163,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       }),
       filter(_ => this.isValid()),
     ).subscribe(() => {});
-
-
-    this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
-      map(values => values.fitting),
-      filter(_ => this.isValid()),
-      shareReplay()
-    );
   }
 
   ngOnDestroy(): void {
@@ -208,11 +196,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     return true;
   }
 
-  isWide(img: HTMLImageElement) {
-    const page = this.readerService.imageUrlToPageNum(img.src);
-    return this.mangaReaderService.isWidePage(page);
-  }
-
   isValid() {
     return this.layoutMode === LayoutMode.DoubleReversed;
   }
@@ -220,9 +203,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
-    
-    this.rightImage = this.currentImageNext;
-    this.cdRef.markForCheck();
 
     this.imageHeight.emit(Math.max(this.leftImage.height, this.rightImage.height));
     this.cdRef.markForCheck();

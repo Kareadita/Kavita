@@ -23,10 +23,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
-  /**
-   * The image fit class
-   */
-  @Input() imageFit$!: Observable<FITTING_OPTION>;  
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
   @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
@@ -39,7 +35,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   layoutClass$!: Observable<string>;
-  shouldRenderSecondPage$!: Observable<boolean>;
   darkenss$: Observable<string> = of('brightness(100%)');
   emulateBookClass$: Observable<string> = of('');
   layoutMode: LayoutMode = LayoutMode.Single;
@@ -57,11 +52,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     * @remarks Used for rendering to screen.
     */
   currentImage2 = new Image();
-   /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the next image to currentImage
-    * @see currentImage
-    */
-  currentImageNext = new Image();
 
   /**
    * Determines if we should render a double page.
@@ -118,7 +108,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         this.currentImage = this.getPage(this.pageNum);
         this.currentImage2 = this.getPage(this.pageNum + 1);
 
-        this.currentImageNext = this.getPage(this.pageNum + 1);
         this.cdRef.markForCheck();
       }),
       filter(_ => this.isValid()),
@@ -130,25 +119,24 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       filter(_ => this.isValid()),
     );
 
-    this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.imageFit$]).pipe(
+    this.imageFitClass$ = this.readerSettings$.pipe(
+      takeUntil(this.onDestroy),
+      map(values => values.fitting),
+      filter(_ => this.isValid()),
+      shareReplay()
+    );
+
+    this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
       takeUntil(this.onDestroy),
       map((value) =>  {
-        if (!value[0]) return 'd-none';
-        if (value[0] && value[1] === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
-        if (value[0] && value[1] === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
-        if (value[0] && value[1] === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
         return '';
       }),
       filter(_ => this.isValid()),
     );
 
-    this.shouldRenderSecondPage$ = this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
-      map(_ => {
-        return this.shouldRenderDouble();
-      }),
-      filter(_ => this.isValid()),
-    );
 
     this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
@@ -173,14 +161,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       }),
       filter(_ => this.isValid()),
     ).subscribe(() => {});
-
-
-    this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
-      map(values => values.fitting),
-      filter(_ => this.isValid()),
-      shareReplay()
-    );
   }
 
   ngOnDestroy(): void {
@@ -205,7 +185,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       return false;
     }
 
-    //  && this.maxPages % 2 !== 0 We can check if we have an odd number of pairs
     if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
       console.log('Not rendering double as current page is last and there are an odd number of pages');
       return false;
@@ -232,8 +211,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       this.imageHeight.emit(this.currentImage.height || img[0].height);
       return;
     }
-    
-    this.currentImage2 = this.currentImageNext;
 
     this.cdRef.markForCheck();
     this.imageHeight.emit(Math.max(this.currentImage.height, this.currentImage2.height));

@@ -9,7 +9,7 @@
                 class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"
             >
         </ng-container>
-        <ng-container *ngIf="shouldRenderSecondPage$ | async">
+        <ng-container *ngIf="shouldRenderDouble$ | async">
             <img alt=" " [src]="currentImage2.src" 
             id="image-2" 
             class="image-2 {{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"> 

@@ -310,11 +310,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private currentImage: Subject<HTMLImageElement | null> = new ReplaySubject(1);
   currentImage$: Observable<HTMLImageElement | null> = this.currentImage.asObservable();
 
-  private imageFit: Subject<FITTING_OPTION> = new ReplaySubject();
-  private imageFitClass: Subject<string> = new ReplaySubject();
-  imageFitClass$: Observable<string> = this.imageFitClass.asObservable();
-  imageFit$: Observable<FITTING_OPTION> = this.imageFit.asObservable();
-
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
   
@@ -555,17 +550,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   onResize() {  
-    if (window.innerWidth > window.innerHeight) {
-      this.generalSettingsForm.get('layoutMode')?.enable();
-      this.cdRef.markForCheck();
-      return;
-    };
-    if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) return;
-    
-    this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
-    this.generalSettingsForm.get('layoutMode')?.disable();
-    this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
-    this.cdRef.markForCheck();
+    this.disableDoubleRendererIfScreenTooSmall();
   }
 
   @HostListener('window:keyup', ['$event'])
@@ -623,6 +608,20 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       readerMode: this.readerMode,
       emulateBook: this.generalSettingsForm.get('emulateBook')?.value,
     };
+  }
+
+  disableDoubleRendererIfScreenTooSmall() {
+    if (window.innerWidth > window.innerHeight) {
+      this.generalSettingsForm.get('layoutMode')?.enable();
+      this.cdRef.markForCheck();
+      return;
+    };
+    if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) return;
+    
+    this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
+    this.generalSettingsForm.get('layoutMode')?.disable();
+    this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
+    this.cdRef.markForCheck();
   }
 
   /**
@@ -755,6 +754,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.subtitle = results.chapterInfo.subtitle;
 
       this.inSetup = false;
+
+      //this.disableDoubleRendererIfScreenTooSmall();
 
 
       // From bookmarks, create map of pages to make lookup time O(1)

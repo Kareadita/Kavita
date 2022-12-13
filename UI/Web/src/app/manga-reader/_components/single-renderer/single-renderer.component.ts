@@ -20,10 +20,6 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
-  /**
-   * The image fit class
-   */
-  @Input() imageFit$!: Observable<FITTING_OPTION>;  
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
   @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
