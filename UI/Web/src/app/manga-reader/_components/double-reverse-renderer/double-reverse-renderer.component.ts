@@ -312,6 +312,10 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   }
   reset(): void {}
 
+  getPageNum(pageNum: number): number {
+    return pageNum; // TODO
+  }
+
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
 

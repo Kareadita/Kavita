@@ -162,6 +162,10 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     return needsSplitting;
   }
 
+  getPageNum(pageNum: number): number {
+    return pageNum;
+  }
+
   isValid() {
     return this.renderWithCanvas;
   }

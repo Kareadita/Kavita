@@ -55,6 +55,10 @@ export interface ImageRenderer {
      * This should reset any needed state, but not unset the image.
      */
     reset(): void;
+    /**
+     * Returns the number that the slider should show. For example, double renderers might return page 8, when 7 and 8 are being shown.
+     */
+    getPageNum(pageNum: number): number;
     
 
 }

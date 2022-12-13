@@ -181,8 +181,13 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       return false;
     }
 
+    if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
+      this.debugLog('Not rendering double as current page is last');
+      return false;
+    }
+
     if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
-      this.debugLog('Not rendering double as current page is last and there are an odd number of pages');
+      this.debugLog('Not rendering double as current page is last');
       return false;
     }
 
@@ -252,7 +257,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           return 1;
         }
 
-        if (this.mangaReaderService.adjustForDoubleReader(this.pageNum - 1) != this.pageNum - 1) {
+        if (this.mangaReaderService.adjustForDoubleReader(this.pageNum - 1) != this.pageNum - 1 && !this.mangaReaderService.isWidePage(this.pageNum - 2)) {
           this.debugLog('Moving back 2 pages as previous pair should be in a pair');
           return 2;
         }
@@ -261,7 +266,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           this.debugLog('Moving back 1 page as current page is wide');
           return 1;
         }
-        
+
         if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
           this.debugLog('Moving back 1 page as prev page is wide');
           return 1;
@@ -276,6 +281,10 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     }
   }
   reset(): void {}
+
+  getPageNum(pageNum: number): number {
+    return pageNum; // TODO
+  }
 
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;

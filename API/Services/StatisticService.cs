@@ -310,6 +310,16 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
+    public void ReadCountByDay()
+    {
+        // _context.AppUserProgresses
+        //     .GroupBy(p => p.LastModified.Day)
+        //     .Select(g =>
+        //     {
+        //         Day = g.Key,
+        //     })
+    }
+
     public Task<IEnumerable<ReadHistoryEvent>> GetHistory()
     {
         // _context.AppUserProgresses
