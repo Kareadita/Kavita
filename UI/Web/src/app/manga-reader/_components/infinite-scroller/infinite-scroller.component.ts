@@ -32,8 +32,6 @@ const enum DEBUG_MODES {
    * Turn on Page outline
    */
   Outline = 8
-
-
 }
 
 @Component({

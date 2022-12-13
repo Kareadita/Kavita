@@ -7,7 +7,7 @@ import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
-import { ImageRenderer } from '../../_models/renderer';
+import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
 
 /**
@@ -26,11 +26,10 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
   @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
-
   @Input() getPage!: (pageNum: number) => HTMLImageElement;
-
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
+  debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
   imageFitClass$!: Observable<string>;
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
@@ -60,6 +59,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
    * @remarks This will always fail if the window's width is greater than the height
   */
   shouldRenderDouble$!: Observable<boolean>;
+
 
   private readonly onDestroy = new Subject<void>();
 
@@ -172,22 +172,22 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     if (!this.isValid()) return false;
 
     if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-      console.log('Not rendering double as current page is cover image');
+      this.debugLog('Not rendering double as current page is cover image');
       return false;
     }
 
     if (this.mangaReaderService.isWidePage(this.pageNum) ) {
-      console.log('Not rendering double as current page is wide image');
+      this.debugLog('Not rendering double as current page is wide image');
       return false;
     }
 
     if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
-      console.log('Not rendering double as current page is last and there are an odd number of pages');
+      this.debugLog('Not rendering double as current page is last and there are an odd number of pages');
       return false;
     }
 
     if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
-      console.log('Not rendering double as next page is wide image');
+      this.debugLog('Not rendering double as next page is wide image');
       return false;
     }
 
@@ -225,49 +225,66 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-          console.log('Moving forward 1 page as on cover image');
+          this.debugLog('Moving forward 1 page as on cover image');
           return 1;
         }
         if (this.mangaReaderService.isWidePage(this.pageNum)) {
-          console.log('Moving forward 1 page as current page is wide');
+          this.debugLog('Moving forward 1 page as current page is wide');
           return 1;
         }
         if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
-          console.log('Moving forward 1 page as next page is wide');
+          this.debugLog('Moving forward 1 page as next page is wide');
           return 1;
         }
         if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
-          console.log('Moving forward 1 page as 2 pages left');
+          this.debugLog('Moving forward 1 page as 2 pages left');
           return 1;
         }
         if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
-          console.log('Moving forward 1 page as 1 page left');
+          this.debugLog('Moving forward 1 page as 1 page left');
           return 1;
         }
-        console.log('Moving forward 2 pages');
+        this.debugLog('Moving forward 2 pages');
         return 2;
       case PAGING_DIRECTION.BACKWARDS:
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-          console.log('Moving back 1 page as on cover image');
-          return 1;
-        }
-        if (this.mangaReaderService.isWidePage(this.pageNum)) {
-          console.log('Moving back 1 page as current page is wide');
-          return 1;
-        }
-        if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
-          console.log('Moving back 1 page as prev page is wide');
-          return 1;
-        }
-        if (this.mangaReaderService.isWidePage(this.pageNum - 2)) {
-          console.log('Moving back 1 page as 2 pages back is wide');
+          this.debugLog('Moving back 1 page as on cover image');
           return 1;
         }
 
-        console.log('Moving back 2 pages');
+        if (this.mangaReaderService.adjustForDoubleReader(this.pageNum - 1) != this.pageNum - 1) {
+          this.debugLog('Moving back 2 pages as previous pair should be in a pair');
+          return 2;
+        }
+
+        if (this.mangaReaderService.isWidePage(this.pageNum)) {
+          this.debugLog('Moving back 1 page as current page is wide');
+          return 1;
+        }
+        
+        if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
+          this.debugLog('Moving back 1 page as prev page is wide');
+          return 1;
+        }
+        if (this.mangaReaderService.isWidePage(this.pageNum - 2)) {
+          this.debugLog('Moving back 1 page as 2 pages back is wide');
+          return 1;
+        }
+
+        this.debugLog('Moving back 2 pages');
         return 2;
     }
   }
   reset(): void {}
+
+  debugLog(message: string, extraData?: any) {
+    if (!(this.debugMode & DEBUG_MODES.Logs)) return;
+
+    if (extraData !== undefined) {
+      console.log(message, extraData);  
+    } else {
+      console.log(message);
+    }
+  }
 
 }

@@ -478,10 +478,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Re-render the current page when we switch layouts
         if (changeOccurred) {
-          // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
-          if (this.readerMode !== ReaderMode.Webtoon && this.layoutMode !== LayoutMode.Single) {
-            this.setPageNum(this.mangaReaderService.adjustForDoubleReader(this.pageNum));
-          }
+          this.setPageNum(this.adjustPagesForDoubleRenderer(this.pageNum));
           this.loadPage();
         }
       });
@@ -601,6 +598,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       readerMode: this.readerMode,
       emulateBook: this.generalSettingsForm.get('emulateBook')?.value,
     };
+  }
+
+  // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
+  adjustPagesForDoubleRenderer(pageNum: number) {
+    if (this.readerMode !== ReaderMode.Webtoon && this.layoutMode !== LayoutMode.Single) {
+      return this.mangaReaderService.adjustForDoubleReader(pageNum);
+    }
+    return pageNum;
   }
 
   disableDoubleRendererIfScreenTooSmall() {
@@ -735,10 +740,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         page = this.maxPages - 1;
       }
 
-      // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
-      if (this.layoutMode !== LayoutMode.Single && this.readerMode !== ReaderMode.Webtoon) {
-        page = this.mangaReaderService.adjustForDoubleReader(page);
-      }
+      page = this.adjustPagesForDoubleRenderer(page);
 
       this.setPageNum(page); // first call
       this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
@@ -1120,9 +1122,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
-    this.setPageNum(page);
+    this.setPageNum(this.adjustPagesForDoubleRenderer(page));
     this.refreshSlider.emit();
-    this.goToPageEvent.next(page);
+    this.goToPageEvent.next(this.pageNum);
     this.render();
   }
 
@@ -1178,7 +1180,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
-    this.setPageNum(page);
+    this.setPageNum(this.adjustPagesForDoubleRenderer(page));
     this.goToPageEvent.next(page);
     this.render();
   }

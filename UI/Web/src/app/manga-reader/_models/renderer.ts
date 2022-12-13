@@ -2,6 +2,21 @@ import { Observable } from "rxjs";
 import { PAGING_DIRECTION } from "./reader-enums";
 import { ReaderSetting } from "./reader-setting";
 
+
+/**
+* Bitwise enums for configuring how much debug information we want
+*/
+export const enum DEBUG_MODES {
+ /**
+  * No Debug information
+  */
+ None = 0,
+ /**
+  * Turn on debug logging
+  */
+ Logs = 2,
+}
+
 /**
  * A generic interface for an image renderer 
  */
