@@ -18,11 +18,11 @@ export class SwipeDirective {
   touchCancels$!: Observable<TouchEvent>;
 
   @HostListener('touchstart') onTouchStart(event: TouchEvent) {
-    console.log('Touch Start: ', event);
+    //console.log('Touch Start: ', event);
   }
 
   @HostListener('touchend') onTouchEnd(event: TouchEvent) {
-    console.log('Touch End: ', event);
+    //console.log('Touch End: ', event);
   }
 
   constructor(private el: ElementRef) {

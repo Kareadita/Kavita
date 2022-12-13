@@ -350,7 +350,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight)
     //console.log('Image 1 Height: ', this.document.querySelector('#image-1')?.clientHeight || 0)
     //return 'calc(100*var(--vh))';
-    console.log('Image Height: ', Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px');
     return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
   }
 
@@ -850,7 +849,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onSwipeEvent(event: any) {
-    console.log('Swipe event occured: ', event);
   }
 
   handlePageChange(event: any, direction: string) {
