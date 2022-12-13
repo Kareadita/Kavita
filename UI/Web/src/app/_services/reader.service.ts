@@ -194,6 +194,11 @@ export class ReaderService {
     return parseInt(imageSrc.split('&page=')[1], 10);
   }
 
+  imageUrlToChapterId(imageSrc: string) {
+    if (imageSrc === undefined || imageSrc === '') { return -1; }
+    return parseInt(imageSrc.split('chapterId=')[1].split('&')[0], 10);
+  }
+
   getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
     const lastSlashIndex = url.lastIndexOf('/');
     let newRoute = url.substring(0, lastSlashIndex + 1) + nextChapterId + '';

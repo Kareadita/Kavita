@@ -20,8 +20,17 @@ export class ManagaReaderService {
   loadPageDimensions(dims: Array<FileDimension>) {
     this.pageDimensions = {};
     dims.forEach(d => {
-      this.pageDimensions[d.pageNumber] = d.width > d.height ? 'W' : 'S';
+      this.pageDimensions[d.pageNumber] = {
+        height: d.height,
+        width: d.width,
+        isWide: d.width > d.height
+      };
     });
+  }
+
+  getPageDimensions(pageNum: number) {
+    if (!this.pageDimensions.hasOwnProperty(pageNum)) return null;
+    return this.pageDimensions[pageNum];
   }
 
   /**
@@ -30,7 +39,7 @@ export class ManagaReaderService {
    */
   isWidePage(pageNum: number) {
     if (!this.pageDimensions.hasOwnProperty(pageNum)) return false;
-    return this.pageDimensions[pageNum] === 'W'
+    return this.pageDimensions[pageNum].isWide;
   }
 
 

@@ -315,9 +315,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   imageFitClass$: Observable<string> = this.imageFitClass.asObservable();
   imageFit$: Observable<FITTING_OPTION> = this.imageFit.asObservable();
 
-  private imageHeight: Subject<string> = new ReplaySubject();
-  imageHeight$: Observable<string> = this.imageHeight.asObservable();
-
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
   
@@ -350,7 +347,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     //console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight)
     //console.log('Image 1 Height: ', this.document.querySelector('#image-1')?.clientHeight || 0)
     //return 'calc(100*var(--vh))';
-    return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
+    if (this.FittingOption !== FITTING_OPTION.HEIGHT) return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
+    return this.readingArea?.nativeElement?.clientHeight + 'px';
+    // const actualHeight = this.mangaReaderService.getPageDimensions(this.pageNum)?.height;
+    // console.log('Actual Image Height: ', actualHeight);
+    // console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight);
+    // console.log('Rendered Image Height: ', this.document.querySelector('#image-1')?.clientHeight);
+
+    // return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
   }
 
   get RightPaginationOffset() {
@@ -629,8 +633,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns 
    */
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
-    // ?! This doesn't compare with chapterId, only for fetching
-    let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
+    let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum 
+      && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
+    );
     if (!img || forceNew) {
       img = new Image();
       img.src = this.getPageUrl(pageNum, chapterId);
@@ -656,7 +661,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu code
   clickOverlayClass(side: 'right' | 'left') {
-    // TODO: This needs to be validated with subject
     if (!this.showClickOverlay) {
       return '';
     }
@@ -877,7 +881,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), 
     this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD),
     this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
-    const notInSplit = this.canvasRenderer.shouldMovePrev(); // TODO: Make this generic like above, but by default only canvasRenderer will have logic
+    const notInSplit = this.canvasRenderer.shouldMovePrev();
 
     if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) { 
       // Move to next volume/chapter automatically
