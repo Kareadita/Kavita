@@ -130,7 +130,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
       takeUntil(this.onDestroy),
       map((value) =>  {
-        if (!value[0]) return 'd-none';
         if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
         if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
         if (value[0] && value[1].fitting === FITTING_OPTION.ORIGINAL) return 'original-double-offset';

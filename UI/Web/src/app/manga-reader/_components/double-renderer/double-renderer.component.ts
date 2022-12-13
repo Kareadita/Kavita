@@ -169,11 +169,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   }
 
   shouldRenderDouble() {
-    if (this.layoutMode !== LayoutMode.Double) return false;
-
-
-    // If we are cover image, a wide image or last page, we don't render double
-  
+    if (!this.isValid()) return false;
 
     if (this.mangaReaderService.isCoverImage(this.pageNum)) {
       console.log('Not rendering double as current page is cover image');

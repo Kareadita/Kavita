@@ -337,19 +337,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ImageHeight() {
-    // ?! This doesn't work reliably
-    // ?! BUG: Moving from double to single, the scaling options no longer work when on a wide image due to height being too large
-    //console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight)
-    //console.log('Image 1 Height: ', this.document.querySelector('#image-1')?.clientHeight || 0)
-    //return 'calc(100*var(--vh))';
     if (this.FittingOption !== FITTING_OPTION.HEIGHT) return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
     return this.readingArea?.nativeElement?.clientHeight + 'px';
-    // const actualHeight = this.mangaReaderService.getPageDimensions(this.pageNum)?.height;
-    // console.log('Actual Image Height: ', actualHeight);
-    // console.log('Reading Area Height: ', this.readingArea?.nativeElement?.clientHeight);
-    // console.log('Rendered Image Height: ', this.document.querySelector('#image-1')?.clientHeight);
-
-    // return Math.max(this.readingArea?.nativeElement?.clientHeight, this.document.querySelector('#image-1')?.clientHeight || 0) + 'px';
   }
 
   get RightPaginationOffset() {
@@ -486,7 +475,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.generalSettingsForm.get('fittingOption')?.disable();
 
           // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
-          if (this.readerMode !== ReaderMode.Webtoon && this.layoutMode === LayoutMode.Double) {
+          if (this.readerMode !== ReaderMode.Webtoon) {
             this.setPageNum(this.mangaReaderService.adjustForDoubleReader(this.pageNum));
           }
         }
@@ -748,7 +737,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
-      if (this.layoutMode === LayoutMode.Double && this.readerMode !== ReaderMode.Webtoon) {
+      if (this.layoutMode !== LayoutMode.Single && this.readerMode !== ReaderMode.Webtoon) {
         page = this.mangaReaderService.adjustForDoubleReader(page);
       }
 
