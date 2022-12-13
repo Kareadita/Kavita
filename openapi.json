@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.12"
+    "version": "0.6.1.14"
   },
   "servers": [
     {
@@ -3565,6 +3565,15 @@
             "name": "extractPdf",
             "in": "query",
             "description": "Should Kavita extract pdf into images. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "includeDimensions",
+            "in": "query",
+            "description": "Include file dimensions. Only useful for image based reading",
             "schema": {
               "type": "boolean",
               "default": false
@@ -9237,6 +9246,10 @@
             "type": "boolean",
             "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
           },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+          },
           "layoutMode": {
             "$ref": "#/components/schemas/LayoutMode"
           },
@@ -9888,6 +9901,13 @@
           "title": {
             "type": "string",
             "description": "Series Title",
+            "nullable": true
+          },
+          "pageDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileDimensionDto"
+            },
             "nullable": true
           }
         },
@@ -13894,6 +13914,7 @@
           "bookReaderReadingDirection",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
+          "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
           "noTransitions",
@@ -13920,6 +13941,10 @@
           },
           "layoutMode": {
             "$ref": "#/components/schemas/LayoutMode"
+          },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
           },
           "backgroundColor": {
             "minLength": 1,

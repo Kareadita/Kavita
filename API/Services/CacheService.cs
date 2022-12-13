@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -60,6 +61,7 @@ public class CacheService : ICacheService
 
     public IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId)
     {
+        var sw = Stopwatch.StartNew();
         var path = GetCachePath(chapterId);
         var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)
@@ -74,7 +76,7 @@ public class CacheService : ICacheService
         for (var i = 0; i < files.Length; i++)
         {
             var file = files[i];
-            using var image = Image.NewFromStream(File.OpenRead(file), access: Enums.Access.SequentialUnbuffered);
+            using var image = Image.NewFromFile(file, memory:false, access: Enums.Access.SequentialUnbuffered);
             dimensions.Add(new FileDimensionDto()
             {
                 PageNumber = i,
@@ -84,6 +86,7 @@ public class CacheService : ICacheService
             });
         }
 
+        _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);
         return dimensions;
     }
 

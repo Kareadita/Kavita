@@ -18,6 +18,7 @@ export interface Preferences {
     layoutMode: LayoutMode;
     backgroundColor: string;
     showScreenHints: boolean;
+    emulateBook: boolean;
 
     // Book Reader
     bookReaderMargin: number;

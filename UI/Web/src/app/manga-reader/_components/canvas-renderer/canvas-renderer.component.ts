@@ -1,6 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { map, Observable, of, Subject, takeUntil, tap } from 'rxjs';
+import { filter, map, Observable, of, Subject, takeUntil, takeWhile, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
+import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
@@ -47,7 +48,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   
 
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) { }
+  constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerSettings$.pipe(takeUntil(this.onDestroy), tap(value => {
@@ -63,6 +64,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
     this.darkenss$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'), 
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
@@ -75,15 +77,15 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
         // Would this ever execute given that we perform splitting only in this renderer? 
         if (
-          this.mangaReaderService.isWideImage(this.canvasImage) &&
+          this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src)) &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
-          console.log('Fit (override): ', fit);
           return FITTING_OPTION.WIDTH;
         }
         return fit;
-      })
+      }),
+      filter(() => this.isValid()),
     );
 
 
@@ -94,7 +96,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
         if (!this.canvas) return;
 
         const elements = [this.canvas?.nativeElement];
-        console.log('Applying bookmark on ', elements);
         this.mangaReaderService.applyBookmarkEffect(elements);
       })
     ).subscribe(() => {});
@@ -122,7 +123,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   updateSplitPage() {
     if (this.canvasImage == null) return;
-    const needsSplitting = this.mangaReaderService.isWideImage(this.canvasImage);
+    const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
+    
     if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return needsSplitting;
@@ -160,6 +162,10 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     return needsSplitting;
   }
 
+  isValid() {
+    return this.renderWithCanvas;
+  }
+
   /**
    * This renderer does not render when splitting is not needed
    * @param img 
@@ -173,7 +179,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     this.cdRef.markForCheck();
     
     const needsSplitting = this.updateSplitPage();
-    //console.log('split: ',this.currentImageSplitPart);
     if (!needsSplitting) return;
     if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
 
@@ -195,7 +200,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   getPageAmount(direction: PAGING_DIRECTION) {
     if (this.canvasImage === null) return 1;
-    if (!this.mangaReaderService.isWideImage(this.canvasImage)) return 1;
+    if (!this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src))) return 1;
     switch(direction) {
       case PAGING_DIRECTION.FORWARD:
         return this.shouldMoveNext() ? 1 : 0;
@@ -221,7 +226,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
    setCanvasSize() {
     if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) { return; }
-    // TODO: Move this somewhere else (maybe canvas renderer?)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const isSafari = [

@@ -36,7 +36,6 @@
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
-
             <div (dblclick)="bookmarkPage($event)">
                 <app-canvas-renderer 
                     [readerSettings$]="readerSettings$"
@@ -69,14 +68,13 @@
             <div (dblclick)="bookmarkPage($event)">
                 <app-single-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
-                    [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
+                    [pageNum$]="pageNum$"
                     [showClickOverlay$]="showClickOverlay$">
                 </app-single-renderer>
 
                 <app-double-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
-                    [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
@@ -85,31 +83,12 @@
 
                 <app-double-reverse-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
-                    [imageFit$]="imageFit$" 
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
                     [getPage]="getPageFn">
                 </app-double-reverse-renderer>
             </div>
-<!-- 
-            <div class="image-container {{imageFitClass$ | async}}" [ngClass]="{'d-none': renderWithCanvas, 'center-double': ShouldRenderDoublePage,
-                    'fit-to-width-double-offset' : FittingOption === FITTING_OPTION.WIDTH && ShouldRenderDoublePage,
-                    'fit-to-height-double-offset': FittingOption === FITTING_OPTION.HEIGHT && ShouldRenderDoublePage,
-                    'original-double-offset' : FittingOption === FITTING_OPTION.ORIGINAL && ShouldRenderDoublePage}"
-                    [style.filter]="'brightness(' + generalSettingsForm.get('darkness')?.value + '%)' | safeStyle" (dblclick)="bookmarkPage($event)">
-
-                    <app-single-renderer [image$]="currentImage$" 
-                        [readerSettings$]="readerSettings$" 
-                        [imageFit$]="imageFit$" 
-                        [bookmark$]="showBookmarkEffect$"
-                        (imageHeight)="updateImageHeight($event)">
-                    </app-single-renderer>
-                
-                    <ng-container *ngIf="(this.canvasImage2.src !== '') && (readerService.imageUrlToPageNum(canvasImage2.src) <= maxPages - 1 && !mangaReaderService.isCoverImage(this.pageNum))">
-                        <img alt=" " [src]="canvasImage2.src" id="image-2" class="image-2 {{imageFitClass$ | async}} {{readerMode === ReaderMode.LeftRight || readerMode === ReaderMode.UpDown ? '' : 'd-none'}} {{showClickOverlay ? 'blur' : ''}}  {{ShouldRenderReverseDouble ? 'reverse' : ''}}"> 
-                    </ng-container>
-            </div> -->
 
         </ng-container>
 
@@ -191,7 +170,7 @@
                     </div>
 
                     <div class="col-md-6 col-sm-12">
-                        <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="fa {{getFittingIcon()}}" aria-hidden="true"></i>
+                        <label for="page-fitting" class="form-label">Image Scaling</label>&nbsp;<i class="{{FittingOption | fittingIcon}}" aria-hidden="true"></i>
                         <select class="form-control" id="page-fitting" formControlName="fittingOption">
                             <option value="full-height">Height</option>
                             <option value="full-width">Width</option>
@@ -241,13 +220,22 @@
                             <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
                         </select>
                     </div>
-                    <div class="col-md-6 col-sm-12">
+                    <div class="col-md-3 col-sm-12">
                         <div class="mb-3">
-                            <label id="auto-close-label" class="form-label"></label>
                             <div class="mb-3">
                                 <div class="form-check form-switch">
-                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true" aria-labelledby="auto-close-label">
+                                    <input type="checkbox" id="auto-close" formControlName="autoCloseMenu" class="form-check-input" [value]="true">
                                     <label class="form-check-label" for="auto-close">Auto Close Menu</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-12">
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="emulate-book" formControlName="emulateBook" class="form-check-input" [value]="true">
+                                    <label class="form-check-label" for="emulate-book">Emulate comic book</label>
                                 </div>
                             </div>
                         </div>
@@ -258,6 +246,9 @@
                         <label for="darkness" class="form-label range-label">Brightness</label><span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
                         <input type="range" class="form-range" id="darkness" 
                                 min="10" max="100" step="1" formControlName="darkness">
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <button class="btn btn-primary" (click)="savePref()">Save to Preferences</button>
                     </div>
                 </div>
             </form>

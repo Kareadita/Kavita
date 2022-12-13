@@ -126,6 +126,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('showScreenHints', new FormControl(this.user.preferences.showScreenHints, []));
       this.settingsForm.addControl('readerMode', new FormControl(this.user.preferences.readerMode, []));
       this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
+      this.settingsForm.addControl('emulateBook', new FormControl(this.user.preferences.emulateBook, []));
+
       this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
       this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
       this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
@@ -184,6 +186,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
     this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
     this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions);
+    this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -214,10 +217,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       blurUnreadSummaries: modelSettings.blurUnreadSummaries,
       promptForDownloadSize: modelSettings.promptForDownloadSize,
       noTransitions: modelSettings.noTransitions,
+      emulateBook: modelSettings.emulateBook
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success('Server settings updated');
+      this.toastr.success('User preferences updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
         this.cdRef.markForCheck();

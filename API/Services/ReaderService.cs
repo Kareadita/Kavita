@@ -225,6 +225,7 @@ public class ReaderService : IReaderService
 
         try
         {
+            // TODO: Rewrite this code to just pull user object with progress for that particiular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
@@ -241,8 +242,7 @@ public class ReaderService : IReaderService
                     SeriesId = progressDto.SeriesId,
                     ChapterId = progressDto.ChapterId,
                     LibraryId = progressDto.LibraryId,
-                    BookScrollId = progressDto.BookScrollId,
-                    LastModified = DateTime.Now
+                    BookScrollId = progressDto.BookScrollId
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }
@@ -253,7 +253,6 @@ public class ReaderService : IReaderService
                 userProgress.VolumeId = progressDto.VolumeId;
                 userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
-                userProgress.LastModified = DateTime.Now;
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
@@ -267,6 +266,10 @@ public class ReaderService : IReaderService
         }
         catch (Exception exception)
         {
+            // This can happen when the reader sends 2 events at same time, so 2 threads are inserting and one fails.
+            if (exception.Message.StartsWith(
+                    "The database operation was expected to affect 1 row(s), but actually affected 0 row(s)"))
+                return true;
             _logger.LogError(exception, "Could not save progress");
             await _unitOfWork.RollbackAsync();
         }

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
+import { Series } from 'src/app/_models/series';
 import { User } from 'src/app/_models/user';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { FileExtensionBreakdown } from '../../_models/file-breakdown';
@@ -24,7 +26,7 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
   stats$!: Observable<ServerStatistics>;
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private statService: StatisticsService) {
+  constructor(private statService: StatisticsService, private router: Router) {
     this.stats$ = this.statService.getServerStatistics().pipe(takeUntil(this.onDestroy), shareReplay());
     this.releaseYears$ = this.statService.getTopYears().pipe(takeUntil(this.onDestroy));
     this.mostActiveUsers$ = this.stats$.pipe(
@@ -54,7 +56,7 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
     this.recentlyRead$ = this.stats$.pipe(
       map(d => d.recentlyRead),
       map(counts => counts.map(count => {
-        return {name: count.name, value: -1};
+        return {name: count.name, value: -1, extra: count};
       })),
       takeUntil(this.onDestroy)
     );
@@ -68,6 +70,11 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  handleRecentlyReadClick = (data: PieDataItem) => {
+    const series = data.extra as Series;
+    this.router.navigate(['library', series.libraryId, 'series', series.id]);
   }
 
   

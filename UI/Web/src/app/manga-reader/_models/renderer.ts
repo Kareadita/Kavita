@@ -32,7 +32,7 @@ export interface ImageRenderer {
      */
     shouldMoveNext(): boolean;
     /**
-     * Returns the number of pages that should occur based on page direction and internal state of the renderer.
+     * Returns the number of pages that should occur based on page direction and internal state of the renderer. Should return 0 when not in the conditions to render.
      */
     getPageAmount(direction: PAGING_DIRECTION): number;
     /**

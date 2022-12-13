@@ -66,4 +66,6 @@ public class ChapterInfoDto : IChapterInfoDto
     /// <remarks>Usually just series name, but can include chapter title</remarks>
     public string Title { get; set; }
 
+    public IEnumerable<FileDimensionDto> PageDimensions { get; set; }
+
 }

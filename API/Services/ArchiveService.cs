@@ -409,6 +409,7 @@ public class ArchiveService : IArchiveService
     private void ExtractArchiveEntities(IEnumerable<IArchiveEntry> entries, string extractPath)
     {
         _directoryService.ExistOrCreate(extractPath);
+        // TODO: Look into a Parallel.ForEach
         foreach (var entry in entries)
         {
             entry.WriteToDirectory(extractPath, new ExtractionOptions()

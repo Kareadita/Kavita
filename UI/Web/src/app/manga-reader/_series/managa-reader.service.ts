@@ -1,8 +1,8 @@
-import { DOCUMENT } from '@angular/common';
-import { ElementRef, Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
+import { ElementRef, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { ReaderService } from 'src/app/_services/reader.service';
+import { DimensionMap, FileDimension } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 
 @Injectable({
@@ -10,27 +10,57 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 })
 export class ManagaReaderService {
 
+  private pageDimensions: DimensionMap = {};
+  private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
-  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private readerService: ReaderService) {
+  constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 
 
+  loadPageDimensions(dims: Array<FileDimension>) {
+    this.pageDimensions = {};
+    let counter = 0;
+    let i = 0;
+    dims.forEach(d => {
+      const isWide = (d.width > d.height);
+      this.pageDimensions[d.pageNumber] = {
+        height: d.height,
+        width: d.width,
+        isWide: isWide
+      };
+
+      if (isWide) {
+        this.pairs[d.pageNumber] = d.pageNumber;
+      } else {
+        this.pairs[d.pageNumber] =  counter % 2 === 0 ? Math.max(i - 1, 0) : counter;
+        counter++;
+      }
+
+      i++;
+    });
+  }
+
+  adjustForDoubleReader(page: number) {
+    if (!this.pairs.hasOwnProperty(page)) return page;
+    return this.pairs[page];
+  }
+
+  getPageDimensions(pageNum: number) {
+    if (!this.pageDimensions.hasOwnProperty(pageNum)) return null;
+    return this.pageDimensions[pageNum];
+  }
 
   /**
    * If the image's width is greater than it's height
-   * @param elem Image
+   * @param pageNum Page number - Expected to call loadPageDimensions before this call
    */
-  isWideImage(elem: HTMLImageElement) {
-    if (!elem) return false;
-    if (elem) {
-      elem.addEventListener('load', () => {
-        return elem.width > elem.height;
-      }, false);
-      if (elem.src === '') return false;
-    }
-    return elem.width > elem.height;
+  isWidePage(pageNum: number) {
+    if (!this.pageDimensions.hasOwnProperty(pageNum)) return false;
+    return this.pageDimensions[pageNum].isWide;
   }
+
+
 
   /**
    * If pagenumber is 0 aka first page, which on double page rendering should always render as a single. 
@@ -64,7 +94,7 @@ export class ManagaReaderService {
    * If the current page is second to last image
    */
   isSecondLastImage(pageNum: number, maxPages: number) {
-    return maxPages - 1 - pageNum === 2;
+    return maxPages - 2 === pageNum;
   }
 
   /**
@@ -81,7 +111,7 @@ export class ManagaReaderService {
    * @returns 
    */
   shouldSplit(img: HTMLImageElement, pageSplitOption: PageSplitOption) {
-    const needsSplitting = this.isWideImage(img);
+    const needsSplitting = this.isWidePage(this.readerService.imageUrlToPageNum(img?.src));
     return !(this.isNoSplit(pageSplitOption) || !needsSplitting)
   }
 

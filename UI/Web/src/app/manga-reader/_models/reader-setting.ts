@@ -10,4 +10,5 @@ export interface ReaderSetting {
     darkness: number;
     pagingDirection: PAGING_DIRECTION;
     readerMode: ReaderMode;
+    emulateBook: boolean;
 }

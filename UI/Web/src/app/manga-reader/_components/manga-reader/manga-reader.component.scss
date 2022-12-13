@@ -54,64 +54,6 @@ $pointer-offset: 5px;
   }
 } 
 
-// Fitting Options
-
-.full-height {
-  width: auto;
-  margin: 0 auto;
-  max-height: calc(var(--vh)*100);
-  vertical-align: top;
-    &.wide {
-      height: 100vh;
-  }
-}
-
-.original {
-  align-self: center;
-  width: auto;
-  margin: 0 auto;
-  vertical-align: top;
-}
-
-.full-width {
-  width: 100%;
-  margin: 0 auto;
-  vertical-align: top;
-  max-width: fit-content;
-
-  &.double {
-    width: 50%;
-
-    &.cover {
-      width: 100%;
-    }
-  }
-}
-
-.center-double {
-  display: flex;
-  overflow: unset;
-}
-
-.fit-to-width-double-offset {
-  max-width: 100%; // max-width fixes center alignment issue
-}
-
-.original-double-offset {
-  max-width: 100%;
-}
-
-.fit-to-height-double-offset {
-  // position: absolute;
-  height: 100vh;
-  object-fit: scale-down;
-  top: 50%;
-  left: 50%;
-  // transform: translate(-50%, 0%);
-  max-width: 100%;
-}
-
-
 // Splitting Icon
 .split {
     height: 20px;
@@ -217,7 +159,6 @@ $pointer-offset: 5px;
   }
 
 
-
   .pagination-area {
     $pagination-bg: rgba(0, 0, 0, 0);
     //$pagination-bg: rgba(0, 0, 255, 0.4); // DEBUG CODE
@@ -265,4 +206,3 @@ $pointer-offset: 5px;
         z-index: 100;
     }
   }
-

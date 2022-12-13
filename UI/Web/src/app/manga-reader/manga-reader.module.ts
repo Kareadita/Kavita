@@ -17,6 +17,7 @@ import { SingleRendererComponent } from './_components/single-renderer/single-re
 import { DoubleRendererComponent } from './_components/double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from './_components/double-reverse-renderer/double-reverse-renderer.component';
 import { MangaReaderComponent } from './_components/manga-reader/manga-reader.component';
+import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { MangaReaderComponent } from './_components/manga-reader/manga-reader.co
     SingleRendererComponent,
     DoubleRendererComponent,
     DoubleReverseRendererComponent,
+    FittingIconPipe,
   ],
   imports: [
     CommonModule,

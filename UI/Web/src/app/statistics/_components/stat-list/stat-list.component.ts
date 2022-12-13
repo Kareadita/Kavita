@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { PieData } from '@swimlane/ngx-charts';
 import { Observable } from 'rxjs';
 import { PieDataItem } from '../../_models/pie-data-item';
 
@@ -23,5 +24,14 @@ export class StatListComponent {
    */
   @Input() description: string = '';
   @Input() data$!: Observable<PieDataItem[]>;
+  /**
+   * Optional callback handler when an item is clicked
+   */
+  @Input() handleClick: ((data: PieDataItem) => void) | undefined = undefined;
+
+  doClick(item: PieDataItem) {
+    if (!this.handleClick) return; 
+    this.handleClick(item);
+  }
 
 }

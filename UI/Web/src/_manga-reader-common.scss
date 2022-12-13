@@ -45,6 +45,10 @@ img {
     vertical-align: top;
     max-width: fit-content;
   }
+
+  .fit-to-screen.full-width {
+    max-height: calc(var(--vh)*100);
+  }
 }
 
 
@@ -70,4 +74,29 @@ img {
   background-color: var(--manga-reader-prev-highlight-bg-color) !important;
   animation: fadein .5s both;
   backdrop-filter: blur(10px);
+}
+
+
+::ng-deep .image-container.book-shadow.center-double:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  box-shadow:
+      0px 0px calc(17px*3.14) 25px rgb(0 0 0 / 43%),
+      0px 0px calc(2px*3.14) 2px rgb(0 0 0 / 43%),
+      0px 0px calc(5px*3.14) 4px rgb(0 0 0 / 43%),
+      0px 0px calc(0.5px*3.14) 0.3px rgb(0 0 0 / 43%);
+}
+
+@supports (-moz-appearance:none) {
+  ::ng-deep .image-container.book-shadow.center-double:before {
+    box-shadow:
+      0px 0px calc(17px*3.14) 25px rgb(0 0 0 / 43%),
+      0px 0px calc(2px*3.14) 2px rgb(0 0 0 / 43%),
+      0px 0px calc(5px*3.14) 4px rgb(0 0 0 / 43%),
+      0px 0px calc(0.5px*3.14) 0.3px rgb(0 0 0 / 43%),
+      0px 0px 1px 0.5px rgb(0 0 0 / 43%);
+  }
 }

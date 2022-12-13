@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, zip, shareReplay, filter } from 'rxjs';
+import { Observable, of, Subject, map, takeUntil, tap, zip, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -10,6 +10,9 @@ import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
 
+/**
+ * Renders 2 pages except on first page, last page, and before a wide image
+ */
 @Component({
   selector: 'app-double-renderer',
   templateUrl: './double-renderer.component.html',
@@ -20,10 +23,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
-  /**
-   * The image fit class
-   */
-  @Input() imageFit$!: Observable<FITTING_OPTION>;  
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
   @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
@@ -36,8 +35,8 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   layoutClass$!: Observable<string>;
-  shouldRenderSecondPage$!: Observable<boolean>;
   darkenss$: Observable<string> = of('brightness(100%)');
+  emulateBookClass$: Observable<string> = of('');
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
   pageNum: number = 0;
@@ -53,26 +52,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     * @remarks Used for rendering to screen.
     */
   currentImage2 = new Image();
-   /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the previous image to currentImage
-    * @see currentImage
-    */
-  currentImagePrev = new Image();
-   /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the next image to currentImage
-    * @see currentImage
-    */
-  currentImageNext = new Image();
-  /**
-    * Used solely for LayoutMode.Double rendering. Will always hold the current - 2 image to currentImage
-    * @see currentImage
-    */
-  currentImage2Behind = new Image();
-  /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the current + 2 image to currentImage
-   * @see currentImage
-   */
-  currentImage2Ahead = new Image();
 
   /**
    * Determines if we should render a double page.
@@ -95,14 +74,21 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
-      filter(_ => this.isValid()),
       map(values => values.readerMode), 
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
     this.darkenss$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'), 
+      filter(_ => this.isValid()),
+      takeUntil(this.onDestroy)
+    );
+
+    this.emulateBookClass$ = this.readerSettings$.pipe(
+      map(data => data.emulateBook),
+      map(enabled => enabled ? 'book-shadow' : ''), 
       filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
@@ -115,7 +101,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -123,67 +108,35 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         this.currentImage = this.getPage(this.pageNum);
         this.currentImage2 = this.getPage(this.pageNum + 1);
 
-        this.currentImageNext = this.getPage(this.pageNum + 1);
-        this.currentImagePrev = this.getPage(this.pageNum - 1);
-
-        this.currentImage2Behind = this.getPage(this.pageNum - 2);
-        this.currentImage2Ahead = this.getPage(this.pageNum + 2);
         this.cdRef.markForCheck();
-      })).subscribe(() => {});
+      }),
+      filter(_ => this.isValid()),
+    ).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
       takeUntil(this.onDestroy),
+      map((_) => this.shouldRenderDouble()),
       filter(_ => this.isValid()),
-      map((_) => {
-        return this.shouldRenderDouble();
-      })
     );
 
-    this.layoutClass$ = zip(this.shouldRenderDouble$, this.imageFit$).pipe(
+    this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
+      map(values => values.fitting),
       filter(_ => this.isValid()),
+      shareReplay()
+    );
+
+    this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
+      takeUntil(this.onDestroy),
       map((value) =>  {
-        if (!value[0]) return 'd-none';
-        if (value[0] && value[1] === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
-        if (value[0] && value[1] === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
-        if (value[0] && value[1] === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
+        if (value[0] && value[1].fitting === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
         return '';
-      })
-    );
-
-    this.shouldRenderSecondPage$ = this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
+      }),
       filter(_ => this.isValid()),
-      map(_ => {
-        if (this.currentImage2.src === '') {
-          console.log('Not rendering second page as 2nd image is empty');
-          return false;
-        }
-        if (this.mangaReaderService.isCoverImage(this.pageNum)) {
-          console.log('Not rendering second page as on cover image');
-          return false;
-        }
-        if (this.readerService.imageUrlToPageNum(this.currentImage2.src) > this.maxPages - 1) {
-          console.log('Not rendering second page as 2nd image is on last page');
-          return false;
-        }
-        if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
-          console.log('Not rendering second page as next page is wide');
-          return false;
-        }
-
-        if (this.mangaReaderService.isWideImage(this.currentImage)) {
-          console.log('Not rendering second page as next page is wide');
-          return false;
-        }
-
-        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
-          console.log('Not rendering second page as prev page is wide');
-          return false;
-        }
-        return true;
-      })
     );
+
 
     this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
@@ -196,7 +149,6 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
     this.bookmark$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -206,16 +158,9 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         if (image2 != null) elements.push(image2);
   
         this.mangaReaderService.applyBookmarkEffect(elements);
-      })
-    ).subscribe(() => {});
-
-
-    this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
+      }),
       filter(_ => this.isValid()),
-      map(values => values.fitting),
-      shareReplay()
-    );
+    ).subscribe(() => {});
   }
 
   ngOnDestroy(): void {
@@ -224,13 +169,29 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   }
 
   shouldRenderDouble() {
-    if (this.layoutMode !== LayoutMode.Double) return false;
+    if (!this.isValid()) return false;
 
-    return !(
-      this.mangaReaderService.isCoverImage(this.pageNum)
-      || this.mangaReaderService.isWideImage(this.currentImage)
-      || this.mangaReaderService.isWideImage(this.currentImageNext)
-      );
+    if (this.mangaReaderService.isCoverImage(this.pageNum)) {
+      console.log('Not rendering double as current page is cover image');
+      return false;
+    }
+
+    if (this.mangaReaderService.isWidePage(this.pageNum) ) {
+      console.log('Not rendering double as current page is wide image');
+      return false;
+    }
+
+    if (this.mangaReaderService.isLastImage(this.pageNum, this.maxPages)) {
+      console.log('Not rendering double as current page is last and there are an odd number of pages');
+      return false;
+    }
+
+    if (this.mangaReaderService.isWidePage(this.pageNum + 1) ) {
+      console.log('Not rendering double as next page is wide image');
+      return false;
+    }
+
+    return true;
   }
 
   isValid() {
@@ -240,19 +201,12 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
-
-    console.log('[DoubleRenderer] renderPage(): ', this.pageNum);
-    console.log(this.readerService.imageUrlToPageNum(this.currentImage2Behind.src), this.readerService.imageUrlToPageNum(this.currentImagePrev.src),
-    '[', this.readerService.imageUrlToPageNum(this.currentImage.src), ']',
-    this.readerService.imageUrlToPageNum(this.currentImageNext.src), this.readerService.imageUrlToPageNum(this.currentImage2Ahead.src))
     
-
-    if (!this.shouldRenderDouble()) {
-      this.imageHeight.emit(this.currentImage.height);
+    // First load, switching from double manga -> double, this is 0 and thus not rendering
+    if (!this.shouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {
+      this.imageHeight.emit(this.currentImage.height || img[0].height);
       return;
     }
-    
-    this.currentImage2 = this.currentImageNext;
 
     this.cdRef.markForCheck();
     this.imageHeight.emit(Math.max(this.currentImage.height, this.currentImage2.height));
@@ -268,18 +222,17 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   getPageAmount(direction: PAGING_DIRECTION): number {
     if (this.layoutMode !== LayoutMode.Double) return 0;
 
-    // If prev page:
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {
           console.log('Moving forward 1 page as on cover image');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImage)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum)) {
           console.log('Moving forward 1 page as current page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImageNext)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum + 1)) {
           console.log('Moving forward 1 page as next page is wide');
           return 1;
         }
@@ -298,23 +251,19 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           console.log('Moving back 1 page as on cover image');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImage)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum)) {
           console.log('Moving back 1 page as current page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImagePrev)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum - 1)) {
           console.log('Moving back 1 page as prev page is wide');
           return 1;
         }
-        if (this.mangaReaderService.isWideImage(this.currentImage2Behind)) {
+        if (this.mangaReaderService.isWidePage(this.pageNum - 2)) {
           console.log('Moving back 1 page as 2 pages back is wide');
           return 1;
         }
-        // Not sure about this condition on moving backwards
-        if (this.mangaReaderService.isSecondLastImage(this.pageNum, this.maxPages)) {
-          console.log('Moving back 1 page as 2 pages left');
-          return 1;
-        }
+
         console.log('Moving back 2 pages');
         return 2;
     }

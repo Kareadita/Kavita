@@ -5,7 +5,7 @@
           <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0" *ngIf="description && description.length > 0"></i>
         </div>
         <ul class="list-group list-group-flush">
-          <li class="list-group-item" *ngFor="let item of data">
+          <li class="list-group-item" [ngClass]="{'underline': handleClick != undefined}" *ngFor="let item of data" (click)="doClick(item)">
             {{item.name}} <span class="float-end" *ngIf="item.value >= 0">{{item.value}} {{label}}</span>
           </li>
         </ul>

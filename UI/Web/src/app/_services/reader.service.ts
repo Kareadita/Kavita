@@ -103,8 +103,8 @@ export class ReaderService {
     return this.baseUrl + 'reader/bookmark-image?seriesId=' + seriesId + '&page=' + page + '&apiKey=' + encodeURIComponent(apiKey);
   }
 
-  getChapterInfo(chapterId: number) {
-    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
+  getChapterInfo(chapterId: number, includeDimensions = false) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&includeDimensions=' + includeDimensions);
   }
 
   getFileDimensions(chapterId: number) {
@@ -192,6 +192,11 @@ export class ReaderService {
   imageUrlToPageNum(imageSrc: string) {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
     return parseInt(imageSrc.split('&page=')[1], 10);
+  }
+
+  imageUrlToChapterId(imageSrc: string) {
+    if (imageSrc === undefined || imageSrc === '') { return -1; }
+    return parseInt(imageSrc.split('chapterId=')[1].split('&')[0], 10);
   }
 
   getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {
