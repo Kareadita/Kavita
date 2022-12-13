@@ -473,16 +473,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.generalSettingsForm.get('pageSplitOption')?.disable();
           this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
           this.generalSettingsForm.get('fittingOption')?.disable();
-
-          // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
-          if (this.readerMode !== ReaderMode.Webtoon) {
-            this.setPageNum(this.mangaReaderService.adjustForDoubleReader(this.pageNum));
-          }
         }
         this.cdRef.markForCheck();
 
         // Re-render the current page when we switch layouts
         if (changeOccurred) {
+          // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
+          if (this.readerMode !== ReaderMode.Webtoon && this.layoutMode !== LayoutMode.Single) {
+            this.setPageNum(this.mangaReaderService.adjustForDoubleReader(this.pageNum));
+          }
           this.loadPage();
         }
       });
