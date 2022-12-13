@@ -486,7 +486,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.generalSettingsForm.get('fittingOption')?.disable();
 
           // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
-          if (this.readerMode !== ReaderMode.Webtoon) {
+          if (this.readerMode !== ReaderMode.Webtoon && this.layoutMode === LayoutMode.Double) {
             this.setPageNum(this.mangaReaderService.adjustForDoubleReader(this.pageNum));
           }
         }
@@ -748,7 +748,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       // If we are in double mode, we need to check if our current page is on a right edge or not, if so adjust by decrementing by 1
-      if (this.layoutMode !== LayoutMode.Single && this.readerMode !== ReaderMode.Webtoon) {
+      if (this.layoutMode === LayoutMode.Double && this.readerMode !== ReaderMode.Webtoon) {
         page = this.mangaReaderService.adjustForDoubleReader(page);
       }
 
