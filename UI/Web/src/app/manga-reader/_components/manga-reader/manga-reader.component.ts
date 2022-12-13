@@ -443,12 +443,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.readerModeSubject.next(this.readerMode);
       this.pagingDirectionSubject.next(this.pagingDirection);
-      
 
       // We need a mergeMap when page changes
       this.readerSettings$ = merge(this.generalSettingsForm.valueChanges, this.pagingDirection$, this.readerMode$).pipe(
+        map(_ => this.createReaderSettingsUpdate()),
         takeUntil(this.onDestroy), 
-        map(_ => this.createReaderSettingsUpdate())
       );
 
       this.updateForm();
@@ -613,7 +612,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   createReaderSettingsUpdate() {
     return {
       pageSplit: parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10),
-      fitting: this.mangaReaderService.translateScalingOption(this.scalingOption),
+      fitting: (this.generalSettingsForm.get('fittingOption')?.value as FITTING_OPTION),
       layoutMode: this.layoutMode,
       darkness: 100,
       pagingDirection: this.pagingDirection,
@@ -1226,7 +1225,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.canvasImage = this.cachedImages[this.pageNum & this.cachedImages.length];
       this.currentImage.next(this.canvasImage);
       this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
-      console.log('Emitting page number: ', this.pageNum);
       this.isLoading = true;
     }
 

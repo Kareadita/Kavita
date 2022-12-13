@@ -85,7 +85,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
         }
         return fit;
       }),
-      //takeWhile(() => this.isValid()),
+      filter(() => this.isValid()),
     );
 
 

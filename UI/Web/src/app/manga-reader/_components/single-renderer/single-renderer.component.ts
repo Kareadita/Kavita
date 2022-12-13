@@ -1,10 +1,9 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { filter, map, Observable, of, Subject, takeUntil, tap, zip } from 'rxjs';
+import { combineLatest, filter, map, Observable, of, shareReplay, Subject, takeUntil, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
-import { DimensionMap } from '../../_models/file-dimension';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
@@ -52,15 +51,14 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
-      filter(_ => this.isValid()),
       map(values => values.readerMode), 
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
+      filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
 
     this.pageNum$.pipe(
       takeUntil(this.onDestroy),
-      filter(_ => this.isValid()),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -99,8 +97,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       filter(_ => this.isValid()),
     ).subscribe(() => {});
 
-    this.imageFitClass$ = zip(this.readerSettings$, this.image$).pipe(
-      takeUntil(this.onDestroy),
+    this.imageFitClass$ = combineLatest([this.readerSettings$, this.pageNum$]).pipe(
       map(values => values[0].fitting),
       map(fit => {
         if (
@@ -111,7 +108,10 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           return FITTING_OPTION.WIDTH;
         }
         return fit;
-      })
+      }),
+      shareReplay(),
+      filter(_ => this.isValid()),
+      takeUntil(this.onDestroy),
     );
   }
 

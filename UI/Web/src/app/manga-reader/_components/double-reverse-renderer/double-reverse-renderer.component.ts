@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, zip, shareReplay, filter } from 'rxjs';
+import { Observable, of, Subject, map, takeUntil, tap, zip, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -132,7 +132,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       shareReplay()
     );
 
-    this.layoutClass$ = zip(this.shouldRenderDouble$, this.imageFit$).pipe(
+    this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.imageFit$]).pipe(
       takeUntil(this.onDestroy),
       map((value) =>  {
         if (!value[0]) return 'd-none';
