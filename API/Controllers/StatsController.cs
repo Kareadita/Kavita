@@ -79,7 +79,7 @@ public class StatsController : BaseApiController
     }
 
     /// <summary>
-    /// Returns
+    /// Returns users with the top reads in the server
     /// </summary>
     /// <param name="days"></param>
     /// <returns></returns>
@@ -97,6 +97,15 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<IEnumerable<FileExtensionBreakdownDto>>> GetFileSize()
     {
         return Ok(await _statService.GetFileBreakdown());
+    }
+
+
+    [Authorize("RequireAdminRole")]
+    [HttpGet("server/reading-count-by-day")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay()
+    {
+        return Ok(await _statService.ReadCountByDay());
     }
 
 

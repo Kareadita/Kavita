@@ -77,10 +77,10 @@
             <app-stat-list [data$]="releaseYears$" title="Release Years"></app-stat-list>
         </div>
         <div class="col-auto">
-            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users" label="events"></app-stat-list>
+            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users" label="reads"></app-stat-list>
         </div>
         <div class="col-auto">
-            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries" label="events"></app-stat-list>
+            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries" label="reads"></app-stat-list>
         </div>
         <div class="col-auto">
             <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
@@ -100,6 +100,14 @@
         </div>
         <div class="col-md-6 col-sm-12">
             <app-publication-status-stats></app-publication-status-stats>
+        </div>
+    </div>
+    <div class="row g-0 pt-4 pb-2 " style="height: 242px">
+        <div class="col-md-6 col-sm-12">
+            <app-read-by-day-and></app-read-by-day-and>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            
         </div>
     </div>
     

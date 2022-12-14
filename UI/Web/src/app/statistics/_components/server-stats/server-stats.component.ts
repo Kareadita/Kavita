@@ -61,6 +61,7 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       takeUntil(this.onDestroy)
     );
 
+    this.statService.getReadCountByDay().subscribe(d => console.log(d));
     
   }
 

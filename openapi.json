@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.15"
+    "version": "0.6.1.16"
   },
   "servers": [
     {
@@ -7874,7 +7874,7 @@
         "tags": [
           "Stats"
         ],
-        "summary": "Returns",
+        "summary": "Returns users with the top reads in the server",
         "parameters": [
           {
             "name": "days",
@@ -7950,6 +7950,44 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/FileExtensionBreakdownDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/reading-count-by-day": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
                   }
                 }
               }
@@ -10157,6 +10195,25 @@
           "title": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DateTimePagesReadOnADayCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The day of the readings",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of pages read",
+            "format": "int32"
+          },
+          "format": {
+            "$ref": "#/components/schemas/MangaFormat"
           }
         },
         "additionalProperties": false

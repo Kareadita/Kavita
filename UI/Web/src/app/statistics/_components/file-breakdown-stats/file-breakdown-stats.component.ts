@@ -72,8 +72,6 @@ export class FileBreakdownStatsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   ngOnDestroy(): void {

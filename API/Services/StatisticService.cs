@@ -27,6 +27,7 @@ public interface IStatisticService
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
     Task<IEnumerable<ReadHistoryEvent>> GetHistory();
+    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay();
 }
 
 /// <summary>
@@ -310,14 +311,30 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public void ReadCountByDay()
+    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay()
     {
-        // _context.AppUserProgresses
-        //     .GroupBy(p => p.LastModified.Day)
-        //     .Select(g =>
-        //     {
-        //         Day = g.Key,
-        //     })
+        return await _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Join(_context.Chapter, appUserProgresses => appUserProgresses.ChapterId, chapter => chapter.Id,
+                (appUserProgresses, chapter) => new {appUserProgresses, chapter})
+            .Join(_context.Volume, x => x.chapter.VolumeId, volume => volume.Id,
+                (x, volume) => new {x.appUserProgresses, x.chapter, volume})
+            .Join(_context.Series, x => x.appUserProgresses.SeriesId, series => series.Id,
+                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series})
+            .GroupBy(x => new
+            {
+                Day = x.appUserProgresses.LastModified.Date,
+                x.series.Format
+            })
+            .Select(g => new PagesReadOnADayCount<DateTime>
+            {
+                Value = g.Key.Day,
+                Format = g.Key.Format,
+                Count = g.Sum(x => x.appUserProgresses.PagesRead)
+            })
+            .OrderBy(d => d.Value)
+            .ToListAsync();
     }
 
     public Task<IEnumerable<ReadHistoryEvent>> GetHistory()
@@ -329,12 +346,12 @@ public class StatisticService : IStatisticService
         //     .Select(sm => new
         //     {
         //         User = _context.AppUser.Single(u => u.Id == sm.Key),
-        //         Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
-        //             .Where(u => u.AppUserId == sm.Key)
-        //             .Where(p => p.PagesRead > 0)
-        //             .Select(p => p.ChapterId)
-        //             .Distinct()
-        //             .Contains(c.Id))
+        // Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
+        //     .Where(u => u.AppUserId == sm.Key)
+        //     .Where(p => p.PagesRead > 0)
+        //     .Select(p => p.ChapterId)
+        //     .Distinct()
+        //     .Contains(c.Id))
         //     })
         //     .OrderByDescending(d => d.Chapters.Sum(c => c.AvgHoursToRead))
         //     .Take(5)
