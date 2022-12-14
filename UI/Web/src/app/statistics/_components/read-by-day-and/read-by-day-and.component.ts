@@ -26,7 +26,7 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
 
   legend: boolean = true;
   animations: boolean = true;
-  xAxis: boolean = true;
+  xAxis: boolean = false;
   yAxis: boolean = true;
   showYAxisLabel: boolean = true;
   showXAxisLabel: boolean = true;

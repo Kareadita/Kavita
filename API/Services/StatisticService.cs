@@ -324,7 +324,7 @@ public class StatisticService : IStatisticService
                 (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series})
             .GroupBy(x => new
             {
-                Day = x.appUserProgresses.LastModified.Date,
+                Day = x.appUserProgresses.Created.Date,
                 x.series.Format
             })
             .Select(g => new PagesReadOnADayCount<DateTime>
