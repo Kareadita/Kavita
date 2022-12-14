@@ -26,7 +26,7 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
 
   legend: boolean = true;
   animations: boolean = true;
-  xAxis: boolean = false;
+  xAxis: boolean = true;
   yAxis: boolean = true;
   showYAxisLabel: boolean = true;
   showXAxisLabel: boolean = true;
@@ -34,7 +34,6 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
   yAxisLabel: string = 'Reading Events';
   timeline: boolean = true;
 
-  data$!: Observable<Array<LineDataItem>>;
   groupedList: any = [];
 
 
@@ -61,11 +60,9 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
         return formats;
       }, {});
 
-      console.log('gList: ', gList);
       this.groupedList = Object.keys(gList).map(format => {
         return {name: format, value: 0, series: gList[format].series}
       });
-      console.log('grouped list: ', this.groupedList);
     });
 
   }
