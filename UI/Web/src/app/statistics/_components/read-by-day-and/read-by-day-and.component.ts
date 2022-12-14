@@ -31,7 +31,7 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
   showYAxisLabel: boolean = true;
   showXAxisLabel: boolean = true;
   xAxisLabel: string = 'Time';
-  yAxisLabel: string = 'Pages Read';
+  yAxisLabel: string = 'Reading Events';
   timeline: boolean = true;
 
   data$!: Observable<Array<LineDataItem>>;

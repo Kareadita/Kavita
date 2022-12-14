@@ -331,7 +331,7 @@ public class StatisticService : IStatisticService
             {
                 Value = g.Key.Day,
                 Format = g.Key.Format,
-                Count = g.Sum(x => x.appUserProgresses.PagesRead)
+                Count = g.Count()
             })
             .OrderBy(d => d.Value)
             .ToListAsync();
