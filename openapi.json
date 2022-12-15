@@ -7958,10 +7958,23 @@
         }
       }
     },
-    "/api/Stats/server/reading-count-by-day": {
+    "/api/Stats/reading-count-by-day": {
       "get": {
         "tags": [
           "Stats"
+        ],
+        "summary": "Returns reading history events for a give or all users, broken up by day, and format",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If 0, defaults to all users, else just userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
         ],
         "responses": {
           "200": {

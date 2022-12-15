@@ -17,11 +17,11 @@ export class ManagaReaderService {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 
-
   loadPageDimensions(dims: Array<FileDimension>) {
     this.pageDimensions = {};
     let counter = 0;
     let i = 0;
+
     dims.forEach(d => {
       const isWide = (d.width > d.height);
       this.pageDimensions[d.pageNumber] = {
@@ -30,16 +30,22 @@ export class ManagaReaderService {
         isWide: isWide
       };
 
+      //console.log('Page Number: ', d.pageNumber);
+
       if (isWide) {
+        console.log('\tPage is wide, counter: ', counter, 'i: ', i);
         this.pairs[d.pageNumber] = d.pageNumber;
+        //this.pairs[d.pageNumber] = this.pairs[d.pageNumber - 1] + 1;
       } else {
+        //console.log('\tPage is single, counter: ', counter, 'i: ', i);
         this.pairs[d.pageNumber] =  counter % 2 === 0 ? Math.max(i - 1, 0) : counter;
         counter++;
       }
+      //console.log('\t\tMapped to ', this.pairs[d.pageNumber]);
 
       i++;
     });
-    console.log('pairs: ', this.pairs);
+    //console.log('pairs: ', this.pairs);
   }
 
   adjustForDoubleReader(page: number) {

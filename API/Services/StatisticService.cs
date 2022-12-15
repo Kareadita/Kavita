@@ -27,7 +27,7 @@ public interface IStatisticService
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
     Task<IEnumerable<ReadHistoryEvent>> GetHistory();
-    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay();
+    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0);
 }
 
 /// <summary>
@@ -51,7 +51,6 @@ public class StatisticService : IStatisticService
     {
         if (libraryIds.Count == 0)
             libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
-
 
         // Total Pages Read
         var totalPagesRead = await _context.AppUserProgresses
@@ -311,9 +310,9 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay()
+    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0)
     {
-        return await _context.AppUserProgresses
+        var query = _context.AppUserProgresses
             .AsSplitQuery()
             .AsNoTracking()
             .Join(_context.Chapter, appUserProgresses => appUserProgresses.ChapterId, chapter => chapter.Id,
@@ -321,8 +320,14 @@ public class StatisticService : IStatisticService
             .Join(_context.Volume, x => x.chapter.VolumeId, volume => volume.Id,
                 (x, volume) => new {x.appUserProgresses, x.chapter, volume})
             .Join(_context.Series, x => x.appUserProgresses.SeriesId, series => series.Id,
-                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series})
-            .GroupBy(x => new
+                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series});
+
+        if (userId > 0)
+        {
+            query = query.Where(x => x.appUserProgresses.AppUserId == userId);
+        }
+
+        return await query.GroupBy(x => new
             {
                 Day = x.appUserProgresses.Created.Date,
                 x.series.Format

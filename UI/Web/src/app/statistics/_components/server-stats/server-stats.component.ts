@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import { map, Observable, shareReplay, Subject, takeUntil, tap } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Series } from 'src/app/_models/series';
 import { User } from 'src/app/_models/user';
@@ -46,7 +46,7 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
     );
 
     this.mostActiveSeries$ = this.stats$.pipe(
-      map(d => d.mostActiveLibraries),
+      map(d => d.mostReadSeries),
       map(counts => counts.map(count => {
         return {name: count.value.name, value: count.count};
       })),
@@ -60,9 +60,6 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       })),
       takeUntil(this.onDestroy)
     );
-
-    this.statService.getReadCountByDay().subscribe(d => console.log(d));
-    
   }
 
   ngOnInit(): void {
