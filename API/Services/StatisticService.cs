@@ -282,6 +282,7 @@ public class StatisticService : IStatisticService
                     TotalSize = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Sum(mf2 => mf2.Bytes),
                     TotalFiles = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Count()
                 })
+                .OrderBy(d => d.TotalFiles)
                 .ToListAsync(),
             TotalFileSize = await _context.MangaFile
                 .AsNoTracking()

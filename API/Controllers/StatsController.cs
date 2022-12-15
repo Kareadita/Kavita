@@ -91,6 +91,10 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetTopUsers(days));
     }
 
+    /// <summary>
+    /// A breakdown of different files, their size, and format
+    /// </summary>
+    /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpGet("server/file-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]

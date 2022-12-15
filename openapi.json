@@ -7925,6 +7925,7 @@
         "tags": [
           "Stats"
         ],
+        "summary": "A breakdown of different files, their size, and format",
         "responses": {
           "200": {
             "description": "Success",
