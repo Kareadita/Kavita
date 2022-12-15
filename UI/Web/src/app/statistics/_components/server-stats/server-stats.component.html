@@ -72,21 +72,22 @@
         </ng-container>
     </div>
 
-    <div class="grid row g-0 pt-2 pb-2">
+    <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around">
         <div class="col-auto">
-            <app-stat-list [data$]="releaseYears$" title="Release Years"></app-stat-list>
+            <app-stat-list [data$]="releaseYears$" title="Release Years" lable="series"></app-stat-list>
         </div>
         <div class="col-auto">
-            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users" label="events"></app-stat-list>
+            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users" label="reads"></app-stat-list>
         </div>
         <div class="col-auto">
-            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries" label="events"></app-stat-list>
+            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries" label="reads"></app-stat-list>
         </div>
         <div class="col-auto">
-            <app-stat-list [data$]="mostActiveSeries$" title="Popular Series"></app-stat-list>
+            <app-stat-list [data$]="mostActiveSeries$" title="Popular Series" [image]="seriesImage" [handleClick]="openSeries">
+            </app-stat-list>
         </div>
         <div class="col-auto">
-            <app-stat-list [data$]="recentlyRead$" title="Recently Read" [handleClick]="handleRecentlyReadClick"></app-stat-list>
+            <app-stat-list [data$]="recentlyRead$" title="Recently Read" [image]="seriesImage" [handleClick]="openSeries"></app-stat-list>
         </div>
     </div>
 
@@ -94,12 +95,17 @@
         <app-top-readers></app-top-readers>
     </div>
 
-    <div class="row g-0 pt-2 pb-2 " style="height: 242px">
+    <div class="row g-0 pt-4 pb-2" style="height: 242px">
         <div class="col-md-6 col-sm-12">
             <app-file-breakdown-stats></app-file-breakdown-stats>
         </div>
         <div class="col-md-6 col-sm-12">
             <app-publication-status-stats></app-publication-status-stats>
+        </div>
+    </div>
+    <div class="row g-0 pt-4 pb-2 " style="height: 242px">
+        <div class="col-md-12 col-sm-12 mt-4 pt-2">
+            <app-read-by-day-and [isAdmin]="true"></app-read-by-day-and>
         </div>
     </div>
     

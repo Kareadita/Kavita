@@ -47,5 +47,9 @@ export class MemberService {
   removeSeriesToWantToRead(seriesIds: Array<number>) {
     return this.httpClient.post<Array<Member>>(this.baseUrl + 'want-to-read/remove-series', {seriesIds});
   }
+
+  getMember() {
+    return this.httpClient.get<Member>(this.baseUrl + 'users/myself');
+  }
   
 }

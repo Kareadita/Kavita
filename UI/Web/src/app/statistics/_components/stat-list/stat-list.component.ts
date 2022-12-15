@@ -24,6 +24,7 @@ export class StatListComponent {
    */
   @Input() description: string = '';
   @Input() data$!: Observable<PieDataItem[]>;
+  @Input() image: ((data: PieDataItem) => string) | undefined = undefined;
   /**
    * Optional callback handler when an item is clicked
    */

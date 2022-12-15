@@ -79,7 +79,7 @@ public class StatsController : BaseApiController
     }
 
     /// <summary>
-    /// Returns
+    /// Returns users with the top reads in the server
     /// </summary>
     /// <param name="days"></param>
     /// <returns></returns>
@@ -91,6 +91,10 @@ public class StatsController : BaseApiController
         return Ok(await _statService.GetTopUsers(days));
     }
 
+    /// <summary>
+    /// A breakdown of different files, their size, and format
+    /// </summary>
+    /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpGet("server/file-breakdown")]
     [ResponseCache(CacheProfileName = "Statistics")]
@@ -100,11 +104,30 @@ public class StatsController : BaseApiController
     }
 
 
+    /// <summary>
+    /// Returns reading history events for a give or all users, broken up by day, and format
+    /// </summary>
+    /// <param name="userId">If 0, defaults to all users, else just userId</param>
+    /// <returns></returns>
+    [HttpGet("reading-count-by-day")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin && userId != user.Id) return BadRequest();
+
+        return Ok(await _statService.ReadCountByDay(userId));
+    }
+
+
     [HttpGet("user/reading-history")]
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
     {
-        // TODO: Put a check in if the calling user is said userId or has admin
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin && userId != user.Id) return BadRequest();
 
         return Ok(await _statService.GetReadingHistory(userId));
     }

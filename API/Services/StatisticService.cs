@@ -27,6 +27,7 @@ public interface IStatisticService
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
     Task<IEnumerable<ReadHistoryEvent>> GetHistory();
+    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0);
 }
 
 /// <summary>
@@ -50,7 +51,6 @@ public class StatisticService : IStatisticService
     {
         if (libraryIds.Count == 0)
             libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
-
 
         // Total Pages Read
         var totalPagesRead = await _context.AppUserProgresses
@@ -226,19 +226,20 @@ public class StatisticService : IStatisticService
             .OrderByDescending(d => d.Count)
             .Take(5);
 
-        var seriesIds = (await _context.AppUserProgresses
-            .AsSplitQuery()
-            .OrderByDescending(d => d.LastModified)
-            .Select(d => d.SeriesId)
-            .ToListAsync())
-            .Distinct()
+        // Remember: Ordering does not apply if there is a distinct
+        var recentlyRead = _context.AppUserProgresses
+            .Join(_context.Series, p => p.SeriesId, s => s.Id,
+                (appUserProgresses, series) => new
+                {
+                    Series = series,
+                    AppUserProgresses = appUserProgresses
+                })
+            .AsEnumerable()
+            .DistinctBy(s => s.AppUserProgresses.SeriesId)
+            .OrderByDescending(x => x.AppUserProgresses.LastModified)
+            .Select(x => _mapper.Map<SeriesDto>(x.Series))
             .Take(5);
 
-        var recentlyRead = _context.Series
-            .AsSplitQuery()
-            .Where(s => seriesIds.Contains(s.Id))
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .AsEnumerable();
 
         var distinctPeople = _context.Person
             .AsSplitQuery()
@@ -281,6 +282,7 @@ public class StatisticService : IStatisticService
                     TotalSize = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Sum(mf2 => mf2.Bytes),
                     TotalFiles = _context.MangaFile.Where(mf2 => mf2.Extension == mf.Key).Distinct().Count()
                 })
+                .OrderBy(d => d.TotalFiles)
                 .ToListAsync(),
             TotalFileSize = await _context.MangaFile
                 .AsNoTracking()
@@ -310,14 +312,36 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public void ReadCountByDay()
+    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0)
     {
-        // _context.AppUserProgresses
-        //     .GroupBy(p => p.LastModified.Day)
-        //     .Select(g =>
-        //     {
-        //         Day = g.Key,
-        //     })
+        var query = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Join(_context.Chapter, appUserProgresses => appUserProgresses.ChapterId, chapter => chapter.Id,
+                (appUserProgresses, chapter) => new {appUserProgresses, chapter})
+            .Join(_context.Volume, x => x.chapter.VolumeId, volume => volume.Id,
+                (x, volume) => new {x.appUserProgresses, x.chapter, volume})
+            .Join(_context.Series, x => x.appUserProgresses.SeriesId, series => series.Id,
+                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series});
+
+        if (userId > 0)
+        {
+            query = query.Where(x => x.appUserProgresses.AppUserId == userId);
+        }
+
+        return await query.GroupBy(x => new
+            {
+                Day = x.appUserProgresses.Created.Date,
+                x.series.Format
+            })
+            .Select(g => new PagesReadOnADayCount<DateTime>
+            {
+                Value = g.Key.Day,
+                Format = g.Key.Format,
+                Count = g.Count()
+            })
+            .OrderBy(d => d.Value)
+            .ToListAsync();
     }
 
     public Task<IEnumerable<ReadHistoryEvent>> GetHistory()
@@ -329,12 +353,12 @@ public class StatisticService : IStatisticService
         //     .Select(sm => new
         //     {
         //         User = _context.AppUser.Single(u => u.Id == sm.Key),
-        //         Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
-        //             .Where(u => u.AppUserId == sm.Key)
-        //             .Where(p => p.PagesRead > 0)
-        //             .Select(p => p.ChapterId)
-        //             .Distinct()
-        //             .Contains(c.Id))
+        // Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
+        //     .Where(u => u.AppUserId == sm.Key)
+        //     .Where(p => p.PagesRead > 0)
+        //     .Select(p => p.ChapterId)
+        //     .Distinct()
+        //     .Contains(c.Id))
         //     })
         //     .OrderByDescending(d => d.Chapters.Sum(c => c.AvgHoursToRead))
         //     .Take(5)

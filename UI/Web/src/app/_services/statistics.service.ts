@@ -81,4 +81,8 @@ export class StatisticsService {
   getFileBreakdown() {
     return this.httpClient.get<FileExtensionBreakdown>(this.baseUrl + 'stats/server/file-breakdown');
   }
+
+  getReadCountByDay(userId: number = 0) {
+    return this.httpClient.get<Array<any>>(this.baseUrl + 'stats/reading-count-by-day?userId=' + userId);
+  }
 }

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.15"
+    "version": "0.6.1.16"
   },
   "servers": [
     {
@@ -7874,7 +7874,7 @@
         "tags": [
           "Stats"
         ],
-        "summary": "Returns",
+        "summary": "Returns users with the top reads in the server",
         "parameters": [
           {
             "name": "days",
@@ -7925,6 +7925,7 @@
         "tags": [
           "Stats"
         ],
+        "summary": "A breakdown of different files, their size, and format",
         "responses": {
           "200": {
             "description": "Success",
@@ -7950,6 +7951,57 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/FileExtensionBreakdownDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/reading-count-by-day": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns reading history events for a give or all users, broken up by day, and format",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If 0, defaults to all users, else just userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
                   }
                 }
               }
@@ -8525,6 +8577,44 @@
       }
     },
     "/api/Users/pending": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/myself": {
       "get": {
         "tags": [
           "Users"
@@ -10157,6 +10247,25 @@
           "title": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DateTimePagesReadOnADayCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The day of the readings",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of pages read",
+            "format": "int32"
+          },
+          "format": {
+            "$ref": "#/components/schemas/MangaFormat"
           }
         },
         "additionalProperties": false

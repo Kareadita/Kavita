@@ -14,6 +14,7 @@ import { MangaFormatStatsComponent } from './_components/manga-format-stats/mang
 import { FileBreakdownStatsComponent } from './_components/file-breakdown-stats/file-breakdown-stats.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { TopReadersComponent } from './_components/top-readers/top-readers.component';
+import { ReadByDayAndComponent } from './_components/read-by-day-and/read-by-day-and.component';
 
 
 
@@ -26,7 +27,8 @@ import { TopReadersComponent } from './_components/top-readers/top-readers.compo
     PublicationStatusStatsComponent,
     MangaFormatStatsComponent,
     FileBreakdownStatsComponent,
-    TopReadersComponent
+    TopReadersComponent,
+    ReadByDayAndComponent
   ],
   imports: [
     CommonModule,
