@@ -226,19 +226,20 @@ public class StatisticService : IStatisticService
             .OrderByDescending(d => d.Count)
             .Take(5);
 
-        var seriesIds = (await _context.AppUserProgresses
-            .AsSplitQuery()
-            .OrderByDescending(d => d.LastModified)
-            .Select(d => d.SeriesId)
-            .ToListAsync())
-            .Distinct()
+        // Remember: Ordering does not apply if there is a distinct
+        var recentlyRead = _context.AppUserProgresses
+            .Join(_context.Series, p => p.SeriesId, s => s.Id,
+                (appUserProgresses, series) => new
+                {
+                    Series = series,
+                    AppUserProgresses = appUserProgresses
+                })
+            .AsEnumerable()
+            .DistinctBy(s => s.AppUserProgresses.SeriesId)
+            .OrderByDescending(x => x.AppUserProgresses.LastModified)
+            .Select(x => _mapper.Map<SeriesDto>(x.Series))
             .Take(5);
 
-        var recentlyRead = _context.Series
-            .AsSplitQuery()
-            .Where(s => seriesIds.Contains(s.Id))
-            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .AsEnumerable();
 
         var distinctPeople = _context.Person
             .AsSplitQuery()
