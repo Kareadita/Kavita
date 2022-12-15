@@ -24,42 +24,15 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
   @Input() userId: number = 0;
 
   view: [number, number] = [0, 400];
-  gradient: boolean = true;
-  showLegend: boolean = true;
-  showLabels: boolean = true;
-  isDoughnut: boolean = false;
-  legendPosition: LegendPosition = LegendPosition.Right;
-  colorScheme = {
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
-  };
-
-  legend: boolean = true;
-  animations: boolean = true;
-  xAxis: boolean = true;
-  yAxis: boolean = true;
-  showYAxisLabel: boolean = true;
-  showXAxisLabel: boolean = true;
-  xAxisLabel: string = 'Time';
-  yAxisLabel: string = 'Reading Events';
-  timeline: boolean = true;
-
-  groupedList: any = [];
-
   formGroup: FormGroup = new FormGroup({
     'users': new FormControl(-1, []),
   });
   users$: Observable<Member[]>;
   data$: Observable<any>;
-  isAdmin$: Observable<boolean>;
 
   private readonly onDestroy = new Subject<void>();
 
   constructor(private statService: StatisticsService, private memberService: MemberService, private accountService: AccountService) {
-    this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), map(u => {
-      if (!u) return false;
-      return this.accountService.hasAdminRole(u);
-    }));
-
     this.users$ = this.memberService.getMembers().pipe(takeUntil(this.onDestroy), shareReplay());
     this.data$ = this.formGroup.get('users')!.valueChanges.pipe(
       switchMap(uId => this.statService.getReadCountByDay(uId)),
@@ -88,7 +61,6 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.data$.subscribe();
-    this.formGroup.get('users')?.valueChanges.subscribe(d => console.log('form changed', d));
     this.formGroup.get('users')?.setValue(this.userId, {emitValue: true});
     this.accountService.currentUser$.subscribe(u => {
       if (!u || !this.accountService.hasAdminRole(u)) this.formGroup.get('users')?.disable();
