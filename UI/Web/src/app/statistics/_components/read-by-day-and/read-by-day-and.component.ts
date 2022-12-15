@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { LegendPosition } from '@swimlane/ngx-charts';
-import { map, Observable, shareReplay, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { filter, map, Observable, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
 import { Member } from 'src/app/_models/auth/member';
-import { AccountService } from 'src/app/_services/account.service';
 import { MemberService } from 'src/app/_services/member.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
+import { PieDataItem } from '../../_models/pie-data-item';
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 const mangaFormatPipe = new MangaFormatPipe();
@@ -22,19 +21,18 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
    * Only show for one user
    */
   @Input() userId: number = 0;
+  @Input() isAdmin: boolean = true;
 
   view: [number, number] = [0, 400];
   formGroup: FormGroup = new FormGroup({
     'users': new FormControl(-1, []),
   });
-  users$: Observable<Member[]>;
-  data$: Observable<any>;
-
+  users$: Observable<Member[]> | undefined;
+  data$: Observable<Array<PieDataItem>>;
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private statService: StatisticsService, private memberService: MemberService, private accountService: AccountService) {
-    this.users$ = this.memberService.getMembers().pipe(takeUntil(this.onDestroy), shareReplay());
-    this.data$ = this.formGroup.get('users')!.valueChanges.pipe(
+  constructor(private statService: StatisticsService, private memberService: MemberService) {
+    this.data$ = this.formGroup.get('users')!.valueChanges.pipe(      
       switchMap(uId => this.statService.getReadCountByDay(uId)),
       map(data => {
         const gList = data.reduce((formats, entry) => {
@@ -54,18 +52,20 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
           return {name: format, value: 0, series: gList[format].series}
         });
       }),
-      shareReplay(),
       takeUntil(this.onDestroy),
+      shareReplay(),
     );
+    
+    this.data$.subscribe(_ => console.log('hi'));
   }
 
   ngOnInit(): void {
-    this.data$.subscribe();
+    this.users$ = (this.isAdmin ? this.memberService.getMembers() : of([])).pipe(filter(_ => this.isAdmin), takeUntil(this.onDestroy), shareReplay());
     this.formGroup.get('users')?.setValue(this.userId, {emitValue: true});
-    this.accountService.currentUser$.subscribe(u => {
-      if (!u || !this.accountService.hasAdminRole(u)) this.formGroup.get('users')?.disable();
-    });
-    
+
+    if (!this.isAdmin) {
+      this.formGroup.get('users')?.disable();
+    }
   }
 
   ngOnDestroy(): void {
@@ -74,3 +74,4 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
   }
 
 }
+

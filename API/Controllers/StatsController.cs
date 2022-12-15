@@ -111,7 +111,7 @@ public class StatsController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin && userId != user.Id) return Unauthorized();
+        if (!isAdmin && userId != user.Id) return BadRequest();
 
         return Ok(await _statService.ReadCountByDay(userId));
     }
@@ -121,7 +121,9 @@ public class StatsController : BaseApiController
     [ResponseCache(CacheProfileName = "Statistics")]
     public async Task<ActionResult<IEnumerable<ReadHistoryEvent>>> GetReadingHistory(int userId)
     {
-        // TODO: Put a check in if the calling user is said userId or has admin
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin && userId != user.Id) return BadRequest();
 
         return Ok(await _statService.GetReadingHistory(userId));
     }

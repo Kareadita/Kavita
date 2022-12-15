@@ -4,7 +4,7 @@
             <h4>Top Readers</h4>
         </div>
         <div class="col-8">
-            <form [formGroup]="formGroup" class="d-inline-flex float-end">
+            <form [formGroup]="formGroup" class="d-inline-flex float-end" *ngIf="isAdmin">
                 <div class="d-flex">
                     <label for="time-select-read-by-day" class="form-check-label"></label>
                     <select id="time-select-read-by-day" class="form-select" formControlName="users"

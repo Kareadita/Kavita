@@ -1,8 +1,8 @@
-<div class="row g-0 mt-4 mb-3">
+<div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
     <ng-container>
         <div class="col-auto mb-2">
             <app-icon-and-title label="Total Pages Read" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Total Pages Read">
-                {{totalPagesRead | number}}
+                {{totalPagesRead | compactNumber}}
             </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>

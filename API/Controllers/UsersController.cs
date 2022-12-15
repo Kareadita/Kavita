@@ -55,6 +55,13 @@ public class UsersController : BaseApiController
         return Ok(await _unitOfWork.UserRepository.GetPendingMemberDtosAsync());
     }
 
+    [HttpGet("myself")]
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetMyself()
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
+        return Ok(users.Where(u => u.UserName == User.GetUsername()).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
+    }
+
 
     [HttpGet("has-reading-progress")]
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)

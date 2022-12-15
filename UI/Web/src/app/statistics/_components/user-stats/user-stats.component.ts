@@ -7,6 +7,8 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { ReadHistoryEvent } from '../../_models/read-history-event';
+import { MemberService } from 'src/app/_services/member.service';
+import { AccountService } from 'src/app/_services/account.service';
 
 type SeriesWithProgress = Series & {progress: number};
 
@@ -18,49 +20,40 @@ type SeriesWithProgress = Series & {progress: number};
 })
 export class UserStatsComponent implements OnInit, OnDestroy {
 
-  @Input() userId!: number;
-
-  @ViewChildren(SortableHeader) headers!: QueryList<SortableHeader<SeriesWithProgress>>;
-
+  userId: number | undefined = undefined;
   userStats$!: Observable<UserReadStatistics>;
   readSeries$!: Observable<ReadHistoryEvent[]>;
+  isAdmin$: Observable<boolean>;
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(private readonly cdRef: ChangeDetectorRef, private statService: StatisticsService, private seriesService: SeriesService,
-    private filterService: FilterUtilitiesService) { }
+  constructor(private readonly cdRef: ChangeDetectorRef, private statService: StatisticsService, 
+    private filterService: FilterUtilitiesService, private accountService: AccountService, private memberService: MemberService) { 
+      this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), map(u => {
+        if (!u) return false;
+        return this.accountService.hasAdminRole(u);
+      }));
+
+    }
 
   ngOnInit(): void {
     const filter = this.filterService.createSeriesFilter();
     filter.readStatus = {read: true, notRead: false, inProgress: true};
-    this.userStats$ = this.statService.getUserStatistics(this.userId).pipe(takeUntil(this.onDestroy));
-    this.readSeries$ = this.statService.getReadingHistory(this.userId).pipe(
-      takeUntil(this.onDestroy), 
-    );
+    this.memberService.getMember().subscribe(me => {
+      this.userId = me.id;
+      this.cdRef.markForCheck();
+      
+      this.userStats$ = this.statService.getUserStatistics(this.userId).pipe(takeUntil(this.onDestroy));
+      this.readSeries$ = this.statService.getReadingHistory(this.userId).pipe(
+        takeUntil(this.onDestroy), 
+      );
+    });
+    
   }
 
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
   }
-
-  onSort({ column, direction }: SortEvent<SeriesWithProgress>) {
-		// resetting other headers
-		this.headers.forEach((header) => {
-			if (header.sortable !== column) {
-				header.direction = '';
-			}
-		});
-
-		// sorting countries
-		// if (direction === '' || column === '') {
-		// 	this.countries = COUNTRIES;
-		// } else {
-		// 	this.countries = [...COUNTRIES].sort((a, b) => {
-		// 		const res = compare(a[column], b[column]);
-		// 		return direction === 'asc' ? res : -res;
-		// 	});
-		// }
-	}
 
 }

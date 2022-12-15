@@ -28,7 +28,6 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
 
   constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService) {
     this.seriesImage = (data: PieDataItem) => {
-      console.log(data.extra);
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
       return '';      
     }
