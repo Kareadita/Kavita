@@ -349,7 +349,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get SplitIconClass() {
-    // NOTE: This could be rewritten to valueChanges.pipe(map()) and | async in the UI instead of the getter
+    // TODO: make this a pipe
     if (this.mangaReaderService.isSplitLeftToRight(this.pageSplitOption)) {
       return 'left-side';
     } else if (this.mangaReaderService.isNoSplit(this.pageSplitOption)) {
@@ -593,7 +593,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       pageSplit: parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10),
       fitting: (this.generalSettingsForm.get('fittingOption')?.value as FITTING_OPTION),
       layoutMode: this.layoutMode,
-      darkness: 100,
+      darkness: parseInt(this.generalSettingsForm.get('darkness')?.value + '', 10) || 100,
       pagingDirection: this.pagingDirection,
       readerMode: this.readerMode,
       emulateBook: this.generalSettingsForm.get('emulateBook')?.value,
