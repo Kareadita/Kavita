@@ -830,36 +830,42 @@ public class BookService : IBookService
 
 
         var bookPages = await book.GetReadingOrderAsync();
-        foreach (var contentFileRef in bookPages)
+        try
         {
-            if (page != counter)
+            foreach (var contentFileRef in bookPages)
             {
-                counter++;
-                continue;
-            }
-
-            var content = await contentFileRef.ReadContentAsync();
-            if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
-
-            // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
-            content = BookService.EscapeTags(content);
-
-            doc.LoadHtml(content);
-            var body = doc.DocumentNode.SelectSingleNode("//body");
-
-            if (body == null)
-            {
-                if (doc.ParseErrors.Any())
+                if (page != counter)
                 {
-                    LogBookErrors(book, contentFileRef, doc);
-                    throw new KavitaException("The file is malformed! Cannot read.");
+                    counter++;
+                    continue;
                 }
-                _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
-                doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
-                body = doc.DocumentNode.SelectSingleNode("/html/body");
-            }
 
-            return await ScopePage(doc, book, apiBase, body, mappings, page);
+                var content = await contentFileRef.ReadContentAsync();
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
+
+                // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
+                content = BookService.EscapeTags(content);
+
+                doc.LoadHtml(content);
+                var body = doc.DocumentNode.SelectSingleNode("//body");
+
+                if (body == null)
+                {
+                    if (doc.ParseErrors.Any())
+                    {
+                        LogBookErrors(book, contentFileRef, doc);
+                        throw new KavitaException("The file is malformed! Cannot read.");
+                    }
+                    _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+                    doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+                    body = doc.DocumentNode.SelectSingleNode("/html/body");
+                }
+
+                return await ScopePage(doc, book, apiBase, body, mappings, page);
+            }
+        } catch (Exception ex)
+        {
+              _logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
         }
 
         throw new KavitaException("Could not find the appropriate html for that page");
