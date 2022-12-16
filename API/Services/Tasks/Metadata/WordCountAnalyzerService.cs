@@ -196,8 +196,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                             return;
                         }
 
-                        file.LastFileAnalysis = DateTime.Now;
-                        _unitOfWork.MangaFileRepository.Update(file);
+                        UpdateFileAnalysis(file);
                     }
 
                     chapter.WordCount = sum;
@@ -211,8 +210,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 chapter.AvgHoursToRead = est.AvgHours;
                 foreach (var file in chapter.Files)
                 {
-                    file.LastFileAnalysis = DateTime.Now;
-                    _unitOfWork.MangaFileRepository.Update(file);
+                    UpdateFileAnalysis(file);
                 }
                 _unitOfWork.ChapterRepository.Update(chapter);
             }
@@ -231,6 +229,12 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         series.MaxHoursToRead = seriesEstimate.MaxHours;
         series.AvgHoursToRead = seriesEstimate.AvgHours;
         _unitOfWork.SeriesRepository.Update(series);
+    }
+
+    private void UpdateFileAnalysis(MangaFile file)
+    {
+        file.LastFileAnalysis = DateTime.Now;
+        _unitOfWork.MangaFileRepository.Update(file);
     }
 
 
