@@ -239,16 +239,10 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         var doc = new HtmlDocument();
         doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
 
-        var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
-        if (textNodes == null) return 0;
-
-        return textNodes
+        return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
+            .DefaultIfEmpty()
             .Select(node => node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
-            .Select(words => words.Count())
-            .Where(wordCount => wordCount > 0)
-            .Sum();
+            .Sum(words => words.Count());
     }
-
-
 }

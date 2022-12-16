@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Services;
 using BenchmarkDotNet.Attributes;
@@ -9,34 +10,58 @@ using VersOne.Epub;
 
 namespace API.Benchmark;
 
+[StopOnFirstError]
 [MemoryDiagnoser]
-[Orderer(SummaryOrderPolicy.FastestToSlowest)]
 [RankColumn]
-[SimpleJob(launchCount: 1, warmupCount: 3, targetCount: 5, invocationCount: 100, id: "Epub"), ShortRunJob]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[SimpleJob(launchCount: 1, warmupCount: 5, targetCount: 20)]
 public class EpubBenchmark
 {
+    private const string FilePath = @"E:\Books\Invaders of the Rokujouma\Invaders of the Rokujouma - Volume 01.epub";
+    private readonly Regex WordRegex = new Regex(@"\b\w+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    // [Benchmark]
+    // public async Task GetWordCount_PassByString()
+    // {
+    //     using var book = await EpubReader.OpenBookAsync(FilePath, BookService.BookReaderOptions);
+    //     foreach (var bookFile in book.Content.Html.Values)
+    //     {
+    //         GetBookWordCount_PassByString(await bookFile.ReadContentAsTextAsync());
+    //         ;
+    //     }
+    // }
+
     [Benchmark]
-    public static async Task GetWordCount_PassByString()
+    public async Task GetWordCount_PassByRef()
     {
-        using var book = await EpubReader.OpenBookAsync("Data/book-test.epub", BookService.BookReaderOptions);
+        using var book = await EpubReader.OpenBookAsync(FilePath, BookService.BookReaderOptions);
         foreach (var bookFile in book.Content.Html.Values)
         {
-            Console.WriteLine(GetBookWordCount_PassByString(await bookFile.ReadContentAsTextAsync()));
-            ;
+            await GetBookWordCount_PassByRef(bookFile);
         }
     }
 
     [Benchmark]
-    public static async Task GetWordCount_PassByRef()
+    public async Task GetBookWordCount_SumEarlier()
     {
-        using var book = await EpubReader.OpenBookAsync("Data/book-test.epub", BookService.BookReaderOptions);
+        using var book = await EpubReader.OpenBookAsync(FilePath, BookService.BookReaderOptions);
         foreach (var bookFile in book.Content.Html.Values)
         {
-            Console.WriteLine(await GetBookWordCount_PassByRef(bookFile));
+            await GetBookWordCount_SumEarlier(bookFile);
         }
     }
 
-    private static int GetBookWordCount_PassByString(string fileContents)
+    [Benchmark]
+    public async Task GetBookWordCount_Regex()
+    {
+        using var book = await EpubReader.OpenBookAsync(FilePath, BookService.BookReaderOptions);
+        foreach (var bookFile in book.Content.Html.Values)
+        {
+            await GetBookWordCount_Regex(bookFile);
+        }
+    }
+
+    private int GetBookWordCount_PassByString(string fileContents)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(fileContents);
@@ -51,7 +76,7 @@ public class EpubBenchmark
             .Sum();
     }
 
-    private static async Task<int> GetBookWordCount_PassByRef(EpubContentFileRef bookFile)
+    private async Task<int> GetBookWordCount_PassByRef(EpubContentFileRef bookFile)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
@@ -64,5 +89,28 @@ public class EpubBenchmark
             .Select(words => words.Count())
             .Where(wordCount => wordCount > 0)
             .Sum();
+    }
+
+    private async Task<int> GetBookWordCount_SumEarlier(EpubContentFileRef bookFile)
+    {
+        var doc = new HtmlDocument();
+        doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
+        var delimiter = new char[] {' '};
+
+        return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
+            .Select(node => node.InnerText)
+            .Select(text => text.Split(delimiter, StringSplitOptions.RemoveEmptyEntries)
+                .Where(s => char.IsLetter(s[0])))
+            .Sum(words => words.Count());
+    }
+
+    private async Task<int> GetBookWordCount_Regex(EpubContentFileRef bookFile)
+    {
+        var doc = new HtmlDocument();
+        doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
+
+
+        return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
+            .Sum(node => WordRegex.Matches(node.InnerText).Count);
     }
 }

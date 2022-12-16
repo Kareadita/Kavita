@@ -49,7 +49,7 @@ public interface IBookService
     /// <summary>
     /// Extracts a PDF file's pages as images to an target directory
     /// </summary>
-    /// <remarks>This method relies on Docnet which has explict patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
+    /// <remarks>This method relies on Docnet which has explicit patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
     /// <param name="fileFilePath"></param>
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
@@ -401,7 +401,7 @@ public class BookService : IBookService
         {
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
             var publicationDate =
-                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(date => date.Event == "publication")?.Date;
+                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(pDate => pDate.Event == "publication")?.Date;
 
             if (string.IsNullOrEmpty(publicationDate))
             {
@@ -533,7 +533,7 @@ public class BookService : IBookService
         return 0;
     }
 
-    public static string EscapeTags(string content)
+    private static string EscapeTags(string content)
     {
         content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>");
         content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>");
@@ -872,8 +872,8 @@ public class BookService : IBookService
         throw new KavitaException("Could not find the appropriate html for that page");
     }
 
-    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters, IList<BookChapterItem> chaptersList,
-        IReadOnlyDictionary<string, int> mappings)
+    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
+        ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
     {
         if (navigationItem.Link == null)
         {
