@@ -865,7 +865,8 @@ public class BookService : IBookService
             }
         } catch (Exception ex)
         {
-              _logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
+            // NOTE: We can log this to media analysis service
+            _logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
         }
 
         throw new KavitaException("Could not find the appropriate html for that page");
