@@ -82,8 +82,9 @@ public class EpubBenchmark
         doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
         var delimiter = new char[] {' '};
 
-        return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
-            .Select(node => node.InnerText)
+        var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
+        if (textNodes == null) return 0;
+        return textNodes.Select(node => node.InnerText)
             .Select(text => text.Split(delimiter, StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
             .Select(words => words.Count())
@@ -95,11 +96,10 @@ public class EpubBenchmark
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
-        var delimiter = new char[] {' '};
 
         return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
-            .Select(node => node.InnerText)
-            .Select(text => text.Split(delimiter, StringSplitOptions.RemoveEmptyEntries)
+            .DefaultIfEmpty()
+            .Select(node => node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
             .Sum(words => words.Count());
     }
