@@ -25,6 +25,7 @@ public interface IUnitOfWork
     ISiteThemeRepository SiteThemeRepository { get; }
     IMangaFileRepository MangaFileRepository { get; }
     IDeviceRepository DeviceRepository { get; }
+    IMediaErrorRepository MediaErrorRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -62,6 +63,7 @@ public class UnitOfWork : IUnitOfWork
     public ISiteThemeRepository SiteThemeRepository => new SiteThemeRepository(_context, _mapper);
     public IMangaFileRepository MangaFileRepository => new MangaFileRepository(_context);
     public IDeviceRepository DeviceRepository => new DeviceRepository(_context, _mapper);
+    public IMediaErrorRepository MediaErrorRepository => new MediaErrorRepository(_context, _mapper);
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.
