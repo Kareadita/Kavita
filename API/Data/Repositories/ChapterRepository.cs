@@ -52,7 +52,7 @@ public class ChapterRepository : IChapterRepository
         _context.Entry(chapter).State = EntityState.Modified;
     }
 
-    public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes)
+    public async Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None)
     {
         return await _context.Chapter
             .Where(c => chapterIds.Contains(c.Id))

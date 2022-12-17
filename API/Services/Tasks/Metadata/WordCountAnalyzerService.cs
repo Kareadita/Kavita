@@ -196,8 +196,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                             return;
                         }
 
-                        file.LastFileAnalysis = DateTime.Now;
-                        _unitOfWork.MangaFileRepository.Update(file);
+                        UpdateFileAnalysis(file);
                     }
 
                     chapter.WordCount = sum;
@@ -211,8 +210,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 chapter.AvgHoursToRead = est.AvgHours;
                 foreach (var file in chapter.Files)
                 {
-                    file.LastFileAnalysis = DateTime.Now;
-                    _unitOfWork.MangaFileRepository.Update(file);
+                    UpdateFileAnalysis(file);
                 }
                 _unitOfWork.ChapterRepository.Update(chapter);
             }
@@ -233,22 +231,22 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         _unitOfWork.SeriesRepository.Update(series);
     }
 
+    private void UpdateFileAnalysis(MangaFile file)
+    {
+        file.LastFileAnalysis = DateTime.Now;
+        _unitOfWork.MangaFileRepository.Update(file);
+    }
+
 
     private static async Task<int> GetWordCountFromHtml(EpubContentFileRef bookFile)
     {
         var doc = new HtmlDocument();
         doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
 
-        var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
-        if (textNodes == null) return 0;
-
-        return textNodes
+        return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
+            .DefaultIfEmpty()
             .Select(node => node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
-            .Select(words => words.Count())
-            .Where(wordCount => wordCount > 0)
-            .Sum();
+            .Sum(words => words.Count());
     }
-
-
 }

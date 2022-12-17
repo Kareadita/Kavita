@@ -49,7 +49,7 @@ public interface IBookService
     /// <summary>
     /// Extracts a PDF file's pages as images to an target directory
     /// </summary>
-    /// <remarks>This method relies on Docnet which has explict patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
+    /// <remarks>This method relies on Docnet which has explicit patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
     /// <param name="fileFilePath"></param>
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
@@ -401,7 +401,7 @@ public class BookService : IBookService
         {
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
             var publicationDate =
-                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(date => date.Event == "publication")?.Date;
+                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(pDate => pDate.Event == "publication")?.Date;
 
             if (string.IsNullOrEmpty(publicationDate))
             {
@@ -533,7 +533,7 @@ public class BookService : IBookService
         return 0;
     }
 
-    public static string EscapeTags(string content)
+    private static string EscapeTags(string content)
     {
         content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>");
         content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>");
@@ -830,43 +830,50 @@ public class BookService : IBookService
 
 
         var bookPages = await book.GetReadingOrderAsync();
-        foreach (var contentFileRef in bookPages)
+        try
         {
-            if (page != counter)
+            foreach (var contentFileRef in bookPages)
             {
-                counter++;
-                continue;
-            }
-
-            var content = await contentFileRef.ReadContentAsync();
-            if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
-
-            // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
-            content = BookService.EscapeTags(content);
-
-            doc.LoadHtml(content);
-            var body = doc.DocumentNode.SelectSingleNode("//body");
-
-            if (body == null)
-            {
-                if (doc.ParseErrors.Any())
+                if (page != counter)
                 {
-                    LogBookErrors(book, contentFileRef, doc);
-                    throw new KavitaException("The file is malformed! Cannot read.");
+                    counter++;
+                    continue;
                 }
-                _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
-                doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
-                body = doc.DocumentNode.SelectSingleNode("/html/body");
-            }
 
-            return await ScopePage(doc, book, apiBase, body, mappings, page);
+                var content = await contentFileRef.ReadContentAsync();
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
+
+                // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
+                content = BookService.EscapeTags(content);
+
+                doc.LoadHtml(content);
+                var body = doc.DocumentNode.SelectSingleNode("//body");
+
+                if (body == null)
+                {
+                    if (doc.ParseErrors.Any())
+                    {
+                        LogBookErrors(book, contentFileRef, doc);
+                        throw new KavitaException("The file is malformed! Cannot read.");
+                    }
+                    _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+                    doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+                    body = doc.DocumentNode.SelectSingleNode("/html/body");
+                }
+
+                return await ScopePage(doc, book, apiBase, body, mappings, page);
+            }
+        } catch (Exception ex)
+        {
+            // NOTE: We can log this to media analysis service
+            _logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
         }
 
         throw new KavitaException("Could not find the appropriate html for that page");
     }
 
-    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters, IList<BookChapterItem> chaptersList,
-        IReadOnlyDictionary<string, int> mappings)
+    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
+        ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
     {
         if (navigationItem.Link == null)
         {

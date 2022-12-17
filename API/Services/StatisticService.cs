@@ -26,7 +26,6 @@ public interface IStatisticService
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
-    Task<IEnumerable<ReadHistoryEvent>> GetHistory();
     Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0);
 }
 
@@ -70,20 +69,6 @@ public class StatisticService : IStatisticService
         var timeSpentReading = await _context.Chapter
             .Where(c => chapterIds.Contains(c.Id))
             .SumAsync(c => c.AvgHoursToRead);
-
-        // Maybe make this top 5 genres? But usually there are 3-5 genres that are always common...
-        // Maybe use rating to calculate top genres?
-        // var genres = await _context.Series
-        //     .Where(s => seriesIds.Contains(s.Id))
-        //     .Select(s => s.Metadata)
-        //     .SelectMany(sm => sm.Genres)
-        //     //.DistinctBy(g => g.NormalizedTitle)
-        //     .ToListAsync();
-
-        // How many series of each format have you read? (Epub, Archive, etc)
-
-        // Percentage of libraries read. For each library, get the total pages vs read
-        //var allLibraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
 
         var chaptersRead = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
@@ -343,43 +328,6 @@ public class StatisticService : IStatisticService
             .OrderBy(d => d.Value)
             .ToListAsync();
     }
-
-    public Task<IEnumerable<ReadHistoryEvent>> GetHistory()
-    {
-        // _context.AppUserProgresses
-        //     .AsSplitQuery()
-        //     .AsEnumerable()
-        //     .GroupBy(sm => sm.LastModified)
-        //     .Select(sm => new
-        //     {
-        //         User = _context.AppUser.Single(u => u.Id == sm.Key),
-        // Chapters = _context.Chapter.Where(c => _context.AppUserProgresses
-        //     .Where(u => u.AppUserId == sm.Key)
-        //     .Where(p => p.PagesRead > 0)
-        //     .Select(p => p.ChapterId)
-        //     .Distinct()
-        //     .Contains(c.Id))
-        //     })
-        //     .OrderByDescending(d => d.Chapters.Sum(c => c.AvgHoursToRead))
-        //     .Take(5)
-        //     .ToList();
-
-        var firstOfWeek = DateTime.Now.StartOfWeek(DayOfWeek.Monday);
-        var groupedReadingDays = _context.AppUserProgresses
-            .Where(x => x.LastModified >= firstOfWeek)
-            .GroupBy(x => x.LastModified.Day)
-            .Select(g => new StatCount<int>()
-            {
-                Value = g.Key,
-                Count = _context.AppUserProgresses.Where(p => p.LastModified.Day == g.Key).Select(p => p.ChapterId).Distinct().Count()
-            })
-            .AsEnumerable();
-
-        // var records = firstOfWeek.Range(7)
-        //     .GroupJoin(groupedReadingDays, wd => wd.Day, lg => lg.Key, (_, lg) => lg.Any() ? lg.First().Count() : 0).ToArray();
-        return Task.FromResult<IEnumerable<ReadHistoryEvent>>(null);
-    }
-
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)
     {

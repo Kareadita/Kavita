@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs;
 
@@ -19,4 +20,8 @@ public class ProgressDto
     /// on pages that combine multiple "chapters".
     /// </summary>
     public string BookScrollId { get; set; }
+    /// <summary>
+    /// Last time the progress was synced from UI or external app
+    /// </summary>
+    public DateTime LastModified { get; set; }
 }

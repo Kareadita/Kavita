@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using NetVips;
 using SixLabors.ImageSharp;
 using Image = NetVips.Image;
 
@@ -113,15 +114,15 @@ public class ImageService : IImageService
         return filename;
     }
 
-    public async Task<string> ConvertToWebP(string filePath, string outputPath)
+    public Task<string> ConvertToWebP(string filePath, string outputPath)
     {
         var file = _directoryService.FileSystem.FileInfo.FromFileName(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + ".webp");
 
-        using var sourceImage = await SixLabors.ImageSharp.Image.LoadAsync(filePath);
-        await sourceImage.SaveAsWebpAsync(outputFile);
-        return outputFile;
+        using var sourceImage = Image.NewFromFile(filePath, false, Enums.Access.SequentialUnbuffered);
+        sourceImage.WriteToFile(outputFile);
+        return Task.FromResult(outputFile);
     }
 
     public async Task<bool> IsImage(string filePath)
