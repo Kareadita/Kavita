@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.17"
+    "version": "0.6.1.18"
   },
   "servers": [
     {
@@ -11431,6 +11431,11 @@
             "type": "string",
             "description": "For Book reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "Last time the progress was synced from UI or external app",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
