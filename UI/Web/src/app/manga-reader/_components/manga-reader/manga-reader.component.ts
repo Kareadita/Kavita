@@ -631,8 +631,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns 
    */
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
-    let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum 
-      || !this.bookmarkMode
+
+    let img = undefined;
+    if (this.bookmarkMode) img =  this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
+    else img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum 
       && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
     );
     if (!img || forceNew) {
