@@ -282,6 +282,10 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   }
   reset(): void {}
 
+  getBookmarkPageCount(): number {
+    return this.shouldRenderDouble() ? 2 : 1;
+  }
+
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
 
