@@ -13157,6 +13157,20 @@
         },
         "additionalProperties": false
       },
+      "SingleStatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "format": "float"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SiteTheme": {
         "type": "object",
         "properties": {
@@ -13263,20 +13277,6 @@
         },
         "additionalProperties": false,
         "description": "Sorting Options for a query"
-      },
-      "StringInt64Tuple": {
-        "type": "object",
-        "properties": {
-          "item1": {
-            "type": "string",
-            "nullable": true
-          },
-          "item2": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
       },
       "Tag": {
         "type": "object",
@@ -14145,14 +14145,6 @@
             "description": "Total time spent reading based on estimates",
             "format": "int64"
           },
-          "favoriteGenres": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/StringInt64Tuple"
-            },
-            "description": "A list of genres mapped with genre and number of series that fall into said genre",
-            "nullable": true
-          },
           "chaptersRead": {
             "type": "integer",
             "format": "int64"
@@ -14162,8 +14154,15 @@
             "format": "date-time"
           },
           "avgHoursPerWeekSpentReading": {
-            "type": "integer",
-            "format": "int64"
+            "type": "number",
+            "format": "double"
+          },
+          "percentReadPerLibrary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleStatCount"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

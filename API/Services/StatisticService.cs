@@ -81,7 +81,34 @@ public class StatisticService : IStatisticService
             .Select(p => p.LastModified)
             .FirstOrDefaultAsync();
 
-        //var
+        // Reading Progress by Library Name
+
+        // First get the total pages per library
+        var totalPageCountByLibrary = _context.Chapter
+            .Join(_context.Volume, c => c.VolumeId, v => v.Id, (chapter, volume) => new { chapter, volume })
+            .Join(_context.Series, g => g.volume.SeriesId, s => s.Id, (g, series) => new { g.chapter, series })
+            .AsEnumerable()
+            .GroupBy(g => g.series.LibraryId)
+            .ToDictionary(g => g.Key, g => g.Sum(c => c.chapter.Pages));
+        //
+        //
+        var totalProgressByLibrary = await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Where(p => p.LibraryId > 0)
+            .GroupBy(p => p.LibraryId)
+            .Select(g => new StatCount<float>
+            {
+                Count = g.Key,
+                Value = g.Sum(p => p.PagesRead) / (float) totalPageCountByLibrary[g.Key]
+            })
+            .ToListAsync();
+
+
+        var averageReadingTimePerWeek = _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
+                (p, c) => (p.PagesRead / c.Pages) * c.AvgHoursToRead)
+            .Average() / 7;
 
         return new UserReadStatistics()
         {
@@ -89,6 +116,8 @@ public class StatisticService : IStatisticService
             TimeSpentReading = timeSpentReading,
             ChaptersRead = chaptersRead,
             LastActive = lastActive,
+            PercentReadPerLibrary = totalProgressByLibrary,
+            AvgHoursPerWeekSpentReading = averageReadingTimePerWeek
         };
     }
 
