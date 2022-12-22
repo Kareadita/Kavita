@@ -26,7 +26,7 @@ public interface IStatisticService
     Task<FileExtensionBreakdownDto> GetFileBreakdown();
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
-    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0);
+    Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0);
 }
 
 /// <summary>
@@ -326,7 +326,7 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0)
+    public async Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0)
     {
         var query = _context.AppUserProgresses
             .AsSplitQuery()
@@ -343,7 +343,13 @@ public class StatisticService : IStatisticService
             query = query.Where(x => x.appUserProgresses.AppUserId == userId);
         }
 
-        return await query.GroupBy(x => new
+        if (days > 0)
+        {
+            var date = DateTime.Now.AddDays(days * -1);
+            query = query.Where(x => x.appUserProgresses.LastModified >= date && x.appUserProgresses.Created >= date);
+        }
+
+        var results = await query.GroupBy(x => new
             {
                 Day = x.appUserProgresses.Created.Date,
                 x.series.Format
@@ -356,6 +362,23 @@ public class StatisticService : IStatisticService
             })
             .OrderBy(d => d.Value)
             .ToListAsync();
+
+        if (results.Count > 0)
+        {
+            var minDay = results.Min(d => d.Value);
+            for (var date = minDay; date < DateTime.Now; date = date.AddDays(1))
+            {
+                if (results.Any(d => d.Value == date)) continue;
+                results.Add(new PagesReadOnADayCount<DateTime>()
+                {
+                    Format = MangaFormat.Unknown,
+                    Value = date,
+                    Count = 0
+                });
+            }
+        }
+
+        return results;
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)

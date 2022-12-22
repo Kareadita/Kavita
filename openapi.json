@@ -7975,6 +7975,16 @@
               "format": "int32",
               "default": 0
             }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "If 0, defaults to all time, else just those days asked for",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
           }
         ],
         "responses": {

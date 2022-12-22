@@ -108,16 +108,17 @@ public class StatsController : BaseApiController
     /// Returns reading history events for a give or all users, broken up by day, and format
     /// </summary>
     /// <param name="userId">If 0, defaults to all users, else just userId</param>
+    /// <param name="days">If 0, defaults to all time, else just those days asked for</param>
     /// <returns></returns>
     [HttpGet("reading-count-by-day")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0)
+    public async Task<ActionResult<IEnumerable<PagesReadOnADayCount<DateTime>>>> ReadCountByDay(int userId = 0, int days = 0)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         if (!isAdmin && userId != user.Id) return BadRequest();
 
-        return Ok(await _statService.ReadCountByDay(userId));
+        return Ok(await _statService.ReadCountByDay(userId, days));
     }
 
 
