@@ -535,8 +535,8 @@ public class BookService : IBookService
 
     private static string EscapeTags(string content)
     {
-        content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>");
-        content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>");
+        content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
         return content;
     }
 
@@ -995,12 +995,12 @@ public class BookService : IBookService
         }
 
         // Remove comments from CSS
-        body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty);
+        body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty, RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
 
-        body = Regex.Replace(body, @"[a-zA-Z]+#", "#");
-        body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty);
-        body = Regex.Replace(body, @"\s+", " ");
-        body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1");
+        body = Regex.Replace(body, @"[a-zA-Z]+#", "#", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty, RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"\s+", " ", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
         try
         {
             body = body.Replace(";}", "}");
@@ -1010,7 +1010,7 @@ public class BookService : IBookService
             //Swallow exception. Some css don't have style rules ending in ';'
         }
 
-        body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1");
+        body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
 
 
         return body;

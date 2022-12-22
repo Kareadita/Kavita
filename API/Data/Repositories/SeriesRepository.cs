@@ -322,7 +322,7 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var justYear = Regex.Match(searchQuery, @"\d{4}").Value;
+        var justYear = Regex.Match(searchQuery, @"\d{4}", RegexOptions.None, Services.Tasks.Scanner.Parser.Parser.RegexTimeout).Value;
         var hasYearInQuery = !string.IsNullOrEmpty(justYear);
         var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
 
