@@ -13,7 +13,7 @@ import { TopUserRead } from '../../_models/top-reads';
 export class TopReadersComponent implements OnInit, OnDestroy {
 
   formGroup: FormGroup;
-  timePeriods: Array<{title: string, value: number}> = [{title: 'Last 7 Days', value: 7}, {title: 'Last 30 Days', value: 30}, {title: 'Last 90 Days', value: 90}, {title: 'Last Year', value: 365}, {title: 'All Time', value: 0}];
+  timePeriods: Array<{title: string, value: number}> = [{title: 'This Week', value: new Date().getDay() || 1}, {title: 'Last 7 Days', value: 7}, {title: 'Last 30 Days', value: 30}, {title: 'Last 90 Days', value: 90}, {title: 'Last Year', value: 365}, {title: 'All Time', value: 0}];
 
   users$: Observable<TopUserRead[]>;
   private readonly onDestroy = new Subject<void>();
