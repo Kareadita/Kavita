@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
-import { UtilityService } from '../shared/_services/utility.service';
+import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from '../typeahead/_models/typeahead-settings';
 import { CollectionTag } from '../_models/collection-tag';
 import { Genre } from '../_models/metadata/genre';
@@ -630,6 +630,11 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   apply() {
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
     this.updateApplied++;
+    
+    if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile) {
+      this.toggleSelected();
+    }
+    
     this.cdRef.markForCheck();
   }
 
