@@ -251,4 +251,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     this.imageHeight.emit(this.canvas.nativeElement.height);
     this.cdRef.markForCheck();
   }
+
+  getBookmarkPageCount(): number {
+    return 1;
+  }
 }

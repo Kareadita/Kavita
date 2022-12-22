@@ -55,4 +55,8 @@ export interface ImageRenderer {
      * This should reset any needed state, but not unset the image.
      */
     reset(): void;
+    /**
+     * Returns the number of pages that are currently rendererd on screen and thus should be bookmarked.
+     */
+    getBookmarkPageCount(): number;
 }

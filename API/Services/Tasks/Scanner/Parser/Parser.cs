@@ -911,7 +911,7 @@ public static class Parser
     {
         try
         {
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$"))
+            if (!Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
             {
                 return (float) 0.0;
             }
@@ -929,7 +929,7 @@ public static class Parser
     {
         try
         {
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$"))
+            if (!Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
             {
                 return (float) 0.0;
             }

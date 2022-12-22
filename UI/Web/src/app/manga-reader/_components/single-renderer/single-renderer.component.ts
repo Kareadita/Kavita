@@ -143,4 +143,8 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return 1;
   }
   reset(): void {}
+
+  getBookmarkPageCount(): number {
+    return 1;
+  }
 }

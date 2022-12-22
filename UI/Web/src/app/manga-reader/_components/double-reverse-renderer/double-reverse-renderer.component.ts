@@ -296,6 +296,10 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   }
   reset(): void {}
 
+  getBookmarkPageCount(): number {
+    return this.shouldRenderDouble() ? 2 : 1;
+  }
+
   debugLog(message: string, extraData?: any) {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
 

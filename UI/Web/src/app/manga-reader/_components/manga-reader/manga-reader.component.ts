@@ -627,11 +627,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Gets a page from cache else gets a brand new Image
    * @param pageNum Page Number to load
    * @param forceNew Forces to fetch a new image
-   * @param chapterId ChapterId to fetch page from. Defaults to current chapterId
+   * @param chapterId ChapterId to fetch page from. Defaults to current chapterId. Not used when in bookmark mode
    * @returns 
    */
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
-    let img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum 
+
+    let img = undefined;
+    if (this.bookmarkMode) img =  this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
+    else img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum 
       && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
     );
     if (!img || forceNew) {
@@ -1273,7 +1276,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.bookmarkMode) return;
 
     const pageNum = this.pageNum;
-    const isDouble = this.layoutMode === LayoutMode.Double || this.layoutMode === LayoutMode.DoubleReversed;
+    const isDouble = Math.max(this.canvasRenderer.getBookmarkPageCount(), this.singleRenderer.getBookmarkPageCount(), 
+      this.doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer.getBookmarkPageCount()) > 1;
 
     if (this.CurrentPageBookmarked) {
       let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
