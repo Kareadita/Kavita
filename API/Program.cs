@@ -173,7 +173,25 @@ public class Program
             {
                 webBuilder.UseKestrel((opts) =>
                 {
-                    opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                    var ipAddresses = Configuration.IpAddresses;
+                    if (ipAddresses == null || ipAddresses.Length == 0)
+                    {
+                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                    }
+                    else
+                    {
+                        foreach(var ipAddress in ipAddresses.Split(','))
+                        {
+                            try {
+                                var address = System.Net.IPAddress.Parse(ipAddress.Trim());
+                                opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                            }
+                            catch(Exception ex)
+                            {
+                                Log.Fatal(ex, "Could not parse ip addess '{0}'", ipAddress);
+                            }
+                        }
+                    }
                 });
 
                 webBuilder.UseStartup<Startup>();

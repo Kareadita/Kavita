@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 
 namespace API.Entities.Enums;
@@ -105,4 +105,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("ConvertCoverToWebP")]
     ConvertCoverToWebP = 19,
+    /// <summary>
+    /// Ip addresses the server listens on. Not managed in DB. Managed in appsettings.json and synced to DB.
+    /// </summary>
+    [Description("IpAddresses")]
+    IpAddresses = 20,
 }

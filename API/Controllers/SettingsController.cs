@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -142,6 +142,14 @@ public class SettingsController : BaseApiController
                 setting.Value = updateSettingsDto.Port + string.Empty;
                 // Port is managed in appSetting.json
                 Configuration.Port = updateSettingsDto.Port;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
+            {
+                setting.Value = updateSettingsDto.IpAddresses;
+                // IpAddesses is managed in appSetting.json
+                Configuration.IpAddresses = updateSettingsDto.IpAddresses;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

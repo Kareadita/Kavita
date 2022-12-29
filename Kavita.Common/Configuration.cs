@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -15,6 +15,12 @@ public static class Configuration
     {
         get => GetPort(GetAppSettingFilename());
         set => SetPort(GetAppSettingFilename(), value);
+    }
+
+    public static string IpAddresses
+    {
+        get => GetIpAddresses(GetAppSettingFilename());
+        set => SetIpAddresses(GetAppSettingFilename(), value);
     }
 
     public static string JwtToken
@@ -137,6 +143,56 @@ public static class Configuration
         }
 
         return defaultPort;
+    }
+
+    #endregion
+
+    #region Ip Addresses
+
+    private static void SetIpAddresses(string filePath, string ipAddresses)
+    {
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return;
+        }
+
+        try
+        {
+            var currentIpAddresses = GetIpAddresses(filePath);
+            var json = File.ReadAllText(filePath).Replace("\"IpAddresses\": \"" + currentIpAddresses, "\"IpAddresses\": \"" + ipAddresses);
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow Exception */
+        }
+    }
+
+    private static string GetIpAddresses(string filePath)
+    {
+        const string defaultIpAddresses = "0.0.0.0,::";
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return defaultIpAddresses;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+            const string key = "IpAddresses";
+
+            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+            {
+                return tokenElement.GetString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error writing app settings: " + ex.Message);
+        }
+
+        return defaultIpAddresses;
     }
 
     #endregion

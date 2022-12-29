@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using API.Services;
 
@@ -17,6 +17,10 @@ public class ServerSettingDto
     /// Port the server listens on. Managed in appsettings.json.
     /// </summary>
     public int Port { get; set; }
+    /// <summary>
+    /// Comma separated list of ip addresses the server listens on. Managed in appsettings.json
+    /// </summary>
+    public string IpAddresses { get; set; }
     /// <summary>
     /// Allows anonymous information to be collected and sent to KavitaStats
     /// </summary>

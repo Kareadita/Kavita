@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -29,6 +29,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.Port:
                     destination.Port = int.Parse(row.Value);
+                    break;
+                case ServerSettingKey.IpAddresses:
+                    destination.IpAddresses = row.Value;
                     break;
                 case ServerSettingKey.AllowStatCollection:
                     destination.AllowStatCollection = bool.Parse(row.Value);

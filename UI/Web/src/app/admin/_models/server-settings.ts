@@ -4,6 +4,7 @@ export interface ServerSettings {
     taskBackup: string;
     loggingLevel: string;
     port: number;
+    ipAddresses: string;
     allowStatCollection: boolean;
     enableOpds: boolean;
     baseUrl: string;
