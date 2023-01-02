@@ -252,7 +252,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  @ViewChild('readingHtml', {static: false}) readingHtml!: ElementRef<HTMLDivElement>;
+  @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
+  /**
+   * book-content class
+   */
+  @ViewChild('bookContentElemRef', {static: false}) bookContentElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: true}) reader!: ElementRef;
@@ -326,7 +330,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const [currentVirtualPage, totalVirtualPages, _] = this.getVirtualPage();
-    if (this.readingHtml == null) return this.pageNum + 1 >= this.maxPages;
+    if (this.bookContentElemRef == null) return this.pageNum + 1 >= this.maxPages;
 
     return this.pageNum + 1 >= this.maxPages && (currentVirtualPage === totalVirtualPages);
   }
@@ -339,7 +343,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     const [currentVirtualPage,,] = this.getVirtualPage();
-    if (this.readingHtml == null) return this.pageNum + 1 >= this.maxPages;
+    if (this.bookContentElemRef == null) return this.pageNum + 1 >= this.maxPages;
 
     return this.pageNum === 0 && (currentVirtualPage === 0);
   }
@@ -378,7 +382,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get PageHeightForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default) {
-      return (this.readingHtml?.nativeElement?.scrollHeight || 0) - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
+
+      // if the book content is less than the height of the container, override and return height of container for pagination area
+      if (this.bookContainerElemRef?.nativeElement?.clientHeight > this.bookContentElemRef?.nativeElement?.clientHeight) {
+        return (this.bookContainerElemRef?.nativeElement?.clientHeight || 0) + 'px';
+      }
+
+      return (this.bookContentElemRef?.nativeElement?.scrollHeight || 0)  - ((this.topOffset * (this.immersiveMode ? 0 : 1)) * 2) + 'px';
     }
 
     if (this.immersiveMode) return this.windowHeight + 'px';
@@ -848,9 +858,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reader.nativeElement.children
         // We need to check if we are paging back, because we need to adjust the scroll
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-          setTimeout(() => this.scrollService.scrollToX(this.readingHtml.nativeElement.scrollWidth, this.readingHtml.nativeElement));
+          setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
         } else {
-          setTimeout(() => this.scrollService.scrollToX(0, this.readingHtml.nativeElement));
+          setTimeout(() => this.scrollService.scrollToX(0, this.bookContentElemRef.nativeElement));
         }
       }  
     }
@@ -925,7 +935,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (currentVirtualPage > 1) {
         // -2 apparently goes back 1 virtual page...
-        this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.readingHtml.nativeElement);
+        this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.bookContentElemRef.nativeElement);
         this.handleScrollEvent();
         return;
       }
@@ -957,7 +967,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (currentVirtualPage < totalVirtualPages) {
         // +0 apparently goes forward 1 virtual page...
-        this.scrollService.scrollToX((currentVirtualPage) * pageWidth, this.readingHtml.nativeElement);
+        this.scrollService.scrollToX((currentVirtualPage) * pageWidth, this.bookContentElemRef.nativeElement);
         this.handleScrollEvent();
         return;
       }
@@ -995,10 +1005,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @returns 
    */
   getVirtualPage() {
-    if (this.readingHtml === undefined || this.readingSectionElemRef === undefined) return [1, 1, 0];
+    if (this.bookContentElemRef === undefined || this.readingSectionElemRef === undefined) return [1, 1, 0];
 
-    const scrollOffset = this.readingHtml.nativeElement.scrollLeft;
-    const totalScroll = this.readingHtml.nativeElement.scrollWidth;
+    const scrollOffset = this.bookContentElemRef.nativeElement.scrollLeft;
+    const totalScroll = this.bookContentElemRef.nativeElement.scrollWidth;
     const pageWidth = this.getPageWidth();
     const delta = totalScroll - scrollOffset;
 
@@ -1022,9 +1032,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getFirstVisibleElementXPath() {
     let resumeElement: string | null = null;
-    if (this.readingHtml === null) return null;
+    if (this.bookContentElemRef === null) return null;
 
-    const intersectingEntries = Array.from(this.readingHtml.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
+    const intersectingEntries = Array.from(this.bookContentElemRef.nativeElement.querySelectorAll('div,o,p,ul,li,a,img,h1,h2,h3,h4,h5,h6,span'))
       .filter(element => !element.classList.contains('no-observe'))
       .filter(entry => {
         return this.utilityService.isInViewport(entry, this.topOffset);
@@ -1048,7 +1058,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   updateReaderStyles(pageStyles: PageStyle) {
     this.pageStyles = pageStyles;
-    if (this.readingHtml === undefined || !this.readingHtml.nativeElement) return;
+    if (this.bookContentElemRef === undefined || !this.bookContentElemRef.nativeElement) return;
 
     // Before we apply styles, let's get an element on the screen so we can scroll to it after any shifts
     const resumeElement: string | null | undefined = this.getFirstVisibleElementXPath();
@@ -1060,17 +1070,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     Object.entries(this.pageStyles).forEach(item => {
       if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
         // Remove the style or skip
-        this.renderer.removeStyle(this.readingHtml.nativeElement, item[0]);
+        this.renderer.removeStyle(this.bookContentElemRef.nativeElement, item[0]);
         return;
       }
       if (pageLevelStyles.includes(item[0])) {
-        this.renderer.setStyle(this.readingHtml.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
+        this.renderer.setStyle(this.bookContentElemRef.nativeElement, item[0], item[1], RendererStyleFlags2.Important);
       }
     });
 
     const individualElementStyles = Object.entries(this.pageStyles).filter(item => elementLevelStyles.includes(item[0]));
-    for(let i = 0; i < this.readingHtml.nativeElement.children.length; i++) {
-      const elem = this.readingHtml.nativeElement.children.item(i);
+    for(let i = 0; i < this.bookContentElemRef.nativeElement.children.length; i++) {
+      const elem = this.bookContentElemRef.nativeElement.children.item(i);
       if (elem?.tagName === 'STYLE') continue;
       individualElementStyles.forEach(item => {
           if (item[1] == '100%' || item[1] == '0px' || item[1] == 'inherit') {
@@ -1114,7 +1124,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
 
     // Recalculate if bottom action bar is needed
-    this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
+    this.scrollbarNeeded = this.bookContentElemRef.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
     this.cdRef.markForCheck();
   }
 
@@ -1221,12 +1231,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.updateImagesWithHeight();
 
     // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
-    if (this.readingHtml == null) {
+    if (this.bookContentElemRef == null) {
       setTimeout(() => this.updateLayoutMode(this.layoutMode), 10);
       return;
     }
     setTimeout(() => {
-      this.scrollbarNeeded = this.readingHtml.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
+      this.scrollbarNeeded = this.bookContentElemRef.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
       this.cdRef.markForCheck();
     });
 
