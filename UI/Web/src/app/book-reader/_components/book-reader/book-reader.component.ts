@@ -1124,7 +1124,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.windowWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth, window.innerWidth);
 
     // Recalculate if bottom action bar is needed
-    this.scrollbarNeeded = this.bookContentElemRef.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
+    this.scrollbarNeeded = this.bookContentElemRef?.nativeElement?.clientHeight > this.reader?.nativeElement?.clientHeight;
     this.cdRef.markForCheck();
   }
 
@@ -1236,7 +1236,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     setTimeout(() => {
-      this.scrollbarNeeded = this.bookContentElemRef.nativeElement.clientHeight > this.reader.nativeElement.clientHeight;
+      this.scrollbarNeeded = this.bookContentElemRef?.nativeElement?.clientHeight > this.reader?.nativeElement?.clientHeight;
       this.cdRef.markForCheck();
     });
 
@@ -1262,11 +1262,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   updateReadingSectionHeight() {
+    const renderer = this.renderer;
+    const elem = this.readingSectionElemRef;
     setTimeout(() => {
+      if (renderer === undefined || elem === undefined) return;
       if (this.immersiveMode) {
-        this.renderer?.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
+        renderer.setStyle(elem, 'height', 'calc(var(--vh, 1vh) * 100)', RendererStyleFlags2.Important);
       } else {
-        this.renderer?.setStyle(this.readingSectionElemRef, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
+        renderer.setStyle(elem, 'height', 'calc(var(--vh, 1vh) * 100 - ' + this.topOffset + 'px)', RendererStyleFlags2.Important);
       }
     });
   }
