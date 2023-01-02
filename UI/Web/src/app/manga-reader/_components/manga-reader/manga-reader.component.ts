@@ -147,36 +147,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @remarks Used for rendering to screen.
    */
   canvasImage = new Image();
-  /**
-   * Used solely for LayoutMode.Double rendering. 
-   * @remarks Used for rendering to screen.
-   */
-  canvasImage2 = new Image();
-  /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the previous image to canvasImage
-   * @see canvasImage
-   */
-  canvasImagePrev = new Image();
-  /**
-   * Used solely for LayoutMode.Double rendering. Will always hold the next image to canvasImage
-   * @see canvasImage
-   */
-  canvasImageNext = new Image();
-  /**
-   * Responsible to hold current page + 2. Used to know if we should render 
-   * @remarks Used solely for LayoutMode.DoubleReverse rendering. 
-   */
-   canvasImageAheadBy2 = new Image();
-   /**
-   * Responsible to hold current page -2 2. Used to know if we should render 
-   * @remarks Used solely for LayoutMode.DoubleReverse rendering. 
-   */
-  canvasImageBehindBy2 = new Image();
+  
   /**
    * Dictates if we use render with canvas or with image. 
    * @remarks This is only for Splitting.
    */
-  renderWithCanvas: boolean = false;
+  //renderWithCanvas: boolean = false;
 
   /**
    * A circular array of size PREFETCH_PAGES. Maintains prefetched Images around the current page to load from to avoid loading animation.
@@ -468,11 +444,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
           this.generalSettingsForm.get('pageSplitOption')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
+          this.generalSettingsForm.get('emulateBook')?.disable();
         } else {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
           this.generalSettingsForm.get('pageSplitOption')?.disable();
           this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
           this.generalSettingsForm.get('fittingOption')?.disable();
+          this.generalSettingsForm.get('emulateBook')?.enable();
         }
         this.cdRef.markForCheck();
 
@@ -682,7 +660,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     this.inSetup = true;
     this.canvasImage.src = '';
-    this.canvasImage2.src = '';
     this.cdRef.markForCheck();
 
     this.cachedImages = [];
