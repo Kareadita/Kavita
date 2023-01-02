@@ -14163,6 +14163,11 @@
             "description": "Total number of pages read",
             "format": "int64"
           },
+          "totalWordsRead": {
+            "type": "integer",
+            "description": "Total number of words read",
+            "format": "int64"
+          },
           "timeSpentReading": {
             "type": "integer",
             "description": "Total time spent reading based on estimates",

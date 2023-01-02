@@ -10,6 +10,10 @@ public class UserReadStatistics
     /// </summary>
     public long TotalPagesRead { get; set; }
     /// <summary>
+    /// Total number of words read
+    /// </summary>
+    public long TotalWordsRead { get; set; }
+    /// <summary>
     /// Total time spent reading based on estimates
     /// </summary>
     public long TimeSpentReading { get; set; }

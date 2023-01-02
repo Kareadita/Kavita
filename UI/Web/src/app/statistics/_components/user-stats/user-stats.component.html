@@ -1,10 +1,9 @@
 <div class="container-fluid" *ngIf="userId">
 
-    <!-- High level stats (use same design as series metadata info cards)-->
     <div class="row g-0 d-flex justify-content-around">
         <ng-container *ngIf="userStats$ | async as userStats">
-            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [timeSpentReading]="userStats.timeSpentReading"
-             [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive"></app-user-stats-info-cards>
+            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [totalWordsRead]="userStats.totalWordsRead" [timeSpentReading]="userStats.timeSpentReading"
+             [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading"></app-user-stats-info-cards>
         </ng-container>
     </div>
 
@@ -17,14 +16,4 @@
     <div class="row g-0 pt-4 pb-2 " style="height: 242px">
         <app-stat-list [data$]="precentageRead$" label="% Read" title="Library Read Progress"></app-stat-list>
     </div>
-
-    <!-- <div class="row g-0">
-        Books Read (this can be chapters read fully)
-        Number of bookmarks
-        Last Active Time
-        Average days reading on server a week
-        Total Series in want to read list? 
-    </div> -->
-
-    
 </div>

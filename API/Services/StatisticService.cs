@@ -70,6 +70,10 @@ public class StatisticService : IStatisticService
             .Where(c => chapterIds.Contains(c.Id))
             .SumAsync(c => c.AvgHoursToRead);
 
+        var totalWordsRead = await _context.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .SumAsync(c => c.WordCount);
+
         var chaptersRead = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Where(p => libraryIds.Contains(p.LibraryId))
@@ -108,11 +112,12 @@ public class StatisticService : IStatisticService
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
                 (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
-            .Average() / 7;
+            .Average() / 7.0;
 
         return new UserReadStatistics()
         {
             TotalPagesRead = totalPagesRead,
+            TotalWordsRead = totalWordsRead,
             TimeSpentReading = timeSpentReading,
             ChaptersRead = chaptersRead,
             LastActive = lastActive,
