@@ -148,6 +148,7 @@
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.chapter.isSpecial" [entity]="item.chapter" [title]="item.chapter.title" (click)="openChapter(item.chapter)"
                                         [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)"
                                         [read]="item.chapter.pagesRead" [total]="item.chapter.pages" [actions]="chapterActions" 
+                                        [count]="item.chapter.files.length"
                                         (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, storyChapters.length, $event)"
                                         [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>
                                     </ng-template>
@@ -227,6 +228,7 @@
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.isSpecial" [entity]="item" [title]="item.title" (click)="openChapter(item)"
                                         [imageUrl]="imageService.getChapterCoverImage(item.id)"
                                         [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                                        [count]="item.files.length"
                                         (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, chapters.length, $event)"
                                         [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
                                             <ng-container title>
@@ -263,6 +265,7 @@
                                 <app-card-item class="col-auto mt-2 mb-2" [entity]="item" [title]="item.title || item.range" (click)="openChapter(item)"
                                 [imageUrl]="imageService.getChapterCoverImage(item.id)"
                                 [read]="item.pagesRead" [total]="item.pages" [actions]="chapterActions"
+                                [count]="item.files.length"
                                 (selection)="bulkSelectionService.handleCardSelection('special', scroll.viewPortInfo.startIndexWithBuffer + idx, chapters.length, $event)"
                                 [selected]="bulkSelectionService.isCardSelected('special', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true">
                             </app-card-item>
