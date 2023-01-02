@@ -187,7 +187,7 @@ public class ReaderController : BaseApiController
 
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
         if (dto == null) return BadRequest("Please perform a scan on this series or library and try again");
-        var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+        var mangaFile = chapter.Files.First();
 
         var info = new ChapterInfoDto()
         {

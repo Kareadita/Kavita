@@ -18,6 +18,7 @@ public enum ChapterIncludes
 {
     None = 1,
     Volumes = 2,
+    Files = 4
 }
 
 public interface IChapterRepository
@@ -26,7 +27,7 @@ public interface IChapterRepository
     Task<IEnumerable<Chapter>> GetChaptersByIdsAsync(IList<int> chapterIds, ChapterIncludes includes = ChapterIncludes.None);
     Task<IChapterInfoDto> GetChapterInfoDtoAsync(int chapterId);
     Task<int> GetChapterTotalPagesAsync(int chapterId);
-    Task<Chapter> GetChapterAsync(int chapterId);
+    Task<Chapter> GetChapterAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files);
     Task<ChapterDto> GetChapterDtoAsync(int chapterId);
     Task<ChapterMetadataDto> GetChapterMetadataDtoAsync(int chapterId);
     Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId);
@@ -162,12 +163,17 @@ public class ChapterRepository : IChapterRepository
     /// Returns a Chapter for an Id. Includes linked <see cref="MangaFile"/>s.
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <param name="includes"></param>
     /// <returns></returns>
-    public async Task<Chapter> GetChapterAsync(int chapterId)
+    public async Task<Chapter> GetChapterAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files)
     {
-        return await _context.Chapter
-            .Include(c => c.Files)
-            .AsSplitQuery()
+        var query = _context.Chapter
+            .AsSplitQuery();
+
+        if (includes.HasFlag(ChapterIncludes.Files)) query = query.Include(c => c.Files);
+        if (includes.HasFlag(ChapterIncludes.Volumes)) query = query.Include(c => c.Volume);
+
+        return await query
             .SingleOrDefaultAsync(c => c.Id == chapterId);
     }
 
