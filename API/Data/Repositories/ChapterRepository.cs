@@ -35,6 +35,7 @@ public interface IChapterRepository
     Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds);
     Task<string> GetChapterCoverImageAsync(int chapterId);
     Task<IList<string>> GetAllCoverImagesAsync();
+    Task<IList<Chapter>> GetAllChaptersWithNonWebPCovers();
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
 }
 public class ChapterRepository : IChapterRepository
@@ -210,6 +211,13 @@ public class ChapterRepository : IChapterRepository
             .Select(c => c.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
             .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IList<Chapter>> GetAllChaptersWithNonWebPCovers()
+    {
+        return await _context.Chapter
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage)  && !c.CoverImage.EndsWith(".webp"))
             .ToListAsync();
     }
 

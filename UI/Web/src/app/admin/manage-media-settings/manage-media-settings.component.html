@@ -3,6 +3,7 @@
 
         <div class="row g-0">
             <p>WebP can drastically reduce space requirements for files. WebP is not supported on all browsers or versions. To learn if these settings are appropriate for your setup, visit <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">Can I Use</a>.</p>
+            <div *ngIf="settingsForm.dirty" class="alert alert-danger" role="alert">You must trigger the conversion to WebP task in Tasks Tab.</div>
             <div class="col-md-6 col-sm-12 mb-3">
                 <label for="bookmark-webp" class="form-label me-1" aria-describedby="settings-convertBookmarkToWebP-help">Save Bookmarks as WebP</label>
                 <i class="fa fa-info-circle" placement="right" [ngbTooltip]="convertBookmarkToWebPTooltip" role="button" tabindex="0"></i>

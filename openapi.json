@@ -7146,6 +7146,19 @@
         }
       }
     },
+    "/api/Server/convert-covers": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Triggers the scheduling of the convert covers job. Only one job will run at a time.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Server/logs": {
       "get": {
         "tags": [

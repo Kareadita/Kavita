@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NetVips;
-using SixLabors.ImageSharp;
 using Image = NetVips.Image;
 
 namespace API.Services;

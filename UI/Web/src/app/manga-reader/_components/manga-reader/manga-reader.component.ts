@@ -1053,10 +1053,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // NOTE: I may want to provide a different prefetcher for double renderer
     for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
       const numOffset = this.pageNum + i;
+      //console.log('numOffset: ', numOffset);
       if (numOffset > this.maxPages - 1) continue;
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
-      if (this.readerService.imageUrlToPageNum(this.cachedImages[index].src) !== numOffset) {
+      const cachedImagePageNum = this.readerService.imageUrlToPageNum(this.cachedImages[index].src);
+      const cachedImageChapterId = this.readerService.imageUrlToChapterId(this.cachedImages[index].src);
+      //console.log('chapter id for ', cachedImagePageNum, ' = ', cachedImageChapterId)
+      if (cachedImagePageNum !== numOffset) { //  && cachedImageChapterId === this.chapterId
         this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
       }
