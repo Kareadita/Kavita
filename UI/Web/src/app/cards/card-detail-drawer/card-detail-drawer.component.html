@@ -151,7 +151,9 @@
                                                 <ng-template #fileDate>
                                                     {{(file.created | date: 'short') || '-'}}
                                                 </ng-template>
-                                                
+                                            </div>
+                                            <div class="col">
+                                                Size: {{file.bytes | bytes}}
                                             </div>
                                         </div>
                                     </li>

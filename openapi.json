@@ -11166,6 +11166,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
