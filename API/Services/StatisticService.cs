@@ -94,8 +94,7 @@ public class StatisticService : IStatisticService
             .AsEnumerable()
             .GroupBy(g => g.series.LibraryId)
             .ToDictionary(g => g.Key, g => g.Sum(c => c.chapter.Pages));
-        //
-        //
+
         var totalProgressByLibrary = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Where(p => p.LibraryId > 0)
@@ -319,7 +318,7 @@ public class StatisticService : IStatisticService
             .Select(u => new ReadHistoryEvent
             {
                 UserId = u.AppUserId,
-                UserName = _context.AppUser.Single(u => u.Id == userId).UserName,
+                UserName = _context.AppUser.Single(u2 => u2.Id == userId).UserName,
                 SeriesName = _context.Series.Single(s => s.Id == u.SeriesId).Name,
                 SeriesId = u.SeriesId,
                 LibraryId = u.LibraryId,

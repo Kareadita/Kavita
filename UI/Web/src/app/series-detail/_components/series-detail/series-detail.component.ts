@@ -681,7 +681,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       this.toastr.error('There are no pages. Kavita was not able to read this archive.');
       return;
     }
-    console.log('chapter files: ', chapter.files.length);return;
     this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: {incognitoMode}});
   }
 
