@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Member } from 'src/app/_models/member';
+import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
 
 @Component({

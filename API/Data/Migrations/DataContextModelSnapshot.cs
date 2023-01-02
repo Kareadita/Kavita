@@ -217,6 +217,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue("Dark");
 
+                    b.Property<bool>("EmulateBook")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("GlobalPageLayoutMode")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -279,6 +282,9 @@ namespace API.Data.Migrations
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PagesRead")
                         .HasColumnType("INTEGER");
@@ -588,10 +594,16 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("Bytes")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ChapterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Extension")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FilePath")

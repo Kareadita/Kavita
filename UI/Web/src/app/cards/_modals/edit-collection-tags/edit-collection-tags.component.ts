@@ -5,7 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { SelectionModel } from 'src/app/typeahead/typeahead.component';
+import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';

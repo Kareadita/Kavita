@@ -48,11 +48,6 @@ public class ServerSettingDto
     /// </summary>
     public bool ConvertBookmarkToWebP { get; set; }
     /// <summary>
-    /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
-    /// </summary>
-    [Obsolete("Being removed in v0.7 in favor of dedicated hosted api")]
-    public bool EnableSwaggerUi { get; set; }
-    /// <summary>
     /// The amount of Backups before cleanup
     /// </summary>
     /// <remarks>Value should be between 1 and 30</remarks>

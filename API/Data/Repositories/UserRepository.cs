@@ -61,7 +61,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAllUsers();
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
-    Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags);
+    Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByConfirmationToken(string token);
 }
 
@@ -190,11 +190,6 @@ public class UserRepository : IUserRepository
         return await _context.AppUser.SingleOrDefaultAsync(u => u.Email != null && u.Email.ToLower().Equals(lowerEmail));
     }
 
-    public async Task<IEnumerable<AppUser>> GetAllUsers()
-    {
-        return await _context.AppUser
-            .ToListAsync();
-    }
 
     public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId)
     {
@@ -213,7 +208,7 @@ public class UserRepository : IUserRepository
             .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId));
     }
 
-    public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags)
+    public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None)
     {
         return await _context.AppUser
             .Includes(includeFlags)

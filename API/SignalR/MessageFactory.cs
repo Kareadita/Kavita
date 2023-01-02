@@ -102,6 +102,10 @@ public static class MessageFactory
     /// </summary>
     private const string ConvertBookmarksProgress = "ConvertBookmarksProgress";
     /// <summary>
+    /// When bulk covers are being converted
+    /// </summary>
+    private const string ConvertCoversProgress = "ConvertBookmarksProgress";
+    /// <summary>
     /// When files are being scanned to calculate word count
     /// </summary>
     private const string WordCountAnalyzerProgress = "WordCountAnalyzerProgress";
@@ -481,6 +485,23 @@ public static class MessageFactory
         {
             Name = ConvertBookmarksProgress,
             Title = "Converting Bookmarks to WebP",
+            SubTitle = string.Empty,
+            EventType = eventType,
+            Progress = ProgressType.Determinate,
+            Body = new
+            {
+                Progress = progress,
+                EventTime = DateTime.Now
+            }
+        };
+    }
+
+    public static SignalRMessage ConvertCoverProgressEvent(float progress, string eventType)
+    {
+        return new SignalRMessage()
+        {
+            Name = ConvertCoversProgress,
+            Title = "Converting Covers to WebP",
             SubTitle = string.Empty,
             EventType = eventType,
             Progress = ProgressType.Determinate,

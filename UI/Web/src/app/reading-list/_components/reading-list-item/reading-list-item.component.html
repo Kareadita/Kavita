@@ -1,0 +1,45 @@
+<div class="d-flex flex-row g-0 mb-2">
+  <div class="pe-2">
+    <app-image width="106px" maxHeight="125px" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
+      <div class="not-read-badge" *ngIf="item.pagesRead === 0 && item.pagesTotal > 0"></div>
+      <div class="progress-banner" *ngIf="item.pagesRead < item.pagesTotal && item.pagesTotal > 0 && item.pagesRead !== item.pagesTotal"> 
+          <p><ngb-progressbar type="primary" height="5px" [value]="item.pagesRead" [max]="item.pagesTotal"></ngb-progressbar></p>
+      </div>
+  </div>
+
+  <div class="flex-grow-1">
+    <div class="g-0">
+        <h5 class="mb-1 pb-0" id="item.id--{{position}}">
+            {{item.title}}
+            <div class="float-end">
+              <button class="btn btn-primary" (click)="readChapter(item)">
+                <span>
+                    <i class="fa fa-book me-1" aria-hidden="true"></i>
+                </span>
+                <span class="d-none d-sm-inline-block">Read</span>
+            </button>
+            <button class="btn btn-danger ms-2" (click)="remove.emit(item)">
+              <span>
+                  <i class="fa fa-trash me-1" aria-hidden="true"></i>
+              </span>
+              <span class="d-none d-sm-inline-block">Remove</span>
+            </button>
+          </div>
+            
+        </h5>
+        <div class="ps-1 d-none d-md-inline-block">
+          <ng-container *ngIf="item.seriesFormat | mangaFormat as formatString">
+            <i class="fa {{item.seriesFormat | mangaFormatIcon}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{formatString}}"></i>
+            <span class="visually-hidden">{{formatString}}</span>&nbsp;
+          </ng-container>
+    
+          <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
+        </div>
+
+        <div class="ps-1 mt-2" *ngIf="item.releaseDate !== '0001-01-01T00:00:00'">
+          Released: {{item.releaseDate | date:'short'}}
+        </div>
+    </div>
+</div>
+
+</div>

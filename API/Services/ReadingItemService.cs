@@ -198,6 +198,8 @@ public class ReadingItemService : IReadingItemService
                 _imageService.ExtractImages(fileFilePath, targetDirectory, imageCount);
                 break;
             case MangaFormat.Pdf:
+                _bookService.ExtractPdfImages(fileFilePath, targetDirectory);
+                break;
             case MangaFormat.Unknown:
             case MangaFormat.Epub:
                 break;

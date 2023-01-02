@@ -3,15 +3,15 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
-import { BookService } from 'src/app/book-reader/book.service';
 import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes, pageLayoutModes } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
-import { bookColorThemes } from 'src/app/book-reader/reader-settings/reader-settings.component';
-import { BookPageLayoutMode } from 'src/app/_models/book-page-layout-mode';
+import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { forkJoin, Subject } from 'rxjs';
+import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
+import { BookService } from 'src/app/book-reader/_services/book.service';
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -25,6 +25,7 @@ enum FragmentID {
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',
+  Stats = 'stats',
 
 }
 
@@ -60,6 +61,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: '3rd Party Clients', fragment: FragmentID.Clients},
     {title: 'Theme', fragment: FragmentID.Theme},
     {title: 'Devices', fragment: FragmentID.Devices},
+    {title: 'Stats', fragment: FragmentID.Stats},
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;
@@ -124,6 +126,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('showScreenHints', new FormControl(this.user.preferences.showScreenHints, []));
       this.settingsForm.addControl('readerMode', new FormControl(this.user.preferences.readerMode, []));
       this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.layoutMode, []));
+      this.settingsForm.addControl('emulateBook', new FormControl(this.user.preferences.emulateBook, []));
+
       this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
       this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
       this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
@@ -182,6 +186,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('blurUnreadSummaries')?.setValue(this.user.preferences.blurUnreadSummaries);
     this.settingsForm.get('promptForDownloadSize')?.setValue(this.user.preferences.promptForDownloadSize);
     this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions);
+    this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -212,10 +217,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       blurUnreadSummaries: modelSettings.blurUnreadSummaries,
       promptForDownloadSize: modelSettings.promptForDownloadSize,
       noTransitions: modelSettings.noTransitions,
+      emulateBook: modelSettings.emulateBook
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success('Server settings updated');
+      this.toastr.success('User preferences updated');
       if (this.user) {
         this.user.preferences = updatedPrefs;
         this.cdRef.markForCheck();

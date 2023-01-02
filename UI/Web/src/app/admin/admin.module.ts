@@ -24,6 +24,7 @@ import { ManageEmailSettingsComponent } from './manage-email-settings/manage-ema
 import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tasks-settings.component';
 import { ManageLogsComponent } from './manage-logs/manage-logs.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import { StatisticsModule } from '../statistics/statistics.module';
 
 
 
@@ -60,7 +61,9 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     PipeModule,
     SidenavModule,
     UserSettingsModule, // API-key componet
-    VirtualScrollerModule
+    VirtualScrollerModule,
+
+    StatisticsModule
   ],
   providers: []
 })

@@ -7,7 +7,7 @@ import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { PageBookmark } from 'src/app/_models/page-bookmark';
+import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { RecentlyAddedItem } from 'src/app/_models/recently-added-item';
 import { Series } from 'src/app/_models/series';
 import { User } from 'src/app/_models/user';
@@ -319,9 +319,9 @@ export class CardItemComponent implements OnInit, OnDestroy {
       this.actions = this.actionFactoryService.filterSendToAction(this.actions, vol.chapters[0]);
     } else if (this.utilityService.isSeries(this.entity)) {
       const series = (this.entity as Series);
-      if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
-        this.actions = this.actions.filter(a => a.title !== 'Send To');
-      }
+      // if (series.format === MangaFormat.EPUB || series.format === MangaFormat.PDF) {
+      //   this.actions = this.actions.filter(a => a.title !== 'Send To');
+      // }
     }
   }
 }

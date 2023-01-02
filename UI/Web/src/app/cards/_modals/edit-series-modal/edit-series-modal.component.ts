@@ -4,16 +4,16 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { TypeaheadSettings } from 'src/app/typeahead/typeahead-settings';
+import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
-import { Genre } from 'src/app/_models/genre';
+import { Genre } from 'src/app/_models/metadata/genre';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { Language } from 'src/app/_models/metadata/language';
 import { PublicationStatusDto } from 'src/app/_models/metadata/publication-status-dto';
-import { Person, PersonRole } from 'src/app/_models/person';
+import { Person, PersonRole } from 'src/app/_models/metadata/person';
 import { Series } from 'src/app/_models/series';
-import { SeriesMetadata } from 'src/app/_models/series-metadata';
+import { SeriesMetadata } from 'src/app/_models/metadata/series-metadata';
 import { Tag } from 'src/app/_models/tag';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
@@ -54,7 +54,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
+  size: number = 0;
   private readonly onDestroy = new Subject<void>();
+  
 
 
   // Typeaheads
@@ -121,7 +123,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     });
     
     this.initSeries = Object.assign({}, this.series);
-
 
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
@@ -232,6 +233,16 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
           return f;
         })).flat();
       });
+
+      if (volumes.length > 0) {
+        this.size = volumes.reduce((sum1, volume) => {
+          return sum1 + volume.chapters.reduce((sum2, chapter) => {
+            return sum2 + chapter.files.reduce((sum3, file) => {
+              return sum3 + file.bytes;
+            }, 0);
+          }, 0);
+        }, 0);
+      }
       this.cdRef.markForCheck();
     });
   }

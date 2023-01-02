@@ -32,10 +32,11 @@ public class ServerController : BaseApiController
     private readonly ICleanupService _cleanupService;
     private readonly IEmailService _emailService;
     private readonly IBookmarkService _bookmarkService;
+    private readonly IScannerService _scannerService;
 
     public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IEmailService emailService, IBookmarkService bookmarkService)
+        ICleanupService cleanupService, IEmailService emailService, IBookmarkService bookmarkService, IScannerService scannerService)
     {
         _applicationLifetime = applicationLifetime;
         _logger = logger;
@@ -46,6 +47,7 @@ public class ServerController : BaseApiController
         _cleanupService = cleanupService;
         _emailService = emailService;
         _bookmarkService = bookmarkService;
+        _scannerService = scannerService;
     }
 
     /// <summary>
@@ -82,7 +84,7 @@ public class ServerController : BaseApiController
     public ActionResult CleanupWantToRead()
     {
         _logger.LogInformation("{UserName} is clearing running want to read cleanup from admin dashboard", User.GetUsername());
-        RecurringJob.TriggerJob(API.Services.TaskScheduler.RemoveFromWantToReadTaskId);
+        RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);
 
         return Ok();
     }
@@ -95,7 +97,23 @@ public class ServerController : BaseApiController
     public ActionResult BackupDatabase()
     {
         _logger.LogInformation("{UserName} is backing up database of server from admin dashboard", User.GetUsername());
-        RecurringJob.TriggerJob(API.Services.TaskScheduler.BackupTaskId);
+        RecurringJob.TriggerJob(TaskScheduler.BackupTaskId);
+        return Ok();
+    }
+
+    /// <summary>
+    /// This is a one time task that needs to be ran for v0.7 statistics to work
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("analyze-files")]
+    public ActionResult AnalyzeFiles()
+    {
+        _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", User.GetUsername());
+        if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
+                Array.Empty<object>(), TaskScheduler.DefaultQueue, true))
+            return Ok("Job already running");
+
+        BackgroundJob.Enqueue(() => _scannerService.AnalyzeFiles());
         return Ok();
     }
 
@@ -119,6 +137,19 @@ public class ServerController : BaseApiController
         if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
                 TaskScheduler.DefaultQueue, true)) return Ok();
         BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToWebP());
+        return Ok();
+    }
+
+    /// <summary>
+    /// Triggers the scheduling of the convert covers job. Only one job will run at a time.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("convert-covers")]
+    public ActionResult ScheduleConvertCovers()
+    {
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true)) return Ok();
+        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllCoverToWebP());
         return Ok();
     }
 

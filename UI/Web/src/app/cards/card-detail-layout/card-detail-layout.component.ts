@@ -11,7 +11,7 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/metadata/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 
@@ -116,14 +116,17 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
     
-    if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
-      const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
-      if (resumeKey === '') return;
-      const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
-      if (keys.length < 1) return;
-
-      this.hasResumedJumpKey = true;
-      setTimeout(() => this.scrollTo(keys[0]), 100);
+    // Don't resume jump key when there is a custom sort order, as it won't work
+    if (this.hasCustomSort()) {
+      if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
+        const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
+        if (resumeKey === '') return;
+        const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
+        if (keys.length < 1) return;
+  
+        this.hasResumedJumpKey = true;
+        setTimeout(() => this.scrollTo(keys[0]), 100);
+      }
     }
   }
 
@@ -131,6 +134,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   ngOnDestroy() {
     this.onDestory.next();
     this.onDestory.complete();
+  }
+
+  hasCustomSort() {
+    return this.filter.sortOptions !== null || this.filterSettings.presets?.sortOptions !== null;
   }
 
   performAction(action: ActionItem<any>) {
@@ -147,6 +154,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
 
   scrollTo(jumpKey: JumpKey) {
+    if (this.hasCustomSort()) return;
+
     let targetIndex = 0;
     for(var i = 0; i < this.jumpBarKeys.length; i++) {
       if (this.jumpBarKeys[i].key === jumpKey.key) break;

@@ -97,7 +97,7 @@ public class BookController : BaseApiController
         if (chapter == null) return BadRequest("Chapter is not valid");
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
-        var key = BookService.CleanContentKeys(file);
+        var key = BookService.CoalesceKeyForAnyFile(book, file);
         if (!book.Content.AllFiles.ContainsKey(key)) return BadRequest("File was not found in book");
 
         var bookFile = book.Content.AllFiles[key];

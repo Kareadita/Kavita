@@ -22,9 +22,16 @@ public class MangaFile : IEntityDate
     /// </summary>
     public int Pages { get; set; }
     public MangaFormat Format { get; set; }
+    /// <summary>
+    /// How many bytes make up this file
+    /// </summary>
+    public long Bytes { get; set; }
+    /// <summary>
+    /// File extension
+    /// </summary>
+    public string Extension { get; set; }
     /// <inheritdoc cref="IEntityDate.Created"/>
     public DateTime Created { get; set; }
-
     /// <summary>
     /// Last time underlying file was modified
     /// </summary>

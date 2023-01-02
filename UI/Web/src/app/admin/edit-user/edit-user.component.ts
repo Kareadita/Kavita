@@ -1,9 +1,9 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AgeRestriction } from 'src/app/_models/age-restriction';
+import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
 import { Library } from 'src/app/_models/library';
-import { Member } from 'src/app/_models/member';
+import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
 
 @Component({

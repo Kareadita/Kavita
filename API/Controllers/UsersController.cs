@@ -52,6 +52,13 @@ public class UsersController : BaseApiController
         return Ok(await _unitOfWork.UserRepository.GetPendingMemberDtosAsync());
     }
 
+    [HttpGet("myself")]
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetMyself()
+    {
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
+        return Ok(users.Where(u => u.UserName == User.GetUsername()).DefaultIfEmpty().Select(u => _mapper.Map<MemberDto>(u)).SingleOrDefault());
+    }
+
 
     [HttpGet("has-reading-progress")]
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
@@ -82,6 +89,7 @@ public class UsersController : BaseApiController
         existingPreferences.PageSplitOption = preferencesDto.PageSplitOption;
         existingPreferences.AutoCloseMenu = preferencesDto.AutoCloseMenu;
         existingPreferences.ShowScreenHints = preferencesDto.ShowScreenHints;
+        existingPreferences.EmulateBook = preferencesDto.EmulateBook;
         existingPreferences.ReaderMode = preferencesDto.ReaderMode;
         existingPreferences.LayoutMode = preferencesDto.LayoutMode;
         existingPreferences.BackgroundColor = string.IsNullOrEmpty(preferencesDto.BackgroundColor) ? "#000000" : preferencesDto.BackgroundColor;
@@ -112,11 +120,26 @@ public class UsersController : BaseApiController
         return BadRequest("There was an issue saving preferences.");
     }
 
+    /// <summary>
+    /// Returns the preferences of the user
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("get-preferences")]
     public async Task<ActionResult<UserPreferencesDto>> GetPreferences()
     {
         return _mapper.Map<UserPreferencesDto>(
             await _unitOfWork.UserRepository.GetPreferencesAsync(User.GetUsername()));
 
+    }
+
+    /// <summary>
+    /// Returns a list of the user names within the system
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("names")]
+    public async Task<ActionResult<IEnumerable<string>>> GetUserNames()
+    {
+        return Ok((await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(u => u.UserName));
     }
 }

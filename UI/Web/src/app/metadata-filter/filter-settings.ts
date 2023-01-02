@@ -1,4 +1,4 @@
-import { SeriesFilter } from "../_models/series-filter";
+import { SeriesFilter } from "../_models/metadata/series-filter";
 
 export class FilterSettings {
     libraryDisabled = false;

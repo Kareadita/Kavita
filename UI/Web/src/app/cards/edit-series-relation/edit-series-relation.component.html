@@ -10,8 +10,8 @@
     </div>
     
     <form>
-        <div class="row g-0 mb-3" *ngFor="let relation of relations; let idx = index; let isLast = last;">
-            <div class="col-sm-12 col-md-7">
+        <div class="row g-0" *ngFor="let relation of relations; let idx = index; let isLast = last;">
+            <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
                 <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">
                     <ng-template #badgeItem let-item let-position="idx">
                         {{item.name}} ({{libraryNames[item.libraryId]}})
@@ -21,13 +21,13 @@
                     </ng-template>
                 </app-typeahead>
             </div>
-            <div class="col-sm-auto col-md-3">
+            <div class="col-sm-12 col-md-10 col-lg-3 mb-3">
                 <select class="form-select" [formControl]="relation.formControl">
                     <option [value]="RelationKind.Parent" disabled>Parent</option>
                     <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.text}}</option>
                 </select>
             </div>
-            <button class="col-sm-auto col-md-2 btn btn-outline-secondary" (click)="removeRelation(idx)">Remove</button>
+            <button class="col-sm-auto col-md-2 mb-3 btn btn-outline-secondary" (click)="removeRelation(idx)"><i class="fa fa-trash"></i><span class="visually-hidden">Remove</span></button>
         </div>
     </form>
 

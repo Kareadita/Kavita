@@ -146,12 +146,14 @@
                                                 Added: 
                                                 <!-- TODO: This data.created can be removed after v0.5.5 release -->
                                                 <ng-container *ngIf="file.created == '0001-01-01T00:00:00'; else fileDate">
-                                                    {{(data.created | date: 'short') || '-'}}
+                                                    {{data.created | date: 'short' | defaultDate}}
                                                 </ng-container>
                                                 <ng-template #fileDate>
-                                                    {{(file.created | date: 'short') || '-'}}
+                                                    {{file.created | date: 'short' | defaultDate}}
                                                 </ng-template>
-                                                
+                                            </div>
+                                            <div class="col">
+                                                Size: {{file.bytes | bytes}}
                                             </div>
                                         </div>
                                     </li>

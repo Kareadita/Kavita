@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BookReaderComponent } from './book-reader/book-reader.component';
+import { BookReaderComponent } from './_components/book-reader/book-reader.component';
 import { BookReaderRoutingModule } from './book-reader.router.module';
 import { SharedModule } from '../shared/shared.module';
-import { SafeStylePipe } from './safe-style.pipe';
+import { SafeStylePipe } from './_pipes/safe-style.pipe';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PipeModule } from '../pipe/pipe.module';
 import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { TableOfContentsComponent } from './table-of-contents/table-of-contents.component';
-import { ReaderSettingsComponent } from './reader-settings/reader-settings.component';
+import { ReaderSettingsComponent } from './_components/reader-settings/reader-settings.component';
+import { TableOfContentsComponent } from './_components/table-of-contents/table-of-contents.component';
 
 
 @NgModule({

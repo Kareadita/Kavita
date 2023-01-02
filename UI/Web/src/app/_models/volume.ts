@@ -1,5 +1,5 @@
 import { Chapter } from './chapter';
-import { HourEstimateRange } from './hour-estimate-range';
+import { HourEstimateRange } from './series-detail/hour-estimate-range';
 
 export interface Volume {
     id: number;

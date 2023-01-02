@@ -33,8 +33,8 @@ public interface IBookService
 {
     int GetNumberOfPages(string filePath);
     string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false);
-    Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
-
+    ComicInfo? GetComicInfo(string filePath);
+    ParserInfo? ParseInfo(string filePath);
     /// <summary>
     /// Scopes styles to .reading-section and replaces img src to the passed apiBase
     /// </summary>
@@ -44,20 +44,16 @@ public interface IBookService
     /// <param name="book">Book Reference, needed for if you expect Import statements</param>
     /// <returns></returns>
     Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
-    ComicInfo? GetComicInfo(string filePath);
-    ParserInfo? ParseInfo(string filePath);
     /// <summary>
     /// Extracts a PDF file's pages as images to an target directory
     /// </summary>
+    /// <remarks>This method relies on Docnet which has explicit patches from Kavita for ARM support. This should only be used with Tachiyomi</remarks>
     /// <param name="fileFilePath"></param>
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
-    [Obsolete("This method of reading is no longer supported. Please use native pdf reader")]
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
-
-    Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
     Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter);
-
     Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl);
+    Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 }
 
 public partial class BookService : IBookService
@@ -183,6 +179,14 @@ public partial class BookService : IBookService
         anchor.Attributes.Add("href", "javascript:void(0)");
     }
 
+    /// <summary>
+    /// Scopes styles to .reading-section and replaces img src to the passed apiBase
+    /// </summary>
+    /// <param name="stylesheetHtml"></param>
+    /// <param name="apiBase"></param>
+    /// <param name="filename">If the stylesheetHtml contains Import statements, when scoping the filename, scope needs to be wrt filepath.</param>
+    /// <param name="book">Book Reference, needed for if you expect Import statements</param>
+    /// <returns></returns>
     public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book)
     {
         // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
@@ -421,7 +425,7 @@ public partial class BookService : IBookService
         {
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
             var publicationDate =
-                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(d => d.Event == "publication")?.Date;
+                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(pDate => pDate.Event == "publication")?.Date;
 
             if (string.IsNullOrEmpty(publicationDate))
             {
@@ -549,7 +553,7 @@ public partial class BookService : IBookService
         return 0;
     }
 
-    public static string EscapeTags(string content)
+    private static string EscapeTags(string content)
     {
         content = StartingScriptTag().Replace(content, "<script$1></script>");
         content = StartingTitleTag().Replace(content, "<title$1></title>");
@@ -734,6 +738,44 @@ public partial class BookService : IBookService
     }
 
     /// <summary>
+    /// Tries to find the correct key by applying cleaning and remapping if the epub has bad data. Only works for HTML files.
+    /// </summary>
+    /// <param name="book"></param>
+    /// <param name="mappings"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    private static string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
+    {
+        if (mappings.ContainsKey(CleanContentKeys(key))) return key;
+
+        // Fallback to searching for key (bad epub metadata)
+        var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+        if (!string.IsNullOrEmpty(correctedKey))
+        {
+            key = correctedKey;
+        }
+
+        return key;
+    }
+
+    public static string CoalesceKeyForAnyFile(EpubBookRef book, string key)
+    {
+        if (book.Content.AllFiles.ContainsKey(key)) return key;
+
+        var cleanedKey = CleanContentKeys(key);
+        if (book.Content.AllFiles.ContainsKey(cleanedKey)) return cleanedKey;
+
+        // Fallback to searching for key (bad epub metadata)
+        var correctedKey = book.Content.AllFiles.Keys.SingleOrDefault(s => s.EndsWith(key));
+        if (!string.IsNullOrEmpty(correctedKey))
+        {
+            key = correctedKey;
+        }
+
+        return key;
+    }
+
+    /// <summary>
     /// This will return a list of mappings from ID -> page num. ID will be the xhtml key and page num will be the reading order
     /// this is used to rewrite anchors in the book text so that we always load properly in our reader.
     /// </summary>
@@ -759,7 +801,7 @@ public partial class BookService : IBookService
 
             foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
             {
-                var key = BookService.CleanContentKeys(nestedChapter.Link.ContentFileName);
+                var key = CoalesceKey(book, mappings, nestedChapter.Link.ContentFileName);
                 if (mappings.ContainsKey(key))
                 {
                     nestedChapters.Add(new BookChapterItem()
@@ -776,7 +818,7 @@ public partial class BookService : IBookService
         }
 
         if (chaptersList.Count != 0) return chaptersList;
-        // Generate from TOC
+        // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
         var tocPage = book.Content.Html.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
         if (tocPage == null) return chaptersList;
 
@@ -791,16 +833,7 @@ public partial class BookService : IBookService
         {
             if (!anchor.Attributes.Contains("href")) continue;
 
-            var key = BookService.CleanContentKeys(anchor.Attributes["href"].Value).Split("#")[0];
-            if (!mappings.ContainsKey(key))
-            {
-                // Fallback to searching for key (bad epub metadata)
-                var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
-                if (!string.IsNullOrEmpty(correctedKey))
-                {
-                    key = correctedKey;
-                }
-            }
+            var key = CoalesceKey(book, mappings, anchor.Attributes["href"].Value.Split("#")[0]);
 
             if (string.IsNullOrEmpty(key) || !mappings.ContainsKey(key)) continue;
             var part = string.Empty;
@@ -841,43 +874,50 @@ public partial class BookService : IBookService
 
 
         var bookPages = await book.GetReadingOrderAsync();
-        foreach (var contentFileRef in bookPages)
+        try
         {
-            if (page != counter)
+            foreach (var contentFileRef in bookPages)
             {
-                counter++;
-                continue;
-            }
-
-            var content = await contentFileRef.ReadContentAsync();
-            if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
-
-            // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
-            content = BookService.EscapeTags(content);
-
-            doc.LoadHtml(content);
-            var body = doc.DocumentNode.SelectSingleNode("//body");
-
-            if (body == null)
-            {
-                if (doc.ParseErrors.Any())
+                if (page != counter)
                 {
-                    LogBookErrors(book, contentFileRef, doc);
-                    throw new KavitaException("The file is malformed! Cannot read.");
+                    counter++;
+                    continue;
                 }
-                _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
-                doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
-                body = doc.DocumentNode.SelectSingleNode("/html/body");
-            }
 
-            return await ScopePage(doc, book, apiBase, body, mappings, page);
+                var content = await contentFileRef.ReadContentAsync();
+                if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
+
+                // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
+                content = EscapeTags(content);
+
+                doc.LoadHtml(content);
+                var body = doc.DocumentNode.SelectSingleNode("//body");
+
+                if (body == null)
+                {
+                    if (doc.ParseErrors.Any())
+                    {
+                        LogBookErrors(book, contentFileRef, doc);
+                        throw new KavitaException("The file is malformed! Cannot read.");
+                    }
+                    _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
+                    doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
+                    body = doc.DocumentNode.SelectSingleNode("/html/body");
+                }
+
+                return await ScopePage(doc, book, apiBase, body, mappings, page);
+            }
+        } catch (Exception ex)
+        {
+            // NOTE: We can log this to media analysis service
+            _logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
         }
 
         throw new KavitaException("Could not find the appropriate html for that page");
     }
 
-    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters, IList<BookChapterItem> chaptersList,
-        IReadOnlyDictionary<string, int> mappings)
+    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
+        ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
     {
         if (navigationItem.Link == null)
         {

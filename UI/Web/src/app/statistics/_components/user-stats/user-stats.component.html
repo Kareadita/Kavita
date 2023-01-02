@@ -1,0 +1,19 @@
+<div class="container-fluid" *ngIf="userId">
+
+    <div class="row g-0 d-flex justify-content-around">
+        <ng-container *ngIf="userStats$ | async as userStats">
+            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [totalWordsRead]="userStats.totalWordsRead" [timeSpentReading]="userStats.timeSpentReading"
+             [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading"></app-user-stats-info-cards>
+        </ng-container>
+    </div>
+
+    <div class="row g-0 pt-4 pb-2 " style="height: 242px">
+        <div class="col-md-12 col-sm-12 mt-4 pt-2">
+            <app-read-by-day-and [userId]="userId" [isAdmin]="(isAdmin$ | async) || false"></app-read-by-day-and>
+        </div>
+    </div>
+
+    <div class="row g-0 pt-4 pb-2 " style="height: 242px">
+        <app-stat-list [data$]="precentageRead$" label="% Read" title="Library Read Progress"></app-stat-list>
+    </div>
+</div>

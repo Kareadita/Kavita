@@ -146,6 +146,7 @@ public class TaskScheduler : ITaskScheduler
     /// <summary>
     /// First time run stat collection. Executes immediately on a background thread. Does not block.
     /// </summary>
+    /// <remarks>Schedules it for 1 day in the future to ensure we don't have users that try the software out</remarks>
     public async Task RunStatCollection()
     {
         var allowStatCollection  = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).AllowStatCollection;
@@ -154,7 +155,7 @@ public class TaskScheduler : ITaskScheduler
             _logger.LogDebug("User has opted out of stat collection, not sending stats");
             return;
         }
-        BackgroundJob.Enqueue(() => _statsService.Send());
+        BackgroundJob.Schedule(() => _statsService.Send(), DateTimeOffset.Now.AddDays(1));
     }
 
     public void ScanSiteThemes()

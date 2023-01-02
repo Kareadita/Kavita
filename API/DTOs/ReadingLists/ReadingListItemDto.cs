@@ -15,9 +15,11 @@ public class ReadingListItemDto
     public int PagesTotal { get; set; }
     public string? ChapterNumber { get; set; }
     public string? VolumeNumber { get; set; }
+    public string? ChapterTitleName { get; set; }
     public int VolumeId { get; set; }
     public int LibraryId { get; set; }
     public string? Title { get; set; }
+    public LibraryType LibraryType { get; set; }
     /// <summary>
     /// Release Date from Chapter
     /// </summary>

@@ -40,6 +40,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'Conversion of Bookmarks has been queued'
     },
     {
+      name: 'Convert Covers to WebP', 
+      description: 'Runs a long-running task which will convert all existing covers to WebP. This is slow (especially on ARM devices).',
+      api: this.serverService.convertCovers(), 
+      successMessage: 'Conversion of Coverts has been queued'
+    },
+    {
       name: 'Clear Cache', 
       description: 'Clears cached files for reading. Usefull when you\'ve just updated a file that you were previously reading within last 24 hours.',
       api: this.serverService.clearCache(), 
@@ -62,6 +68,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       description: 'Compiles all log files into a zip and downloads it',
       api: defer(() => of(this.downloadService.download('logs', undefined))), 
       successMessage: ''
+    },
+    {
+      name: 'Analyze Files', 
+      description: 'Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release.',
+      api: this.serverService.analyzeFiles(), 
+      successMessage: 'File analysis has been queued'
     },
     {
       name: 'Check for Updates', 

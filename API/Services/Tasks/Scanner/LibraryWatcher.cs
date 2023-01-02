@@ -236,17 +236,17 @@ public class LibraryWatcher : ILibraryWatcher
     private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
-        _logger.LogDebug("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
+        _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
 
         // We need to find the library this creation belongs to
         // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
         var libraryFolder = libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
-        _logger.LogDebug("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
+        _logger.LogTrace("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
         if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
 
         var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
-        _logger.LogDebug("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
+        _logger.LogTrace("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
         if (!rootFolder.Any()) return string.Empty;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.

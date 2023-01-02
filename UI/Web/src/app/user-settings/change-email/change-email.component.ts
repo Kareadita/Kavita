@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, of, Subject, takeUntil, shareReplay, map, tap, take } from 'rxjs';
-import { UpdateEmailResponse } from 'src/app/_models/email/update-email-response';
+import { UpdateEmailResponse } from 'src/app/_models/auth/update-email-response';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 

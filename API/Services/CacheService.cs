@@ -1,13 +1,17 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using NetVips;
 
 namespace API.Services;
 
@@ -18,18 +22,20 @@ public interface ICacheService
     /// cache operations (except cleanup).
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <param name="extractPdfToImages">Extracts a PDF into images for a different reading experience</param>
     /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
-    Task<Chapter?> Ensure(int chapterId);
+    Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false);
     /// <summary>
     /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
     /// </summary>
     /// <param name="chapterIds">Volumes that belong to that library. Assume the library might have been deleted before this invocation.</param>
     void CleanupChapters(IEnumerable<int> chapterIds);
     void CleanupBookmarks(IEnumerable<int> seriesIds);
-    string GetCachedPagePath(Chapter chapter, int page);
+    string GetCachedPagePath(int chapterId, int page);
+    IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files);
+    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
     Task<int> CacheBookmarkForSeries(int userId, int seriesId);
     void CleanupBookmarkCache(int seriesId);
 }
@@ -50,6 +56,37 @@ public class CacheService : ICacheService
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _bookmarkService = bookmarkService;
+    }
+
+    public IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId)
+    {
+        var sw = Stopwatch.StartNew();
+        var path = GetCachePath(chapterId);
+        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
+            .OrderByNatural(Path.GetFileNameWithoutExtension)
+            .ToArray();
+
+        if (files.Length == 0)
+        {
+            return ArraySegment<FileDimensionDto>.Empty;
+        }
+
+        var dimensions = new List<FileDimensionDto>();
+        for (var i = 0; i < files.Length; i++)
+        {
+            var file = files[i];
+            using var image = Image.NewFromFile(file, memory:false, access: Enums.Access.SequentialUnbuffered);
+            dimensions.Add(new FileDimensionDto()
+            {
+                PageNumber = i,
+                Height = image.Height,
+                Width = image.Width,
+                FileName = file.Replace(path, string.Empty)
+            });
+        }
+
+        _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);
+        return dimensions;
     }
 
     public string GetCachedBookmarkPagePath(int seriesId, int page)
@@ -93,7 +130,7 @@ public class CacheService : ICacheService
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns>This will always return the Chapter for the chapterId</returns>
-    public async Task<Chapter?> Ensure(int chapterId)
+    public async Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false)
     {
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
@@ -101,7 +138,7 @@ public class CacheService : ICacheService
 
         if (_directoryService.Exists(extractPath)) return chapter;
         var files = chapter?.Files.ToList();
-        ExtractChapterFiles(extractPath, files);
+        ExtractChapterFiles(extractPath, files, extractPdfToImages);
 
         return  chapter;
     }
@@ -112,8 +149,9 @@ public class CacheService : ICacheService
     /// </summary>
     /// <param name="extractPath"></param>
     /// <param name="files"></param>
+    /// <param name="extractPdfImages">Defaults to false, if true, will extract the images from the PDF renderer and not move the pdf file</param>
     /// <returns></returns>
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files)
+    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files, bool extractPdfImages = false)
     {
         if (files == null) return;
         var removeNonImages = true;
@@ -142,12 +180,17 @@ public class CacheService : ICacheService
                 case MangaFormat.Epub:
                 case MangaFormat.Pdf:
                 {
-                    removeNonImages = false;
                     if (!_directoryService.FileSystem.File.Exists(files[0].FilePath))
                     {
                         _logger.LogError("{File} does not exist on disk", files[0].FilePath);
                         throw new KavitaException($"{files[0].FilePath} does not exist on disk");
                     }
+                    if (extractPdfImages)
+                    {
+                        _readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
+                        break;
+                    }
+                    removeNonImages = false;
 
                     _directoryService.ExistOrCreate(extractPath);
                     _directoryService.CopyFileToDirectory(files[0].FilePath, extractPath);
@@ -206,13 +249,13 @@ public class CacheService : ICacheService
     /// <summary>
     /// Returns the absolute path of a cached page.
     /// </summary>
-    /// <param name="chapter">Chapter entity with Files populated.</param>
+    /// <param name="chapterId">Chapter id with Files populated.</param>
     /// <param name="page">Page number to look for</param>
     /// <returns>Page filepath or empty if no files found.</returns>
-    public string GetCachedPagePath(Chapter chapter, int page)
+    public string GetCachedPagePath(int chapterId, int page)
     {
         // Calculate what chapter the page belongs to
-        var path = GetCachePath(chapter.Id);
+        var path = GetCachePath(chapterId);
         // NOTE: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
         var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)

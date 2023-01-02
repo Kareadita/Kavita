@@ -21,6 +21,7 @@ public interface IBookmarkService
     Task<IEnumerable<string>> GetBookmarkFilesById(IEnumerable<int> bookmarkIds);
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     Task ConvertAllBookmarkToWebP();
+    Task ConvertAllCoverToWebP();
 
 }
 
@@ -183,7 +184,9 @@ public class BookmarkService : IBookmarkService
         var count = 1F;
         foreach (var bookmark in bookmarks)
         {
-            await SaveBookmarkAsWebP(bookmarkDirectory, bookmark);
+            bookmark.FileName = await SaveAsWebP(bookmarkDirectory, bookmark.FileName,
+                BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId));
+            _unitOfWork.UserRepository.Update(bookmark);
             await _unitOfWork.CommitAsync();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertBookmarksProgressEvent(count / bookmarks.Count, ProgressEventType.Started));
@@ -197,9 +200,39 @@ public class BookmarkService : IBookmarkService
     }
 
     /// <summary>
+    /// This is a long-running job that will convert all covers into WebP. Do not invoke anyway except via Hangfire.
+    /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
+    public async Task ConvertAllCoverToWebP()
+    {
+        var coverDirectory = _directoryService.CoverImageDirectory;
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started));
+        var chapters = await _unitOfWork.ChapterRepository.GetAllChaptersWithNonWebPCovers();
+
+        var count = 1F;
+        foreach (var chapter in chapters)
+        {
+            var newFile = await SaveAsWebP(coverDirectory, chapter.CoverImage, coverDirectory);
+            chapter.CoverImage = newFile;
+            _unitOfWork.ChapterRepository.Update(chapter);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / chapters.Count, ProgressEventType.Started));
+            count++;
+        }
+
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.ConvertCoverProgressEvent(1F, ProgressEventType.Ended));
+
+        _logger.LogInformation("[BookmarkService] Converted covers to WebP");
+    }
+
+    /// <summary>
     /// This is a job that runs after a bookmark is saved
     /// </summary>
-    public async Task ConvertBookmarkToWebP(int bookmarkId)
+    private async Task ConvertBookmarkToWebP(int bookmarkId)
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
@@ -212,46 +245,52 @@ public class BookmarkService : IBookmarkService
         var bookmark = await _unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId);
         if (bookmark == null) return;
 
-        await SaveBookmarkAsWebP(bookmarkDirectory, bookmark);
+        bookmark.FileName = await SaveAsWebP(bookmarkDirectory, bookmark.FileName,
+            BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId));
+        _unitOfWork.UserRepository.Update(bookmark);
+
         await _unitOfWork.CommitAsync();
     }
 
     /// <summary>
-    /// Converts bookmark file, deletes original, marks bookmark as dirty. Does not commit.
+    /// Converts an image file, deletes original and returns the new path back
     /// </summary>
-    /// <param name="bookmarkDirectory"></param>
-    /// <param name="bookmark"></param>
-    private async Task SaveBookmarkAsWebP(string bookmarkDirectory, AppUserBookmark bookmark)
+    /// <param name="imageDirectory">Full Path to where files are stored</param>
+    /// <param name="filename">The file to convert</param>
+    /// <param name="targetFolder">Full path to where files should be stored or any stem</param>
+    /// <returns></returns>
+    private async Task<string> SaveAsWebP(string imageDirectory, string filename, string targetFolder)
     {
-        var fullSourcePath = _directoryService.FileSystem.Path.Join(bookmarkDirectory, bookmark.FileName);
-        var fullTargetDirectory = fullSourcePath.Replace(new FileInfo(bookmark.FileName).Name, string.Empty);
-        var targetFolderStem = BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId);
+        var fullSourcePath = _directoryService.FileSystem.Path.Join(imageDirectory, filename);
+        var fullTargetDirectory = fullSourcePath.Replace(new FileInfo(filename).Name, string.Empty);
 
-        _logger.LogDebug("Converting {Source} bookmark into WebP at {Target}", fullSourcePath, fullTargetDirectory);
+        var newFilename = string.Empty;
+        _logger.LogDebug("Converting {Source} image into WebP at {Target}", fullSourcePath, fullTargetDirectory);
 
         try
         {
             // Convert target file to webp then delete original target file and update bookmark
 
-            var originalFile = bookmark.FileName;
+            var originalFile = filename;
             try
             {
                 var targetFile = await _imageService.ConvertToWebP(fullSourcePath, fullTargetDirectory);
                 var targetName = new FileInfo(targetFile).Name;
-                bookmark.FileName = Path.Join(targetFolderStem, targetName);
+                newFilename = Path.Join(targetFolder, targetName);
                 _directoryService.DeleteFiles(new[] {fullSourcePath});
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Could not convert file {FilePath}", bookmark.FileName);
-                bookmark.FileName = originalFile;
+                _logger.LogError(ex, "Could not convert image {FilePath}", filename);
+                newFilename = originalFile;
             }
-            _unitOfWork.UserRepository.Update(bookmark);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Could not convert bookmark to WebP");
+            _logger.LogError(ex, "Could not convert image to WebP");
         }
+
+        return newFilename;
     }
 
     private static string BookmarkStem(int userId, int seriesId, int chapterId)

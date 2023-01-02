@@ -91,7 +91,7 @@ public static class Seed
                 Key = ServerSettingKey.Port, Value = "5000"
             }, // Not used from DB, but DB is sync with appSettings.json
             new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
-            new() {Key = ServerSettingKey.EnableOpds, Value = "false"},
+            new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
             new() {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
             new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
             new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
@@ -99,7 +99,6 @@ public static class Seed
             new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
             new() {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
             new() {Key = ServerSettingKey.ConvertBookmarkToWebP, Value = "false"},
-            new() {Key = ServerSettingKey.EnableSwaggerUi, Value = "false"},
             new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
             new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},

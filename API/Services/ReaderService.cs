@@ -32,7 +32,6 @@ public interface IReaderService
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
-    string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false);
 }
 
 public class ReaderService : IReaderService
@@ -103,6 +102,7 @@ public class ReaderService : IReaderService
     public async Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters)
     {
         var seenVolume = new Dictionary<int, bool>();
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -114,7 +114,8 @@ public class ReaderService : IReaderService
                     PagesRead = chapter.Pages,
                     VolumeId = chapter.VolumeId,
                     SeriesId = seriesId,
-                    ChapterId = chapter.Id
+                    ChapterId = chapter.Id,
+                    LibraryId = series.LibraryId
                 });
             }
             else
@@ -224,6 +225,7 @@ public class ReaderService : IReaderService
 
         try
         {
+            // TODO: Rewrite this code to just pull user object with progress for that particiular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
@@ -240,8 +242,8 @@ public class ReaderService : IReaderService
                     VolumeId = progressDto.VolumeId,
                     SeriesId = progressDto.SeriesId,
                     ChapterId = progressDto.ChapterId,
-                    BookScrollId = progressDto.BookScrollId,
-                    LastModified = DateTime.Now
+                    LibraryId = progressDto.LibraryId,
+                    BookScrollId = progressDto.BookScrollId
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }
@@ -250,8 +252,8 @@ public class ReaderService : IReaderService
                 userProgress.PagesRead = progressDto.PageNum;
                 userProgress.SeriesId = progressDto.SeriesId;
                 userProgress.VolumeId = progressDto.VolumeId;
+                userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
-                userProgress.LastModified = DateTime.Now;
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
@@ -265,6 +267,10 @@ public class ReaderService : IReaderService
         }
         catch (Exception exception)
         {
+            // This can happen when the reader sends 2 events at same time, so 2 threads are inserting and one fails.
+            if (exception.Message.StartsWith(
+                    "The database operation was expected to affect 1 row(s), but actually affected 0 row(s)"))
+                return true;
             _logger.LogError(exception, "Could not save progress");
             await _unitOfWork.RollbackAsync();
         }
@@ -474,11 +480,14 @@ public class ReaderService : IReaderService
         var volumeChapters = volumes
             .Where(v => v.Number != 0)
             .SelectMany(v => v.Chapters)
-            .OrderBy(c => float.Parse(c.Number))
+            //.OrderBy(c => float.Parse(c.Number))
             .ToList();
 
+        // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
-        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
+        var currentlyReadingChapter = volumeChapters
+            .OrderBy(c => double.Parse(c.Range), _chapterSortComparer)
+            .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
@@ -609,7 +618,7 @@ public class ReaderService : IReaderService
     /// <param name="includeHash">For comics only, includes a # which is used for numbering on cards</param>
     /// <param name="includeSpace">Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.</param>
     /// <returns></returns>
-    public string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false)
+    public static string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false)
     {
         switch(libraryType)
         {

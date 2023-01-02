@@ -1,0 +1,128 @@
+.side-nav-item {
+    position: relative;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    width: 100%;
+    height: auto;
+    min-height: 40px;
+    overflow: hidden;
+    cursor: pointer;
+
+    .side-nav-text {
+        opacity: 1;
+        min-width: 100px;
+
+        div {
+            min-width: 102px;
+            width: 100%
+        }
+    }
+
+    .side-nav-img {
+        width: 20px;
+        height: 18px;
+    }
+
+
+    span {
+        &:last-child {
+            flex-grow: 1;
+            justify-content: end;
+        }
+
+        div {
+            align-items: center;
+            display: flex;
+            height: 100%;
+            justify-content: inherit;
+            min-width: 30px;
+            width: 100%;
+            padding-left: 5px;
+    
+            i {
+                font-size: 18px;
+            }
+        }
+    }
+
+    &.closed {
+        .side-nav-text {
+            opacity: 0;
+        }
+
+        .card-actions {
+           opacity: 0;
+        }
+
+        &.active {
+            color: var(--side-nav-item-active-color);
+            background-color: unset;
+        }
+    }
+
+    &:hover {
+        color: var(--side-nav-hover-text-color);
+        background-color: var(--side-nav-hover-bg-color);
+
+        .card-actions i.fa {
+            // TODO: The override to white does not work, please fix for light themes
+            color: var(--side-nav-hover-text-color) !important;
+        }
+    }
+
+    &.active {
+        color: var(--side-nav-item-active-color);
+        background-color: var(--side-nav-active-bg-color);
+
+        .active-highlight {
+            background-color: var(--side-nav-item-active-color);
+            width: 5px;
+            height: 100%;
+            position: absolute;
+            left: 0;
+        }
+
+        .side-nav-text, i {
+            color: var(--side-nav-item-active-text-color) !important;
+        }
+
+        &:hover {
+            color: var(--side-nav-hover-text-color);
+            background-color: var(--side-nav-hover-bg-color);
+
+            .card-actions i.fa {
+                // TODO: The override to white does not work, please fix for light themes
+                color: var(--side-nav-hover-text-color) !important;
+            }
+        }
+        
+    }
+}
+
+
+a {
+    text-decoration: none;
+    color: var(--side-nav-color);
+}
+
+@media (max-width: 576px) {
+    .side-nav-item {
+        align-items: center;
+        padding: 15px 10px;
+        height: 70px;
+        font-size: 1rem;
+
+        .side-nav-text {
+            width: 100%;
+        }
+
+    
+        &.closed {
+            .card-actions {
+               font-size: inherit;
+            }
+        }
+    }
+}

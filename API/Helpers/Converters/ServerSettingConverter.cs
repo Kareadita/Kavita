@@ -54,9 +54,6 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.ConvertCoverToWebP:
                     destination.ConvertCoverToWebP = bool.Parse(row.Value);
                     break;
-                case ServerSettingKey.EnableSwaggerUi:
-                    destination.EnableSwaggerUi = bool.Parse(row.Value);
-                    break;
                 case ServerSettingKey.TotalBackups:
                     destination.TotalBackups = int.Parse(row.Value);
                     break;

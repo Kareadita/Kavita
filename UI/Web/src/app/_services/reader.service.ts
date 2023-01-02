@@ -5,14 +5,15 @@ import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';
 import { Chapter } from '../_models/chapter';
-import { HourEstimateRange } from '../_models/hour-estimate-range';
+import { HourEstimateRange } from '../_models/series-detail/hour-estimate-range';
 import { MangaFormat } from '../_models/manga-format';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
-import { PageBookmark } from '../_models/page-bookmark';
-import { ProgressBookmark } from '../_models/progress-bookmark';
-import { SeriesFilter } from '../_models/series-filter';
+import { PageBookmark } from '../_models/readers/page-bookmark';
+import { ProgressBookmark } from '../_models/readers/progress-bookmark';
+import { SeriesFilter } from '../_models/metadata/series-filter';
 import { UtilityService } from '../shared/_services/utility.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
+import { FileDimension } from '../manga-reader/_models/file-dimension';
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -102,12 +103,16 @@ export class ReaderService {
     return this.baseUrl + 'reader/bookmark-image?seriesId=' + seriesId + '&page=' + page + '&apiKey=' + encodeURIComponent(apiKey);
   }
 
-  getChapterInfo(chapterId: number) {
-    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId);
+  getChapterInfo(chapterId: number, includeDimensions = false) {
+    return this.httpClient.get<ChapterInfo>(this.baseUrl + 'reader/chapter-info?chapterId=' + chapterId + '&includeDimensions=' + includeDimensions);
   }
 
-  saveProgress(seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
-    return this.httpClient.post(this.baseUrl + 'reader/progress', {seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
+  getFileDimensions(chapterId: number) {
+    return this.httpClient.get<Array<FileDimension>>(this.baseUrl + 'reader/file-dimensions?chapterId=' + chapterId);
+  }
+
+  saveProgress(libraryId: number, seriesId: number, volumeId: number, chapterId: number, page: number, bookScrollId: string | null = null) {
+    return this.httpClient.post(this.baseUrl + 'reader/progress', {libraryId, seriesId, volumeId, chapterId, pageNum: page, bookScrollId});
   }
 
   markVolumeRead(seriesId: number, volumeId: number) {
@@ -186,7 +191,14 @@ export class ReaderService {
    */
   imageUrlToPageNum(imageSrc: string) {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
-    return parseInt(imageSrc.split('&page=')[1], 10);
+    const params = new URLSearchParams(new URL(imageSrc).search);
+    return parseInt(params.get('page') || '-1', 10);
+  }
+
+  imageUrlToChapterId(imageSrc: string) {
+    if (imageSrc === undefined || imageSrc === '') { return -1; }
+    const params = new URLSearchParams(new URL(imageSrc).search);
+    return parseInt(params.get('chapterId') || '-1', 10);
   }
 
   getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {

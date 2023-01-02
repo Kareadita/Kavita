@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.6"
+    "version": "0.6.1.18"
   },
   "servers": [
     {
@@ -3256,6 +3256,14 @@
             }
           },
           {
+            "name": "libraryId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "seriesId",
             "in": "query",
             "schema": {
@@ -3403,7 +3411,7 @@
           {
             "name": "chapterId",
             "in": "query",
-            "description": "",
+            "description": "Chapter Id",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3412,10 +3420,19 @@
           {
             "name": "page",
             "in": "query",
-            "description": "",
+            "description": "Page in question",
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "Should Kavita extract pdf into images. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -3468,6 +3485,66 @@
         }
       }
     },
+    "/api/Reader/file-dimensions": {
+      "get": {
+        "tags": [
+          "Reader"
+        ],
+        "summary": "Returns the file dimensions for all pages in a chapter. If the underlying chapter is PDF, use extractPDF to unpack as images.",
+        "description": "This has a side effect of caching the images.\r\n            This will only be populated on archive filetypes and not in bookmark mode",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileDimensionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Reader/chapter-info": {
       "get": {
         "tags": [
@@ -3482,6 +3559,24 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "extractPdf",
+            "in": "query",
+            "description": "Should Kavita extract pdf into images. Defaults to false.",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "includeDimensions",
+            "in": "query",
+            "description": "Include file dimensions. Only useful for image based reading",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -6995,6 +7090,19 @@
         }
       }
     },
+    "/api/Server/analyze-files": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "This is a one time task that needs to be ran for v0.7 statistics to work",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Server/server-info": {
       "get": {
         "tags": [
@@ -7031,6 +7139,19 @@
           "Server"
         ],
         "summary": "Triggers the scheduling of the convert bookmarks job. Only one job will run at a time.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Server/convert-covers": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Triggers the scheduling of the convert covers job. Only one job will run at a time.",
         "responses": {
           "200": {
             "description": "Success"
@@ -7533,6 +7654,426 @@
               "text/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/user/{userId}/read": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadStatistics"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadStatistics"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReadStatistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/stats": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerStatistics"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerStatistics"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerStatistics"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/count/year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/count/publication-status": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationStatusStatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationStatusStatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PublicationStatusStatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/count/manga-format": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MangaFormatStatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MangaFormatStatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MangaFormatStatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/top/years": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/top/users": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns users with the top reads in the server",
+        "parameters": [
+          {
+            "name": "days",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopReadDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopReadDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopReadDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/server/file-breakdown": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "A breakdown of different files, their size, and format",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileExtensionBreakdownDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileExtensionBreakdownDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FileExtensionBreakdownDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/reading-count-by-day": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns reading history events for a give or all users, broken up by day, and format",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If 0, defaults to all users, else just userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "If 0, defaults to all time, else just those days asked for",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DateTimePagesReadOnADayCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/user/reading-history": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
                 }
               }
             }
@@ -8096,6 +8637,44 @@
         }
       }
     },
+    "/api/Users/myself": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Users/has-reading-progress": {
       "get": {
         "tags": [
@@ -8227,6 +8806,7 @@
         "tags": [
           "Users"
         ],
+        "summary": "Returns the preferences of the user",
         "responses": {
           "200": {
             "description": "Success",
@@ -8244,6 +8824,45 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UserPreferencesDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Users/names": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Returns a list of the user names within the system",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -8740,6 +9359,10 @@
             "type": "boolean",
             "description": "Manga Reader Option: Show screen hints to the user on some actions, ie) pagination direction change"
           },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
+          },
           "layoutMode": {
             "$ref": "#/components/schemas/LayoutMode"
           },
@@ -8836,6 +9459,11 @@
           "seriesId": {
             "type": "integer",
             "description": "Series belonging to Chapter",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "Library belonging to Chapter",
             "format": "int32"
           },
           "chapterId": {
@@ -9387,6 +10015,13 @@
             "type": "string",
             "description": "Series Title",
             "nullable": true
+          },
+          "pageDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileDimensionDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -9639,6 +10274,25 @@
         },
         "additionalProperties": false
       },
+      "DateTimePagesReadOnADayCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The day of the readings",
+            "format": "date-time"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of pages read",
+            "format": "int32"
+          },
+          "format": {
+            "$ref": "#/components/schemas/MangaFormat"
+          }
+        },
+        "additionalProperties": false
+      },
       "DeleteSeriesDto": {
         "type": "object",
         "properties": {
@@ -9788,6 +10442,69 @@
         },
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
+      },
+      "FileDimensionDto": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "The filename of the cached file. If this was nested in a subfolder, the foldername will be appended with _",
+            "nullable": true,
+            "example": "chapter01_page01.png"
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileExtensionBreakdownDto": {
+        "type": "object",
+        "properties": {
+          "totalFileSize": {
+            "type": "integer",
+            "description": "Total bytes for all files",
+            "format": "int64"
+          },
+          "fileBreakdown": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileExtensionDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileExtensionDto": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "$ref": "#/components/schemas/MangaFormat"
+          },
+          "totalSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalFiles": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
       },
       "FileFormatDto": {
         "type": "object",
@@ -10098,6 +10815,20 @@
         "additionalProperties": false,
         "description": "Represents a range between two int/float/double"
       },
+      "Int32StatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "InviteUserDto": {
         "required": [
           "email"
@@ -10329,6 +11060,19 @@
         },
         "additionalProperties": false
       },
+      "LibraryDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/LibraryDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "LibraryType": {
         "enum": [
           0,
@@ -10372,6 +11116,16 @@
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
+          "bytes": {
+            "type": "integer",
+            "description": "How many bytes make up this file",
+            "format": "int64"
+          },
+          "extension": {
+            "type": "string",
+            "description": "File extension",
+            "nullable": true
+          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -10412,6 +11166,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
@@ -10433,6 +11191,19 @@
         "type": "integer",
         "description": "Represents the format of the file",
         "format": "int32"
+      },
+      "MangaFormatStatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/MangaFormat"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "MarkMultipleSeriesAsReadDto": {
         "type": "object",
@@ -10559,6 +11330,9 @@
           "password": {
             "type": "string",
             "nullable": true
+          },
+          "sendEmail": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -10653,6 +11427,7 @@
       "ProgressDto": {
         "required": [
           "chapterId",
+          "libraryId",
           "pageNum",
           "seriesId",
           "volumeId"
@@ -10675,10 +11450,19 @@
             "type": "integer",
             "format": "int32"
           },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "bookScrollId": {
             "type": "string",
             "description": "For Book reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "Last time the progress was synced from UI or external app",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -10693,6 +11477,58 @@
         ],
         "type": "integer",
         "format": "int32"
+      },
+      "PublicationStatusStatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReadHistoryEvent": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "readDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a single User's reading event"
       },
       "ReadStatus": {
         "type": "object",
@@ -10899,6 +11735,10 @@
             "type": "string",
             "nullable": true
           },
+          "chapterTitleName": {
+            "type": "string",
+            "nullable": true
+          },
           "volumeNumber": {
             "type": "string",
             "nullable": true
@@ -10910,6 +11750,9 @@
           "libraryId": {
             "type": "integer",
             "format": "int32"
+          },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
           },
           "title": {
             "type": "string",
@@ -11662,6 +12505,19 @@
         },
         "additionalProperties": false
       },
+      "SeriesDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/SeriesDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SeriesMetadata": {
         "type": "object",
         "properties": {
@@ -12232,11 +13088,6 @@
             "type": "boolean",
             "description": "If the server should save bookmarks as WebP encoding"
           },
-          "enableSwaggerUi": {
-            "type": "boolean",
-            "description": "If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.",
-            "deprecated": true
-          },
           "totalBackups": {
             "type": "integer",
             "description": "The amount of Backups before cleanup",
@@ -12254,6 +13105,95 @@
           "convertCoverToWebP": {
             "type": "boolean",
             "description": "If the server should save covers as WebP encoding"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ServerStatistics": {
+        "type": "object",
+        "properties": {
+          "chapterCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "volumeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "seriesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalFiles": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalGenres": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalTags": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPeople": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mostReadSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDtoICount"
+            },
+            "nullable": true
+          },
+          "mostPopularSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDtoICount"
+            },
+            "description": "Total users who have started/reading/read per series",
+            "nullable": true
+          },
+          "mostActiveUsers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDtoICount"
+            },
+            "nullable": true
+          },
+          "mostActiveLibraries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryDtoICount"
+            },
+            "nullable": true
+          },
+          "recentlyRead": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "description": "Last 5 Series read",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SingleStatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number",
+            "format": "float"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -12442,6 +13382,34 @@
           "refreshToken": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TopReadDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "comicsTime": {
+            "type": "integer",
+            "description": "Amount of time read on Comic libraries",
+            "format": "int64"
+          },
+          "booksTime": {
+            "type": "integer",
+            "description": "Amount of time read on",
+            "format": "int64"
+          },
+          "mangaTime": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -13018,15 +13986,12 @@
         "additionalProperties": false
       },
       "UploadUrlDto": {
-        "required": [
-          "url"
-        ],
         "type": "object",
         "properties": {
           "url": {
-            "minLength": 1,
             "type": "string",
-            "description": "External url"
+            "description": "External url",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -13063,6 +14028,19 @@
         },
         "additionalProperties": false
       },
+      "UserDtoICount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "UserPreferencesDto": {
         "required": [
           "autoCloseMenu",
@@ -13077,6 +14055,7 @@
           "bookReaderReadingDirection",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
+          "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
           "noTransitions",
@@ -13085,8 +14064,7 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
-          "showScreenHints",
-          "theme"
+          "showScreenHints"
         ],
         "type": "object",
         "properties": {
@@ -13104,6 +14082,10 @@
           },
           "layoutMode": {
             "$ref": "#/components/schemas/LayoutMode"
+          },
+          "emulateBook": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
           },
           "backgroundColor": {
             "minLength": 1,
@@ -13173,6 +14155,46 @@
           "noTransitions": {
             "type": "boolean",
             "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserReadStatistics": {
+        "type": "object",
+        "properties": {
+          "totalPagesRead": {
+            "type": "integer",
+            "description": "Total number of pages read",
+            "format": "int64"
+          },
+          "totalWordsRead": {
+            "type": "integer",
+            "description": "Total number of words read",
+            "format": "int64"
+          },
+          "timeSpentReading": {
+            "type": "integer",
+            "description": "Total time spent reading based on estimates",
+            "format": "int64"
+          },
+          "chaptersRead": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "avgHoursPerWeekSpentReading": {
+            "type": "number",
+            "format": "double"
+          },
+          "percentReadPerLibrary": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SingleStatCount"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

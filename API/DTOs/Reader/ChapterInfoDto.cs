@@ -1,4 +1,5 @@
-﻿using API.Entities.Enums;
+﻿using System.Collections.Generic;
+using API.Entities.Enums;
 
 namespace API.DTOs.Reader;
 
@@ -65,5 +66,7 @@ public class ChapterInfoDto : IChapterInfoDto
     /// </summary>
     /// <remarks>Usually just series name, but can include chapter title</remarks>
     public string Title { get; set; } = default! ;
+
+    public IEnumerable<FileDimensionDto> PageDimensions { get; set; }
 
 }

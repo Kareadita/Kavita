@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from '../_guards/auth.guard';
-import { AllCollectionsComponent } from './all-collections/all-collections.component';
-import { CollectionDetailComponent } from './collection-detail/collection-detail.component';
+import { AllCollectionsComponent } from './_components/all-collections/all-collections.component';
+import { CollectionDetailComponent } from './_components/collection-detail/collection-detail.component';
 
 const routes: Routes = [
   {
