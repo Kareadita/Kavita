@@ -38,7 +38,7 @@
     <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && totalWordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
         <div class="col-auto mb-2">
             <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                <ng-container *ngIf="readingTime.maxHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
+                <ng-container *ngIf="readingTime.maxHours === 0 || readingTime.minHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
                 <ng-template #normalReadTime>
                     {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
                 </ng-template>
