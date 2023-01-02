@@ -1112,7 +1112,7 @@ public partial class SeriesRepository : ISeriesRepository
 
     public async Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, QueryContext.Recommended)
+        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended)
             .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 
@@ -1140,7 +1140,7 @@ public partial class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, QueryContext.Recommended)
+        var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended)
             .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
         var distinctSeriesIdsWithProgress = _context.AppUserProgresses
@@ -1160,7 +1160,7 @@ public partial class SeriesRepository : ISeriesRepository
 
     public async Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId)
     {
-        var libraryIds = GetLibraryIdsForUser(userId, QueryContext.Search);
+        var libraryIds = GetLibraryIdsForUser(userId, 0, QueryContext.Search);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.MangaFile
@@ -1580,5 +1580,33 @@ public partial class SeriesRepository : ISeriesRepository
             .Select(s => s.Metadata.AgeRating)
             .OrderBy(s => s)
             .LastOrDefaultAsync();
+    }
+
+    /// <summary>
+    /// Returns all library ids for a user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="libraryId">0 for no library filter</param>
+    /// <param name="queryContext">Defaults to None - The context behind this query, so appropriate restrictions can be placed</param>
+    /// <returns></returns>
+    private IQueryable<int> GetLibraryIdsForUser(int userId, int libraryId = 0, QueryContext queryContext = QueryContext.None)
+    {
+        var user = _context.AppUser
+            .AsSplitQuery()
+            .AsNoTracking()
+            .Where(u => u.Id == userId)
+            .AsSingleQuery();
+
+        if (libraryId == 0)
+        {
+            return user.SelectMany(l => l.Libraries)
+                .IsRestricted(queryContext)
+                .Select(lib => lib.Id);
+        }
+
+        return user.SelectMany(l => l.Libraries)
+            .Where(lib => lib.Id == libraryId)
+            .IsRestricted(queryContext)
+            .Select(lib => lib.Id);
     }
 }

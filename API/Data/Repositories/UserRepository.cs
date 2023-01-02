@@ -58,7 +58,6 @@ public interface IUserRepository
     Task<int> GetUserIdByUsernameAsync(string username);
     Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds);
     Task<AppUser?> GetUserByEmailAsync(string email);
-    Task<IEnumerable<AppUser>> GetAllUsers();
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);

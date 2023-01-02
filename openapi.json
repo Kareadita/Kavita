@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.18"
+    "version": "0.6.1.19"
   },
   "servers": [
     {
@@ -11330,9 +11330,6 @@
           "password": {
             "type": "string",
             "nullable": true
-          },
-          "sendEmail": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -11735,11 +11732,11 @@
             "type": "string",
             "nullable": true
           },
-          "chapterTitleName": {
+          "volumeNumber": {
             "type": "string",
             "nullable": true
           },
-          "volumeNumber": {
+          "chapterTitleName": {
             "type": "string",
             "nullable": true
           },
@@ -11751,12 +11748,12 @@
             "type": "integer",
             "format": "int32"
           },
-          "libraryType": {
-            "$ref": "#/components/schemas/LibraryType"
-          },
           "title": {
             "type": "string",
             "nullable": true
+          },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
           },
           "releaseDate": {
             "type": "string",
@@ -13986,12 +13983,15 @@
         "additionalProperties": false
       },
       "UploadUrlDto": {
+        "required": [
+          "url"
+        ],
         "type": "object",
         "properties": {
           "url": {
+            "minLength": 1,
             "type": "string",
-            "description": "External url",
-            "nullable": true
+            "description": "External url"
           }
         },
         "additionalProperties": false
@@ -14064,7 +14064,8 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
-          "showScreenHints"
+          "showScreenHints",
+          "theme"
         ],
         "type": "object",
         "properties": {
