@@ -137,13 +137,13 @@ const ANIMATION_SPEED = 200;
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('slideFromTop', [
-      state('in', style({ height: '0px', overflow: 'hidden'})),
+      state('in', style({ height: '0px'})),
       transition('void => *', [
         style({ height: '100%', overflow: 'auto' }),
         animate(ANIMATION_SPEED)
       ]),
       transition('* => void', [
-        animate(ANIMATION_SPEED, style({ height: '0px', overflow: 'hidden' })),
+        animate(ANIMATION_SPEED, style({ height: '0px' })),
       ])
     ])
   ]
