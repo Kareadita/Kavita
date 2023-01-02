@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using API.DTOs.Reader;
 using API.Entities.Enums;
 using API.Services;
 using Kavita.Common;
-using HtmlAgilityPack;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VersOne.Epub;
@@ -97,7 +95,7 @@ public class BookController : BaseApiController
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
-        var key = BookService.CleanContentKeys(file);
+        var key = BookService.CoalesceKeyForAnyFile(book, file);
         if (!book.Content.AllFiles.ContainsKey(key)) return BadRequest("File was not found in book");
 
         var bookFile = book.Content.AllFiles[key];
